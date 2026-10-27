@@ -28,4 +28,33 @@ public class ServidorPessoaResponseDTO extends ServidorPessoaDados {
       group = "Identificação",
       order = 0)
   private Long id;
+
+  @Schema(
+      description = "Idade civil em anos completos na data atual.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Idade civil em anos completos na data atual",
+      group = "Identificação civil",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private Integer idadeAnos;
+
+  @Schema(
+      description = "Indica ao menos uma das cinco deficiências específicas registrada na pessoa.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Indica ao menos uma das cinco deficiências específicas registrada na pessoa",
+      group = "Acessibilidade e PcD",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.RESTRICTED,
+      dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+      reason = "Indicador derivado de condição de saúde da pessoa.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private Boolean possuiDeficienciaPcD;
 }

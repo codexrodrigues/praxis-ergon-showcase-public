@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component;
 /** Disponibilidade de ações derivada do mesmo estado persistido que governa a execução. */
 @Component
 public class VinculoStateProvider implements ResourceStateSnapshotProvider {
+  @org.springframework.beans.factory.annotation.Autowired
+  private br.com.praxis.ergonshowcase.repository.CargoRepository cargos;
+
   private final VinculoRepository repository;
 
   public VinculoStateProvider(VinculoRepository repository) {
@@ -16,6 +19,10 @@ public class VinculoStateProvider implements ResourceStateSnapshotProvider {
   }
 
   public Optional<ResourceStateSnapshot> resolve(String key, Object id) {
+    if ("administracao-pessoal.cargos".equals(key) && id != null)
+      return cargos
+          .findById(Integer.valueOf(id.toString()))
+          .map(c -> ResourceStateSnapshot.of(c.getDtExtincao() == null ? "VIGENTE" : "EXTINTO"));
     if (!"administracao-pessoal.vinculos".equals(key) || id == null) return Optional.empty();
     String[] parts = id.toString().split(":");
     VinculoId keyId =

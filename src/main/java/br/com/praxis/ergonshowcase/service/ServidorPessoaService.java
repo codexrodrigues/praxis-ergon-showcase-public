@@ -32,7 +32,16 @@ public class ServidorPessoaService
         ServidorPessoaFilterDTO,
         CreateServidorPessoaDTO,
         UpdateServidorPessoaDTO> {
+  @org.springframework.beans.factory.annotation.Autowired private ErgonInvariants invariants;
   @PersistenceContext protected EntityManager entityManager;
+
+  @Override
+  public org.praxisplatform.uischema.filter.specification.GenericSpecificationsBuilder<
+          ServidorPessoa>
+      getSpecificationsBuilder() {
+    return new br.com.praxis.ergonshowcase.config.PessoaSpecificationsBuilder();
+  }
+
   protected final ServidorPessoaMapper mapper;
   private final TenantContext tenant;
 
@@ -106,6 +115,7 @@ public class ServidorPessoaService
     beforeUpdate(id, entity, dto);
     var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
     mapper.applyUpdate(entity, dto);
+    invariants.pessoa(entity);
     CustomFieldSupport.restoreReadOnlyValues(entity, readOnlyKeys, old);
     var saved = getRepository().save(entity);
     afterUpdate(id, saved, dto);
@@ -116,6 +126,7 @@ public class ServidorPessoaService
 
   @Override
   protected void beforeCreate(CreateServidorPessoaDTO dto, ServidorPessoa e) {
+    invariants.pessoa(e);
     if (getRepository().existsById(e.getNumero()))
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Identidade já cadastrada.");
   }

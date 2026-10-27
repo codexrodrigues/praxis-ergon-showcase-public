@@ -1,5 +1,32 @@
 # Relatório de rodada — issue 305
 
+## Complementação após CHANGES REQUESTED
+
+Revisões lidas integralmente: [issue, comentário 6455474606](https://github.com/codexrodrigues/praxis-metadata-starter/issues/305#issuecomment-6455474606) e [PR, comentário 6455474233](https://github.com/codexrodrigues/praxis-ergon-showcase/pull/1#issuecomment-6455474233). A revisão registra a correção das nove fricções da rodada inicial nos commits bd7eb3f31f (guias) e 766fc1d (skills); a seção histórica abaixo preserva o diagnóstico original.
+
+O solicitante definiu expressamente a manutenção do schema existente, sem DDL ou migrations. Permanecem ddl-auto=validate, flyway.enabled=false, 16 entidades e 392 colunas. Nomes e colunas inexistentes na revisão foram substituídos pelos atributos reais conforme a orientação posterior; nenhum campo institucional foi escondido no JSONB.
+
+### Entrega complementar
+
+- Fichas cadastrais e respostas cobrem todos os atributos persistidos de negócio dos quatro pilotos. A suíte compara os campos JPA com a hierarquia dos DTOs de resposta para impedir omissões. Grupos organizam identificação, filiação, documentos, endereço, bancos, acessibilidade, requisitos, vigência, ingresso, contratos, cessão, aposentadoria e FGTS; detalhes ficam ocultos na grade. Auditoria institucional aparece somente na leitura.
+- Governança pessoal, financeira e sensível nos campos pertinentes e nos critérios de pesquisa. PcD conserva os cinco indicadores e obsDeficiencia; possuiDeficienciaPcD e somentePcD usam sua disjunção. Como não existe um indicador geral separado, a declaração específica já identifica a deficiência; observações complementam o registro.
+- Filtros avançados cobrem LIKE, STARTS_WITH, EQUAL, IN, NOT_IN, BETWEEN, GREATER_OR_EQUAL, ON_DATE, IN_LAST_DAYS, IN_NEXT_DAYS, IS_NULL, IS_NOT_NULL e IS_TRUE, incluindo pessoa.nome, pessoa.cpf e cargoEntidade.nome. Os quatro recursos têm filtros rápidos.
+- Três PATCH com ResourceIntent e UiSurface PARTIAL_FORM: lotacao-exercicio e previdencia-pagamento no vínculo; dados-bancarios-contato na pessoa. Propriedades ausentes ou nulas preservam o valor persistido. Identidade, órgão e campos fora da superfície não são atribuídos.
+- Ações registrar-cessao, encerrar-cessao, conceder-aposentadoria, homologar-estagio-probatorio e extinguir-cargo, além da vacância existente. Cada comando verifica versão e estado persistido; dados de ciclo de vida são exclusivos dessas operações. O provedor único de estado atende vínculos e vigência dos cargos.
+- Fatos publicados e calculados: emEstagioProbatorio, possuiCargoComissao, emCessaoAtiva, idadeAnos, possuiDeficienciaPcD, cargoExtinto e saldoVagasDisponiveis. Estágio indica exercício ativo sem homologação; idade e dias são medidas civis, sem certificar elegibilidade jurídica.
+- Invariantes: cronologia de ingresso/contrato, cargo extinto inclusive quando a extinção tem data futura, saldo de vagas, redução do quadro abaixo da ocupação, cargo aglutinador habilitado no mesmo órgão, lotação/exercício/cargo em comissão no mesmo órgão, registro profissional com número e tipo, CPF/CNPJ únicos. Acumulação operacional limitada a dois vínculos ativos nas categorias MAGISTERIO ou SAUDE. Campos inexistentes de conselho/acumulação não foram criados.
+- Decisões de provimento bloqueiam o cargo, e decisões sobre vínculos da pessoa bloqueiam seu cadastro. Consultas de validação evitam autoflush anterior à decisão. A bateria comprova regras e transações; não representa ensaio de carga concorrente ou certificação jurídica da acumulação.
+
+### Evidência da complementação
+
+Gates finais: mvn clean test e mvn clean package passaram, ambos com **25 testes, zero falhas, zero erros e zero ignorados**, em JDK 21 e PostgreSQL Neon real. O JAR final foi iniciado: health, OpenAPI, consulta autenticada de vínculo e catálogo com as novas ações retornaram HTTP 200; ETag presente. O processo foi encerrado. O resumo atualizado do Surefire e os oito schemas capturados constam em evidence. A conferência pós-suíte confirmou 392 colunas, nenhuma fixture residual e o vínculo 1001:1 ainda ATIVO. Todas as mutações usam a branch isolada e rollback; o banco principal não é destino dos testes.
+
+As falhas intermediárias foram corrigidas: combinação de provedores de estado em uma única fronteira e publicação explícita de eMail no JSON. Não houve alterações de schema, dependências, plataforma ou código do quickstart.
+
+Nenhum frontend Angular consome ainda esses novos contratos neste repositório; a prova desta entrega é backend HTTP, JPA, schema e discovery. Não há artefatos globais de landing/corpus a sincronizar nesta etapa.
+
+---
+
 ## Identificação e escopo
 
 - Data: 27/10/2026.

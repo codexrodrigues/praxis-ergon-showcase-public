@@ -2,6 +2,7 @@ package br.com.praxis.ergonshowcase.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
+import java.time.LocalDate;
 import java.util.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -50,4 +51,39 @@ public class CargoResponseDTO extends CargoDados {
       valueField = "empCodigo",
       surfaceId = "detail")
   private String orgaoNome;
+
+  @Schema(
+      description = "Data de extinção do cargo registrada pelo comando específico.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Data de extinção do cargo registrada pelo comando específico",
+      group = "Quadro de Vagas e Vigência",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private LocalDate dtExtincao;
+
+  @Schema(
+      description = "Indica existência de extinção registrada para o cargo.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Indica existência de extinção registrada para o cargo",
+      group = "Quadro de Vagas e Vigência",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private Boolean cargoExtinto;
+
+  @Schema(
+      description =
+          "Vagas autorizadas menos vínculos ativos, afastados ou cedidos; nulo quando não há quantitativo autorizado.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label =
+          "Vagas autorizadas menos vínculos ativos, afastados ou cedidos; nulo quando não há quantitativo autorizado",
+      group = "Quadro de Vagas e Vigência",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private Long saldoVagasDisponiveis;
 }

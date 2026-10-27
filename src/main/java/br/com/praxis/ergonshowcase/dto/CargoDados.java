@@ -2,6 +2,7 @@ package br.com.praxis.ergonshowcase.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
+import java.time.LocalDate;
 import java.util.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -116,4 +117,38 @@ public abstract class CargoDados {
           "Atributos adicionais do cargo definidos pelo catálogo global e pelo órgão selecionado, incluindo requisitos profissionais.")
   @UISchema(label = "Características do órgão", group = "Características adicionais", order = 110)
   private Map<String, Object> customFields = new LinkedHashMap<>();
+
+  @Schema(description = "Indica cargo que reúne outros cargos para controle agregado do quadro.")
+  @UISchema(
+      label = "Cargo aglutinador",
+      group = "Quadro de Vagas e Vigência",
+      tableHidden = true,
+      order = 200)
+  @Getter(onMethod_ = @com.fasterxml.jackson.annotation.JsonProperty("eAglutinador"))
+  @Setter(onMethod_ = @com.fasterxml.jackson.annotation.JsonProperty("eAglutinador"))
+  private Boolean eAglutinador = false;
+
+  @Schema(description = "Cargo agregador do mesmo órgão ao qual este cargo está vinculado.")
+  @UISchema(
+      label = "Cargo agregador",
+      group = "Quadro de Vagas e Vigência",
+      tableHidden = true,
+      order = 201)
+  private Integer cargoAglutinador;
+
+  @Schema(description = "Data inicial da vigência do controle de vagas deste cargo.")
+  @UISchema(
+      label = "Início do controle de vagas",
+      group = "Quadro de Vagas e Vigência",
+      tableHidden = true,
+      order = 202)
+  private LocalDate dtInicioContrVaga;
+
+  @Schema(description = "Documento legal que fundamenta a definição do cargo.")
+  @UISchema(
+      label = "Documento legal",
+      group = "Quadro de Vagas e Vigência",
+      tableHidden = true,
+      order = 203)
+  private Long documentoLegalId;
 }

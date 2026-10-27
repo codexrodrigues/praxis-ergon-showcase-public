@@ -23,6 +23,7 @@ public class OrgaoService
         Orgao, OrgaoResponseDTO, Integer, OrgaoFilterDTO, CreateOrgaoDTO, UpdateOrgaoDTO>
     implements VersionedCreateUpdateResourceService<
         OrgaoResponseDTO, Integer, OrgaoFilterDTO, CreateOrgaoDTO, UpdateOrgaoDTO> {
+  @org.springframework.beans.factory.annotation.Autowired private ErgonInvariants invariants;
   @PersistenceContext protected EntityManager entityManager;
   protected final OrgaoMapper mapper;
   private final TenantContext tenant;
@@ -103,6 +104,7 @@ public class OrgaoService
     beforeUpdate(id, entity, dto);
     var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
     mapper.applyUpdate(entity, dto);
+    invariants.orgao(entity);
     CustomFieldSupport.restoreReadOnlyValues(entity, readOnlyKeys, old);
     var saved = getRepository().save(entity);
     afterUpdate(id, saved, dto);
@@ -113,6 +115,7 @@ public class OrgaoService
 
   @Override
   protected void beforeCreate(CreateOrgaoDTO dto, Orgao e) {
+    invariants.orgao(e);
     if (getRepository().existsById(e.getEmpresa()))
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Identidade já cadastrada.");
   }

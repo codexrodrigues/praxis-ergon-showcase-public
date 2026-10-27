@@ -11,6 +11,8 @@ public abstract class OrgaoMapper
     implements ResourceMapper<Orgao, OrgaoResponseDTO, CreateOrgaoDTO, UpdateOrgaoDTO, Integer> {
   @BeanMapping(ignoreByDefault = true)
   @Mapping(target = "id", source = "empresa")
+  @Mapping(target = "createdAt", source = "auditoria.createdAt")
+  @Mapping(target = "updatedAt", source = "auditoria.updatedAt")
   @Mapping(target = "nome", source = "nome")
   @Mapping(target = "fantasia", source = "fantasia")
   @Mapping(target = "razao", source = "razao")

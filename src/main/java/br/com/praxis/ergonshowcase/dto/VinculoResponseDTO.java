@@ -82,6 +82,13 @@ public class VinculoResponseDTO extends VinculoDados {
       resourceKey = "administracao-pessoal.funcionarios",
       valueField = "numfunc",
       surfaceId = "detail")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.CONFIDENTIAL,
+      dataCategory = DomainDataCategory.PERSONAL,
+      reason = "Identifica a pessoa titular do vínculo.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   private String pessoaNome;
 
   @Schema(description = "Nomenclatura oficial do cargo de provimento associado ao vínculo.")
@@ -126,4 +133,215 @@ public class VinculoResponseDTO extends VinculoDados {
           "Quantidade de dias corridos desde o exercício até a vacância ou a data atual; não desconta afastamentos nem certifica tempo previdenciário.")
   @UISchema(label = "Dias desde o exercício", readOnly = true, group = "Exercício", order = 140)
   private Long diasDesdeExercicio;
+
+  @Schema(
+      description = "Data da homologação do estágio probatório registrada por comando.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Data da homologação do estágio probatório registrada por comando",
+      group = "Ingresso, concurso e estágio probatório",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private LocalDate dtHomologEstagio;
+
+  @Schema(
+      description = "Modalidade administrativa de requisição ou cessão.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Modalidade administrativa de requisição ou cessão",
+      group = "Cessão e requisição",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private String tipoReq;
+
+  @Schema(
+      description = "Órgão destinatário ou de origem da cessão.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Órgão destinatário ou de origem da cessão",
+      group = "Cessão e requisição",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private String orgaoReq;
+
+  @Schema(
+      description = "Função desempenhada no órgão da cessão.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Função desempenhada no órgão da cessão",
+      group = "Cessão e requisição",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private String funcaoReq;
+
+  @Schema(
+      description = "Responsabilidade pelo ônus financeiro da cessão.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Responsabilidade pelo ônus financeiro da cessão",
+      group = "Cessão e requisição",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private String tipoOnusReq;
+
+  @Schema(
+      description = "Forma de ressarcimento entre os órgãos da cessão.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Forma de ressarcimento entre os órgãos da cessão",
+      group = "Cessão e requisição",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private String tipoRessarcReq;
+
+  @Schema(
+      description = "Data inicial da cessão registrada por comando.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Data inicial da cessão registrada por comando",
+      group = "Cessão e requisição",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private LocalDate dtiniCessao;
+
+  @Schema(
+      description = "Data final da cessão registrada por comando.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Data final da cessão registrada por comando",
+      group = "Cessão e requisição",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private LocalDate dtfimCessao;
+
+  @Schema(
+      description = "Data de concessão da aposentadoria do vínculo.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Data de concessão da aposentadoria do vínculo",
+      group = "Aposentadoria e vacância",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private LocalDate dtaposent;
+
+  @Schema(
+      description = "Modalidade jurídica de aposentadoria concedida.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Modalidade jurídica de aposentadoria concedida",
+      group = "Aposentadoria e vacância",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private String tipoapos;
+
+  @Schema(
+      description = "Fator de proporcionalidade da aposentadoria concedida.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Fator de proporcionalidade da aposentadoria concedida",
+      group = "Aposentadoria e vacância",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private java.math.BigDecimal fatorProporcAposent;
+
+  @Schema(
+      description = "Forma jurídica da vacância registrada.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Forma jurídica da vacância registrada",
+      group = "Aposentadoria e vacância",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private String formavac;
+
+  @Schema(
+      description = "Fundamentação administrativa da vacância registrada.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Fundamentação administrativa da vacância registrada",
+      group = "Aposentadoria e vacância",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private String motivovac;
+
+  @Schema(
+      description = "Data limite de pagamento após a vacância.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Data limite de pagamento após a vacância",
+      group = "Aposentadoria e vacância",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private LocalDate dtPgtoAte;
+
+  @Schema(
+      description = "Denominação da unidade de lotação do vínculo.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Denominação da unidade de lotação do vínculo",
+      group = "Enquadramento e lotação",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private String setorNome;
+
+  @Schema(
+      description = "Denominação da unidade de exercício do vínculo.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Denominação da unidade de exercício do vínculo",
+      group = "Enquadramento e lotação",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private String setorExercicioNome;
+
+  @Schema(
+      description =
+          "Indica vínculo ativo em exercício cujo estágio ainda não foi homologado; não certifica elegibilidade jurídica.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label =
+          "Indica vínculo ativo em exercício cujo estágio ainda não foi homologado; não certifica elegibilidade jurídica",
+      group = "Ingresso, concurso e estágio probatório",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private Boolean emEstagioProbatorio;
+
+  @Schema(
+      description = "Indica cargo em comissão associado ao vínculo.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Indica cargo em comissão associado ao vínculo",
+      group = "Enquadramento e lotação",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private Boolean possuiCargoComissao;
+
+  @Schema(
+      description = "Indica estado funcional CEDIDO persistido.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Indica estado funcional CEDIDO persistido",
+      group = "Cessão e requisição",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private Boolean emCessaoAtiva;
 }

@@ -19,6 +19,360 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @WithMockUser(authorities = {"ERGON_READ", "ERGON_WRITE"})
 class NeonIntegrationTest {
+  @Test
+  void revisionResponsesCoverEveryPersistentBusinessField() throws Exception {
+    for (String name : new String[] {"Orgao", "Cargo", "ServidorPessoa", "Vinculo"}) {
+      Class<?> entity = Class.forName("br.com.praxis.ergonshowcase.domain." + name);
+      Class<?> response = Class.forName("br.com.praxis.ergonshowcase.dto." + name + "ResponseDTO");
+      java.util.Set<String> fields = new java.util.HashSet<>();
+      for (Class<?> cursor = response; cursor != Object.class; cursor = cursor.getSuperclass())
+        for (var f : cursor.getDeclaredFields()) fields.add(f.getName());
+      for (var field : entity.getDeclaredFields())
+        if (field.isAnnotationPresent(jakarta.persistence.Column.class)
+            && !field.isAnnotationPresent(jakarta.persistence.Id.class)
+            && !field.isAnnotationPresent(jakarta.persistence.Version.class))
+          assertThat(fields).as(name + "." + field.getName()).contains(field.getName());
+    }
+  }
+
+  @Test
+  void revisionVacancyBalancePreventsOverProvision() {
+    var rules = context.getBean(br.com.praxis.ergonshowcase.service.ErgonInvariants.class);
+    Integer id =
+        em.createQuery(
+                "select min(v.cargo) from Vinculo v where v.empCodigo=1 and v.situacao in ('ATIVO','AFASTADO','CEDIDO')",
+                Integer.class)
+            .getSingleResult();
+    var cargo = em.find(br.com.praxis.ergonshowcase.domain.Cargo.class, id);
+    cargo.setDtExtincao(null);
+    cargo.setControleVaga(true);
+    cargo.setVagasAutorizadas((int) rules.ocupadas(id, null));
+    var v = revisionNewVinculo();
+    v.setCargo(id);
+    assertThatThrownBy(() -> rules.vinculo(v, true)).hasMessageContaining("Saldo de vagas");
+  }
+
+  @Test
+  void revisionBusinessRulesRejectInvalidVacanciesAndAggregation() {
+    var rules = context.getBean(br.com.praxis.ergonshowcase.service.ErgonInvariants.class);
+    var cargo = new br.com.praxis.ergonshowcase.domain.Cargo();
+    cargo.setCargo(9405);
+    cargo.setEmpCodigo(1);
+    cargo.setControleVaga(true);
+    cargo.setVagasAutorizadas(0);
+    assertThatThrownBy(() -> rules.cargo(cargo))
+        .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+        .hasMessageContaining("positiva");
+    cargo.setControleVaga(false);
+    cargo.setVagasAutorizadas(null);
+    cargo.setCargoAglutinador(999999);
+    assertThatThrownBy(() -> rules.cargo(cargo)).hasMessageContaining("aglutinador");
+    Integer occupied =
+        em.createQuery(
+                "select min(v.cargo) from Vinculo v where v.empCodigo=1 and v.situacao in ('ATIVO','AFASTADO','CEDIDO')",
+                Integer.class)
+            .getSingleResult();
+    var existing = em.find(br.com.praxis.ergonshowcase.domain.Cargo.class, occupied);
+    existing.setVagasAutorizadas(0);
+    existing.setControleVaga(false);
+    assertThatThrownBy(() -> rules.cargo(existing)).hasMessageContaining("ocupação");
+  }
+
+  private br.com.praxis.ergonshowcase.domain.Vinculo revisionNewVinculo() {
+    var v = new br.com.praxis.ergonshowcase.domain.Vinculo();
+    v.setId(new br.com.praxis.ergonshowcase.domain.VinculoId(1001L, 99));
+    v.setEmpCodigo(1);
+    v.setSituacao("ATIVO");
+    v.setCategoria("GERAL");
+    v.setDtexerc(java.time.LocalDate.of(2020, 1, 1));
+    return v;
+  }
+
+  @Test
+  void revisionBusinessRulesRejectChronologyAndAccumulation() {
+    var rules = context.getBean(br.com.praxis.ergonshowcase.service.ErgonInvariants.class);
+    var v = revisionNewVinculo();
+    v.setDtnom(java.time.LocalDate.of(2021, 1, 1));
+    v.setDtposse(java.time.LocalDate.of(2020, 1, 1));
+    assertThatThrownBy(() -> rules.vinculo(v, true)).hasMessageContaining("Nomeação");
+    v.setDtnom(null);
+    v.setDtposse(null);
+    assertThatThrownBy(() -> rules.vinculo(v, true)).hasMessageContaining("Acumulação");
+    v.setSituacao("CEDIDO");
+    v.setDtinicontr(java.time.LocalDate.of(2026, 5, 1));
+    v.setDtfimcontr(java.time.LocalDate.of(2026, 4, 1));
+    assertThatThrownBy(() -> rules.vinculo(v, true)).hasMessageContaining("contratual");
+  }
+
+  @Test
+  void revisionBusinessRulesRejectCrossOrgAndExtinctCargo() {
+    var rules = context.getBean(br.com.praxis.ergonshowcase.service.ErgonInvariants.class);
+    var v = revisionNewVinculo();
+    v.setSituacao("CEDIDO");
+    String foreign =
+        em.createQuery("select min(s.setor) from Setor s where s.empCodigo<>1", String.class)
+            .getSingleResult();
+    v.setSetor(foreign);
+    assertThatThrownBy(() -> rules.vinculo(v, true)).hasMessageContaining("outro órgão");
+    v.setSetor(null);
+    v.setSetorExercicio(foreign);
+    assertThatThrownBy(() -> rules.vinculo(v, true)).hasMessageContaining("outro órgão");
+    v.setSetorExercicio(null);
+    Integer other =
+        em.createQuery("select min(c.cargo) from Cargo c where c.empCodigo<>1", Integer.class)
+            .getSingleResult();
+    v.setCargoComissao(other);
+    assertThatThrownBy(() -> rules.vinculo(v, true)).hasMessageContaining("outro órgão");
+    v.setCargoComissao(null);
+    Integer own =
+        em.createQuery("select min(c.cargo) from Cargo c where c.empCodigo=1", Integer.class)
+            .getSingleResult();
+    var cargo = em.find(br.com.praxis.ergonshowcase.domain.Cargo.class, own);
+    cargo.setDtExtincao(java.time.LocalDate.now().plusDays(1));
+    v.setCargo(own);
+    assertThatThrownBy(() -> rules.vinculo(v, true)).hasMessageContaining("extinto");
+  }
+
+  @Test
+  void revisionProfessionalRegistrationAndUniqueness() throws Exception {
+    var rules = context.getBean(br.com.praxis.ergonshowcase.service.ErgonInvariants.class);
+    var p = new br.com.praxis.ergonshowcase.domain.ServidorPessoa();
+    p.setNumero(9499L);
+    p.setCpf("00000009499");
+    p.setIdentprof("123");
+    assertThatThrownBy(() -> rules.pessoa(p)).hasMessageContaining("número e tipo");
+    var existing = em.find(br.com.praxis.ergonshowcase.domain.ServidorPessoa.class, 1001L);
+    p.setTipoidprof("CRM");
+    p.setCpf(existing.getCpf());
+    assertThatThrownBy(() -> rules.pessoa(p)).hasMessageContaining("CPF");
+    var o = new br.com.praxis.ergonshowcase.domain.Orgao();
+    o.setEmpresa(9499);
+    o.setCnpj(em.find(br.com.praxis.ergonshowcase.domain.Orgao.class, 1).getCnpj());
+    assertThatThrownBy(() -> rules.orgao(o)).hasMessageContaining("CNPJ");
+    revisionCommand(
+            "/api/ergon/servidor-pessoas/1001/dados-bancarios-contato",
+            "{\"eMail\":\"prova@example.invalid\"}")
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void revisionDiscoveryAndRichSchemas() throws Exception {
+    for (String resource : new String[] {"orgaos", "cargos", "servidor-pessoas", "vinculos"}) {
+      String schema =
+          mvc.perform(
+                  get("/schemas/filtered")
+                      .param("resourcePath", "/api/ergon/" + resource)
+                      .param("operation", "post")
+                      .param("schemaType", "response"))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      assertThat(schema).contains("quickFilters");
+      if (resource.equals("servidor-pessoas"))
+        assertThat(schema)
+            .contains(
+                "numcartpro",
+                "numtitel",
+                "defintelectual",
+                "nomelogender",
+                "identprof",
+                "idadeAnos",
+                "possuiDeficienciaPcD");
+      if (resource.equals("vinculos"))
+        assertThat(schema)
+            .contains(
+                "regimeprev",
+                "dtaposent",
+                "dtiniCessao",
+                "emCessaoAtiva",
+                "setorExercicio",
+                "cargoComissao");
+      if (resource.equals("cargos"))
+        assertThat(schema).contains("cargoAglutinador", "saldoVagasDisponiveis", "cargoExtinto");
+    }
+    for (String key : new String[] {"vinculos", "cargos", "funcionarios"}) {
+      String domain =
+          mvc.perform(get("/schemas/domain").param("resource", "administracao-pessoal." + key))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      assertThat(domain)
+          .contains(
+              key.equals("vinculos")
+                  ? "emEstagioProbatorio"
+                  : key.equals("cargos") ? "saldoVagasDisponiveis" : "possuiDeficienciaPcD");
+    }
+    String actions =
+        mvc.perform(get("/schemas/actions").param("resource", "administracao-pessoal.vinculos"))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    assertThat(actions)
+        .contains(
+            "registrar-cessao",
+            "encerrar-cessao",
+            "conceder-aposentadoria",
+            "homologar-estagio-probatorio");
+    String surfaces =
+        mvc.perform(get("/schemas/surfaces").param("resource", "administracao-pessoal.vinculos"))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    assertThat(surfaces).contains("lotacao-exercicio", "previdencia-pagamento");
+  }
+
+  @Test
+  void revisionFiltersExecuteTheirDeclaredPredicates() throws Exception {
+    String[][] cases = {
+      {"orgaos", "{\"cnpj\":\"00\",\"somenteAtivos\":true}"},
+      {"orgaos", "{\"semPortalWeb\":true,\"criadoNosUltimosDias\":30}"},
+      {"cargos", "{\"apenasVigentes\":true,\"vagasMinimas\":0}"},
+      {"cargos", "{\"apenasExtintos\":true,\"vagasAutorizadasRange\":[0,99999]}"},
+      {"servidor-pessoas", "{\"cpfPrefixo\":\"0\",\"possuiNomeSocial\":true}"},
+      {"servidor-pessoas", "{\"dataNascimentoExata\":\"1990-01-01\"}"},
+      {"servidor-pessoas", "{\"cnhVencendoNosProximosDias\":90,\"somentePcD\":true}"},
+      {"vinculos", "{\"pessoaNome\":\"a\",\"cargoNome\":\"a\",\"excluirSituacoes\":[\"VACANTE\"]}"},
+      {"vinculos", "{\"exercicioNaData\":\"2020-01-01\",\"emExercicioSemVacancia\":true}"},
+      {
+        "vinculos",
+        "{\"fimContratoNosProximosDias\":90,\"estagioHomologado\":true,\"infoCota\":true}"
+      }
+    };
+    for (var item : cases)
+      mvc.perform(
+              post("/api/ergon/" + item[0] + "/filter")
+                  .contentType("application/json")
+                  .content(item[1]))
+          .andExpect(status().isOk());
+    var expected =
+        em.createQuery(
+                "select count(p) from ServidorPessoa p where p.deffisica=true or p.defvisual=true or p.defauditiva=true or p.defmental=true or p.defintelectual=true",
+                Long.class)
+            .getSingleResult();
+    mvc.perform(
+            post("/api/ergon/servidor-pessoas/filter")
+                .contentType("application/json")
+                .content("{\"somentePcD\":true}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.totalElements").value(expected.intValue()));
+  }
+
+  private String revisionEtag(String uri) throws Exception {
+    return mvc.perform(get(uri))
+        .andExpect(status().isOk())
+        .andReturn()
+        .getResponse()
+        .getHeader("ETag");
+  }
+
+  private org.springframework.test.web.servlet.ResultActions revisionCommand(
+      String uri, String body) throws Exception {
+    String base =
+        uri.contains("/actions/")
+            ? uri.substring(0, uri.indexOf("/actions/"))
+            : uri.substring(0, uri.lastIndexOf('/'));
+    return mvc.perform(
+        (uri.contains("/actions/") ? post(uri) : patch(uri))
+            .header("If-Match", revisionEtag(base))
+            .contentType("application/json")
+            .content(body));
+  }
+
+  @Test
+  void revisionPartialFormsPreserveIdentityAndUntouchedValues() throws Exception {
+    String uri = "/api/ergon/vinculos/1001:1";
+    Integer bank =
+        em.find(
+                br.com.praxis.ergonshowcase.domain.Vinculo.class,
+                new br.com.praxis.ergonshowcase.domain.VinculoId(1001L, 1))
+            .getBanco();
+    revisionCommand(uri + "/previdencia-pagamento", "{\"correio\":true}")
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value("1001:1"));
+    assertThat(
+            em.find(
+                    br.com.praxis.ergonshowcase.domain.Vinculo.class,
+                    new br.com.praxis.ergonshowcase.domain.VinculoId(1001L, 1))
+                .getBanco())
+        .isEqualTo(bank);
+    revisionCommand(uri + "/lotacao-exercicio", "{\"jornadaSemanal\":35}")
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.jornadaSemanal").value(35));
+    revisionCommand(
+            "/api/ergon/servidor-pessoas/1001/dados-bancarios-contato",
+            "{\"telefone\":\"1130503050\"}")
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.telefone").value("1130503050"));
+    mvc.perform(patch(uri + "/lotacao-exercicio").contentType("application/json").content("{}"))
+        .andExpect(status().isPreconditionRequired());
+  }
+
+  @Test
+  void revisionCessaoAndRetirementTransitions() throws Exception {
+    String uri = "/api/ergon/vinculos/1001:1";
+    revisionCommand(
+            uri + "/actions/registrar-cessao",
+            "{\"tipoReq\":\"CESSAO\",\"orgaoReq\":\"Órgão de prova\",\"funcaoReq\":\"APOIO\",\"tipoOnusReq\":\"CEDENTE\",\"dtiniCessao\":\"2026-09-01\"}")
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.situacao").value("CEDIDO"));
+    revisionCommand(uri + "/actions/encerrar-cessao", "{\"dtfimCessao\":\"2026-10-01\"}")
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.situacao").value("ATIVO"));
+    Long doc =
+        em.createQuery("select min(d.id) from DocumentoLegal d", Long.class).getSingleResult();
+    revisionCommand(
+            uri + "/actions/conceder-aposentadoria",
+            "{\"dtaposent\":\"2026-10-01\",\"tipoapos\":\"VOLUNTARIA\",\"fatorProporcAposent\":1,\"documentoLegalId\":"
+                + doc
+                + "}")
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.situacao").value("APOSENTADO"));
+    revisionCommand(
+            uri + "/actions/registrar-cessao",
+            "{\"tipoReq\":\"CESSAO\",\"orgaoReq\":\"Órgão de prova\",\"funcaoReq\":\"APOIO\",\"tipoOnusReq\":\"CEDENTE\",\"dtiniCessao\":\"2026-09-01\"}")
+        .andExpect(status().isConflict());
+  }
+
+  @Test
+  void revisionHomologacaoAndCargoExtinction() throws Exception {
+    var vinculo =
+        em.find(
+            br.com.praxis.ergonshowcase.domain.Vinculo.class,
+            new br.com.praxis.ergonshowcase.domain.VinculoId(1001L, 1));
+    vinculo.setDtHomologEstagio(null);
+    em.flush();
+    Long doc =
+        em.createQuery("select min(d.id) from DocumentoLegal d", Long.class).getSingleResult();
+    revisionCommand(
+            "/api/ergon/vinculos/1001:1/actions/homologar-estagio-probatorio",
+            "{\"dtHomologEstagio\":\"2026-10-01\",\"documentoLegalId\":" + doc + "}")
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.emEstagioProbatorio").value(false));
+    mvc.perform(
+            post("/api/ergon/cargos")
+                .contentType("application/json")
+                .content(
+                    "{\"cargo\":9405,\"empCodigo\":1,\"nome\":\"Cargo para extinção\",\"categoria\":\"GERAL\"}"))
+        .andExpect(status().isCreated());
+    revisionCommand(
+            "/api/ergon/cargos/9405/actions/extinguir-cargo", "{\"dtExtincao\":\"2026-10-01\"}")
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.cargoExtinto").value(true));
+    Integer occupied =
+        em.createQuery(
+                "select min(v.cargo) from Vinculo v where v.empCodigo=1 and v.situacao in ('ATIVO','AFASTADO','CEDIDO')",
+                Integer.class)
+            .getSingleResult();
+    revisionCommand(
+            "/api/ergon/cargos/" + occupied + "/actions/extinguir-cargo",
+            "{\"dtExtincao\":\"2026-10-01\"}")
+        .andExpect(status().isUnprocessableEntity());
+  }
+
   @Autowired MockMvc mvc;
   @Autowired EntityManager em;
   @Autowired com.fasterxml.jackson.databind.ObjectMapper json;

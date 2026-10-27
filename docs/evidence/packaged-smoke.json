@@ -2,6 +2,8 @@
   "health": 200,
   "openapi": 200,
   "vinculo": 200,
+  "actions": 200,
+  "newActionsPresent": true,
   "etagPresent": true,
   "jarStarted": true,
   "processStopped": true

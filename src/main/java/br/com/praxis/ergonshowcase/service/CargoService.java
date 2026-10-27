@@ -23,6 +23,7 @@ public class CargoService
         Cargo, CargoResponseDTO, Integer, CargoFilterDTO, CreateCargoDTO, UpdateCargoDTO>
     implements VersionedCreateUpdateResourceService<
         CargoResponseDTO, Integer, CargoFilterDTO, CreateCargoDTO, UpdateCargoDTO> {
+  @org.springframework.beans.factory.annotation.Autowired private ErgonInvariants invariants;
   @PersistenceContext protected EntityManager entityManager;
   protected final CargoMapper mapper;
   private final TenantContext tenant;
@@ -104,6 +105,7 @@ public class CargoService
     beforeUpdate(id, entity, dto);
     var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
     mapper.applyUpdate(entity, dto);
+    invariants.cargo(entity);
     CustomFieldSupport.restoreReadOnlyValues(entity, readOnlyKeys, old);
     var saved = getRepository().save(entity);
     afterUpdate(id, saved, dto);
@@ -114,6 +116,7 @@ public class CargoService
 
   @Override
   protected void beforeCreate(CreateCargoDTO dto, Cargo e) {
+    invariants.cargo(e);
     checkOrg(e.getEmpCodigo());
     if (getRepository().existsById(e.getCargo()))
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Cargo já cadastrado.");

@@ -81,4 +81,203 @@ public class VinculoFilterDTO implements GenericFilterDTO {
           "Predicados sobre atributos funcionais dinâmicos, validados pelo catálogo do órgão.")
   @UISchema(label = "Características adicionais", group = "Pesquisa", order = 80)
   private Map<String, Object> customFields;
+
+  @Schema(description = "Trecho do nome civil da pessoa titular do vínculo.")
+  @UISchema(
+      label = "Trecho do nome civil da pessoa titular do vínculo",
+      group = "Pesquisa avançada",
+      order = 200)
+  @Filterable(operation = FilterOperation.LIKE, relation = "pessoa.nome")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.CONFIDENTIAL,
+      dataCategory = DomainDataCategory.PERSONAL,
+      reason = "Critério de pesquisa sobre dado pessoal do cadastro civil.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private String pessoaNome;
+
+  @Schema(description = "CPF exato da pessoa titular do vínculo.")
+  @UISchema(
+      label = "CPF exato da pessoa titular do vínculo",
+      group = "Pesquisa avançada",
+      order = 201)
+  @Filterable(operation = FilterOperation.EQUAL, relation = "pessoa.cpf")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.CONFIDENTIAL,
+      dataCategory = DomainDataCategory.PERSONAL,
+      reason = "Critério de pesquisa sobre dado pessoal do cadastro civil.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private String pessoaCpf;
+
+  @Schema(description = "Prefixo da matrícula do vínculo no sistema externo.")
+  @UISchema(
+      label = "Prefixo da matrícula do vínculo no sistema externo",
+      group = "Pesquisa avançada",
+      order = 202)
+  @Filterable(operation = FilterOperation.STARTS_WITH, relation = "matriculaExterna")
+  private String matriculaExterna;
+
+  @Schema(description = "Estados funcionais excluídos da consulta.")
+  @UISchema(
+      label = "Estados funcionais excluídos da consulta",
+      group = "Pesquisa avançada",
+      order = 203)
+  @Filterable(operation = FilterOperation.NOT_IN, relation = "situacao")
+  private List<String> excluirSituacoes;
+
+  @Schema(description = "Regimes jurídicos dos vínculos incluídos.")
+  @UISchema(
+      label = "Regimes jurídicos dos vínculos incluídos",
+      group = "Pesquisa avançada",
+      order = 204)
+  @Filterable(operation = FilterOperation.IN, relation = "regimejur")
+  private List<String> regimesJuridicos;
+
+  @Schema(description = "Modalidades de vínculo incluídas.")
+  @UISchema(label = "Modalidades de vínculo incluídas", group = "Pesquisa avançada", order = 205)
+  @Filterable(operation = FilterOperation.IN, relation = "tipovinc")
+  private List<String> tiposVinculo;
+
+  @Schema(description = "Categorias funcionais incluídas.")
+  @UISchema(label = "Categorias funcionais incluídas", group = "Pesquisa avançada", order = 206)
+  @Filterable(operation = FilterOperation.IN, relation = "categoria")
+  private List<String> categorias;
+
+  @Schema(description = "Código do cargo ocupado pelo vínculo.")
+  @UISchema(
+      label = "Código do cargo ocupado pelo vínculo",
+      group = "Pesquisa avançada",
+      order = 207)
+  @Filterable(operation = FilterOperation.EQUAL, relation = "cargo")
+  private Integer cargo;
+
+  @Schema(description = "Trecho da nomenclatura do cargo ocupado.")
+  @UISchema(
+      label = "Trecho da nomenclatura do cargo ocupado",
+      group = "Pesquisa avançada",
+      order = 208)
+  @Filterable(operation = FilterOperation.LIKE, relation = "cargoEntidade.nome")
+  private String cargoNome;
+
+  @Schema(description = "Código exato do cargo em comissão.")
+  @UISchema(label = "Código exato do cargo em comissão", group = "Pesquisa avançada", order = 209)
+  @Filterable(operation = FilterOperation.EQUAL, relation = "cargoComissao")
+  private Integer cargoComissao;
+
+  @Schema(description = "Seleciona vínculos com cargo em comissão.")
+  @UISchema(
+      label = "Seleciona vínculos com cargo em comissão",
+      group = "Pesquisa avançada",
+      order = 210)
+  @Filterable(operation = FilterOperation.IS_NOT_NULL, relation = "cargoComissao")
+  private Boolean possuiCargoComissao;
+
+  @Schema(description = "Unidade de lotação do vínculo.")
+  @UISchema(label = "Unidade de lotação do vínculo", group = "Pesquisa avançada", order = 211)
+  @Filterable(operation = FilterOperation.EQUAL, relation = "setor")
+  private String setor;
+
+  @Schema(description = "Unidade de exercício efetivo do vínculo.")
+  @UISchema(
+      label = "Unidade de exercício efetivo do vínculo",
+      group = "Pesquisa avançada",
+      order = 212)
+  @Filterable(operation = FilterOperation.EQUAL, relation = "setorExercicio")
+  private String setorExercicio;
+
+  @Schema(description = "Intervalo inclusivo da jornada semanal em horas.")
+  @UISchema(
+      label = "Intervalo inclusivo da jornada semanal em horas",
+      group = "Pesquisa avançada",
+      order = 213)
+  @Filterable(operation = FilterOperation.BETWEEN, relation = "jornadaSemanal")
+  private List<Integer> jornadaRange;
+
+  @Schema(description = "Regimes previdenciários incluídos.")
+  @UISchema(label = "Regimes previdenciários incluídos", group = "Pesquisa avançada", order = 214)
+  @Filterable(operation = FilterOperation.IN, relation = "regimeprev")
+  private List<String> regimesPrevidenciarios;
+
+  @Schema(description = "Intervalo inclusivo da data de nomeação.")
+  @UISchema(
+      label = "Intervalo inclusivo da data de nomeação",
+      group = "Pesquisa avançada",
+      order = 215,
+      controlType = FieldControlType.DATE_RANGE)
+  @Filterable(operation = FilterOperation.BETWEEN, relation = "dtnom")
+  private List<LocalDate> nomeacaoRange;
+
+  @Schema(description = "Intervalo inclusivo da data de posse.")
+  @UISchema(
+      label = "Intervalo inclusivo da data de posse",
+      group = "Pesquisa avançada",
+      order = 216,
+      controlType = FieldControlType.DATE_RANGE)
+  @Filterable(operation = FilterOperation.BETWEEN, relation = "dtposse")
+  private List<LocalDate> posseRange;
+
+  @Schema(description = "Data exata de início do exercício.")
+  @UISchema(label = "Data exata de início do exercício", group = "Pesquisa avançada", order = 217)
+  @Filterable(operation = FilterOperation.ON_DATE, relation = "dtexerc")
+  private LocalDate exercicioNaData;
+
+  @Schema(description = "Janela em dias até o fim do contrato temporário.")
+  @UISchema(
+      label = "Janela em dias até o fim do contrato temporário",
+      group = "Pesquisa avançada",
+      order = 218)
+  @Filterable(operation = FilterOperation.IN_NEXT_DAYS, relation = "dtfimcontr")
+  private Integer fimContratoNosProximosDias;
+
+  @Schema(description = "Intervalo inclusivo de vacância.")
+  @UISchema(
+      label = "Intervalo inclusivo de vacância",
+      group = "Pesquisa avançada",
+      order = 219,
+      controlType = FieldControlType.DATE_RANGE)
+  @Filterable(operation = FilterOperation.BETWEEN, relation = "dtvac")
+  private List<LocalDate> vacanciaRange;
+
+  @Schema(description = "Seleciona vínculos sem data de vacância.")
+  @UISchema(
+      label = "Seleciona vínculos sem data de vacância",
+      group = "Pesquisa avançada",
+      order = 220)
+  @Filterable(operation = FilterOperation.IS_NULL, relation = "dtvac")
+  private Boolean emExercicioSemVacancia;
+
+  @Schema(description = "Seleciona vínculos com estágio homologado.")
+  @UISchema(
+      label = "Seleciona vínculos com estágio homologado",
+      group = "Pesquisa avançada",
+      order = 221)
+  @Filterable(operation = FilterOperation.IS_NOT_NULL, relation = "dtHomologEstagio")
+  private Boolean estagioHomologado;
+
+  @Schema(description = "Seleciona vínculos com aposentadoria registrada.")
+  @UISchema(
+      label = "Seleciona vínculos com aposentadoria registrada",
+      group = "Pesquisa avançada",
+      order = 222)
+  @Filterable(operation = FilterOperation.IS_NOT_NULL, relation = "dtaposent")
+  private Boolean aposentado;
+
+  @Schema(description = "Seleciona vínculos com informação de cota.")
+  @UISchema(
+      label = "Seleciona vínculos com informação de cota",
+      group = "Pesquisa avançada",
+      order = 223)
+  @Filterable(operation = FilterOperation.IS_TRUE, relation = "infoCota")
+  private Boolean infoCota;
+
+  @Schema(description = "Pesquisa a incidência de desconto de imposto de renda.")
+  @UISchema(
+      label = "Pesquisa a incidência de desconto de imposto de renda",
+      group = "Pesquisa avançada",
+      order = 224)
+  @Filterable(operation = FilterOperation.EQUAL, relation = "descontaIr")
+  private Boolean descontaIr;
 }

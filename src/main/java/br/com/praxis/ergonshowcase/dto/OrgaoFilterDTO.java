@@ -30,4 +30,65 @@ public class OrgaoFilterDTO implements GenericFilterDTO {
   @UISchema(label = "UF", group = "Pesquisa", order = 30)
   @Filterable(operation = FilterOperation.EQUAL)
   private String ufSigla;
+
+  @Schema(description = "Trecho da sigla institucional do órgão.")
+  @UISchema(
+      label = "Trecho da sigla institucional do órgão",
+      group = "Pesquisa avançada",
+      order = 200)
+  @Filterable(operation = FilterOperation.LIKE, relation = "fantasia")
+  private String fantasia;
+
+  @Schema(description = "Trecho da denominação jurídica do ente.")
+  @UISchema(
+      label = "Trecho da denominação jurídica do ente",
+      group = "Pesquisa avançada",
+      order = 201)
+  @Filterable(operation = FilterOperation.LIKE, relation = "razao")
+  private String razao;
+
+  @Schema(description = "Prefixo da inscrição do ente no CNPJ.")
+  @UISchema(
+      label = "Prefixo da inscrição do ente no CNPJ",
+      group = "Pesquisa avançada",
+      order = 202)
+  @Filterable(operation = FilterOperation.STARTS_WITH, relation = "cnpj")
+  private String cnpj;
+
+  @Schema(description = "Unidades federativas incluídas na pesquisa.")
+  @UISchema(
+      label = "Unidades federativas incluídas na pesquisa",
+      group = "Pesquisa avançada",
+      order = 203)
+  @Filterable(operation = FilterOperation.IN, relation = "ufSigla")
+  private List<String> ufs;
+
+  @Schema(description = "Trecho do município sede do órgão.")
+  @UISchema(label = "Trecho do município sede do órgão", group = "Pesquisa avançada", order = 204)
+  @Filterable(operation = FilterOperation.LIKE, relation = "municipio")
+  private String municipio;
+
+  @Schema(description = "Seleciona somente órgãos habilitados.")
+  @UISchema(
+      label = "Seleciona somente órgãos habilitados",
+      group = "Pesquisa avançada",
+      order = 205)
+  @Filterable(operation = FilterOperation.IS_TRUE, relation = "ativa")
+  private Boolean somenteAtivos;
+
+  @Schema(description = "Seleciona órgãos sem portal informado.")
+  @UISchema(
+      label = "Seleciona órgãos sem portal informado",
+      group = "Pesquisa avançada",
+      order = 206)
+  @Filterable(operation = FilterOperation.IS_NULL, relation = "web")
+  private Boolean semPortalWeb;
+
+  @Schema(description = "Janela em dias desde a inclusão do órgão.")
+  @UISchema(
+      label = "Janela em dias desde a inclusão do órgão",
+      group = "Pesquisa avançada",
+      order = 207)
+  @Filterable(operation = FilterOperation.IN_LAST_DAYS, relation = "auditoria.createdAt")
+  private Integer criadoNosUltimosDias;
 }

@@ -18,9 +18,29 @@ import org.praxisplatform.uischema.filter.dto.GenericFilterDTO;
 @Setter
 @Schema(description = "Critérios de pesquisa de pessoas servidoras na administração de pessoal.")
 public class ServidorPessoaFilterDTO implements GenericFilterDTO {
+  @Schema(
+      description =
+          "Seleciona pessoas com ao menos um indicador específico de deficiência registrado.")
+  @UISchema(label = "Pessoas com deficiência", group = "Acessibilidade e PcD")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.RESTRICTED,
+      dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+      reason = "Critério de pesquisa sobre dado sensível de saúde ou identificação étnica.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private Boolean somentePcD;
+
   @Schema(description = "Trecho do nome civil para localizar a pessoa no cadastro único.")
   @UISchema(label = "Nome", group = "Pesquisa", order = 10)
   @Filterable(operation = FilterOperation.LIKE)
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.CONFIDENTIAL,
+      dataCategory = DomainDataCategory.PERSONAL,
+      reason = "Critério de pesquisa sobre dado pessoal do cadastro civil.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   private String nome;
 
   @Schema(
@@ -31,10 +51,318 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
       group = "Pesquisa",
       order = 20)
   @Filterable(operation = FilterOperation.BETWEEN, relation = "dtnasc")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.CONFIDENTIAL,
+      dataCategory = DomainDataCategory.PERSONAL,
+      reason = "Critério de pesquisa sobre dado pessoal do cadastro civil.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   private List<LocalDate> nascimento;
 
   @CustomFields(resourceKey = "administracao-pessoal.funcionarios")
   @Schema(description = "Predicados sobre os atributos civis adicionais publicados para o órgão.")
   @UISchema(label = "Características adicionais", group = "Pesquisa", order = 30)
   private Map<String, Object> customFields;
+
+  @Schema(description = "Trecho do nome social adotado pela pessoa.")
+  @UISchema(
+      label = "Trecho do nome social adotado pela pessoa",
+      group = "Pesquisa avançada",
+      order = 200)
+  @Filterable(operation = FilterOperation.LIKE, relation = "nomeSocial")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.CONFIDENTIAL,
+      dataCategory = DomainDataCategory.PERSONAL,
+      reason = "Critério de pesquisa sobre dado pessoal do cadastro civil.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private String nomeSocial;
+
+  @Schema(description = "CPF exato da pessoa consultada.")
+  @UISchema(label = "CPF exato da pessoa consultada", group = "Pesquisa avançada", order = 201)
+  @Filterable(operation = FilterOperation.EQUAL, relation = "cpf")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.CONFIDENTIAL,
+      dataCategory = DomainDataCategory.PERSONAL,
+      reason = "Critério de pesquisa sobre dado pessoal do cadastro civil.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private String cpf;
+
+  @Schema(description = "Prefixo do CPF da pessoa.")
+  @UISchema(label = "Prefixo do CPF da pessoa", group = "Pesquisa avançada", order = 202)
+  @Filterable(operation = FilterOperation.STARTS_WITH, relation = "cpf")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.CONFIDENTIAL,
+      dataCategory = DomainDataCategory.PERSONAL,
+      reason = "Critério de pesquisa sobre dado pessoal do cadastro civil.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private String cpfPrefixo;
+
+  @Schema(description = "Inscrição PIS/PASEP exata.")
+  @UISchema(label = "Inscrição PIS/PASEP exata", group = "Pesquisa avançada", order = 203)
+  @Filterable(operation = FilterOperation.EQUAL, relation = "pispasep")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.CONFIDENTIAL,
+      dataCategory = DomainDataCategory.PERSONAL,
+      reason = "Critério de pesquisa sobre dado pessoal do cadastro civil.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private String pispasep;
+
+  @Schema(description = "Número exato da identidade civil.")
+  @UISchema(label = "Número exato da identidade civil", group = "Pesquisa avançada", order = 204)
+  @Filterable(operation = FilterOperation.EQUAL, relation = "numrg")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.CONFIDENTIAL,
+      dataCategory = DomainDataCategory.PERSONAL,
+      reason = "Critério de pesquisa sobre dado pessoal do cadastro civil.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private String numrg;
+
+  @Schema(description = "Sexo registral incluído na consulta.")
+  @UISchema(label = "Sexo registral incluído na consulta", group = "Pesquisa avançada", order = 205)
+  @Filterable(operation = FilterOperation.EQUAL, relation = "sexo")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.CONFIDENTIAL,
+      dataCategory = DomainDataCategory.PERSONAL,
+      reason = "Critério de pesquisa sobre dado pessoal do cadastro civil.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private String sexo;
+
+  @Schema(description = "Estados civis incluídos na consulta.")
+  @UISchema(label = "Estados civis incluídos na consulta", group = "Pesquisa avançada", order = 206)
+  @Filterable(operation = FilterOperation.IN, relation = "estcivil")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.CONFIDENTIAL,
+      dataCategory = DomainDataCategory.PERSONAL,
+      reason = "Critério de pesquisa sobre dado pessoal do cadastro civil.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private List<String> estadosCivis;
+
+  @Schema(description = "Graus de instrução das pessoas consultadas.")
+  @UISchema(
+      label = "Graus de instrução das pessoas consultadas",
+      group = "Pesquisa avançada",
+      order = 207)
+  @Filterable(operation = FilterOperation.IN, relation = "escolaridade")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.CONFIDENTIAL,
+      dataCategory = DomainDataCategory.PERSONAL,
+      reason = "Critério de pesquisa sobre dado pessoal do cadastro civil.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private List<String> escolaridades;
+
+  @Schema(description = "Raças ou cores autodeclaradas incluídas.")
+  @UISchema(
+      label = "Raças ou cores autodeclaradas incluídas",
+      group = "Pesquisa avançada",
+      order = 208)
+  @Filterable(operation = FilterOperation.IN, relation = "racaCor")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.RESTRICTED,
+      dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+      reason = "Critério de pesquisa sobre dado sensível de saúde ou identificação étnica.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private List<String> racasCor;
+
+  @Schema(description = "Grupos sanguíneos incluídos na consulta.")
+  @UISchema(
+      label = "Grupos sanguíneos incluídos na consulta",
+      group = "Pesquisa avançada",
+      order = 209)
+  @Filterable(operation = FilterOperation.IN, relation = "gSanguineo")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.RESTRICTED,
+      dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+      reason = "Critério de pesquisa sobre dado sensível de saúde ou identificação étnica.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private List<String> gruposSanguineos;
+
+  @Schema(description = "Data civil exata de nascimento.")
+  @UISchema(label = "Data civil exata de nascimento", group = "Pesquisa avançada", order = 210)
+  @Filterable(operation = FilterOperation.ON_DATE, relation = "dtnasc")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.CONFIDENTIAL,
+      dataCategory = DomainDataCategory.PERSONAL,
+      reason = "Critério de pesquisa sobre dado pessoal do cadastro civil.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private LocalDate dataNascimentoExata;
+
+  @Schema(description = "UF de residência das pessoas consultadas.")
+  @UISchema(
+      label = "UF de residência das pessoas consultadas",
+      group = "Pesquisa avançada",
+      order = 211)
+  @Filterable(operation = FilterOperation.EQUAL, relation = "ufender")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.CONFIDENTIAL,
+      dataCategory = DomainDataCategory.PERSONAL,
+      reason = "Critério de pesquisa sobre dado pessoal do cadastro civil.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private String ufender;
+
+  @Schema(description = "Trecho do município de residência.")
+  @UISchema(label = "Trecho do município de residência", group = "Pesquisa avançada", order = 212)
+  @Filterable(operation = FilterOperation.LIKE, relation = "cidadeender")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.CONFIDENTIAL,
+      dataCategory = DomainDataCategory.PERSONAL,
+      reason = "Critério de pesquisa sobre dado pessoal do cadastro civil.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private String cidadeender;
+
+  @Schema(description = "Trecho do endereço de correio eletrônico.")
+  @UISchema(
+      label = "Trecho do endereço de correio eletrônico",
+      group = "Pesquisa avançada",
+      order = 213)
+  @Filterable(operation = FilterOperation.LIKE, relation = "eMail")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.CONFIDENTIAL,
+      dataCategory = DomainDataCategory.PERSONAL,
+      reason = "Critério de pesquisa sobre dado pessoal do cadastro civil.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @Getter(onMethod_ = @com.fasterxml.jackson.annotation.JsonProperty("eMail"))
+  @Setter(onMethod_ = @com.fasterxml.jackson.annotation.JsonProperty("eMail"))
+  private String eMail;
+
+  @Schema(description = "Indicador de deficiência física registrado.")
+  @UISchema(
+      label = "Indicador de deficiência física registrado",
+      group = "Pesquisa avançada",
+      order = 214)
+  @Filterable(operation = FilterOperation.EQUAL, relation = "deffisica")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.RESTRICTED,
+      dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+      reason = "Critério de pesquisa sobre dado sensível de saúde ou identificação étnica.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private Boolean deffisica;
+
+  @Schema(description = "Indicador de deficiência visual registrado.")
+  @UISchema(
+      label = "Indicador de deficiência visual registrado",
+      group = "Pesquisa avançada",
+      order = 215)
+  @Filterable(operation = FilterOperation.EQUAL, relation = "defvisual")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.RESTRICTED,
+      dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+      reason = "Critério de pesquisa sobre dado sensível de saúde ou identificação étnica.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private Boolean defvisual;
+
+  @Schema(description = "Indicador de deficiência auditiva registrado.")
+  @UISchema(
+      label = "Indicador de deficiência auditiva registrado",
+      group = "Pesquisa avançada",
+      order = 216)
+  @Filterable(operation = FilterOperation.EQUAL, relation = "defauditiva")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.RESTRICTED,
+      dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+      reason = "Critério de pesquisa sobre dado sensível de saúde ou identificação étnica.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private Boolean defauditiva;
+
+  @Schema(description = "Indicador de deficiência mental registrado.")
+  @UISchema(
+      label = "Indicador de deficiência mental registrado",
+      group = "Pesquisa avançada",
+      order = 217)
+  @Filterable(operation = FilterOperation.EQUAL, relation = "defmental")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.RESTRICTED,
+      dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+      reason = "Critério de pesquisa sobre dado sensível de saúde ou identificação étnica.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private Boolean defmental;
+
+  @Schema(description = "Indicador de deficiência intelectual registrado.")
+  @UISchema(
+      label = "Indicador de deficiência intelectual registrado",
+      group = "Pesquisa avançada",
+      order = 218)
+  @Filterable(operation = FilterOperation.EQUAL, relation = "defintelectual")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.RESTRICTED,
+      dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+      reason = "Critério de pesquisa sobre dado sensível de saúde ou identificação étnica.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private Boolean defintelectual;
+
+  @Schema(description = "Seleciona pessoas com nome social registrado.")
+  @UISchema(
+      label = "Seleciona pessoas com nome social registrado",
+      group = "Pesquisa avançada",
+      order = 219)
+  @Filterable(operation = FilterOperation.IS_NOT_NULL, relation = "nomeSocial")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.CONFIDENTIAL,
+      dataCategory = DomainDataCategory.PERSONAL,
+      reason = "Critério de pesquisa sobre dado pessoal do cadastro civil.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private Boolean possuiNomeSocial;
+
+  @Schema(description = "Janela em dias até o vencimento da CNH.")
+  @UISchema(
+      label = "Janela em dias até o vencimento da CNH",
+      group = "Pesquisa avançada",
+      order = 220)
+  @Filterable(operation = FilterOperation.IN_NEXT_DAYS, relation = "validcnh")
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.CONFIDENTIAL,
+      dataCategory = DomainDataCategory.PERSONAL,
+      reason = "Critério de pesquisa sobre dado pessoal do cadastro civil.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private Integer cnhVencendoNosProximosDias;
+
+  @Schema(description = "Janela em dias desde a inclusão cadastral.")
+  @UISchema(
+      label = "Janela em dias desde a inclusão cadastral",
+      group = "Pesquisa avançada",
+      order = 221)
+  @Filterable(operation = FilterOperation.IN_LAST_DAYS, relation = "auditoria.createdAt")
+  private Integer cadastradoNosUltimosDias;
 }

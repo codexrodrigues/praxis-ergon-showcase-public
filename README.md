@@ -28,11 +28,19 @@ Porta padrão: 8080. Os testes iniciam Tomcat em porta aleatória. O schema exis
 
 Os resourceKeys `administracao-pessoal.*` preservam a vinculação ao catálogo de campos dinâmicos já existente no Neon. Os nomes de recursos desta entrega seguem a instrução do solicitante, que substitui os quatro nomes originalmente listados na issue.
 
-Cada piloto publica CRUD, filtro paginado, opções, fontes RESOURCE_ENTITY, cursor por identidade, localização, capacidades, schemas e estatísticas elegíveis. As 16 tabelas estão mapeadas; somente os quatro pilotos têm endpoints de manutenção. Os DTOs expõem os campos cadastrais deliberadamente selecionados: o mapeamento completo de uma tabela não transforma automaticamente todas as suas colunas em campos editáveis.
+Cada piloto publica CRUD, filtros avançados e rápidos, opções, fontes RESOURCE_ENTITY, cursor por identidade, localização, capacidades, schemas e estatísticas elegíveis. As 16 tabelas estão mapeadas; os quatro pilotos expõem em leitura todos os seus atributos persistidos de negócio, organizados em grupos semânticos. Campos de ciclo de vida permanecem exclusivos dos comandos específicos. Dados secundários são ocultos na grade e disponíveis na ficha; dados pessoais, financeiros e de saúde carregam governança.
 
 PUT exige o ETag forte obtido no GET em `If-Match`: ausência retorna 428 e versão divergente retorna 412. Identidades e órgão proprietário são definidos na criação. Campos do ciclo de vida não pertencem ao PUT cadastral.
 
 `POST /api/ergon/vinculos/{id}/actions/registrar-vacancia` recebe `data`, `forma` e `motivo`, exige ETag e estado ATIVO, e registra VACANTE. A ação não calcula folha ou direitos previdenciários. `GET /api/ergon/vinculos/{id}/resumo-funcional` é a superfície de consulta; `diasDesdeExercicio` conta dias corridos, sem equivaler a tempo previdenciário certificado.
+
+Outras ações de vínculo: `registrar-cessao`, `encerrar-cessao`, `conceder-aposentadoria` e `homologar-estagio-probatorio`, sob `/{id}/actions/`. Cargos publicam `/{id}/actions/extinguir-cargo`; a extinção exige ausência de ocupantes ativos, afastados ou cedidos.
+
+Manutenções especializadas com If-Match: PATCH `/api/ergon/vinculos/{id}/lotacao-exercicio`, `/api/ergon/vinculos/{id}/previdencia-pagamento` e `/api/ergon/servidor-pessoas/{id}/dados-bancarios-contato`. Propriedades ausentes ou nulas preservam os valores existentes; esses formulários mantêm somente seus campos próprios. Nome público de correio eletrônico da pessoa: `eMail`.
+
+As invariantes verificam cronologia de ingresso e contrato, cargo extinto, saldo de vagas, cargo aglutinador, unidades/cargo em comissão no mesmo órgão, pares de identificação profissional e unicidade de CPF/CNPJ. A regra operacional de acumulação desta prova admite no máximo dois vínculos ativos e exige categorias MAGISTERIO ou SAUDE em ambos; não certifica todos os requisitos jurídicos de acumulação.
+
+PcD usa as cinco colunas existentes (`deffisica`, `defvisual`, `defauditiva`, `defmental`, `defintelectual`) e `obsDeficiencia`. O fato e o filtro `somentePcD` usam a disjunção desses indicadores, preservando deficiências múltiplas. Não há coluna sintética ou alteração do schema.
 
 ## Segurança e órgão
 

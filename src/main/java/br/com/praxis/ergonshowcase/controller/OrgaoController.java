@@ -9,6 +9,10 @@ import org.praxisplatform.uischema.controller.base.AbstractResourceController;
 
 /** Publica o contrato de órgãos através da hierarquia canônica Praxis. */
 @ApiResource(
+    quickFilters = {
+      @QuickFilter(id = "ativos", label = "Órgãos ativos", filter = "{\"ativa\":true}"),
+      @QuickFilter(id = "inativos", label = "Órgãos inativos", filter = "{\"ativa\":false}")
+    },
     value = ApiPaths.ORGAOS,
     resourceKey = "administracao-pessoal.empresas",
     title = "Órgãos",

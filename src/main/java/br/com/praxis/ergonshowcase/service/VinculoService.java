@@ -28,6 +28,7 @@ public class VinculoService
         UpdateVinculoDTO>
     implements VersionedCreateUpdateResourceService<
         VinculoResponseDTO, VinculoId, VinculoFilterDTO, CreateVinculoDTO, UpdateVinculoDTO> {
+  @org.springframework.beans.factory.annotation.Autowired private ErgonInvariants invariants;
   @PersistenceContext protected EntityManager entityManager;
   protected final VinculoMapper mapper;
   private final TenantContext tenant;
@@ -113,6 +114,7 @@ public class VinculoService
     beforeUpdate(id, entity, dto);
     var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
     mapper.applyUpdate(entity, dto);
+    invariants.vinculo(entity, false);
     CustomFieldSupport.restoreReadOnlyValues(entity, readOnlyKeys, old);
     var saved = getRepository().save(entity);
     afterUpdate(id, saved, dto);
@@ -147,6 +149,7 @@ public class VinculoService
 
   @Override
   protected void beforeCreate(CreateVinculoDTO dto, Vinculo e) {
+    invariants.vinculo(e, true);
     checkOrg(e.getEmpCodigo());
     checkCargo(e.getEmpCodigo(), e.getCargo());
     if (getRepository().existsById(e.getId()))
@@ -174,10 +177,7 @@ public class VinculoService
   private void checkCargo(Integer orgao, Integer codigo) {
     if (codigo == null) return;
     Cargo cargo = entityManager.find(Cargo.class, codigo);
-    if (cargo == null
-        || !orgao.equals(cargo.getEmpCodigo())
-        || cargo.getDtExtincao() != null
-            && !cargo.getDtExtincao().isAfter(java.time.LocalDate.now()))
+    if (cargo == null || !orgao.equals(cargo.getEmpCodigo()) || cargo.getDtExtincao() != null)
       throw new ResponseStatusException(
           HttpStatus.UNPROCESSABLE_ENTITY,
           "Cargo inexistente, extinto ou pertencente a outro órgão.");

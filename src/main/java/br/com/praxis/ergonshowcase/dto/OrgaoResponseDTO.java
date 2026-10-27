@@ -27,4 +27,26 @@ public class OrgaoResponseDTO extends OrgaoDados {
       group = "Identificação",
       order = 0)
   private Integer id;
+
+  @Schema(
+      description = "Data e hora de criação do cadastro institucional.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Data e hora de criação do cadastro institucional",
+      group = "Auditoria",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private java.time.OffsetDateTime createdAt;
+
+  @Schema(
+      description = "Data e hora da última manutenção institucional.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Data e hora da última manutenção institucional",
+      group = "Auditoria",
+      tableHidden = true,
+      readOnly = true,
+      formHidden = true)
+  private java.time.OffsetDateTime updatedAt;
 }
