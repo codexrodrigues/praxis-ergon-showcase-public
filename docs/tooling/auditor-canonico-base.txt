@@ -1,0 +1,499 @@
+#!/usr/bin/env python3
+"""
+Praxis Platform — Java Resource Completeness, Quick View & Editorial Quality Auditor
+
+Audits a Java/Spring Boot host project using praxis-metadata-starter to detect:
+1. Entity-to-DTO truncation (percentage of @Entity business fields exposed in ResponseDTO/CreateDTO/UpdateDTO).
+2. Quick View / 360° readiness (@ResourceIdentity subtitleField/metadataFields, @UISchema quickViewVisible/quickViewOrder,
+   @ResourceReference with previewSurfaceId, and READ_PROJECTION / VIEW @UiSurface).
+3. @UISchema editorial quality (detects descriptions pasted as labels, LocalDate fields without DATE_PICKER, etc.).
+4. FilterDTO density (count of @Filterable fields, variety of FilterOperation, and @QuickFilter presence).
+5. Praxis semantic capabilities (@UiSurface, @WorkflowAction, @ResourceIntent, @ResourceFact).
+
+Usage:
+    python scripts/workspace/audit-java-resource-completeness.py <path-to-java-host-project> [--strict]
+"""
+
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
+
+AUDIT_EXCLUDED_ENTITY_FIELDS = {
+    "id",
+    "createdAt",
+    "updatedAt",
+    "createdBy",
+    "updatedBy",
+    "version",
+    "rowVersion",
+    "criadoEm",
+    "atualizadoEm",
+    "criadoPor",
+    "atualizadoPor",
+    "auditoria",
+}
+
+
+@dataclass
+class JavaClassInfo:
+    name: str
+    path: Path
+    content: str
+    superclass: Optional[str] = None
+    is_entity: bool = False
+    is_controller: bool = False
+    is_service: bool = False
+    resource_key: Optional[str] = None
+    resource_path: Optional[str] = None
+    controller_type_args: List[str] = field(default_factory=list)
+    service_type_args: List[str] = field(default_factory=list)
+    fields: List[Tuple[str, str, str]] = field(default_factory=list)  # (type, name, annotations)
+
+
+def strip_comments(source: str) -> str:
+    source = re.sub(r"/\*.*?\*/", "", source, flags=re.DOTALL)
+    source = re.sub(r"//.*?$", "", source, flags=re.MULTILINE)
+    return source
+
+
+def extract_fields(source: str) -> List[Tuple[str, str, str]]:
+    """Extract fields with their preceding annotation block from a Java class body."""
+    cleaned = strip_comments(source)
+    class_decl = re.search(r"\b(?:class|record)\s+\w+[^{]*\{", cleaned, re.DOTALL)
+    if not class_decl:
+        return []
+
+    body = cleaned[class_decl.end() :]
+    results: List[Tuple[str, str, str]] = []
+    brace_depth = 0
+    paren_depth = 0
+    current_token: List[str] = []
+
+    top_statements: List[str] = []
+    i = 0
+    n = len(body)
+    while i < n:
+        ch = body[i]
+        if ch == "{":
+            brace_depth += 1
+            if brace_depth == 1:
+                current_token.append("{")
+        elif ch == "}":
+            if brace_depth == 0:
+                break
+            brace_depth -= 1
+            if brace_depth == 0:
+                current_token = []
+        elif ch == "(":
+            paren_depth += 1
+            if brace_depth == 0:
+                current_token.append(ch)
+        elif ch == ")":
+            if paren_depth > 0:
+                paren_depth -= 1
+            if brace_depth == 0:
+                current_token.append(ch)
+        elif ch == ";" and brace_depth == 0 and paren_depth == 0:
+            stmt = "".join(current_token).strip()
+            if stmt:
+                top_statements.append(stmt)
+            current_token = []
+        else:
+            if brace_depth == 0:
+                current_token.append(ch)
+        i += 1
+
+    field_re = re.compile(
+        r"(?:^|\s)(?:private|protected|public)\s+(?!static\b)(?!final\b)([\w<>?,\s\[\].]+?)\s+(\w+)\s*(?:=.*)?$",
+        re.DOTALL,
+    )
+    for stmt in top_statements:
+        m = field_re.search(stmt)
+        if m:
+            f_type = m.group(1).strip()
+            f_name = m.group(2).strip()
+            annot_part = stmt[: m.start()].strip()
+            results.append((f_type, f_name, annot_part))
+
+    return results
+
+
+def split_top_level_type_args(arg_str: str) -> List[str]:
+    args: List[str] = []
+    depth = 0
+    curr: List[str] = []
+    for ch in arg_str:
+        if ch == "<":
+            depth += 1
+            curr.append(ch)
+        elif ch == ">":
+            depth -= 1
+            curr.append(ch)
+        elif ch == "," and depth == 0:
+            args.append("".join(curr).strip())
+            curr = []
+        else:
+            curr.append(ch)
+    if curr:
+        args.append("".join(curr).strip())
+    return args
+
+
+def parse_java_file(path: Path) -> Optional[JavaClassInfo]:
+    try:
+        content = path.read_text(encoding="utf-8")
+    except Exception:
+        return None
+
+    cleaned = strip_comments(content)
+    class_match = re.search(
+        r"\b(?:public\s+|abstract\s+|final\s+)*(?:class|record)\s+(\w+)(?:\s+extends\s+([\w.]+)(?:\s*<([^>{]+)>)?)",
+        cleaned,
+        re.DOTALL,
+    )
+    if not class_match:
+        simple_match = re.search(r"\b(?:class|record)\s+(\w+)", cleaned)
+        if not simple_match:
+            return None
+        name = simple_match.group(1)
+        superclass = None
+        type_args_raw = None
+    else:
+        name = class_match.group(1)
+        superclass = class_match.group(2).split(".")[-1] if class_match.group(2) else None
+        type_args_raw = class_match.group(3)
+
+    info = JavaClassInfo(name=name, path=path, content=content, superclass=superclass)
+    info.is_entity = "@Entity" in cleaned or "@MappedSuperclass" in cleaned
+    info.is_controller = bool(
+        superclass
+        and superclass
+        in {
+            "AbstractResourceController",
+            "AbstractReadOnlyResourceController",
+            "AbstractCollectionCommandResourceController",
+            "AbstractResourceQueryController",
+        }
+    )
+    info.is_service = bool(
+        superclass
+        and (
+            superclass in {"AbstractBaseResourceService", "AbstractReadOnlyResourceService"}
+            or superclass.endswith("ResourceService")
+        )
+        and type_args_raw
+    )
+
+    if "@ApiResource" in cleaned:
+        rk_match = re.search(r'resourceKey\s*=\s*"([^"]+)"', cleaned)
+        if rk_match:
+            info.resource_key = rk_match.group(1)
+
+    if info.is_controller and type_args_raw:
+        info.controller_type_args = split_top_level_type_args(type_args_raw)
+
+    if info.is_service and type_args_raw:
+        info.service_type_args = split_top_level_type_args(type_args_raw)
+
+    info.fields = extract_fields(content)
+    return info
+
+
+def get_all_fields_with_inheritance(
+    cls_name: str, classes: Dict[str, JavaClassInfo]
+) -> List[Tuple[str, str, str]]:
+    visited: Set[str] = set()
+    chain: List[JavaClassInfo] = []
+    curr = classes.get(cls_name)
+    while curr and curr.name not in visited:
+        visited.add(curr.name)
+        chain.append(curr)
+        curr = classes.get(curr.superclass) if curr.superclass else None
+
+    merged: Dict[str, Tuple[str, str, str]] = {}
+    for c in reversed(chain):
+        for f_type, f_name, f_annot in c.fields:
+            merged[f_name] = (f_type, f_name, f_annot)
+    return list(merged.values())
+
+
+def normalize_field_name(name: str) -> str:
+    n = name.lower()
+    for suffix in ("id", "codigo", "nome", "sigla"):
+        if n.endswith(suffix) and len(n) > len(suffix):
+            return n[: -len(suffix)]
+    return n
+
+
+def entity_field_covered_in_dto(entity_field: str, entity_type: str, dto_fields: Set[str]) -> bool:
+    if entity_field in dto_fields:
+        return True
+    if (
+        f"{entity_field}Id" in dto_fields
+        or f"{entity_field}Nome" in dto_fields
+        or f"{entity_field}Codigo" in dto_fields
+    ):
+        return True
+    norm_ent = normalize_field_name(entity_field)
+    for df in dto_fields:
+        if df.lower() == entity_field.lower():
+            return True
+        if normalize_field_name(df) == norm_ent and len(norm_ent) >= 4:
+            return True
+    return False
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Audit Praxis Java resource completeness, Quick View readiness, and editorial quality."
+    )
+    parser.add_argument("project_dir", type=Path, help="Path to the Java host project root")
+    parser.add_argument("--strict", action="store_true", help="Exit with code 1 if any gate fails")
+    parser.add_argument(
+        "--min-dto-coverage",
+        type=float,
+        default=85.0,
+        help="Minimum Entity-to-ResponseDTO coverage %% (default: 85)",
+    )
+    args = parser.parse_args()
+
+    src_main = args.project_dir / "src" / "main" / "java"
+    if not src_main.exists():
+        print(f"ERROR: Could not find {src_main}", file=sys.stderr)
+        return 2
+
+    classes: Dict[str, JavaClassInfo] = {}
+    for java_file in sorted(src_main.rglob("*.java")):
+        info = parse_java_file(java_file)
+        if info:
+            classes[info.name] = info
+
+    controllers = [c for c in classes.values() if c.is_controller and c.controller_type_args]
+    services = [c for c in classes.values() if c.is_service and c.service_type_args]
+    entities = [c for c in classes.values() if "@Entity" in c.content]
+
+    print("# Praxis Resource Completeness, Quick View & Editorial Quality Audit")
+    print(f"- **Project**: `{args.project_dir.resolve()}`")
+    print(f"- **Mapped JPA Entities**: {len(entities)}")
+    print(f"- **Resource Controllers**: {len(controllers)}\n")
+
+    print("## 1. Resource & Capability Scorecard")
+    print(
+        "| Resource (`resourceKey`) | Entity | BizCols | RespCols | Cov % | FilterCols | FilterOps | `@QuickFilter` | QuickViewCols | RichIdentity | `@ResourceRef` (`preview`) | `@UiSurface` | `@WorkflowAction` | `@ResourceIntent` | `@ResourceFact` | EditorialIssues | Status |"
+    )
+    print("|---|---|---:|---:|---:|---:|---|---:|---:|:---:|---|---:|---:|---:|---:|---:|---|")
+
+    failures: List[str] = []
+    unmapped_details: List[Tuple[str, str, List[str]]] = []
+    editorial_details: List[Tuple[str, List[str]]] = []
+
+    for ctrl in controllers:
+        t_args = ctrl.controller_type_args
+        if len(t_args) >= 5:
+            resp_dto_name, _, filter_dto_name, create_dto_name, update_dto_name = t_args[:5]
+        elif len(t_args) == 3:
+            resp_dto_name, _, filter_dto_name = t_args
+            create_dto_name, update_dto_name = "", ""
+        else:
+            continue
+
+        matched_svc = next(
+            (
+                s
+                for s in services
+                if len(s.service_type_args) >= 2 and s.service_type_args[1] == resp_dto_name
+            ),
+            None,
+        )
+        entity_name = matched_svc.service_type_args[0] if matched_svc else ""
+        entity_all_fields = (
+            get_all_fields_with_inheritance(entity_name, classes) if entity_name else []
+        )
+        resp_all_fields = (
+            get_all_fields_with_inheritance(resp_dto_name, classes) if resp_dto_name else []
+        )
+        create_all_fields = (
+            get_all_fields_with_inheritance(create_dto_name, classes) if create_dto_name else []
+        )
+        update_all_fields = (
+            get_all_fields_with_inheritance(update_dto_name, classes) if update_dto_name else []
+        )
+        filter_all_fields = (
+            get_all_fields_with_inheritance(filter_dto_name, classes) if filter_dto_name else []
+        )
+
+        entity_biz_fields: List[Tuple[str, str]] = []
+        for f_type, f_name, f_annot in entity_all_fields:
+            if f_name in AUDIT_EXCLUDED_ENTITY_FIELDS:
+                continue
+            if (
+                "@Id" in f_annot
+                or "@EmbeddedId" in f_annot
+                or "@OneToMany" in f_annot
+                or "@ManyToMany" in f_annot
+            ):
+                continue
+            entity_biz_fields.append((f_type, f_name))
+
+        resp_fields = {
+            f_name for _, f_name, _ in resp_all_fields if f_name not in AUDIT_EXCLUDED_ENTITY_FIELDS
+        }
+
+        covered_count = 0
+        missing_fields: List[str] = []
+        for f_type, f_name in entity_biz_fields:
+            if entity_field_covered_in_dto(f_name, f_type, resp_fields):
+                covered_count += 1
+            else:
+                missing_fields.append(f_name)
+
+        total_ent_biz = len(entity_biz_fields)
+        coverage_pct = (covered_count / total_ent_biz * 100.0) if total_ent_biz > 0 else 100.0
+
+        filterable_count = 0
+        filter_ops: Set[str] = set()
+        for _, f_name, f_annot in filter_all_fields:
+            if "@Filterable" in f_annot:
+                filterable_count += 1
+                op_match = re.search(r"operation\s*=\s*(?:FilterOperation\.)?(\w+)", f_annot)
+                filter_ops.add(op_match.group(1) if op_match else "EQUAL")
+
+        # Quick View & Editorial checks across ResponseDTO + base DTO + FilterDTO
+        quick_view_cols = 0
+        res_ref_count = 0
+        res_ref_preview_count = 0
+        res_editorial_issues: List[str] = []
+
+        for f_type, f_name, f_annot in resp_all_fields:
+            if re.search(r"quickViewVisible\s*=\s*true", f_annot):
+                quick_view_cols += 1
+            if "@ResourceReference" in f_annot:
+                res_ref_count += 1
+                if re.search(r'previewSurfaceId\s*=\s*"[^"]+"', f_annot):
+                    res_ref_preview_count += 1
+            lbl_match = re.search(r'@UISchema\s*\([^)]*label\s*=\s*"([^"]+)"', f_annot, re.DOTALL)
+            if lbl_match:
+                lbl = lbl_match.group(1).strip()
+                if len(lbl) > 36 or lbl.endswith("."):
+                    res_editorial_issues.append(
+                        f"{resp_dto_name}.{f_name}: label looks like a sentence/description ('{lbl}')"
+                    )
+            if f_type in {"LocalDate", "LocalDateTime"} and "@UISchema" in f_annot:
+                if "controlType" not in f_annot and "preset" not in f_annot:
+                    res_editorial_issues.append(
+                        f"{resp_dto_name}.{f_name} ({f_type}): @UISchema missing explicit controlType=DATE_PICKER"
+                    )
+
+        for f_type, f_name, f_annot in filter_all_fields:
+            lbl_match = re.search(r'@UISchema\s*\([^)]*label\s*=\s*"([^"]+)"', f_annot, re.DOTALL)
+            if lbl_match:
+                lbl = lbl_match.group(1).strip()
+                if len(lbl) > 36 or lbl.endswith("."):
+                    res_editorial_issues.append(
+                        f"{filter_dto_name}.{f_name}: label looks like a sentence/description ('{lbl}')"
+                    )
+
+        related_class_names = {
+            ctrl.name,
+            matched_svc.name if matched_svc else "",
+            resp_dto_name,
+            create_dto_name,
+            update_dto_name,
+            filter_dto_name,
+        }
+        for dto_n in (resp_dto_name, create_dto_name, update_dto_name, filter_dto_name):
+            c_obj = classes.get(dto_n)
+            if c_obj and c_obj.superclass:
+                related_class_names.add(c_obj.superclass)
+
+        combined_sources = "\n".join(
+            classes[n].content for n in related_class_names if n and n in classes
+        )
+        has_rich_identity = bool(
+            re.search(r"@ResourceIdentity\s*\([^)]*(?:subtitleField|metadataFields)\s*=", combined_sources, re.DOTALL)
+        )
+        quick_filter_count = len(re.findall(r"@(?:[\w.]+\.)?QuickFilter\b", combined_sources))
+        ui_surface_count = len(re.findall(r"@(?:[\w.]+\.)?UiSurface\b", combined_sources))
+        workflow_action_count = len(
+            re.findall(r"@(?:[\w.]+\.)?WorkflowAction\b", combined_sources)
+        )
+        resource_intent_count = len(
+            re.findall(r"@(?:[\w.]+\.)?ResourceIntent\b", combined_sources)
+        )
+        resource_fact_count = len(re.findall(r"@(?:[\w.]+\.)?ResourceFact\b", combined_sources))
+
+        res_label = ctrl.resource_key or ctrl.name
+        row_issues: List[str] = []
+
+        if total_ent_biz > 0 and coverage_pct < args.min_dto_coverage:
+            row_issues.append(f"DTO coverage {coverage_pct:.1f}% < {args.min_dto_coverage:.0f}%")
+        if total_ent_biz >= 8 and filterable_count < 5:
+            row_issues.append(f"Only {filterable_count} @Filterable")
+        if total_ent_biz >= 8 and len(filter_ops) < 3:
+            row_issues.append(f"Low FilterOperation diversity ({len(filter_ops)})")
+        if quick_filter_count < 2:
+            row_issues.append(f"Only {quick_filter_count} @QuickFilter")
+        if quick_view_cols < 4:
+            row_issues.append(f"Only {quick_view_cols} QuickView fields (quickViewVisible=true)")
+        if not has_rich_identity:
+            row_issues.append("Shallow @ResourceIdentity (missing subtitleField/metadataFields)")
+        if (
+            ui_surface_count + workflow_action_count + resource_intent_count + resource_fact_count
+        ) < 1:
+            row_issues.append("0 semantic capabilities")
+        if res_editorial_issues:
+            row_issues.append(f"{len(res_editorial_issues)} @UISchema editorial issues")
+
+        status_str = "PASS" if not row_issues else "FAIL (" + "; ".join(row_issues) + ")"
+        if row_issues:
+            failures.append(f"{res_label}: {status_str}")
+        if missing_fields:
+            unmapped_details.append((res_label, entity_name, missing_fields))
+        if res_editorial_issues:
+            editorial_details.append((res_label, res_editorial_issues))
+
+        ops_str = f"{len(filter_ops)} ops"
+        rich_id_str = "YES" if has_rich_identity else "NO"
+        print(
+            f"| `{res_label}` | `{entity_name}` | {total_ent_biz} | {len(resp_fields)} | {coverage_pct:.1f}% | {filterable_count} | {ops_str} | {quick_filter_count} | {quick_view_cols} | {rich_id_str} | {res_ref_count} ({res_ref_preview_count}) | {ui_surface_count} | {workflow_action_count} | {resource_intent_count} | {resource_fact_count} | {len(res_editorial_issues)} | **{status_str}** |"
+        )
+
+    if unmapped_details:
+        print("\n## 2. Unmapped Entity Business Columns (Entity -> ResponseDTO Gaps)")
+        for res_label, ent_name, missing in unmapped_details:
+            print(
+                f"- **`{res_label}` (`{ent_name}`)** — {len(missing)} unmapped columns: `{', '.join(missing)}`"
+            )
+
+    if editorial_details:
+        print("\n## 3. @UISchema Editorial & Metadata Quality Issues")
+        for res_label, issues in editorial_details:
+            print(f"- **`{res_label}`** ({len(issues)} issues):")
+            for iss in issues[:12]:
+                print(f"  - `{iss}`")
+            if len(issues) > 12:
+                print(f"  - ... and {len(issues) - 12} more")
+
+    if failures:
+        print(
+            f"\n## 4. Verdict: FAILED ({len(failures)} resource(s) below Praxis platform completeness standard)"
+        )
+        for f in failures:
+            print(f"- [x] {f}")
+        if args.strict:
+            return 1
+    else:
+        print(
+            "\n## 4. Verdict: PASSED (All audited resources meet Praxis completeness, Quick View, and capability density gates)"
+        )
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

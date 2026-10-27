@@ -14,8 +14,24 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
 @Schema(
     description =
         "Entes públicos responsáveis pelos quadros funcionais e pela administração de pessoal.")
-@ResourceIdentity(keyField = "id", titleField = "nome", displayLabelField = "nome")
+@ResourceIdentity(
+    keyField = "id",
+    titleField = "nome",
+    displayLabelField = "nome",
+    subtitleField = "fantasia",
+    metadataFields = {"municipio", "ufSigla", "ativa"})
 public class OrgaoResponseDTO extends OrgaoDados {
+  @Schema(
+      description = "Habilitação atual do órgão; mantida pelas ações de ativação e inativação.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Órgão ativo",
+      group = "Situação",
+      readOnly = true,
+      quickViewVisible = true,
+      quickViewOrder = 5)
+  private Boolean ativa;
+
   @Schema(
       description = "Código imutável do órgão público no cadastro multi-órgão do Ergon.",
       accessMode = Schema.AccessMode.READ_ONLY)
@@ -32,7 +48,7 @@ public class OrgaoResponseDTO extends OrgaoDados {
       description = "Data e hora de criação do cadastro institucional.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Data e hora de criação do cadastro institucional",
+      label = "Criado em",
       group = "Auditoria",
       tableHidden = true,
       readOnly = true,
@@ -43,7 +59,7 @@ public class OrgaoResponseDTO extends OrgaoDados {
       description = "Data e hora da última manutenção institucional.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Data e hora da última manutenção institucional",
+      label = "Atualizado em",
       group = "Auditoria",
       tableHidden = true,
       readOnly = true,

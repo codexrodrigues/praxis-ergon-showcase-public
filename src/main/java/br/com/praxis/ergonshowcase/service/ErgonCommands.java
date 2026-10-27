@@ -25,6 +25,106 @@ public class ErgonCommands {
   @Autowired private ServidorPessoaMapper pessoas;
   @Autowired private ErgonInvariants rules;
   @Autowired private TenantContext tenant;
+  @Autowired private OrgaoMapper orgaos;
+  @Autowired private ErgonReadFacts readFacts;
+
+  public ResourceRepresentationResult<OrgaoResponseDTO> ativarOrgao(
+      Integer id, AlterarSituacaoOrgaoDTO dto, ResourceVersionUpdatePrecondition<Integer> p) {
+    Orgao e = locked(Orgao.class, id);
+    p.requireMatch(e.getVersion());
+    if (Boolean.TRUE.equals(e.getAtiva()))
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Órgão já ativo.");
+    e.setAtiva(true);
+    em.flush();
+    return ResourceRepresentationResult.versioned(orgaos.toResponse(e), e.getVersion());
+  }
+
+  public ResourceRepresentationResult<OrgaoResponseDTO> inativarOrgao(
+      Integer id, AlterarSituacaoOrgaoDTO dto, ResourceVersionUpdatePrecondition<Integer> p) {
+    Orgao e = locked(Orgao.class, id);
+    p.requireMatch(e.getVersion());
+    if (!Boolean.TRUE.equals(e.getAtiva()))
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Órgão já inativo.");
+    e.setAtiva(false);
+    em.flush();
+    return ResourceRepresentationResult.versioned(orgaos.toResponse(e), e.getVersion());
+  }
+
+  private void documentoDoOrgao(Long id, Integer orgao) {
+    DocumentoLegal doc = em.find(DocumentoLegal.class, id);
+    if (doc == null || !Objects.equals(doc.getEmpCodigo(), orgao))
+      ErgonInvariants.fail("Documento legal deve existir no mesmo órgão do vínculo.");
+  }
+
+  public ResourceRepresentationResult<VinculoResponseDTO> registrarAfastamento(
+      VinculoId id, RegistrarAfastamentoDTO dto, ResourceVersionUpdatePrecondition<VinculoId> p) {
+    Vinculo e = vinculo(id, p, "ATIVO");
+    documentoDoOrgao(dto.documentoLegalId(), e.getEmpCodigo());
+    CodigoFrequencia codigo =
+        em.find(CodigoFrequencia.class, new CodigoFrequenciaId(dto.tipofreq(), dto.codfreq()));
+    if (codigo == null || !Boolean.TRUE.equals(codigo.getAfastamento()))
+      ErgonInvariants.fail("Código de frequência não habilitado para afastamento.");
+    ErgonInvariants.chronology(e.getDtexerc(), dto.dtini(), "Afastamento anterior ao exercício.");
+    ErgonInvariants.chronology(
+        dto.dtini(), dto.dtprevfim(), "Término previsto anterior ao início do afastamento.");
+    long conflitos =
+        em.createQuery(
+                "select count(a) from Afastamento a where a.numfunc=:p and a.numvinc=:v and a.situacao='HOMOLOGADO' and (a.dtfim is null or a.dtfim>=:inicio)",
+                Long.class)
+            .setParameter("p", id.numfunc())
+            .setParameter("v", id.numero())
+            .setParameter("inicio", dto.dtini())
+            .getSingleResult();
+    if (conflitos > 0)
+      ErgonInvariants.fail("Período conflita com afastamento homologado existente.");
+    Afastamento a = new Afastamento();
+    a.setNumfunc(id.numfunc());
+    a.setNumvinc(id.numero());
+    a.setEmpCodigo(e.getEmpCodigo());
+    a.setDtini(dto.dtini());
+    a.setDtprevfim(dto.dtprevfim());
+    a.setTipofreq(dto.tipofreq());
+    a.setCodfreq(dto.codfreq());
+    a.setMotivo(dto.motivo());
+    a.setDocumentoLegalId(dto.documentoLegalId());
+    a.setSituacao("HOMOLOGADO");
+    em.persist(a);
+    e.setSituacao("AFASTADO");
+    e.setDocumentoLegalId(dto.documentoLegalId());
+    return finish(e);
+  }
+
+  public ResourceRepresentationResult<VinculoResponseDTO> encerrarAfastamento(
+      VinculoId id, EncerrarAfastamentoDTO dto, ResourceVersionUpdatePrecondition<VinculoId> p) {
+    Vinculo e = vinculo(id, p, "AFASTADO");
+    Afastamento a = locked(Afastamento.class, dto.afastamentoId());
+    if (!Objects.equals(a.getNumfunc(), id.numfunc())
+        || !Objects.equals(a.getNumvinc(), id.numero())
+        || !Objects.equals(a.getEmpCodigo(), e.getEmpCodigo()))
+      ErgonInvariants.fail("Afastamento não pertence ao vínculo selecionado.");
+    if (!"HOMOLOGADO".equals(a.getSituacao()) || a.getDtfim() != null)
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT, "Afastamento não está homologado e aberto.");
+    long abertos =
+        em.createQuery(
+                "select count(a) from Afastamento a where a.numfunc=:p and a.numvinc=:v and a.situacao='HOMOLOGADO' and a.dtfim is null",
+                Long.class)
+            .setParameter("p", id.numfunc())
+            .setParameter("v", id.numero())
+            .getSingleResult();
+    if (abertos != 1)
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT, "Retorno exige um único afastamento homologado aberto.");
+    documentoDoOrgao(dto.documentoLegalId(), e.getEmpCodigo());
+    ErgonInvariants.chronology(
+        a.getDtini(), dto.dtfim(), "Encerramento anterior ao início do afastamento.");
+    a.setDtfim(dto.dtfim());
+    a.setQuantidadeDias(
+        Math.toIntExact(java.time.temporal.ChronoUnit.DAYS.between(a.getDtini(), dto.dtfim()) + 1));
+    e.setSituacao("ATIVO");
+    e.setDocumentoLegalId(dto.documentoLegalId());
+    return finish(e);
+  }
 
   private <E> E locked(Class<E> type, Object id) {
     E e = em.find(type, id, LockModeType.PESSIMISTIC_WRITE);
@@ -53,7 +153,8 @@ public class ErgonCommands {
     rules.vinculo(e, false);
     em.flush();
     em.refresh(e);
-    return ResourceRepresentationResult.versioned(vinculos.toResponse(e), e.getVersion());
+    return ResourceRepresentationResult.versioned(
+        readFacts.enrichOne(vinculos.toResponse(e)), e.getVersion());
   }
 
   public ResourceRepresentationResult<VinculoResponseDTO> registrarCessao(
@@ -128,7 +229,8 @@ public class ErgonCommands {
         e.getDtInicioContrVaga(), dto.dtExtincao(), "Extinção anterior à vigência do cargo.");
     e.setDtExtincao(dto.dtExtincao());
     em.flush();
-    return ResourceRepresentationResult.versioned(cargos.toResponse(e), e.getVersion());
+    return ResourceRepresentationResult.versioned(
+        readFacts.enrichOne(cargos.toResponse(e)), e.getVersion());
   }
 
   public ResourceRepresentationResult<VinculoResponseDTO> alterarLotacaoExercicio(

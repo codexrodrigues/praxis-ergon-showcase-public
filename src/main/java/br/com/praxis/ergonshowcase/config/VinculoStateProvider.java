@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class VinculoStateProvider implements ResourceStateSnapshotProvider {
   @org.springframework.beans.factory.annotation.Autowired
+  private br.com.praxis.ergonshowcase.repository.OrgaoRepository orgaos;
+
+  @org.springframework.beans.factory.annotation.Autowired
   private br.com.praxis.ergonshowcase.repository.CargoRepository cargos;
 
   private final VinculoRepository repository;
@@ -19,6 +22,13 @@ public class VinculoStateProvider implements ResourceStateSnapshotProvider {
   }
 
   public Optional<ResourceStateSnapshot> resolve(String key, Object id) {
+    if ("administracao-pessoal.empresas".equals(key) && id != null)
+      return orgaos
+          .findById(Integer.valueOf(id.toString()))
+          .map(
+              o ->
+                  ResourceStateSnapshot.of(
+                      Boolean.TRUE.equals(o.getAtiva()) ? "ATIVO" : "INATIVO"));
     if ("administracao-pessoal.cargos".equals(key) && id != null)
       return cargos
           .findById(Integer.valueOf(id.toString()))

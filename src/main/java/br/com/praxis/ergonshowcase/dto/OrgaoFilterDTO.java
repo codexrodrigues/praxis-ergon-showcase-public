@@ -32,18 +32,12 @@ public class OrgaoFilterDTO implements GenericFilterDTO {
   private String ufSigla;
 
   @Schema(description = "Trecho da sigla institucional do órgão.")
-  @UISchema(
-      label = "Trecho da sigla institucional do órgão",
-      group = "Pesquisa avançada",
-      order = 200)
+  @UISchema(label = "Sigla", group = "Pesquisa avançada", order = 200)
   @Filterable(operation = FilterOperation.LIKE, relation = "fantasia")
   private String fantasia;
 
   @Schema(description = "Trecho da denominação jurídica do ente.")
-  @UISchema(
-      label = "Trecho da denominação jurídica do ente",
-      group = "Pesquisa avançada",
-      order = 201)
+  @UISchema(label = "Razão social", group = "Pesquisa avançada", order = 201)
   @Filterable(operation = FilterOperation.LIKE, relation = "razao")
   private String razao;
 
@@ -56,10 +50,7 @@ public class OrgaoFilterDTO implements GenericFilterDTO {
   private String cnpj;
 
   @Schema(description = "Unidades federativas incluídas na pesquisa.")
-  @UISchema(
-      label = "Unidades federativas incluídas na pesquisa",
-      group = "Pesquisa avançada",
-      order = 203)
+  @UISchema(label = "Unidades federativas", group = "Pesquisa avançada", order = 203)
   @Filterable(operation = FilterOperation.IN, relation = "ufSigla")
   private List<String> ufs;
 
@@ -77,18 +68,12 @@ public class OrgaoFilterDTO implements GenericFilterDTO {
   private Boolean somenteAtivos;
 
   @Schema(description = "Seleciona órgãos sem portal informado.")
-  @UISchema(
-      label = "Seleciona órgãos sem portal informado",
-      group = "Pesquisa avançada",
-      order = 206)
+  @UISchema(label = "Sem portal informado", group = "Pesquisa avançada", order = 206)
   @Filterable(operation = FilterOperation.IS_NULL, relation = "web")
   private Boolean semPortalWeb;
 
   @Schema(description = "Janela em dias desde a inclusão do órgão.")
-  @UISchema(
-      label = "Janela em dias desde a inclusão do órgão",
-      group = "Pesquisa avançada",
-      order = 207)
+  @UISchema(label = "Criado nos últimos dias", group = "Pesquisa avançada", order = 207)
   @Filterable(operation = FilterOperation.IN_LAST_DAYS, relation = "auditoria.createdAt")
   private Integer criadoNosUltimosDias;
 }

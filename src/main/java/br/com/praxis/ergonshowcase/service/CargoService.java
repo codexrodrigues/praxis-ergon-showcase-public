@@ -111,7 +111,7 @@ public class CargoService
     afterUpdate(id, saved, dto);
     entityManager.flush();
     entityManager.refresh(saved);
-    return toResourceRepresentation(saved);
+    return enriched(toResourceRepresentation(saved));
   }
 
   @Override

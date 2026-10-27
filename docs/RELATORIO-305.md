@@ -1,5 +1,42 @@
 # Relatório de rodada — issue 305
 
+## Correções da revisão independente — rodada atual
+
+Esta seção substitui o estado da entrega anterior, preservada abaixo como histórico. Classificação e mapa de impacto: [plano de correções](PLANO-CORRECOES-REVIEW-305.md). Mantidos o starter local rc.179, as 16 entidades e as 392 colunas, sem DDL, migrations ou alterações nos mapeamentos JPA.
+
+| Lacuna da revisão | Correção implementada | Evidência focal em NeonIntegrationTest |
+|---|---|---|
+| Jornada inválida no PATCH de lotação | Positive/Max(168) no DTO e faixa 1..168 na invariante transacional, também para chamada direta do serviço | reviewPatchRejectsBothInvalidJornadaBounds; reviewServiceAlsoRejectsInvalidJornada |
+| Cargo em comissão não ocupava vaga nem impedia extinção | Ocupação inclui cargo titular OU cargoComissao, uma vez por vínculo; aplica extinção e saldo a ambos, mantendo ATIVO/AFASTADO/CEDIDO como ocupantes | reviewCommissionOccupancyPreventsExtinctionAndDoubleCounting; reviewCommissionCannotUseExtinctOrFullCargo; reviewCommissionCannotExceedVacancies |
+| dtPgtoAte sem destino de escrita | Parâmetro opcional da vacância; data final de pagamento não pode preceder a saída | reviewVacancyMaintainsPaymentLimit; reviewVacancyRejectsPaymentBeforeDeparture |
+| Estado AFASTADO sem entrada/retorno | registrar-afastamento e encerrar-afastamento usam afastamentos e codigos_frequencia existentes, documento do mesmo órgão, homologação, cronologia, sobreposição e vínculo proprietário; retornam nova versão e afastamentoAbertoId | reviewAfastamentoRoundTripPersistsLicenseAndVersion; reviewAfastamentoRejectsInvalidCodeAndChronology; reviewAfastamentoRejectsEndBeforeStart; reviewRetornoRejectsForeignLicense; reviewAfastamentoRejectsOverlappingPeriodAndEarlyReturn |
+| Órgão sem capacidades semânticas | ativar-orgao/inativar-orgao, estados ATIVO/INATIVO, If-Match obrigatório; ativa sai do PUT e permanece na criação/leitura. Nova admissão exige órgão ativo | reviewInstitutionalActionsProtectStateAndETag; reviewOrgaoStateIsNotWritableByCadastralPut; reviewInactiveOrgaoRejectsNewAdmission |
+| Quick View e referências incompletas | Identidades com subtítulo e metadados; 5/5/5/6 campos executivos; título com referência própria; referências entre pilotos apontam a fichas realmente publicadas. Rótulos curtos e controles de data explícitos | reviewReadSurfacesPublishRealETagAndReferences; schemas capturados em evidence |
+| Consulta por linha no mapper | ErgonReadFacts enriquece coleções em lote, incluindo consulta, cursor, lookup por IDs, exportação e respostas de comandos; mappers não executam essas consultas | reviewDerivedFactsUseOneBatchQueryRegardlessOfPageSize: uma consulta para uma ou três linhas, por categoria de fato |
+| Auditor aceitava 85%, associações contadas incorretamente e campos apenas de leitura | Gate de 100%, destino de escrita obrigatório por mapper ou comando alcançável do próprio recurso, joins somente leitura tratados como espelhos e referências resolvidas. Recurso somente de leitura não é obrigado a publicar mutações | [18 testes do auditor](evidence/auditor-tests.txt), [scorecard](evidence/SCORECARD-COMPLETUDE.md), [patch canônico reproduzível](tooling/README.md) |
+
+O ciclo de afastamento registra concessão administrativa já homologada por autoridade ERGON_WRITE, com documento legal, e retorno. A data de término é o último dia afastado, inclusive, e qtdDias inclui início e fim. Não implementa instrução de processo, perícia, homologação pendente ou todos os limites estatutários por espécie de licença. O schema legado existente e sua documentação foram consultados; nenhuma coluna adicional foi simulada em JSONB.
+
+A auditoria estática contabiliza **12/12** atributos de órgão, **17/17** de cargo, **68/68** de pessoa e **59/59** de vínculo, em leitura e destino de escrita. IDs, versão, auditoria técnica e associações espelhadas somente leitura não compõem o denominador; uma relação gravável não é descartada. Os totais não equivalem às 392 colunas das 16 tabelas nem à prova de paridade funcional de todas as telas legadas.
+
+O auditor da raiz foi corrigido no local canônico. Como essa raiz não é um repositório Git, o PR transporta base textual, patch, hashes e testes reproduzidos em diretório temporário; não instala uma cópia executável concorrente no host. As verificações de Quick View adicionadas à versão vigente do workspace foram preservadas e estendidas. Ele retorna **STATIC PASS**, sem substituir revisão independente, testes ou certificação jurídica.
+
+Fricção nova: o ObjectMapper de fallback do starter usa a serialização padrão de datas como arrays quando não há bean do host. O round-trip de dtPgtoAte revelou a divergência. JsonConfig usa o Jackson2ObjectMapperBuilder oficial do Boot, conserva CompositeIdJacksonModule e aplica write-dates-as-timestamps=false. O teste valida ISO-8601 e a identidade composta; não há serializer ad hoc ou troca de versão do starter. A evolução do fallback canônico deve ser tratada em seu módulo proprietário; não foi misturada à dependência local desta prova.
+
+### Validação desta rodada
+
+`mvn clean test` e `mvn clean package` passaram com **42 testes de integração, zero falhas, zero erros e zero ignorados**. O empacotamento final recompilou a versão definitiva dos DTOs e repetiu os 42 testes. Os **18 testes Python** do auditor passaram também após aplicar o patch em diretório temporário vazio. O auditor estrito retornou STATIC PASS nos quatro pilotos.
+
+A consulta pós-suíte no Neon isolado confirmou **392 colunas**, zero fixtures de órgãos/cargos/pessoas/vínculos/afastamentos, órgão 1 ativo e vínculo 1001:1 ATIVO. As mutações dos testes têm rollback; a branch principal do banco não foi usada como destino de escrita. As entidades JPA não foram alteradas nesta rodada.
+
+O JAR final respondeu HTTP 200 para health, OpenAPI, vínculo autenticado, catálogo das ações de afastamento e as três novas fichas de consulta; ETag e data ISO-8601 presentes. O processo foi encerrado. Evidências atuais: resumo Surefire de 42 testes, oito schemas, hashes do starter/JAR, smoke do pacote, conferência de rollback, scorecard e testes do auditor em evidence. Logs completos ficam somente em .local, ignorada pelo Git.
+
+O scorecard comprova estrutura estática; a matriz acima relaciona as verificações de comportamento. A rodada anterior de 25 testes permanece abaixo somente para rastreabilidade histórica.
+
+Limites de aceitação: sem prova visual Angular, ensaio de carga concorrente, Reactive Determinations ou integração governada com motor de regras. Setores/documentos e outras tabelas auxiliares não são APIs próprias nesta fase; seus rótulos não recebem links para endpoints inexistentes. A leitura integral de campos e o gate estático não certificam toda a Visão 360°, todos os fluxos do legado ou as fases 1–3 do novo AGENTS.md. Não se declara aprovação arquitetural automática ou merge autorizado.
+
+---
+
 ## Complementação após CHANGES REQUESTED
 
 Revisões lidas integralmente: [issue, comentário 6455474606](https://github.com/codexrodrigues/praxis-metadata-starter/issues/305#issuecomment-6455474606) e [PR, comentário 6455474233](https://github.com/codexrodrigues/praxis-ergon-showcase/pull/1#issuecomment-6455474233). A revisão registra a correção das nove fricções da rodada inicial nos commits bd7eb3f31f (guias) e 766fc1d (skills); a seção histórica abaixo preserva o diagnóstico original.

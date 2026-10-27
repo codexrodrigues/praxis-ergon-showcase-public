@@ -1,0 +1,514 @@
+--- a/scripts/workspace/audit-java-resource-completeness.py
++++ b/scripts/workspace/audit-java-resource-completeness.py
+@@ -19,6 +19,7 @@
+ import argparse
+ import re
+ import sys
++from java_resource_audit import technical_or_mirrored, mapped_input_fields, command_fields
+ from dataclasses import dataclass, field
+ from pathlib import Path
+ from typing import Dict, List, Optional, Set, Tuple
+@@ -109,7 +110,7 @@
+         i += 1
+ 
+     field_re = re.compile(
+-        r"(?:^|\s)(?:private|protected|public)\s+(?!static\b)(?!final\b)([\w<>?,\s\[\].]+?)\s+(\w+)\s*(?:=.*)?$",
++        r"(?:^|\s)(?:private|protected|public)\s+(?!static\b)(?:final\s+)?([\w<>?,\s\[\].]+?)\s+(\w+)\s*(?:=.*)?$",
+         re.DOTALL,
+     )
+     for stmt in top_statements:
+@@ -222,30 +223,8 @@
+     return list(merged.values())
+ 
+ 
+-def normalize_field_name(name: str) -> str:
+-    n = name.lower()
+-    for suffix in ("id", "codigo", "nome", "sigla"):
+-        if n.endswith(suffix) and len(n) > len(suffix):
+-            return n[: -len(suffix)]
+-    return n
+-
+-
+ def entity_field_covered_in_dto(entity_field: str, entity_type: str, dto_fields: Set[str]) -> bool:
+-    if entity_field in dto_fields:
+-        return True
+-    if (
+-        f"{entity_field}Id" in dto_fields
+-        or f"{entity_field}Nome" in dto_fields
+-        or f"{entity_field}Codigo" in dto_fields
+-    ):
+-        return True
+-    norm_ent = normalize_field_name(entity_field)
+-    for df in dto_fields:
+-        if df.lower() == entity_field.lower():
+-            return True
+-        if normalize_field_name(df) == norm_ent and len(norm_ent) >= 4:
+-            return True
+-    return False
++    return entity_field in dto_fields
+ 
+ 
+ def main() -> int:
+@@ -253,14 +232,16 @@
+         description="Audit Praxis Java resource completeness, Quick View readiness, and editorial quality."
+     )
+     parser.add_argument("project_dir", type=Path, help="Path to the Java host project root")
+-    parser.add_argument("--strict", action="store_true", help="Exit with code 1 if any gate fails")
++    parser.add_argument("--strict", action="store_true", help="Explicit gate mode; failures always exit with code 1")
+     parser.add_argument(
+         "--min-dto-coverage",
+         type=float,
+-        default=85.0,
+-        help="Minimum Entity-to-ResponseDTO coverage %% (default: 85)",
++        default=100.0,
++        help="Minimum reading coverage %% (default: 100; cannot weaken accountability)",
+     )
+     args = parser.parse_args()
++    if args.min_dto_coverage != 100.0:
++        parser.error("The governed completeness gate requires exactly 100% coverage.")
+ 
+     src_main = args.project_dir / "src" / "main" / "java"
+     if not src_main.exists():
+@@ -276,17 +257,34 @@
+     controllers = [c for c in classes.values() if c.is_controller and c.controller_type_args]
+     services = [c for c in classes.values() if c.is_service and c.service_type_args]
+     entities = [c for c in classes.values() if "@Entity" in c.content]
++    published_entities = {svc.service_type_args[0] for svc in services
++                          if any(ctrl.controller_type_args[0] == svc.service_type_args[1]
++                                 for ctrl in controllers) and len(svc.service_type_args) >= 2}
++    if not controllers:
++        print("ERROR: no supported resource controllers found; nothing was proven.",file=sys.stderr)
++        return 2
++
++    resources = {c.resource_key: c for c in controllers if c.resource_key}
++    read_surfaces = {}
++    for key, controller in resources.items():
++        read_surfaces[key] = set()
++        for annotation in re.findall(r"@(?:[\w.]+\.)?UiSurface\s*\(([^)]*)\)", strip_comments(controller.content), re.DOTALL):
++            if re.search(r"SurfaceKind\.(?:VIEW|READ_PROJECTION)\b", annotation):
++                surface_id = re.search(r'id\s*=\s*"([^"]+)"', annotation)
++                if surface_id:
++                    read_surfaces[key].add(surface_id.group(1))
+ 
+     print("# Praxis Resource Completeness, Quick View & Editorial Quality Audit")
+     print(f"- **Project**: `{args.project_dir.resolve()}`")
+     print(f"- **Mapped JPA Entities**: {len(entities)}")
+     print(f"- **Resource Controllers**: {len(controllers)}\n")
++    print("- **Scope**: static source evidence; not HTTP, concurrency, parity or runtime approval.\n")
+ 
+     print("## 1. Resource & Capability Scorecard")
+     print(
+-        "| Resource (`resourceKey`) | Entity | BizCols | RespCols | Cov % | FilterCols | FilterOps | `@QuickFilter` | QuickViewCols | RichIdentity | `@ResourceRef` (`preview`) | `@UiSurface` | `@WorkflowAction` | `@ResourceIntent` | `@ResourceFact` | EditorialIssues | Status |"
+-    )
+-    print("|---|---|---:|---:|---:|---:|---|---:|---:|:---:|---|---:|---:|---:|---:|---:|---|")
++        "| Resource (`resourceKey`) | Entity | BizCols | RespCols | Cov % | Accounted writes | FilterCols | FilterOps | `@QuickFilter` | QuickViewCols | RichIdentity | `@ResourceRef` (`preview`) | `@UiSurface` | `@WorkflowAction` | `@ResourceIntent` | `@ResourceFact` | EditorialIssues | Status |"
++    )
++    print("|---|---|---:|---:|---:|---:|---:|---|---:|---:|:---:|---|---:|---:|---:|---:|---:|---|")
+ 
+     failures: List[str] = []
+     unmapped_details: List[Tuple[str, str, List[str]]] = []
+@@ -300,6 +298,7 @@
+             resp_dto_name, _, filter_dto_name = t_args
+             create_dto_name, update_dto_name = "", ""
+         else:
++            failures.append(f"{ctrl.name}: unsupported generic resource binding")
+             continue
+ 
+         matched_svc = next(
+@@ -329,20 +328,15 @@
+ 
+         entity_biz_fields: List[Tuple[str, str]] = []
+         for f_type, f_name, f_annot in entity_all_fields:
+-            if f_name in AUDIT_EXCLUDED_ENTITY_FIELDS:
+-                continue
+-            if (
+-                "@Id" in f_annot
+-                or "@EmbeddedId" in f_annot
+-                or "@OneToMany" in f_annot
+-                or "@ManyToMany" in f_annot
+-            ):
++            if technical_or_mirrored(f_name, f_annot, AUDIT_EXCLUDED_ENTITY_FIELDS):
+                 continue
+             entity_biz_fields.append((f_type, f_name))
+ 
+         resp_fields = {
+             f_name for _, f_name, _ in resp_all_fields if f_name not in AUDIT_EXCLUDED_ENTITY_FIELDS
+         }
++        create_fields = {name for _, name, _ in create_all_fields}
++        update_fields = {name for _, name, _ in update_all_fields}
+ 
+         covered_count = 0
+         missing_fields: List[str] = []
+@@ -414,8 +408,14 @@
+         combined_sources = "\n".join(
+             classes[n].content for n in related_class_names if n and n in classes
+         )
+-        has_rich_identity = bool(
+-            re.search(r"@ResourceIdentity\s*\([^)]*(?:subtitleField|metadataFields)\s*=", combined_sources, re.DOTALL)
++        identities = [re.search(r"@ResourceIdentity\s*\(([^)]*)\)", source, re.DOTALL)
++                      for source in (ctrl.content, classes[resp_dto_name].content if resp_dto_name in classes else "")]
++        has_rich_identity = all(identity and
++            re.search(r'subtitleField\s*=\s*"[^"]+"', identity.group(1)) and
++            re.search(r'metadataFields\s*=\s*\{?\s*"[^"]+"', identity.group(1))
++            for identity in identities)
++        has_read_surface = bool(
++            re.search(r"@(?:[\w.]+\.)?UiSurface\s*\([^)]*SurfaceKind\.(?:VIEW|READ_PROJECTION)\b", combined_sources, re.DOTALL)
+         )
+         quick_filter_count = len(re.findall(r"@(?:[\w.]+\.)?QuickFilter\b", combined_sources))
+         ui_surface_count = len(re.findall(r"@(?:[\w.]+\.)?UiSurface\b", combined_sources))
+@@ -427,10 +427,29 @@
+         )
+         resource_fact_count = len(re.findall(r"@(?:[\w.]+\.)?ResourceFact\b", combined_sources))
+ 
++        mapper_n_plus_one = False
++        for info in classes.values():
++            if re.search(r"\bResourceMapper\s*<\s*" + re.escape(entity_name) + r"\s*,", info.content):
++                if re.search(r"\b(?:createQuery|createNativeQuery)\s*\(", strip_comments(info.content)):
++                    mapper_n_plus_one = True
++
+         res_label = ctrl.resource_key or ctrl.name
+         row_issues: List[str] = []
+-
+-        if total_ent_biz > 0 and coverage_pct < args.min_dto_coverage:
++        if not entity_name or not entity_biz_fields:
++            row_issues.append("Unresolved entity/business-column binding")
++        writable = mapped_input_fields(entity_name, create_fields | update_fields, classes)
++        commands = command_fields(ctrl, entity_name, classes)
++        readonly = {name for _, name, annotation in resp_all_fields
++                    if re.search(r'readOnly\s*=\s*true|accessMode\s*=\s*(?:Schema\.)?AccessMode\.READ_ONLY', annotation)}
++        writable_resource = bool(create_dto_name or update_dto_name)
++        orphaned = [name for _, name in entity_biz_fields
++                    if name not in writable and not (name in readonly and name in commands)] if writable_resource else []
++        accounted_writes = f"{total_ent_biz-len(orphaned)}/{total_ent_biz}" if writable_resource else "N/A (read-only)"
++        if orphaned:
++            row_issues.append("Unaccounted business writes: " + ", ".join(orphaned))
++        print(f"<!-- {res_label}: functional-accountability={total_ent_biz-len(orphaned)}/{total_ent_biz}; command-managed={','.join(sorted(commands)) or 'none'} -->")
++
++        if total_ent_biz > 0 and coverage_pct < max(100.0, args.min_dto_coverage):
+             row_issues.append(f"DTO coverage {coverage_pct:.1f}% < {args.min_dto_coverage:.0f}%")
+         if total_ent_biz >= 8 and filterable_count < 5:
+             row_issues.append(f"Only {filterable_count} @Filterable")
+@@ -438,10 +457,44 @@
+             row_issues.append(f"Low FilterOperation diversity ({len(filter_ops)})")
+         if quick_filter_count < 2:
+             row_issues.append(f"Only {quick_filter_count} @QuickFilter")
+-        if quick_view_cols < 4:
+-            row_issues.append(f"Only {quick_view_cols} QuickView fields (quickViewVisible=true)")
++        if not 4 <= quick_view_cols <= 8:
++            row_issues.append(f"QuickView field count outside 4..8: {quick_view_cols}")
+         if not has_rich_identity:
+             row_issues.append("Shallow @ResourceIdentity (missing subtitleField/metadataFields)")
++        reference_targets = {typ for typ, _, annot in entity_all_fields
++                             if typ in published_entities and re.search(r"@(?:ManyToOne|OneToOne)\b", annot)}
++        if reference_targets and res_ref_count < 1:
++            row_issues.append("0 @ResourceReference (title/FK fields not wired for Quick View 360)")
++        elif res_ref_preview_count < res_ref_count:
++            row_issues.append(f"@ResourceReference missing previewSurfaceId ({res_ref_preview_count}/{res_ref_count})")
++        title = re.search(r'titleField\s*=\s*"([^"]+)"', combined_sources)
++        title_annotations = next((annotations for _, field_name, annotations in resp_all_fields
++                                  if title and field_name == title.group(1)), "")
++        if not re.search(r'@ResourceReference\s*\([^)]*resourceKey\s*=\s*"' + re.escape(ctrl.resource_key or "") + r'"', title_annotations, re.DOTALL):
++            row_issues.append("Resource title lacks an explicit self reference")
++        for target_entity in reference_targets:
++            target_keys = {key for key, controller in resources.items()
++                           if any(svc.service_type_args[0] == target_entity and
++                                  svc.service_type_args[1] == controller.controller_type_args[0]
++                                  for svc in services)}
++            if not any(key in annotations for _, _, annotations in resp_all_fields
++                       if "@ResourceReference" in annotations for key in target_keys):
++                row_issues.append(f"Missing published relationship reference: {target_entity}")
++        # A reference must resolve to a real resource and its declared item read surface.
++        for _, field_name, annotations in resp_all_fields:
++            for reference in re.findall(r"@ResourceReference\s*\(([^)]*)\)", annotations, re.DOTALL):
++                values = dict(re.findall(r'(resourceKey|surfaceId|previewSurfaceId)\s*=\s*"([^"]+)"', reference))
++                target = values.get("resourceKey", "")
++                if target not in resources:
++                    row_issues.append(f"Unresolved reference target: {field_name} -> {target}")
++                else:
++                    for attribute in ("surfaceId", "previewSurfaceId"):
++                        if values.get(attribute) not in read_surfaces.get(target, set()):
++                            row_issues.append(f"Unresolved reference surface: {field_name}.{attribute} -> {target}/{values.get(attribute, '')}")
++        if not has_read_surface:
++            row_issues.append("Missing READ_PROJECTION/VIEW @UiSurface for Quick View 360")
++        if mapper_n_plus_one:
++            row_issues.append("N+1 query detected inside ResourceMapper")
+         if (
+             ui_surface_count + workflow_action_count + resource_intent_count + resource_fact_count
+         ) < 1:
+@@ -457,10 +510,12 @@
+         if res_editorial_issues:
+             editorial_details.append((res_label, res_editorial_issues))
+ 
++        if not reference_targets and res_ref_count == 0:
++            print(f"<!-- {res_label}: resource-reference=N/A (no association to another published entity) -->")
+         ops_str = f"{len(filter_ops)} ops"
+         rich_id_str = "YES" if has_rich_identity else "NO"
+         print(
+-            f"| `{res_label}` | `{entity_name}` | {total_ent_biz} | {len(resp_fields)} | {coverage_pct:.1f}% | {filterable_count} | {ops_str} | {quick_filter_count} | {quick_view_cols} | {rich_id_str} | {res_ref_count} ({res_ref_preview_count}) | {ui_surface_count} | {workflow_action_count} | {resource_intent_count} | {resource_fact_count} | {len(res_editorial_issues)} | **{status_str}** |"
++            f"| `{res_label}` | `{entity_name}` | {total_ent_biz} | {len(resp_fields)} | {coverage_pct:.1f}% | {accounted_writes} | {filterable_count} | {ops_str} | {quick_filter_count} | {quick_view_cols} | {rich_id_str} | {res_ref_count} ({res_ref_preview_count}) | {ui_surface_count} | {workflow_action_count} | {resource_intent_count} | {resource_fact_count} | {len(res_editorial_issues)} | **{status_str}** |"
+         )
+ 
+     if unmapped_details:
+@@ -485,11 +540,10 @@
+         )
+         for f in failures:
+             print(f"- [x] {f}")
+-        if args.strict:
+-            return 1
++        return 1
+     else:
+         print(
+-            "\n## 4. Verdict: PASSED (All audited resources meet Praxis completeness, Quick View, and capability density gates)"
++            "\n## 4. Verdict: STATIC PASS (source gates satisfied; runtime and architectural review still required)"
+         )
+ 
+     return 0
+--- /dev/null
++++ b/scripts/workspace/java_resource_audit.py
+@@ -0,0 +1,101 @@
++"""Conservative static source evidence. This module does not approve runtime behavior."""
++import re
++
++
++def masked_java(source):
++    return re.sub(r'"(?:\\.|[^"\\])*"|//[^\n]*|/\*.*?\*/',
++                  lambda m: " " * len(m.group()), source, flags=re.DOTALL)
++
++
++def end_delimiter(text, start, opening, closing):
++    depth = 0
++    for index in range(start, len(text)):
++        if text[index] == opening:
++            depth += 1
++        elif text[index] == closing:
++            depth -= 1
++            if depth == 0:
++                return index
++    return -1
++
++
++def java_methods(source):
++    mask = masked_java(source)
++    result, boundary = {}, 0
++    for match in re.finditer(r'\b(?:public|protected|private)\s+(?:[\w<>,.?\[\]]+\s+)+(\w+)\s*\(', mask):
++        start = mask.find("(", match.start())
++        end = end_delimiter(mask, start, "(", ")")
++        brace, semicolon = mask.find("{", end), mask.find(";", end)
++        if end < 0 or brace < 0 or (semicolon >= 0 and semicolon < brace):
++            continue
++        close = end_delimiter(mask, brace, "{", "}")
++        if close >= 0:
++            result[match.group(1)] = (source[boundary:match.start()], source[match.start():brace], source[brace+1:close])
++            boundary = close + 1
++    return result
++
++
++def technical_or_mirrored(name, annotations, technical_names):
++    if re.search(r'@(?:\w+\.)*(?:Id|EmbeddedId|Version|OneToMany|ManyToMany)\b', annotations):
++        return True
++    if name in technical_names and "@Embedded" in annotations:
++        return True
++    joins=re.findall(r'@(?:\w+\.)*JoinColumn\s*\(([^)]*)\)',annotations,re.DOTALL)
++    return bool(re.search(r'@(?:\w+\.)*(?:ManyToOne|OneToOne)\b', annotations) and joins
++                and all(re.search(r'insertable\s*=\s*false',join) and re.search(r'updatable\s*=\s*false',join)
++                        and not re.search(r'(?:insertable|updatable)\s*=\s*true',join) for join in joins))
++
++
++def mapped_input_fields(entity, dto_fields, classes):
++    found = set()
++    for info in classes.values():
++        if not re.search(r'\bResourceMapper\s*<\s*' + re.escape(entity) + r'\s*,', info.content):
++            continue
++        code=masked_java(info.content)
++        mappings=[]
++        for annotation in re.finditer(r'@(?:\w+\.)*Mapping\s*\(',code):
++            start=code.find("(",annotation.start())
++            end=end_delimiter(code,start,"(",")")
++            if end>=0:mappings.append(info.content[start+1:end])
++        for field in dto_fields:
++            accessor = re.escape(field[:1].upper() + field[1:])
++            direct = re.search(r'\bentity\.set' + accessor + r'\s*\(\s*dto\.get' + accessor + r'\s*\(\s*\)\s*\)', code)
++            explicit = any(re.search(r'target\s*=\s*"' + re.escape(field) + '"', item)
++                           and re.search(r'source\s*=\s*"' + re.escape(field) + '"', item)
++                           and not re.search(r'ignore\s*=\s*true', item) for item in mappings)
++            if direct or explicit:
++                found.add(field)
++    return found
++
++
++def command_fields(ctrl, entity, classes):
++    methods = {name: java_methods(info.content) for name, info in classes.items()}
++    roots = [name for name, (header, _, _) in methods[ctrl.name].items()
++             if re.search(r'@(?:\w+\.)*(?:WorkflowAction|ResourceIntent)\b', masked_java(header))
++             and re.search(r'@(?:\w+\.)*(?:PostMapping|PatchMapping)\b', masked_java(header))]
++    result, visited = set(), set()
++
++    def visit(owner, method):
++        if (owner, method) in visited or method not in methods.get(owner, {}):
++            return
++        visited.add((owner, method))
++        info = classes[owner]
++        if re.search(r'\bResourceMapper\s*<', info.content):
++            return
++        _, signature, body = methods[owner][method]
++        code=masked_java(body)
++        variables = set(re.findall(r'\b' + re.escape(entity) + r'\s+(\w+)\b', masked_java(signature) + "\n" + code))
++        variables.update(re.findall(r'\bvar\s+(\w+)\s*=\s*new\s+' + re.escape(entity) + r'\b', code))
++        for receiver, setter in re.findall(r'\b(\w+)\.set([A-Z]\w*)\s*\(', code):
++            if receiver in variables:
++                result.add(setter[:1].lower() + setter[1:])
++        fields = {name: type_.split("<")[0].split(".")[-1] for type_, name, _ in info.fields}
++        for receiver, called in re.findall(r'\b(\w+)\.(\w+)\s*\(', code):
++            target = fields.get(receiver, receiver if receiver in classes else owner if receiver == "this" else "")
++            if target in classes:
++                visit(target, called)
++        for called in re.findall(r'(?<![.\w])([a-zA-Z_]\w*)\s*\(', masked_java(body)):
++            visit(owner, called)
++    for root in roots:
++        visit(ctrl.name, root)
++    return result
+--- /dev/null
++++ b/scripts/workspace/test_audit_java_resource_completeness.py
+@@ -0,0 +1,142 @@
++"""Regression proofs for the canonical static audit; no product DTO enrichment."""
++import importlib.util
++from pathlib import Path
++import subprocess
++import sys
++import tempfile
++import unittest
++from types import SimpleNamespace
++
++ROOT = Path(__file__).resolve().parent
++sys.path.insert(0,str(ROOT))
++spec=importlib.util.spec_from_file_location("resource_audit_cli",ROOT/"audit-java-resource-completeness.py")
++audit=importlib.util.module_from_spec(spec)
++sys.modules[spec.name]=audit
++spec.loader.exec_module(audit)
++from java_resource_audit import technical_or_mirrored, command_fields, mapped_input_fields
++
++
++def info(name,content,fields=()):
++    return SimpleNamespace(name=name,content=content,fields=fields)
++
++
++class CompletenessRegression(unittest.TestCase):
++    def fixture_audit(self,write_command=False,extra_args=(),strict=True,reference="",read_only=False):
++        with tempfile.TemporaryDirectory() as tmp:
++            root=Path(tmp,"src/main/java");root.mkdir(parents=True)
++            names=[f"field{i}" for i in range(8)]
++            base=" ".join((('@ResourceReference(resourceKey="test.items",surfaceId="view",previewSurfaceId="view") ' if n=="field0" else "") + f'@UISchema(quickViewVisible=true) private String {n};') for n in names)
++            entity=" ".join(f'@Column private String {n};' for n in names)
++            filters=" ".join(f'@Filterable(operation=FilterOperation.{op}) private String filter{i};' for i,op in enumerate(["LIKE","EQUAL","IN","LIKE","EQUAL"]))
++            assignments="".join(f'entity.setField{i}(dto.getField{i}());' for i in range(8))
++            sources={
++                "Item":f"@Entity public class Item {{ @Id private Long id;{entity} @Column private LocalDate deadline; }}",
++                "Base":f"public class Base {{{base}}}",
++                "Response":'@ResourceIdentity(titleField="field0",subtitleField="field1",metadataFields={"field2"}) public class Response extends Base {@Schema(accessMode=Schema.AccessMode.READ_ONLY) @UISchema(label="Deadline",controlType=FieldControlType.DATE_PICKER) private LocalDate deadline;}',
++                "Create":"public class Create extends Base {}",
++                "Update":"public class Update extends Base {}",
++                "Filter":f"public class Filter {{{filters}}}",
++                "Mapper":f"public class Mapper implements ResourceMapper<Item,Response,Create,Update,Long> {{public void apply(){{{assignments}}}}}",
++                "Service":"@Service public class Service extends AbstractBaseResourceService<Item,Response,Long,Filter,Create,Update> {}",
++                "Controller":'@ApiResource(identity=@ResourceIdentity(titleField="field0",subtitleField="field1",metadataFields={"field2"}),resourceKey="test.items",quickFilters={@QuickFilter(id="a"),@QuickFilter(id="b")}) public class Controller extends AbstractResourceController<Response,Long,Filter,Create,Update> {private final Commands commands; @GetMapping("/{id}/view") @UiSurface(id="view",kind=SurfaceKind.READ_PROJECTION) public Response view(){return null;} @WorkflowAction(id="close") @PostMapping("/actions/close") public Response close(){return commands.close();}}',
++                "Commands":"public class Commands {public Response close(){Item e=load();"+("e.setDeadline(dto.deadline());" if write_command else "")+"return null;}}",
++            }
++            if read_only:
++                sources["Controller"] = sources["Controller"].replace("AbstractResourceController<Response,Long,Filter,Create,Update>", "AbstractReadOnlyResourceController<Response,Long,Filter>")
++                sources["Service"] = sources["Service"].replace("AbstractBaseResourceService<Item,Response,Long,Filter,Create,Update>", "AbstractReadOnlyResourceService<Item,Response,Long,Filter>")
++            for name,source in sources.items():Path(root,name+".java").write_text(source.replace("private LocalDate deadline;", reference+" private LocalDate deadline;") if name=="Response" else source,encoding="utf-8")
++            return subprocess.run([sys.executable,str(ROOT/"audit-java-resource-completeness.py"),tmp,*(["--strict"] if strict else []),*extra_args],capture_output=True,text=True)
++
++    def test_default_gate_also_returns_failure(self):
++        result=self.fixture_audit(strict=False)
++        self.assertEqual(result.returncode,1,result.stdout+result.stderr)
++
++    def test_cli_rejects_readonly_column_without_command_even_at_full_reading_coverage(self):
++        result=self.fixture_audit()
++        self.assertEqual(result.returncode,1,result.stdout+result.stderr)
++        self.assertIn("Unaccounted business writes: deadline",result.stdout)
++
++    def test_cli_accepts_real_bound_writer_but_only_claims_static_pass(self):
++        result=self.fixture_audit(True)
++        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
++        self.assertIn("STATIC PASS",result.stdout)
++        self.assertIn("functional-accountability=9/9",result.stdout)
++
++    def test_reference_cannot_point_to_a_missing_resource(self):
++        result=self.fixture_audit(True,reference='@ResourceReference(resourceKey="absent",surfaceId="view",previewSurfaceId="view")')
++        self.assertEqual(result.returncode,1,result.stdout+result.stderr)
++        self.assertIn("Unresolved reference target",result.stdout)
++
++    def test_reference_cannot_point_to_an_undeclared_surface(self):
++        result=self.fixture_audit(True,reference='@ResourceReference(resourceKey="test.items",surfaceId="invented",previewSurfaceId="invented")')
++        self.assertEqual(result.returncode,1,result.stdout+result.stderr)
++        self.assertIn("Unresolved reference surface",result.stdout)
++
++    def test_real_self_reference_is_accepted(self):
++        result=self.fixture_audit(True,reference='@ResourceReference(resourceKey="test.items",surfaceId="view",previewSurfaceId="view")')
++        # The fixture declares its real surface id explicitly below.
++        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
++
++    def test_read_only_resource_does_not_require_mutation_handlers(self):
++        result=self.fixture_audit(read_only=True)
++        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
++        self.assertIn("N/A (read-only)",result.stdout)
++
++    def test_comments_and_strings_do_not_count_as_writes(self):
++        ctrl=info("Controller",'class Controller { @WorkflowAction(id="x") @PostMapping("/actions/x") public void x(){Item e=load();log("e.setDeadline(1)"); /* e.setDeadline(2); */} }')
++        self.assertEqual(command_fields(ctrl,"Item",{"Controller":ctrl}),set())
++
++    def test_partly_writable_join_is_not_discarded(self):
++        annotations="@ManyToOne @JoinColumns({@JoinColumn(insertable=false,updatable=false),@JoinColumn(insertable=true,updatable=false)})"
++        self.assertFalse(technical_or_mirrored("owner",annotations,set()))
++
++    def test_only_readonly_mirrored_relations_are_excluded(self):
++        self.assertTrue(technical_or_mirrored("owner","@ManyToOne @JoinColumn(insertable=false,updatable=false)",set()))
++        self.assertFalse(technical_or_mirrored("owner","@ManyToOne @JoinColumn",set()))
++        self.assertFalse(technical_or_mirrored("version","@Column",{"version"}))
++        self.assertTrue(technical_or_mirrored("revision","@Version @Column",set()))
++
++    def test_similar_labels_never_cover_a_column(self):
++        self.assertFalse(audit.entity_field_covered_in_dto("saldo","Long",{"saldoNome","saldoId"}))
++        self.assertTrue(audit.entity_field_covered_in_dto("saldo","Long",{"saldo"}))
++
++    def test_final_constructor_dependencies_are_parsed(self):
++        result=audit.extract_fields("public class Controller { private final CommandService commands; }")
++        self.assertEqual([(t,n) for t,n,a in result],[("CommandService","commands")])
++
++    def test_a_declared_input_without_mapper_is_not_writable(self):
++        self.assertEqual(mapped_input_fields("Item",{"name"},{}),set())
++        mapper=info("Mapper","class Mapper implements ResourceMapper<Item,R,C,U,Long> { void apply(){entity.setName(dto.getName());} }")
++        self.assertEqual(mapped_input_fields("Item",{"name","ignored"},{"Mapper":mapper}),{"name"})
++
++    def test_readonly_projection_is_not_a_command_write(self):
++        ctrl=info("Controller",'class Controller { @PostMapping("/actions/close") @WorkflowAction(id="close") public R close(){ return commands.close(); } }',[("Commands","commands","")])
++        cmd=info("Commands","class Commands { public R close(){ Item e=load(); return mapper.toResponse(e); } }",[("Mapper","mapper","")])
++        mapper=info("Mapper","class Mapper implements ResourceMapper<Item,R,C,U,Long> { public R toResponse(Item e){ R dto=new R();dto.setDeadline(e.getDeadline());return dto; } }")
++        classes={x.name:x for x in (ctrl,cmd,mapper)}
++        self.assertNotIn("deadline",command_fields(ctrl,"Item",classes))
++
++    def test_transitive_entity_setter_is_proven_only_from_bound_handler(self):
++        ctrl=info("Controller",'class Controller { @PostMapping("/actions/close") @WorkflowAction(id="close") public R close(){return commands.close();} }',[("Commands","commands","")])
++        cmd=info("Commands","class Commands { public R close(){Item e=load();apply(e);return null;} private void apply(Item e){e.setDeadline(dto.deadline());} public void unrelated(){Item e=load();e.setSecret(1);} }")
++        self.assertEqual(command_fields(ctrl,"Item",{"Controller":ctrl,"Commands":cmd}),{"deadline"})
++
++    def test_other_controller_cannot_supply_write_coverage(self):
++        ctrl=info("Controller","class Controller { public R get(){return null;} }")
++        other=info("Other",'class Other { @WorkflowAction(id="x") @PostMapping("/actions/x") public void x(){Item e=load();e.setDeadline(1);} }')
++        self.assertEqual(command_fields(ctrl,"Item",{"Controller":ctrl,"Other":other}),set())
++
++    def test_threshold_cannot_be_weakened(self):
++        result=subprocess.run([sys.executable,str(ROOT/"audit-java-resource-completeness.py"),".","--min-dto-coverage","85"],capture_output=True,text=True)
++        self.assertEqual(result.returncode,2)
++        self.assertIn("exactly 100%",result.stderr)
++
++    def test_empty_project_is_not_approved(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            Path(tmp,"src/main/java").mkdir(parents=True)
++            result=subprocess.run([sys.executable,str(ROOT/"audit-java-resource-completeness.py"),tmp,"--strict"],capture_output=True,text=True)
++            self.assertEqual(result.returncode,2)
++
++
++if __name__=="__main__":
++    unittest.main()

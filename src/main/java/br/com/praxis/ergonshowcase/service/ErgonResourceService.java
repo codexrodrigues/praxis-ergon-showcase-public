@@ -203,6 +203,61 @@ public abstract class ErgonResourceService<E, R, I, F extends GenericFilterDTO, 
         Map.of("effectiveMaxRows", limit, "truncated", truncated, "scope", "filtered"));
   }
 
+  @Autowired protected ErgonReadFacts readFacts;
+
+  protected org.praxisplatform.uischema.concurrency.ResourceRepresentationResult<R> enriched(
+      org.praxisplatform.uischema.concurrency.ResourceRepresentationResult<R> result) {
+    readFacts.enrichOne(result.body());
+    return result;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public org.praxisplatform.uischema.concurrency.ResourceRepresentationResult<R> findById(I id) {
+    return enriched(super.findById(id));
+  }
+
+  @Override
+  @Transactional
+  public org.praxisplatform.uischema.service.base.BaseResourceCommandService.SavedResult<I, R>
+      create(C dto) {
+    var result = super.create(dto);
+    readFacts.enrichOne(result.body());
+    return result;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<R> findAll() {
+    var result = super.findAll();
+    readFacts.enrich(result);
+    return result;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<R> findAllById(Collection<I> ids) {
+    var result = super.findAllById(ids);
+    readFacts.enrich(result);
+    return result;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Page<R> filter(F filter, Pageable pageable, Collection<I> includeIds) {
+    var result = super.filter(filter, pageable, includeIds);
+    readFacts.enrich(result.getContent());
+    return result;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public CursorPage<R> filterByCursor(F filter, Sort sort, String after, String before, int size) {
+    var result = super.filterByCursor(filter, sort, after, before, size);
+    readFacts.enrich(result.content());
+    return result;
+  }
+
   private static ResponseStatusException bad(String message) {
     return new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, message);
   }

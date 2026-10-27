@@ -20,6 +20,434 @@ import org.springframework.transaction.annotation.Transactional;
 @WithMockUser(authorities = {"ERGON_READ", "ERGON_WRITE"})
 class NeonIntegrationTest {
   @Test
+  void reviewReadSurfacesPublishRealETagAndReferences() throws Exception {
+    for (String[] view :
+        new String[][] {
+          {"/api/ergon/orgaos/1", "ficha-institucional"},
+          {
+            "/api/ergon/cargos/"
+                + em.createQuery("select min(c.cargo) from Cargo c", Integer.class)
+                    .getSingleResult(),
+            "ficha-cargo"
+          },
+          {"/api/ergon/servidor-pessoas/1001", "ficha-cadastral"}
+        }) {
+      String expected = revisionEtag(view[0]);
+      mvc.perform(get(view[0] + "/" + view[1]))
+          .andExpect(status().isOk())
+          .andExpect(header().string("ETag", expected))
+          .andExpect(jsonPath("$.id").exists());
+    }
+    var schema =
+        mvc.perform(get("/v3/api-docs"))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    assertThat(schema).contains("ficha-institucional", "ficha-cargo", "ficha-cadastral");
+    var components = json.readTree(schema).path("components").path("schemas");
+    for (String[] field :
+        new String[][] {
+          {"RegistrarAfastamentoDTO", "dtini"},
+          {"RegistrarAfastamentoDTO", "dtprevfim"},
+          {"EncerrarAfastamentoDTO", "dtfim"},
+          {"RegistrarVacanciaDTO", "dtPgtoAte"}
+        }) {
+      var ui = components.path(field[0]).path("properties").path(field[1]).path("x-ui");
+      assertThat(ui.path("controlType").asText()).isEqualTo("date");
+      assertThat(ui.path("type").asText()).isEqualTo("date");
+      assertThat(ui.path("icon").asText()).isEqualTo("calendar_today");
+    }
+
+    for (String surface : new String[] {"ficha-institucional", "ficha-cargo", "ficha-cadastral"})
+      assertThat(schema).contains("\"previewSurfaceId\":\"" + surface + "\"");
+  }
+
+  @Test
+  void reviewDerivedFactsUseOneBatchQueryRegardlessOfPageSize() {
+    var facts = context.getBean(br.com.praxis.ergonshowcase.service.ErgonReadFacts.class);
+    var cargoMapper = context.getBean(br.com.praxis.ergonshowcase.mapper.CargoMapper.class);
+    var vinculoMapper = context.getBean(br.com.praxis.ergonshowcase.mapper.VinculoMapper.class);
+    var cargos =
+        em
+            .createQuery(
+                "select c from Cargo c order by c.cargo",
+                br.com.praxis.ergonshowcase.domain.Cargo.class)
+            .setMaxResults(3)
+            .getResultList()
+            .stream()
+            .map(cargoMapper::toResponse)
+            .toList();
+    var vinculos =
+        em
+            .createQuery(
+                "select v from Vinculo v order by v.id.numfunc, v.id.numero",
+                br.com.praxis.ergonshowcase.domain.Vinculo.class)
+            .setMaxResults(3)
+            .getResultList()
+            .stream()
+            .map(vinculoMapper::toResponse)
+            .toList();
+    var stats =
+        em.getEntityManagerFactory().unwrap(org.hibernate.SessionFactory.class).getStatistics();
+    stats.setStatisticsEnabled(true);
+    try {
+      for (java.util.List<?> rows : java.util.List.of(cargos, vinculos)) {
+        assertThat(rows).hasSize(3);
+        stats.clear();
+        facts.enrich(rows.subList(0, 1));
+        assertThat(stats.getPrepareStatementCount()).isEqualTo(1);
+        stats.clear();
+        facts.enrich(rows);
+        assertThat(stats.getPrepareStatementCount()).isEqualTo(1);
+      }
+      assertThat(cargos)
+          .allSatisfy(
+              c -> {
+                if (c.getVagasAutorizadas() != null)
+                  assertThat(c.getSaldoVagasDisponiveis()).isNotNull();
+              });
+    } finally {
+      stats.setStatisticsEnabled(false);
+    }
+  }
+
+  @Test
+  void reviewInactiveOrgaoRejectsNewAdmission() throws Exception {
+    var orgao = em.find(br.com.praxis.ergonshowcase.domain.Orgao.class, 1);
+    orgao.setAtiva(false);
+    em.flush();
+    mvc.perform(
+            post("/api/ergon/vinculos")
+                .contentType("application/json")
+                .content(
+                    "{\"numfunc\":1001,\"numero\":95,\"empCodigo\":1,\"matric\":\"INATIVO-305\",\"regimejur\":\"ESTATUTARIO\",\"tipovinc\":\"EFETIVO\",\"categoria\":\"SAUDE\",\"dtexerc\":\"2020-01-01\",\"customFields\":{\"processo_sei_nomeacao\":\"SEI-2026.009505\"}}"))
+        .andExpect(status().isUnprocessableEntity());
+  }
+
+  @Test
+  void reviewAfastamentoRejectsOverlappingPeriodAndEarlyReturn() throws Exception {
+    String uri = reviewFixture();
+    var legacy = new br.com.praxis.ergonshowcase.domain.Afastamento();
+    legacy.setNumfunc(9505L);
+    legacy.setNumvinc(1);
+    legacy.setEmpCodigo(1);
+    legacy.setTipofreq("LICENCA");
+    legacy.setCodfreq(201);
+    legacy.setDtini(java.time.LocalDate.of(2026, 9, 1));
+    legacy.setDtfim(java.time.LocalDate.of(2026, 10, 5));
+    legacy.setSituacao("HOMOLOGADO");
+    legacy.setDocumentoLegalId(reviewDocumento());
+    em.persist(legacy);
+    em.flush();
+    revisionCommand(uri + "/actions/registrar-afastamento", reviewAfastamentoBody())
+        .andExpect(status().isUnprocessableEntity());
+    em.remove(legacy);
+    em.flush();
+    var response =
+        revisionCommand(uri + "/actions/registrar-afastamento", reviewAfastamentoBody())
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    long license = json.readTree(response).path("afastamentoAbertoId").asLong();
+    revisionCommand(
+            uri + "/actions/encerrar-afastamento",
+            "{\"afastamentoId\":"
+                + license
+                + ",\"dtfim\":\"2026-09-30\",\"documentoLegalId\":"
+                + reviewDocumento()
+                + "}")
+        .andExpect(status().isUnprocessableEntity());
+  }
+
+  private void reviewActionAllowed(String uri, String id, boolean expected) throws Exception {
+    var actions =
+        json.readTree(
+                mvc.perform(get(uri + "/actions"))
+                    .andExpect(status().isOk())
+                    .andReturn()
+                    .getResponse()
+                    .getContentAsString())
+            .path("actions");
+    boolean found = false;
+    for (var action : actions)
+      if (id.equals(action.path("id").asText())) {
+        found = true;
+        assertThat(action.path("availability").path("allowed").booleanValue())
+            .as(id)
+            .isEqualTo(expected);
+      }
+    assertThat(found).as("Ação publicada: " + id).isTrue();
+  }
+
+  private String reviewFixture() throws Exception {
+    mvc.perform(
+            post("/api/ergon/servidor-pessoas")
+                .contentType("application/json")
+                .content(
+                    "{\"numero\":9505,\"nome\":\"Pessoa para prova de comandos\",\"cpf\":\"00000009505\",\"dtnasc\":\"1990-01-01\"}"))
+        .andExpect(status().isCreated());
+    mvc.perform(
+            post("/api/ergon/vinculos")
+                .contentType("application/json")
+                .content(
+                    "{\"numfunc\":9505,\"numero\":1,\"empCodigo\":1,\"matric\":\"REV-305\",\"regimejur\":\"ESTATUTARIO\",\"tipovinc\":\"EFETIVO\",\"categoria\":\"SAUDE\",\"dtexerc\":\"2020-01-01\",\"customFields\":{\"processo_sei_nomeacao\":\"SEI-2026.009505\"}}"))
+        .andExpect(status().isCreated());
+    return "/api/ergon/vinculos/9505:1";
+  }
+
+  private void reviewCargo() throws Exception {
+    mvc.perform(
+            post("/api/ergon/cargos")
+                .contentType("application/json")
+                .content(
+                    "{\"cargo\":9505,\"empCodigo\":1,\"nome\":\"Cargo para prova em comissão\",\"categoria\":\"SAUDE\",\"controleVaga\":true,\"vagasAutorizadas\":1}"))
+        .andExpect(status().isCreated());
+  }
+
+  private Long reviewDocumento() {
+    return em.createQuery("select min(d.id) from DocumentoLegal d where d.empCodigo=1", Long.class)
+        .getSingleResult();
+  }
+
+  private String reviewAfastamentoBody() {
+    return "{\"tipofreq\":\"LICENCA\",\"codfreq\":201,\"dtini\":\"2026-10-01\",\"dtprevfim\":\"2026-10-20\",\"motivo\":\"Concessão administrativa de prova\",\"documentoLegalId\":"
+        + reviewDocumento()
+        + "}";
+  }
+
+  @Test
+  void reviewPatchRejectsBothInvalidJornadaBounds() throws Exception {
+    String uri = reviewFixture();
+    for (int invalid : new int[] {-1, 0, 169})
+      mvc.perform(
+              patch(uri + "/lotacao-exercicio")
+                  .header("If-Match", revisionEtag(uri))
+                  .contentType("application/json")
+                  .content("{\"jornadaSemanal\":" + invalid + "}"))
+          .andExpect(status().isBadRequest());
+    revisionCommand(uri + "/lotacao-exercicio", "{\"jornadaSemanal\":168}")
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.jornadaSemanal").value(168));
+  }
+
+  @Test
+  void reviewServiceAlsoRejectsInvalidJornada() throws Exception {
+    String uri = reviewFixture();
+    var cmd = context.getBean(br.com.praxis.ergonshowcase.service.ErgonCommands.class);
+    var dto = new br.com.praxis.ergonshowcase.dto.AlterarLotacaoExercicioDTO();
+    dto.setJornadaSemanal(169);
+    var p =
+        new org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition<
+            br.com.praxis.ergonshowcase.domain.VinculoId>(
+            context.getBean(
+                org.praxisplatform.uischema.concurrency.ResourceVersionEtagService.class),
+            revisionEtag(uri),
+            "administracao-pessoal.vinculos",
+            new br.com.praxis.ergonshowcase.domain.VinculoId(9505L, 1));
+    assertThatThrownBy(
+            () ->
+                cmd.alterarLotacaoExercicio(
+                    new br.com.praxis.ergonshowcase.domain.VinculoId(9505L, 1), dto, p))
+        .isInstanceOfSatisfying(
+            org.springframework.web.server.ResponseStatusException.class,
+            e -> assertThat(e.getStatusCode().value()).isEqualTo(422));
+  }
+
+  @Test
+  void reviewCommissionOccupancyPreventsExtinctionAndDoubleCounting() throws Exception {
+    String uri = reviewFixture();
+    reviewCargo();
+    revisionCommand(uri + "/lotacao-exercicio", "{\"cargoComissao\":9505}")
+        .andExpect(status().isOk());
+    mvc.perform(get("/api/ergon/cargos/9505"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.saldoVagasDisponiveis").value(0));
+    var v =
+        em.find(
+            br.com.praxis.ergonshowcase.domain.Vinculo.class,
+            new br.com.praxis.ergonshowcase.domain.VinculoId(9505L, 1));
+    v.setCargo(9505);
+    em.flush();
+    assertThat(
+            context
+                .getBean(br.com.praxis.ergonshowcase.service.ErgonInvariants.class)
+                .ocupadas(9505, null))
+        .isEqualTo(1);
+    revisionCommand(
+            "/api/ergon/cargos/9505/actions/extinguir-cargo", "{\"dtExtincao\":\"2026-10-01\"}")
+        .andExpect(status().isUnprocessableEntity());
+  }
+
+  @Test
+  void reviewCommissionCannotUseExtinctOrFullCargo() throws Exception {
+    String uri = reviewFixture();
+    reviewCargo();
+    revisionCommand(
+            "/api/ergon/cargos/9505/actions/extinguir-cargo", "{\"dtExtincao\":\"2026-10-01\"}")
+        .andExpect(status().isOk());
+    revisionCommand(uri + "/lotacao-exercicio", "{\"cargoComissao\":9505}")
+        .andExpect(status().isUnprocessableEntity());
+  }
+
+  @Test
+  void reviewCommissionCannotExceedVacancies() throws Exception {
+    String uri = reviewFixture();
+    reviewCargo();
+    var seeded =
+        em.find(
+            br.com.praxis.ergonshowcase.domain.Vinculo.class,
+            new br.com.praxis.ergonshowcase.domain.VinculoId(1001L, 1));
+    seeded.setCargoComissao(9505);
+    em.flush();
+    revisionCommand(uri + "/lotacao-exercicio", "{\"cargoComissao\":9505}")
+        .andExpect(status().isUnprocessableEntity());
+  }
+
+  @Test
+  void reviewVacancyMaintainsPaymentLimit() throws Exception {
+    String uri = reviewFixture();
+    revisionCommand(
+            uri + "/actions/registrar-vacancia",
+            "{\"data\":\"2026-10-01\",\"forma\":\"EXONERACAO\",\"motivo\":\"Ato administrativo de prova\",\"dtPgtoAte\":\"2026-10-20\"}")
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.dtPgtoAte").value("2026-10-20"));
+    em.clear();
+    assertThat(
+            em.find(
+                    br.com.praxis.ergonshowcase.domain.Vinculo.class,
+                    new br.com.praxis.ergonshowcase.domain.VinculoId(9505L, 1))
+                .getDtPgtoAte())
+        .isEqualTo(java.time.LocalDate.of(2026, 10, 20));
+  }
+
+  @Test
+  void reviewVacancyRejectsPaymentBeforeDeparture() throws Exception {
+    String uri = reviewFixture();
+    revisionCommand(
+            uri + "/actions/registrar-vacancia",
+            "{\"data\":\"2026-10-01\",\"forma\":\"EXONERACAO\",\"motivo\":\"Ato administrativo de prova\",\"dtPgtoAte\":\"2026-09-30\"}")
+        .andExpect(status().isUnprocessableEntity());
+  }
+
+  @Test
+  void reviewAfastamentoRoundTripPersistsLicenseAndVersion() throws Exception {
+    String uri = reviewFixture();
+    String stale = revisionEtag(uri);
+    reviewActionAllowed(uri, "registrar-afastamento", true);
+    reviewActionAllowed(uri, "encerrar-afastamento", false);
+    var response =
+        revisionCommand(uri + "/actions/registrar-afastamento", reviewAfastamentoBody())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.situacao").value("AFASTADO"))
+            .andReturn()
+            .getResponse();
+    Long afastamento =
+        json.readTree(response.getContentAsString()).path("afastamentoAbertoId").longValue();
+    assertThat(afastamento).isPositive();
+    reviewActionAllowed(uri, "registrar-afastamento", false);
+    reviewActionAllowed(uri, "encerrar-afastamento", true);
+    mvc.perform(
+            post(uri + "/actions/encerrar-afastamento")
+                .header("If-Match", stale)
+                .contentType("application/json")
+                .content(
+                    "{\"afastamentoId\":"
+                        + afastamento
+                        + ",\"dtfim\":\"2026-10-10\",\"documentoLegalId\":"
+                        + reviewDocumento()
+                        + "}"))
+        .andExpect(status().isPreconditionFailed());
+    revisionCommand(
+            uri + "/actions/encerrar-afastamento",
+            "{\"afastamentoId\":"
+                + afastamento
+                + ",\"dtfim\":\"2026-10-10\",\"documentoLegalId\":"
+                + reviewDocumento()
+                + "}")
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.situacao").value("ATIVO"));
+    reviewActionAllowed(uri, "registrar-afastamento", true);
+    reviewActionAllowed(uri, "encerrar-afastamento", false);
+    em.clear();
+    var a = em.find(br.com.praxis.ergonshowcase.domain.Afastamento.class, afastamento);
+    assertThat(a.getQuantidadeDias()).isEqualTo(10);
+    assertThat(a.getNumfunc()).isEqualTo(9505L);
+    assertThat(a.getDtfim()).isEqualTo(java.time.LocalDate.of(2026, 10, 10));
+  }
+
+  @Test
+  void reviewAfastamentoRejectsInvalidCodeAndChronology() throws Exception {
+    String uri = reviewFixture();
+    revisionCommand(
+            uri + "/actions/registrar-afastamento",
+            reviewAfastamentoBody().replace("\"codfreq\":201", "\"codfreq\":999999"))
+        .andExpect(status().isUnprocessableEntity());
+  }
+
+  @Test
+  void reviewAfastamentoRejectsEndBeforeStart() throws Exception {
+    String uri = reviewFixture();
+    revisionCommand(
+            uri + "/actions/registrar-afastamento",
+            reviewAfastamentoBody().replace("2026-10-20", "2026-09-30"))
+        .andExpect(status().isUnprocessableEntity());
+  }
+
+  @Test
+  void reviewRetornoRejectsForeignLicense() throws Exception {
+    String uri = reviewFixture();
+    revisionCommand(uri + "/actions/registrar-afastamento", reviewAfastamentoBody())
+        .andExpect(status().isOk());
+    Long other =
+        em.createQuery("select min(a.id) from Afastamento a where a.numfunc<>9505", Long.class)
+            .getSingleResult();
+    assertThat(other).isNotNull();
+    revisionCommand(
+            uri + "/actions/encerrar-afastamento",
+            "{\"afastamentoId\":"
+                + other
+                + ",\"dtfim\":\"2026-10-10\",\"documentoLegalId\":"
+                + reviewDocumento()
+                + "}")
+        .andExpect(status().isUnprocessableEntity());
+  }
+
+  @Test
+  void reviewInstitutionalActionsProtectStateAndETag() throws Exception {
+    String uri = "/api/ergon/orgaos/1";
+    String stale = revisionEtag(uri);
+    reviewActionAllowed(uri, "inativar-orgao", true);
+    reviewActionAllowed(uri, "ativar-orgao", false);
+    revisionCommand(uri + "/actions/inativar-orgao", "{}")
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.ativa").value(false));
+    reviewActionAllowed(uri, "inativar-orgao", false);
+    reviewActionAllowed(uri, "ativar-orgao", true);
+    mvc.perform(
+            post(uri + "/actions/ativar-orgao")
+                .header("If-Match", stale)
+                .contentType("application/json")
+                .content("{}"))
+        .andExpect(status().isPreconditionFailed());
+    revisionCommand(uri + "/actions/ativar-orgao", "{}")
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.ativa").value(true));
+    revisionCommand(uri + "/actions/ativar-orgao", "{}").andExpect(status().isConflict());
+  }
+
+  @Test
+  void reviewOrgaoStateIsNotWritableByCadastralPut() throws Exception {
+    mvc.perform(
+            put("/api/ergon/orgaos/1")
+                .header("If-Match", revisionEtag("/api/ergon/orgaos/1"))
+                .contentType("application/json")
+                .content("{\"ativa\":false}"))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
   void revisionResponsesCoverEveryPersistentBusinessField() throws Exception {
     for (String name : new String[] {"Orgao", "Cargo", "ServidorPessoa", "Vinculo"}) {
       Class<?> entity = Class.forName("br.com.praxis.ergonshowcase.domain." + name);

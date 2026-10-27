@@ -66,10 +66,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private Map<String, Object> customFields;
 
   @Schema(description = "Trecho do nome social adotado pela pessoa.")
-  @UISchema(
-      label = "Trecho do nome social adotado pela pessoa",
-      group = "Pesquisa avançada",
-      order = 200)
+  @UISchema(label = "Nome social", group = "Pesquisa avançada", order = 200)
   @Filterable(operation = FilterOperation.LIKE, relation = "nomeSocial")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -153,10 +150,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private List<String> estadosCivis;
 
   @Schema(description = "Graus de instrução das pessoas consultadas.")
-  @UISchema(
-      label = "Graus de instrução das pessoas consultadas",
-      group = "Pesquisa avançada",
-      order = 207)
+  @UISchema(label = "Escolaridades", group = "Pesquisa avançada", order = 207)
   @Filterable(operation = FilterOperation.IN, relation = "escolaridade")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -168,10 +162,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private List<String> escolaridades;
 
   @Schema(description = "Raças ou cores autodeclaradas incluídas.")
-  @UISchema(
-      label = "Raças ou cores autodeclaradas incluídas",
-      group = "Pesquisa avançada",
-      order = 208)
+  @UISchema(label = "Raças/cores", group = "Pesquisa avançada", order = 208)
   @Filterable(operation = FilterOperation.IN, relation = "racaCor")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -183,10 +174,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private List<String> racasCor;
 
   @Schema(description = "Grupos sanguíneos incluídos na consulta.")
-  @UISchema(
-      label = "Grupos sanguíneos incluídos na consulta",
-      group = "Pesquisa avançada",
-      order = 209)
+  @UISchema(label = "Grupos sanguíneos", group = "Pesquisa avançada", order = 209)
   @Filterable(operation = FilterOperation.IN, relation = "gSanguineo")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -198,7 +186,11 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private List<String> gruposSanguineos;
 
   @Schema(description = "Data civil exata de nascimento.")
-  @UISchema(label = "Data civil exata de nascimento", group = "Pesquisa avançada", order = 210)
+  @UISchema(
+      label = "Data civil exata de nascimento",
+      group = "Pesquisa avançada",
+      order = 210,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER)
   @Filterable(operation = FilterOperation.ON_DATE, relation = "dtnasc")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -210,10 +202,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private LocalDate dataNascimentoExata;
 
   @Schema(description = "UF de residência das pessoas consultadas.")
-  @UISchema(
-      label = "UF de residência das pessoas consultadas",
-      group = "Pesquisa avançada",
-      order = 211)
+  @UISchema(label = "UF de residência", group = "Pesquisa avançada", order = 211)
   @Filterable(operation = FilterOperation.EQUAL, relation = "ufender")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -237,10 +226,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private String cidadeender;
 
   @Schema(description = "Trecho do endereço de correio eletrônico.")
-  @UISchema(
-      label = "Trecho do endereço de correio eletrônico",
-      group = "Pesquisa avançada",
-      order = 213)
+  @UISchema(label = "E-mail", group = "Pesquisa avançada", order = 213)
   @Filterable(operation = FilterOperation.LIKE, relation = "eMail")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -254,10 +240,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private String eMail;
 
   @Schema(description = "Indicador de deficiência física registrado.")
-  @UISchema(
-      label = "Indicador de deficiência física registrado",
-      group = "Pesquisa avançada",
-      order = 214)
+  @UISchema(label = "Deficiência física", group = "Pesquisa avançada", order = 214)
   @Filterable(operation = FilterOperation.EQUAL, relation = "deffisica")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -269,10 +252,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private Boolean deffisica;
 
   @Schema(description = "Indicador de deficiência visual registrado.")
-  @UISchema(
-      label = "Indicador de deficiência visual registrado",
-      group = "Pesquisa avançada",
-      order = 215)
+  @UISchema(label = "Deficiência visual", group = "Pesquisa avançada", order = 215)
   @Filterable(operation = FilterOperation.EQUAL, relation = "defvisual")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -284,10 +264,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private Boolean defvisual;
 
   @Schema(description = "Indicador de deficiência auditiva registrado.")
-  @UISchema(
-      label = "Indicador de deficiência auditiva registrado",
-      group = "Pesquisa avançada",
-      order = 216)
+  @UISchema(label = "Deficiência auditiva", group = "Pesquisa avançada", order = 216)
   @Filterable(operation = FilterOperation.EQUAL, relation = "defauditiva")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -299,10 +276,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private Boolean defauditiva;
 
   @Schema(description = "Indicador de deficiência mental registrado.")
-  @UISchema(
-      label = "Indicador de deficiência mental registrado",
-      group = "Pesquisa avançada",
-      order = 217)
+  @UISchema(label = "Deficiência mental", group = "Pesquisa avançada", order = 217)
   @Filterable(operation = FilterOperation.EQUAL, relation = "defmental")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -314,10 +288,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private Boolean defmental;
 
   @Schema(description = "Indicador de deficiência intelectual registrado.")
-  @UISchema(
-      label = "Indicador de deficiência intelectual registrado",
-      group = "Pesquisa avançada",
-      order = 218)
+  @UISchema(label = "Deficiência intelectual", group = "Pesquisa avançada", order = 218)
   @Filterable(operation = FilterOperation.EQUAL, relation = "defintelectual")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -329,10 +300,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private Boolean defintelectual;
 
   @Schema(description = "Seleciona pessoas com nome social registrado.")
-  @UISchema(
-      label = "Seleciona pessoas com nome social registrado",
-      group = "Pesquisa avançada",
-      order = 219)
+  @UISchema(label = "Com nome social", group = "Pesquisa avançada", order = 219)
   @Filterable(operation = FilterOperation.IS_NOT_NULL, relation = "nomeSocial")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -344,10 +312,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private Boolean possuiNomeSocial;
 
   @Schema(description = "Janela em dias até o vencimento da CNH.")
-  @UISchema(
-      label = "Janela em dias até o vencimento da CNH",
-      group = "Pesquisa avançada",
-      order = 220)
+  @UISchema(label = "CNH vencendo nos próximos dias", group = "Pesquisa avançada", order = 220)
   @Filterable(operation = FilterOperation.IN_NEXT_DAYS, relation = "validcnh")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -359,10 +324,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private Integer cnhVencendoNosProximosDias;
 
   @Schema(description = "Janela em dias desde a inclusão cadastral.")
-  @UISchema(
-      label = "Janela em dias desde a inclusão cadastral",
-      group = "Pesquisa avançada",
-      order = 221)
+  @UISchema(label = "Cadastro nos últimos dias", group = "Pesquisa avançada", order = 221)
   @Filterable(operation = FilterOperation.IN_LAST_DAYS, relation = "auditoria.createdAt")
   private Integer cadastradoNosUltimosDias;
 }

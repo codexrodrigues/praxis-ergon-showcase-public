@@ -55,7 +55,6 @@ public abstract class OrgaoMapper
   @Mapping(target = "telefone", source = "telefone")
   @Mapping(target = "email", source = "email")
   @Mapping(target = "web", source = "web")
-  @Mapping(target = "ativa", source = "ativa")
   public abstract void applyUpdate(@MappingTarget Orgao entity, UpdateOrgaoDTO dto);
 
   public Integer extractId(Orgao entity) {

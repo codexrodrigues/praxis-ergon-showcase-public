@@ -25,14 +25,28 @@ public abstract class OrgaoDados {
       preset = UISchemaPreset.ENTERPRISE_NAME,
       group = "Identificação",
       order = 10,
-      icon = "apartment")
+      icon = "apartment",
+      quickViewVisible = true,
+      quickViewOrder = 1)
+  @ResourceReference(
+      resourceKey = "administracao-pessoal.empresas",
+      valueField = "id",
+      surfaceId = "ficha-institucional",
+      previewSurfaceId = "ficha-institucional",
+      detailPresentation = "drawer")
   private String nome;
 
   @Size(max = 60)
   @Schema(
       description =
           "Sigla institucional que permite distinguir o ente em consultas e seleções de lotação.")
-  @UISchema(label = "Sigla", group = "Identificação", order = 20, icon = "short_text")
+  @UISchema(
+      label = "Sigla",
+      group = "Identificação",
+      order = 20,
+      icon = "short_text",
+      quickViewVisible = true,
+      quickViewOrder = 2)
   private String fantasia;
 
   @NotBlank
@@ -60,7 +74,13 @@ public abstract class OrgaoDados {
   @NotBlank
   @Pattern(regexp = "[A-Z]{2}")
   @Schema(description = "Sigla da unidade federativa onde está sediado o órgão.")
-  @UISchema(label = "UF", group = "Sede e contato", order = 50, icon = "map")
+  @UISchema(
+      label = "UF",
+      group = "Sede e contato",
+      order = 50,
+      icon = "map",
+      quickViewVisible = true,
+      quickViewOrder = 4)
   private String ufSigla;
 
   @NotBlank
@@ -68,7 +88,13 @@ public abstract class OrgaoDados {
   @Schema(
       description =
           "Município sede da entidade pública, usado para identificação territorial institucional.")
-  @UISchema(label = "Município", group = "Sede e contato", order = 60, icon = "location_city")
+  @UISchema(
+      label = "Município",
+      group = "Sede e contato",
+      order = 60,
+      icon = "location_city",
+      quickViewVisible = true,
+      quickViewOrder = 3)
   private String municipio;
 
   @Size(max = 10)
@@ -120,16 +146,4 @@ public abstract class OrgaoDados {
       order = 110,
       icon = "public")
   private String web;
-
-  @NotNull
-  @Schema(
-      description =
-          "Indica se o órgão está habilitado para receber novas admissões e movimentações funcionais.")
-  @UISchema(
-      label = "Órgão ativo",
-      preset = UISchemaPreset.BOOLEAN_FLAG,
-      group = "Situação",
-      order = 120,
-      icon = "toggle_on")
-  private Boolean ativa = true;
 }

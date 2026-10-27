@@ -23,6 +23,8 @@ public class AlterarLotacaoExercicioDTO {
 
   @Schema(description = "Quantidade de horas semanais de trabalho do vínculo.")
   @UISchema(label = "Jornada semanal", group = "Enquadramento e lotação")
+  @jakarta.validation.constraints.Positive
+  @jakarta.validation.constraints.Max(168)
   private Integer jornadaSemanal;
 
   @Schema(description = "Documento legal que fundamenta o assentamento funcional.")

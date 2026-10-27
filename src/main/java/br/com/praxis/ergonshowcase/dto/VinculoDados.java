@@ -27,7 +27,15 @@ public abstract class VinculoDados {
       preset = UISchemaPreset.ENTERPRISE_CODE,
       group = "Identificação funcional",
       order = 10,
-      icon = "badge")
+      icon = "badge",
+      quickViewVisible = true,
+      quickViewOrder = 1)
+  @ResourceReference(
+      resourceKey = "administracao-pessoal.vinculos",
+      valueField = "id",
+      surfaceId = "resumo-funcional",
+      previewSurfaceId = "resumo-funcional",
+      detailPresentation = "drawer")
   private String matric;
 
   @NotBlank
@@ -148,7 +156,10 @@ public abstract class VinculoDados {
       label = "Nomeação",
       group = "Ingresso, concurso e estágio probatório",
       tableHidden = true,
-      order = 207)
+      order = 207,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   private LocalDate dtnom;
 
   @Schema(description = "Data de posse; deve ocorrer entre nomeação e exercício.")
@@ -156,7 +167,10 @@ public abstract class VinculoDados {
       label = "Posse",
       group = "Ingresso, concurso e estágio probatório",
       tableHidden = true,
-      order = 208)
+      order = 208,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   private LocalDate dtposse;
 
   @Schema(description = "Data de admissão informada nas obrigações trabalhistas.")
@@ -164,7 +178,10 @@ public abstract class VinculoDados {
       label = "Admissão RAIS",
       group = "Ingresso, concurso e estágio probatório",
       tableHidden = true,
-      order = 209)
+      order = 209,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   private LocalDate dtadmRais;
 
   @Schema(description = "Classificação obtida no concurso que fundamenta a admissão.")
@@ -180,7 +197,10 @@ public abstract class VinculoDados {
       label = "Concurso",
       group = "Ingresso, concurso e estágio probatório",
       tableHidden = true,
-      order = 211)
+      order = 211,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   private LocalDate dtconc;
 
   @Schema(description = "Número do vínculo anterior na cadeia de continuidade funcional.")
@@ -212,7 +232,10 @@ public abstract class VinculoDados {
       label = "Início do contrato",
       group = "Contrato temporário",
       tableHidden = true,
-      order = 215)
+      order = 215,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   private LocalDate dtinicontr;
 
   @Schema(description = "Data final originalmente contratada.")
@@ -220,7 +243,10 @@ public abstract class VinculoDados {
       label = "Término do contrato",
       group = "Contrato temporário",
       tableHidden = true,
-      order = 216)
+      order = 216,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   private LocalDate dtfimcontr;
 
   @Schema(
@@ -229,7 +255,10 @@ public abstract class VinculoDados {
       label = "Prorrogação do contrato",
       group = "Contrato temporário",
       tableHidden = true,
-      order = 217)
+      order = 217,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   private LocalDate dtprorrogcontr;
 
   @Schema(description = "Regime previdenciário ao qual o vínculo está filiado.")
@@ -264,7 +293,7 @@ public abstract class VinculoDados {
 
   @Schema(description = "Indica incidência do desconto de imposto de renda na folha do vínculo.")
   @UISchema(
-      label = "Descontar IR",
+      label = "Desconta IR",
       group = "Previdência, folha e FGTS",
       tableHidden = true,
       order = 220)
@@ -360,7 +389,10 @@ public abstract class VinculoDados {
       label = "Opção FGTS",
       group = "Previdência, folha e FGTS",
       tableHidden = true,
-      order = 227)
+      order = 227,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -375,7 +407,10 @@ public abstract class VinculoDados {
       label = "Retroação FGTS",
       group = "Previdência, folha e FGTS",
       tableHidden = true,
-      order = 228)
+      order = 228,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,

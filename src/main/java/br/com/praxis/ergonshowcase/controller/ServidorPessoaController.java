@@ -37,7 +37,13 @@ import org.praxisplatform.uischema.controller.base.AbstractResourceController;
     description =
         "Cadastro civil único das pessoas titulares de vínculos funcionais com órgãos públicos.",
     icon = "badge",
-    identity = @ResourceIdentity(keyField = "id", titleField = "nome", displayLabelField = "nome"))
+    identity =
+        @ResourceIdentity(
+            keyField = "id",
+            titleField = "nome",
+            displayLabelField = "nome",
+            subtitleField = "nomeSocial",
+            metadataFields = {"id", "escolaridade", "cidadeender", "ufender"}))
 @ApiGroup(
     value = "ergon",
     title = "Administração de pessoal",
@@ -111,5 +117,27 @@ public class ServidorPessoaController
         org.springframework.http.ResponseEntity.ok(),
         id,
         commands.atualizarDadosBancariosContato(id, dto, p));
+  }
+
+  @org.springframework.web.bind.annotation.GetMapping("/{id}/ficha-cadastral")
+  @UiSurface(
+      id = "ficha-cadastral",
+      kind = org.praxisplatform.uischema.surface.SurfaceKind.READ_PROJECTION,
+      scope = org.praxisplatform.uischema.surface.SurfaceScope.ITEM,
+      title = "Ficha cadastral",
+      description =
+          "Consulta dados cadastrais da pessoa conforme as políticas de acesso e privacidade.",
+      requiredAuthorities = {"ERGON_READ"})
+  @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_READ')")
+  @io.swagger.v3.oas.annotations.Operation(
+      summary = "Consultar ficha cadastral",
+      description =
+          "Consulta dados cadastrais da pessoa conforme as políticas de acesso e privacidade.")
+  public org.springframework.http.ResponseEntity<ServidorPessoaResponseDTO> ficha(
+      @io.swagger.v3.oas.annotations.Parameter(description = "Identidade imutável do cadastro")
+          @org.springframework.web.bind.annotation.PathVariable
+          Long id) {
+    return withResourceVersion(
+        org.springframework.http.ResponseEntity.ok(), id, service.findById(id));
   }
 }

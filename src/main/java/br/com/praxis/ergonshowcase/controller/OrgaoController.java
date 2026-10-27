@@ -19,7 +19,13 @@ import org.praxisplatform.uischema.controller.base.AbstractResourceController;
     description =
         "Entes públicos responsáveis pelos quadros funcionais e pela administração de pessoal.",
     icon = "apartment",
-    identity = @ResourceIdentity(keyField = "id", titleField = "nome", displayLabelField = "nome"))
+    identity =
+        @ResourceIdentity(
+            keyField = "id",
+            titleField = "nome",
+            displayLabelField = "nome",
+            subtitleField = "fantasia",
+            metadataFields = {"municipio", "ufSigla", "ativa"}))
 @ApiGroup(
     value = "ergon",
     title = "Administração de pessoal",
@@ -42,5 +48,111 @@ public class OrgaoController
   @Override
   protected Integer getResponseId(OrgaoResponseDTO dto) {
     return dto.getId();
+  }
+
+  @org.springframework.beans.factory.annotation.Autowired private ErgonCommands commands;
+
+  @org.springframework.beans.factory.annotation.Autowired
+  private org.praxisplatform.uischema.concurrency.ResourceVersionEtagService commandEtags;
+
+  @org.springframework.beans.factory.annotation.Autowired
+  private org.praxisplatform.uischema.concurrency.ResourceVersionScopeProvider commandScopes;
+
+  @org.springframework.web.bind.annotation.PostMapping("/{id}/actions/ativar-orgao")
+  @WorkflowAction(
+      id = "ativar-orgao",
+      title = "Ativar órgão",
+      description = "Habilita o órgão para novas admissões e operações cadastrais.",
+      scope = org.praxisplatform.uischema.action.ActionScope.ITEM,
+      requiredAuthorities = {"ERGON_WRITE"},
+      allowedStates = {"INATIVO"},
+      confirmationRequired = true,
+      resourceVersion = org.praxisplatform.uischema.action.ActionRequirement.REQUIRED,
+      resourceVersionTransport =
+          org.praxisplatform.uischema.action.ActionResourceVersionTransport.IF_MATCH)
+  @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_WRITE')")
+  @io.swagger.v3.oas.annotations.Operation(
+      summary = "Ativar órgão",
+      description =
+          "Habilita o órgão para novas admissões e operações cadastrais. Exige If-Match atual.")
+  public org.springframework.http.ResponseEntity<OrgaoResponseDTO> ativarOrgao(
+      @io.swagger.v3.oas.annotations.Parameter(description = "Identidade imutável do assentamento")
+          @org.springframework.web.bind.annotation.PathVariable
+          Integer id,
+      @io.swagger.v3.oas.annotations.Parameter(description = "ETag forte recebido na leitura atual")
+          @org.springframework.web.bind.annotation.RequestHeader(
+              value = "If-Match",
+              required = false)
+          String ifMatch,
+      @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
+          AlterarSituacaoOrgaoDTO dto) {
+    var p =
+        new org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition<Integer>(
+            commandEtags,
+            ifMatch,
+            commandScopes.currentScope(),
+            "administracao-pessoal.empresas",
+            id);
+    return withResourceVersion(
+        org.springframework.http.ResponseEntity.ok(), id, commands.ativarOrgao(id, dto, p));
+  }
+
+  @org.springframework.web.bind.annotation.PostMapping("/{id}/actions/inativar-orgao")
+  @WorkflowAction(
+      id = "inativar-orgao",
+      title = "Inativar órgão",
+      description = "Desabilita novas admissões sem remover os assentamentos existentes.",
+      scope = org.praxisplatform.uischema.action.ActionScope.ITEM,
+      requiredAuthorities = {"ERGON_WRITE"},
+      allowedStates = {"ATIVO"},
+      confirmationRequired = true,
+      resourceVersion = org.praxisplatform.uischema.action.ActionRequirement.REQUIRED,
+      resourceVersionTransport =
+          org.praxisplatform.uischema.action.ActionResourceVersionTransport.IF_MATCH)
+  @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_WRITE')")
+  @io.swagger.v3.oas.annotations.Operation(
+      summary = "Inativar órgão",
+      description =
+          "Desabilita novas admissões sem remover os assentamentos existentes. Exige If-Match atual.")
+  public org.springframework.http.ResponseEntity<OrgaoResponseDTO> inativarOrgao(
+      @io.swagger.v3.oas.annotations.Parameter(description = "Identidade imutável do assentamento")
+          @org.springframework.web.bind.annotation.PathVariable
+          Integer id,
+      @io.swagger.v3.oas.annotations.Parameter(description = "ETag forte recebido na leitura atual")
+          @org.springframework.web.bind.annotation.RequestHeader(
+              value = "If-Match",
+              required = false)
+          String ifMatch,
+      @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
+          AlterarSituacaoOrgaoDTO dto) {
+    var p =
+        new org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition<Integer>(
+            commandEtags,
+            ifMatch,
+            commandScopes.currentScope(),
+            "administracao-pessoal.empresas",
+            id);
+    return withResourceVersion(
+        org.springframework.http.ResponseEntity.ok(), id, commands.inativarOrgao(id, dto, p));
+  }
+
+  @org.springframework.web.bind.annotation.GetMapping("/{id}/ficha-institucional")
+  @UiSurface(
+      id = "ficha-institucional",
+      kind = org.praxisplatform.uischema.surface.SurfaceKind.READ_PROJECTION,
+      scope = org.praxisplatform.uischema.surface.SurfaceScope.ITEM,
+      title = "Ficha institucional",
+      description = "Consulta identificação, endereço e situação administrativa do órgão.",
+      requiredAuthorities = {"ERGON_READ"})
+  @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_READ')")
+  @io.swagger.v3.oas.annotations.Operation(
+      summary = "Consultar ficha institucional",
+      description = "Consulta identificação, endereço e situação administrativa do órgão.")
+  public org.springframework.http.ResponseEntity<OrgaoResponseDTO> ficha(
+      @io.swagger.v3.oas.annotations.Parameter(description = "Identidade imutável do cadastro")
+          @org.springframework.web.bind.annotation.PathVariable
+          Integer id) {
+    return withResourceVersion(
+        org.springframework.http.ResponseEntity.ok(), id, service.findById(id));
   }
 }

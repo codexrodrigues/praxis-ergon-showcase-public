@@ -27,7 +27,15 @@ public abstract class CargoDados {
       preset = UISchemaPreset.ENTERPRISE_NAME,
       group = "Identificação",
       order = 10,
-      icon = "work")
+      icon = "work",
+      quickViewVisible = true,
+      quickViewOrder = 1)
+  @ResourceReference(
+      resourceKey = "administracao-pessoal.cargos",
+      valueField = "id",
+      surfaceId = "ficha-cargo",
+      previewSurfaceId = "ficha-cargo",
+      detailPresentation = "drawer")
   private String nome;
 
   @NotBlank
@@ -35,7 +43,13 @@ public abstract class CargoDados {
   @Schema(
       description =
           "Categoria funcional do cargo, utilizada no enquadramento do servidor e na aplicação das regras estatutárias.")
-  @UISchema(label = "Categoria", group = "Enquadramento", order = 20, icon = "category")
+  @UISchema(
+      label = "Categoria",
+      group = "Enquadramento",
+      order = 20,
+      icon = "category",
+      quickViewVisible = true,
+      quickViewOrder = 2)
   private String categoria;
 
   @Size(max = 40)
@@ -47,7 +61,13 @@ public abstract class CargoDados {
   @Schema(
       description =
           "Classificação estrutural do provimento, como cargo efetivo, comissionado ou função gratificada.")
-  @UISchema(label = "Tipo de cargo", group = "Enquadramento", order = 40, icon = "work_outline")
+  @UISchema(
+      label = "Tipo de cargo",
+      group = "Enquadramento",
+      order = 40,
+      icon = "work_outline",
+      quickViewVisible = true,
+      quickViewOrder = 3)
   private String tipoCargo;
 
   @NotBlank
@@ -70,7 +90,7 @@ public abstract class CargoDados {
       description =
           "Código da Classificação Brasileira de Ocupações associado ao cargo; tratado como identificador textual.")
   @UISchema(
-      label = "CBO",
+      label = "Prefixo CBO",
       type = FieldDataType.TEXT,
       group = "Enquadramento",
       order = 70,
@@ -92,7 +112,7 @@ public abstract class CargoDados {
   @Schema(
       description = "Indica que o provimento requer controle do saldo de vagas autorizadas em lei.")
   @UISchema(
-      label = "Controlar vagas",
+      label = "Controle de vagas",
       preset = UISchemaPreset.BOOLEAN_FLAG,
       group = "Quadro de vagas",
       order = 90,
@@ -141,7 +161,10 @@ public abstract class CargoDados {
       label = "Início do controle de vagas",
       group = "Quadro de Vagas e Vigência",
       tableHidden = true,
-      order = 202)
+      order = 202,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   private LocalDate dtInicioContrVaga;
 
   @Schema(description = "Documento legal que fundamenta a definição do cargo.")

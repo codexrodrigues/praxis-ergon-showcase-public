@@ -15,6 +15,11 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
 @Schema(description = "Inclusão de órgãos no cadastro de administração de pessoal.")
 public class CreateOrgaoDTO extends OrgaoDados {
   @NotNull
+  @Schema(description = "Estado inicial de habilitação do órgão para novas admissões.")
+  @UISchema(label = "Órgão inicialmente ativo", group = "Situação")
+  private Boolean ativa = true;
+
+  @NotNull
   @Positive
   @Schema(description = "Código imutável do órgão público no cadastro multi-órgão do Ergon.")
   @UISchema(

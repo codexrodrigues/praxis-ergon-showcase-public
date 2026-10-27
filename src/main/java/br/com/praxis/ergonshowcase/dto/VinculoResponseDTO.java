@@ -17,8 +17,24 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
 @Schema(
     description =
         "Assentamentos funcionais por pessoa e número sequencial, com enquadramento e exercício.")
-@ResourceIdentity(keyField = "id", titleField = "matric", displayLabelField = "matric")
+@ResourceIdentity(
+    keyField = "id",
+    titleField = "matric",
+    displayLabelField = "matric",
+    subtitleField = "pessoaNome",
+    metadataFields = {"orgaoNome", "cargoNome", "situacao"})
 public class VinculoResponseDTO extends VinculoDados {
+  @Schema(
+      description =
+          "Identidade do único afastamento homologado aberto deste vínculo; nulo quando não há exatamente um.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Afastamento aberto",
+      group = "Afastamentos",
+      readOnly = true,
+      tableHidden = true)
+  private Long afastamentoAbertoId;
+
   @Schema(
       description =
           "Identidade imutável formada pelo número funcional e pelo número do vínculo, como 1001:1.",
@@ -50,11 +66,15 @@ public class VinculoResponseDTO extends VinculoDados {
       formHidden = true,
       group = "Lotação",
       order = 102,
-      icon = "apartment")
+      icon = "apartment",
+      quickViewVisible = true,
+      quickViewOrder = 5)
   @ResourceReference(
       resourceKey = "administracao-pessoal.empresas",
       valueField = "empCodigo",
-      surfaceId = "detail")
+      surfaceId = "ficha-institucional",
+      previewSurfaceId = "ficha-institucional",
+      detailPresentation = "drawer")
   private String orgaoNome;
 
   @Schema(
@@ -77,11 +97,15 @@ public class VinculoResponseDTO extends VinculoDados {
       readOnly = true,
       formHidden = true,
       group = "Identificação funcional",
-      order = 3)
+      order = 3,
+      quickViewVisible = true,
+      quickViewOrder = 2)
   @ResourceReference(
       resourceKey = "administracao-pessoal.funcionarios",
       valueField = "numfunc",
-      surfaceId = "detail")
+      surfaceId = "ficha-cadastral",
+      previewSurfaceId = "ficha-cadastral",
+      detailPresentation = "drawer")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -92,11 +116,20 @@ public class VinculoResponseDTO extends VinculoDados {
   private String pessoaNome;
 
   @Schema(description = "Nomenclatura oficial do cargo de provimento associado ao vínculo.")
-  @UISchema(label = "Cargo", readOnly = true, formHidden = true, group = "Lotação", order = 51)
+  @UISchema(
+      label = "Cargo",
+      readOnly = true,
+      formHidden = true,
+      group = "Lotação",
+      order = 51,
+      quickViewVisible = true,
+      quickViewOrder = 3)
   @ResourceReference(
       resourceKey = "administracao-pessoal.cargos",
       valueField = "cargo",
-      surfaceId = "detail")
+      surfaceId = "ficha-cargo",
+      previewSurfaceId = "ficha-cargo",
+      detailPresentation = "drawer")
   private String cargoNome;
 
   @Schema(
@@ -107,7 +140,9 @@ public class VinculoResponseDTO extends VinculoDados {
       preset = UISchemaPreset.ENTERPRISE_STATUS,
       readOnly = true,
       group = "Exercício",
-      order = 110)
+      order = 110,
+      quickViewVisible = true,
+      quickViewOrder = 4)
   private String situacao;
 
   @Schema(description = "Data de início do efetivo exercício neste vínculo.")
@@ -116,7 +151,11 @@ public class VinculoResponseDTO extends VinculoDados {
       readOnly = true,
       controlType = FieldControlType.DATE_PICKER,
       group = "Exercício",
-      order = 120)
+      order = 120,
+      quickViewVisible = true,
+      quickViewOrder = 6,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   private LocalDate dtexerc;
 
   @Schema(description = "Data do encerramento funcional por vacância, quando registrado.")
@@ -125,7 +164,9 @@ public class VinculoResponseDTO extends VinculoDados {
       readOnly = true,
       controlType = FieldControlType.DATE_PICKER,
       group = "Exercício",
-      order = 130)
+      order = 130,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   private LocalDate dtvac;
 
   @Schema(
@@ -138,18 +179,21 @@ public class VinculoResponseDTO extends VinculoDados {
       description = "Data da homologação do estágio probatório registrada por comando.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Data da homologação do estágio probatório registrada por comando",
+      label = "Homologação do estágio",
       group = "Ingresso, concurso e estágio probatório",
       tableHidden = true,
       readOnly = true,
-      formHidden = true)
+      formHidden = true,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   private LocalDate dtHomologEstagio;
 
   @Schema(
       description = "Modalidade administrativa de requisição ou cessão.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Modalidade administrativa de requisição ou cessão",
+      label = "Modalidade da cessão",
       group = "Cessão e requisição",
       tableHidden = true,
       readOnly = true,
@@ -160,7 +204,7 @@ public class VinculoResponseDTO extends VinculoDados {
       description = "Órgão destinatário ou de origem da cessão.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Órgão destinatário ou de origem da cessão",
+      label = "Órgão da cessão",
       group = "Cessão e requisição",
       tableHidden = true,
       readOnly = true,
@@ -171,7 +215,7 @@ public class VinculoResponseDTO extends VinculoDados {
       description = "Função desempenhada no órgão da cessão.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Função desempenhada no órgão da cessão",
+      label = "Função na cessão",
       group = "Cessão e requisição",
       tableHidden = true,
       readOnly = true,
@@ -182,7 +226,7 @@ public class VinculoResponseDTO extends VinculoDados {
       description = "Responsabilidade pelo ônus financeiro da cessão.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Responsabilidade pelo ônus financeiro da cessão",
+      label = "Ônus da cessão",
       group = "Cessão e requisição",
       tableHidden = true,
       readOnly = true,
@@ -193,7 +237,7 @@ public class VinculoResponseDTO extends VinculoDados {
       description = "Forma de ressarcimento entre os órgãos da cessão.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Forma de ressarcimento entre os órgãos da cessão",
+      label = "Ressarcimento da cessão",
       group = "Cessão e requisição",
       tableHidden = true,
       readOnly = true,
@@ -204,40 +248,49 @@ public class VinculoResponseDTO extends VinculoDados {
       description = "Data inicial da cessão registrada por comando.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Data inicial da cessão registrada por comando",
+      label = "Início da cessão",
       group = "Cessão e requisição",
       tableHidden = true,
       readOnly = true,
-      formHidden = true)
+      formHidden = true,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   private LocalDate dtiniCessao;
 
   @Schema(
       description = "Data final da cessão registrada por comando.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Data final da cessão registrada por comando",
+      label = "Fim da cessão",
       group = "Cessão e requisição",
       tableHidden = true,
       readOnly = true,
-      formHidden = true)
+      formHidden = true,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   private LocalDate dtfimCessao;
 
   @Schema(
       description = "Data de concessão da aposentadoria do vínculo.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Data de concessão da aposentadoria do vínculo",
+      label = "Aposentadoria",
       group = "Aposentadoria e vacância",
       tableHidden = true,
       readOnly = true,
-      formHidden = true)
+      formHidden = true,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   private LocalDate dtaposent;
 
   @Schema(
       description = "Modalidade jurídica de aposentadoria concedida.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Modalidade jurídica de aposentadoria concedida",
+      label = "Modalidade de aposentadoria",
       group = "Aposentadoria e vacância",
       tableHidden = true,
       readOnly = true,
@@ -248,7 +301,7 @@ public class VinculoResponseDTO extends VinculoDados {
       description = "Fator de proporcionalidade da aposentadoria concedida.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Fator de proporcionalidade da aposentadoria concedida",
+      label = "Proporção da aposentadoria",
       group = "Aposentadoria e vacância",
       tableHidden = true,
       readOnly = true,
@@ -259,7 +312,7 @@ public class VinculoResponseDTO extends VinculoDados {
       description = "Forma jurídica da vacância registrada.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Forma jurídica da vacância registrada",
+      label = "Forma da vacância",
       group = "Aposentadoria e vacância",
       tableHidden = true,
       readOnly = true,
@@ -270,7 +323,7 @@ public class VinculoResponseDTO extends VinculoDados {
       description = "Fundamentação administrativa da vacância registrada.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Fundamentação administrativa da vacância registrada",
+      label = "Fundamentação da vacância",
       group = "Aposentadoria e vacância",
       tableHidden = true,
       readOnly = true,
@@ -281,18 +334,21 @@ public class VinculoResponseDTO extends VinculoDados {
       description = "Data limite de pagamento após a vacância.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Data limite de pagamento após a vacância",
+      label = "Pagamento até",
       group = "Aposentadoria e vacância",
       tableHidden = true,
       readOnly = true,
-      formHidden = true)
+      formHidden = true,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   private LocalDate dtPgtoAte;
 
   @Schema(
       description = "Denominação da unidade de lotação do vínculo.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Denominação da unidade de lotação do vínculo",
+      label = "Lotação",
       group = "Enquadramento e lotação",
       tableHidden = true,
       readOnly = true,
@@ -303,7 +359,7 @@ public class VinculoResponseDTO extends VinculoDados {
       description = "Denominação da unidade de exercício do vínculo.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Denominação da unidade de exercício do vínculo",
+      label = "Exercício",
       group = "Enquadramento e lotação",
       tableHidden = true,
       readOnly = true,
@@ -315,8 +371,7 @@ public class VinculoResponseDTO extends VinculoDados {
           "Indica vínculo ativo em exercício cujo estágio ainda não foi homologado; não certifica elegibilidade jurídica.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label =
-          "Indica vínculo ativo em exercício cujo estágio ainda não foi homologado; não certifica elegibilidade jurídica",
+      label = "Em estágio probatório",
       group = "Ingresso, concurso e estágio probatório",
       tableHidden = true,
       readOnly = true,
@@ -327,7 +382,7 @@ public class VinculoResponseDTO extends VinculoDados {
       description = "Indica cargo em comissão associado ao vínculo.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Indica cargo em comissão associado ao vínculo",
+      label = "Com cargo em comissão",
       group = "Enquadramento e lotação",
       tableHidden = true,
       readOnly = true,
@@ -338,7 +393,7 @@ public class VinculoResponseDTO extends VinculoDados {
       description = "Indica estado funcional CEDIDO persistido.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Indica estado funcional CEDIDO persistido",
+      label = "Em cessão",
       group = "Cessão e requisição",
       tableHidden = true,
       readOnly = true,

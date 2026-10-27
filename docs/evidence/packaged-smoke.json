@@ -1,10 +1,14 @@
 {
+  "jarStarted": true,
+  "processStopped": true,
   "health": 200,
   "openapi": 200,
   "vinculo": 200,
-  "actions": 200,
-  "newActionsPresent": true,
   "etagPresent": true,
-  "jarStarted": true,
-  "processStopped": true
+  "isoDate": true,
+  "actions": 200,
+  "afastamentoActionsPresent": true,
+  "orgaoView": 200,
+  "cargoView": 200,
+  "pessoaView": 200
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 public class VinculoMapper
     implements ResourceMapper<
         Vinculo, VinculoResponseDTO, CreateVinculoDTO, UpdateVinculoDTO, VinculoId> {
+
   public VinculoResponseDTO toResponse(Vinculo entity) {
     var dto = new VinculoResponseDTO();
     dto.setMatric(entity.getMatric());

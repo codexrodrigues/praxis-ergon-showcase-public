@@ -34,7 +34,15 @@ public abstract class ServidorPessoaDados {
       preset = UISchemaPreset.ENTERPRISE_NAME,
       group = "Identificação civil",
       order = 10,
-      icon = "person")
+      icon = "person",
+      quickViewVisible = true,
+      quickViewOrder = 1)
+  @ResourceReference(
+      resourceKey = "administracao-pessoal.funcionarios",
+      valueField = "id",
+      surfaceId = "ficha-cadastral",
+      previewSurfaceId = "ficha-cadastral",
+      detailPresentation = "drawer")
   private String nome;
 
   @Size(max = 70)
@@ -52,7 +60,9 @@ public abstract class ServidorPessoaDados {
       label = "Nome social",
       group = "Identificação civil",
       order = 20,
-      icon = "person_outline")
+      icon = "person_outline",
+      quickViewVisible = true,
+      quickViewOrder = 2)
   private String nomeSocial;
 
   @NotBlank
@@ -94,7 +104,8 @@ public abstract class ServidorPessoaDados {
       controlType = FieldControlType.DATE_PICKER,
       group = "Identificação civil",
       order = 40,
-      icon = "cake")
+      icon = "cake",
+      type = org.praxisplatform.uischema.FieldDataType.DATE)
   private LocalDate dtnasc;
 
   @Email
@@ -301,7 +312,13 @@ public abstract class ServidorPessoaDados {
   private Boolean uniaoEstavel = false;
 
   @Schema(description = "Grau de instrução concluído pela pessoa.")
-  @UISchema(label = "Escolaridade", group = "Identificação civil", tableHidden = true, order = 209)
+  @UISchema(
+      label = "Escolaridade",
+      group = "Identificação civil",
+      tableHidden = true,
+      order = 209,
+      quickViewVisible = true,
+      quickViewOrder = 3)
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -454,7 +471,10 @@ public abstract class ServidorPessoaDados {
       label = "Expedição do RG",
       group = "Documentação civil e trabalhista",
       tableHidden = true,
-      order = 220)
+      order = 220,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -469,7 +489,10 @@ public abstract class ServidorPessoaDados {
       label = "Inscrição PIS/PASEP",
       group = "Documentação civil e trabalhista",
       tableHidden = true,
-      order = 221)
+      order = 221,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -664,7 +687,10 @@ public abstract class ServidorPessoaDados {
       label = "Validade da CNH",
       group = "Documentação civil e trabalhista",
       tableHidden = true,
-      order = 234)
+      order = 234,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -794,7 +820,13 @@ public abstract class ServidorPessoaDados {
   private String bairroender;
 
   @Schema(description = "Município de residência da pessoa.")
-  @UISchema(label = "Município", group = "Endereço e contato", tableHidden = true, order = 244)
+  @UISchema(
+      label = "Município",
+      group = "Endereço e contato",
+      tableHidden = true,
+      order = 244,
+      quickViewVisible = true,
+      quickViewOrder = 4)
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -805,7 +837,13 @@ public abstract class ServidorPessoaDados {
   private String cidadeender;
 
   @Schema(description = "UF de residência da pessoa.")
-  @UISchema(label = "UF", group = "Endereço e contato", tableHidden = true, order = 245)
+  @UISchema(
+      label = "UF de residência",
+      group = "Endereço e contato",
+      tableHidden = true,
+      order = 245,
+      quickViewVisible = true,
+      quickViewOrder = 5)
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -980,7 +1018,10 @@ public abstract class ServidorPessoaDados {
       label = "Último recadastramento",
       group = "Recadastramento",
       tableHidden = true,
-      order = 258)
+      order = 258,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,

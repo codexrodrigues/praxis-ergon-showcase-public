@@ -48,18 +48,12 @@ public class CargoFilterDTO implements GenericFilterDTO {
   private Map<String, Object> customFields;
 
   @Schema(description = "Distingue cargo de provimento e função de confiança.")
-  @UISchema(
-      label = "Distingue cargo de provimento e função de confiança",
-      group = "Pesquisa avançada",
-      order = 200)
+  @UISchema(label = "Cargo ou função", group = "Pesquisa avançada", order = 200)
   @Filterable(operation = FilterOperation.EQUAL, relation = "cargoFuncao")
   private String cargoFuncao;
 
   @Schema(description = "Trecho da especialidade funcional do cargo.")
-  @UISchema(
-      label = "Trecho da especialidade funcional do cargo",
-      group = "Pesquisa avançada",
-      order = 201)
+  @UISchema(label = "Subcategoria", group = "Pesquisa avançada", order = 201)
   @Filterable(operation = FilterOperation.LIKE, relation = "subcategoria")
   private String subcategoria;
 
@@ -69,56 +63,38 @@ public class CargoFilterDTO implements GenericFilterDTO {
   private List<String> tiposCargo;
 
   @Schema(description = "Graus de instrução exigidos para o cargo.")
-  @UISchema(
-      label = "Graus de instrução exigidos para o cargo",
-      group = "Pesquisa avançada",
-      order = 203)
+  @UISchema(label = "Escolaridades", group = "Pesquisa avançada", order = 203)
   @Filterable(operation = FilterOperation.IN, relation = "escolaridade")
   private List<String> escolaridades;
 
   @Schema(description = "Prefixo da classificação brasileira de ocupações.")
-  @UISchema(
-      label = "Prefixo da classificação brasileira de ocupações",
-      group = "Pesquisa avançada",
-      order = 204)
+  @UISchema(label = "Prefixo CBO", group = "Pesquisa avançada", order = 204)
   @Filterable(operation = FilterOperation.STARTS_WITH, relation = "cbo")
   private String cbo;
 
   @Schema(description = "Pesquisa cargos sujeitos ao controle de vagas.")
-  @UISchema(
-      label = "Pesquisa cargos sujeitos ao controle de vagas",
-      group = "Pesquisa avançada",
-      order = 205)
+  @UISchema(label = "Controle de vagas", group = "Pesquisa avançada", order = 205)
   @Filterable(operation = FilterOperation.EQUAL, relation = "controleVaga")
   private Boolean controleVaga;
 
   @Schema(description = "Pesquisa cargos remunerados por referência salarial.")
-  @UISchema(
-      label = "Pesquisa cargos remunerados por referência salarial",
-      group = "Pesquisa avançada",
-      order = 206)
+  @UISchema(label = "Por referência salarial", group = "Pesquisa avançada", order = 206)
   @Filterable(operation = FilterOperation.EQUAL, relation = "porReferencia")
   private Boolean porReferencia;
 
   @Schema(description = "Intervalo inclusivo de vagas legalmente autorizadas.")
-  @UISchema(
-      label = "Intervalo inclusivo de vagas legalmente autorizadas",
-      group = "Pesquisa avançada",
-      order = 207)
+  @UISchema(label = "Intervalo de vagas", group = "Pesquisa avançada", order = 207)
   @Filterable(operation = FilterOperation.BETWEEN, relation = "vagasAutorizadas")
   private List<Integer> vagasAutorizadasRange;
 
   @Schema(description = "Quantidade mínima de vagas autorizadas.")
-  @UISchema(
-      label = "Quantidade mínima de vagas autorizadas",
-      group = "Pesquisa avançada",
-      order = 208)
+  @UISchema(label = "Vagas mínimas", group = "Pesquisa avançada", order = 208)
   @Filterable(operation = FilterOperation.GREATER_OR_EQUAL, relation = "vagasAutorizadas")
   private Integer vagasMinimas;
 
   @Schema(description = "Intervalo de início do controle de vagas.")
   @UISchema(
-      label = "Intervalo de início do controle de vagas",
+      label = "Início do controle de vagas",
       group = "Pesquisa avançada",
       order = 209,
       controlType = FieldControlType.DATE_RANGE)
@@ -126,18 +102,12 @@ public class CargoFilterDTO implements GenericFilterDTO {
   private List<LocalDate> vigenciaControleVagaRange;
 
   @Schema(description = "Seleciona cargos sem ato de extinção registrado.")
-  @UISchema(
-      label = "Seleciona cargos sem ato de extinção registrado",
-      group = "Pesquisa avançada",
-      order = 210)
+  @UISchema(label = "Somente vigentes", group = "Pesquisa avançada", order = 210)
   @Filterable(operation = FilterOperation.IS_NULL, relation = "dtExtincao")
   private Boolean apenasVigentes;
 
   @Schema(description = "Seleciona cargos com extinção registrada.")
-  @UISchema(
-      label = "Seleciona cargos com extinção registrada",
-      group = "Pesquisa avançada",
-      order = 211)
+  @UISchema(label = "Somente extintos", group = "Pesquisa avançada", order = 211)
   @Filterable(operation = FilterOperation.IS_NOT_NULL, relation = "dtExtincao")
   private Boolean apenasExtintos;
 }

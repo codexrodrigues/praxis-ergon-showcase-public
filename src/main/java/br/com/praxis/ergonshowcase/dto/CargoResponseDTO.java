@@ -13,7 +13,12 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
 @Getter
 @Setter
 @Schema(description = "Cargos e funções integrantes dos quadros de pessoal dos órgãos públicos.")
-@ResourceIdentity(keyField = "id", titleField = "nome", displayLabelField = "nome")
+@ResourceIdentity(
+    keyField = "id",
+    titleField = "nome",
+    displayLabelField = "nome",
+    subtitleField = "categoria",
+    metadataFields = {"id", "orgaoNome", "tipoCargo", "saldoVagasDisponiveis"})
 public class CargoResponseDTO extends CargoDados {
   @Schema(
       description = "Código imutável que identifica o cargo ou função no quadro de pessoal.",
@@ -45,29 +50,36 @@ public class CargoResponseDTO extends CargoDados {
       formHidden = true,
       group = "Lotação",
       order = 102,
-      icon = "apartment")
+      icon = "apartment",
+      quickViewVisible = true,
+      quickViewOrder = 4)
   @ResourceReference(
       resourceKey = "administracao-pessoal.empresas",
       valueField = "empCodigo",
-      surfaceId = "detail")
+      surfaceId = "ficha-institucional",
+      previewSurfaceId = "ficha-institucional",
+      detailPresentation = "drawer")
   private String orgaoNome;
 
   @Schema(
       description = "Data de extinção do cargo registrada pelo comando específico.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Data de extinção do cargo registrada pelo comando específico",
+      label = "Extinção",
       group = "Quadro de Vagas e Vigência",
       tableHidden = true,
       readOnly = true,
-      formHidden = true)
+      formHidden = true,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "calendar_today")
   private LocalDate dtExtincao;
 
   @Schema(
       description = "Indica existência de extinção registrada para o cargo.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Indica existência de extinção registrada para o cargo",
+      label = "Cargo extinto",
       group = "Quadro de Vagas e Vigência",
       tableHidden = true,
       readOnly = true,
@@ -79,11 +91,12 @@ public class CargoResponseDTO extends CargoDados {
           "Vagas autorizadas menos vínculos ativos, afastados ou cedidos; nulo quando não há quantitativo autorizado.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label =
-          "Vagas autorizadas menos vínculos ativos, afastados ou cedidos; nulo quando não há quantitativo autorizado",
+      label = "Saldo de vagas",
       group = "Quadro de Vagas e Vigência",
       tableHidden = true,
       readOnly = true,
-      formHidden = true)
+      formHidden = true,
+      quickViewVisible = true,
+      quickViewOrder = 5)
   private Long saldoVagasDisponiveis;
 }

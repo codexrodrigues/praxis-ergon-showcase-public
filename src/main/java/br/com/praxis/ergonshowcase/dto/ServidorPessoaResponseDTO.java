@@ -14,7 +14,12 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
 @Schema(
     description =
         "Cadastro civil único das pessoas titulares de vínculos funcionais com órgãos públicos.")
-@ResourceIdentity(keyField = "id", titleField = "nome", displayLabelField = "nome")
+@ResourceIdentity(
+    keyField = "id",
+    titleField = "nome",
+    displayLabelField = "nome",
+    subtitleField = "nomeSocial",
+    metadataFields = {"id", "escolaridade", "cidadeender", "ufender"})
 public class ServidorPessoaResponseDTO extends ServidorPessoaDados {
   @Schema(
       description =
@@ -33,7 +38,7 @@ public class ServidorPessoaResponseDTO extends ServidorPessoaDados {
       description = "Idade civil em anos completos na data atual.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Idade civil em anos completos na data atual",
+      label = "Idade",
       group = "Identificação civil",
       tableHidden = true,
       readOnly = true,
@@ -44,7 +49,7 @@ public class ServidorPessoaResponseDTO extends ServidorPessoaDados {
       description = "Indica ao menos uma das cinco deficiências específicas registrada na pessoa.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Indica ao menos uma das cinco deficiências específicas registrada na pessoa",
+      label = "Pessoa com deficiência",
       group = "Acessibilidade e PcD",
       tableHidden = true,
       readOnly = true,

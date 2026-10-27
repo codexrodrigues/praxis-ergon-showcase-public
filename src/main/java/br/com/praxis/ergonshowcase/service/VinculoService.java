@@ -120,7 +120,7 @@ public class VinculoService
     afterUpdate(id, saved, dto);
     entityManager.flush();
     entityManager.refresh(saved);
-    return toResourceRepresentation(saved);
+    return enriched(toResourceRepresentation(saved));
   }
 
   @Transactional
@@ -142,6 +142,8 @@ public class VinculoService
     e.setDtvac(dto.data());
     e.setFormavac(dto.forma());
     e.setMotivovac(dto.motivo());
+    ErgonInvariants.chronology(dto.data(), dto.dtPgtoAte(), "Pagamento final anterior à vacância.");
+    e.setDtPgtoAte(dto.dtPgtoAte());
     e.setSituacao("VACANTE");
     entityManager.flush();
     return toResourceRepresentation(e);

@@ -12,7 +12,12 @@ public record RegistrarVacanciaDTO(
         @Schema(
             description =
                 "Data em que cessa o exercício deste vínculo; não pode anteceder seu início nem estar no futuro.")
-        @UISchema(label = "Data de vacância", order = 1)
+        @UISchema(
+            type = org.praxisplatform.uischema.FieldDataType.DATE,
+            controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+            icon = "calendar_today",
+            label = "Data de vacância",
+            order = 1)
         LocalDate data,
     @NotBlank
         @Size(max = 20)
@@ -27,4 +32,15 @@ public record RegistrarVacanciaDTO(
             description =
                 "Fundamentação administrativa do encerramento, com referência ao ato que sustenta a vacância.")
         @UISchema(label = "Fundamentação", order = 3)
-        String motivo) {}
+        String motivo,
+    @Schema(
+            description =
+                "Data limite de pagamento após a vacância; quando preenchida, não pode anteceder o desligamento.")
+        @UISchema(
+            type = org.praxisplatform.uischema.FieldDataType.DATE,
+            controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+            icon = "calendar_today",
+            label = "Pagamento até",
+            group = "Aposentadoria e vacância",
+            order = 4)
+        LocalDate dtPgtoAte) {}

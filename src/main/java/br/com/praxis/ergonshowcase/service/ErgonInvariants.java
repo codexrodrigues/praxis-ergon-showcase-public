@@ -15,7 +15,7 @@ public class ErgonInvariants {
 
   public long ocupadas(Integer codigo, VinculoId excluir) {
     return em.createQuery(
-            "select count(v) from Vinculo v where v.cargo=:cargo and v.situacao in ('ATIVO','AFASTADO','CEDIDO') and (:pessoa is null or v.id.numfunc<>:pessoa or v.id.numero<>:numero)",
+            "select count(v) from Vinculo v where (v.cargo=:cargo or v.cargoComissao=:cargo) and v.situacao in ('ATIVO','AFASTADO','CEDIDO') and (:pessoa is null or v.id.numfunc<>:pessoa or v.id.numero<>:numero)",
             Long.class)
         .setParameter("cargo", codigo)
         .setParameter("pessoa", excluir == null ? null : excluir.numfunc())
@@ -68,6 +68,14 @@ public class ErgonInvariants {
   }
 
   public void vinculo(Vinculo v, boolean creating) {
+    if (creating) {
+      Orgao orgao = em.find(Orgao.class, v.getEmpCodigo(), LockModeType.PESSIMISTIC_READ);
+      if (orgao == null || !Boolean.TRUE.equals(orgao.getAtiva()))
+        fail("Nova admissão exige órgão ativo.");
+    }
+    if (v.getJornadaSemanal() != null
+        && (v.getJornadaSemanal() <= 0 || v.getJornadaSemanal() > 168))
+      fail("Jornada semanal deve estar entre 1 e 168 horas.");
     ServidorPessoa pessoa =
         em.find(ServidorPessoa.class, v.getId().numfunc(), LockModeType.PESSIMISTIC_WRITE);
     if (pessoa == null) fail("Pessoa inexistente.");
@@ -79,15 +87,11 @@ public class ErgonInvariants {
         v.getDtfimcontr(), v.getDtprorrogcontr(), "Prorrogação anterior ao término contratual.");
     setor(v.getSetor(), v.getEmpCodigo());
     setor(v.getSetorExercicio(), v.getEmpCodigo());
-    if (v.getCargoComissao() != null) checkCargo(v.getCargoComissao(), v.getEmpCodigo());
+    if (v.getCargoComissao() != null)
+      validarProvimento(v, checkCargo(v.getCargoComissao(), v.getEmpCodigo()));
     if (v.getCargo() != null) {
       Cargo c = checkCargo(v.getCargo(), v.getEmpCodigo());
-      if (c.getDtExtincao() != null) fail("Provimento em cargo extinto é proibido.");
-      if (Set.of("ATIVO", "AFASTADO", "CEDIDO").contains(v.getSituacao())
-          && Boolean.TRUE.equals(c.getControleVaga())
-          && (c.getVagasAutorizadas() == null
-              || ocupadas(c.getCargo(), v.getId()) >= c.getVagasAutorizadas()))
-        fail("Saldo de vagas insuficiente para provimento.");
+      validarProvimento(v, c);
     }
     if ("ATIVO".equals(v.getSituacao())) {
       var others =
@@ -108,6 +112,15 @@ public class ErgonInvariants {
 
   private boolean acumulavel(String categoria) {
     return Set.of("MAGISTERIO", "SAUDE").contains(categoria);
+  }
+
+  private void validarProvimento(Vinculo v, Cargo c) {
+    if (!Set.of("ATIVO", "AFASTADO", "CEDIDO").contains(v.getSituacao())) return;
+    if (c.getDtExtincao() != null) fail("Provimento em cargo extinto é proibido.");
+    if (Boolean.TRUE.equals(c.getControleVaga())
+        && (c.getVagasAutorizadas() == null
+            || ocupadas(c.getCargo(), v.getId()) >= c.getVagasAutorizadas()))
+      fail("Saldo de vagas insuficiente para provimento.");
   }
 
   private Cargo checkCargo(Integer id, Integer orgao) {

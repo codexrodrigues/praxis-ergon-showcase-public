@@ -46,7 +46,13 @@ import org.praxisplatform.uischema.controller.base.AbstractResourceController;
     title = "Cargos",
     description = "Cargos e funções integrantes dos quadros de pessoal dos órgãos públicos.",
     icon = "badge",
-    identity = @ResourceIdentity(keyField = "id", titleField = "nome", displayLabelField = "nome"))
+    identity =
+        @ResourceIdentity(
+            keyField = "id",
+            titleField = "nome",
+            displayLabelField = "nome",
+            subtitleField = "categoria",
+            metadataFields = {"id", "orgaoNome", "tipoCargo", "saldoVagasDisponiveis"}))
 @ApiGroup(
     value = "ergon",
     title = "Administração de pessoal",
@@ -111,5 +117,25 @@ public class CargoController
             id);
     return withResourceVersion(
         org.springframework.http.ResponseEntity.ok(), id, commands.extinguirCargo(id, dto, p));
+  }
+
+  @org.springframework.web.bind.annotation.GetMapping("/{id}/ficha-cargo")
+  @UiSurface(
+      id = "ficha-cargo",
+      kind = org.praxisplatform.uischema.surface.SurfaceKind.READ_PROJECTION,
+      scope = org.praxisplatform.uischema.surface.SurfaceScope.ITEM,
+      title = "Ficha do cargo",
+      description = "Consulta enquadramento, controle de vagas e extinção do cargo.",
+      requiredAuthorities = {"ERGON_READ"})
+  @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_READ')")
+  @io.swagger.v3.oas.annotations.Operation(
+      summary = "Consultar ficha do cargo",
+      description = "Consulta enquadramento, controle de vagas e extinção do cargo.")
+  public org.springframework.http.ResponseEntity<CargoResponseDTO> ficha(
+      @io.swagger.v3.oas.annotations.Parameter(description = "Identidade imutável do cadastro")
+          @org.springframework.web.bind.annotation.PathVariable
+          Integer id) {
+    return withResourceVersion(
+        org.springframework.http.ResponseEntity.ok(), id, service.findById(id));
   }
 }

@@ -5,6 +5,8 @@
     "fixture_cargos": "0",
     "fixture_pessoas": "0",
     "fixture_vinculos": "0",
+    "fixture_afastamentos": "0",
+    "orgao_ativo_apos_rollback": true,
     "estado_apos_rollback": "ATIVO"
   }
 ]

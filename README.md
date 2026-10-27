@@ -32,9 +32,15 @@ Cada piloto publica CRUD, filtros avançados e rápidos, opções, fontes RESOUR
 
 PUT exige o ETag forte obtido no GET em `If-Match`: ausência retorna 428 e versão divergente retorna 412. Identidades e órgão proprietário são definidos na criação. Campos do ciclo de vida não pertencem ao PUT cadastral.
 
-`POST /api/ergon/vinculos/{id}/actions/registrar-vacancia` recebe `data`, `forma` e `motivo`, exige ETag e estado ATIVO, e registra VACANTE. A ação não calcula folha ou direitos previdenciários. `GET /api/ergon/vinculos/{id}/resumo-funcional` é a superfície de consulta; `diasDesdeExercicio` conta dias corridos, sem equivaler a tempo previdenciário certificado.
+`POST /api/ergon/vinculos/{id}/actions/registrar-vacancia` recebe `data`, `forma`, `motivo` e, opcionalmente, `dtPgtoAte`, exige ETag e estado ATIVO, e registra VACANTE. A data final de pagamento não pode anteceder a vacância. A ação não calcula folha ou direitos previdenciários. `GET /api/ergon/vinculos/{id}/resumo-funcional` é a superfície de consulta; `diasDesdeExercicio` conta dias corridos, sem equivaler a tempo previdenciário certificado.
 
 Outras ações de vínculo: `registrar-cessao`, `encerrar-cessao`, `conceder-aposentadoria` e `homologar-estagio-probatorio`, sob `/{id}/actions/`. Cargos publicam `/{id}/actions/extinguir-cargo`; a extinção exige ausência de ocupantes ativos, afastados ou cedidos.
+
+`registrar-afastamento` recebe código de frequência elegível, início, término previsto opcional, motivo e documento legal do órgão. Registra afastamento HOMOLOGADO e muda ATIVO → AFASTADO; rejeita sobreposição. `encerrar-afastamento` recebe afastamentoId, dtfim e documentoLegalId, confere propriedade e período aberto, contabiliza dias inclusivos e retorna AFASTADO → ATIVO. `afastamentoAbertoId` identifica o único registro aberto; é nulo se nenhum ou mais de um existir. Ambas as ações exigem If-Match.
+
+Órgãos publicam `ativar-orgao` e `inativar-orgao`, com estado e If-Match; ativa não pertence ao PUT cadastral. Novas admissões exigem órgão ativo. Cargos em comissão integram saldo de vagas e bloqueio de extinção, sem dupla contagem quando coincidem com o cargo titular. Jornada semanal informada deve estar entre 1 e 168 horas.
+
+Superfícies de consulta: `GET /orgaos/{id}/ficha-institucional`, `/cargos/{id}/ficha-cargo` e `/servidor-pessoas/{id}/ficha-cadastral`, sob `/api/ergon`; mantêm ETag e autoridade ERGON_READ. Os títulos e referências entre pilotos apontam para essas superfícies ou para resumo-funcional. O contrato contém identidade enriquecida e campos executivos de Quick View; não houve validação visual de um consumidor Angular.
 
 Manutenções especializadas com If-Match: PATCH `/api/ergon/vinculos/{id}/lotacao-exercicio`, `/api/ergon/vinculos/{id}/previdencia-pagamento` e `/api/ergon/servidor-pessoas/{id}/dados-bancarios-contato`. Propriedades ausentes ou nulas preservam os valores existentes; esses formulários mantêm somente seus campos próprios. Nome público de correio eletrônico da pessoa: `eMail`.
 
@@ -60,6 +66,6 @@ Exportação síncrona em CSV, JSON ou Excel, escopo filtrado, ordem canônica d
 
 `mvn test` conecta ao PostgreSQL Neon real e faz rollback das mutações; não usa H2. Use uma branch isolada. A execução desta issue usa `br-super-sound-b7urizmd`, filha de main, no projeto `holy-mouse-40140108`.
 
-Os schemas capturados pelos testes ficam em `target/proof/`, e o Surefire em `target/surefire-reports/`. Veja [plano e impacto](docs/PLANO-305.md), [catálogo de colunas](docs/database-schema.json) e o relatório de prova.
+Os schemas capturados pelos testes ficam em `target/proof/`, e o Surefire em `target/surefire-reports/`. Veja [plano e impacto](docs/PLANO-305.md), [catálogo de colunas](docs/database-schema.json) [relatório de prova](docs/RELATORIO-305.md), [scorecard](docs/evidence/SCORECARD-COMPLETUDE.md) e [correções do auditor canônico](docs/tooling/README.md).
 
 As descrições de negócio foram redigidas a partir dos comentários do banco e de `docs-legado/v7x/aps/VINCULOS.TAB`, `CARGOS_.TAB` e `FUNCIONARIOS.TAB`. Não foi consultado nem copiado código do quickstart.

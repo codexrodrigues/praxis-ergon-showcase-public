@@ -60,7 +60,12 @@ import org.praxisplatform.uischema.fact.ResourceFact;
         "Assentamentos funcionais por pessoa e número sequencial, com enquadramento e exercício.",
     icon = "badge",
     identity =
-        @ResourceIdentity(keyField = "id", titleField = "matric", displayLabelField = "matric"))
+        @ResourceIdentity(
+            keyField = "id",
+            titleField = "matric",
+            displayLabelField = "matric",
+            subtitleField = "pessoaNome",
+            metadataFields = {"orgaoNome", "cargoNome", "situacao"}))
 @ApiGroup(
     value = "ergon",
     title = "Administração de pessoal",
@@ -369,5 +374,87 @@ public class VinculoController
         org.springframework.http.ResponseEntity.ok(),
         id,
         commands.atualizarPrevidenciaPagamento(id, dto, p));
+  }
+
+  @org.springframework.web.bind.annotation.PostMapping("/{id}/actions/registrar-afastamento")
+  @WorkflowAction(
+      id = "registrar-afastamento",
+      title = "Registrar afastamento",
+      description =
+          "Concede afastamento fundamentado, registra a licença homologada e altera o vínculo para AFASTADO.",
+      scope = org.praxisplatform.uischema.action.ActionScope.ITEM,
+      requiredAuthorities = {"ERGON_WRITE"},
+      allowedStates = {"ATIVO"},
+      confirmationRequired = true,
+      resourceVersion = org.praxisplatform.uischema.action.ActionRequirement.REQUIRED,
+      resourceVersionTransport =
+          org.praxisplatform.uischema.action.ActionResourceVersionTransport.IF_MATCH)
+  @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_WRITE')")
+  @io.swagger.v3.oas.annotations.Operation(
+      summary = "Registrar afastamento",
+      description =
+          "Concede afastamento fundamentado, registra a licença homologada e altera o vínculo para AFASTADO. Exige If-Match atual.")
+  public org.springframework.http.ResponseEntity<VinculoResponseDTO> registrarAfastamento(
+      @io.swagger.v3.oas.annotations.Parameter(description = "Identidade imutável do assentamento")
+          @org.springframework.web.bind.annotation.PathVariable
+          VinculoId id,
+      @io.swagger.v3.oas.annotations.Parameter(description = "ETag forte recebido na leitura atual")
+          @org.springframework.web.bind.annotation.RequestHeader(
+              value = "If-Match",
+              required = false)
+          String ifMatch,
+      @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
+          RegistrarAfastamentoDTO dto) {
+    var p =
+        new org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition<VinculoId>(
+            commandEtags,
+            ifMatch,
+            commandScopes.currentScope(),
+            "administracao-pessoal.vinculos",
+            id);
+    return withResourceVersion(
+        org.springframework.http.ResponseEntity.ok(),
+        id,
+        commands.registrarAfastamento(id, dto, p));
+  }
+
+  @org.springframework.web.bind.annotation.PostMapping("/{id}/actions/encerrar-afastamento")
+  @WorkflowAction(
+      id = "encerrar-afastamento",
+      title = "Registrar retorno",
+      description =
+          "Encerra a licença homologada aberta deste vínculo e registra seu retorno ao estado ATIVO.",
+      scope = org.praxisplatform.uischema.action.ActionScope.ITEM,
+      requiredAuthorities = {"ERGON_WRITE"},
+      allowedStates = {"AFASTADO"},
+      confirmationRequired = true,
+      resourceVersion = org.praxisplatform.uischema.action.ActionRequirement.REQUIRED,
+      resourceVersionTransport =
+          org.praxisplatform.uischema.action.ActionResourceVersionTransport.IF_MATCH)
+  @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_WRITE')")
+  @io.swagger.v3.oas.annotations.Operation(
+      summary = "Registrar retorno",
+      description =
+          "Encerra a licença homologada aberta deste vínculo e registra seu retorno ao estado ATIVO. Exige If-Match atual.")
+  public org.springframework.http.ResponseEntity<VinculoResponseDTO> encerrarAfastamento(
+      @io.swagger.v3.oas.annotations.Parameter(description = "Identidade imutável do assentamento")
+          @org.springframework.web.bind.annotation.PathVariable
+          VinculoId id,
+      @io.swagger.v3.oas.annotations.Parameter(description = "ETag forte recebido na leitura atual")
+          @org.springframework.web.bind.annotation.RequestHeader(
+              value = "If-Match",
+              required = false)
+          String ifMatch,
+      @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
+          EncerrarAfastamentoDTO dto) {
+    var p =
+        new org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition<VinculoId>(
+            commandEtags,
+            ifMatch,
+            commandScopes.currentScope(),
+            "administracao-pessoal.vinculos",
+            id);
+    return withResourceVersion(
+        org.springframework.http.ResponseEntity.ok(), id, commands.encerrarAfastamento(id, dto, p));
   }
 }
