@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: br.com.praxis.ergonshowcase.NeonIntegrationTest
+-------------------------------------------------------------------------------
+Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 61.21 s -- in br.com.praxis.ergonshowcase.NeonIntegrationTest

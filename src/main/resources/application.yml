@@ -1,0 +1,37 @@
+server:
+  port: ${SERVER_PORT:8080}
+  forward-headers-strategy: framework
+spring:
+  application:
+    name: praxis-ergon-showcase
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    hikari:
+      maximum-pool-size: 5
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: false
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+springdoc:
+  api-docs:
+    version: OPENAPI_3_0
+  writer-with-order-by-keys: true
+praxis:
+  stats:
+    enabled: true
+  resource-version:
+    etag:
+      secret: ${PRAXIS_RESOURCE_VERSION_ETAG_SECRET}
+showcase:
+  security:
+    username: ${SHOWCASE_USERNAME}
+    password: ${SHOWCASE_PASSWORD}

@@ -1,0 +1,119 @@
+package br.com.praxis.ergonshowcase.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.*;
+import java.util.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.praxisplatform.uischema.FieldDataType;
+import org.praxisplatform.uischema.NumericFormat;
+import org.praxisplatform.uischema.annotation.*;
+import org.praxisplatform.uischema.customfields.CustomFields;
+import org.praxisplatform.uischema.extension.annotation.UISchema;
+import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
+
+/** Definição administrativa do cargo, preservando seu órgão proprietário no update. */
+@Getter
+@Setter
+public abstract class CargoDados {
+  @NotBlank
+  @Size(max = 120)
+  @Schema(
+      description =
+          "Nomenclatura oficial do cargo público ou função de confiança no quadro de pessoal.")
+  @UISchema(
+      label = "Nome do cargo",
+      preset = UISchemaPreset.ENTERPRISE_NAME,
+      group = "Identificação",
+      order = 10,
+      icon = "work")
+  private String nome;
+
+  @NotBlank
+  @Size(max = 20)
+  @Schema(
+      description =
+          "Categoria funcional do cargo, utilizada no enquadramento do servidor e na aplicação das regras estatutárias.")
+  @UISchema(label = "Categoria", group = "Enquadramento", order = 20, icon = "category")
+  private String categoria;
+
+  @Size(max = 40)
+  @Schema(description = "Especialidade ou classe funcional que detalha a categoria do cargo.")
+  @UISchema(label = "Subcategoria", group = "Enquadramento", order = 30, icon = "label")
+  private String subcategoria;
+
+  @Size(max = 40)
+  @Schema(
+      description =
+          "Classificação estrutural do provimento, como cargo efetivo, comissionado ou função gratificada.")
+  @UISchema(label = "Tipo de cargo", group = "Enquadramento", order = 40, icon = "work_outline")
+  private String tipoCargo;
+
+  @NotBlank
+  @Pattern(regexp = "[CF]")
+  @Schema(
+      description =
+          "Distingue cargo público (C) de função de confiança (F) no quadro institucional.")
+  @UISchema(label = "Cargo ou função", group = "Enquadramento", order = 50, icon = "badge")
+  private String cargoFuncao = "C";
+
+  @Size(max = 20)
+  @Schema(
+      description =
+          "Grau de instrução mínimo exigido para provimento no cargo, conforme o domínio de escolaridade do Ergon.")
+  @UISchema(label = "Escolaridade exigida", group = "Enquadramento", order = 60, icon = "school")
+  private String escolaridade;
+
+  @Size(max = 10)
+  @Schema(
+      description =
+          "Código da Classificação Brasileira de Ocupações associado ao cargo; tratado como identificador textual.")
+  @UISchema(
+      label = "CBO",
+      type = FieldDataType.TEXT,
+      group = "Enquadramento",
+      order = 70,
+      icon = "tag")
+  private String cbo;
+
+  @PositiveOrZero
+  @Schema(
+      description = "Total de vagas legalmente autorizadas para provimento neste cargo ou função.")
+  @UISchema(
+      label = "Vagas autorizadas",
+      numericFormat = NumericFormat.INTEGER,
+      group = "Quadro de vagas",
+      order = 80,
+      icon = "groups")
+  private Integer vagasAutorizadas;
+
+  @NotNull
+  @Schema(
+      description = "Indica que o provimento requer controle do saldo de vagas autorizadas em lei.")
+  @UISchema(
+      label = "Controlar vagas",
+      preset = UISchemaPreset.BOOLEAN_FLAG,
+      group = "Quadro de vagas",
+      order = 90,
+      icon = "rule")
+  private Boolean controleVaga = false;
+
+  @NotNull
+  @Schema(
+      description =
+          "Indica remuneração estruturada por tabela de vencimentos e referências salariais.")
+  @UISchema(
+      label = "Por referência salarial",
+      preset = UISchemaPreset.BOOLEAN_FLAG,
+      group = "Quadro de vagas",
+      order = 100,
+      icon = "payments")
+  private Boolean porReferencia = false;
+
+  @CustomFields(resourceKey = "administracao-pessoal.cargos")
+  @Schema(
+      description =
+          "Atributos adicionais do cargo definidos pelo catálogo global e pelo órgão selecionado, incluindo requisitos profissionais.")
+  @UISchema(label = "Características do órgão", group = "Características adicionais", order = 110)
+  private Map<String, Object> customFields = new LinkedHashMap<>();
+}
