@@ -68,7 +68,7 @@
         },
         {
           "path": "docs/evidence/final-sdk-provenance.json",
-          "sha256": "1df1d92cff998bc6f4bb4c9a0b73eb3c6cd9ba7d052ed91c63549d7c0d39f0c0"
+          "sha256": "7130c49e7258c3ded88ec2b9eb09f3dd7e8b43cfb9dc16c054a03a4732d6381c"
         }
       ]
     },
@@ -85,7 +85,7 @@
         },
         {
           "path": "docs/evidence/final-sdk-provenance.json",
-          "sha256": "1df1d92cff998bc6f4bb4c9a0b73eb3c6cd9ba7d052ed91c63549d7c0d39f0c0"
+          "sha256": "7130c49e7258c3ded88ec2b9eb09f3dd7e8b43cfb9dc16c054a03a4732d6381c"
         }
       ]
     },
@@ -102,7 +102,7 @@
         },
         {
           "path": "docs/evidence/final-sdk-provenance.json",
-          "sha256": "1df1d92cff998bc6f4bb4c9a0b73eb3c6cd9ba7d052ed91c63549d7c0d39f0c0"
+          "sha256": "7130c49e7258c3ded88ec2b9eb09f3dd7e8b43cfb9dc16c054a03a4732d6381c"
         }
       ],
       "scope": "Authorizations, versions, workflow states and declared item/collection operations exercised by the suite"
@@ -124,7 +124,7 @@
         },
         {
           "path": "docs/evidence/final-sdk-provenance.json",
-          "sha256": "1df1d92cff998bc6f4bb4c9a0b73eb3c6cd9ba7d052ed91c63549d7c0d39f0c0"
+          "sha256": "7130c49e7258c3ded88ec2b9eb09f3dd7e8b43cfb9dc16c054a03a4732d6381c"
         },
         {
           "path": "docs/evidence/final-fixture-cleanup.json",
@@ -153,7 +153,7 @@
         },
         {
           "path": "docs/evidence/final-sdk-provenance.json",
-          "sha256": "1df1d92cff998bc6f4bb4c9a0b73eb3c6cd9ba7d052ed91c63549d7c0d39f0c0"
+          "sha256": "7130c49e7258c3ded88ec2b9eb09f3dd7e8b43cfb9dc16c054a03a4732d6381c"
         }
       ],
       "scope": "Only mapped pilot registration and listed administrative operations; full statutory/legacy parity is not certified"
@@ -175,7 +175,7 @@
         },
         {
           "path": "docs/evidence/final-sdk-provenance.json",
-          "sha256": "1df1d92cff998bc6f4bb4c9a0b73eb3c6cd9ba7d052ed91c63549d7c0d39f0c0"
+          "sha256": "7130c49e7258c3ded88ec2b9eb09f3dd7e8b43cfb9dc16c054a03a4732d6381c"
         }
       ],
       "scope": "Official source normalizer and ReactiveDeterminationRuntimeService; not published npm adoption or visual host acceptance"
@@ -197,7 +197,7 @@
         },
         {
           "path": "docs/evidence/final-sdk-provenance.json",
-          "sha256": "1df1d92cff998bc6f4bb4c9a0b73eb3c6cd9ba7d052ed91c63549d7c0d39f0c0"
+          "sha256": "7130c49e7258c3ded88ec2b9eb09f3dd7e8b43cfb9dc16c054a03a4732d6381c"
         }
       ]
     },
@@ -246,7 +246,7 @@
         },
         {
           "path": "docs/evidence/final-sdk-provenance.json",
-          "sha256": "1df1d92cff998bc6f4bb4c9a0b73eb3c6cd9ba7d052ed91c63549d7c0d39f0c0"
+          "sha256": "7130c49e7258c3ded88ec2b9eb09f3dd7e8b43cfb9dc16c054a03a4732d6381c"
         }
       ]
     },
@@ -275,7 +275,7 @@
         },
         {
           "path": "docs/evidence/final-sdk-provenance.json",
-          "sha256": "1df1d92cff998bc6f4bb4c9a0b73eb3c6cd9ba7d052ed91c63549d7c0d39f0c0"
+          "sha256": "7130c49e7258c3ded88ec2b9eb09f3dd7e8b43cfb9dc16c054a03a4732d6381c"
         }
       ]
     }
