@@ -25,6 +25,10 @@ public class ErgonInvariants {
   }
 
   public void cargo(Cargo c) {
+    if (!Boolean.TRUE.equals(c.getEAglutinador()) && em.createQuery(
+        "select count(c) from Cargo c where c.cargoAglutinador=:pai", Long.class)
+        .setParameter("pai", c.getCargo()).setFlushMode(FlushModeType.COMMIT).getSingleResult() > 0)
+      fail("Cargo com dependentes não pode deixar de ser aglutinador.");
     if (Boolean.TRUE.equals(c.getControleVaga())
         && (c.getVagasAutorizadas() == null || c.getVagasAutorizadas() <= 0))
       fail("Controle de vagas exige quantidade autorizada positiva.");
@@ -33,7 +37,9 @@ public class ErgonInvariants {
     if (c.getCargoAglutinador() != null) {
       if (c.getCargoAglutinador().equals(c.getCargo()))
         fail("Cargo não pode aglutinar a si próprio.");
-      Cargo parent = em.find(Cargo.class, c.getCargoAglutinador());
+      // O compartilhamento do lock com a manutenção do pai impede desabilitação concorrente.
+      Cargo parent = em.find(Cargo.class, c.getCargoAglutinador(), LockModeType.PESSIMISTIC_READ);
+      if (parent != null) em.refresh(parent, LockModeType.PESSIMISTIC_READ);
       if (parent == null
           || !Objects.equals(parent.getEmpCodigo(), c.getEmpCodigo())
           || !Boolean.TRUE.equals(parent.getEAglutinador()))

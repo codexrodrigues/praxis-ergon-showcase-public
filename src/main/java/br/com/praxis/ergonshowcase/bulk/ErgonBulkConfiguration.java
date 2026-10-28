@@ -62,7 +62,7 @@ public class ErgonBulkConfiguration {
     return new BulkOperationDescriptorProvider() {
       public String confirmationOperationId() { return "ergon." + resource + "." + suffix; }
       public String providerId() { return "ergon-bulk-" + resource + "-" + suffix; }
-      public String providerRevision() { return "1"; }
+      public String providerRevision() { return ErgonBulkOperations.REVISION; }
       public BulkIdentityCodec<?, ?> identityCodec() { return resource.equals("cargos") ? BulkIdentityCodecs.integers() : resource.equals("funcionarios") ? BulkIdentityCodecs.longs() : BulkIdentityCodecs.strings(); }
       public String identitySchemaPointer() { return mode == BulkMode.PER_ITEM_UPDATE ? "/properties/items/items/properties/id" : "/properties/selection/properties/targets/items/properties/id"; }
       public BulkOperationalProfile profile() {

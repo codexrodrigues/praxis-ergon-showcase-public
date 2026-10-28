@@ -238,11 +238,11 @@ public class ErgonCommands {
       AlterarLotacaoExercicioDTO dto,
       ResourceVersionUpdatePrecondition<VinculoId> p) {
     Vinculo e = vinculo(id, p, null);
-    if (dto.getSetor() != null) e.setSetor(dto.getSetor());
-    if (dto.getSetorExercicio() != null) e.setSetorExercicio(dto.getSetorExercicio());
-    if (dto.getCargoComissao() != null) e.setCargoComissao(dto.getCargoComissao());
-    if (dto.getJornadaSemanal() != null) e.setJornadaSemanal(dto.getJornadaSemanal());
-    if (dto.getDocumentoLegalId() != null) e.setDocumentoLegalId(dto.getDocumentoLegalId());
+    if (dto.wasSupplied("setor")) e.setSetor(dto.getSetor());
+    if (dto.wasSupplied("setorExercicio")) e.setSetorExercicio(dto.getSetorExercicio());
+    if (dto.wasSupplied("cargoComissao")) e.setCargoComissao(dto.getCargoComissao());
+    if (dto.wasSupplied("jornadaSemanal")) e.setJornadaSemanal(dto.getJornadaSemanal());
+    if (dto.wasSupplied("documentoLegalId")) e.setDocumentoLegalId(dto.getDocumentoLegalId());
     documento(e.getDocumentoLegalId());
     return finish(e);
   }
@@ -252,14 +252,14 @@ public class ErgonCommands {
       AtualizarPrevidenciaPagamentoDTO dto,
       ResourceVersionUpdatePrecondition<VinculoId> p) {
     Vinculo e = vinculo(id, p, null);
-    if (dto.getRegimeprev() != null) e.setRegimeprev(dto.getRegimeprev());
-    if (dto.getPlanoprev() != null) e.setPlanoprev(dto.getPlanoprev());
-    if (dto.getDescontaIr() != null) e.setDescontaIr(dto.getDescontaIr());
-    if (dto.getCorreio() != null) e.setCorreio(dto.getCorreio());
-    if (dto.getBanco() != null) e.setBanco(dto.getBanco());
-    if (dto.getAgencia() != null) e.setAgencia(dto.getAgencia());
-    if (dto.getConta() != null) e.setConta(dto.getConta());
-    if (dto.getTipopag() != null) e.setTipopag(dto.getTipopag());
+    if (dto.wasSupplied("regimeprev")) e.setRegimeprev(dto.getRegimeprev());
+    if (dto.wasSupplied("planoprev")) e.setPlanoprev(dto.getPlanoprev());
+    if (dto.wasSupplied("descontaIr")) e.setDescontaIr(dto.getDescontaIr());
+    if (dto.wasSupplied("correio")) e.setCorreio(dto.getCorreio());
+    if (dto.wasSupplied("banco")) e.setBanco(dto.getBanco());
+    if (dto.wasSupplied("agencia")) e.setAgencia(dto.getAgencia());
+    if (dto.wasSupplied("conta")) e.setConta(dto.getConta());
+    if (dto.wasSupplied("tipopag")) e.setTipopag(dto.getTipopag());
     documento(e.getDocumentoLegalId());
     return finish(e);
   }
@@ -268,21 +268,21 @@ public class ErgonCommands {
       Long id, AtualizarDadosBancariosContatoDTO dto, ResourceVersionUpdatePrecondition<Long> p) {
     ServidorPessoa e = locked(ServidorPessoa.class, id);
     p.requireMatch(e.getVersion());
-    if (dto.getEMail() != null) e.setEMail(dto.getEMail());
-    if (dto.getTelefone() != null) e.setTelefone(dto.getTelefone());
-    if (dto.getNumtelCelular() != null) e.setNumtelCelular(dto.getNumtelCelular());
-    if (dto.getTipologender() != null) e.setTipologender(dto.getTipologender());
-    if (dto.getNomelogender() != null) e.setNomelogender(dto.getNomelogender());
-    if (dto.getNumender() != null) e.setNumender(dto.getNumender());
-    if (dto.getComplender() != null) e.setComplender(dto.getComplender());
-    if (dto.getBairroender() != null) e.setBairroender(dto.getBairroender());
-    if (dto.getCidadeender() != null) e.setCidadeender(dto.getCidadeender());
-    if (dto.getUfender() != null) e.setUfender(dto.getUfender());
-    if (dto.getCepender() != null) e.setCepender(dto.getCepender());
-    if (dto.getBanco() != null) e.setBanco(dto.getBanco());
-    if (dto.getAgencia() != null) e.setAgencia(dto.getAgencia());
-    if (dto.getConta() != null) e.setConta(dto.getConta());
-    if (dto.getTipopag() != null) e.setTipopag(dto.getTipopag());
+    if (dto.wasSupplied("eMail")) e.setEMail(dto.getEMail());
+    if (dto.wasSupplied("telefone")) e.setTelefone(dto.getTelefone());
+    if (dto.wasSupplied("numtelCelular")) e.setNumtelCelular(dto.getNumtelCelular());
+    if (dto.wasSupplied("tipologender")) e.setTipologender(dto.getTipologender());
+    if (dto.wasSupplied("nomelogender")) e.setNomelogender(dto.getNomelogender());
+    if (dto.wasSupplied("numender")) e.setNumender(dto.getNumender());
+    if (dto.wasSupplied("complender")) e.setComplender(dto.getComplender());
+    if (dto.wasSupplied("bairroender")) e.setBairroender(dto.getBairroender());
+    if (dto.wasSupplied("cidadeender")) e.setCidadeender(dto.getCidadeender());
+    if (dto.wasSupplied("ufender")) e.setUfender(dto.getUfender());
+    if (dto.wasSupplied("cepender")) e.setCepender(dto.getCepender());
+    if (dto.wasSupplied("banco")) e.setBanco(dto.getBanco());
+    if (dto.wasSupplied("agencia")) e.setAgencia(dto.getAgencia());
+    if (dto.wasSupplied("conta")) e.setConta(dto.getConta());
+    if (dto.wasSupplied("tipopag")) e.setTipopag(dto.getTipopag());
     rules.pessoa(e);
     em.flush();
     em.refresh(e);

@@ -1,8 +1,20 @@
 # Relatório de rodada — issue 305
 
-## Fechamento atual — Omnibox, pilares e Bulking
+## Correções da revisão 2013442 — rodada atual
 
-Esta seção prevalece sobre as campanhas históricas abaixo. Mudança classificada como contrato público/transversal; plano e impacto em [PLANO-20-PILARES.md](PLANO-20-PILARES.md). Os quatro passos solicitados foram concluídos com o schema Neon preservado.
+Esta rodada substitui o veredito operacional histórico abaixo. O [plano de impacto](PLANO-CORRECOES-2013442.md) e a [matriz de correções](CORRECOES-2013442.md) registram o escopo transversal: host, Metadata e cliente Angular. O schema Neon permanece intacto. O [scorecard](evidence/SCORECARD-COMPLETUDE.md) deve ser lido em conjunto com os resultados desta rodada; o PASS de 66 testes pertence exclusivamente à campanha anterior.
+
+Mudanças: escopo de órgão antes do limite da seleção QUERY; proteção concorrente da aglutinação; presença explícita em PATCH; diagnósticos públicos distintos; segregação de administração; cliente oficial com cancelamento cooperativo; provas de mutação para cargos e pessoas, recuperação/idempotência, conflito concorrente e submit parcial. A dependência utilizada agora é `8.0.0-bulk.308-review-SNAPSHOT`, privada e instalada no cache isolado. O POM rc.179 não está certificado.
+
+A execução integral terminou com **74 testes, 4 falhas, 0 erros e 0 ignorados**. Na repetição focal, 3/5 passaram: a prova de segregação foi corrigida para usar a identidade administrativa real por HTTP, e schemas/analytics passaram. O ciclo positivo de vínculos segue bloqueado por 503 de publicação/reconciliação. Em conjunto, 73/74 casos distintos passaram; isso não equivale a uma execução Maven integral verde. O auditor estático passa nos seis recursos, mas o gate operacional permanece pendente. **Não pronto para merge.**
+
+O SDK passou 130 testes focais; o auditor passou 45 regressões. O harness HTTP do consumidor passou com ciclo de lote, idempotência/retomada, cancelamento terminal, CLEAR, resultado parcial por edição concorrente e submit parcial. As libs Angular ficaram sob responsabilidade de outro agente, por determinação do usuário, em PR #661 separado; ele conferiu 17 specs, builds Core/Table e pureza. O schema foi preservado e a cópia descartável foi excluída após as provas, com autorização. Evidências atuais em [CORRECOES-2013442.md](CORRECOES-2013442.md) e [PILLARS-CAMPAIGN.json](evidence/PILLARS-CAMPAIGN.json).
+
+Derivados: documentação canônica de PATCH e tratamento operacional no Metadata; README do core Angular; receita, relatório e evidências do host. Não há novo formato x-ui, componente visual, recipe ou catálogo HTTP público a sincronizar. Não foi executada aceitação visual desktop/narrow: o artefato do host é backend e a prova do consumidor usa runtime oficial em harness HTTP, sem montar uma tela.
+
+## Histórico — fechamento Omnibox, pilares e Bulking
+
+Esta seção registra a campanha anterior e não certifica as correções de 2013442. Mudança classificada como contrato público/transversal; plano e impacto em [PLANO-20-PILARES.md](PLANO-20-PILARES.md).
 
 | Validação | Resultado | Evidência |
 |---|---|---|

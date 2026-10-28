@@ -1,0 +1,426 @@
+{
+  "validatedAt": "2026-10-28T14:58:20.552438+00:00",
+  "branch": "br-dry-breeze-b7pc58x5",
+  "dependency": "8.0.0-bulk.308-review-SNAPSHOT",
+  "jvm": "-XX:TieredStopAtLevel=1",
+  "logSha256": "4bc1b93dde6158a850639a90cac6844c40a84cd9a43a46e5bec039a0fcf969f2",
+  "buildSuccess": false,
+  "totals": {
+    "tests": 74,
+    "failures": 4,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suites": [
+    {
+      "suite": "br.com.praxis.ergonshowcase.BulkNeonIntegrationTest",
+      "tests": 6,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 713.451,
+      "cases": [
+        {
+          "name": "publishesCanonicalBulkOperationsAndEditableFields",
+          "seconds": 81.135,
+          "status": "passed"
+        },
+        {
+          "name": "evaluatesThenExecutesUniformItemsAndCollectiveCommands",
+          "seconds": 118.338,
+          "status": "failed"
+        },
+        {
+          "name": "blockedProposalExplainsStaleVersionAndInvalidItemWithoutMutation",
+          "seconds": 99.068,
+          "status": "passed"
+        },
+        {
+          "name": "cargosAndPessoasExecuteBothUpdateModesAndClear",
+          "seconds": 374.128,
+          "status": "passed"
+        },
+        {
+          "name": "concurrentDiscoveryReturnsVerifiedSnapshotOrSafeUnavailable",
+          "seconds": 17.982,
+          "status": "passed"
+        },
+        {
+          "name": "readOnlyCannotEvaluateOrConfirmAnyBulkOperation",
+          "seconds": 1.794,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.NeonIntegrationTest",
+      "tests": 58,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 492.991,
+      "cases": [
+        {
+          "name": "reviewAggregatorCannotBeDisabledWithDependentCargo",
+          "seconds": 4.622,
+          "status": "passed"
+        },
+        {
+          "name": "phaseTwoPartialFormsRejectStorageOverflowBeforeWriting",
+          "seconds": 3.927,
+          "status": "passed"
+        },
+        {
+          "name": "revisionFiltersExecuteTheirDeclaredPredicates",
+          "seconds": 5.302,
+          "status": "passed"
+        },
+        {
+          "name": "schemaShowsCompositeKeyGovernanceAndTenantFields",
+          "seconds": 5.487,
+          "status": "passed"
+        },
+        {
+          "name": "revisionResponsesCoverEveryPersistentBusinessField",
+          "seconds": 0.403,
+          "status": "passed"
+        },
+        {
+          "name": "phaseThreePreviewIsAuthorizedNonPersistingAndTenantScoped",
+          "seconds": 1.427,
+          "status": "passed"
+        },
+        {
+          "name": "reviewAfastamentoRejectsEndBeforeStart",
+          "seconds": 3.389,
+          "status": "passed"
+        },
+        {
+          "name": "phaseThreeSubmitRejectsForgedPreview",
+          "seconds": 1.543,
+          "status": "passed"
+        },
+        {
+          "name": "reviewServiceAlsoRejectsInvalidJornada",
+          "seconds": 2.955,
+          "status": "passed"
+        },
+        {
+          "name": "statisticsExecuteAndRejectIdentifierMeasures",
+          "seconds": 1.865,
+          "status": "passed"
+        },
+        {
+          "name": "revisionBusinessRulesRejectChronologyAndAccumulation",
+          "seconds": 0.589,
+          "status": "passed"
+        },
+        {
+          "name": "revisionBusinessRulesRejectCrossOrgAndExtinctCargo",
+          "seconds": 1.441,
+          "status": "passed"
+        },
+        {
+          "name": "revisionProfessionalRegistrationAndUniqueness",
+          "seconds": 1.749,
+          "status": "passed"
+        },
+        {
+          "name": "allSixteenEntitiesMatchPostgres17",
+          "seconds": 6.37,
+          "status": "passed"
+        },
+        {
+          "name": "reviewAfastamentoRejectsInvalidCodeAndChronology",
+          "seconds": 3.339,
+          "status": "passed"
+        },
+        {
+          "name": "reviewDerivedFactsUseOneBatchQueryRegardlessOfPageSize",
+          "seconds": 5.141,
+          "status": "passed"
+        },
+        {
+          "name": "vacanciaEnforcesVersionAndPersistsTransition",
+          "seconds": 1.62,
+          "status": "passed"
+        },
+        {
+          "name": "revisionBusinessRulesRejectInvalidVacanciesAndAggregation",
+          "seconds": 1.16,
+          "status": "passed"
+        },
+        {
+          "name": "compositeIdentityAndSurface",
+          "seconds": 1.84,
+          "status": "passed"
+        },
+        {
+          "name": "reviewAfastamentoRejectsOverlappingPeriodAndEarlyReturn",
+          "seconds": 7.219,
+          "status": "passed"
+        },
+        {
+          "name": "phaseThreeAggregatorPreviewRevalidatesEligibility",
+          "seconds": 1.991,
+          "status": "passed"
+        },
+        {
+          "name": "phaseTwoHistoricalMaintenanceAllowsExtinctCargo",
+          "seconds": 9.175,
+          "status": "passed"
+        },
+        {
+          "name": "reviewOrgaoStateIsNotWritableByCadastralPut",
+          "seconds": 0.517,
+          "status": "passed"
+        },
+        {
+          "name": "reviewCommissionCannotExceedVacancies",
+          "seconds": 4.768,
+          "status": "passed"
+        },
+        {
+          "name": "phaseThreeDeterminationsPublishExactCreateEditBindings",
+          "seconds": 23.736,
+          "status": "passed"
+        },
+        {
+          "name": "cursorContinuityLocateAndCompositeOptions",
+          "seconds": 2.711,
+          "status": "passed"
+        },
+        {
+          "name": "reviewInstitutionalActionsProtectStateAndETag",
+          "seconds": 10.593,
+          "status": "passed"
+        },
+        {
+          "name": "reviewPublicationAdministratorCannotWriteDomainRecords",
+          "seconds": 0.091,
+          "status": "failed"
+        },
+        {
+          "name": "reviewVacancyMaintainsPaymentLimit",
+          "seconds": 3.183,
+          "status": "passed"
+        },
+        {
+          "name": "reviewCommissionCannotUseExtinctOrFullCargo",
+          "seconds": 5.29,
+          "status": "passed"
+        },
+        {
+          "name": "reviewAggregatorSerializesConcurrentChildAdmissionAndDisable",
+          "seconds": 2.083,
+          "status": "passed"
+        },
+        {
+          "name": "phaseTwoChronologyRejectsReverseEndpointsWithMissingMiddle",
+          "seconds": 3.566,
+          "status": "passed"
+        },
+        {
+          "name": "reviewDomainWriterCannotAdministerPublication",
+          "seconds": 0.12,
+          "status": "passed"
+        },
+        {
+          "name": "reviewReadSurfacesPublishRealETagAndReferences",
+          "seconds": 3.85,
+          "status": "passed"
+        },
+        {
+          "name": "customFieldsAreTenantScopedAndValidated",
+          "seconds": 1.108,
+          "status": "passed"
+        },
+        {
+          "name": "reviewCommissionOccupancyPreventsExtinctionAndDoubleCounting",
+          "seconds": 6.232,
+          "status": "passed"
+        },
+        {
+          "name": "phaseOneAuxiliaryReferencesAreReadOnlyAndResolvable",
+          "seconds": 4.595,
+          "status": "passed"
+        },
+        {
+          "name": "reviewBulkSelectionAppliesOrganizationBeforeLimit",
+          "seconds": 0.611,
+          "status": "passed"
+        },
+        {
+          "name": "crudFourPilotsAndImmutableIdentifiers",
+          "seconds": 13.612,
+          "status": "passed"
+        },
+        {
+          "name": "reviewRetornoRejectsForeignLicense",
+          "seconds": 5.137,
+          "status": "passed"
+        },
+        {
+          "name": "phaseTwoRelatedCollectionsRespectParentAndPagination",
+          "seconds": 3.472,
+          "status": "passed"
+        },
+        {
+          "name": "reviewPartialUpdatesDistinguishOmissionClearAndRequiredBooleans",
+          "seconds": 9.929,
+          "status": "passed"
+        },
+        {
+          "name": "reviewPatchRejectsBothInvalidJornadaBounds",
+          "seconds": 4.43,
+          "status": "passed"
+        },
+        {
+          "name": "revisionCessaoAndRetirementTransitions",
+          "seconds": 5.949,
+          "status": "passed"
+        },
+        {
+          "name": "revisionDiscoveryAndRichSchemas",
+          "seconds": 129.654,
+          "status": "passed"
+        },
+        {
+          "name": "revisionHomologacaoAndCargoExtinction",
+          "seconds": 6.63,
+          "status": "passed"
+        },
+        {
+          "name": "phaseThreeDocumentScopeIsExplicitPerOperation",
+          "seconds": 6.133,
+          "status": "passed"
+        },
+        {
+          "name": "revisionPartialFormsPreserveIdentityAndUntouchedValues",
+          "seconds": 5.721,
+          "status": "passed"
+        },
+        {
+          "name": "structuralAndSemanticMetadataArePublished",
+          "seconds": 10.595,
+          "status": "failed"
+        },
+        {
+          "name": "reviewVacancyRejectsPaymentBeforeDeparture",
+          "seconds": 2.933,
+          "status": "passed"
+        },
+        {
+          "name": "optionsCursorStatsAndExportExecuteOnNeon",
+          "seconds": 4.86,
+          "status": "passed"
+        },
+        {
+          "name": "filtersAndExportPolicyAreEffective",
+          "seconds": 8.022,
+          "status": "passed"
+        },
+        {
+          "name": "fourResourcesExposeDataAndCapabilities",
+          "seconds": 72.249,
+          "status": "passed"
+        },
+        {
+          "name": "realHttpOpenApiAndAuthentication",
+          "seconds": 9.985,
+          "status": "passed"
+        },
+        {
+          "name": "reviewAfastamentoRoundTripPersistsLicenseAndVersion",
+          "seconds": 17.761,
+          "status": "passed"
+        },
+        {
+          "name": "mappingCoversEveryDocumentedColumn",
+          "seconds": 6.442,
+          "status": "passed"
+        },
+        {
+          "name": "reviewInactiveOrgaoRejectsNewAdmission",
+          "seconds": 0.819,
+          "status": "passed"
+        },
+        {
+          "name": "revisionVacancyBalancePreventsOverProvision",
+          "seconds": 1.17,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.PillarsNeonIntegrationTest",
+      "tests": 6,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 14.034,
+      "cases": [
+        {
+          "name": "historicExtinctCargoIsRetainedButDisabledAndCompanyDependencyIsEffective",
+          "seconds": 1.184,
+          "status": "passed"
+        },
+        {
+          "name": "analyticMeasuresUseRegisteredFieldsAndRejectDocumentSummation",
+          "seconds": 0.455,
+          "status": "passed"
+        },
+        {
+          "name": "broadSearchUsesTheSameCriterionForNameCpfAndParentage",
+          "seconds": 1.992,
+          "status": "passed"
+        },
+        {
+          "name": "sixRichDirectoriesFilterAndReloadActualIdentities",
+          "seconds": 3.163,
+          "status": "passed"
+        },
+        {
+          "name": "nominalAnalyticsBucketsCarryRealIdsForThePublishedSurfaces",
+          "seconds": 1.458,
+          "status": "passed"
+        },
+        {
+          "name": "publicSchemasActuallyPublishAnalyticsAndMicrovisualizations",
+          "seconds": 4.74,
+          "status": "failed"
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.PraxisMetadataCompletenessTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 4.464,
+      "cases": [
+        {
+          "name": "derivedIndicatorsPreserveUnknownAndDoNotInventValidity",
+          "seconds": 0.001,
+          "status": "passed"
+        },
+        {
+          "name": "expectedLookupInventoryIsPublishedAndRich",
+          "seconds": 0.004,
+          "status": "passed"
+        },
+        {
+          "name": "actualResolvedMicrovisualizationsHaveValidExpressions",
+          "seconds": 0.334,
+          "status": "passed"
+        },
+        {
+          "name": "allDomainDtosPassSemanticReview",
+          "seconds": 4.123,
+          "status": "passed"
+        }
+      ]
+    }
+  ]
+}

@@ -523,6 +523,117 @@ class NeonIntegrationTest {
     return "/api/ergon/vinculos/9505:1";
   }
 
+  @Test
+  void reviewPartialUpdatesDistinguishOmissionClearAndRequiredBooleans() throws Exception {
+    String uri=reviewFixture();
+    revisionCommand(uri+"/lotacao-exercicio", "{\"jornadaSemanal\":40}").andExpect(status().isOk());
+    revisionCommand(uri+"/lotacao-exercicio", "{}").andExpect(status().isOk())
+        .andExpect(jsonPath("$.jornadaSemanal").value(40));
+    revisionCommand(uri+"/lotacao-exercicio", "{\"jornadaSemanal\":null}").andExpect(status().isOk())
+        .andExpect(jsonPath("$.jornadaSemanal").doesNotExist());
+    revisionCommand(uri+"/previdencia-pagamento", "{\"agencia\":\"1234\"}").andExpect(status().isOk());
+    revisionCommand(uri+"/previdencia-pagamento", "{\"agencia\":null}").andExpect(status().isOk())
+        .andExpect(jsonPath("$.agencia").doesNotExist());
+    for(String field:java.util.List.of("correio","descontaIr"))
+      revisionCommand(uri+"/previdencia-pagamento", "{\""+field+"\":null}").andExpect(status().isBadRequest());
+    String pessoa="/api/ergon/servidor-pessoas/9505";
+    revisionCommand(pessoa+"/dados-bancarios-contato", "{\"eMail\":\"prova@example.org\",\"telefone\":\"12345678\"}")
+        .andExpect(status().isOk());
+    revisionCommand(pessoa+"/dados-bancarios-contato", "{\"eMail\":null}").andExpect(status().isOk())
+        .andExpect(jsonPath("$.eMail").doesNotExist()).andExpect(jsonPath("$.telefone").value("12345678"));
+  }
+
+  @Test
+  void reviewBulkSelectionAppliesOrganizationBeforeLimit() {
+    var service=context.getBean(br.com.praxis.ergonshowcase.service.CargoService.class);
+    var ids=service.selectBulkIdentities(new br.com.praxis.ergonshowcase.dto.CargoFilterDTO(),
+        (root,q,cb)->cb.equal(root.get("empCodigo"),2),1);
+    assertThat(ids).hasSize(1);
+    assertThat(em.find(br.com.praxis.ergonshowcase.domain.Cargo.class,ids.get(0)).getEmpCodigo()).isEqualTo(2);
+    var domain=context.getBean(br.com.praxis.ergonshowcase.bulk.ErgonBulkDomain.class);
+    var selected=domain.query(br.com.praxis.ergonshowcase.bulk.ErgonBulkDomain.Resource.CARGOS,
+        new br.com.praxis.ergonshowcase.dto.CargoFilterDTO(),0);
+    assertThat(selected).isNotEmpty();
+    for(Object id:selected) assertThat(em.find(br.com.praxis.ergonshowcase.domain.Cargo.class,id).getEmpCodigo()).isEqualTo(1);
+  }
+
+  @Test
+  void reviewAggregatorCannotBeDisabledWithDependentCargo() throws Exception {
+    reviewCargo();
+    var parent=em.find(br.com.praxis.ergonshowcase.domain.Cargo.class,9505);
+    parent.setEAglutinador(true); em.flush();
+    mvc.perform(post("/api/ergon/cargos").contentType("application/json").content(
+        "{\"cargo\":9506,\"empCodigo\":1,\"nome\":\"Dependente da prova\",\"categoria\":\"SAUDE\",\"cargoAglutinador\":9505}"))
+        .andExpect(status().isCreated());
+    mvc.perform(put("/api/ergon/cargos/9505").header("If-Match",revisionEtag("/api/ergon/cargos/9505"))
+        .contentType("application/json").content("{\"nome\":\"Agregador\",\"categoria\":\"SAUDE\",\"eAglutinador\":false}"))
+        .andExpect(status().isUnprocessableEntity());
+  }
+
+  @Test
+  void reviewDomainWriterCannotAdministerPublication() throws Exception {
+    mvc.perform(post("/api/ergon/operations/bulk/publication").contentType("application/json").content("{}"))
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
+  void reviewPublicationAdministratorCannotWriteDomainRecords() throws Exception {
+    // The suite's MockMvc default request authenticates the domain writer with Basic Auth.
+    // Use the real administrative identity over HTTP so that default cannot mask this proof.
+    var admin=publicationHttp.withBasicAuth(System.getenv("SHOWCASE_BULK_ADMIN_USERNAME"),
+        System.getenv("SHOWCASE_BULK_ADMIN_PASSWORD"));
+    for(String endpoint:java.util.List.of("/api/ergon/cargos","/api/ergon/cargos/bulk/update/evaluation"))
+      assertThat(admin.postForEntity(endpoint,java.util.Map.of(),String.class).getStatusCode().value()).isEqualTo(403);
+  }
+
+  @Test
+  @Transactional(propagation=Propagation.NOT_SUPPORTED)
+  void reviewAggregatorSerializesConcurrentChildAdmissionAndDisable() throws Exception {
+    var tx=new org.springframework.transaction.support.TransactionTemplate(transactionManager);
+    var rules=context.getBean(br.com.praxis.ergonshowcase.service.ErgonInvariants.class);
+    var locked=new java.util.concurrent.CountDownLatch(1);
+    var release=new java.util.concurrent.CountDownLatch(1);
+    var attemptingDisable=new java.util.concurrent.CountDownLatch(1);
+    var pool=java.util.concurrent.Executors.newFixedThreadPool(2);
+    try {
+      tx.executeWithoutResult(s->{
+        var p=reviewRaceCargo(9507);p.setEAglutinador(true);em.persist(p);
+      });
+      var child=pool.submit(()->tx.executeWithoutResult(s->{
+        var c=reviewRaceCargo(9508);c.setCargoAglutinador(9507);rules.cargo(c);
+        locked.countDown();
+        try { if(!release.await(15,java.util.concurrent.TimeUnit.SECONDS))throw new IllegalStateException("Proof coordination expired"); }
+        catch(InterruptedException e){Thread.currentThread().interrupt();throw new IllegalStateException(e);}
+        em.persist(c);em.flush();
+      }));
+      assertThat(locked.await(15,java.util.concurrent.TimeUnit.SECONDS)).isTrue();
+      var disable=pool.submit(()-> {
+        try {tx.executeWithoutResult(s->{
+          attemptingDisable.countDown();
+          var p=em.find(br.com.praxis.ergonshowcase.domain.Cargo.class,9507,jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+          p.setEAglutinador(false);rules.cargo(p);em.flush();
+        });return "incorrectly accepted";}
+        catch(org.springframework.web.server.ResponseStatusException e){return e.getReason();}
+      });
+      assertThat(attemptingDisable.await(5,java.util.concurrent.TimeUnit.SECONDS)).isTrue();
+      assertThat(disable.isDone()).isFalse();
+      release.countDown();child.get(20,java.util.concurrent.TimeUnit.SECONDS);
+      assertThat(disable.get(20,java.util.concurrent.TimeUnit.SECONDS)).contains("dependentes");
+      assertThat(jdbc.queryForObject("select e_aglutinador from cargos where cargo=9507",Boolean.class)).isTrue();
+    } finally {
+      release.countDown();pool.shutdown();
+      if(!pool.awaitTermination(25,java.util.concurrent.TimeUnit.SECONDS))pool.shutdownNow();
+      tx.executeWithoutResult(s->{jdbc.update("delete from cargos where cargo=9508");jdbc.update("delete from cargos where cargo=9507");});
+    }
+  }
+
+  private br.com.praxis.ergonshowcase.domain.Cargo reviewRaceCargo(int id) {
+    var c=new br.com.praxis.ergonshowcase.domain.Cargo();
+    c.setCargo(id);c.setEmpCodigo(1);c.setNome("Cargo da prova concorrente "+id);
+    c.setCategoria("SAUDE");c.setCargoFuncao("C");c.setControleVaga(false);
+    return c;
+  }
+
   private void reviewCargo() throws Exception {
     mvc.perform(
             post("/api/ergon/cargos")

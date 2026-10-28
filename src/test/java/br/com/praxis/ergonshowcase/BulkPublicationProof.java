@@ -10,12 +10,18 @@ import org.springframework.http.HttpStatus;
 /** Fixture administrativa explícita; somente o kernel realiza transições de controle. */
 final class BulkPublicationProof {
   private BulkPublicationProof() {}
-  static void publish(TestRestTemplate http, boolean reset) throws Exception {
+  static void publish(TestRestTemplate runtimeHttp, boolean reset) throws Exception {
+    String admin = System.getenv("SHOWCASE_BULK_ADMIN_USERNAME");
+    String secret = System.getenv("SHOWCASE_BULK_ADMIN_PASSWORD");
+    assertThat(admin).as("Identidade administrativa separada para publicação").isNotBlank();
+    assertThat(secret).isNotBlank();
+    var http = runtimeHttp.withBasicAuth(admin, secret);
     // Bound a broken network independently of the SDK's operational budgets.
     var client=java.net.http.HttpClient.newBuilder().connectTimeout(java.time.Duration.ofSeconds(10)).build();
     var transport=new org.springframework.http.client.JdkClientHttpRequestFactory(client);
     transport.setReadTimeout(java.time.Duration.ofSeconds(90));
     http.getRestTemplate().setRequestFactory(transport);
+    runtimeHttp.getRestTemplate().setRequestFactory(transport);
     var generations=new LinkedHashMap<String,Long>();
     var states=new HashMap<String,String>();
     readControls(generations,states);

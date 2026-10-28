@@ -1,0 +1,71 @@
+{
+  "validatedAt": "2026-10-28T15:05:01.556563+00:00",
+  "branch": "br-dry-breeze-b7pc58x5",
+  "dependency": "8.0.0-bulk.308-review-SNAPSHOT",
+  "jvm": "-XX:TieredStopAtLevel=1",
+  "logSha256": "f705eb2aa26c2ab5afa454680d06caaf84f9106bb6e50550b91b7ed571b273c8",
+  "buildSuccess": false,
+  "totals": {
+    "tests": 5,
+    "failures": 2,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suites": [
+    {
+      "suite": "br.com.praxis.ergonshowcase.BulkNeonIntegrationTest",
+      "tests": 2,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 42.777,
+      "cases": [
+        {
+          "name": "publishesCanonicalBulkOperationsAndEditableFields",
+          "seconds": 8.123,
+          "status": "failed"
+        },
+        {
+          "name": "evaluatesThenExecutesUniformItemsAndCollectiveCommands",
+          "seconds": 0.009,
+          "status": "failed"
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.NeonIntegrationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 122.001,
+      "cases": [
+        {
+          "name": "reviewPublicationAdministratorCannotWriteDomainRecords",
+          "seconds": 0.266,
+          "status": "passed"
+        },
+        {
+          "name": "structuralAndSemanticMetadataArePublished",
+          "seconds": 101.474,
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.PillarsNeonIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 25.504,
+      "cases": [
+        {
+          "name": "publicSchemasActuallyPublishAnalyticsAndMicrovisualizations",
+          "seconds": 25.49,
+          "status": "passed"
+        }
+      ]
+    }
+  ]
+}

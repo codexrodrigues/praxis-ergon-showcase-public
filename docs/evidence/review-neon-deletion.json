@@ -1,0 +1,27 @@
+{
+  "verifiedAt": "2026-10-28T15:21:22.458Z",
+  "project": "holy-mouse-40140108",
+  "deletedBranch": "br-dry-breeze-b7pc58x5",
+  "userAuthorizedDeletion": true,
+  "proofsRecordedBeforeDeletion": true,
+  "fixtures": [
+    {
+      "tabela": "cargos",
+      "fixtures": "0"
+    },
+    {
+      "tabela": "funcionarios",
+      "fixtures": "0"
+    },
+    {
+      "tabela": "vinculos",
+      "fixtures": "0"
+    }
+  ],
+  "deletedBranchAbsent": true,
+  "originalBranchPreserved": "br-super-sound-b7urizmd",
+  "remainingBranchIds": [
+    "br-bitter-bonus-b7i0vfko",
+    "br-super-sound-b7urizmd"
+  ]
+}

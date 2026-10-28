@@ -1,10 +1,25 @@
-# Scorecard — fechamento Omnibox, pilares e Bulking
+# Scorecard — correções da revisão 2013442
 
-**66 testes / 0 falhas / 0 erros / 0 ignorados**, executados integralmente no Neon descartável com o candidato privado consolidado. O auditor canônico passou com evidência operacional e 45 regressões; 43 DTOs de domínio entram na revisão nativa. Os seis recursos têm cobertura estática de 100% e zero lacunas editoriais detectadas.
+**STATIC PASS nos seis recursos; aceite operacional pendente, sem liberação para merge.**
 
-Evidências: [campanha](PILLARS-CAMPAIGN.json), [casos de teste](final-test-results.json), [proveniência SDK](final-sdk-provenance.json), [schema preservado](final-neon-schema-comparison.json), [consumidor Angular](angular-consumer-proof.json). Busca ampla foi provada por nome, CPF e filiação; QUERY de lote combina busca ampla, BETWEEN e exclusão.
+O `mvn test` integral executou 74 casos: 4 falhas, 0 erros e 0 ignorados. A repetição focal executou 5 casos: 3 passaram e 2 falharam. O teste de segregação foi corrigido e passou por HTTP real; schemas e analytics passaram na repetição. Em conjunto, 73 dos 74 casos distintos possuem prova positiva nesta rodada. Isso **não equivale a uma execução Maven integral verde**.
 
-Limites: dependência privada `8.0.0-bulk.308-SNAPSHOT`; POM público rc.179 não certificado. Angular: runtime oficial em harness headless, sem aceitação visual ou instalação npm pública. Paridade limitada aos pilotos e à matriz documentada; decisões Config/rules-engine ficam na fase futura aprovada. Não houve merge ou release; permanece necessária revisão arquitetural independente.
+O fluxo positivo de lote de vínculos recebeu 503 de publicação durante a confirmação; a repetição focal foi bloqueada pelo timeout de reconciliação. O tratamento seguro evita 500 e não autoriza replay automático, mas a disponibilidade permanece uma lacuna operacional.
+
+| Recurso | Completude estática | Prova de negócio/contrato e lacunas |
+|---|---:|---|
+| Órgãos | 12/12, 100% | Gates cadastrais e metadados; limites de identidade corporativa permanecem |
+| Cargos | 17/17, 100% | Escopo antes do limite, aglutinação concorrente, SET/CLEAR nas duas modalidades de lote comprovados |
+| Pessoas | 68/68, 100% | PATCH com presença/null e SET/CLEAR nas duas modalidades de lote comprovados |
+| Vínculos | 59/59, 100% | PATCH, regras e preview acionável comprovados; ciclo positivo completo de lote pendente por 503 |
+| Setores | 12/12, 100% | Contratos/diretório comprovados; sem aceitação visual de tabela |
+| Documentos legais | 13/13, 100% | Contratos/diretório comprovados; sem aceitação visual de tabela |
+
+SDK: 130 testes focais aprovados; auditor: 45 regressões aprovadas. Angular: 17 specs e builds Core/Table, pureza aprovada, alteração sob responsabilidade de agente separado no PR #661. O estado da prova HTTP ampliada consta da [campanha](PILLARS-CAMPAIGN.json).
+
+Evidências: [execução integral](review-full-test-results.json), [repetição focal](review-focal-test-results.json), [auditoria operacional](review-operational-audit.md), [proveniência SDK](review-sdk-provenance.json), [schema preservado](review-neon-schema-comparison.json).
+
+Limites: candidato privado `8.0.0-bulk.308-review-SNAPSHOT`; rc.179 não certificada; sem instalação npm pública, avaliação visual desktop/narrow ou prontidão corporativa. Config/rules-engine permanece fase futura aprovada. Não houve merge/release.
 
 # Praxis Resource Completeness, Quick View & Editorial Quality Audit
 - **Project**: `D:\Developer\praxis-plataform\praxis-ergon-showcase`
@@ -29,8 +44,4 @@ Limites: dependência privada `8.0.0-bulk.308-SNAPSHOT`; POM público rc.179 nã
 <!-- administracao-pessoal.vinculos: functional-accountability=59/59; command-managed=agencia,banco,cargoComissao,conta,correio,descontaIr,documentoLegalId,dtHomologEstagio,dtPgtoAte,dtaposent,dtfimCessao,dtiniCessao,dtvac,fatorProporcAposent,formavac,funcaoReq,jornadaSemanal,motivovac,orgaoReq,planoprev,regimeprev,setor,setorExercicio,situacao,tipoOnusReq,tipoReq,tipoRessarcReq,tipoapos,tipopag -->
 | `administracao-pessoal.vinculos` | `Vinculo` | 59 | 74 | 100.0% | 59/59 | 33 | 12 ops | 6 | 6 | YES | 13 (13) | 3 | 9 | 2 | 4 | 1 | 2 | 1 | 10 | 4 | 0 | **PASS** |
 
-## Operational Evidence Receipts
-Hashed receipts are checked for freshness; independent review remains required.
-
-## 4. OVERALL STATUS: PASS (static + operational runtime evidence)
-Receipt integrity and source freshness verified; independent architectural review remains required.
+## 4. Verdict: STATIC PASS (source gates satisfied; runtime and architectural review still required)

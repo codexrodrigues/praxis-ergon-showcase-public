@@ -1,4 +1,5 @@
 {
+  "completed": true,
   "schemas": [
     {
       "resource": "servidor-pessoas",
@@ -325,5 +326,29 @@
   ],
   "staleResultProtected": true,
   "rejectionVisible": true,
-  "fixtureRemoved": true
+  "fixtureRemoved": true,
+  "bulkHttpCycle": {
+    "proposalId": "b0906703-3005-4dae-9919-55b7e84c5f4f",
+    "executionId": "3fc26c38-feee-42d9-8413-31ae8d842948",
+    "confirmed": true,
+    "retryStable": true,
+    "reloaded": true,
+    "terminalCancellationPreserved": true,
+    "staleProposalBlocked": true,
+    "perItemClear": true,
+    "transport": "Angular HttpClient over real HTTP",
+    "partialResult": {
+      "executionId": "031e0687-578a-4686-973c-3a97ff455998",
+      "statuses": [
+        "CONFIRMED",
+        "CONFLICT"
+      ],
+      "concurrentEditPreserved": true
+    }
+  },
+  "partialForm": {
+    "explicitNullPersisted": true,
+    "untouchedOptionalOmitted": true,
+    "pipeline": "prepareSubmitPayload"
+  }
 }

@@ -1,108 +1,57 @@
 {
-  "sourceSha256": "28efa3053b9631383627c007a56023c1532c542d325c864010fc6f44df2b80c4",
-  "validatedAt": "2026-10-28T13:09:59.022779+00:00",
-  "baselineCommit": "670dff740f1c3fdb028b7ddac52b83b26f0770a8",
+  "sourceSha256": "064acba2f51428189df7bb047edcdc986caf92cc6c4c339e4dcadb94b536ee22",
+  "validatedAt": "2026-10-28T15:22:12.752875+00:00",
+  "baselineCommit": "2013442d676c4373e28aa3c42c2ec879324f9f92",
   "gates": {
     "schema": {
       "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/cargos-request.json",
-          "sha256": "ef7c3e37fc8b157e8d1358a99821dc9d5b9784c41a95fef959150771936700d3"
+          "path": "docs/evidence/review-full-test-results.json",
+          "sha256": "9c0d0b254ee3cbe68b885fe26779caaa95f819d32ef56dafb48e2f6512c0613b"
         },
         {
-          "path": "docs/evidence/orgaos-request.json",
-          "sha256": "92794871098ab4fbc1af5905ebc9a0ec22c353e434f1f9862f9545af24f6c466"
+          "path": "docs/evidence/review-focal-test-results.json",
+          "sha256": "d7d73668dcc19165fcf4f1c41fc2d0ba6619e9b71b535ad1f7b4f64873652380"
         },
         {
-          "path": "docs/evidence/servidor-pessoas-request.json",
-          "sha256": "4fb47449458da0ce515d41d1f1c56ca1a4ba7b18a602ca1b6eb04a3120f3c287"
-        },
-        {
-          "path": "docs/evidence/vinculos-request.json",
-          "sha256": "e130caf34cd1db02b3f1a9c7ad61404e9eed77b6b77bf8ef57ae2f1425eff2f7"
-        },
-        {
-          "path": "docs/evidence/cargos-response.json",
-          "sha256": "bbcdf9b9e3a4bdc1e3332d7c998dd872edf534e9f6f3e5962b460cab23d9e8d5"
-        },
-        {
-          "path": "docs/evidence/orgaos-response.json",
-          "sha256": "7bc246ed44beb0c53cf4aa8b60a1680a59275fd5c876ffa98b2addec76b7065c"
-        },
-        {
-          "path": "docs/evidence/servidor-pessoas-response.json",
-          "sha256": "d65d4db5c9b439786f823e4f52651ccc00397c95c95e6ee947e194307644b098"
-        },
-        {
-          "path": "docs/evidence/vinculos-response.json",
-          "sha256": "27813e36e95bdc4e30df947ef3595067ebcca4b9f3ac8b2d1527ba8feb59b5e4"
-        },
-        {
-          "path": "docs/evidence/cargos-post-determinations.json",
-          "sha256": "ef7c3e37fc8b157e8d1358a99821dc9d5b9784c41a95fef959150771936700d3"
-        },
-        {
-          "path": "docs/evidence/cargos-put-determinations.json",
-          "sha256": "bb40199f25d43e087da89de432f9006e6718b4a86ebee758a86807601849b9e9"
-        },
-        {
-          "path": "docs/evidence/servidor-pessoas-post-determinations.json",
-          "sha256": "4fb47449458da0ce515d41d1f1c56ca1a4ba7b18a602ca1b6eb04a3120f3c287"
-        },
-        {
-          "path": "docs/evidence/servidor-pessoas-put-determinations.json",
-          "sha256": "b50f890c939304adfee4cc19a924e1d8829954da0ece2e25205eabd6577b79ec"
-        },
-        {
-          "path": "docs/evidence/vinculos-post-determinations.json",
-          "sha256": "e130caf34cd1db02b3f1a9c7ad61404e9eed77b6b77bf8ef57ae2f1425eff2f7"
-        },
-        {
-          "path": "docs/evidence/vinculos-put-determinations.json",
-          "sha256": "484d82bbc24431133e870b609c2fb361c8e88b41e59014c6f16f89c3ddb2c593"
-        },
-        {
-          "path": "docs/evidence/final-test-results.json",
-          "sha256": "e8681c7331ee068fd0b570fec2f5592c351073d7e08d0a112350b99d3a97da02"
-        },
-        {
-          "path": "docs/evidence/final-sdk-provenance.json",
-          "sha256": "7130c49e7258c3ded88ec2b9eb09f3dd7e8b43cfb9dc16c054a03a4732d6381c"
+          "path": "docs/evidence/review-sdk-provenance.json",
+          "sha256": "231819b1bd1bb499d0aef55eed76827e64bec587fe29a7205a290b0fef25fa2a"
         }
       ]
     },
     "http": {
-      "status": "pass",
+      "status": "pending",
       "artifacts": [
         {
-          "path": "docs/evidence/neon-integration-tests.txt",
-          "sha256": "803cbe8a829a40dec0c1789920c85b3ef97809c118052afd39e5f36854f1ddb0"
+          "path": "docs/evidence/review-full-test-results.json",
+          "sha256": "9c0d0b254ee3cbe68b885fe26779caaa95f819d32ef56dafb48e2f6512c0613b"
         },
         {
-          "path": "docs/evidence/final-test-results.json",
-          "sha256": "e8681c7331ee068fd0b570fec2f5592c351073d7e08d0a112350b99d3a97da02"
+          "path": "docs/evidence/review-focal-test-results.json",
+          "sha256": "d7d73668dcc19165fcf4f1c41fc2d0ba6619e9b71b535ad1f7b4f64873652380"
         },
         {
-          "path": "docs/evidence/final-sdk-provenance.json",
-          "sha256": "7130c49e7258c3ded88ec2b9eb09f3dd7e8b43cfb9dc16c054a03a4732d6381c"
+          "path": "docs/evidence/review-sdk-provenance.json",
+          "sha256": "231819b1bd1bb499d0aef55eed76827e64bec587fe29a7205a290b0fef25fa2a"
         }
-      ]
+      ],
+      "reason": "Positive Vinculo bulk lifecycle could not complete: 503 during confirmation in full run; focal retry blocked by publication reconciliation TRANSACTION_TIMEOUT."
     },
     "availability": {
       "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/neon-integration-tests.txt",
-          "sha256": "803cbe8a829a40dec0c1789920c85b3ef97809c118052afd39e5f36854f1ddb0"
+          "path": "docs/evidence/review-full-test-results.json",
+          "sha256": "9c0d0b254ee3cbe68b885fe26779caaa95f819d32ef56dafb48e2f6512c0613b"
         },
         {
-          "path": "docs/evidence/final-test-results.json",
-          "sha256": "e8681c7331ee068fd0b570fec2f5592c351073d7e08d0a112350b99d3a97da02"
+          "path": "docs/evidence/review-focal-test-results.json",
+          "sha256": "d7d73668dcc19165fcf4f1c41fc2d0ba6619e9b71b535ad1f7b4f64873652380"
         },
         {
-          "path": "docs/evidence/final-sdk-provenance.json",
-          "sha256": "7130c49e7258c3ded88ec2b9eb09f3dd7e8b43cfb9dc16c054a03a4732d6381c"
+          "path": "docs/evidence/review-sdk-provenance.json",
+          "sha256": "231819b1bd1bb499d0aef55eed76827e64bec587fe29a7205a290b0fef25fa2a"
         }
       ],
       "scope": "Authorizations, versions, workflow states and declared item/collection operations exercised by the suite"
@@ -111,28 +60,20 @@
       "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/neon-integration-tests.txt",
-          "sha256": "803cbe8a829a40dec0c1789920c85b3ef97809c118052afd39e5f36854f1ddb0"
+          "path": "docs/evidence/review-full-test-results.json",
+          "sha256": "9c0d0b254ee3cbe68b885fe26779caaa95f819d32ef56dafb48e2f6512c0613b"
         },
         {
-          "path": "docs/evidence/final-neon-schema-comparison.json",
-          "sha256": "a29987418164210b1c6660d8fe87fffbb303e05b3ed62de261c620a63e49b194"
+          "path": "docs/evidence/review-focal-test-results.json",
+          "sha256": "d7d73668dcc19165fcf4f1c41fc2d0ba6619e9b71b535ad1f7b4f64873652380"
         },
         {
-          "path": "docs/evidence/final-test-results.json",
-          "sha256": "e8681c7331ee068fd0b570fec2f5592c351073d7e08d0a112350b99d3a97da02"
+          "path": "docs/evidence/review-sdk-provenance.json",
+          "sha256": "231819b1bd1bb499d0aef55eed76827e64bec587fe29a7205a290b0fef25fa2a"
         },
         {
-          "path": "docs/evidence/final-sdk-provenance.json",
-          "sha256": "7130c49e7258c3ded88ec2b9eb09f3dd7e8b43cfb9dc16c054a03a4732d6381c"
-        },
-        {
-          "path": "docs/evidence/final-fixture-cleanup.json",
-          "sha256": "7c71170d662d18df239d828da3fa2f32c9c4bcdd4040b690e117962598048543"
-        },
-        {
-          "path": "docs/evidence/final-neon-deletion.json",
-          "sha256": "15e8f0746a4c3df5042dac5be8b48a9586bfa8cac5e714939792243b03b1ee3b"
+          "path": "docs/evidence/review-neon-schema-comparison.json",
+          "sha256": "0fdd2b65a54a4df7229ad448c7a27f3a93618bc03c34acae0cde86921124107a"
         }
       ]
     },
@@ -140,20 +81,16 @@
       "status": "pass",
       "artifacts": [
         {
-          "path": "docs/MATRIZ-PARIDADE-305.md",
-          "sha256": "69287eae82702d3a05989749bb39cc85bde944004382fe5226aeb9d23db43fe7"
+          "path": "docs/evidence/review-full-test-results.json",
+          "sha256": "9c0d0b254ee3cbe68b885fe26779caaa95f819d32ef56dafb48e2f6512c0613b"
         },
         {
-          "path": "docs/evidence/neon-integration-tests.txt",
-          "sha256": "803cbe8a829a40dec0c1789920c85b3ef97809c118052afd39e5f36854f1ddb0"
+          "path": "docs/evidence/review-focal-test-results.json",
+          "sha256": "d7d73668dcc19165fcf4f1c41fc2d0ba6619e9b71b535ad1f7b4f64873652380"
         },
         {
-          "path": "docs/evidence/final-test-results.json",
-          "sha256": "e8681c7331ee068fd0b570fec2f5592c351073d7e08d0a112350b99d3a97da02"
-        },
-        {
-          "path": "docs/evidence/final-sdk-provenance.json",
-          "sha256": "7130c49e7258c3ded88ec2b9eb09f3dd7e8b43cfb9dc16c054a03a4732d6381c"
+          "path": "docs/evidence/review-sdk-provenance.json",
+          "sha256": "231819b1bd1bb499d0aef55eed76827e64bec587fe29a7205a290b0fef25fa2a"
         }
       ],
       "scope": "Only mapped pilot registration and listed administrative operations; full statutory/legacy parity is not certified"
@@ -162,20 +99,20 @@
       "status": "pass",
       "artifacts": [
         {
+          "path": "docs/evidence/review-full-test-results.json",
+          "sha256": "9c0d0b254ee3cbe68b885fe26779caaa95f819d32ef56dafb48e2f6512c0613b"
+        },
+        {
+          "path": "docs/evidence/review-focal-test-results.json",
+          "sha256": "d7d73668dcc19165fcf4f1c41fc2d0ba6619e9b71b535ad1f7b4f64873652380"
+        },
+        {
+          "path": "docs/evidence/review-sdk-provenance.json",
+          "sha256": "231819b1bd1bb499d0aef55eed76827e64bec587fe29a7205a290b0fef25fa2a"
+        },
+        {
           "path": "docs/evidence/angular-consumer-proof.json",
-          "sha256": "6efb9b391af179d0188125c565d03658e6032127deef233f45c64c267e2404dc"
-        },
-        {
-          "path": "docs/evidence/angular-consumer-input-hashes.json",
-          "sha256": "f973952a9bb65f8fa0d310f42cc2fde1d48258992da3c8ea80fba99d8d3052ff"
-        },
-        {
-          "path": "docs/evidence/final-test-results.json",
-          "sha256": "e8681c7331ee068fd0b570fec2f5592c351073d7e08d0a112350b99d3a97da02"
-        },
-        {
-          "path": "docs/evidence/final-sdk-provenance.json",
-          "sha256": "7130c49e7258c3ded88ec2b9eb09f3dd7e8b43cfb9dc16c054a03a4732d6381c"
+          "sha256": "b4d7bf8ae54fd60775506bb5591dc93afb7259b0c8b48b4717fc8becc0630eee"
         }
       ],
       "scope": "Official source normalizer and ReactiveDeterminationRuntimeService; not published npm adoption or visual host acceptance"
@@ -184,20 +121,16 @@
       "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/cold-query-counts.json",
-          "sha256": "78ce82dba10613fbee24fc10ed9796209e559e14d0c01b97ee95104dbb6e99bf"
+          "path": "docs/evidence/review-full-test-results.json",
+          "sha256": "9c0d0b254ee3cbe68b885fe26779caaa95f819d32ef56dafb48e2f6512c0613b"
         },
         {
-          "path": "docs/evidence/neon-integration-tests.txt",
-          "sha256": "803cbe8a829a40dec0c1789920c85b3ef97809c118052afd39e5f36854f1ddb0"
+          "path": "docs/evidence/review-focal-test-results.json",
+          "sha256": "d7d73668dcc19165fcf4f1c41fc2d0ba6619e9b71b535ad1f7b4f64873652380"
         },
         {
-          "path": "docs/evidence/final-test-results.json",
-          "sha256": "e8681c7331ee068fd0b570fec2f5592c351073d7e08d0a112350b99d3a97da02"
-        },
-        {
-          "path": "docs/evidence/final-sdk-provenance.json",
-          "sha256": "7130c49e7258c3ded88ec2b9eb09f3dd7e8b43cfb9dc16c054a03a4732d6381c"
+          "path": "docs/evidence/review-sdk-provenance.json",
+          "sha256": "231819b1bd1bb499d0aef55eed76827e64bec587fe29a7205a290b0fef25fa2a"
         }
       ]
     },
@@ -205,48 +138,16 @@
       "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/cargos-post-determinations.json",
-          "sha256": "ef7c3e37fc8b157e8d1358a99821dc9d5b9784c41a95fef959150771936700d3"
+          "path": "docs/evidence/review-full-test-results.json",
+          "sha256": "9c0d0b254ee3cbe68b885fe26779caaa95f819d32ef56dafb48e2f6512c0613b"
         },
         {
-          "path": "docs/evidence/cargos-put-determinations.json",
-          "sha256": "bb40199f25d43e087da89de432f9006e6718b4a86ebee758a86807601849b9e9"
+          "path": "docs/evidence/review-focal-test-results.json",
+          "sha256": "d7d73668dcc19165fcf4f1c41fc2d0ba6619e9b71b535ad1f7b4f64873652380"
         },
         {
-          "path": "docs/evidence/servidor-pessoas-post-determinations.json",
-          "sha256": "4fb47449458da0ce515d41d1f1c56ca1a4ba7b18a602ca1b6eb04a3120f3c287"
-        },
-        {
-          "path": "docs/evidence/servidor-pessoas-put-determinations.json",
-          "sha256": "b50f890c939304adfee4cc19a924e1d8829954da0ece2e25205eabd6577b79ec"
-        },
-        {
-          "path": "docs/evidence/vinculos-post-determinations.json",
-          "sha256": "e130caf34cd1db02b3f1a9c7ad61404e9eed77b6b77bf8ef57ae2f1425eff2f7"
-        },
-        {
-          "path": "docs/evidence/vinculos-put-determinations.json",
-          "sha256": "484d82bbc24431133e870b609c2fb361c8e88b41e59014c6f16f89c3ddb2c593"
-        },
-        {
-          "path": "docs/evidence/angular-consumer-proof.json",
-          "sha256": "6efb9b391af179d0188125c565d03658e6032127deef233f45c64c267e2404dc"
-        },
-        {
-          "path": "docs/evidence/angular-consumer-input-hashes.json",
-          "sha256": "f973952a9bb65f8fa0d310f42cc2fde1d48258992da3c8ea80fba99d8d3052ff"
-        },
-        {
-          "path": "docs/evidence/neon-integration-tests.txt",
-          "sha256": "803cbe8a829a40dec0c1789920c85b3ef97809c118052afd39e5f36854f1ddb0"
-        },
-        {
-          "path": "docs/evidence/final-test-results.json",
-          "sha256": "e8681c7331ee068fd0b570fec2f5592c351073d7e08d0a112350b99d3a97da02"
-        },
-        {
-          "path": "docs/evidence/final-sdk-provenance.json",
-          "sha256": "7130c49e7258c3ded88ec2b9eb09f3dd7e8b43cfb9dc16c054a03a4732d6381c"
+          "path": "docs/evidence/review-sdk-provenance.json",
+          "sha256": "231819b1bd1bb499d0aef55eed76827e64bec587fe29a7205a290b0fef25fa2a"
         }
       ]
     },
@@ -255,32 +156,37 @@
       "reason": "The responsible user explicitly approved HOST determinations, transactional invariants and Angular proof as PASS for phase 3A at e6b9fa0. No external Config snapshot exists for this phase; Config/rules-engine integration is assigned to a future dedicated phase."
     },
     "bulkOperations": {
-      "status": "pass",
+      "status": "pending",
       "artifacts": [
         {
-          "path": "docs/evidence/bulk-protocol-receipts.json",
-          "sha256": "6fdbd8397bd25cd59e31cf361f6ff77fa7015b50aa0717f019cf030a4d02eb9b"
+          "path": "docs/evidence/review-full-test-results.json",
+          "sha256": "9c0d0b254ee3cbe68b885fe26779caaa95f819d32ef56dafb48e2f6512c0613b"
+        },
+        {
+          "path": "docs/evidence/review-focal-test-results.json",
+          "sha256": "d7d73668dcc19165fcf4f1c41fc2d0ba6619e9b71b535ad1f7b4f64873652380"
+        },
+        {
+          "path": "docs/evidence/review-sdk-provenance.json",
+          "sha256": "231819b1bd1bb499d0aef55eed76827e64bec587fe29a7205a290b0fef25fa2a"
+        },
+        {
+          "path": "docs/evidence/bulk-cargos-pessoas-receipts.json",
+          "sha256": "c560071f91654cf54f64add5cebc09685d3ccb8a7242b20553980608e558246e"
         },
         {
           "path": "docs/evidence/bulk-blocked-preview.json",
-          "sha256": "46d692ef06699fe665fb09e8df8bb2dfd61f3764285fe107b78145fdc63db072"
+          "sha256": "a1c794bc7f362c55157f6ab552fe21d1959003b6d80ad04f1ad8bdc5647c1f82"
         },
         {
-          "path": "docs/evidence/PILLARS-CAMPAIGN.json",
-          "sha256": "e7004389cea57b7348470d2d7e8dcf9698d117e7c427532d891c6e6f91f431b0"
-        },
-        {
-          "path": "docs/evidence/final-test-results.json",
-          "sha256": "e8681c7331ee068fd0b570fec2f5592c351073d7e08d0a112350b99d3a97da02"
-        },
-        {
-          "path": "docs/evidence/final-sdk-provenance.json",
-          "sha256": "7130c49e7258c3ded88ec2b9eb09f3dd7e8b43cfb9dc16c054a03a4732d6381c"
+          "path": "docs/evidence/bulk-concurrent-discovery.json",
+          "sha256": "e1b89327e8e388dd2fabf9a4b9e8e3de16a3a6b9fe2a50b81fa0509f74a17bcc"
         }
-      ]
+      ],
+      "reason": "Positive Vinculo bulk lifecycle could not complete: 503 during confirmation in full run; focal retry blocked by publication reconciliation TRANSACTION_TIMEOUT."
     }
   },
   "historicalSourceSha256": "933d9c8ccb29e18e1be39694fb495b99636da9bbc9efd05ba937e6b5e88f3408",
-  "status": "PASS",
+  "status": "PARTIAL",
   "currentCampaign": "docs/evidence/PILLARS-CAMPAIGN.json"
 }

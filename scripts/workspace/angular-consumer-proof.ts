@@ -2,11 +2,14 @@
 import '@angular/compiler';
 import { FormControl, FormGroup } from '@angular/forms';
 import { normalizeSchemaFields } from '@praxisui/core/schema';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { ReactiveDeterminationRuntimeService } from 'OFFICIAL_RUNTIME_PATH';
 import { BulkOperationClientService } from 'OFFICIAL_BULK_RUNTIME_PATH';
 import { ResourceDiscoveryService } from 'OFFICIAL_DISCOVERY_RUNTIME_PATH';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { API_URL } from 'OFFICIAL_API_TOKEN_PATH';
+import { SchemaNormalizerService } from 'OFFICIAL_NORMALIZER_PATH';
+import { prepareSubmitPayload } from 'OFFICIAL_SUBMIT_PATH';
 import { Injector, runInInjectionContext } from '@angular/core';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
@@ -14,9 +17,14 @@ import path from 'node:path';
 
 const [baseUrl, evidenceDir] = process.argv.slice(2);
 assert(baseUrl && evidenceDir);
-const expectedProofBranch = process.env.BULK_PROOF_DISPOSABLE_BRANCH ?? 'br-super-sound-b7urizmd';
+const expectedProofBranch = process.env.BULK_PROOF_DISPOSABLE_BRANCH;
+assert(expectedProofBranch, 'An explicitly provisioned disposable branch is mandatory');
+assert.notEqual(expectedProofBranch, 'br-super-sound-b7urizmd');
 assert.match(expectedProofBranch, /^br-[a-z0-9-]+$/u);
 assert.equal(process.env.PROOF_NEON_BRANCH, expectedProofBranch, 'Use the explicitly provisioned isolated proof branch');
+assert(process.env.BULK_PROOF_EXPECTED_HOST, 'A verified disposable database endpoint is mandatory');
+assert.equal(new URL(process.env.SPRING_DATASOURCE_URL!.replace(/^jdbc:/u, '')).hostname,
+  process.env.BULK_PROOF_EXPECTED_HOST);
 const auth = 'Basic ' + Buffer.from(process.env.SHOWCASE_USERNAME + ':' + process.env.SHOWCASE_PASSWORD).toString('base64');
 async function http(url: string, method = 'GET', body?: unknown, extra: any = {}) {
   const response = await fetch(new URL(url, baseUrl), { method, headers: { Authorization: auth, 'Content-Type': 'application/json', 'X-Tenant': '1', ...extra }, body: body === undefined ? undefined : JSON.stringify(body) });
@@ -25,10 +33,31 @@ async function http(url: string, method = 'GET', body?: unknown, extra: any = {}
   return result?.data ?? result;
 }
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
-const receipt: any = { schemas: [], executions: [], bulkContracts: [], staleResultProtected: false, rejectionVisible: false, fixtureRemoved: false };
-// This proof exercises the official contract reader, not its transport methods.
+const receipt: any = { completed: false, schemas: [], executions: [], bulkContracts: [], staleResultProtected: false, rejectionVisible: false, fixtureRemoved: false };
+// Real Angular HttpClient and Discovery; only the Node network backend is adapted to fetch.
+const transport = new HttpClient({ handle(request: any) {
+  return new Observable<any>(subscriber => {
+    const abort = new AbortController();
+    const url = new URL(request.urlWithParams, baseUrl);
+    assert.equal(url.origin, new URL(baseUrl).origin);
+    const headers: any = { Authorization: auth, 'Content-Type': 'application/json', 'X-Tenant': '1' };
+    for (const key of request.headers.keys()) headers[key] = request.headers.get(key);
+    fetch(url, { method: request.method, headers, signal: abort.signal,
+      body: request.body == null ? undefined : JSON.stringify(request.body) }).then(async response => {
+      const body = response.status === 204 ? null : await response.json();
+      if (!response.ok) throw new HttpErrorResponse({ status: response.status, error: body, url: url.href });
+      subscriber.next(new HttpResponse({ body, status: response.status, url: url.href,
+        headers: new HttpHeaders(Object.fromEntries(response.headers.entries())) }));
+      subscriber.complete();
+    }).catch(error => subscriber.error(error));
+    return () => abort.abort();
+  });
+} });
 const injector = Injector.create({providers: [
-  {provide: HttpClient, useValue: {}}, {provide: ResourceDiscoveryService, useValue: {}}
+  {provide: HttpClient, useValue: transport},
+  {provide: API_URL, useValue: {default: {baseUrl}}},
+  {provide: SchemaNormalizerService, useFactory: () => new SchemaNormalizerService()},
+  {provide: ResourceDiscoveryService, useFactory: () => new ResourceDiscoveryService()}
 ]});
 const bulkClient = runInInjectionContext(injector, () => new BulkOperationClientService());
 for (const resource of ['vinculos', 'servidor-pessoas', 'cargos']) {
@@ -47,11 +76,84 @@ for (const resource of ['vinculos', 'servidor-pessoas', 'cargos']) {
   }
 }
 let fixtureCreated = false;
+let personCreated = false;
+let secondCargoCreated = false;
 try {
   const existing = await fetch(new URL('/api/ergon/cargos/9590', baseUrl), { headers: { Authorization: auth } });
   assert.equal(existing.status, 404, 'Reserved fixture identity must be absent');
   await http('/api/ergon/cargos', 'POST', { cargo: 9590, empCodigo: 1, nome: 'Agregador temporário da prova de consumo', categoria: 'SAUDE', controleVaga: false, eAglutinador: true });
   fixtureCreated = true;
+  const capabilities = await http('/api/ergon/cargos/capabilities');
+  const contract = bulkClient.fromCapability(capabilities.operations['bulk-update']);
+  const target = await firstValueFrom(bulkClient.readTargetVersion({self: {href: '/api/ergon/cargos/9590'}}, 9590, 'id'));
+  const proposal = await firstValueFrom(bulkClient.evaluate(contract, {executionMode: 'SYNC',
+    selection: {mode: 'EXPLICIT', targets: [target]}, changes: [{field: 'subcategoria', operator: 'SET', value: 'PROVA'}]}));
+  assert.equal(proposal.status, 'READY');
+  assert.equal((await firstValueFrom(bulkClient.readProposal(contract, proposal.proposalId))).proposalId, proposal.proposalId);
+  assert.equal((await firstValueFrom(bulkClient.readProposalResults(contract, proposal.proposalId))).content.length, 1);
+  const key = crypto.randomUUID();
+  const confirmed = await firstValueFrom(bulkClient.confirm(contract, proposal, key));
+  const executionId = confirmed.execution.executionId;
+  assert.equal((await firstValueFrom(bulkClient.confirm(contract, proposal, key))).execution.executionId, executionId);
+  const reloadedClient = runInInjectionContext(injector, () => new BulkOperationClientService());
+  assert.equal((await firstValueFrom(reloadedClient.readExecution(contract, executionId))).status, 'COMPLETED');
+  assert.equal((await firstValueFrom(reloadedClient.readResults(contract, executionId))).content[0].status, 'CONFIRMED');
+  assert.equal((await firstValueFrom(reloadedClient.requestCancellation(contract, executionId))).status, 'COMPLETED');
+  assert.equal((await http('/api/ergon/cargos/9590')).subcategoria, 'PROVA');
+  const stale = await firstValueFrom(bulkClient.evaluate(contract, {executionMode: 'SYNC',
+    selection: {mode: 'EXPLICIT', targets: [target]}, changes: [{field: 'subcategoria', operator: 'SET', value: 'OBSOLETA'}]}));
+  assert.equal(stale.status, 'BLOCKED');
+  assert.throws(() => bulkClient.confirm(contract, stale, crypto.randomUUID()), /READY/);
+  assert(JSON.stringify(await firstValueFrom(bulkClient.readProposalResults(contract, stale.proposalId))).includes('CONFLICT'));
+  const current = await firstValueFrom(bulkClient.readTargetVersion({self: {href: '/api/ergon/cargos/9590'}}, 9590, 'id'));
+  const itemsContract = bulkClient.fromCapability(capabilities.operations['bulk-update-items']);
+  const clear = await firstValueFrom(bulkClient.evaluate(itemsContract, {executionMode: 'SYNC', items: [
+    {...current, changes: [{field: 'subcategoria', operator: 'CLEAR'}]}]}));
+  assert.equal(clear.status, 'READY');
+  const cleared = await firstValueFrom(bulkClient.confirm(itemsContract, clear, crypto.randomUUID()));
+  assert.equal((await firstValueFrom(bulkClient.readResults(itemsContract, cleared.execution.executionId))).content[0].status, 'CONFIRMED');
+  assert.equal((await http('/api/ergon/cargos/9590')).subcategoria ?? null, null);
+  receipt.bulkHttpCycle = {proposalId: proposal.proposalId, executionId, confirmed: true, retryStable: true,
+    reloaded: true, terminalCancellationPreserved: true, staleProposalBlocked: true, perItemClear: true,
+    transport: 'Angular HttpClient over real HTTP'};
+  assert.equal((await fetch(new URL('/api/ergon/cargos/9592', baseUrl), {headers: {Authorization: auth}})).status, 404);
+  await http('/api/ergon/cargos', 'POST', {cargo: 9592, empCodigo: 1,
+    nome: 'Cargo da prova de conflito concorrente', categoria: 'SAUDE'});
+  secondCargoCreated = true;
+  const firstMixedTarget = await firstValueFrom(bulkClient.readTargetVersion({self: {href: '/api/ergon/cargos/9590'}}, 9590, 'id'));
+  const secondMixedTarget = await firstValueFrom(bulkClient.readTargetVersion({self: {href: '/api/ergon/cargos/9592'}}, 9592, 'id'));
+  const mixed = await firstValueFrom(bulkClient.evaluate(contract, {executionMode: 'SYNC',
+    selection: {mode: 'EXPLICIT', targets: [firstMixedTarget, secondMixedTarget]},
+    changes: [{field: 'subcategoria', operator: 'SET', value: 'LOTE'}]}));
+  assert.equal(mixed.status, 'READY');
+  await http('/api/ergon/cargos/9592', 'PUT', {nome: 'Cargo da prova de conflito concorrente',
+    categoria: 'SAUDE', subcategoria: 'EDICAO EXTERNA'}, {'If-Match': secondMixedTarget.expectedVersion});
+  const mixedExecution = await firstValueFrom(bulkClient.confirm(contract, mixed, crypto.randomUUID()));
+  const mixedResults = await firstValueFrom(bulkClient.readResults(contract, mixedExecution.execution.executionId));
+  assert.deepEqual(mixedResults.content.map(item => item.status).sort(), ['CONFIRMED', 'CONFLICT']);
+  assert.equal((await http('/api/ergon/cargos/9590')).subcategoria, 'LOTE');
+  assert.equal((await http('/api/ergon/cargos/9592')).subcategoria, 'EDICAO EXTERNA');
+  receipt.bulkHttpCycle.partialResult = {executionId: mixedExecution.execution.executionId,
+    statuses: mixedResults.content.map(item => item.status), concurrentEditPreserved: true};
+  const personPath = '/api/ergon/servidor-pessoas/9591';
+  assert.equal((await fetch(new URL(personPath, baseUrl), {headers: {Authorization: auth}})).status, 404);
+  await http('/api/ergon/servidor-pessoas', 'POST', {numero: 9591, nome: 'Pessoa da prova de submit',
+    cpf: '00000009591', dtnasc: '1990-01-01', eMail: 'prova@example.org', telefone: '12345678'});
+  personCreated = true;
+  const partialSchema = await http('/schemas/filtered?' + new URLSearchParams({
+    resourcePath: '/api/ergon/servidor-pessoas/{id}/dados-bancarios-contato', operation: 'patch', schemaType: 'request'}));
+  const partialFields = normalizeSchemaFields(partialSchema);
+  const partialForm = new FormGroup({eMail: new FormControl<string | null>('prova@example.org'),
+    telefone: new FormControl<string | null>(null)});
+  partialForm.controls.eMail.setValue(null); partialForm.controls.eMail.markAsDirty();
+  const patchPayload = prepareSubmitPayload(partialForm.getRawValue(), partialFields as any, {dirtyFields: ['eMail']});
+  assert.deepEqual(patchPayload, {eMail: null});
+  const beforePatch = await fetch(new URL(personPath, baseUrl), {headers: {Authorization: auth}});
+  assert.equal(beforePatch.status, 200);
+  await http(personPath + '/dados-bancarios-contato', 'PATCH', patchPayload, {'If-Match': beforePatch.headers.get('ETag')});
+  const afterPatch = await http(personPath);
+  assert.equal(afterPatch.eMail ?? null, null); assert.equal(afterPatch.telefone, '12345678');
+  receipt.partialForm = {explicitNullPersisted: true, untouchedOptionalOmitted: true, pipeline: 'prepareSubmitPayload'};
   const selected = (await http('/api/ergon/cargos/101')).id;
   for (const resource of ['servidor-pessoas', 'vinculos', 'cargos']) {
     for (const mode of ['post', 'put']) {
@@ -108,13 +210,22 @@ try {
       subscription.unsubscribe();
     }
   }
+  receipt.completed = true;
 } finally {
+  if (secondCargoCreated) {
+    await http('/api/ergon/cargos/9592', 'DELETE');
+    assert.equal((await fetch(new URL('/api/ergon/cargos/9592', baseUrl), {headers: {Authorization: auth}})).status, 404);
+  }
+  if (personCreated) {
+    await http('/api/ergon/servidor-pessoas/9591', 'DELETE');
+    assert.equal((await fetch(new URL('/api/ergon/servidor-pessoas/9591', baseUrl), {headers: {Authorization: auth}})).status, 404);
+  }
   if (fixtureCreated) {
     await http('/api/ergon/cargos/9590', 'DELETE');
     const missing = await fetch(new URL('/api/ergon/cargos/9590', baseUrl), { headers: { Authorization: auth } });
     assert.equal(missing.status, 404);
     receipt.fixtureRemoved = true;
   }
+  await fs.writeFile(path.join(evidenceDir, 'angular-consumer-proof.json'), JSON.stringify(receipt, null, 2));
 }
-await fs.writeFile(path.join(evidenceDir, 'angular-consumer-proof.json'), JSON.stringify(receipt, null, 2));
 console.log(JSON.stringify({ schemas: receipt.schemas.length, executions: receipt.executions.length, bulkContracts: receipt.bulkContracts.length, staleResultProtected: receipt.staleResultProtected, rejectionVisible: receipt.rejectionVisible, fixtureRemoved: receipt.fixtureRemoved }));

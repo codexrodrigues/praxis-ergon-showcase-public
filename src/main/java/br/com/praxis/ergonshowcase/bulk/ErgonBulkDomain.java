@@ -16,7 +16,6 @@ import org.praxisplatform.uischema.id.CompositeIdSupport;
 import org.praxisplatform.uischema.mapper.base.ResourceMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 /** Adapter do domínio: candidato completo e validação sem modificar entidades gerenciadas. */
@@ -88,7 +87,10 @@ public class ErgonBulkDomain {
     return response;
   }
   public void validate(Object dto) {
-    if (!validator.validate(dto).isEmpty()) throw new IllegalArgumentException("Parâmetros incompatíveis com o cadastro.");
+    var violations=validator.validate(dto);
+    if(violations.stream().anyMatch(v->v.getPropertyPath().toString().equals("jornadaSemanal")))
+      throw new BulkInputViolation("JORNADA_FORA_INTERVALO");
+    if (!violations.isEmpty()) throw new IllegalArgumentException("Parâmetros incompatíveis com o cadastro.");
   }
   private void types(Resource r, List<BulkFieldChange> changes) {
     var bean=json.getDeserializationConfig().introspect(json.constructType(r.update));
@@ -122,13 +124,17 @@ public class ErgonBulkDomain {
   }
   public List<Object> query(Resource r, Object filter, int excluded) {
     validate(filter);
-    var page=PageRequest.of(0,201+excluded);
-    List<?> rows=switch(r) {
-      case VINCULOS -> vinculoService.filter((VinculoFilterDTO)filter,page,null).getContent();
-      case PESSOAS -> pessoaService.filter((ServidorPessoaFilterDTO)filter,page,null).getContent();
-      case CARGOS -> cargoService.filter((CargoFilterDTO)filter,page,null).getContent();
+    int limit=Math.addExact(201,excluded);
+    int orgao=tenant.orgao();
+    return switch(r) {
+      case VINCULOS -> vinculoService.selectBulkIdentities((VinculoFilterDTO)filter,
+          (root,q,cb)->cb.equal(root.get("empCodigo"),orgao),limit).stream()
+          .map(id->(Object)CompositeIdSupport.encode(id)).toList();
+      case PESSOAS -> pessoaService.selectBulkIdentities((ServidorPessoaFilterDTO)filter,
+          (root,q,cb)->cb.conjunction(),limit).stream().map(id->(Object)id.toString()).toList();
+      case CARGOS -> cargoService.selectBulkIdentities((CargoFilterDTO)filter,
+          (root,q,cb)->cb.equal(root.get("empCodigo"),orgao),limit).stream().map(id->(Object)id).toList();
     };
-    return rows.stream().map(row -> r==Resource.VINCULOS ? CompositeIdSupport.encode(((VinculoResponseDTO)row).getId()) : r==Resource.CARGOS ? ((CargoResponseDTO)row).getId() : ((ServidorPessoaResponseDTO)row).getId().toString()).map(v -> (Object)v).toList();
   }
   public Object commandCandidate(Vinculo current, String operation, JsonNode parameters) {
     Vinculo copy=new Vinculo(); BeanUtils.copyProperties(current,copy);

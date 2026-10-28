@@ -40,6 +40,16 @@ public abstract class ErgonResourceService<E, R, I, F extends GenericFilterDTO, 
 
   protected abstract F emptyFilter();
 
+  /** Seleção interna de lote: escopo obrigatório é combinado antes do limite e da paginação. */
+  @Transactional(readOnly = true)
+  public List<I> selectBulkIdentities(F filter, Specification<E> operationScope, int limit) {
+    if (limit < 1) throw bad("Limite de seleção inválido.");
+    return getRepository()
+        .findAll(filtered(filter).and(Objects.requireNonNull(operationScope)),
+            PageRequest.of(0, limit, getDefaultSort()))
+        .getContent().stream().map(getResourceMapper()::extractId).toList();
+  }
+
   protected static CollectionExportField field(String key, String label, String type) {
     return new CollectionExportField(key, label, true, true, type, key);
   }

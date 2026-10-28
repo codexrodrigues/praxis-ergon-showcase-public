@@ -1,0 +1,19 @@
+{
+  "coordinate": "io.github.codexrodrigues:praxis-metadata-starter:8.0.0-bulk.308-review-SNAPSHOT",
+  "commit": "0a2db557a725c0044a9fc6a444b31a7024a067c9",
+  "consolidationUncommitted": true,
+  "published": false,
+  "jarSha256": "c463daff31e89bdbd4a10b144d8aa68c975e0c9779408578a36ac8df6627d124",
+  "assemblyPomSha256": "6be6beb5f57be60c9e4a9004bf08f7f6b319f72f8f5b3310ebe5a3e8c3d68ed4",
+  "sourceFileCount": 655,
+  "sourceManifestSha256": "31a433d1b4d509486c71871ff37d18e2c925e2e380191a58b27f7f2c3611cf4a",
+  "focusedTests": {
+    "tests": 130,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "validatedAt": "2026-10-28T14:39:19.653952+00:00",
+  "sourceHashAlgorithm": "SHA256 raw bytes of pom.xml restored to rc.183 and all src/main files; sorted compact JSON of path/hash pairs",
+  "localLogSha256": "aaa2410503e26623e29fb4705daf7f22d10907a349dc0f8795d13e6bd8dfad8d"
+}

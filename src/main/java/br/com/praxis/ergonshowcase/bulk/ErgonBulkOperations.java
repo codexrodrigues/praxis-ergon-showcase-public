@@ -33,8 +33,7 @@ import org.springframework.web.server.ResponseStatusException;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class ErgonBulkOperations {
   private static final org.slf4j.Logger LOG=org.slf4j.LoggerFactory.getLogger(ErgonBulkOperations.class);
-  private static final String REVISION="ergon-bulk/1";
-  private static final String MESSAGE="Registro incompatível com a operação solicitada.";
+  static final String REVISION="ergon-bulk/2";
   @Autowired BulkExecutionInfrastructure infrastructure;
   @Autowired ObjectProvider<BulkOperationLifecycle> lifecycles;
   @Autowired PlatformTransactionManager transactionManager;
@@ -90,7 +89,7 @@ public class ErgonBulkOperations {
   private void remaining(java.util.function.Supplier<Duration> budget) { if(budget.get().toMillis()<1) throw new IllegalStateException("Orçamento do lote esgotado."); }
 
   public BulkPublicationResult publication(BulkPublicationRequest request) {
-    authority("ERGON_WRITE");outside();domain.validate(request);
+    authority("ERGON_BULK_ADMIN");outside();domain.validate(request);
     var selected=InstallBulkStorage.identities().stream().filter(id->id.confirmationOperationId().equals(request.operationId()))
         .findFirst().orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST,"Operação não declarada pelo host."));
     if(request.intent()==BulkPublicationRequest.Intent.SUSPEND)
@@ -162,6 +161,7 @@ public class ErgonBulkOperations {
               LOG.debug("Validação do candidato concluída: ordinal={}",all.size());
               eligibility=BulkTargetEligibility.executable();
             } catch(SecurityException denied) { plan.put("blockedReason","DENIED");eligibility=blocked("DENIED"); }
+            catch(BulkInputViolation invalid) { plan.put("blockedReason",invalid.code);eligibility=blocked(invalid.code); }
             catch(IllegalArgumentException | ResponseStatusException invalid) {
               if(!plan.has("blockedReason")) plan.put("blockedReason","INVALID");eligibility=blocked(plan.path("blockedReason").asText());
             }
@@ -173,10 +173,18 @@ public class ErgonBulkOperations {
     return proposal(resource,operation,evidence.proposal().id());
   }
   private List<BulkPreviewProjection.PublicDiagnostic> publicDiagnostics() {
-    return List.of("INVALID","CONFLICT","DENIED").stream().map(code->new BulkPreviewProjection.PublicDiagnostic(ResourceCommandErrorCategory.VALIDATION,code,MESSAGE)).toList();
+    return List.of("INVALID","CONFLICT","DENIED","JORNADA_FORA_INTERVALO").stream().map(code->new BulkPreviewProjection.PublicDiagnostic(ResourceCommandErrorCategory.VALIDATION,code,diagnosticMessage(code))).toList();
+  }
+  private String diagnosticMessage(String code) {
+    return switch(code) {
+      case "JORNADA_FORA_INTERVALO" -> "Informe jornadaSemanal entre 1 e 168 horas e avalie novamente.";
+      case "CONFLICT" -> "O registro mudou. Atualize a seleção e avalie novamente antes de confirmar.";
+      case "DENIED" -> "Não foi possível autorizar este item. Revise o órgão selecionado e solicite acesso ao responsável.";
+      default -> "Os valores não atendem às regras do cadastro. Revise os campos alterados e avalie novamente.";
+    };
   }
   private BulkTargetEligibility blocked(String code) {
-    return BulkTargetEligibility.blocked(List.of(new ResourceCommandMessage(ResourceCommandErrorCategory.VALIDATION,code,MESSAGE,null,Map.of())));
+    return BulkTargetEligibility.blocked(List.of(new ResourceCommandMessage(ResourceCommandErrorCategory.VALIDATION,code,diagnosticMessage(code),null,Map.of())));
   }
 
   public BulkExecution confirm(Resource resource,String operation,BulkConfirmationRequest request,String key) {

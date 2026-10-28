@@ -19,12 +19,21 @@ public class SecurityConfig {
   @Bean
   UserDetailsService users(
       @Value("${showcase.security.username}") String username,
-      @Value("${showcase.security.password}") String password) {
-    return new InMemoryUserDetailsManager(
-        User.withUsername(username)
+      @Value("${showcase.security.password}") String password,
+      @Value("${SHOWCASE_BULK_ADMIN_USERNAME:}") String adminUsername,
+      @Value("${SHOWCASE_BULK_ADMIN_PASSWORD:}") String adminPassword) {
+    var users = new java.util.ArrayList<UserDetails>();
+    users.add(User.withUsername(username)
             .password(PasswordEncoderFactories.createDelegatingPasswordEncoder().encode(password))
             .authorities("ERGON_READ", "ERGON_WRITE")
             .build());
+    if (adminUsername.isBlank() != adminPassword.isBlank() || adminUsername.equals(username))
+      throw new IllegalArgumentException("Administração de lote exige identidade e senha próprias.");
+    if (!adminUsername.isBlank())
+      users.add(User.withUsername(adminUsername)
+          .password(PasswordEncoderFactories.createDelegatingPasswordEncoder().encode(adminPassword))
+          .authorities("ERGON_READ", "ERGON_BULK_ADMIN").build());
+    return new InMemoryUserDetailsManager(users);
   }
 
   @Bean
@@ -35,6 +44,8 @@ public class SecurityConfig {
             a ->
                 a.requestMatchers("/actuator/health", "/v3/api-docs/**")
                     .permitAll()
+                    .requestMatchers("/api/ergon/operations/bulk/publication")
+                    .hasAuthority("ERGON_BULK_ADMIN")
                     .requestMatchers("/praxis/cockpit/**")
                     .hasAuthority("ERGON_READ")
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/**")

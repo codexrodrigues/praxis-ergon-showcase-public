@@ -21,10 +21,22 @@
   },
   {
     "path": "projects/praxis-core/src/lib/services/bulk-operation-client.service.ts",
-    "sha256": "27d0a0b5c78f893192434f8bc1a628be81ec6ee9dfdfb25a2cbc4c43eef12f71"
+    "sha256": "9601000f55a8afd2ffbc36b5f62d6ffc00847a1eeaabbc09a565439deea21615"
   },
   {
     "path": "projects/praxis-core/src/lib/services/resource-discovery.service.ts",
     "sha256": "76c967b3ec59af07b4af32f50484fb65944303ffa2b2c304e08ea817b0e551f4"
+  },
+  {
+    "path": "projects/praxis-core/src/lib/tokens/api-url.token.ts",
+    "sha256": "a582d437f877c6702029bc5f4a031d0aaaa56a318b7ab37d2b9716bd548cd4a8"
+  },
+  {
+    "path": "projects/praxis-core/src/lib/services/schema-normalizer.service.ts",
+    "sha256": "9d816933c5ebd567e74e7ad92de27b47cbd970beafd24e3bccc468e83aa7fb85"
+  },
+  {
+    "path": "projects/praxis-dynamic-form/src/lib/utils/prepare-submit-payload.ts",
+    "sha256": "d3f316574a82bec2d63a7f7e78f89b27f701f6f69f36d6596bbb4d6d50d3aac9"
   }
 ]

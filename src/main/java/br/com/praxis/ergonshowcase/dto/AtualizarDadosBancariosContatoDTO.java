@@ -7,9 +7,8 @@ import org.praxisplatform.uischema.extension.annotation.UISchema;
 
 /** Manutenção especializada; propriedades ausentes preservam o valor persistido. */
 @Getter
-@Setter
-public class AtualizarDadosBancariosContatoDTO {
-  @Schema(description = "Endereço eletrônico para contato com a pessoa.")
+public class AtualizarDadosBancariosContatoDTO extends org.praxisplatform.uischema.dto.PartialUpdateInput {
+  @Schema(nullable = true, description = "Endereço eletrônico para contato com a pessoa.")
   @UISchema(label = "E-mail", group = "Endereço, contato e dados bancários")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -19,12 +18,11 @@ public class AtualizarDadosBancariosContatoDTO {
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   @Getter(onMethod_ = @com.fasterxml.jackson.annotation.JsonProperty("eMail"))
-  @Setter(onMethod_ = @com.fasterxml.jackson.annotation.JsonProperty("eMail"))
   @jakarta.validation.constraints.Email
   @jakarta.validation.constraints.Size(max = 120)
   private String eMail;
 
-  @Schema(description = "Telefone de contato administrativo da pessoa.")
+  @Schema(nullable = true, description = "Telefone de contato administrativo da pessoa.")
   @UISchema(label = "Telefone", group = "Endereço, contato e dados bancários")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -36,7 +34,7 @@ public class AtualizarDadosBancariosContatoDTO {
   @jakarta.validation.constraints.Size(max = 20)
   private String telefone;
 
-  @Schema(description = "Número de telefone celular da pessoa.")
+  @Schema(nullable = true, description = "Número de telefone celular da pessoa.")
   @UISchema(label = "Celular", group = "Endereço, contato e dados bancários")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -48,7 +46,7 @@ public class AtualizarDadosBancariosContatoDTO {
   @jakarta.validation.constraints.Size(max = 20)
   private String numtelCelular;
 
-  @Schema(description = "Tipo do logradouro residencial, como rua ou avenida.")
+  @Schema(nullable = true, description = "Tipo do logradouro residencial, como rua ou avenida.")
   @UISchema(label = "Tipo de logradouro", group = "Endereço, contato e dados bancários")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -60,7 +58,7 @@ public class AtualizarDadosBancariosContatoDTO {
   @jakarta.validation.constraints.Size(max = 15)
   private String tipologender;
 
-  @Schema(description = "Nome do logradouro do endereço residencial.")
+  @Schema(nullable = true, description = "Nome do logradouro do endereço residencial.")
   @UISchema(label = "Logradouro", group = "Endereço, contato e dados bancários")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -72,7 +70,7 @@ public class AtualizarDadosBancariosContatoDTO {
   @jakarta.validation.constraints.Size(max = 120)
   private String nomelogender;
 
-  @Schema(description = "Número do imóvel residencial, mantido como texto.")
+  @Schema(nullable = true, description = "Número do imóvel residencial, mantido como texto.")
   @UISchema(label = "Número", group = "Endereço, contato e dados bancários")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -84,7 +82,7 @@ public class AtualizarDadosBancariosContatoDTO {
   @jakarta.validation.constraints.Size(max = 15)
   private String numender;
 
-  @Schema(description = "Complemento do endereço residencial.")
+  @Schema(nullable = true, description = "Complemento do endereço residencial.")
   @UISchema(label = "Complemento", group = "Endereço, contato e dados bancários")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -96,7 +94,7 @@ public class AtualizarDadosBancariosContatoDTO {
   @jakarta.validation.constraints.Size(max = 80)
   private String complender;
 
-  @Schema(description = "Bairro de residência da pessoa.")
+  @Schema(nullable = true, description = "Bairro de residência da pessoa.")
   @UISchema(label = "Bairro", group = "Endereço, contato e dados bancários")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -108,7 +106,7 @@ public class AtualizarDadosBancariosContatoDTO {
   @jakarta.validation.constraints.Size(max = 80)
   private String bairroender;
 
-  @Schema(description = "Município de residência da pessoa.")
+  @Schema(nullable = true, description = "Município de residência da pessoa.")
   @UISchema(label = "Município", group = "Endereço, contato e dados bancários")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -120,7 +118,7 @@ public class AtualizarDadosBancariosContatoDTO {
   @jakarta.validation.constraints.Size(max = 60)
   private String cidadeender;
 
-  @Schema(description = "UF de residência da pessoa.")
+  @Schema(nullable = true, description = "UF de residência da pessoa.")
   @UISchema(label = "UF", group = "Endereço, contato e dados bancários")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -132,7 +130,7 @@ public class AtualizarDadosBancariosContatoDTO {
   @jakarta.validation.constraints.Size(max = 2)
   private String ufender;
 
-  @Schema(description = "Código postal do endereço residencial, preservando zeros.")
+  @Schema(nullable = true, description = "Código postal do endereço residencial, preservando zeros.")
   @UISchema(label = "CEP", group = "Endereço, contato e dados bancários")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -144,7 +142,7 @@ public class AtualizarDadosBancariosContatoDTO {
   @jakarta.validation.constraints.Size(max = 8)
   private String cepender;
 
-  @Schema(description = "Código da instituição bancária padrão para pagamento ao servidor.")
+  @Schema(nullable = true, description = "Código da instituição bancária padrão para pagamento ao servidor.")
   @UISchema(label = "Banco", group = "Endereço, contato e dados bancários")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -155,7 +153,7 @@ public class AtualizarDadosBancariosContatoDTO {
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   private Integer banco;
 
-  @Schema(description = "Agência bancária padrão, incluindo eventual dígito verificador.")
+  @Schema(nullable = true, description = "Agência bancária padrão, incluindo eventual dígito verificador.")
   @UISchema(label = "Agência", group = "Endereço, contato e dados bancários")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -167,7 +165,7 @@ public class AtualizarDadosBancariosContatoDTO {
   @jakarta.validation.constraints.Size(max = 10)
   private String agencia;
 
-  @Schema(description = "Conta bancária padrão, preservando zeros e dígito verificador.")
+  @Schema(nullable = true, description = "Conta bancária padrão, preservando zeros e dígito verificador.")
   @UISchema(label = "Conta", group = "Endereço, contato e dados bancários")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -179,7 +177,7 @@ public class AtualizarDadosBancariosContatoDTO {
   @jakarta.validation.constraints.Size(max = 25)
   private String conta;
 
-  @Schema(description = "Modalidade de pagamento associada aos dados bancários padrão.")
+  @Schema(nullable = true, description = "Modalidade de pagamento associada aos dados bancários padrão.")
   @UISchema(label = "Tipo de pagamento", group = "Endereço, contato e dados bancários")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -190,4 +188,94 @@ public class AtualizarDadosBancariosContatoDTO {
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   @jakarta.validation.constraints.Size(max = 10)
   private String tipopag;
+
+  @com.fasterxml.jackson.annotation.JsonSetter(value = "eMail", nulls = com.fasterxml.jackson.annotation.Nulls.SET)
+  public void setEMail(String value) {
+    supplied("eMail");
+    this.eMail = value;
+  }
+
+  @com.fasterxml.jackson.annotation.JsonSetter(value = "telefone", nulls = com.fasterxml.jackson.annotation.Nulls.SET)
+  public void setTelefone(String value) {
+    supplied("telefone");
+    this.telefone = value;
+  }
+
+  @com.fasterxml.jackson.annotation.JsonSetter(value = "numtelCelular", nulls = com.fasterxml.jackson.annotation.Nulls.SET)
+  public void setNumtelCelular(String value) {
+    supplied("numtelCelular");
+    this.numtelCelular = value;
+  }
+
+  @com.fasterxml.jackson.annotation.JsonSetter(value = "tipologender", nulls = com.fasterxml.jackson.annotation.Nulls.SET)
+  public void setTipologender(String value) {
+    supplied("tipologender");
+    this.tipologender = value;
+  }
+
+  @com.fasterxml.jackson.annotation.JsonSetter(value = "nomelogender", nulls = com.fasterxml.jackson.annotation.Nulls.SET)
+  public void setNomelogender(String value) {
+    supplied("nomelogender");
+    this.nomelogender = value;
+  }
+
+  @com.fasterxml.jackson.annotation.JsonSetter(value = "numender", nulls = com.fasterxml.jackson.annotation.Nulls.SET)
+  public void setNumender(String value) {
+    supplied("numender");
+    this.numender = value;
+  }
+
+  @com.fasterxml.jackson.annotation.JsonSetter(value = "complender", nulls = com.fasterxml.jackson.annotation.Nulls.SET)
+  public void setComplender(String value) {
+    supplied("complender");
+    this.complender = value;
+  }
+
+  @com.fasterxml.jackson.annotation.JsonSetter(value = "bairroender", nulls = com.fasterxml.jackson.annotation.Nulls.SET)
+  public void setBairroender(String value) {
+    supplied("bairroender");
+    this.bairroender = value;
+  }
+
+  @com.fasterxml.jackson.annotation.JsonSetter(value = "cidadeender", nulls = com.fasterxml.jackson.annotation.Nulls.SET)
+  public void setCidadeender(String value) {
+    supplied("cidadeender");
+    this.cidadeender = value;
+  }
+
+  @com.fasterxml.jackson.annotation.JsonSetter(value = "ufender", nulls = com.fasterxml.jackson.annotation.Nulls.SET)
+  public void setUfender(String value) {
+    supplied("ufender");
+    this.ufender = value;
+  }
+
+  @com.fasterxml.jackson.annotation.JsonSetter(value = "cepender", nulls = com.fasterxml.jackson.annotation.Nulls.SET)
+  public void setCepender(String value) {
+    supplied("cepender");
+    this.cepender = value;
+  }
+
+  @com.fasterxml.jackson.annotation.JsonSetter(value = "banco", nulls = com.fasterxml.jackson.annotation.Nulls.SET)
+  public void setBanco(Integer value) {
+    supplied("banco");
+    this.banco = value;
+  }
+
+  @com.fasterxml.jackson.annotation.JsonSetter(value = "agencia", nulls = com.fasterxml.jackson.annotation.Nulls.SET)
+  public void setAgencia(String value) {
+    supplied("agencia");
+    this.agencia = value;
+  }
+
+  @com.fasterxml.jackson.annotation.JsonSetter(value = "conta", nulls = com.fasterxml.jackson.annotation.Nulls.SET)
+  public void setConta(String value) {
+    supplied("conta");
+    this.conta = value;
+  }
+
+  @com.fasterxml.jackson.annotation.JsonSetter(value = "tipopag", nulls = com.fasterxml.jackson.annotation.Nulls.SET)
+  public void setTipopag(String value) {
+    supplied("tipopag");
+    this.tipopag = value;
+  }
 }

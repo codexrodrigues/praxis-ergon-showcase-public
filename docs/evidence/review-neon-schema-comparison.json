@@ -1,0 +1,21 @@
+{
+  "original": "br-super-sound-b7urizmd",
+  "proof": "br-dry-breeze-b7pc58x5",
+  "checkedAt": "2026-10-28T14:12:36.222Z",
+  "equal": true,
+  "tables": 16,
+  "columns": 392,
+  "comparedAttributes": [
+    "table_name",
+    "column_name",
+    "ordinal_position",
+    "data_type",
+    "udt_name",
+    "is_nullable",
+    "column_default",
+    "character_maximum_length",
+    "numeric_precision",
+    "numeric_scale"
+  ],
+  "ddlPerformed": false
+}

@@ -16,7 +16,7 @@ public class BulkPublicationController {
   private final ErgonBulkOperations operations;
   public BulkPublicationController(ErgonBulkOperations operations) { this.operations=operations; }
   @PostMapping("/publication")
-  @PreAuthorize("hasAuthority('ERGON_WRITE')")
+  @PreAuthorize("hasAuthority('ERGON_BULK_ADMIN')")
   @Operation(operationId="publishErgonBulkOperation",summary="Administrar publicação do lote",description="Executa um único CAS explícito de publicação, reconciliação ou suspensão, sem repetir automaticamente uma geração divergente.")
   public RestApiResponse<br.com.praxis.ergonshowcase.bulk.BulkPublicationResult> transition(
       @jakarta.validation.Valid @RequestBody br.com.praxis.ergonshowcase.bulk.BulkPublicationRequest request) {

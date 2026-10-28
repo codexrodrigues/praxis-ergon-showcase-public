@@ -28,6 +28,9 @@ class BulkNeonIntegrationTest {
     String expected=System.getenv("BULK_PROOF_DISPOSABLE_BRANCH");
     assertThat(expected).as("Identidade explícita da cópia descartável provisionada para esta execução").matches("br-[a-z0-9-]+").isNotEqualTo("br-super-sound-b7urizmd");
     assertThat(System.getenv("PROOF_NEON_BRANCH")).isEqualTo(expected);
+    String host=System.getenv("BULK_PROOF_EXPECTED_HOST");
+    assertThat(host).as("Endpoint da cópia confirmado no provisionamento").isNotBlank();
+    assertThat(System.getenv("SPRING_DATASOURCE_URL")).contains("//"+host+"/");
   }
 
   @Test
@@ -161,13 +164,83 @@ class BulkNeonIntegrationTest {
       String id=proposal.path("proposalId").asText();
       var preview=bulkGet("/bulk/proposals/"+id+"/results?size=50");
       assertThat(preview.path("content")).hasSize(2);
-      assertThat(preview.toString()).contains("CONFLICT","INVALID").doesNotContain(stale,"expectedVersion","blockedReason","orgao");
+      assertThat(preview.toString()).contains("CONFLICT","JORNADA_FORA_INTERVALO","1 e 168","Atualize a seleção").doesNotContain(stale,"expectedVersion","blockedReason","orgao");
       bulkPost("/bulk/update-items",Map.of("proposalId",id),UUID.randomUUID().toString(),HttpStatus.UNPROCESSABLE_ENTITY);
       assertThat(storedVersion(9611)).isEqualTo(beforeFirst);assertThat(storedVersion(9612)).isEqualTo(beforeSecond);
       assertThat(readVinculo("9611:1").getBody().path("jornadaSemanal").asInt()).isEqualTo(37);
       assertThat(readVinculo("9612:1").getBody().path("jornadaSemanal").asInt()).isEqualTo(36);
       Files.writeString(Path.of("target/proof/bulk-blocked-preview.json"),preview.toString());
     } finally { removeFixtures(); }
+  }
+
+  @Test @Order(4)
+  void cargosAndPessoasExecuteBothUpdateModesAndClear() throws Exception {
+    assertThat(publicationReady).isTrue(); requireDisposableTarget();
+    try {
+      assertThat(rest.postForEntity("/api/ergon/cargos",Map.of("cargo",9621,"empCodigo",1,
+          "nome","Cargo BULK-308-9621","categoria","SAUDE"),JsonNode.class).getStatusCode()).isEqualTo(HttpStatus.CREATED);
+      assertThat(rest.postForEntity("/api/ergon/servidor-pessoas",Map.of("numero",9621,"nome","Pessoa BULK-308-9621",
+          "cpf","00000009621","dtnasc","1990-01-01"),JsonNode.class).getStatusCode()).isEqualTo(HttpStatus.CREATED);
+      var evidence=new java.util.ArrayList<JsonNode>();
+      for(String resource:List.of("cargos","servidor-pessoas")) {
+        String base="/api/ergon/"+resource,field=resource.equals("cargos")?"subcategoria":"agencia";
+        Object id=resource.equals("cargos")?(Object)Integer.valueOf(9621):"9621";
+        for(String mode:List.of("update","update-items")) {
+          var read=rest.getForEntity(base+"/9621",JsonNode.class);
+          var changes=mode.equals("update")?List.of(set(field,"PROVA")):List.of(Map.of("field",field,"operator","CLEAR"));
+          Object request=mode.equals("update")?Map.of("executionMode","SYNC","selection",Map.of("mode","EXPLICIT",
+              "targets",List.of(Map.of("id",id,"expectedVersion",read.getHeaders().getETag()))),"changes",changes)
+              :Map.of("executionMode","SYNC","items",List.of(Map.of("id",id,"expectedVersion",read.getHeaders().getETag(),"changes",changes)));
+          var proposal=postResource(base+"/bulk/"+mode+"/evaluation",request,null);
+          assertThat(proposal.path("status").asText()).isEqualTo("READY");
+          var execution=postResource(base+"/bulk/"+mode,Map.of("proposalId",proposal.path("proposalId").asText()),UUID.randomUUID().toString());
+          var receipts=rest.getForEntity(base+"/bulk/executions/"+execution.path("executionId").asText()+"/results",JsonNode.class);
+          assertThat(receipts.getStatusCode()).isEqualTo(HttpStatus.OK);
+          assertThat(receipts.getBody().path("data").path("content").get(0).path("status").asText()).isEqualTo("CONFIRMED");
+          var changed=rest.getForEntity(base+"/9621",JsonNode.class);
+          if(mode.equals("update")) assertThat(changed.getBody().path("data").path(field).asText()).isEqualTo("PROVA");
+          else assertThat(changed.getBody().path("data").hasNonNull(field)).isFalse();
+          assertThat(changed.getHeaders().getETag()).isNotEqualTo(read.getHeaders().getETag());
+          evidence.add(receipts.getBody());
+        }
+      }
+      Files.writeString(Path.of("target/proof/bulk-cargos-pessoas-receipts.json"),new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(evidence));
+    } finally {
+      try(var c=ownerConnection();var s=c.createStatement()) {
+        s.executeUpdate("delete from cargos where cargo=9621 and nome='Cargo BULK-308-9621'");
+        s.executeUpdate("delete from funcionarios where numero=9621 and nome='Pessoa BULK-308-9621'");
+      }
+    }
+  }
+
+  private JsonNode postResource(String path,Object body,String key) {
+    var headers=new HttpHeaders();headers.setContentType(MediaType.APPLICATION_JSON);
+    if(key!=null)headers.set("Idempotency-Key",key);
+    var response=rest.exchange(path,HttpMethod.POST,new HttpEntity<>(body,headers),JsonNode.class);
+    assertThat(response.getStatusCode()).as(path+": "+response.getBody()).isEqualTo(HttpStatus.OK);
+    return response.getBody().path("data");
+  }
+
+  @Test @Order(5)
+  void concurrentDiscoveryReturnsVerifiedSnapshotOrSafeUnavailable() throws Exception {
+    assertThat(publicationReady).isTrue();
+    var pool=java.util.concurrent.Executors.newFixedThreadPool(2);
+    var start=new java.util.concurrent.CountDownLatch(1);
+    try {
+      var calls=new java.util.ArrayList<java.util.concurrent.Future<ResponseEntity<JsonNode>>>();
+      for(int i=0;i<2;i++) calls.add(pool.submit(()->{start.await();return rest.getForEntity("/api/ergon/cargos/capabilities",JsonNode.class);}));
+      start.countDown();
+      var statuses=new java.util.ArrayList<Integer>();
+      for(var call:calls) {
+        var response=call.get(100,java.util.concurrent.TimeUnit.SECONDS);
+        assertThat(response.getStatusCode()).isIn(HttpStatus.OK,HttpStatus.SERVICE_UNAVAILABLE);
+        if(response.getStatusCode()==HttpStatus.OK)
+          assertThat(response.getBody().path("operations").path("bulk-update").path("bulk").isObject()).isTrue();
+        else assertThat(response.getBody().toString()).contains("BULK_DISCOVERY_UNAVAILABLE").doesNotContain("jdbc","SQLException","TransactionTimedOut");
+        statuses.add(response.getStatusCode().value());
+      }
+      Files.writeString(Path.of("target/proof/bulk-concurrent-discovery.json"),new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(Map.of("statuses",statuses,"partialSnapshots",0)));
+    } finally {pool.shutdownNow();pool.awaitTermination(10,java.util.concurrent.TimeUnit.SECONDS);}
   }
 
   private void removeFixtures() throws Exception {
