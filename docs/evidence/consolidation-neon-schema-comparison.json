@@ -1,0 +1,94 @@
+{
+  "checkedAt": "2026-10-28T18:07:28.597Z",
+  "original": "br-super-sound-b7urizmd",
+  "proof": "br-winter-bird-b7sa7euc",
+  "equal": true,
+  "tables": 16,
+  "columns": 392,
+  "columnsSha256": "d5864656286c36b0c7cca808bfb4f30748540a495af6bed8307069cddbc49779",
+  "domainDataIdentical": true,
+  "domainRows": [
+    {
+      "table_name": "afastamentos",
+      "rows": "3",
+      "data_sha256": "c428ed3565ee63c9bd01dfd86d042c8afdf835641af3191a8293141fb8b4eda8"
+    },
+    {
+      "table_name": "cargos",
+      "rows": "8",
+      "data_sha256": "191bc302516c93819f560c8d96c41740a0ab94d27d9fa710e68c7935299783e3"
+    },
+    {
+      "table_name": "codigos_frequencia",
+      "rows": "12",
+      "data_sha256": "d4fa0a40cda2de663b7df5fce1aeda7827879904083413c6c16dbfaec029661e"
+    },
+    {
+      "table_name": "custom_field_definitions",
+      "rows": "17",
+      "data_sha256": "f785e2ffb9bbee07c9516a8282d078612ca9ceebbe70d4503cacf939a7bd0542"
+    },
+    {
+      "table_name": "dependentes",
+      "rows": "4",
+      "data_sha256": "9858c4e984d8e72d63226e46ca14877c8548198adc3bc8b4c2c1828ebfff549b"
+    },
+    {
+      "table_name": "documentos_legais",
+      "rows": "7",
+      "data_sha256": "8ddf0f9c134774859cd698d948f3f20424ab5c7df88448cb404dd08906b83b37"
+    },
+    {
+      "table_name": "empresas",
+      "rows": "3",
+      "data_sha256": "723f4f3fe973ee0acf0e9e7d4b9836aaf81c9cd95eb6dc1edb603dd44b6f8f66"
+    },
+    {
+      "table_name": "frequencias",
+      "rows": "5",
+      "data_sha256": "7ede10ca43a8626c94320e9a3b1976685f4225fc1955d000e12a96878df2d753"
+    },
+    {
+      "table_name": "funcionarios",
+      "rows": "4",
+      "data_sha256": "8e2c03a6850449b9e94845f49d5a32c8cc37d8474a7115a1bfef804c0657eb24"
+    },
+    {
+      "table_name": "itemtabelas",
+      "rows": "103",
+      "data_sha256": "cfa882060bd55d9cb66b3cb1c69fcc8175bfaf7c7ab53f75b041d219ae29bd17"
+    },
+    {
+      "table_name": "regras_frequencia_estatutaria",
+      "rows": "9",
+      "data_sha256": "b3a15b2237baf4a75b66110c0100f60be7f2e465385199623e48a1e55bb4d1a4"
+    },
+    {
+      "table_name": "setores",
+      "rows": "9",
+      "data_sha256": "84389e155f93f0a0064b18a64d6bee3dd69bbdb28968e54765f9ab5fa5d6c499"
+    },
+    {
+      "table_name": "tabelas",
+      "rows": "25",
+      "data_sha256": "12383be9e0c5f20918a050ed1f1cbbe80288f84931bc14b2758ed963563507ee"
+    },
+    {
+      "table_name": "tipos_dependente",
+      "rows": "5",
+      "data_sha256": "045e2d3f2a6801d13af2d18180878fffd74bc234571275236bdcfa4716d59a44"
+    },
+    {
+      "table_name": "tipos_frequencia",
+      "rows": "6",
+      "data_sha256": "ea7751cf1f1d0ab448b4dd45ad4ce096df438d458f132b89401da101977ed86f"
+    },
+    {
+      "table_name": "vinculos",
+      "rows": "5",
+      "data_sha256": "759c30b4993767513fd42379e36873ef63083603486a611aea0e4c3a15f1ea77"
+    }
+  ],
+  "domainDdlPerformed": false,
+  "method": "SHA-256 ordered column definitions including identity/generated metadata; ordered JSONB rows per public table compared with original branch after all tests and consumer fixture cleanup"
+}

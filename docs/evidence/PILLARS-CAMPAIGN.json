@@ -1,46 +1,46 @@
 {
-  "validatedAt": "2026-10-28T15:22:12.752875+00:00",
-  "sourceSha256": "064acba2f51428189df7bb047edcdc986caf92cc6c4c339e4dcadb94b536ee22",
-  "baselineCommit": "2013442d676c4373e28aa3c42c2ec879324f9f92",
-  "status": "PARTIAL",
-  "mergeReady": false,
-  "dependency": "8.0.0-bulk.308-review-SNAPSHOT",
   "pomDependency": "8.0.0-rc.179",
   "published": false,
-  "disposableBranch": "br-dry-breeze-b7pc58x5",
+  "limits": [
+    "No single green full Maven campaign",
+    "Private SDK includes preexisting uncommitted consolidation",
+    "Config/rules-engine deferred by user",
+    "No corporate production or independent merge approval"
+  ],
+  "validatedAt": "2026-10-28T18:08:57.584866+00:00",
+  "sourceSha256": "064acba2f51428189df7bb047edcdc986caf92cc6c4c339e4dcadb94b536ee22",
+  "baselineCommit": "5fd84831a2b3fc237e77e9c14482afe45b730a3a",
+  "status": "PARTIAL",
+  "mergeReady": false,
+  "dependency": "8.0.0-bulk.308-consolidation.1-SNAPSHOT",
+  "disposableBranch": "br-winter-bird-b7sa7euc",
+  "disposableBranchDeleted": true,
   "domainSchema": {
     "tables": 16,
     "columns": 392,
     "equalToOriginal": true,
-    "evidence": "review-neon-schema-comparison.json"
+    "domainDataIdentical": true,
+    "evidence": "consolidation-neon-schema-comparison.json"
   },
   "fullCampaign": {
     "tests": 74,
-    "failures": 4,
+    "failures": 1,
     "errors": 0,
     "skipped": 0,
-    "evidence": "review-full-test-results.json"
-  },
-  "focalRerun": {
-    "tests": 5,
-    "failures": 2,
-    "errors": 0,
-    "skipped": 0,
-    "evidence": "review-focal-test-results.json"
-  },
-  "combinedDistinctCases": {
     "passed": 73,
-    "total": 74,
-    "notASingleGreenMavenRun": true
+    "evidence": "consolidation-full-test-results.json"
   },
-  "remainingGap": "Positive Vinculo bulk lifecycle could not complete: 503 during confirmation in full run; focal retry blocked by publication reconciliation TRANSACTION_TIMEOUT.",
-  "sdkFocal": {
-    "tests": 130,
-    "failures": 0,
-    "errors": 0
+  "remainingGap": "Full serial campaign: 74 tests, one failure in cargosAndPessoasExecuteBothUpdateModesAndClear; person confirmation returned 503 GOVERNED_OPENAPI_PUBLICATION_UNAVAILABLE. No integral green run.",
+  "sdkValidation": {
+    "baselineTests": 130,
+    "finalFocusedTests": 49,
+    "finalNeonAuthorityTests": 1,
+    "allPassed": true,
+    "countsAreSeparateRuns": true,
+    "evidence": "consolidation-sdk-tests.json"
   },
   "auditorRegression": {
-    "tests": 45,
+    "tests": 46,
     "failures": 0
   },
   "angular": {
@@ -50,13 +50,15 @@
     "purityPassed": true,
     "httpHarnessPassed": true,
     "libraryOwner": "Separate delegated agent; PR #661; no parent edits after responsibility split",
-    "scope": "Official source HTTP harness; no browser visual acceptance or published npm adoption"
+    "scope": "Official source HTTP harness; no browser visual acceptance or published npm adoption",
+    "commit": "421012f90f86335e5f15f7a865a4f83dfbf642ef",
+    "initialHarnessPreparationFailure": "Missing determination inputs in isolated evidence directory after bulk and partial form checks; fixtures removed; final full harness rerun with current Java-generated inputs passed",
+    "finalHarnessLogSha256": "63556300fe94b0a7e26a29f6cf04d305361e1be38a353943ad68a0f76fb6ba5d"
   },
   "freshProofFiles": [
-    "angular-consumer-proof.json",
     "bulk-blocked-preview.json",
-    "bulk-cargos-pessoas-receipts.json",
     "bulk-concurrent-discovery.json",
+    "bulk-protocol-receipts.json",
     "cargos-bulk-capabilities.json",
     "cargos-post-determinations.json",
     "cargos-put-determinations.json",
@@ -77,18 +79,37 @@
     "vinculos-post-determinations.json",
     "vinculos-put-determinations.json",
     "vinculos-request.json",
-    "vinculos-response.json"
+    "vinculos-response.json",
+    "angular-consumer-proof.json",
+    "angular-consumer-input-hashes.json"
   ],
-  "limits": [
-    "No single green full Maven campaign",
-    "Private SDK includes preexisting uncommitted consolidation",
-    "Config/rules-engine deferred by user",
-    "No corporate production or independent merge approval"
+  "historicalOnlyProofFiles": [
+    "bulk-cargos-pessoas-receipts.json"
   ],
   "logHashes": {
-    ".local/review-host-final.log": "4bc1b93dde6158a850639a90cac6844c40a84cd9a43a46e5bec039a0fcf969f2",
-    ".local/review-host-focal.log": "f705eb2aa26c2ab5afa454680d06caaf84f9106bb6e50550b91b7ed571b273c8",
-    ".local/review-angular-http.log": "63556300fe94b0a7e26a29f6cf04d305361e1be38a353943ad68a0f76fb6ba5d",
-    ".local/review-auditor-tests.log": "edb1ebb36974929604f566a46b32b57de2d8609afc8cc75397253d077d664ec6"
+    "consolidation-host-full-test.log": "c591b87a8fe68f0fba3f8222ed3da0a62faa9675072e3ba5b2683d89bb7868f2",
+    "consolidation-host-package.log": "8d339f00fad548320c21157324642fdab959f47fba8c3dfc8ed16fbeb540632b",
+    "consolidation-read-only-stress.log": "3c2086200e643d15985b10ed48499b71ad712f057b3aa40747213423ff0d88cd"
+  },
+  "neonAdminEvidence": "consolidation-neon-admin.json",
+  "cleanupEvidence": "consolidation-neon-deletion.json",
+  "auditor": {
+    "status": "FAILED",
+    "runtimeEvidenceFresh": true,
+    "failureCount": 8,
+    "pendingDuplicateDraftDecisions": 6,
+    "pendingRuntimeGates": [
+      "http",
+      "bulkOperations"
+    ],
+    "defaultCommandEvidence": "consolidation-operational-audit.md",
+    "candidateSourcesEvidence": "consolidation-candidate-audit.md",
+    "newBaselineDuringExecution": true,
+    "inputHashes": {
+      "scripts/workspace/audit-java-resource-completeness.py": "8e53f7129998cd2a14acf504e1010becf406763ef29c6221352c63eb22c9fc82",
+      "scripts/workspace/java_resource_audit.py": "71a4520d7fe7b6de26b5e3342930d6885af7042f1244aab81b754572b5373b21",
+      "scripts/workspace/java_resource_hierarchy.py": "54732932a02f4aa188264f622b4c33fe768b4315629e63f037b390ac81b98385",
+      "scripts/workspace/resource-audit-inventories/praxis-ergon-showcase.json": "db2841d6619cd32d61c6325f4211d03e3f324ce0ca73e7cb8fcd3ab4173d5d9b"
+    }
   }
 }

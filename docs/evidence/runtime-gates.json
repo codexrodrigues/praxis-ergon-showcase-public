@@ -1,22 +1,18 @@
 {
   "sourceSha256": "064acba2f51428189df7bb047edcdc986caf92cc6c4c339e4dcadb94b536ee22",
-  "validatedAt": "2026-10-28T15:22:12.752875+00:00",
-  "baselineCommit": "2013442d676c4373e28aa3c42c2ec879324f9f92",
+  "validatedAt": "2026-10-28T18:08:57.584866+00:00",
+  "baselineCommit": "5fd84831a2b3fc237e77e9c14482afe45b730a3a",
   "gates": {
     "schema": {
       "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/review-full-test-results.json",
-          "sha256": "9c0d0b254ee3cbe68b885fe26779caaa95f819d32ef56dafb48e2f6512c0613b"
+          "path": "docs/evidence/consolidation-full-test-results.json",
+          "sha256": "aaffc7dd75a4c924e49884d4d91514cce9ce11f93c30a529e4d674c64a08314b"
         },
         {
-          "path": "docs/evidence/review-focal-test-results.json",
-          "sha256": "d7d73668dcc19165fcf4f1c41fc2d0ba6619e9b71b535ad1f7b4f64873652380"
-        },
-        {
-          "path": "docs/evidence/review-sdk-provenance.json",
-          "sha256": "231819b1bd1bb499d0aef55eed76827e64bec587fe29a7205a290b0fef25fa2a"
+          "path": "docs/evidence/consolidation-sdk-provenance.json",
+          "sha256": "12b6a92a7205f3ebcc88e97ebb91c4a4891d8a6a0e8892746aff03f408c006e6"
         }
       ]
     },
@@ -24,34 +20,26 @@
       "status": "pending",
       "artifacts": [
         {
-          "path": "docs/evidence/review-full-test-results.json",
-          "sha256": "9c0d0b254ee3cbe68b885fe26779caaa95f819d32ef56dafb48e2f6512c0613b"
+          "path": "docs/evidence/consolidation-full-test-results.json",
+          "sha256": "aaffc7dd75a4c924e49884d4d91514cce9ce11f93c30a529e4d674c64a08314b"
         },
         {
-          "path": "docs/evidence/review-focal-test-results.json",
-          "sha256": "d7d73668dcc19165fcf4f1c41fc2d0ba6619e9b71b535ad1f7b4f64873652380"
-        },
-        {
-          "path": "docs/evidence/review-sdk-provenance.json",
-          "sha256": "231819b1bd1bb499d0aef55eed76827e64bec587fe29a7205a290b0fef25fa2a"
+          "path": "docs/evidence/consolidation-sdk-provenance.json",
+          "sha256": "12b6a92a7205f3ebcc88e97ebb91c4a4891d8a6a0e8892746aff03f408c006e6"
         }
       ],
-      "reason": "Positive Vinculo bulk lifecycle could not complete: 503 during confirmation in full run; focal retry blocked by publication reconciliation TRANSACTION_TIMEOUT."
+      "reason": "Full serial campaign: 74 tests, one failure in cargosAndPessoasExecuteBothUpdateModesAndClear; person confirmation returned 503 GOVERNED_OPENAPI_PUBLICATION_UNAVAILABLE. No integral green run."
     },
     "availability": {
       "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/review-full-test-results.json",
-          "sha256": "9c0d0b254ee3cbe68b885fe26779caaa95f819d32ef56dafb48e2f6512c0613b"
+          "path": "docs/evidence/consolidation-full-test-results.json",
+          "sha256": "aaffc7dd75a4c924e49884d4d91514cce9ce11f93c30a529e4d674c64a08314b"
         },
         {
-          "path": "docs/evidence/review-focal-test-results.json",
-          "sha256": "d7d73668dcc19165fcf4f1c41fc2d0ba6619e9b71b535ad1f7b4f64873652380"
-        },
-        {
-          "path": "docs/evidence/review-sdk-provenance.json",
-          "sha256": "231819b1bd1bb499d0aef55eed76827e64bec587fe29a7205a290b0fef25fa2a"
+          "path": "docs/evidence/consolidation-sdk-provenance.json",
+          "sha256": "12b6a92a7205f3ebcc88e97ebb91c4a4891d8a6a0e8892746aff03f408c006e6"
         }
       ],
       "scope": "Authorizations, versions, workflow states and declared item/collection operations exercised by the suite"
@@ -60,20 +48,16 @@
       "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/review-full-test-results.json",
-          "sha256": "9c0d0b254ee3cbe68b885fe26779caaa95f819d32ef56dafb48e2f6512c0613b"
+          "path": "docs/evidence/consolidation-full-test-results.json",
+          "sha256": "aaffc7dd75a4c924e49884d4d91514cce9ce11f93c30a529e4d674c64a08314b"
         },
         {
-          "path": "docs/evidence/review-focal-test-results.json",
-          "sha256": "d7d73668dcc19165fcf4f1c41fc2d0ba6619e9b71b535ad1f7b4f64873652380"
+          "path": "docs/evidence/consolidation-sdk-provenance.json",
+          "sha256": "12b6a92a7205f3ebcc88e97ebb91c4a4891d8a6a0e8892746aff03f408c006e6"
         },
         {
-          "path": "docs/evidence/review-sdk-provenance.json",
-          "sha256": "231819b1bd1bb499d0aef55eed76827e64bec587fe29a7205a290b0fef25fa2a"
-        },
-        {
-          "path": "docs/evidence/review-neon-schema-comparison.json",
-          "sha256": "0fdd2b65a54a4df7229ad448c7a27f3a93618bc03c34acae0cde86921124107a"
+          "path": "docs/evidence/consolidation-neon-schema-comparison.json",
+          "sha256": "24018cab4935d5347a6407d822a4131b2ab8e34b288860834fe7def202eb8af2"
         }
       ]
     },
@@ -81,16 +65,12 @@
       "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/review-full-test-results.json",
-          "sha256": "9c0d0b254ee3cbe68b885fe26779caaa95f819d32ef56dafb48e2f6512c0613b"
+          "path": "docs/evidence/consolidation-full-test-results.json",
+          "sha256": "aaffc7dd75a4c924e49884d4d91514cce9ce11f93c30a529e4d674c64a08314b"
         },
         {
-          "path": "docs/evidence/review-focal-test-results.json",
-          "sha256": "d7d73668dcc19165fcf4f1c41fc2d0ba6619e9b71b535ad1f7b4f64873652380"
-        },
-        {
-          "path": "docs/evidence/review-sdk-provenance.json",
-          "sha256": "231819b1bd1bb499d0aef55eed76827e64bec587fe29a7205a290b0fef25fa2a"
+          "path": "docs/evidence/consolidation-sdk-provenance.json",
+          "sha256": "12b6a92a7205f3ebcc88e97ebb91c4a4891d8a6a0e8892746aff03f408c006e6"
         }
       ],
       "scope": "Only mapped pilot registration and listed administrative operations; full statutory/legacy parity is not certified"
@@ -99,20 +79,20 @@
       "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/review-full-test-results.json",
-          "sha256": "9c0d0b254ee3cbe68b885fe26779caaa95f819d32ef56dafb48e2f6512c0613b"
+          "path": "docs/evidence/consolidation-full-test-results.json",
+          "sha256": "aaffc7dd75a4c924e49884d4d91514cce9ce11f93c30a529e4d674c64a08314b"
         },
         {
-          "path": "docs/evidence/review-focal-test-results.json",
-          "sha256": "d7d73668dcc19165fcf4f1c41fc2d0ba6619e9b71b535ad1f7b4f64873652380"
-        },
-        {
-          "path": "docs/evidence/review-sdk-provenance.json",
-          "sha256": "231819b1bd1bb499d0aef55eed76827e64bec587fe29a7205a290b0fef25fa2a"
+          "path": "docs/evidence/consolidation-sdk-provenance.json",
+          "sha256": "12b6a92a7205f3ebcc88e97ebb91c4a4891d8a6a0e8892746aff03f408c006e6"
         },
         {
           "path": "docs/evidence/angular-consumer-proof.json",
-          "sha256": "b4d7bf8ae54fd60775506bb5591dc93afb7259b0c8b48b4717fc8becc0630eee"
+          "sha256": "4f37afbb5269ec6acc34645369936cb7b084a4d45adb8f5a0ba41dedffafdd33"
+        },
+        {
+          "path": "docs/evidence/angular-consumer-input-hashes.json",
+          "sha256": "ebc21f40f414c6bebca048be5da4b5bd998ba00ce5aad3f4978b50485b84b0f1"
         }
       ],
       "scope": "Official source normalizer and ReactiveDeterminationRuntimeService; not published npm adoption or visual host acceptance"
@@ -121,16 +101,16 @@
       "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/review-full-test-results.json",
-          "sha256": "9c0d0b254ee3cbe68b885fe26779caaa95f819d32ef56dafb48e2f6512c0613b"
+          "path": "docs/evidence/consolidation-full-test-results.json",
+          "sha256": "aaffc7dd75a4c924e49884d4d91514cce9ce11f93c30a529e4d674c64a08314b"
         },
         {
-          "path": "docs/evidence/review-focal-test-results.json",
-          "sha256": "d7d73668dcc19165fcf4f1c41fc2d0ba6619e9b71b535ad1f7b4f64873652380"
+          "path": "docs/evidence/consolidation-sdk-provenance.json",
+          "sha256": "12b6a92a7205f3ebcc88e97ebb91c4a4891d8a6a0e8892746aff03f408c006e6"
         },
         {
-          "path": "docs/evidence/review-sdk-provenance.json",
-          "sha256": "231819b1bd1bb499d0aef55eed76827e64bec587fe29a7205a290b0fef25fa2a"
+          "path": "docs/evidence/cold-query-counts.json",
+          "sha256": "78ce82dba10613fbee24fc10ed9796209e559e14d0c01b97ee95104dbb6e99bf"
         }
       ]
     },
@@ -138,16 +118,16 @@
       "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/review-full-test-results.json",
-          "sha256": "9c0d0b254ee3cbe68b885fe26779caaa95f819d32ef56dafb48e2f6512c0613b"
+          "path": "docs/evidence/consolidation-full-test-results.json",
+          "sha256": "aaffc7dd75a4c924e49884d4d91514cce9ce11f93c30a529e4d674c64a08314b"
         },
         {
-          "path": "docs/evidence/review-focal-test-results.json",
-          "sha256": "d7d73668dcc19165fcf4f1c41fc2d0ba6619e9b71b535ad1f7b4f64873652380"
+          "path": "docs/evidence/consolidation-sdk-provenance.json",
+          "sha256": "12b6a92a7205f3ebcc88e97ebb91c4a4891d8a6a0e8892746aff03f408c006e6"
         },
         {
-          "path": "docs/evidence/review-sdk-provenance.json",
-          "sha256": "231819b1bd1bb499d0aef55eed76827e64bec587fe29a7205a290b0fef25fa2a"
+          "path": "docs/evidence/angular-consumer-proof.json",
+          "sha256": "4f37afbb5269ec6acc34645369936cb7b084a4d45adb8f5a0ba41dedffafdd33"
         }
       ]
     },
@@ -159,20 +139,16 @@
       "status": "pending",
       "artifacts": [
         {
-          "path": "docs/evidence/review-full-test-results.json",
-          "sha256": "9c0d0b254ee3cbe68b885fe26779caaa95f819d32ef56dafb48e2f6512c0613b"
+          "path": "docs/evidence/consolidation-full-test-results.json",
+          "sha256": "aaffc7dd75a4c924e49884d4d91514cce9ce11f93c30a529e4d674c64a08314b"
         },
         {
-          "path": "docs/evidence/review-focal-test-results.json",
-          "sha256": "d7d73668dcc19165fcf4f1c41fc2d0ba6619e9b71b535ad1f7b4f64873652380"
+          "path": "docs/evidence/consolidation-sdk-provenance.json",
+          "sha256": "12b6a92a7205f3ebcc88e97ebb91c4a4891d8a6a0e8892746aff03f408c006e6"
         },
         {
-          "path": "docs/evidence/review-sdk-provenance.json",
-          "sha256": "231819b1bd1bb499d0aef55eed76827e64bec587fe29a7205a290b0fef25fa2a"
-        },
-        {
-          "path": "docs/evidence/bulk-cargos-pessoas-receipts.json",
-          "sha256": "c560071f91654cf54f64add5cebc09685d3ccb8a7242b20553980608e558246e"
+          "path": "docs/evidence/bulk-protocol-receipts.json",
+          "sha256": "6fdbd8397bd25cd59e31cf361f6ff77fa7015b50aa0717f019cf030a4d02eb9b"
         },
         {
           "path": "docs/evidence/bulk-blocked-preview.json",
@@ -183,7 +159,7 @@
           "sha256": "e1b89327e8e388dd2fabf9a4b9e8e3de16a3a6b9fe2a50b81fa0509f74a17bcc"
         }
       ],
-      "reason": "Positive Vinculo bulk lifecycle could not complete: 503 during confirmation in full run; focal retry blocked by publication reconciliation TRANSACTION_TIMEOUT."
+      "reason": "Full serial campaign: 74 tests, one failure in cargosAndPessoasExecuteBothUpdateModesAndClear; person confirmation returned 503 GOVERNED_OPENAPI_PUBLICATION_UNAVAILABLE. No integral green run."
     }
   },
   "historicalSourceSha256": "933d9c8ccb29e18e1be39694fb495b99636da9bbc9efd05ba937e6b5e88f3408",

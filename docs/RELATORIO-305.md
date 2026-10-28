@@ -1,6 +1,20 @@
 # Relatório de rodada — issue 305
 
-## Correções da revisão 2013442 — rodada atual
+## Consolidação R1–R7 — estado vigente
+
+A nova campanha serial executou **74 testes: 73 aprovados, 1 falha, 0 erros e 0 ignorados**. Os 58 testes de domínio, seis de pilares e quatro de metadados passaram. O ciclo positivo completo de vínculos passou; a confirmação de lote de pessoas recebeu `GOVERNED_OPENAPI_PUBLICATION_UNAVAILABLE` (503). **Não há execução integral verde nem liberação para merge.**
+
+O SDK foi integrado à `main` canônica em worktree limpa e enviado ao PR #311 no commit `3822eca0af`. O candidato privado é `8.0.0-bulk.308-consolidation.1-SNAPSHOT`, com commit, árvore Git, transformação de versão e SHA-256 do JAR registrados. O checkout principal com alterações de terceiros foi preservado. A rc.179 do POM não está certificada para estas correções.
+
+A correção prepara expectativas imutáveis antes das transações do SDK e agrupa ACLs apenas no transporte, reconstruindo os mesmos fatos antes de validá-los. Mantém deadlines, grants e revalidação LIVE. Provas: 130 testes do baseline integrado; 49 testes focais no código final; um teste Neon de paridade/rejeição de grant excessivo com restauração; 46 regressões do auditor. São execuções distintas, não uma soma de casos únicos.
+
+A redução aproximada de 39% no volume dos valores de catálogo e 30 sondagens de leitura aprovadas não provam a causa específica do 503. A consulta administrativa via conector confirmou compute fixo de 1 CU, autosuspend desativado, ausência de reinício durante a campanha e nenhuma contenção de locks no instante observado. Não há evidência suficiente para aumentar compute ou ampliar prazos. O painel do navegador não pôde ser lido: Computer Use bloqueou a captura por não conseguir verificar sua URL.
+
+O estado do consumidor HTTP, da limpeza e dos quatro gates consta em [CONSOLIDACAO-2013442.md](CONSOLIDACAO-2013442.md) e na [campanha vigente](evidence/PILLARS-CAMPAIGN.json). A biblioteca Angular permanece no PR #661, commit `421012f90`, sob responsabilidade do agente dedicado; as alterações preexistentes do Page Builder foram preservadas. O recibo antigo de cargos/pessoas não comprova esta nova campanha. Não há aceitação visual, adoção de artefatos públicos ou prontidão corporativa certificada.
+
+O auditor atual também aponta seis decisões de adoção de duplicate-draft pendentes no inventário atualizado por outra frente; com HTTP/Bulk, são oito pendências. A cobertura de campos permanece em 100%. Os recibos estão atualizados, sem hash de fonte obsoleto. A cópia descartável foi excluída após conferir schema e dados idênticos à original; o servidor auxiliar foi encerrado.
+
+## Histórico — correções da revisão 2013442 em 5fd8483
 
 Esta rodada substitui o veredito operacional histórico abaixo. O [plano de impacto](PLANO-CORRECOES-2013442.md) e a [matriz de correções](CORRECOES-2013442.md) registram o escopo transversal: host, Metadata e cliente Angular. O schema Neon permanece intacto. O [scorecard](evidence/SCORECARD-COMPLETUDE.md) deve ser lido em conjunto com os resultados desta rodada; o PASS de 66 testes pertence exclusivamente à campanha anterior.
 

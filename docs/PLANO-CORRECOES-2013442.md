@@ -1,5 +1,20 @@
 # Correções da revisão 2013442
 
+## Consolidação operacional de 28/10/2026
+
+Integrar o SDK em worktree limpa a partir dos commits canônicos, preservando as
+mudanças de terceiros no checkout principal. Medir a atestação LIVE no Neon antes
+de corrigir seu transporte; preparar expectativas imutáveis fora da transação e
+agrupar ACLs sem retirar fatos de segurança ou ampliar deadlines. Validar testes
+focais e negativos de grants, construir candidato privado rastreável e executar
+a bateria serial do host e o harness HTTP com o cliente Angular da PR #661.
+Regenerar evidências apenas a partir dos resultados efetivos; manter os gates
+pendentes se a prova falhar. Excluir a branch descartável após preservar as provas.
+
+Impacto: implementação canônica no Metadata; host consumidor, relatório, scorecard
+e recibo de campanha. Sem novo contrato público, alteração de schema Neon ou
+mudança em bibliotecas Angular nesta frente; sem derivados de UI a regenerar.
+
 Classificação: transversal, arquitetural e contrato público. Preservar schema Neon, `ddl-auto: validate`, Flyway desabilitado, consolidação preexistente do SDK e proibição de consultar o quickstart.
 
 1. Host: aplicar escopo obrigatório antes da seleção QUERY; proteger aglutinação inclusive entre transações; separar administração de lote de escrita cadastral.

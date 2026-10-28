@@ -1,0 +1,60 @@
+{
+  "recordedAt": "2026-10-28T18:04:02.005Z",
+  "source": "Authenticated Neon connector; browser panel not inspected because Computer Use could not verify URL",
+  "projectId": "holy-mouse-40140108",
+  "region": "aws-us-east-1",
+  "postgres": 17,
+  "compute": [
+    {
+      "id": "ep-cold-cherry-b72e2ayi",
+      "branch": "br-winter-bird-b7sa7euc",
+      "state": "active",
+      "minCu": 1,
+      "maxCu": 1,
+      "suspendTimeout": 0,
+      "poolerEnabled": false,
+      "startedAt": "2026-10-28T16:27:31Z"
+    }
+  ],
+  "databaseSnapshot": {
+    "database": {
+      "conflicts": 0,
+      "deadlocks": 0,
+      "temp_bytes": 0,
+      "numbackends": 8
+    },
+    "sessions": [
+      {
+        "count": 1,
+        "state": "active",
+        "wait_event": null,
+        "wait_event_type": null
+      },
+      {
+        "count": 6,
+        "state": "idle",
+        "wait_event": "ClientRead",
+        "wait_event_type": "Client"
+      },
+      {
+        "count": 1,
+        "state": "idle in transaction",
+        "wait_event": "ClientRead",
+        "wait_event_type": "Client"
+      }
+    ],
+    "settings": {
+      "max_connections": "450",
+      "statement_timeout": "0",
+      "transaction_timeout": "0",
+      "idle_session_timeout": "0",
+      "idle_in_transaction_session_timeout": "300000"
+    },
+    "waiting_locks": 0,
+    "server_started_at": "2026-10-28T16:27:30.642497+00:00"
+  },
+  "limitations": [
+    "Point-in-time session and lock snapshot, not historical CPU/memory metrics",
+    "Does not establish the root cause of the failed HTTP confirmation"
+  ]
+}

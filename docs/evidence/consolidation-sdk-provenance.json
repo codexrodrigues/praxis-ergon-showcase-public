@@ -1,0 +1,16 @@
+{
+  "coordinate": "io.github.codexrodrigues:praxis-metadata-starter:8.0.0-bulk.308-consolidation.1-SNAPSHOT",
+  "commit": "3822eca0aff4592566e3765171e2463f13efee3f",
+  "tree": "2a59712d3ea4639fde22db4bd0a4c3d339b1a7a5",
+  "canonicalBase": "0b162f2abca8502d090e3184fe323342ec88aca2",
+  "sourceCleanBeforeBuild": true,
+  "published": false,
+  "sourcePomSha256": "68f5f6d676cf107f880f18b4ed102a6412ad2fb35c5683becb124d761323ff19",
+  "buildPomSha256": "65067821d1a1206af78fe86dda382767bd201408ebc29b3af92a90be47a1217b",
+  "transform": "Only project version rc.183 -> bulk.308-consolidation.1-SNAPSHOT; source POM restored after build",
+  "sourceManifestSha256": "a2e91bab30515b7572c4e0d024d3b05bb569d77ff9f11de095670adbf020631d",
+  "sourceFileCount": 655,
+  "jarSha256": "9a850e79148139d041f86d86676947285c0a864b1693dde914bdefa4a7f5693e",
+  "builtAt": "2026-10-28T17:11:06.428981+00:00",
+  "buildSuccess": true
+}

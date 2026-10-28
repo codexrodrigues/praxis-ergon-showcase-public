@@ -3,9 +3,11 @@
 Rodada de 28/10/2026. A classificação e o mapa de impacto estão no [plano](PLANO-CORRECOES-2013442.md).
 Este documento complementa a revisão histórica; não a reescreve como se os defeitos nunca tivessem existido.
 
+**Estado vigente:** a [consolidação](CONSOLIDACAO-2013442.md) executou 74 testes com uma falha 503 no lote de pessoas. O ciclo completo de vínculos passou. As contagens e o candidato da seção histórica abaixo não são o resultado atual.
+
 | Achado | Correção | Prova correspondente |
 |---|---|---|
-| R1 | A seleção QUERY combina o filtro canônico com o órgão obrigatório antes de limitar IDs. Pessoas continuam globais. | `reviewBulkSelectionAppliesOrganizationBeforeLimit` passou no Neon; o ciclo HTTP completo de vínculos, incluindo QUERY/exclusão, continua bloqueado nesta rodada |
+| R1 | A seleção QUERY combina o filtro canônico com o órgão obrigatório antes de limitar IDs. Pessoas continuam globais. | `reviewBulkSelectionAppliesOrganizationBeforeLimit` passou no Neon; o ciclo HTTP completo de vínculos, incluindo QUERY/exclusão, passou na consolidação (`consolidation-full-test-results.json`) |
 | R2 | Pai com dependentes não pode perder a função aglutinadora; admissão do filho mantém lock compartilhado do pai, enquanto a alteração do pai usa lock exclusivo. | `reviewAggregatorCannotBeDisabledWithDependentCargo`; `reviewAggregatorSerializesConcurrentChildAdmissionAndDisable` |
 | R3 | SDK recusa perda da prova final com 503 tipado e sanitizado. Preparação OpenAPI e timeout transacional recebem classificação operacional, sem ampliar prazos nem autorizar replay de escrita. | `BulkDiscoveryProjectionFailureTest`; `OpenApiPublicationPreparationTest`; discovery concorrente Neon |
 | R4 | `PartialUpdateInput` registra presença pelos setters tipados. Omitido preserva; null limpa somente colunas anuláveis. Booleanos obrigatórios rejeitam null. | `PartialUpdateInputTest`; `reviewPartialUpdatesDistinguishOmissionClearAndRequiredBooleans` |
@@ -17,7 +19,7 @@ Administração de publicação agora requer `ERGON_BULK_ADMIN`. Identidades de 
 
 O revisor semântico nativo foi corrigido no Metadata: estado marcado simultaneamente com `@JsonIgnore` e `@Schema(hidden=true)` não é coluna de negócio. Ocultar somente o schema continua sujeito ao gate. O auditor Python não precisou de mudança de semântica nesta rodada; suas 45 regressões foram executadas novamente.
 
-## Limites da prova
+## Limites da prova histórica
 
 - O candidato Maven é privado: `8.0.0-bulk.308-review-SNAPSHOT`; a rc.179 do POM não é certificada por estas provas.
 - O banco de domínio permanece com `ddl-auto=validate` e Flyway desabilitado. A comparação dos atributos das 392 colunas de 16 tabelas entre original e cópia está em `evidence/review-neon-schema-comparison.json`.
@@ -31,7 +33,7 @@ As tentativas iniciais falharam antes das novas provas de domínio: geração fr
 
 A classificação de indisponibilidade cobre também preparação administrativa e timeout antes da projeção. Ela exige verificar estado durável e geração antes de uma nova tentativa explícita; não transforma timeout em sucesso.
 
-## Resultado desta rodada
+## Resultado histórico da rodada anterior em 5fd8483
 
 - Execução integral: 74 testes, 4 falhas, 0 erros, 0 ignorados. Três indisponibilidades 503 e uma falha do teste de identidade administrativa: o Basic Auth padrão do MockMvc substituía o usuário mockado. A prova foi corrigida para autenticar o administrador real por HTTP.
 - Repetição focal: 5 testes, 3 aprovados e 2 falhas. Segregação administrativa, schemas e analytics passaram. Publicação recebeu `TRANSACTION_TIMEOUT` e impediu iniciar o ciclo positivo de vínculos. Em conjunto há prova positiva de 73/74 casos distintos, sem uma execução integral Maven verde.

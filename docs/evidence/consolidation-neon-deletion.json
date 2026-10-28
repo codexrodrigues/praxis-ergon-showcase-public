@@ -1,0 +1,16 @@
+{
+  "verifiedAt": "2026-10-28T18:07:50.750Z",
+  "project": "holy-mouse-40140108",
+  "deletedBranch": "br-winter-bird-b7sa7euc",
+  "userAuthorizedDeletion": true,
+  "proofsRecordedBeforeDeletion": true,
+  "domainDataIdenticalBeforeDeletion": true,
+  "deletedBranchAbsent": true,
+  "originalBranchPreserved": true,
+  "remainingBranchIds": [
+    "br-super-sound-b7urizmd",
+    "br-bitter-bonus-b7i0vfko"
+  ],
+  "auxiliaryServerPid": 36848,
+  "auxiliaryServerStopped": true
+}

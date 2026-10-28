@@ -1,0 +1,162 @@
+{
+  "recordedAt": "2026-10-28T17:11:56.792970+00:00",
+  "batches": [
+    {
+      "name": "integration-baseline",
+      "sourceRevision": "21f89ae167",
+      "totals": {
+        "tests": 130,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "buildSuccess": true,
+      "logSha256": "dade87bf5c856607f3b34455035505ff3fd937b44e9a739a2bb8855cb9277df4",
+      "suites": [
+        {
+          "suite": "org.praxisplatform.uischema.authoring.SemanticMetadataReviewerTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "org.praxisplatform.uischema.bulk.BulkDiscoveryProjectionFailureTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "org.praxisplatform.uischema.bulk.BulkHttpFailureContractTest",
+          "tests": 16,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "org.praxisplatform.uischema.bulk.BulkLifecycleReadBatchTest",
+          "tests": 23,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "org.praxisplatform.uischema.dto.PartialUpdateInputTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "org.praxisplatform.uischema.extension.FilterableBetweenListDetectionTest",
+          "tests": 16,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "org.praxisplatform.uischema.filter.specification.PredicateBuildersTest",
+          "tests": 16,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "org.praxisplatform.uischema.openapi.OpenApiPublicationInstallationTest",
+          "tests": 10,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "org.praxisplatform.uischema.openapi.OpenApiPublicationPreparationTest",
+          "tests": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "org.praxisplatform.uischema.options.service.jpa.JpaLookupSelectionAliasTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "org.praxisplatform.uischema.rest.exceptionhandler.GlobalExceptionHandlerTest",
+          "tests": 29,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "name": "transport-and-boundaries",
+      "sourceRevision": "3822eca0aff4592566e3765171e2463f13efee3f",
+      "totals": {
+        "tests": 49,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "buildSuccess": true,
+      "logSha256": "c120d9b02fca29edb4d9e0b59465578084b23933610c40af8ba647474b53b5ff",
+      "suites": [
+        {
+          "suite": "org.praxisplatform.uischema.bulk.BulkCatalogFunctionBodiesTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "org.praxisplatform.uischema.bulk.BulkExecutionInfrastructureTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "org.praxisplatform.uischema.bulk.BulkLifecycleReadBatchTest",
+          "tests": 23,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "suite": "org.praxisplatform.uischema.bulk.BulkTableAclSnapshotTest",
+          "tests": 18,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "name": "live-neon-authority",
+      "sourceRevision": "3822eca0aff4592566e3765171e2463f13efee3f",
+      "totals": {
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "buildSuccess": true,
+      "logSha256": "8745f44c12ea7d43a3fb944ee2bfeca5d6821cad0399ad9205e51a97a0a74cbe",
+      "suites": [
+        {
+          "suite": "org.praxisplatform.uischema.bulk.BulkLiveRoleAttestationNeonTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "countsAreSeparateRuns": true,
+  "neonBranch": "br-winter-bird-b7sa7euc",
+  "liveProof": "Grouped and ungrouped ACL parity; excessive grant rejected after warmup; original column grants restored; operational access succeeds after restoration"
+}

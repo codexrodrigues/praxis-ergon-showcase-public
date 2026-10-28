@@ -1,31 +1,52 @@
-# Scorecard — correções da revisão 2013442
+# Scorecard — consolidação R1–R7
 
-**STATIC PASS nos seis recursos; aceite operacional pendente, sem liberação para merge.**
+**Cobertura de campos: 100% nos seis recursos. Veredito global: FAILED; não pronto para merge.**
 
-O `mvn test` integral executou 74 casos: 4 falhas, 0 erros e 0 ignorados. A repetição focal executou 5 casos: 3 passaram e 2 falharam. O teste de segregação foi corrigido e passou por HTTP real; schemas e analytics passaram na repetição. Em conjunto, 73 dos 74 casos distintos possuem prova positiva nesta rodada. Isso **não equivale a uma execução Maven integral verde**.
+A campanha integral executou 74 testes: 73 aprovados, uma falha 503 na confirmação
+de lote de pessoas, zero erros e zero ignorados. O ciclo completo de vínculos passou.
+O consumidor HTTP passou em execução completa após corrigir os insumos da prova.
+O auditor atual acrescentou seis decisões pendentes de adoção de duplicate-draft;
+com HTTP/Bulk pendentes, há oito pendências globais. Não há hash de fonte obsoleto.
 
-O fluxo positivo de lote de vínculos recebeu 503 de publicação durante a confirmação; a repetição focal foi bloqueada pelo timeout de reconciliação. O tratamento seguro evita 500 e não autoriza replay automático, mas a disponibilidade permanece uma lacuna operacional.
-
-| Recurso | Completude estática | Prova de negócio/contrato e lacunas |
+| Recurso | Cobertura de negócio | Evidência e lacuna vigente |
 |---|---:|---|
-| Órgãos | 12/12, 100% | Gates cadastrais e metadados; limites de identidade corporativa permanecem |
-| Cargos | 17/17, 100% | Escopo antes do limite, aglutinação concorrente, SET/CLEAR nas duas modalidades de lote comprovados |
-| Pessoas | 68/68, 100% | PATCH com presença/null e SET/CLEAR nas duas modalidades de lote comprovados |
-| Vínculos | 59/59, 100% | PATCH, regras e preview acionável comprovados; ciclo positivo completo de lote pendente por 503 |
-| Setores | 12/12, 100% | Contratos/diretório comprovados; sem aceitação visual de tabela |
-| Documentos legais | 13/13, 100% | Contratos/diretório comprovados; sem aceitação visual de tabela |
+| Órgãos | 12/12 (100%) | Domínio/metadados aprovados; adoção de duplicate-draft pendente |
+| Cargos | 17/17 (100%) | Concorrência, escopo e consumidor de lote comprovados; decisão de adoção pendente |
+| Pessoas | 68/68 (100%) | PATCH/domínio aprovados; cenário Java de lote interrompido por 503; decisão de adoção pendente |
+| Vínculos | 59/59 (100%) | Ciclo completo UNIFORM/PER_ITEM/DOMAIN_COMMAND, QUERY/exclusão e recibos aprovados; decisão de adoção pendente |
+| Setores | 12/12 (100%) | Diretório e contratos aprovados; decisão de adoção pendente; sem aceite visual |
+| Documentos legais | 13/13 (100%) | Diretório e contratos aprovados; decisão de adoção pendente; sem aceite visual |
 
-SDK: 130 testes focais aprovados; auditor: 45 regressões aprovadas. Angular: 17 specs e builds Core/Table, pureza aprovada, alteração sob responsabilidade de agente separado no PR #661. O estado da prova HTTP ampliada consta da [campanha](PILLARS-CAMPAIGN.json).
+Evidências: [74 casos](consolidation-full-test-results.json),
+[consumidor](angular-consumer-proof.json), [SDK](consolidation-sdk-provenance.json),
+[preservação](consolidation-neon-schema-comparison.json),
+[Neon administrativo](consolidation-neon-admin.json), [campanha](PILLARS-CAMPAIGN.json).
+Auditor: 46 regressões aprovadas; inventário atualizado por outra frente, preservado.
 
-Evidências: [execução integral](review-full-test-results.json), [repetição focal](review-focal-test-results.json), [auditoria operacional](review-operational-audit.md), [proveniência SDK](review-sdk-provenance.json), [schema preservado](review-neon-schema-comparison.json).
+As decisões de duplicate-draft não são requisitos de implementação automática.
+Config/rules-engine permanece fase futura aprovada. Artefatos públicos, identidade
+federada/política organizacional e SLO corporativo não estão certificados.
 
-Limites: candidato privado `8.0.0-bulk.308-review-SNAPSHOT`; rc.179 não certificada; sem instalação npm pública, avaliação visual desktop/narrow ou prontidão corporativa. Config/rules-engine permanece fase futura aprovada. Não houve merge/release.
+## Saída integral do auditor com fontes do candidato
 
 # Praxis Resource Completeness, Quick View & Editorial Quality Audit
 - **Project**: `D:\Developer\praxis-plataform\praxis-ergon-showcase`
 - **Mapped JPA Entities**: 16
 - **Resource Controllers**: 6
+- **Resolved controller bindings**: 6
+- **Metadata source**: `.local\m2-bulk308\io\github\codexrodrigues\praxis-metadata-starter\8.0.0-bulk.308-consolidation.1-SNAPSHOT\praxis-metadata-starter-8.0.0-bulk.308-consolidation.1-SNAPSHOT-sources.jar`; declaration SHA-256 `2792bd94656a6c76913fbf77e06719f92af6573ca97d795a63efe3c4afb1aa01`
+- **Expected inventory**: `D:\Developer\praxis-plataform\scripts\workspace\resource-audit-inventories\praxis-ergon-showcase.json`
 
+## Inventory and duplicate-draft adoption
+Adoption is an attributed review decision, separate from static binding. Code, annotations, interfaces and boolean getters do not prove non-persistence or runtime behavior.
+| Resource | Controller | Binding | Duplicate-draft decision | Reason |
+|---|---|---|---|---|
+| administracao-pessoal.cargos | CargoController | CargoResponseDTO, Integer, CargoFilterDTO, CreateCargoDTO, UpdateCargoDTO | pendente | Domain applicability and adoption review pending; T04 does not approve implementation or non-persistence. |
+| administracao-pessoal.documentos-legais | DocumentoLegalController | DocumentoLegalResponseDTO, Long, DocumentoLegalFilterDTO | pendente | Domain applicability and adoption review pending; T04 does not approve implementation or non-persistence. |
+| administracao-pessoal.empresas | OrgaoController | OrgaoResponseDTO, Integer, OrgaoFilterDTO, CreateOrgaoDTO, UpdateOrgaoDTO | pendente | Domain applicability and adoption review pending; T04 does not approve implementation or non-persistence. |
+| administracao-pessoal.funcionarios | ServidorPessoaController | ServidorPessoaResponseDTO, Long, ServidorPessoaFilterDTO, CreateServidorPessoaDTO, UpdateServidorPessoaDTO | pendente | Domain applicability and adoption review pending; T04 does not approve implementation or non-persistence. |
+| administracao-pessoal.setores | SetorController | SetorResponseDTO, String, SetorFilterDTO | pendente | Domain applicability and adoption review pending; T04 does not approve implementation or non-persistence. |
+| administracao-pessoal.vinculos | VinculoController | VinculoResponseDTO, VinculoId, VinculoFilterDTO, CreateVinculoDTO, UpdateVinculoDTO | pendente | Domain applicability and adoption review pending; T04 does not approve implementation or non-persistence. |
 - **Scope**: static source evidence; not HTTP, concurrency, parity or runtime approval. N+1 requires cold full-query/page/cursor/export measurements; this source audit cannot certify it.
 
 ## 1. Resource & Capability Scorecard
@@ -44,4 +65,17 @@ Limites: candidato privado `8.0.0-bulk.308-review-SNAPSHOT`; rc.179 não certifi
 <!-- administracao-pessoal.vinculos: functional-accountability=59/59; command-managed=agencia,banco,cargoComissao,conta,correio,descontaIr,documentoLegalId,dtHomologEstagio,dtPgtoAte,dtaposent,dtfimCessao,dtiniCessao,dtvac,fatorProporcAposent,formavac,funcaoReq,jornadaSemanal,motivovac,orgaoReq,planoprev,regimeprev,setor,setorExercicio,situacao,tipoOnusReq,tipoReq,tipoRessarcReq,tipoapos,tipopag -->
 | `administracao-pessoal.vinculos` | `Vinculo` | 59 | 74 | 100.0% | 59/59 | 33 | 12 ops | 6 | 6 | YES | 13 (13) | 3 | 9 | 2 | 4 | 1 | 2 | 1 | 10 | 4 | 0 | **PASS** |
 
-## 4. Verdict: STATIC PASS (source gates satisfied; runtime and architectural review still required)
+## Operational Evidence Receipts
+Hashed receipts are checked for freshness; independent review remains required.
+- bulkOperations: pending
+- http: pending
+
+## 4. Verdict: FAILED (8 structural or operational gate failure(s))
+- [x] administracao-pessoal.cargos: duplicate-draft adoption decision pending (not a requirement to implement copying)
+- [x] administracao-pessoal.documentos-legais: duplicate-draft adoption decision pending (not a requirement to implement copying)
+- [x] administracao-pessoal.empresas: duplicate-draft adoption decision pending (not a requirement to implement copying)
+- [x] administracao-pessoal.funcionarios: duplicate-draft adoption decision pending (not a requirement to implement copying)
+- [x] administracao-pessoal.setores: duplicate-draft adoption decision pending (not a requirement to implement copying)
+- [x] administracao-pessoal.vinculos: duplicate-draft adoption decision pending (not a requirement to implement copying)
+- [x] bulkOperations: pending
+- [x] http: pending
