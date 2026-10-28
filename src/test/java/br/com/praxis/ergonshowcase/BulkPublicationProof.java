@@ -12,8 +12,8 @@ final class BulkPublicationProof {
   private BulkPublicationProof() {}
   static void publish(TestRestTemplate http, boolean reset) throws Exception {
     // Bound a broken network independently of the SDK's operational budgets.
-    var transport=new org.springframework.http.client.SimpleClientHttpRequestFactory();
-    transport.setConnectTimeout(java.time.Duration.ofSeconds(10));
+    var client=java.net.http.HttpClient.newBuilder().connectTimeout(java.time.Duration.ofSeconds(10)).build();
+    var transport=new org.springframework.http.client.JdkClientHttpRequestFactory(client);
     transport.setReadTimeout(java.time.Duration.ofSeconds(90));
     http.getRestTemplate().setRequestFactory(transport);
     var generations=new LinkedHashMap<String,Long>();
@@ -44,8 +44,23 @@ final class BulkPublicationProof {
   private static void readControls(Map<String,Long> generations,Map<String,String> states) throws Exception {
     try(var connection=DriverManager.getConnection(System.getenv("SPRING_DATASOURCE_URL"),System.getenv("BULK_OWNER_USERNAME"),System.getenv("BULK_OWNER_PASSWORD"));
         var statement=connection.prepareStatement("select operation_id,generation,state from praxis_bulk.praxis_bulk_operation_control where namespace_id=? order by operation_id")) {
+      warmupCatalog(connection);
       statement.setString(1,"ergon-showcase");
       try(var rows=statement.executeQuery()) { while(rows.next()) { generations.put(rows.getString(1),rows.getLong(2));states.put(rows.getString(1),rows.getString(3)); } }
+    }
+  }
+
+  /** Preparação explícita da prova: lê TOAST e catálogos sem modificar grants ou prazos do kernel. */
+  private static void warmupCatalog(java.sql.Connection connection) throws java.sql.SQLException {
+    for (String sql : List.of(
+        "select sum(length(p.prosrc)), count(sha256(convert_to(p.prosrc,'UTF8'))) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='praxis_bulk'",
+        "select count(c.*) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='praxis_bulk'",
+        "select count(a.*) from pg_attribute a join pg_class c on c.oid=a.attrelid join pg_namespace n on n.oid=c.relnamespace where n.nspname='praxis_bulk'",
+        "select count(t.*) from pg_trigger t join pg_class c on c.oid=t.tgrelid join pg_namespace n on n.oid=c.relnamespace where n.nspname='praxis_bulk'",
+        "select count(r.*) from pg_roles r")) {
+      try (var query = connection.prepareStatement(sql); var rows = query.executeQuery()) {
+        if (!rows.next()) throw new java.sql.SQLException("Catalog warmup returned no aggregate");
+      }
     }
   }
 }

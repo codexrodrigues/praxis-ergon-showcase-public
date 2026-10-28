@@ -119,6 +119,210 @@
       }
     }
   ],
+  "bulkContracts": [
+    {
+      "resource": "vinculos",
+      "operationId": "bulk-update",
+      "mode": "UNIFORM_UPDATE",
+      "writableFields": [
+        "agencia",
+        "banco",
+        "correio",
+        "descontaIr",
+        "jornadaSemanal",
+        "planoprev",
+        "regimeprev",
+        "setor",
+        "setorExercicio",
+        "tipopag"
+      ],
+      "clearableFields": [
+        "agencia",
+        "banco",
+        "planoprev",
+        "regimeprev",
+        "setor",
+        "setorExercicio",
+        "tipopag"
+      ],
+      "evaluation": {
+        "group": "api-ergon-vinculos",
+        "operationId": "ergon.vinculos.bulk.uniform.evaluation",
+        "path": "/api/ergon/vinculos/bulk/update/evaluation",
+        "method": "POST"
+      },
+      "confirmation": {
+        "group": "api-ergon-vinculos",
+        "operationId": "ergon.vinculos.bulk.uniform",
+        "path": "/api/ergon/vinculos/bulk/update",
+        "method": "POST"
+      }
+    },
+    {
+      "resource": "vinculos",
+      "operationId": "bulk-update-items",
+      "mode": "PER_ITEM_UPDATE",
+      "writableFields": [
+        "agencia",
+        "banco",
+        "correio",
+        "descontaIr",
+        "jornadaSemanal",
+        "planoprev",
+        "regimeprev",
+        "setor",
+        "setorExercicio",
+        "tipopag"
+      ],
+      "clearableFields": [
+        "agencia",
+        "banco",
+        "planoprev",
+        "regimeprev",
+        "setor",
+        "setorExercicio",
+        "tipopag"
+      ],
+      "evaluation": {
+        "group": "api-ergon-vinculos",
+        "operationId": "ergon.vinculos.bulk.items.evaluation",
+        "path": "/api/ergon/vinculos/bulk/update-items/evaluation",
+        "method": "POST"
+      },
+      "confirmation": {
+        "group": "api-ergon-vinculos",
+        "operationId": "ergon.vinculos.bulk.items",
+        "path": "/api/ergon/vinculos/bulk/update-items",
+        "method": "POST"
+      }
+    },
+    {
+      "resource": "servidor-pessoas",
+      "operationId": "bulk-update",
+      "mode": "UNIFORM_UPDATE",
+      "writableFields": [
+        "agencia",
+        "banco",
+        "cidadeender",
+        "escolaridade",
+        "racaCor",
+        "tipopag",
+        "ufender"
+      ],
+      "clearableFields": [
+        "agencia",
+        "banco",
+        "cidadeender",
+        "escolaridade",
+        "racaCor",
+        "tipopag",
+        "ufender"
+      ],
+      "evaluation": {
+        "group": "api-ergon-servidor-pessoas",
+        "operationId": "ergon.funcionarios.bulk.uniform.evaluation",
+        "path": "/api/ergon/servidor-pessoas/bulk/update/evaluation",
+        "method": "POST"
+      },
+      "confirmation": {
+        "group": "api-ergon-servidor-pessoas",
+        "operationId": "ergon.funcionarios.bulk.uniform",
+        "path": "/api/ergon/servidor-pessoas/bulk/update",
+        "method": "POST"
+      }
+    },
+    {
+      "resource": "servidor-pessoas",
+      "operationId": "bulk-update-items",
+      "mode": "PER_ITEM_UPDATE",
+      "writableFields": [
+        "agencia",
+        "banco",
+        "cidadeender",
+        "escolaridade",
+        "racaCor",
+        "tipopag",
+        "ufender"
+      ],
+      "clearableFields": [
+        "agencia",
+        "banco",
+        "cidadeender",
+        "escolaridade",
+        "racaCor",
+        "tipopag",
+        "ufender"
+      ],
+      "evaluation": {
+        "group": "api-ergon-servidor-pessoas",
+        "operationId": "ergon.funcionarios.bulk.items.evaluation",
+        "path": "/api/ergon/servidor-pessoas/bulk/update-items/evaluation",
+        "method": "POST"
+      },
+      "confirmation": {
+        "group": "api-ergon-servidor-pessoas",
+        "operationId": "ergon.funcionarios.bulk.items",
+        "path": "/api/ergon/servidor-pessoas/bulk/update-items",
+        "method": "POST"
+      }
+    },
+    {
+      "resource": "cargos",
+      "operationId": "bulk-update",
+      "mode": "UNIFORM_UPDATE",
+      "writableFields": [
+        "categoria",
+        "controleVaga",
+        "escolaridade",
+        "subcategoria",
+        "tipoCargo"
+      ],
+      "clearableFields": [
+        "escolaridade",
+        "subcategoria"
+      ],
+      "evaluation": {
+        "group": "api-ergon-cargos",
+        "operationId": "ergon.cargos.bulk.uniform.evaluation",
+        "path": "/api/ergon/cargos/bulk/update/evaluation",
+        "method": "POST"
+      },
+      "confirmation": {
+        "group": "api-ergon-cargos",
+        "operationId": "ergon.cargos.bulk.uniform",
+        "path": "/api/ergon/cargos/bulk/update",
+        "method": "POST"
+      }
+    },
+    {
+      "resource": "cargos",
+      "operationId": "bulk-update-items",
+      "mode": "PER_ITEM_UPDATE",
+      "writableFields": [
+        "categoria",
+        "controleVaga",
+        "escolaridade",
+        "subcategoria",
+        "tipoCargo"
+      ],
+      "clearableFields": [
+        "escolaridade",
+        "subcategoria"
+      ],
+      "evaluation": {
+        "group": "api-ergon-cargos",
+        "operationId": "ergon.cargos.bulk.items.evaluation",
+        "path": "/api/ergon/cargos/bulk/update-items/evaluation",
+        "method": "POST"
+      },
+      "confirmation": {
+        "group": "api-ergon-cargos",
+        "operationId": "ergon.cargos.bulk.items",
+        "path": "/api/ergon/cargos/bulk/update-items",
+        "method": "POST"
+      }
+    }
+  ],
   "staleResultProtected": true,
   "rejectionVisible": true,
   "fixtureRemoved": true

@@ -1,6 +1,36 @@
 # Relatório de rodada — issue 305
 
-## Rodada atual — quatro lacunas dos pilares
+## Fechamento atual — Omnibox, pilares e Bulking
+
+Esta seção prevalece sobre as campanhas históricas abaixo. Mudança classificada como contrato público/transversal; plano e impacto em [PLANO-20-PILARES.md](PLANO-20-PILARES.md). Os quatro passos solicitados foram concluídos com o schema Neon preservado.
+
+| Validação | Resultado | Evidência |
+|---|---|---|
+| SDK consolidado | 33 testes focais; instalação privada com disjunção OR e DISTINCT, sem reintrodução de domínio no starter | [proveniência e hashes](evidence/final-sdk-provenance.json) |
+| `mvn test` integral | 66 testes, zero falhas, zero erros, zero ignorados: Bulk 4, Neon 52, Pilares 6, Metadados 4 | [casos e durações](evidence/final-test-results.json) |
+| Auditor canônico | 45 regressões; patch aplicado em Git isolado; `OVERALL STATUS: PASS (static + operational runtime evidence)` | [scorecard dos seis recursos](evidence/SCORECARD-COMPLETUDE.md), [transporte](tooling/README.md) |
+| Contratos e consumo Angular | 6 schemas, 6 execuções reativas e 6 contratos de lote; resultado obsoleto protegido, rejeição visível, fixture removida | [recibo](evidence/angular-consumer-proof.json), [fontes](evidence/angular-consumer-input-hashes.json) |
+| Preservação do domínio | 16 tabelas e 392 colunas idênticas à branch original; `ddl-auto: validate`, `flyway.enabled: false` | [comparação estrutural](evidence/final-neon-schema-comparison.json) |
+
+`BulkPublicationProof` aquece explicitamente TOAST de `pg_proc.prosrc` e catálogos antes da publicação; não altera grants, estado de autorização ou janela LIVE do kernel. Cinco testes de discovery saíram da transação operacional da thread MockMvc. Os dois com gravação usam fixtures próprias com limpeza em `finally`; o teste institucional não modifica mais `orgaos/1`. A primeira rodada desta execução identificou ainda transporte Java sem suporte a PATCH e fixture de órgão sem campos obrigatórios. Ambos foram corrigidos antes da repetição integral verde; não houve supressão de testes ou relaxamento de assertions.
+
+Busca ampla usa caminhos JPA reais: pessoa reúne nome, nome social, CPF, mãe, pai e e-mail; vínculo reúne matrícula, `pessoa.nome`, `pessoa.cpf`, setor e motivo; cargo reúne nome, categoria, escolaridade e tipo. A prova pesquisa nome/CPF/mãe pelo mesmo parâmetro, testa ausência e identidade sem duplicação. QUERY de lote usa `buscaAmpla` junto de BETWEEN e exclusão. O teste nativo inclui 43 DTOs, inclusive as quatro bases cadastrais abstratas.
+
+Referências de domínio consultadas: `D:/Developer/Techne/ErgonX/migracao/docs-legado/v7x/aps/funcionarios.tab`, `cargos_.tab` e `VINCULOS.TAB`. Nenhuma descrição foi gerada por heurística ou script em lote. Nenhuma consulta ao código do quickstart.
+
+Limites de reprodução: o candidato é **`8.0.0-bulk.308-SNAPSHOT`**, instalado em `.local/m2-bulk308`, derivado de `f9519fb3da` mais a consolidação fornecida pelo usuário. A consolidação permanece não commitada na worktree do SDK, preservada sem sobrescrita. O POM do host continua em rc.179. O comando validado é `mvn -Dpraxis.core.version=8.0.0-bulk.308-SNAPSHOT -Dmaven.repo.local=.local/m2-bulk308 test`; não se declara aprovação com rc.179 puro ou disponibilidade pública das correções.
+
+Angular foi executado em harness headless com fontes oficiais, não em navegador nem contra pacote npm publicado. Paridade significa apenas o escopo da matriz dos pilotos; decisões governadas externas Config/rules-engine continuam na fase futura aprovada pelo responsável. O gate comprova fonte e recibos íntegros, sem substituir revisão arquitetural independente antes do merge. Não houve merge ou release.
+
+Fricções de guidance: testes MockMvc de discovery devem explicitar a fronteira sem transação operacional e limpeza de fixtures commitadas; a prova de publicação deve preparar catálogos frios sem mudar o orçamento do kernel. Os guias consolidados já cobrem `relations`; a companion skill de filtros ainda precisa refletir esse contrato. A árvore de skills contém alterações preexistentes e não foi sobrescrita nem sincronizada; permanecem os gaps de guidance registrados no histórico.
+
+Derivados atualizados: schemas/recibos locais, manifesto de gates, campanha, scorecard, relatório e transporte do auditor. Não houve mudança nas libs Angular ou nova API canônica nesta rodada, portanto não há alteração adicional de landing, recipes ou corpus HTTP público. O contrato de busca ampla já veio consolidado no SDK e em seus guias pelo usuário.
+
+A repetição Angular motivada por uma alteração concorrente de `resource-discovery.service.ts` encontrou um timeout de capabilities enquanto a suíte Java exercitava discovery. A prova isolada posterior, no JAR empacotado em 8080, passou com os hashes novos. Esse achado não certifica capacidade sob concorrência ou margem de latência do control plane; o prazo do kernel foi mantido.
+
+A branch descartável `br-soft-wave-b7ph94z3` foi excluída após registrar as provas e verificar zero fixtures residuais. A listagem posterior confirmou sua ausência e a preservação da original `br-super-sound-b7urizmd`: [recibo de exclusão](evidence/final-neon-deletion.json). O servidor empacotado e os processos de testes desta rodada foram encerrados.
+
+## Histórico — quatro lacunas dos pilares
 
 Esta seção prevalece sobre os resultados históricos. Classificação, impacto e fases: [PLANO-20-PILARES.md](PLANO-20-PILARES.md).
 

@@ -17,6 +17,12 @@ import org.praxisplatform.uischema.filter.dto.GenericFilterDTO;
 @Setter
 @Schema(description = "Critérios de pesquisa de vínculos na administração de pessoal.")
 public class VinculoFilterDTO implements GenericFilterDTO {
+  @Schema(description = "Pesquisa assentamentos por trecho da matrícula, nome ou CPF da pessoa vinculada, código de lotação ou observação funcional. A correspondência em qualquer atributo atende à busca, sem dispensar os outros filtros ou o escopo de acesso.", example = "REV-305")
+  @UISchema(label = "Busca ampla", group = "Pesquisa", order = 1, icon = "search", type = org.praxisplatform.uischema.FieldDataType.TEXT, controlType = org.praxisplatform.uischema.FieldControlType.INPUT)
+  @Filterable(operation = FilterOperation.LIKE, relations = {"matric", "pessoa.nome", "pessoa.cpf", "setor", "motivo"})
+  @DomainGovernance(kind = DomainGovernanceKind.PRIVACY, classification = DomainClassification.CONFIDENTIAL, dataCategory = DomainDataCategory.PERSONAL, reason = "Critério pode identificar a pessoa ou conter informação do assentamento funcional.", aiUsage = @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private String buscaAmpla;
+
   @Schema(description = "Número funcional exato da pessoa cujos vínculos serão consultados.")
   @UISchema(
       label = "Pessoa servidora",

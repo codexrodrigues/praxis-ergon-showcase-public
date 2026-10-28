@@ -17,6 +17,12 @@ import org.praxisplatform.uischema.filter.dto.GenericFilterDTO;
 @Setter
 @Schema(description = "Critérios de pesquisa de pessoas servidoras na administração de pessoal.")
 public class ServidorPessoaFilterDTO implements GenericFilterDTO {
+  @Schema(description = "Localiza a pessoa por trecho do nome civil ou social, CPF, filiação materna ou paterna ou endereço eletrônico. Basta um desses atributos corresponder; os demais critérios informados continuam restringindo o resultado.", example = "Maria")
+  @UISchema(label = "Busca ampla", group = "Pesquisa", order = 1, icon = "search", type = org.praxisplatform.uischema.FieldDataType.TEXT, controlType = org.praxisplatform.uischema.FieldControlType.INPUT)
+  @Filterable(operation = FilterOperation.LIKE, relations = {"nome", "nomeSocial", "cpf", "mae", "pai", "eMail"})
+  @DomainGovernance(kind = DomainGovernanceKind.PRIVACY, classification = DomainClassification.CONFIDENTIAL, dataCategory = DomainDataCategory.PERSONAL, reason = "Busca cadastral pode conter identificação civil, filiação ou contato pessoal.", aiUsage = @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private String buscaAmpla;
+
   @Schema(
       description =
           "Seleciona pessoas com ao menos um indicador específico de deficiência registrado.")

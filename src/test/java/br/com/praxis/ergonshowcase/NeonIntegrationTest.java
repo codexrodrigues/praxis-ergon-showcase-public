@@ -12,8 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 
-/** Integração real com PostgreSQL Neon; mutações de cada teste são revertidas. */
+/** Integração Neon: rollback por padrão; provas de discovery com commit limpam fixtures em finally. */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Transactional
@@ -21,6 +22,16 @@ import org.springframework.transaction.annotation.Transactional;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class NeonIntegrationTest {
   @Autowired org.springframework.boot.test.web.client.TestRestTemplate publicationHttp;
+  @Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;
+  @Autowired org.springframework.transaction.PlatformTransactionManager transactionManager;
+
+  private void cleanupCommandFixture() {
+    new org.springframework.transaction.support.TransactionTemplate(transactionManager).executeWithoutResult(status -> {
+      jdbc.update("delete from afastamentos where numfunc = 9505");
+      jdbc.update("delete from vinculos where numfunc = 9505");
+      jdbc.update("delete from funcionarios where numero = 9505");
+    });
+  }
   @org.springframework.beans.factory.annotation.Value("${showcase.security.username}") String publicationUsername;
   @org.springframework.beans.factory.annotation.Value("${showcase.security.password}") String publicationPassword;
 
@@ -647,49 +658,54 @@ class NeonIntegrationTest {
   }
 
   @Test
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   void reviewAfastamentoRoundTripPersistsLicenseAndVersion() throws Exception {
-    String uri = reviewFixture();
-    String stale = revisionEtag(uri);
-    reviewActionAllowed(uri, "registrar-afastamento", true);
-    reviewActionAllowed(uri, "encerrar-afastamento", false);
-    var response =
-        revisionCommand(uri + "/actions/registrar-afastamento", reviewAfastamentoBody())
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.situacao").value("AFASTADO"))
-            .andReturn()
-            .getResponse();
-    Long afastamento =
-        json.readTree(response.getContentAsString()).path("afastamentoAbertoId").longValue();
-    assertThat(afastamento).isPositive();
-    reviewActionAllowed(uri, "registrar-afastamento", false);
-    reviewActionAllowed(uri, "encerrar-afastamento", true);
-    mvc.perform(
-            post(uri + "/actions/encerrar-afastamento")
-                .header("If-Match", stale)
-                .contentType("application/json")
-                .content(
-                    "{\"afastamentoId\":"
-                        + afastamento
-                        + ",\"dtfim\":\"2026-10-10\",\"documentoLegalId\":"
-                        + reviewDocumento()
-                        + "}"))
-        .andExpect(status().isPreconditionFailed());
-    revisionCommand(
-            uri + "/actions/encerrar-afastamento",
-            "{\"afastamentoId\":"
-                + afastamento
-                + ",\"dtfim\":\"2026-10-10\",\"documentoLegalId\":"
-                + reviewDocumento()
-                + "}")
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.situacao").value("ATIVO"));
-    reviewActionAllowed(uri, "registrar-afastamento", true);
-    reviewActionAllowed(uri, "encerrar-afastamento", false);
-    em.clear();
-    var a = em.find(br.com.praxis.ergonshowcase.domain.Afastamento.class, afastamento);
-    assertThat(a.getQuantidadeDias()).isEqualTo(10);
-    assertThat(a.getNumfunc()).isEqualTo(9505L);
-    assertThat(a.getDtfim()).isEqualTo(java.time.LocalDate.of(2026, 10, 10));
+    try {
+      String uri = reviewFixture();
+      String stale = revisionEtag(uri);
+      reviewActionAllowed(uri, "registrar-afastamento", true);
+      reviewActionAllowed(uri, "encerrar-afastamento", false);
+      var response =
+          revisionCommand(uri + "/actions/registrar-afastamento", reviewAfastamentoBody())
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.situacao").value("AFASTADO"))
+              .andReturn()
+              .getResponse();
+      Long afastamento =
+          json.readTree(response.getContentAsString()).path("afastamentoAbertoId").longValue();
+      assertThat(afastamento).isPositive();
+      reviewActionAllowed(uri, "registrar-afastamento", false);
+      reviewActionAllowed(uri, "encerrar-afastamento", true);
+      mvc.perform(
+              post(uri + "/actions/encerrar-afastamento")
+                  .header("If-Match", stale)
+                  .contentType("application/json")
+                  .content(
+                      "{\"afastamentoId\":"
+                          + afastamento
+                          + ",\"dtfim\":\"2026-10-10\",\"documentoLegalId\":"
+                          + reviewDocumento()
+                          + "}"))
+          .andExpect(status().isPreconditionFailed());
+      revisionCommand(
+              uri + "/actions/encerrar-afastamento",
+              "{\"afastamentoId\":"
+                  + afastamento
+                  + ",\"dtfim\":\"2026-10-10\",\"documentoLegalId\":"
+                  + reviewDocumento()
+                  + "}")
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.situacao").value("ATIVO"));
+      reviewActionAllowed(uri, "registrar-afastamento", true);
+      reviewActionAllowed(uri, "encerrar-afastamento", false);
+      em.clear();
+      var a = em.find(br.com.praxis.ergonshowcase.domain.Afastamento.class, afastamento);
+      assertThat(a.getQuantidadeDias()).isEqualTo(10);
+      assertThat(a.getNumfunc()).isEqualTo(9505L);
+      assertThat(a.getDtfim()).isEqualTo(java.time.LocalDate.of(2026, 10, 10));
+    } finally {
+      cleanupCommandFixture();
+    }
   }
 
   @Test
@@ -730,26 +746,34 @@ class NeonIntegrationTest {
   }
 
   @Test
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   void reviewInstitutionalActionsProtectStateAndETag() throws Exception {
-    String uri = "/api/ergon/orgaos/1";
-    String stale = revisionEtag(uri);
-    reviewActionAllowed(uri, "inativar-orgao", true);
-    reviewActionAllowed(uri, "ativar-orgao", false);
-    revisionCommand(uri + "/actions/inativar-orgao", "{}")
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.ativa").value(false));
-    reviewActionAllowed(uri, "inativar-orgao", false);
-    reviewActionAllowed(uri, "ativar-orgao", true);
-    mvc.perform(
-            post(uri + "/actions/ativar-orgao")
-                .header("If-Match", stale)
-                .contentType("application/json")
-                .content("{}"))
-        .andExpect(status().isPreconditionFailed());
-    revisionCommand(uri + "/actions/ativar-orgao", "{}")
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.ativa").value(true));
-    revisionCommand(uri + "/actions/ativar-orgao", "{}").andExpect(status().isConflict());
+    try {
+      mvc.perform(post("/api/ergon/orgaos").contentType("application/json")
+          .content("{\"empresa\":9505,\"nome\":\"Órgão para prova de transição\",\"razao\":\"Ente para prova de transição\",\"cnpj\":\"00000000950500\",\"ufSigla\":\"SP\",\"municipio\":\"São Paulo\"}"))
+          .andExpect(status().isCreated());
+      String uri = "/api/ergon/orgaos/9505";
+      String stale = revisionEtag(uri);
+      reviewActionAllowed(uri, "inativar-orgao", true);
+      reviewActionAllowed(uri, "ativar-orgao", false);
+      revisionCommand(uri + "/actions/inativar-orgao", "{}")
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.ativa").value(false));
+      reviewActionAllowed(uri, "inativar-orgao", false);
+      reviewActionAllowed(uri, "ativar-orgao", true);
+      mvc.perform(
+              post(uri + "/actions/ativar-orgao")
+                  .header("If-Match", stale)
+                  .contentType("application/json")
+                  .content("{}"))
+          .andExpect(status().isPreconditionFailed());
+      revisionCommand(uri + "/actions/ativar-orgao", "{}")
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.ativa").value(true));
+      revisionCommand(uri + "/actions/ativar-orgao", "{}").andExpect(status().isConflict());
+    } finally {
+      jdbc.update("delete from empresas where empresa = 9505");
+    }
   }
 
   @Test
@@ -899,6 +923,7 @@ class NeonIntegrationTest {
   }
 
   @Test
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   void revisionDiscoveryAndRichSchemas() throws Exception {
     for (String resource : new String[] {"orgaos", "cargos", "servidor-pessoas", "vinculos"}) {
       String schema =
@@ -1173,6 +1198,7 @@ class NeonIntegrationTest {
   }
 
   @Test
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   void fourResourcesExposeDataAndCapabilities() throws Exception {
     for (String resource : new String[] {"orgaos", "cargos", "servidor-pessoas", "vinculos"}) {
       mvc.perform(get("/api/ergon/" + resource + "/capabilities")).andExpect(status().isOk());
@@ -1302,6 +1328,7 @@ class NeonIntegrationTest {
   }
 
   @Test
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   void structuralAndSemanticMetadataArePublished() throws Exception {
     for (String resource : new String[] {"orgaos", "cargos", "servidor-pessoas", "vinculos"}) {
       for (String type : new String[] {"request", "response"}) {

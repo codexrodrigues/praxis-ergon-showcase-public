@@ -1,141 +1,187 @@
 {
-  "sourceSha256": "972022ef089dc1c4f846f5659cf6206e519e743b453a4a3ad77778a7bb755227",
-  "validatedAt": "2026-10-28T11:42:44.519103+00:00",
-  "baselineCommit": "e6b9fa0",
+  "sourceSha256": "28efa3053b9631383627c007a56023c1532c542d325c864010fc6f44df2b80c4",
+  "validatedAt": "2026-10-28T13:09:59.022779+00:00",
+  "baselineCommit": "670dff740f1c3fdb028b7ddac52b83b26f0770a8",
   "gates": {
     "schema": {
-      "status": "pending",
+      "status": "pass",
       "artifacts": [
         {
           "path": "docs/evidence/cargos-request.json",
-          "sha256": "7be4465a8cff41d80307058c0d5ba9ad09e3ff17e0e0c07a3051a3281e276c2d"
+          "sha256": "ef7c3e37fc8b157e8d1358a99821dc9d5b9784c41a95fef959150771936700d3"
         },
         {
           "path": "docs/evidence/orgaos-request.json",
-          "sha256": "eecf55da9e3cfdbe55e09df0a04874c26c380e8090526857a101334b584dab13"
+          "sha256": "92794871098ab4fbc1af5905ebc9a0ec22c353e434f1f9862f9545af24f6c466"
         },
         {
           "path": "docs/evidence/servidor-pessoas-request.json",
-          "sha256": "ea02b11a905cd82b57b7f9abc1ae210a8f8c325195fd73ecdf2190ccb5e476a2"
+          "sha256": "4fb47449458da0ce515d41d1f1c56ca1a4ba7b18a602ca1b6eb04a3120f3c287"
         },
         {
           "path": "docs/evidence/vinculos-request.json",
-          "sha256": "e1dd0e309ee5b0a642ef5b5f36080a8f89d9805e3f2a4a431058bee1ca74f430"
+          "sha256": "e130caf34cd1db02b3f1a9c7ad61404e9eed77b6b77bf8ef57ae2f1425eff2f7"
         },
         {
           "path": "docs/evidence/cargos-response.json",
-          "sha256": "a203ad33708d73aa0ec61042c9971160f7e3944be47b66d6c34f2da45a8e7036"
+          "sha256": "bbcdf9b9e3a4bdc1e3332d7c998dd872edf534e9f6f3e5962b460cab23d9e8d5"
         },
         {
           "path": "docs/evidence/orgaos-response.json",
-          "sha256": "55802080ba03bfb490548960122d01c1263c30d8197f47725cba3672c2eb568b"
+          "sha256": "7bc246ed44beb0c53cf4aa8b60a1680a59275fd5c876ffa98b2addec76b7065c"
         },
         {
           "path": "docs/evidence/servidor-pessoas-response.json",
-          "sha256": "827c9c17959185fdba5d39966fa6a9c42dc1a660ddaf019c2b11989083f2a739"
+          "sha256": "d65d4db5c9b439786f823e4f52651ccc00397c95c95e6ee947e194307644b098"
         },
         {
           "path": "docs/evidence/vinculos-response.json",
-          "sha256": "8dfcdfba5385767b589d5ab49d1f78d1e392479070bb12a631c6982c382cbf8c"
+          "sha256": "27813e36e95bdc4e30df947ef3595067ebcca4b9f3ac8b2d1527ba8feb59b5e4"
         },
         {
           "path": "docs/evidence/cargos-post-determinations.json",
-          "sha256": "7be4465a8cff41d80307058c0d5ba9ad09e3ff17e0e0c07a3051a3281e276c2d"
+          "sha256": "ef7c3e37fc8b157e8d1358a99821dc9d5b9784c41a95fef959150771936700d3"
         },
         {
           "path": "docs/evidence/cargos-put-determinations.json",
-          "sha256": "601f74c96af31969c3cf1117d2d338c8a45af0068c848263618cc41f0e8efcfd"
+          "sha256": "bb40199f25d43e087da89de432f9006e6718b4a86ebee758a86807601849b9e9"
         },
         {
           "path": "docs/evidence/servidor-pessoas-post-determinations.json",
-          "sha256": "ea02b11a905cd82b57b7f9abc1ae210a8f8c325195fd73ecdf2190ccb5e476a2"
+          "sha256": "4fb47449458da0ce515d41d1f1c56ca1a4ba7b18a602ca1b6eb04a3120f3c287"
         },
         {
           "path": "docs/evidence/servidor-pessoas-put-determinations.json",
-          "sha256": "38efbb08ffc44f2a2e25b528d03314118dadbb7afe769bc75fb347833ab516b0"
+          "sha256": "b50f890c939304adfee4cc19a924e1d8829954da0ece2e25205eabd6577b79ec"
         },
         {
           "path": "docs/evidence/vinculos-post-determinations.json",
-          "sha256": "e1dd0e309ee5b0a642ef5b5f36080a8f89d9805e3f2a4a431058bee1ca74f430"
+          "sha256": "e130caf34cd1db02b3f1a9c7ad61404e9eed77b6b77bf8ef57ae2f1425eff2f7"
         },
         {
           "path": "docs/evidence/vinculos-put-determinations.json",
-          "sha256": "55243936f83aaf547985783609ee634c7e63b4da47088ec7b9c1f1c39f5f1e5b"
+          "sha256": "484d82bbc24431133e870b609c2fb361c8e88b41e59014c6f16f89c3ddb2c593"
+        },
+        {
+          "path": "docs/evidence/final-test-results.json",
+          "sha256": "e8681c7331ee068fd0b570fec2f5592c351073d7e08d0a112350b99d3a97da02"
+        },
+        {
+          "path": "docs/evidence/final-sdk-provenance.json",
+          "sha256": "1df1d92cff998bc6f4bb4c9a0b73eb3c6cd9ba7d052ed91c63549d7c0d39f0c0"
         }
-      ],
-      "reason": "Current Bulking campaign did not complete acceptance; previous artifacts remain historical and are not re-certified."
+      ]
     },
     "http": {
-      "status": "failed",
+      "status": "pass",
       "artifacts": [
         {
           "path": "docs/evidence/neon-integration-tests.txt",
-          "sha256": "a5bf000e8b7ae750202ad0020cce806e56b962da25e7ff157631560388eec1eb"
+          "sha256": "803cbe8a829a40dec0c1789920c85b3ef97809c118052afd39e5f36854f1ddb0"
         },
         {
-          "path": "docs/evidence/packaged-phases-smoke.json",
-          "sha256": "a9078527a862e8a6e0ffef902900770894a567d1c7d6e08130e310b26e2869de"
+          "path": "docs/evidence/final-test-results.json",
+          "sha256": "e8681c7331ee068fd0b570fec2f5592c351073d7e08d0a112350b99d3a97da02"
+        },
+        {
+          "path": "docs/evidence/final-sdk-provenance.json",
+          "sha256": "1df1d92cff998bc6f4bb4c9a0b73eb3c6cd9ba7d052ed91c63549d7c0d39f0c0"
         }
-      ],
-      "reason": "Current Bulking campaign did not complete acceptance; previous artifacts remain historical and are not re-certified."
+      ]
     },
     "availability": {
-      "status": "pending",
+      "status": "pass",
       "artifacts": [
         {
           "path": "docs/evidence/neon-integration-tests.txt",
-          "sha256": "a5bf000e8b7ae750202ad0020cce806e56b962da25e7ff157631560388eec1eb"
-        }
-      ],
-      "scope": "Authorizations, versions, workflow states and declared item/collection operations exercised by the suite",
-      "reason": "Current Bulking campaign did not complete acceptance; previous artifacts remain historical and are not re-certified."
-    },
-    "persistence": {
-      "status": "pending",
-      "artifacts": [
-        {
-          "path": "docs/evidence/neon-integration-tests.txt",
-          "sha256": "a5bf000e8b7ae750202ad0020cce806e56b962da25e7ff157631560388eec1eb"
+          "sha256": "803cbe8a829a40dec0c1789920c85b3ef97809c118052afd39e5f36854f1ddb0"
         },
         {
-          "path": "docs/evidence/neon-preservation-61fc36b.json",
-          "sha256": "c830997ccde4bbcd7af154c1f55970543a5dc2510deb285e39a837566dd549b7"
+          "path": "docs/evidence/final-test-results.json",
+          "sha256": "e8681c7331ee068fd0b570fec2f5592c351073d7e08d0a112350b99d3a97da02"
+        },
+        {
+          "path": "docs/evidence/final-sdk-provenance.json",
+          "sha256": "1df1d92cff998bc6f4bb4c9a0b73eb3c6cd9ba7d052ed91c63549d7c0d39f0c0"
         }
       ],
-      "reason": "Current Bulking campaign did not complete acceptance; previous artifacts remain historical and are not re-certified."
+      "scope": "Authorizations, versions, workflow states and declared item/collection operations exercised by the suite"
+    },
+    "persistence": {
+      "status": "pass",
+      "artifacts": [
+        {
+          "path": "docs/evidence/neon-integration-tests.txt",
+          "sha256": "803cbe8a829a40dec0c1789920c85b3ef97809c118052afd39e5f36854f1ddb0"
+        },
+        {
+          "path": "docs/evidence/final-neon-schema-comparison.json",
+          "sha256": "a29987418164210b1c6660d8fe87fffbb303e05b3ed62de261c620a63e49b194"
+        },
+        {
+          "path": "docs/evidence/final-test-results.json",
+          "sha256": "e8681c7331ee068fd0b570fec2f5592c351073d7e08d0a112350b99d3a97da02"
+        },
+        {
+          "path": "docs/evidence/final-sdk-provenance.json",
+          "sha256": "1df1d92cff998bc6f4bb4c9a0b73eb3c6cd9ba7d052ed91c63549d7c0d39f0c0"
+        },
+        {
+          "path": "docs/evidence/final-fixture-cleanup.json",
+          "sha256": "7c71170d662d18df239d828da3fa2f32c9c4bcdd4040b690e117962598048543"
+        },
+        {
+          "path": "docs/evidence/final-neon-deletion.json",
+          "sha256": "15e8f0746a4c3df5042dac5be8b48a9586bfa8cac5e714939792243b03b1ee3b"
+        }
+      ]
     },
     "parity": {
-      "status": "pending",
+      "status": "pass",
       "artifacts": [
         {
           "path": "docs/MATRIZ-PARIDADE-305.md",
-          "sha256": "0e8129205152d0750d3ebc097dbfc1328ddf700b3370a4752ee0a152132af44d"
+          "sha256": "69287eae82702d3a05989749bb39cc85bde944004382fe5226aeb9d23db43fe7"
         },
         {
           "path": "docs/evidence/neon-integration-tests.txt",
-          "sha256": "a5bf000e8b7ae750202ad0020cce806e56b962da25e7ff157631560388eec1eb"
+          "sha256": "803cbe8a829a40dec0c1789920c85b3ef97809c118052afd39e5f36854f1ddb0"
+        },
+        {
+          "path": "docs/evidence/final-test-results.json",
+          "sha256": "e8681c7331ee068fd0b570fec2f5592c351073d7e08d0a112350b99d3a97da02"
+        },
+        {
+          "path": "docs/evidence/final-sdk-provenance.json",
+          "sha256": "1df1d92cff998bc6f4bb4c9a0b73eb3c6cd9ba7d052ed91c63549d7c0d39f0c0"
         }
       ],
-      "scope": "Only mapped pilot registration and listed administrative operations; full statutory/legacy parity is not certified",
-      "reason": "Current Bulking campaign did not complete acceptance; previous artifacts remain historical and are not re-certified."
+      "scope": "Only mapped pilot registration and listed administrative operations; full statutory/legacy parity is not certified"
     },
     "angularReadiness": {
-      "status": "failed",
+      "status": "pass",
       "artifacts": [
         {
           "path": "docs/evidence/angular-consumer-proof.json",
-          "sha256": "58335fb9c87f9263c5d8924992e2d130e703509fad8d4292df5d6528ac5997a7"
+          "sha256": "6efb9b391af179d0188125c565d03658e6032127deef233f45c64c267e2404dc"
         },
         {
           "path": "docs/evidence/angular-consumer-input-hashes.json",
-          "sha256": "f758776b08529fa361f5414fda34e91485e706e1d441fb0c568733f67c855d5a"
+          "sha256": "f973952a9bb65f8fa0d310f42cc2fde1d48258992da3c8ea80fba99d8d3052ff"
+        },
+        {
+          "path": "docs/evidence/final-test-results.json",
+          "sha256": "e8681c7331ee068fd0b570fec2f5592c351073d7e08d0a112350b99d3a97da02"
+        },
+        {
+          "path": "docs/evidence/final-sdk-provenance.json",
+          "sha256": "1df1d92cff998bc6f4bb4c9a0b73eb3c6cd9ba7d052ed91c63549d7c0d39f0c0"
         }
       ],
-      "scope": "Official source normalizer and ReactiveDeterminationRuntimeService; not published npm adoption or visual host acceptance",
-      "reason": "Current Bulking campaign did not complete acceptance; previous artifacts remain historical and are not re-certified."
+      "scope": "Official source normalizer and ReactiveDeterminationRuntimeService; not published npm adoption or visual host acceptance"
     },
     "coldQueries": {
-      "status": "pending",
+      "status": "pass",
       "artifacts": [
         {
           "path": "docs/evidence/cold-query-counts.json",
@@ -143,69 +189,98 @@
         },
         {
           "path": "docs/evidence/neon-integration-tests.txt",
-          "sha256": "a5bf000e8b7ae750202ad0020cce806e56b962da25e7ff157631560388eec1eb"
+          "sha256": "803cbe8a829a40dec0c1789920c85b3ef97809c118052afd39e5f36854f1ddb0"
+        },
+        {
+          "path": "docs/evidence/final-test-results.json",
+          "sha256": "e8681c7331ee068fd0b570fec2f5592c351073d7e08d0a112350b99d3a97da02"
+        },
+        {
+          "path": "docs/evidence/final-sdk-provenance.json",
+          "sha256": "1df1d92cff998bc6f4bb4c9a0b73eb3c6cd9ba7d052ed91c63549d7c0d39f0c0"
         }
-      ],
-      "reason": "Current Bulking campaign did not complete acceptance; previous artifacts remain historical and are not re-certified."
+      ]
     },
     "reactiveDeterminations": {
-      "status": "pending",
+      "status": "pass",
       "artifacts": [
         {
           "path": "docs/evidence/cargos-post-determinations.json",
-          "sha256": "7be4465a8cff41d80307058c0d5ba9ad09e3ff17e0e0c07a3051a3281e276c2d"
+          "sha256": "ef7c3e37fc8b157e8d1358a99821dc9d5b9784c41a95fef959150771936700d3"
         },
         {
           "path": "docs/evidence/cargos-put-determinations.json",
-          "sha256": "601f74c96af31969c3cf1117d2d338c8a45af0068c848263618cc41f0e8efcfd"
+          "sha256": "bb40199f25d43e087da89de432f9006e6718b4a86ebee758a86807601849b9e9"
         },
         {
           "path": "docs/evidence/servidor-pessoas-post-determinations.json",
-          "sha256": "ea02b11a905cd82b57b7f9abc1ae210a8f8c325195fd73ecdf2190ccb5e476a2"
+          "sha256": "4fb47449458da0ce515d41d1f1c56ca1a4ba7b18a602ca1b6eb04a3120f3c287"
         },
         {
           "path": "docs/evidence/servidor-pessoas-put-determinations.json",
-          "sha256": "38efbb08ffc44f2a2e25b528d03314118dadbb7afe769bc75fb347833ab516b0"
+          "sha256": "b50f890c939304adfee4cc19a924e1d8829954da0ece2e25205eabd6577b79ec"
         },
         {
           "path": "docs/evidence/vinculos-post-determinations.json",
-          "sha256": "e1dd0e309ee5b0a642ef5b5f36080a8f89d9805e3f2a4a431058bee1ca74f430"
+          "sha256": "e130caf34cd1db02b3f1a9c7ad61404e9eed77b6b77bf8ef57ae2f1425eff2f7"
         },
         {
           "path": "docs/evidence/vinculos-put-determinations.json",
-          "sha256": "55243936f83aaf547985783609ee634c7e63b4da47088ec7b9c1f1c39f5f1e5b"
+          "sha256": "484d82bbc24431133e870b609c2fb361c8e88b41e59014c6f16f89c3ddb2c593"
         },
         {
           "path": "docs/evidence/angular-consumer-proof.json",
-          "sha256": "58335fb9c87f9263c5d8924992e2d130e703509fad8d4292df5d6528ac5997a7"
+          "sha256": "6efb9b391af179d0188125c565d03658e6032127deef233f45c64c267e2404dc"
         },
         {
           "path": "docs/evidence/angular-consumer-input-hashes.json",
-          "sha256": "f758776b08529fa361f5414fda34e91485e706e1d441fb0c568733f67c855d5a"
+          "sha256": "f973952a9bb65f8fa0d310f42cc2fde1d48258992da3c8ea80fba99d8d3052ff"
         },
         {
           "path": "docs/evidence/neon-integration-tests.txt",
-          "sha256": "a5bf000e8b7ae750202ad0020cce806e56b962da25e7ff157631560388eec1eb"
+          "sha256": "803cbe8a829a40dec0c1789920c85b3ef97809c118052afd39e5f36854f1ddb0"
+        },
+        {
+          "path": "docs/evidence/final-test-results.json",
+          "sha256": "e8681c7331ee068fd0b570fec2f5592c351073d7e08d0a112350b99d3a97da02"
+        },
+        {
+          "path": "docs/evidence/final-sdk-provenance.json",
+          "sha256": "1df1d92cff998bc6f4bb4c9a0b73eb3c6cd9ba7d052ed91c63549d7c0d39f0c0"
         }
-      ],
-      "reason": "Current Bulking campaign did not complete acceptance; previous artifacts remain historical and are not re-certified."
+      ]
     },
     "governedDecisions": {
       "status": "not-applicable",
       "reason": "The responsible user explicitly approved HOST determinations, transactional invariants and Angular proof as PASS for phase 3A at e6b9fa0. No external Config snapshot exists for this phase; Config/rules-engine integration is assigned to a future dedicated phase."
     },
     "bulkOperations": {
-      "status": "failed",
-      "reason": "Publication reconciliation/deadline blocks full protocol and live Angular proof. See campaign record.",
+      "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/BULKING-308-CAMPAIGN.json",
-          "sha256": "1f84b16c63747a41e172cb3ffffbcbe3ec1d1d1ee31bb8771561fa000bcf9c2a"
+          "path": "docs/evidence/bulk-protocol-receipts.json",
+          "sha256": "6fdbd8397bd25cd59e31cf361f6ff77fa7015b50aa0717f019cf030a4d02eb9b"
+        },
+        {
+          "path": "docs/evidence/bulk-blocked-preview.json",
+          "sha256": "46d692ef06699fe665fb09e8df8bb2dfd61f3764285fe107b78145fdc63db072"
+        },
+        {
+          "path": "docs/evidence/PILLARS-CAMPAIGN.json",
+          "sha256": "e7004389cea57b7348470d2d7e8dcf9698d117e7c427532d891c6e6f91f431b0"
+        },
+        {
+          "path": "docs/evidence/final-test-results.json",
+          "sha256": "e8681c7331ee068fd0b570fec2f5592c351073d7e08d0a112350b99d3a97da02"
+        },
+        {
+          "path": "docs/evidence/final-sdk-provenance.json",
+          "sha256": "1df1d92cff998bc6f4bb4c9a0b73eb3c6cd9ba7d052ed91c63549d7c0d39f0c0"
         }
       ]
     }
   },
   "historicalSourceSha256": "933d9c8ccb29e18e1be39694fb495b99636da9bbc9efd05ba937e6b5e88f3408",
-  "status": "acceptance-pending",
+  "status": "PASS",
   "currentCampaign": "docs/evidence/PILLARS-CAMPAIGN.json"
 }

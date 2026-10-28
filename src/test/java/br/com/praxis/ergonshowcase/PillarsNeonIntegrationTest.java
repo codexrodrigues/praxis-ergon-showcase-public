@@ -17,7 +17,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Provas dos contratos novos contra PostgreSQL real; toda alteraÃ§Ã£o de fixture Ã© revertida. */
+/** Provas dos contratos novos contra PostgreSQL real; toda alteração de fixture é revertida. */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Transactional
@@ -33,6 +33,32 @@ class PillarsNeonIntegrationTest {
   private JsonNode postJson(String path, String body) throws Exception {
     return json.readTree(mvc.perform(post(path).contentType("application/json").content(body))
         .andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
+  }
+
+  @Test
+  void broadSearchUsesTheSameCriterionForNameCpfAndParentage() throws Exception {
+    var pessoa = em.find(ServidorPessoa.class, 1001L);
+    pessoa.setMae("Filiação exclusiva prova omnibox");
+    em.flush();
+    for (String term : List.of(pessoa.getNome(), pessoa.getCpf(), pessoa.getMae())) {
+      var result = postJson("/api/ergon/servidor-pessoas/filter",
+          json.writeValueAsString(Map.of("buscaAmpla", term))).path("data").path("content");
+      assertThat(result.size()).as("busca ampla por identidade ou filiação").isEqualTo(1);
+      assertThat(result.get(0).path("id").asLong()).isEqualTo(1001L);
+    }
+    var absent = postJson("/api/ergon/servidor-pessoas/filter", "{\"buscaAmpla\":\"inexistente-omnibox-308\"}");
+    assertThat(absent.path("data").path("content").size()).isZero();
+    var vinculos = postJson("/api/ergon/vinculos/filter",
+        json.writeValueAsString(Map.of("buscaAmpla", pessoa.getCpf()))).path("data").path("content");
+    assertThat(vinculos.size()).isPositive();
+    var identities = new HashSet<String>();
+    for (var vinculo : vinculos) {
+      assertThat(vinculo.path("id").asText()).startsWith("1001:");
+      assertThat(identities.add(vinculo.path("id").asText())).isTrue();
+    }
+    var cargo = em.find(Cargo.class, 101);
+    var cargos = postJson("/api/ergon/cargos/filter", json.writeValueAsString(Map.of("buscaAmpla", cargo.getNome())));
+    assertThat(cargos.path("data").path("content").size()).isPositive();
   }
 
   @Test
@@ -108,7 +134,7 @@ class PillarsNeonIntegrationTest {
 
   @Test
   void publicSchemasActuallyPublishAnalyticsAndMicrovisualizations() throws Exception {
-    // PublicaÃ§Ã£o Ã© uma operaÃ§Ã£o administrativa explÃ­cita, fora da transaÃ§Ã£o de fixtures.
+    // Publicação é uma operação administrativa explícita, fora da transação de fixtures.
     org.springframework.test.context.transaction.TestTransaction.end();
     BulkPublicationProof.publish(publicationHttp.withBasicAuth(username, password), false);
     var openapi = json.readTree(mvc.perform(get("/v3/api-docs")).andExpect(status().isOk())

@@ -1,0 +1,12 @@
+{
+  "branch": "br-soft-wave-b7ph94z3",
+  "verifiedAt": "2026-10-28T13:10:52.064Z",
+  "criterion": "Synthetic numeric identities >= 9000",
+  "residualRows": {
+    "orgaos": "0",
+    "cargos": "0",
+    "pessoas": "0",
+    "vinculos": "0",
+    "afastamentos": "0"
+  }
+}

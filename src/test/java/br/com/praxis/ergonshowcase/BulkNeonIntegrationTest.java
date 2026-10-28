@@ -130,7 +130,7 @@ class BulkNeonIntegrationTest {
       assertThat(readVinculo("9612:1").getBody().path("dtHomologEstagio").asText()).isEqualTo("2026-10-01");
 
       var query=bulkPost("/bulk/update/evaluation",Map.of("executionMode","SYNC","selection",Map.of("mode","QUERY",
-          "filter",Map.of("matric","BULK-308-","jornadaRange",Map.of("min",35,"max",40)),"excludedIds",List.of("9612:1")),
+          "filter",Map.of("buscaAmpla","BULK-308-","jornadaRange",Map.of("min",35,"max",40)),"excludedIds",List.of("9612:1")),
           "changes",List.of(set("descontaIr",false))),null,HttpStatus.OK);
       assertThat(query.path("totals").path("targetCount").asInt()).isEqualTo(1);
       createVinculo(9613);

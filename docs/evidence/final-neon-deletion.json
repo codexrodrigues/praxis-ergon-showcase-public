@@ -1,0 +1,14 @@
+{
+  "verifiedAt": "2026-10-28T13:11:34.367Z",
+  "project": "holy-mouse-40140108",
+  "deletedBranch": "br-soft-wave-b7ph94z3",
+  "explicitUserAuthorization": "Excluir após registrar as provas",
+  "proofsSavedBeforeDeletion": true,
+  "zeroResidualFixtures": "final-fixture-cleanup.json",
+  "deletedBranchAbsent": true,
+  "originalBranchPresent": true,
+  "remainingBranchIds": [
+    "br-super-sound-b7urizmd",
+    "br-bitter-bonus-b7i0vfko"
+  ]
+}

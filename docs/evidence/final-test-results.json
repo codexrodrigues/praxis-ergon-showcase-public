@@ -1,0 +1,318 @@
+{
+  "validatedAt": "2026-10-28T13:09:59.022779+00:00",
+  "command": "mvn -Dpraxis.core.version=8.0.0-bulk.308-SNAPSHOT -Dmaven.repo.local=.local/m2-bulk308 test",
+  "branch": "br-soft-wave-b7ph94z3",
+  "logSha256": "0455ce107aebca20df48863a2760b12ac97f017b87c4f134f6c62e7a8e2f3c3f",
+  "totals": {
+    "tests": 66,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suites": [
+    {
+      "suite": "br.com.praxis.ergonshowcase.BulkNeonIntegrationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 747.485,
+      "cases": [
+        {
+          "name": "publishesCanonicalBulkOperationsAndEditableFields",
+          "seconds": 72.98
+        },
+        {
+          "name": "evaluatesThenExecutesUniformItemsAndCollectiveCommands",
+          "seconds": 545.619
+        },
+        {
+          "name": "blockedProposalExplainsStaleVersionAndInvalidItemWithoutMutation",
+          "seconds": 100.484
+        },
+        {
+          "name": "readOnlyCannotEvaluateOrConfirmAnyBulkOperation",
+          "seconds": 0.081
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.NeonIntegrationTest",
+      "tests": 52,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 440.273,
+      "cases": [
+        {
+          "name": "phaseTwoPartialFormsRejectStorageOverflowBeforeWriting",
+          "seconds": 7.093
+        },
+        {
+          "name": "revisionFiltersExecuteTheirDeclaredPredicates",
+          "seconds": 3.29
+        },
+        {
+          "name": "schemaShowsCompositeKeyGovernanceAndTenantFields",
+          "seconds": 5.811
+        },
+        {
+          "name": "revisionResponsesCoverEveryPersistentBusinessField",
+          "seconds": 0.63
+        },
+        {
+          "name": "phaseThreePreviewIsAuthorizedNonPersistingAndTenantScoped",
+          "seconds": 1.344
+        },
+        {
+          "name": "reviewAfastamentoRejectsEndBeforeStart",
+          "seconds": 3.32
+        },
+        {
+          "name": "phaseThreeSubmitRejectsForgedPreview",
+          "seconds": 1.126
+        },
+        {
+          "name": "reviewServiceAlsoRejectsInvalidJornada",
+          "seconds": 2.82
+        },
+        {
+          "name": "statisticsExecuteAndRejectIdentifierMeasures",
+          "seconds": 1.092
+        },
+        {
+          "name": "revisionBusinessRulesRejectChronologyAndAccumulation",
+          "seconds": 0.568
+        },
+        {
+          "name": "revisionBusinessRulesRejectCrossOrgAndExtinctCargo",
+          "seconds": 1.417
+        },
+        {
+          "name": "revisionProfessionalRegistrationAndUniqueness",
+          "seconds": 1.702
+        },
+        {
+          "name": "allSixteenEntitiesMatchPostgres17",
+          "seconds": 2.835
+        },
+        {
+          "name": "reviewAfastamentoRejectsInvalidCodeAndChronology",
+          "seconds": 3.264
+        },
+        {
+          "name": "reviewDerivedFactsUseOneBatchQueryRegardlessOfPageSize",
+          "seconds": 3.667
+        },
+        {
+          "name": "vacanciaEnforcesVersionAndPersistsTransition",
+          "seconds": 1.56
+        },
+        {
+          "name": "revisionBusinessRulesRejectInvalidVacanciesAndAggregation",
+          "seconds": 0.72
+        },
+        {
+          "name": "compositeIdentityAndSurface",
+          "seconds": 0.993
+        },
+        {
+          "name": "reviewAfastamentoRejectsOverlappingPeriodAndEarlyReturn",
+          "seconds": 5.928
+        },
+        {
+          "name": "phaseThreeAggregatorPreviewRevalidatesEligibility",
+          "seconds": 1.772
+        },
+        {
+          "name": "phaseTwoHistoricalMaintenanceAllowsExtinctCargo",
+          "seconds": 8.752
+        },
+        {
+          "name": "reviewOrgaoStateIsNotWritableByCadastralPut",
+          "seconds": 0.494
+        },
+        {
+          "name": "reviewCommissionCannotExceedVacancies",
+          "seconds": 4.595
+        },
+        {
+          "name": "phaseThreeDeterminationsPublishExactCreateEditBindings",
+          "seconds": 21.524
+        },
+        {
+          "name": "cursorContinuityLocateAndCompositeOptions",
+          "seconds": 2.39
+        },
+        {
+          "name": "reviewInstitutionalActionsProtectStateAndETag",
+          "seconds": 11.207
+        },
+        {
+          "name": "reviewVacancyMaintainsPaymentLimit",
+          "seconds": 3.183
+        },
+        {
+          "name": "reviewCommissionCannotUseExtinctOrFullCargo",
+          "seconds": 5.035
+        },
+        {
+          "name": "phaseTwoChronologyRejectsReverseEndpointsWithMissingMiddle",
+          "seconds": 3.441
+        },
+        {
+          "name": "reviewReadSurfacesPublishRealETagAndReferences",
+          "seconds": 6.554
+        },
+        {
+          "name": "customFieldsAreTenantScopedAndValidated",
+          "seconds": 1.097
+        },
+        {
+          "name": "reviewCommissionOccupancyPreventsExtinctionAndDoubleCounting",
+          "seconds": 5.972
+        },
+        {
+          "name": "phaseOneAuxiliaryReferencesAreReadOnlyAndResolvable",
+          "seconds": 3.045
+        },
+        {
+          "name": "crudFourPilotsAndImmutableIdentifiers",
+          "seconds": 11.916
+        },
+        {
+          "name": "reviewRetornoRejectsForeignLicense",
+          "seconds": 4.925
+        },
+        {
+          "name": "phaseTwoRelatedCollectionsRespectParentAndPagination",
+          "seconds": 3.22
+        },
+        {
+          "name": "reviewPatchRejectsBothInvalidJornadaBounds",
+          "seconds": 4.175
+        },
+        {
+          "name": "revisionCessaoAndRetirementTransitions",
+          "seconds": 5.774
+        },
+        {
+          "name": "revisionDiscoveryAndRichSchemas",
+          "seconds": 121.825
+        },
+        {
+          "name": "revisionHomologacaoAndCargoExtinction",
+          "seconds": 5.825
+        },
+        {
+          "name": "phaseThreeDocumentScopeIsExplicitPerOperation",
+          "seconds": 6.026
+        },
+        {
+          "name": "revisionPartialFormsPreserveIdentityAndUntouchedValues",
+          "seconds": 5.518
+        },
+        {
+          "name": "structuralAndSemanticMetadataArePublished",
+          "seconds": 26.458
+        },
+        {
+          "name": "reviewVacancyRejectsPaymentBeforeDeparture",
+          "seconds": 2.808
+        },
+        {
+          "name": "optionsCursorStatsAndExportExecuteOnNeon",
+          "seconds": 4.017
+        },
+        {
+          "name": "filtersAndExportPolicyAreEffective",
+          "seconds": 4.643
+        },
+        {
+          "name": "fourResourcesExposeDataAndCapabilities",
+          "seconds": 66.321
+        },
+        {
+          "name": "realHttpOpenApiAndAuthentication",
+          "seconds": 3.553
+        },
+        {
+          "name": "reviewAfastamentoRoundTripPersistsLicenseAndVersion",
+          "seconds": 16.457
+        },
+        {
+          "name": "mappingCoversEveryDocumentedColumn",
+          "seconds": 2.628
+        },
+        {
+          "name": "reviewInactiveOrgaoRejectsNewAdmission",
+          "seconds": 0.772
+        },
+        {
+          "name": "revisionVacancyBalancePreventsOverProvision",
+          "seconds": 1.119
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.PillarsNeonIntegrationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 24.239,
+      "cases": [
+        {
+          "name": "historicExtinctCargoIsRetainedButDisabledAndCompanyDependencyIsEffective",
+          "seconds": 1.007
+        },
+        {
+          "name": "analyticMeasuresUseRegisteredFieldsAndRejectDocumentSummation",
+          "seconds": 0.441
+        },
+        {
+          "name": "broadSearchUsesTheSameCriterionForNameCpfAndParentage",
+          "seconds": 1.801
+        },
+        {
+          "name": "sixRichDirectoriesFilterAndReloadActualIdentities",
+          "seconds": 3.029
+        },
+        {
+          "name": "nominalAnalyticsBucketsCarryRealIdsForThePublishedSurfaces",
+          "seconds": 1.423
+        },
+        {
+          "name": "publicSchemasActuallyPublishAnalyticsAndMicrovisualizations",
+          "seconds": 16.524
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.PraxisMetadataCompletenessTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.847,
+      "cases": [
+        {
+          "name": "derivedIndicatorsPreserveUnknownAndDoNotInventValidity",
+          "seconds": 0.0
+        },
+        {
+          "name": "expectedLookupInventoryIsPublishedAndRich",
+          "seconds": 0.008
+        },
+        {
+          "name": "actualResolvedMicrovisualizationsHaveValidExpressions",
+          "seconds": 0.111
+        },
+        {
+          "name": "allDomainDtosPassSemanticReview",
+          "seconds": 0.727
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "coordinate": "io.github.codexrodrigues:praxis-metadata-starter:8.0.0-bulk.308-SNAPSHOT",
+  "baseCommit": "f9519fb3da376147b6882bc58f512bef9ae3ed5b",
+  "consolidationUncommitted": true,
+  "jarSha256": "8d04e68f46bdbfc145a3ad97c550e90b6dc74c0b60ffc3cafb5e2549936806ec",
+  "focusedTests": {
+    "tests": 33,
+    "failures": 0,
+    "errors": 0
+  },
+  "published": false,
+  "sourceFileCount": 653,
+  "sourceManifestSha256": "fbd6d43b5a045fb3aa1b0c626acc2ac95b1229da3857c2ca802958ac18c40e9b",
+  "sourceHashAlgorithm": "SHA-256 of sorted compact JSON mapping pom.xml and all src/main file paths to SHA-256 of raw bytes; POM restored to rc.183 after private build.",
+  "selectedSourceFiles": {
+    "pom.xml": "68f5f6d676cf107f880f18b4ed102a6412ad2fb35c5683becb124d761323ff19",
+    "src/main/java/org/praxisplatform/uischema/filter/annotation/Filterable.java": "44f603940f50a2d719624be2af3317654e52430955fc7ca883f30cf3646b7ef4",
+    "src/main/java/org/praxisplatform/uischema/filter/specification/GenericSpecificationsBuilder.java": "70b7f69a2e61420eee93698182804c833d874b420c04c44d4c3e8eb5ce6a6c88",
+    "src/main/java/org/praxisplatform/uischema/options/service/jpa/JpaOptionSourceQueryExecutor.java": "9990088dd438b307abc242cc73c2ce9c67ee0ddfa5ded5f0fb4025edca3a2e3c",
+    "src/main/resources/META-INF/praxis/AI-RESOURCE-BLUEPRINT.md": "ff07cfe70ef6ff4a2ecf9ef8b03fdbf9c2bc1f517f3f5b0185f49bb3bd10ae87"
+  }
+}

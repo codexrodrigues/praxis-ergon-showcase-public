@@ -17,6 +17,11 @@ import org.praxisplatform.uischema.filter.dto.GenericFilterDTO;
 @Setter
 @Schema(description = "Critérios de pesquisa de cargos na administração de pessoal.")
 public class CargoFilterDTO implements GenericFilterDTO {
+  @Schema(description = "Localiza cargos por trecho da denominação, categoria funcional, escolaridade exigida ou tipo de cargo. A correspondência em qualquer desses atributos atende à busca; órgão e demais critérios continuam cumulativos.", example = "SAUDE")
+  @UISchema(label = "Busca ampla", group = "Pesquisa", order = 1, icon = "search", type = org.praxisplatform.uischema.FieldDataType.TEXT, controlType = org.praxisplatform.uischema.FieldControlType.INPUT)
+  @Filterable(operation = FilterOperation.LIKE, relations = {"nome", "categoria", "escolaridade", "tipoCargo"})
+  private String buscaAmpla;
+
   @Schema(description = "Trecho da nomenclatura do cargo ou função.")
   @UISchema(label = "Nome do cargo", group = "Pesquisa", order = 10)
   @Filterable(operation = FilterOperation.LIKE)

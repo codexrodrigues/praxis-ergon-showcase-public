@@ -15,7 +15,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
  
  Usage:
      python scripts/workspace/audit-java-resource-completeness.py <path-to-java-host-project> [--strict]
-@@ -19,6 +21,20 @@
+@@ -19,6 +21,22 @@
  import argparse
  import re
  import sys
@@ -32,11 +32,13 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
 +    dto_table_visibility_issues,
 +    entity_lookup_descriptor_issues,
 +    micro_visualization_properties,
++    reactive_determination_count,
++    reactive_determination_issues,
 +)
  from dataclasses import dataclass, field
  from pathlib import Path
  from typing import Dict, List, Optional, Set, Tuple
-@@ -79,7 +95,10 @@
+@@ -79,7 +97,10 @@
      n = len(body)
      while i < n:
          ch = body[i]
@@ -48,7 +50,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
              brace_depth += 1
              if brace_depth == 1:
                  current_token.append("{")
-@@ -109,7 +128,7 @@
+@@ -109,7 +130,7 @@
          i += 1
  
      field_re = re.compile(
@@ -57,7 +59,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
          re.DOTALL,
      )
      for stmt in top_statements:
-@@ -222,30 +241,8 @@
+@@ -222,30 +243,8 @@
      return list(merged.values())
  
  
@@ -89,7 +91,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
  
  
  def main() -> int:
-@@ -253,14 +250,18 @@
+@@ -253,14 +252,18 @@
          description="Audit Praxis Java resource completeness, Quick View readiness, and editorial quality."
      )
      parser.add_argument("project_dir", type=Path, help="Path to the Java host project root")
@@ -111,7 +113,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
  
      src_main = args.project_dir / "src" / "main" / "java"
      if not src_main.exists():
-@@ -276,17 +277,34 @@
+@@ -276,17 +279,34 @@
      controllers = [c for c in classes.values() if c.is_controller and c.controller_type_args]
      services = [c for c in classes.values() if c.is_service and c.service_type_args]
      entities = [c for c in classes.values() if "@Entity" in c.content]
@@ -141,14 +143,14 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
      print("## 1. Resource & Capability Scorecard")
      print(
 -        "| Resource (`resourceKey`) | Entity | BizCols | RespCols | Cov % | FilterCols | FilterOps | `@QuickFilter` | QuickViewCols | RichIdentity | `@ResourceRef` (`preview`) | `@UiSurface` | `@WorkflowAction` | `@ResourceIntent` | `@ResourceFact` | EditorialIssues | Status |"
-+        "| Resource (`resourceKey`) | Entity | BizCols | RespCols | Cov % | Accounted writes | FilterCols | FilterOps | `@QuickFilter` | QuickViewCols | RichIdentity | `@ResourceRef` (`preview`) | `@UiSurface` | `@WorkflowAction` | `@ResourceIntent` | `@ResourceFact` | `MicroViz` | `UiAnalytics` | BulkEditable | BulkOps | EditorialIssues | Status |"
++        "| Resource (`resourceKey`) | Entity | BizCols | RespCols | Cov % | Accounted writes | FilterCols | FilterOps | `@QuickFilter` | QuickViewCols | RichIdentity | `@ResourceRef` (`preview`) | `@UiSurface` | `@WorkflowAction` | `@ResourceIntent` | `@ResourceFact` | `MicroViz` | `UiAnalytics` | `ReactiveDet` | BulkEditable | BulkOps | EditorialIssues | Status |"
      )
 -    print("|---|---|---:|---:|---:|---:|---|---:|---:|:---:|---|---:|---:|---:|---:|---:|---|")
-+    print("|---|---|---:|---:|---:|---:|---:|---|---:|---:|:---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|")
++    print("|---|---|---:|---:|---:|---:|---:|---|---:|---:|:---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|")
  
      failures: List[str] = []
      unmapped_details: List[Tuple[str, str, List[str]]] = []
-@@ -300,6 +318,7 @@
+@@ -300,6 +320,7 @@
              resp_dto_name, _, filter_dto_name = t_args
              create_dto_name, update_dto_name = "", ""
          else:
@@ -156,7 +158,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
              continue
  
          matched_svc = next(
-@@ -329,20 +348,15 @@
+@@ -329,20 +350,15 @@
  
          entity_biz_fields: List[Tuple[str, str]] = []
          for f_type, f_name, f_annot in entity_all_fields:
@@ -180,7 +182,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
  
          covered_count = 0
          missing_fields: List[str] = []
-@@ -398,6 +412,20 @@
+@@ -398,6 +414,20 @@
                          f"{filter_dto_name}.{f_name}: label looks like a sentence/description ('{lbl}')"
                      )
  
@@ -201,7 +203,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
          related_class_names = {
              ctrl.name,
              matched_svc.name if matched_svc else "",
-@@ -414,8 +442,14 @@
+@@ -414,8 +444,14 @@
          combined_sources = "\n".join(
              classes[n].content for n in related_class_names if n and n in classes
          )
@@ -218,7 +220,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
          )
          quick_filter_count = len(re.findall(r"@(?:[\w.]+\.)?QuickFilter\b", combined_sources))
          ui_surface_count = len(re.findall(r"@(?:[\w.]+\.)?UiSurface\b", combined_sources))
-@@ -425,12 +459,40 @@
+@@ -425,12 +461,41 @@
          resource_intent_count = len(
              re.findall(r"@(?:[\w.]+\.)?ResourceIntent\b", combined_sources)
          )
@@ -226,6 +228,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
          resource_fact_count = len(re.findall(r"@(?:[\w.]+\.)?ResourceFact\b", combined_sources))
 +        micro_viz_count = len(micro_visualization_properties(resp_dto_name, classes, resp_all_fields))
 +        ui_analytics_count = len(re.findall(r"@(?:[\w.]+\.)?AnalyticsProjection\b", combined_sources))
++        reactive_det_count = reactive_determination_count(ctrl.content, classes)
 +        res_editorial_issues.extend(resource_fact_editorial_issues(ctrl.content, ctrl.name))
 +        res_editorial_issues.extend(dto_table_visibility_issues(resp_dto_name, resp_all_fields))
 +        for proj_dto in set(re.findall(r'\bResponseEntity<\s*([\w.]+)\s*>', strip_comments(ctrl.content))):
@@ -261,7 +264,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
              row_issues.append(f"DTO coverage {coverage_pct:.1f}% < {args.min_dto_coverage:.0f}%")
          if total_ent_biz >= 8 and filterable_count < 5:
              row_issues.append(f"Only {filterable_count} @Filterable")
-@@ -438,10 +500,49 @@
+@@ -438,10 +503,49 @@
              row_issues.append(f"Low FilterOperation diversity ({len(filter_ops)})")
          if quick_filter_count < 2:
              row_issues.append(f"Only {quick_filter_count} @QuickFilter")
@@ -313,7 +316,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
          if (
              ui_surface_count + workflow_action_count + resource_intent_count + resource_fact_count
          ) < 1:
-@@ -449,6 +550,13 @@
+@@ -449,6 +553,15 @@
          if res_editorial_issues:
              row_issues.append(f"{len(res_editorial_issues)} @UISchema editorial issues")
  
@@ -324,10 +327,12 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
 +            row_issues.append("Enterprise mutable resource (>=15 biz cols) missing @MicroVisualization")
 +        if writable_resource and total_ent_biz >= 15 and ui_analytics_count < 1:
 +            row_issues.append("Enterprise mutable resource (>=15 biz cols) missing @UiAnalytics/@AnalyticsProjection")
++        if writable_resource and total_ent_biz >= 15 and reactive_det_count < 1:
++            row_issues.append("Enterprise mutable resource (>=15 biz cols) missing ReactiveDeterminationDefinitionProvider")
          status_str = "PASS" if not row_issues else "FAIL (" + "; ".join(row_issues) + ")"
          if row_issues:
              failures.append(f"{res_label}: {status_str}")
-@@ -457,11 +565,19 @@
+@@ -457,11 +570,25 @@
          if res_editorial_issues:
              editorial_details.append((res_label, res_editorial_issues))
  
@@ -338,7 +343,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
          print(
 -            f"| `{res_label}` | `{entity_name}` | {total_ent_biz} | {len(resp_fields)} | {coverage_pct:.1f}% | {filterable_count} | {ops_str} | {quick_filter_count} | {quick_view_cols} | {rich_id_str} | {res_ref_count} ({res_ref_preview_count}) | {ui_surface_count} | {workflow_action_count} | {resource_intent_count} | {resource_fact_count} | {len(res_editorial_issues)} | **{status_str}** |"
 -        )
-+            f"| `{res_label}` | `{entity_name}` | {total_ent_biz} | {len(resp_fields)} | {coverage_pct:.1f}% | {accounted_writes} | {filterable_count} | {ops_str} | {quick_filter_count} | {quick_view_cols} | {rich_id_str} | {res_ref_count} ({res_ref_preview_count}) | {ui_surface_count} | {workflow_action_count} | {resource_intent_count} | {resource_fact_count} | {micro_viz_count} | {ui_analytics_count} | {bulk_editable_count} | {bulk_operation_count} | {len(res_editorial_issues)} | **{status_str}** |"
++            f"| `{res_label}` | `{entity_name}` | {total_ent_biz} | {len(resp_fields)} | {coverage_pct:.1f}% | {accounted_writes} | {filterable_count} | {ops_str} | {quick_filter_count} | {quick_view_cols} | {rich_id_str} | {res_ref_count} ({res_ref_preview_count}) | {ui_surface_count} | {workflow_action_count} | {resource_intent_count} | {resource_fact_count} | {micro_viz_count} | {ui_analytics_count} | {reactive_det_count} | {bulk_editable_count} | {bulk_operation_count} | {len(res_editorial_issues)} | **{status_str}** |"
 +        )
 +
 +    lookup_issues = entity_lookup_descriptor_issues(classes)
@@ -346,10 +351,16 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
 +        editorial_details.append(("OptionSources / EntityLookupDescriptor", lookup_issues))
 +        for li in lookup_issues:
 +            failures.append(f"OptionSources: FAIL ({li})")
++
++    det_issues = reactive_determination_issues(classes)
++    if det_issues:
++        editorial_details.append(("ReactiveDeterminations", det_issues))
++        for di in det_issues:
++            failures.append(f"ReactiveDeterminations: FAIL ({di})")
  
      if unmapped_details:
          print("\n## 2. Unmapped Entity Business Columns (Entity -> ResponseDTO Gaps)")
-@@ -479,17 +595,25 @@
+@@ -479,18 +606,30 @@
              if len(issues) > 12:
                  print(f"  - ... and {len(issues) - 12} more")
  
@@ -373,17 +384,24 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
 -            return 1
 +        return 1
      else:
-         print(
+-        print(
 -            "\n## 4. Verdict: PASSED (All audited resources meet Praxis completeness, Quick View, and capability density gates)"
-+            "\n## 4. Verdict: STATIC PASS (source gates satisfied; runtime and architectural review still required)"
-         )
+-        )
++        if args.require_runtime_evidence:
++            print("\n## 4. OVERALL STATUS: PASS (static + operational runtime evidence)")
++            print("Receipt integrity and source freshness verified; independent architectural review remains required.")
++        else:
++            print(
++                "\n## 4. Verdict: STATIC PASS (source gates satisfied; runtime and architectural review still required)"
++            )
  
      return 0
+ 
 diff --git a/scripts/workspace/java_resource_audit.py b/scripts/workspace/java_resource_audit.py
 new file mode 100644
 --- /dev/null
 +++ b/scripts/workspace/java_resource_audit.py
-@@ -0,0 +1,314 @@
+@@ -0,0 +1,361 @@
 +"""Conservative static source evidence. This module does not approve runtime behavior."""
 +import re
 +
@@ -597,6 +615,53 @@ new file mode 100644
 +    return result
 +
 +
++def reactive_determination_count(controller_source, classes):
++    """Count ReactiveDeterminationDefinition bindings matching real POST/PUT/PATCH operationIds on the controller."""
++    det_endpoint_ops = set()
++    form_ops = set()
++    for _, (header, _, _) in java_methods(controller_source).items():
++        uncommented_hdr = re.sub(r'//[^\n]*|/\*.*?\*/', '', header, flags=re.S)
++        op_match = re.search(r'operationId\s*=\s*"([^"]+)"', uncommented_hdr)
++        if not op_match:
++            continue
++        op_id = op_match.group(1)
++        if re.search(r'@(?:[\w.]+\.)?(?:WorkflowAction|BulkOperation)\b', uncommented_hdr):
++            continue
++        if re.search(r'@(?:[\w.]+\.)?PostMapping\s*\(\s*[^)\s]', uncommented_hdr):
++            det_endpoint_ops.add(op_id)
++        elif re.search(r'@(?:[\w.]+\.)?(?:PostMapping|PutMapping|PatchMapping)\b', uncommented_hdr):
++            form_ops.add(op_id)
++    if not det_endpoint_ops and not form_ops:
++        return 0
++    provider_literals = set()
++    for info in classes.values():
++        cleaned = re.sub(r'//[^\n]*|/\*.*?\*/', '', info.content, flags=re.S)
++        if not re.search(r'\bnew\s+(?:[\w.]+\.)?ReactiveDeterminationDefinition\s*\(', cleaned):
++            continue
++        provider_literals.update(re.findall(r'"([^"]+)"', cleaned))
++    matched_det = det_endpoint_ops & provider_literals
++    if matched_det:
++        return len(matched_det)
++    return 1 if (form_ops & provider_literals) else 0
++
++
++def reactive_determination_issues(classes):
++    """Detect invalid JSON Pointers in ReactiveDeterminationInputBinding / ReactiveDeterminationOutputBinding."""
++    issues = []
++    for info in classes.values():
++        cleaned = re.sub(r'//[^\n]*|/\*.*?\*/', '', info.content, flags=re.S)
++        for match in re.finditer(
++            r'\bnew\s+(?:[\w.]+\.)?ReactiveDetermination(?:Input|Output)Binding\s*\(\s*"([^"]*)"\s*,\s*"([^"]*)"\s*\)',
++            cleaned,
++        ):
++            for ptr in (match.group(1), match.group(2)):
++                if not ptr.startswith("/"):
++                    issues.append(
++                        f"{info.name}: invalid JSON Pointer '{ptr}' in ReactiveDetermination binding (must start with '/')"
++                    )
++    return issues
++
++
 +def relationship_display_fields(entity, fields, classes):
 +    relations = {name for _, name, ann in fields if re.search(r'@(?:ManyToOne|OneToOne)\b', ann)}
 +    result = set()
@@ -702,7 +767,7 @@ diff --git a/scripts/workspace/test_audit_java_resource_completeness.py b/script
 new file mode 100644
 --- /dev/null
 +++ b/scripts/workspace/test_audit_java_resource_completeness.py
-@@ -0,0 +1,292 @@
+@@ -0,0 +1,326 @@
 +"""Regression proofs for the canonical static audit; no product DTO enrichment."""
 +import importlib.util
 +from pathlib import Path
@@ -733,6 +798,8 @@ new file mode 100644
 +    dto_table_visibility_issues,
 +    entity_lookup_descriptor_issues,
 +    micro_visualization_properties,
++    reactive_determination_count,
++    reactive_determination_issues,
 +)
 +
 +
@@ -741,7 +808,7 @@ new file mode 100644
 +
 +
 +class CompletenessRegression(unittest.TestCase):
-+    def fixture_audit(self,write_command=False,extra_args=(),strict=True,reference="",read_only=False):
++    def fixture_audit(self,write_command=False,extra_args=(),strict=True,reference="",read_only=False,runtime_status=None):
 +        with tempfile.TemporaryDirectory() as tmp:
 +            root=Path(tmp,"src/main/java");root.mkdir(parents=True)
 +            names=[f"field{i}" for i in range(8)]
@@ -765,6 +832,17 @@ new file mode 100644
 +                sources["Controller"] = sources["Controller"].replace("AbstractResourceController<Response,Long,Filter,Create,Update>", "AbstractReadOnlyResourceController<Response,Long,Filter>")
 +                sources["Service"] = sources["Service"].replace("AbstractBaseResourceService<Item,Response,Long,Filter,Create,Update>", "AbstractReadOnlyResourceService<Item,Response,Long,Filter>")
 +            for name,source in sources.items():Path(root,name+".java").write_text(source.replace("private LocalDate deadline;", reference+" private LocalDate deadline;") if name=="Response" else source,encoding="utf-8")
++            if runtime_status is not None:
++                import json, hashlib
++                project = Path(tmp)
++                evidence = project / "docs/evidence"
++                evidence.mkdir(parents=True)
++                receipt = evidence / "proof.txt"
++                receipt.write_text("Fixture runtime receipt", encoding="utf-8")
++                artifact = {"path": "docs/evidence/proof.txt", "sha256": hashlib.sha256(receipt.read_bytes()).hexdigest()}
++                gates = {name: {"status": "pass", "artifacts": [artifact]} for name in RUNTIME_GATES}
++                gates["http"]["status"] = runtime_status
++                (evidence / "runtime-gates.json").write_text(json.dumps({"sourceSha256": source_fingerprint(project), "gates": gates}), encoding="utf-8")
 +            return subprocess.run([sys.executable,str(ROOT/"audit-java-resource-completeness.py"),tmp,*(["--strict"] if strict else []),*extra_args],capture_output=True,text=True)
 +
 +    def test_default_gate_also_returns_failure(self):
@@ -781,6 +859,18 @@ new file mode 100644
 +        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
 +        self.assertIn("STATIC PASS",result.stdout)
 +        self.assertIn("functional-accountability=9/9",result.stdout)
++
++    def test_cli_labels_verified_runtime_receipts_separately_from_static_only(self):
++        result = self.fixture_audit(True, extra_args=("--require-runtime-evidence",), runtime_status="pass")
++        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
++        self.assertIn("OVERALL STATUS: PASS (static + operational runtime evidence)", result.stdout)
++        self.assertIn("independent architectural review remains required", result.stdout)
++
++    def test_cli_does_not_claim_overall_pass_for_pending_runtime_gate(self):
++        result = self.fixture_audit(True, extra_args=("--require-runtime-evidence",), runtime_status="pending")
++        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
++        self.assertIn("http: pending", result.stdout)
++        self.assertNotIn("OVERALL STATUS: PASS", result.stdout)
 +
 +    def test_reference_cannot_point_to_a_missing_resource(self):
 +        result=self.fixture_audit(True,reference='@ResourceReference(resourceKey="absent",surfaceId="view",previewSurfaceId="view")')
@@ -992,6 +1082,15 @@ new file mode 100644
 +    def test_formula_is_not_a_physical_business_column(self):
 +        self.assertTrue(technical_or_mirrored("statusLookup", '@org.hibernate.annotations.Formula("case when ended is null then 1 else 0 end")', set()))
 +        self.assertFalse(technical_or_mirrored("status", '@Column(name="status")', set()))
++
++    def test_reactive_determination_count_matches_controller_operations(self):
++        ctrl='class C { @PostMapping @Operation(operationId="createItem") public R create(){return null;} @PostMapping("/det") @Operation(operationId="determineItemPreview") public P det(){return null;} }'
++        cfg=info("DetCfg",'class DetCfg { ReactiveDeterminationDefinitionProvider p(){ return () -> List.of(new ReactiveDeterminationDefinition("k", List.of(new ReactiveDeterminationScope("createItem", ReactiveDeterminationFormMode.CREATE)), "determineItemPreview", ReactiveDeterminationTriggerMode.ON_CHANGE, List.of("/a"), List.of(new ReactiveDeterminationInputBinding("/a","/a")), List.of(new ReactiveDeterminationOutputBinding("/b","/b")), null)); } }')
++        self.assertEqual(reactive_determination_count(ctrl, {"DetCfg":cfg}), 1)
++        self.assertEqual(reactive_determination_count('class C { @PostMapping @Operation(operationId="other") public R c(){return null;} }', {"DetCfg":cfg}), 0)
++        self.assertEqual(reactive_determination_issues({"DetCfg":cfg}), [])
++        bad_cfg=info("BadCfg",'class BadCfg { void p(){ new ReactiveDeterminationOutputBinding("noSlash", "/ok"); } }')
++        self.assertEqual(len(reactive_determination_issues({"BadCfg":bad_cfg})), 1)
 +
 +if __name__=="__main__":
 +    unittest.main()

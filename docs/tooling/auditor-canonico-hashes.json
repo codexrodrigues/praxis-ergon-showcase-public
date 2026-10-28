@@ -1,14 +1,14 @@
 {
   "baseline_sha256": "593fb52b8f256ce6e6bacc181d9c2b5c87071ce38915f8156f8805ec027862ed",
   "hash_semantics": "Transported source files are UTF-8/LF; source_byte_sha256 records original workspace bytes.",
-  "scripts/workspace/audit-java-resource-completeness.py": "ba8bd5cc3e498d3c29f9af4f655870050e262fb33c1dc0e00bee31aa69a294a2",
-  "scripts/workspace/java_resource_audit.py": "2db3027854b7c0a2eb9782f965e1883c529c66a9a24f080d4c7bef77ea90407d",
-  "scripts/workspace/test_audit_java_resource_completeness.py": "36716af8a158e4f8fee419ec49a6f403e41cf2ca5d7d708d9d3917dfce66b761",
+  "scripts/workspace/audit-java-resource-completeness.py": "7ec358f2906f134ac98290df4c9f4a0aa958712e2baa64e73164da5d6ea502e8",
+  "scripts/workspace/java_resource_audit.py": "71a4520d7fe7b6de26b5e3342930d6885af7042f1244aab81b754572b5373b21",
+  "scripts/workspace/test_audit_java_resource_completeness.py": "8fff9f6ba454cdaccd42804d7e13ec2d08353b1fa7444fb36447b2d5456fd326",
   "source_byte_sha256": {
-    "scripts/workspace/audit-java-resource-completeness.py": "ba8bd5cc3e498d3c29f9af4f655870050e262fb33c1dc0e00bee31aa69a294a2",
-    "scripts/workspace/java_resource_audit.py": "2db3027854b7c0a2eb9782f965e1883c529c66a9a24f080d4c7bef77ea90407d",
-    "scripts/workspace/test_audit_java_resource_completeness.py": "36716af8a158e4f8fee419ec49a6f403e41cf2ca5d7d708d9d3917dfce66b761"
+    "scripts/workspace/audit-java-resource-completeness.py": "7ec358f2906f134ac98290df4c9f4a0aa958712e2baa64e73164da5d6ea502e8",
+    "scripts/workspace/java_resource_audit.py": "71a4520d7fe7b6de26b5e3342930d6885af7042f1244aab81b754572b5373b21",
+    "scripts/workspace/test_audit_java_resource_completeness.py": "8fff9f6ba454cdaccd42804d7e13ec2d08353b1fa7444fb36447b2d5456fd326"
   },
-  "patch_sha256": "f4882e3fcd75b143a0d50d03ab2f2be01966fe73571012b8e81f3f2c279e48fd",
-  "isolated_patch_validation": "git apply --check, git apply, 42 regression tests and normalized UTF-8/LF source identity: PASS"
+  "patch_sha256": "65d12f6f4f575cbac33ec5bad786efeb951075a98b00bb68406444654fce8c83",
+  "isolated_patch_validation": "git apply --check, git apply, 45 regression tests and normalized UTF-8/LF source identity: PASS"
 }

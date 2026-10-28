@@ -6,6 +6,8 @@ test_bulk_clear_requires_real_schema_nullability (__main__.CompletenessRegressio
 test_bulk_counts_effective_inherited_fields_and_real_handlers (__main__.CompletenessRegression) ... ok
 test_bulk_domain_command_requires_collection_action_and_resolved_evaluation (__main__.CompletenessRegression) ... ok
 test_cli_accepts_real_bound_writer_but_only_claims_static_pass (__main__.CompletenessRegression) ... ok
+test_cli_does_not_claim_overall_pass_for_pending_runtime_gate (__main__.CompletenessRegression) ... ok
+test_cli_labels_verified_runtime_receipts_separately_from_static_only (__main__.CompletenessRegression) ... ok
 test_cli_rejects_readonly_column_without_command_even_at_full_reading_coverage (__main__.CompletenessRegression) ... ok
 test_comments_and_strings_do_not_count_as_writes (__main__.CompletenessRegression) ... ok
 test_date_interval_is_not_a_scalar_picker (__main__.CompletenessRegression) ... ok
@@ -23,6 +25,7 @@ test_only_readonly_mirrored_relations_are_excluded (__main__.CompletenessRegress
 test_other_controller_cannot_supply_write_coverage (__main__.CompletenessRegression) ... ok
 test_partly_writable_join_is_not_discarded (__main__.CompletenessRegression) ... ok
 test_raw_joined_foreign_key_cannot_be_a_generic_input (__main__.CompletenessRegression) ... ok
+test_reactive_determination_count_matches_controller_operations (__main__.CompletenessRegression) ... ok
 test_read_only_resource_does_not_require_mutation_handlers (__main__.CompletenessRegression) ... ok
 test_read_only_resource_requires_no_bulk (__main__.CompletenessRegression) ... ok
 test_readonly_projection_is_not_a_command_write (__main__.CompletenessRegression) ... ok
@@ -42,6 +45,6 @@ test_threshold_cannot_be_weakened (__main__.CompletenessRegression) ... ok
 test_transitive_entity_setter_is_proven_only_from_bound_handler (__main__.CompletenessRegression) ... ok
 
 ----------------------------------------------------------------------
-Ran 42 tests in 1.718s
+Ran 45 tests in 2.742s
 
 OK

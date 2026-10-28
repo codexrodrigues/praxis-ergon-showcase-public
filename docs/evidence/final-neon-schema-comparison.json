@@ -1,0 +1,18 @@
+{
+  "sameSchema": true,
+  "comparison": "information_schema.columns in public; ordered table/ordinal, type, nullability, default, width and precision",
+  "branches": [
+    {
+      "branch": "br-super-sound-b7urizmd",
+      "tables": "16",
+      "columns": "392",
+      "column_fingerprint": "cab4d6e0f6f93e1462c344d51b542190890ab3c16bd16d56f5d4284db2e0dfea"
+    },
+    {
+      "branch": "br-soft-wave-b7ph94z3",
+      "tables": "16",
+      "columns": "392",
+      "column_fingerprint": "cab4d6e0f6f93e1462c344d51b542190890ab3c16bd16d56f5d4284db2e0dfea"
+    }
+  ]
+}

@@ -6,7 +6,6 @@ import br.com.praxis.ergonshowcase.config.OptionSourcesConfig;
 import br.com.praxis.ergonshowcase.dto.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.core.converter.*;
-import java.beans.Introspector;
 import java.util.*;
 import org.junit.jupiter.api.Test;
 import org.praxisplatform.uischema.authoring.*;
@@ -19,12 +18,21 @@ import org.springframework.core.type.filter.RegexPatternTypeFilter;
 /** Gates nativos do JAR: executáveis mesmo sem rede, sem substituir a prova HTTP/Neon. */
 class PraxisMetadataCompletenessTest {
   private List<Class<?>> dtos() throws Exception {
-    var scanner = new ClassPathScanningCandidateComponentProvider(false);
+    var scanner = new ClassPathScanningCandidateComponentProvider(false) {
+      @Override protected boolean isCandidateComponent(org.springframework.beans.factory.annotation.AnnotatedBeanDefinition bean) {
+        return bean.getMetadata().isIndependent() && !bean.getMetadata().isInterface();
+      }
+    };
     scanner.addIncludeFilter(new RegexPatternTypeFilter(java.util.regex.Pattern.compile(".*")));
     var classes = new ArrayList<Class<?>>();
     for (var bean : scanner.findCandidateComponents("br.com.praxis.ergonshowcase.dto"))
       classes.add(Class.forName(bean.getBeanClassName()));
-    assertThat(classes).hasSizeGreaterThanOrEqualTo(39)
+    assertThat(classes).hasSizeGreaterThanOrEqualTo(43)
+        .contains(CargoDados.class, OrgaoDados.class, ServidorPessoaDados.class, VinculoDados.class,
+            CreateCargoDTO.class, UpdateCargoDTO.class, CargoFilterDTO.class,
+            CreateOrgaoDTO.class, UpdateOrgaoDTO.class, OrgaoFilterDTO.class,
+            CreateServidorPessoaDTO.class, UpdateServidorPessoaDTO.class, ServidorPessoaFilterDTO.class,
+            CreateVinculoDTO.class, UpdateVinculoDTO.class, VinculoFilterDTO.class)
         .contains(CargoResponseDTO.class, ServidorPessoaResponseDTO.class, VinculoResponseDTO.class,
             OrgaoResponseDTO.class, DocumentoLegalResponseDTO.class, SetorResponseDTO.class);
     return classes;
