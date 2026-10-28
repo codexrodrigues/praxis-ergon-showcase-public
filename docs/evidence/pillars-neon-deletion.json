@@ -1,0 +1,17 @@
+{
+  "deletedBranch": "br-cool-union-b7i0zs25",
+  "authorization": "User explicitly authorized deletion after recording proofs",
+  "deletionError": false,
+  "remainingBranches": [
+    {
+      "id": "br-super-sound-b7urizmd",
+      "name": "issue-305-host-proof-20261027"
+    },
+    {
+      "id": "br-bitter-bonus-b7i0vfko",
+      "name": "main"
+    }
+  ],
+  "confirmedAbsent": true,
+  "originalPreserved": true
+}

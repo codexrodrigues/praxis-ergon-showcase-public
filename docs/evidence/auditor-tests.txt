@@ -15,7 +15,9 @@ test_dto_excessive_visible_table_columns_is_flagged (__main__.CompletenessRegres
 test_empty_project_is_not_approved (__main__.CompletenessRegression) ... ok
 test_final_constructor_dependencies_are_parsed (__main__.CompletenessRegression) ... ok
 test_foreign_keys_come_from_join_column_pairs_not_property_suffixes (__main__.CompletenessRegression) ... ok
+test_formula_is_not_a_physical_business_column (__main__.CompletenessRegression) ... ok
 test_maven_dependency_changes_invalidate_operational_receipts (__main__.CompletenessRegression) ... ok
+test_micro_visualization_getters_are_properties_not_helpers (__main__.CompletenessRegression) ... ok
 test_named_relationship_lookup_is_required (__main__.CompletenessRegression) ... ok
 test_only_readonly_mirrored_relations_are_excluded (__main__.CompletenessRegression) ... ok
 test_other_controller_cannot_supply_write_coverage (__main__.CompletenessRegression) ... ok
@@ -29,6 +31,7 @@ test_reference_cannot_point_to_a_missing_resource (__main__.CompletenessRegressi
 test_reference_cannot_point_to_an_undeclared_surface (__main__.CompletenessRegression) ... ok
 test_relation_display_is_found_from_mapper_access_not_field_label (__main__.CompletenessRegression) ... ok
 test_resource_fact_label_sentence_is_flagged (__main__.CompletenessRegression) ... ok
+test_rich_lookup_optional_nested_nulls_are_not_skeletal (__main__.CompletenessRegression) ... ok
 test_runtime_evidence_is_fail_closed_when_missing (__main__.CompletenessRegression) ... ok
 test_runtime_evidence_na_requires_reason_and_cannot_hide_a_pending_gate (__main__.CompletenessRegression) ... ok
 test_runtime_evidence_source_change_invalidates_receipt (__main__.CompletenessRegression) ... ok
@@ -39,6 +42,6 @@ test_threshold_cannot_be_weakened (__main__.CompletenessRegression) ... ok
 test_transitive_entity_setter_is_proven_only_from_bound_handler (__main__.CompletenessRegression) ... ok
 
 ----------------------------------------------------------------------
-Ran 39 tests in 1.441s
+Ran 42 tests in 1.718s
 
 OK

@@ -79,7 +79,10 @@ public class ServidorPessoaService
 
   @Override
   public StatsFieldRegistry getStatsFieldRegistry() {
-    return StatsFieldRegistry.builder().temporalTimeSeriesField("dtnasc", "dtnasc").build();
+    return StatsFieldRegistry.builder()
+        .labeledGroupByBucket("id", "numero", "nome", Set.of(StatsMetric.COUNT))
+        .categoricalGroupByBucket("escolaridade", "escolaridade")
+        .temporalTimeSeriesField("dtnasc", "dtnasc").build();
   }
 
   @Override

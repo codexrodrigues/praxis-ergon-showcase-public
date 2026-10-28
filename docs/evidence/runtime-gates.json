@@ -1,6 +1,6 @@
 {
-  "sourceSha256": "108c2aec2f15137f3e1f8063d3386f0b23adcb280ec93f58a6e4e67ee56188b1",
-  "validatedAt": "2026-10-28T09:58:50.307017+00:00",
+  "sourceSha256": "972022ef089dc1c4f846f5659cf6206e519e743b453a4a3ad77778a7bb755227",
+  "validatedAt": "2026-10-28T11:42:44.519103+00:00",
   "baselineCommit": "e6b9fa0",
   "gates": {
     "schema": {
@@ -206,5 +206,6 @@
     }
   },
   "historicalSourceSha256": "933d9c8ccb29e18e1be39694fb495b99636da9bbc9efd05ba937e6b5e88f3408",
-  "status": "acceptance-pending"
+  "status": "acceptance-pending",
+  "currentCampaign": "docs/evidence/PILLARS-CAMPAIGN.json"
 }

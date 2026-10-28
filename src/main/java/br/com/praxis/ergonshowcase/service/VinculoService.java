@@ -45,8 +45,12 @@ public class VinculoService
         field("id", "Vínculo", "string"),
         field("empCodigo", "Órgão", "integer"),
         field("situacao", "Situação", "string"),
-        field("dtexerc", "Exercício", "date"),
-        field("jornadaSemanal", "Jornada semanal", "integer"),
+        presentedField("dtexerc", "Exercício", "date",
+            new org.praxisplatform.uischema.exporting.CollectionExportFieldPresentation(
+                "date", "dd/MM/yyyy", null, "pt-BR", "America/Sao_Paulo", null, null, "Não informado")),
+        presentedField("jornadaSemanal", "Jornada semanal", "integer",
+            new org.praxisplatform.uischema.exporting.CollectionExportFieldPresentation(
+                "number", "0", null, "pt-BR", null, null, null, "Não informado")),
         field("customFields.regime_teletrabalho", "Regime de teletrabalho", "string"));
   }
 
@@ -73,6 +77,7 @@ public class VinculoService
   @Override
   public StatsFieldRegistry getStatsFieldRegistry() {
     return StatsFieldRegistry.builder()
+        .labeledGroupByBucket("id", "id", "matric", Set.of(StatsMetric.COUNT, StatsMetric.SUM))
         .categoricalGroupByBucket("situacao", "situacao")
         .temporalTimeSeriesField("dtexerc", "dtexerc")
         .numericHistogramMeasureField("jornadaSemanal", "jornadaSemanal")

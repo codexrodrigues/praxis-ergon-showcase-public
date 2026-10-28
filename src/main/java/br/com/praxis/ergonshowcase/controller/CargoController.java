@@ -80,6 +80,28 @@ public class CargoController
     extends AbstractResourceController<
         CargoResponseDTO, Integer, CargoFilterDTO, CreateCargoDTO, UpdateCargoDTO> {
   private final CargoService service;
+  @Override
+  @PostMapping("/stats/group-by")
+  @Operation(summary = "Cargos por categoria",
+      description = "Agrega o conjunto autorizado e filtrado. A projeção nominal abre a ficha pela identidade real do bucket; agrupamentos de categoria não abrem registros individuais.")
+  @UiAnalytics(projections = {
+      @AnalyticsProjection(id = "cargos-composicao", intent = AnalyticsIntent.COMPOSITION,
+          sourceOperation = AnalyticsOperation.GROUP_BY,
+          primaryDimension = @AnalyticsDimensionBinding(field = "categoria"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Registros"),
+          defaultLimit = 20),
+      @AnalyticsProjection(id = "vagas-por-cargo", intent = AnalyticsIntent.RANKING,
+          sourceOperation = AnalyticsOperation.GROUP_BY,
+          primaryDimension = @AnalyticsDimensionBinding(field = "id"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "vagasAutorizadas", aggregation = "sum", label = "Vagas autorizadas"),
+          defaultLimit = 20,
+          recordOpen = @AnalyticsRecordOpen(sourceIdentityField = "key",
+              target = @AnalyticsSurfaceTarget(resourceKey = "administracao-pessoal.cargos", surfaceId = "ficha-cargo")))
+  })
+  public org.springframework.http.ResponseEntity<RestApiResponse<org.praxisplatform.uischema.stats.dto.GroupByStatsResponse>> groupByStats(
+      @RequestBody org.praxisplatform.uischema.stats.dto.GroupByStatsRequest<CargoFilterDTO> request) {
+    return super.groupByStats(request);
+  }
 
   public CargoController(CargoService service) {
     this.service = service;

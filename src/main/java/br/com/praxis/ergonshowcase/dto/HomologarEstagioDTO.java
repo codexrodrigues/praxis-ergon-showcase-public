@@ -10,10 +10,15 @@ public record HomologarEstagioDTO(
         @PastOrPresent
         @Schema(description = "Data de homologação do estágio probatório.")
         @UISchema(
-            label = "Data de homologação do estágio probatório",
+            label = "Homologação",
+            type = org.praxisplatform.uischema.FieldDataType.DATE,
+            controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER, icon = "event",
             group = "Fundamentação do ato")
         LocalDate dtHomologEstagio,
     @NotNull
         @Schema(description = "Documento legal que homologa o estágio.")
-        @UISchema(label = "Documento legal que homologa o estágio", group = "Fundamentação do ato")
+        @UISchema(label = "Ato de homologação", group = "Fundamentação do ato",
+            type = org.praxisplatform.uischema.FieldDataType.TEXT,
+            controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP, icon = "gavel",
+            endpoint = "/api/ergon/documentos-legais/option-sources/documento/options/filter", valueField = "id", displayField = "label")
         Long documentoLegalId) {}

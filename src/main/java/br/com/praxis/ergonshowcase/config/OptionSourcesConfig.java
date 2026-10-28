@@ -6,66 +6,84 @@ import java.util.*;
 import org.praxisplatform.uischema.options.*;
 import org.springframework.context.annotation.*;
 
-/** Fontes governadas de seleção de identidades de órgão, cargo, pessoa e vínculo. */
+/** Diretórios de identidades: a seleção não substitui as invariantes transacionais do serviço. */
 @Configuration
 public class OptionSourcesConfig {
   @Bean
-  OptionSourceRegistry options() {
+  public OptionSourceRegistry options() {
     return OptionSourceRegistry.builder()
-        .add(
-            Orgao.class,
-            source("orgao", ApiPaths.ORGAOS, "empresa", "nome", "administracao-pessoal.empresas"))
-        .add(
-            Cargo.class,
-            source("cargo", ApiPaths.CARGOS, "cargo", "nome", "administracao-pessoal.cargos"))
-        .add(
-            ServidorPessoa.class,
-            source(
-                "pessoa", ApiPaths.PESSOAS, "numero", "nome", "administracao-pessoal.funcionarios"))
-        .add(
-            Vinculo.class,
-            source("vinculo", ApiPaths.VINCULOS, "id", "matric", "administracao-pessoal.vinculos"))
-        .add(
-            Setor.class,
-            source("setor", "/api/ergon/setores", "setor", "nome", "administracao-pessoal.setores"))
-        .add(
-            DocumentoLegal.class,
-            source(
-                "documento",
-                "/api/ergon/documentos-legais",
-                "id",
-                "numeroDocumento",
-                "administracao-pessoal.documentos-legais"))
+        .add(Orgao.class, source("orgao", ApiPaths.ORGAOS, "empresa", "nome",
+            "administracao-pessoal.empresas", "ficha-institucional", "ativa",
+            List.of("true"), List.of("false"), List.of("fantasia", "municipio"), false,
+            "Órgão inativo; mantenha apenas referências históricas já existentes.",
+            Map.of("true", "Ativo", "false", "Inativo")))
+        .add(Cargo.class, source("cargo", ApiPaths.CARGOS, "cargo", "nome",
+            "administracao-pessoal.cargos", "ficha-cargo", "situacaoLookup",
+            List.of("VIGENTE"), List.of("EXTINTO"), List.of("categoria", "tipoCargo"), true,
+            "Cargo extinto; novos provimentos não são permitidos.",
+            Map.of("VIGENTE", "Vigente", "EXTINTO", "Extinto")))
+        // Pessoas e atos legais não têm estado ativo/inativo no schema. Não inventar elegibilidade.
+        .add(ServidorPessoa.class, source("pessoa", ApiPaths.PESSOAS, "numero", "nome",
+            "administracao-pessoal.funcionarios", "ficha-cadastral", null,
+            List.of(), List.of(), List.of("nomeSocial"), false,
+            "Cadastro civil indisponível no escopo autorizado.", Map.of()))
+        .add(Vinculo.class, source("vinculo", ApiPaths.VINCULOS, "id", "matric",
+            "administracao-pessoal.vinculos", "resumo-funcional", "situacao",
+            List.of("ATIVO", "AFASTADO", "CEDIDO"), List.of("VACANTE", "APOSENTADO"),
+            List.of("regimejur", "tipovinc"), true,
+            "Vínculo encerrado; mantenha apenas referências históricas já existentes.",
+            Map.of("ATIVO", "Ativo", "AFASTADO", "Afastado", "CEDIDO", "Cedido",
+                "VACANTE", "Vacante", "APOSENTADO", "Aposentado")))
+        .add(Setor.class, source("setor", "/api/ergon/setores", "setor", "nome",
+            "administracao-pessoal.setores", "ficha-unidade", "situacaoLookup",
+            List.of("VIGENTE"), List.of("ENCERRADO", "FUTURO"), List.of("sigla", "tipoSetor"), true,
+            "Unidade fora da vigência; mantenha apenas referências históricas já existentes.",
+            Map.of("VIGENTE", "Vigente", "ENCERRADO", "Encerrado", "FUTURO", "Vigência futura")))
+        .add(DocumentoLegal.class, source("documento", "/api/ergon/documentos-legais", "id",
+            "numeroDocumento", "administracao-pessoal.documentos-legais", "ficha-documento", null,
+            List.of(), List.of(), List.of("tipoDocumento", "anoDocumento"), true,
+            "Ato legal indisponível no escopo autorizado.", Map.of()))
         .build();
   }
 
-  private OptionSourceDescriptor source(
-      String key, String path, String id, String label, String entityKey) {
-    var lookup =
-        new EntityLookupDescriptor(
-            entityKey,
-            null,
-            List.of(),
-            null,
-            null,
-            null,
-            List.of(label),
-            Map.of(),
-            null,
-            new LookupCapabilities(
-                true, true, false, false, false, false, true, false, false, false),
-            null);
-    return new OptionSourceDescriptor(
-        key,
-        OptionSourceType.RESOURCE_ENTITY,
-        path,
-        null,
-        null,
-        label,
-        id,
-        List.of(),
-        Map.of(),
-        OptionSourcePolicy.defaults(),
-        lookup);
+  private OptionSourceDescriptor source(String key, String path, String id, String label,
+      String entityKey, String surface, String status, List<String> allowed, List<String> blocked,
+      List<String> descriptions, boolean scoped, String disabledReason, Map<String, String> statusLabels) {
+    var dependencies = scoped ? Map.of("empCodigo", "empCodigo") : Map.<String, String>of();
+    var filtering = new LookupFilteringDescriptor(List.of(), Map.of(),
+        List.of(new LookupSortOption("descricao", label, "asc", "Descrição crescente"),
+            new LookupSortOption("descricao-desc", label, "desc", "Descrição decrescente")),
+        "descricao", List.of(), "Pesquisar pela descrição", List.of());
+    // O provedor JPA oferece busca textual; estratégias especializadas exigiriam outro provedor.
+    var displayFields = descriptions.stream().map(property -> switch (property) {
+      case "fantasia" -> display(property, "Sigla", "apartment");
+      case "municipio" -> display(property, "Município", "location_city");
+      case "categoria" -> display(property, "Categoria", "category");
+      case "tipoCargo" -> display(property, "Tipo de cargo", "work");
+      case "nomeSocial" -> display(property, "Nome social", "person");
+      case "regimejur" -> display(property, "Regime jurídico", "gavel");
+      case "tipovinc" -> display(property, "Tipo de vínculo", "badge");
+      case "sigla" -> display(property, "Sigla", "account_tree");
+      case "tipoSetor" -> display(property, "Tipo de unidade", "account_tree");
+      case "tipoDocumento" -> display(property, "Espécie do ato", "description");
+      case "anoDocumento" -> display(property, "Ano do ato", "event");
+      default -> throw new IllegalArgumentException("Campo de diretório sem curadoria: " + property);
+    }).toList();
+    var lookup = new EntityLookupDescriptor(entityKey, key.equals("vinculo") ? "matric" : id, descriptions, status, null, null,
+        List.of(label), dependencies,
+        new LookupSelectionPolicy(null, status, allowed, blocked, true, disabledReason, disabledReason),
+        new LookupCapabilities(true, true, true, false, false, true, true, false, false, false),
+        new LookupDetailDescriptor(null, null, "drawer", "surface", surface, "drawer", null,
+            "view", entityKey, surface),
+        new LookupDisplayDescriptor("directory", "form", "comfortable", "inline", "list", label,
+            displayFields, descriptions, List.of(), null, false, true, true, status != null,
+            false, true, statusLabels, 0), filtering);
+    return new OptionSourceDescriptor(key, OptionSourceType.RESOURCE_ENTITY, path, null, null,
+        label, id, scoped ? List.of("empCodigo") : List.of(), dependencies,
+        OptionSourcePolicy.defaults(), lookup);
+  }
+
+  private LookupDisplayFieldDescriptor display(String property, String label, String icon) {
+    return new LookupDisplayFieldDescriptor(property, property, label, icon, "text", "neutral", null);
   }
 }

@@ -9,5 +9,6 @@ public record EncerrarCessaoDTO(
     @NotNull
         @PastOrPresent
         @Schema(description = "Data efetiva do encerramento da cessão.")
-        @UISchema(label = "Data efetiva do encerramento da cessão", group = "Fundamentação do ato")
+        @UISchema(label = "Encerramento", group = "Fundamentação do ato", type = org.praxisplatform.uischema.FieldDataType.DATE,
+            controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER, icon = "event")
         LocalDate dtfimCessao) {}

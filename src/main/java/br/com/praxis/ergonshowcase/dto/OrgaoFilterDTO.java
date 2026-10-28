@@ -43,7 +43,7 @@ public class OrgaoFilterDTO implements GenericFilterDTO {
 
   @Schema(description = "Prefixo da inscrição do ente no CNPJ.")
   @UISchema(
-      label = "Prefixo da inscrição do ente no CNPJ",
+      label = "CNPJ começa com",
       group = "Pesquisa avançada",
       order = 202)
   @Filterable(operation = FilterOperation.STARTS_WITH, relation = "cnpj")
@@ -55,13 +55,13 @@ public class OrgaoFilterDTO implements GenericFilterDTO {
   private List<String> ufs;
 
   @Schema(description = "Trecho do município sede do órgão.")
-  @UISchema(label = "Trecho do município sede do órgão", group = "Pesquisa avançada", order = 204)
+  @UISchema(label = "Município da sede", group = "Pesquisa avançada", order = 204)
   @Filterable(operation = FilterOperation.LIKE, relation = "municipio")
   private String municipio;
 
   @Schema(description = "Seleciona somente órgãos habilitados.")
   @UISchema(
-      label = "Seleciona somente órgãos habilitados",
+      label = "Somente ativos",
       group = "Pesquisa avançada",
       order = 205)
   @Filterable(operation = FilterOperation.IS_TRUE, relation = "ativa")

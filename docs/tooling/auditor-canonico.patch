@@ -15,7 +15,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
  
  Usage:
      python scripts/workspace/audit-java-resource-completeness.py <path-to-java-host-project> [--strict]
-@@ -19,6 +21,19 @@
+@@ -19,6 +21,20 @@
  import argparse
  import re
  import sys
@@ -31,11 +31,12 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
 +    resource_fact_editorial_issues,
 +    dto_table_visibility_issues,
 +    entity_lookup_descriptor_issues,
++    micro_visualization_properties,
 +)
  from dataclasses import dataclass, field
  from pathlib import Path
  from typing import Dict, List, Optional, Set, Tuple
-@@ -79,7 +94,10 @@
+@@ -79,7 +95,10 @@
      n = len(body)
      while i < n:
          ch = body[i]
@@ -47,7 +48,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
              brace_depth += 1
              if brace_depth == 1:
                  current_token.append("{")
-@@ -109,7 +127,7 @@
+@@ -109,7 +128,7 @@
          i += 1
  
      field_re = re.compile(
@@ -56,7 +57,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
          re.DOTALL,
      )
      for stmt in top_statements:
-@@ -222,30 +240,8 @@
+@@ -222,30 +241,8 @@
      return list(merged.values())
  
  
@@ -88,7 +89,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
  
  
  def main() -> int:
-@@ -253,14 +249,18 @@
+@@ -253,14 +250,18 @@
          description="Audit Praxis Java resource completeness, Quick View readiness, and editorial quality."
      )
      parser.add_argument("project_dir", type=Path, help="Path to the Java host project root")
@@ -110,7 +111,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
  
      src_main = args.project_dir / "src" / "main" / "java"
      if not src_main.exists():
-@@ -276,17 +276,34 @@
+@@ -276,17 +277,34 @@
      controllers = [c for c in classes.values() if c.is_controller and c.controller_type_args]
      services = [c for c in classes.values() if c.is_service and c.service_type_args]
      entities = [c for c in classes.values() if "@Entity" in c.content]
@@ -147,7 +148,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
  
      failures: List[str] = []
      unmapped_details: List[Tuple[str, str, List[str]]] = []
-@@ -300,6 +317,7 @@
+@@ -300,6 +318,7 @@
              resp_dto_name, _, filter_dto_name = t_args
              create_dto_name, update_dto_name = "", ""
          else:
@@ -155,7 +156,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
              continue
  
          matched_svc = next(
-@@ -329,20 +347,15 @@
+@@ -329,20 +348,15 @@
  
          entity_biz_fields: List[Tuple[str, str]] = []
          for f_type, f_name, f_annot in entity_all_fields:
@@ -179,7 +180,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
  
          covered_count = 0
          missing_fields: List[str] = []
-@@ -398,6 +411,20 @@
+@@ -398,6 +412,20 @@
                          f"{filter_dto_name}.{f_name}: label looks like a sentence/description ('{lbl}')"
                      )
  
@@ -200,7 +201,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
          related_class_names = {
              ctrl.name,
              matched_svc.name if matched_svc else "",
-@@ -414,8 +441,14 @@
+@@ -414,8 +442,14 @@
          combined_sources = "\n".join(
              classes[n].content for n in related_class_names if n and n in classes
          )
@@ -217,13 +218,13 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
          )
          quick_filter_count = len(re.findall(r"@(?:[\w.]+\.)?QuickFilter\b", combined_sources))
          ui_surface_count = len(re.findall(r"@(?:[\w.]+\.)?UiSurface\b", combined_sources))
-@@ -425,12 +458,40 @@
+@@ -425,12 +459,40 @@
          resource_intent_count = len(
              re.findall(r"@(?:[\w.]+\.)?ResourceIntent\b", combined_sources)
          )
 +        bulk_editable_count, bulk_operation_count, bulk_issues = bulk_source_summary(ctrl.content, update_all_fields)
          resource_fact_count = len(re.findall(r"@(?:[\w.]+\.)?ResourceFact\b", combined_sources))
-+        micro_viz_count = sum(1 for _, _, ann in resp_all_fields if re.search(r"@(?:[\w.]+\.)?MicroVisualization\b", ann))
++        micro_viz_count = len(micro_visualization_properties(resp_dto_name, classes, resp_all_fields))
 +        ui_analytics_count = len(re.findall(r"@(?:[\w.]+\.)?AnalyticsProjection\b", combined_sources))
 +        res_editorial_issues.extend(resource_fact_editorial_issues(ctrl.content, ctrl.name))
 +        res_editorial_issues.extend(dto_table_visibility_issues(resp_dto_name, resp_all_fields))
@@ -260,7 +261,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
              row_issues.append(f"DTO coverage {coverage_pct:.1f}% < {args.min_dto_coverage:.0f}%")
          if total_ent_biz >= 8 and filterable_count < 5:
              row_issues.append(f"Only {filterable_count} @Filterable")
-@@ -438,10 +499,49 @@
+@@ -438,10 +500,49 @@
              row_issues.append(f"Low FilterOperation diversity ({len(filter_ops)})")
          if quick_filter_count < 2:
              row_issues.append(f"Only {quick_filter_count} @QuickFilter")
@@ -312,7 +313,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
          if (
              ui_surface_count + workflow_action_count + resource_intent_count + resource_fact_count
          ) < 1:
-@@ -449,6 +549,13 @@
+@@ -449,6 +550,13 @@
          if res_editorial_issues:
              row_issues.append(f"{len(res_editorial_issues)} @UISchema editorial issues")
  
@@ -326,7 +327,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
          status_str = "PASS" if not row_issues else "FAIL (" + "; ".join(row_issues) + ")"
          if row_issues:
              failures.append(f"{res_label}: {status_str}")
-@@ -457,11 +564,19 @@
+@@ -457,11 +565,19 @@
          if res_editorial_issues:
              editorial_details.append((res_label, res_editorial_issues))
  
@@ -348,7 +349,7 @@ diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/wor
  
      if unmapped_details:
          print("\n## 2. Unmapped Entity Business Columns (Entity -> ResponseDTO Gaps)")
-@@ -479,17 +594,25 @@
+@@ -479,17 +595,25 @@
              if len(issues) > 12:
                  print(f"  - ... and {len(issues) - 12} more")
  
@@ -382,7 +383,7 @@ diff --git a/scripts/workspace/java_resource_audit.py b/scripts/workspace/java_r
 new file mode 100644
 --- /dev/null
 +++ b/scripts/workspace/java_resource_audit.py
-@@ -0,0 +1,283 @@
+@@ -0,0 +1,314 @@
 +"""Conservative static source evidence. This module does not approve runtime behavior."""
 +import re
 +
@@ -421,7 +422,7 @@ new file mode 100644
 +
 +
 +def technical_or_mirrored(name, annotations, technical_names):
-+    if re.search(r'@(?:\w+\.)*(?:Id|EmbeddedId|Version|OneToMany|ManyToMany)\b', annotations):
++    if re.search(r'@(?:\w+\.)*(?:Id|EmbeddedId|Version|OneToMany|ManyToMany|Formula)\b', annotations):
 +        return True
 +    if name in technical_names and "@Embedded" in annotations:
 +        return True
@@ -549,20 +550,51 @@ new file mode 100644
 +def entity_lookup_descriptor_issues(classes):
 +    issues = []
 +    for info in classes.values():
-+        cleaned = re.sub(r"/\*.*?\*/|//.*?$", "", info.content, flags=re.DOTALL | re.MULTILINE)
-+        for match in re.finditer(r'new\s+EntityLookupDescriptor\s*\(', cleaned):
++        cleaned = masked_java(info.content)
++        for match in re.finditer(r'new\s+(?:[\w.]+\.)?EntityLookupDescriptor\s*\(', cleaned):
 +            start = cleaned.find("(", match.start())
 +            end = end_delimiter(cleaned, start, "(", ")")
 +            if end < 0:
 +                continue
-+            args_body = cleaned[start + 1 : end]
-+            null_count = len(re.findall(r'\bnull\b', args_body))
-+            if null_count >= 3:
++            args = []
++            boundary, depth = start + 1, 0
++            for index in range(start + 1, end):
++                char = cleaned[index]
++                if char in '({[': depth += 1
++                elif char in ')}]': depth -= 1
++                elif char == ',' and depth == 0:
++                    args.append(cleaned[boundary:index].strip())
++                    boundary = index + 1
++            args.append(cleaned[boundary:end].strip())
++            # Optional paths/URLs in nested contracts are legitimate. Count only outer arguments,
++            # and require the four actual rich subcontracts (canonical 13-argument constructor).
++            null_count = sum(arg == 'null' for arg in args)
++            missing = len(args) != 13 or any(args[i] == 'null' for i in (8, 10, 11, 12))
++            if missing:
 +                issues.append(
 +                    f"{info.name}: skeletal EntityLookupDescriptor ({null_count} null arguments; populate LookupSelectionPolicy, LookupDetailDescriptor, LookupDisplayDescriptor, LookupFilteringDescriptor)"
 +                )
 +                break
 +    return issues
++
++
++def micro_visualization_properties(dto_name, classes, fields):
++    """Count annotated public bean properties, including inherited zero-argument getters."""
++    result = {name for _, name, ann in fields
++              if re.search(r'@(?:[\w.]+\.)?MicroVisualization\b', masked_java(ann))}
++    visited = set()
++    while dto_name in classes and dto_name not in visited:
++        visited.add(dto_name)
++        info = classes[dto_name]
++        for name, (header, signature, _) in java_methods(info.content).items():
++            if (re.fullmatch(r'get[A-Z]\w*', name)
++                    and re.search(r'\bpublic\b', signature)
++                    and re.search(r'\(\s*\)', signature)
++                    and re.search(r'@(?:[\w.]+\.)?MicroVisualization\b', masked_java(header))):
++                result.add(name[3:4].lower() + name[4:])
++        parent = re.search(r'\bclass\s+\w+\s+extends\s+(\w+)', masked_java(info.content))
++        dto_name = parent.group(1) if parent else ''
++    return result
 +
 +
 +def relationship_display_fields(entity, fields, classes):
@@ -670,7 +702,7 @@ diff --git a/scripts/workspace/test_audit_java_resource_completeness.py b/script
 new file mode 100644
 --- /dev/null
 +++ b/scripts/workspace/test_audit_java_resource_completeness.py
-@@ -0,0 +1,276 @@
+@@ -0,0 +1,292 @@
 +"""Regression proofs for the canonical static audit; no product DTO enrichment."""
 +import importlib.util
 +from pathlib import Path
@@ -700,6 +732,7 @@ new file mode 100644
 +    resource_fact_editorial_issues,
 +    dto_table_visibility_issues,
 +    entity_lookup_descriptor_issues,
++    micro_visualization_properties,
 +)
 +
 +
@@ -944,6 +977,21 @@ new file mode 100644
 +    def test_skeletal_entity_lookup_descriptor_is_flagged(self):
 +        cfg=info("OptionSourcesConfig",'class OptionSourcesConfig { void reg(){ new EntityLookupDescriptor("k","id","lbl",null,List.of(),null,null,null,null,null,LookupCapabilities.defaults()); } }')
 +        self.assertEqual(len(entity_lookup_descriptor_issues({"OptionSourcesConfig":cfg})),1)
++
++    def test_rich_lookup_optional_nested_nulls_are_not_skeletal(self):
++        source = 'class C { public void reg(){new EntityLookupDescriptor("k","id",List.of(),null,null,null,List.of(),Map.of(),new LookupSelectionPolicy(null,null,List.of(),List.of(),true,null,null),caps,new LookupDetailDescriptor(null,null,"drawer"),display,filtering);} }'
++        self.assertEqual(entity_lookup_descriptor_issues({"C":info("C",source)}),[])
++        broken=source.replace('caps,new LookupDetailDescriptor(null,null,"drawer"),display,filtering', 'caps,null,display,filtering')
++        self.assertEqual(len(entity_lookup_descriptor_issues({"C":info("C",broken)})),1)
++
++    def test_micro_visualization_getters_are_properties_not_helpers(self):
++        source='class R extends Base { @MicroVisualization public Long getOcupadas(){return 2L;} @MicroVisualization public void calculate(int n){} }'
++        base='class Base { @MicroVisualization public Integer getProgress(){return 1;} }'
++        self.assertEqual(micro_visualization_properties("R", {"R":info("R",source),"Base":info("Base",base)}, []), {"ocupadas","progress"})
++
++    def test_formula_is_not_a_physical_business_column(self):
++        self.assertTrue(technical_or_mirrored("statusLookup", '@org.hibernate.annotations.Formula("case when ended is null then 1 else 0 end")', set()))
++        self.assertFalse(technical_or_mirrored("status", '@Column(name="status")', set()))
 +
 +if __name__=="__main__":
 +    unittest.main()

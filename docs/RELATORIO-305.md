@@ -1,6 +1,26 @@
 # Relatório de rodada — issue 305
 
-## Rodada atual — Bulking #2 / Metadata #308: aceite pendente
+## Rodada atual — quatro lacunas dos pilares
+
+Esta seção prevalece sobre os resultados históricos. Classificação, impacto e fases: [PLANO-20-PILARES.md](PLANO-20-PILARES.md).
+
+Implementados seis EntityLookupDescriptor ricos com seleção histórica, superfícies reais em drawer, preset directory, ordenação permitida e dependência empCodigo onde aplicável. Cargo extinto e vigência de setor são projeções SQL por Formula, sem colunas novas. MicroVisualization/Threshold em ocupação de cargos, presença de canais de contato e jornada semanal; o indicador de contato não significa validade/consentimento e a escala da jornada não significa limite legal. UiAnalytics possui composição e ranking nominal, StatsFieldRegistry correspondente e recordOpen com identidade real para a ficha. Exportação ganhou apresentação declarativa de campos e o cockpit exige ERGON_READ.
+
+PraxisMetadataCompletenessTest executa SemanticMetadataReviewer sobre os 39 DTOs concretos (incluindo bases herdadas), PraxisExpressionStaticValidator e OptionSourcePublicationInventory/diagnostics com inventário independente de seis fontes. Os 28 rótulos genéricos detectados foram corrigidos manualmente, preservando descrições de domínio. Nenhum script gerou anotações.
+
+Validação: **9/9** testes focais finais, **34/34** testes SDK e **42/42** regressões do auditor. Seis recursos com **STATIC PASS** e cobertura de leitura/escrita contabilizada de 100%. O transporte do auditor foi aplicado em diretório Git temporário e comparado à fonte canônica. Correções de parser abrangem getters anotados, Formula não física e argumentos externos de lookup, sem relaxar exigências de subcontratos.
+
+A campanha integral `mvn test` executou 65 testes com 10 falhas, zero erros. Duas falhas eram asserções incorretas do harness de opções e foram corrigidas/provadas na suíte focal; três são publicação Bulking/dependências, cinco são discovery transacional incompatível com o guard do kernel. **Não há aprovação integral nem de merge.** Não foram alterados prazos, segurança ou gates para forçar sucesso. A prova Angular de Bulking segue pendente; não houve validação visual de UI nesta rodada backend.
+
+Defeito canônico reproduzido no Neon: Path compartilhado pelo Hibernate fazia alias sobrescrever código/descrição/campos ricos. Corrigido no [PR Metadata #311](https://github.com/codexrodrigues/praxis-metadata-starter/pull/311), commit f9519fb3da, usando seleções independentes. O host foi validado com candidato privado; rc.179 continua no POM e não recebe alegação de compatibilidade com essas correções não publicadas.
+
+Fricção documental adicional: o blueprint exemplifica OptionSourcePublicationInventory em pacote/API inexistente (`options.service`, `inspect`, `findings`). A implementação utiliza a API real `options.diagnostics`, `diagnose`, `unpublishedOrMismatched` e `issues`. A árvore canônica de skills contém alterações preexistentes extensas; não foi sobrescrita nem sincronizada. O ajuste de guidance continua registrado como pendência.
+
+Derivados atualizados: relatório, scorecard, manifesto, campanha e transporte do auditor. Sem mudança de shape no SDK, não há schema público, landing ou lib Angular para sincronizar nesta correção. As 16 tabelas/392 colunas da branch de prova são idênticas à original; ddl-auto validate e flyway desabilitado foram preservados. [Evidências e limites](evidence/PILLARS-CAMPAIGN.json).
+
+A branch `br-cool-union-b7i0zs25` foi excluída após gravar as provas e conferir zero fixtures residuais. A listagem posterior confirmou sua ausência e a preservação de `br-super-sound-b7urizmd`: [recibo](evidence/pillars-neon-deletion.json). Os processos de testes foram encerrados.
+
+## Histórico — Bulking #2 / Metadata #308: aceite pendente
 
 Classificação: contrato público e arquitetura; impacto e fases em [PLANO-BULKING-308.md](PLANO-BULKING-308.md). Esta seção prevalece sobre os resultados históricos abaixo.
 

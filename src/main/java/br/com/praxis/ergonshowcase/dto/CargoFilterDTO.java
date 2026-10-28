@@ -58,7 +58,7 @@ public class CargoFilterDTO implements GenericFilterDTO {
   private String subcategoria;
 
   @Schema(description = "Modalidades de provimento incluídas.")
-  @UISchema(label = "Modalidades de provimento incluídas", group = "Pesquisa avançada", order = 202)
+  @UISchema(label = "Tipos de cargo", group = "Pesquisa avançada", order = 202)
   @Filterable(operation = FilterOperation.IN, relation = "tipoCargo")
   private List<String> tiposCargo;
 

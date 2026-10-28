@@ -21,6 +21,9 @@ import org.hibernate.type.SqlTypes;
 @Comment(
     "Catálogo de cargos efetivos, cargos em comissão e funções gratificadas do quadro de pessoal (equivalente a CARGOS_ no legado Ergon). Inclui exigência de escolaridade, categoria funcional, controle de vagas e extensibilidade via JSONB.")
 public class Cargo {
+  /** Situação de seleção derivada da extinção; não cria coluna nem altera o cadastro. */
+  @org.hibernate.annotations.Formula("case when dt_extincao is null then 'VIGENTE' else 'EXTINTO' end")
+  private String situacaoLookup;
   /** Referência relacional para leitura de orgao no assentamento. */
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(

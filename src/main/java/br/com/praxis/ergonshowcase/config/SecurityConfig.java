@@ -35,6 +35,8 @@ public class SecurityConfig {
             a ->
                 a.requestMatchers("/actuator/health", "/v3/api-docs/**")
                     .permitAll()
+                    .requestMatchers("/praxis/cockpit/**")
+                    .hasAuthority("ERGON_READ")
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/**")
                     .hasAuthority("ERGON_READ")
                     .requestMatchers(

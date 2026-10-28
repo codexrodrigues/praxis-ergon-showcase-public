@@ -1,0 +1,56 @@
+{
+  "validatedAt": "2026-10-28T11:42:44.519103+00:00",
+  "sourceSha256": "972022ef089dc1c4f846f5659cf6206e519e743b453a4a3ad77778a7bb755227",
+  "sdkCommit": "f9519fb3da376147b6882bc58f512bef9ae3ed5b",
+  "dependency": "8.0.0-ergon-bulk.308-SNAPSHOT",
+  "pomDependency": "8.0.0-rc.179",
+  "disposableBranch": "br-cool-union-b7i0zs25",
+  "domainSchema": {
+    "tables": 16,
+    "columns": 392,
+    "equalToOriginal": true
+  },
+  "fullCampaign": {
+    "tests": 65,
+    "failures": 10,
+    "errors": 0,
+    "skipped": 0,
+    "note": "Before focal harness fixes: 3 bulk publication/dependent failures, 5 transactional discovery failures, 2 lookup harness envelope failures."
+  },
+  "finalFocal": {
+    "tests": 9,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "cases": [
+      "PillarsNeonIntegrationTest.historicExtinctCargoIsRetainedButDisabledAndCompanyDependencyIsEffective",
+      "PillarsNeonIntegrationTest.analyticMeasuresUseRegisteredFieldsAndRejectDocumentSummation",
+      "PillarsNeonIntegrationTest.sixRichDirectoriesFilterAndReloadActualIdentities",
+      "PillarsNeonIntegrationTest.nominalAnalyticsBucketsCarryRealIdsForThePublishedSurfaces",
+      "PillarsNeonIntegrationTest.publicSchemasActuallyPublishAnalyticsAndMicrovisualizations",
+      "PraxisMetadataCompletenessTest.derivedIndicatorsPreserveUnknownAndDoNotInventValidity",
+      "PraxisMetadataCompletenessTest.expectedLookupInventoryIsPublishedAndRich",
+      "PraxisMetadataCompletenessTest.actualResolvedMicrovisualizationsHaveValidExpressions",
+      "PraxisMetadataCompletenessTest.allDomainDtosPassSemanticReview"
+    ]
+  },
+  "sdkFocal": {
+    "tests": 34,
+    "failures": 0
+  },
+  "auditorRegression": {
+    "tests": 42,
+    "failures": 0
+  },
+  "remaining": [
+    "Full mvn test not green; no full rerun after focal harness corrections",
+    "LIVE publication timeout",
+    "Old transactional discovery harness incompatible with projection boundary",
+    "Bulking Angular end-to-end not accepted",
+    "Public rc.179 does not include private SDK fixes"
+  ],
+  "localLogHashes": {
+    ".local/pillars-full.log": "2e3eb8128eaa1932ee1857aa7d185784f3fe98193d4626ebd1621993fe3e1f82",
+    ".local/pillars-final-focal2.log": "e4f79973407a75ba31cb4bae38409feed287a41bce7d842abb550c11d605f5f5"
+  }
+}

@@ -20,6 +20,19 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
     subtitleField = "categoria",
     metadataFields = {"id", "orgaoNome", "tipoCargo", "saldoVagasDisponiveis"})
 public class CargoResponseDTO extends CargoDados {
+  @Schema(description = "Número de vagas ocupadas por vínculos ativos, afastados ou cedidos no cargo titular ou em comissão, sem dupla contagem. Nulo sem quadro autorizado conhecido.", accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(label = "Ocupação do quadro", group = "Quadro de Vagas e Vigência", readOnly = true,
+      formHidden = true, icon = "groups", helpText = "Compara ocupantes e vagas autorizadas; não reserva provimento.")
+  @MicroVisualization(kind = MicroVisualizationKind.BULLET, valueExpr = "vagasOcupadas",
+      targetExpr = "vagasAutorizadas", totalExpr = "vagasAutorizadas", min = 0,
+      toneExpr = "=saldoVagasDisponiveis < 0 ? 'danger' : (saldoVagasDisponiveis == 0 ? 'warning' : 'info')",
+      thresholds = @Threshold(min = 0, tone = "info", label = "Ocupantes do quadro"),
+      compactValue = true, fallbackText = "Ocupantes em relação às vagas autorizadas",
+      ariaLabel = "Ocupação do quadro de vagas")
+  public Long getVagasOcupadas() {
+    return getVagasAutorizadas() == null || saldoVagasDisponiveis == null
+        ? null : getVagasAutorizadas().longValue() - saldoVagasDisponiveis;
+  }
   @Schema(
       description = "Código imutável que identifica o cargo ou função no quadro de pessoal.",
       accessMode = Schema.AccessMode.READ_ONLY)

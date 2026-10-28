@@ -21,6 +21,9 @@ import org.hibernate.type.SqlTypes;
 @Comment(
     "Estrutura organizacional e unidades de lotação funcional/financeira por órgão público (equivalente a SETORES_ / SETORES_ERGON / HSETOR no legado Ergon). Possui suporte a campos customizados multi-órgão em JSONB indexado via GIN.")
 public class Setor {
+  /** Vigência para novas seleções; referências históricas continuam reidratáveis por identidade. */
+  @org.hibernate.annotations.Formula("case when dtini > current_date then 'FUTURO' when dtfim is not null and dtfim < current_date then 'ENCERRADO' else 'VIGENTE' end")
+  private String situacaoLookup;
   @Id
   /** Código alfanumérico estruturado identificador único do setor ou unidade de lotação. */
   @Comment("Código alfanumérico estruturado identificador único do setor ou unidade de lotação.")

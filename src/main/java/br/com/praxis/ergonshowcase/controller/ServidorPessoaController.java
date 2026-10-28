@@ -75,6 +75,28 @@ public class ServidorPessoaController
         CreateServidorPessoaDTO,
         UpdateServidorPessoaDTO> {
   private final ServidorPessoaService service;
+  @Override
+  @PostMapping("/stats/group-by")
+  @Operation(summary = "Pessoas por escolaridade",
+      description = "Agrega o conjunto autorizado e filtrado. A projeção nominal abre a ficha pela identidade real do bucket; agrupamentos de categoria não abrem registros individuais.")
+  @UiAnalytics(projections = {
+      @AnalyticsProjection(id = "funcionarios-composicao", intent = AnalyticsIntent.COMPOSITION,
+          sourceOperation = AnalyticsOperation.GROUP_BY,
+          primaryDimension = @AnalyticsDimensionBinding(field = "escolaridade"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Registros"),
+          defaultLimit = 20),
+      @AnalyticsProjection(id = "cadastros-por-pessoa", intent = AnalyticsIntent.RANKING,
+          sourceOperation = AnalyticsOperation.GROUP_BY,
+          primaryDimension = @AnalyticsDimensionBinding(field = "id"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Cadastros civis"),
+          defaultLimit = 20,
+          recordOpen = @AnalyticsRecordOpen(sourceIdentityField = "key",
+              target = @AnalyticsSurfaceTarget(resourceKey = "administracao-pessoal.funcionarios", surfaceId = "ficha-cadastral")))
+  })
+  public org.springframework.http.ResponseEntity<RestApiResponse<org.praxisplatform.uischema.stats.dto.GroupByStatsResponse>> groupByStats(
+      @RequestBody org.praxisplatform.uischema.stats.dto.GroupByStatsRequest<ServidorPessoaFilterDTO> request) {
+    return super.groupByStats(request);
+  }
 
   public ServidorPessoaController(ServidorPessoaService service) {
     this.service = service;

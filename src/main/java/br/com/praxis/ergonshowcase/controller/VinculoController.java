@@ -93,6 +93,28 @@ public class VinculoController
     extends AbstractResourceController<
         VinculoResponseDTO, VinculoId, VinculoFilterDTO, CreateVinculoDTO, UpdateVinculoDTO> {
   private final VinculoService service;
+  @Override
+  @PostMapping("/stats/group-by")
+  @Operation(summary = "Vínculos por situação",
+      description = "Agrega o conjunto autorizado e filtrado. A projeção nominal abre a ficha pela identidade real do bucket; agrupamentos de categoria não abrem registros individuais.")
+  @UiAnalytics(projections = {
+      @AnalyticsProjection(id = "vinculos-composicao", intent = AnalyticsIntent.COMPOSITION,
+          sourceOperation = AnalyticsOperation.GROUP_BY,
+          primaryDimension = @AnalyticsDimensionBinding(field = "situacao"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Registros"),
+          defaultLimit = 20),
+      @AnalyticsProjection(id = "jornada-por-vinculo", intent = AnalyticsIntent.RANKING,
+          sourceOperation = AnalyticsOperation.GROUP_BY,
+          primaryDimension = @AnalyticsDimensionBinding(field = "id"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "jornadaSemanal", aggregation = "sum", label = "Horas semanais"),
+          defaultLimit = 20,
+          recordOpen = @AnalyticsRecordOpen(sourceIdentityField = "key",
+              target = @AnalyticsSurfaceTarget(resourceKey = "administracao-pessoal.vinculos", surfaceId = "resumo-funcional")))
+  })
+  public org.springframework.http.ResponseEntity<RestApiResponse<org.praxisplatform.uischema.stats.dto.GroupByStatsResponse>> groupByStats(
+      @RequestBody org.praxisplatform.uischema.stats.dto.GroupByStatsRequest<VinculoFilterDTO> request) {
+    return super.groupByStats(request);
+  }
   private final org.praxisplatform.uischema.concurrency.ResourceVersionEtagService etags;
   private final org.praxisplatform.uischema.concurrency.ResourceVersionScopeProvider scopes;
 

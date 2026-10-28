@@ -79,7 +79,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private String nomeSocial;
 
   @Schema(description = "CPF exato da pessoa consultada.")
-  @UISchema(label = "CPF exato da pessoa consultada", group = "Pesquisa avançada", order = 201)
+  @UISchema(label = "CPF exato", group = "Pesquisa avançada", order = 201)
   @Filterable(operation = FilterOperation.EQUAL, relation = "cpf")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -91,7 +91,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private String cpf;
 
   @Schema(description = "Prefixo do CPF da pessoa.")
-  @UISchema(label = "Prefixo do CPF da pessoa", group = "Pesquisa avançada", order = 202)
+  @UISchema(label = "CPF começa com", group = "Pesquisa avançada", order = 202)
   @Filterable(operation = FilterOperation.STARTS_WITH, relation = "cpf")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -103,7 +103,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private String cpfPrefixo;
 
   @Schema(description = "Inscrição PIS/PASEP exata.")
-  @UISchema(label = "Inscrição PIS/PASEP exata", group = "Pesquisa avançada", order = 203)
+  @UISchema(label = "PIS/PASEP", group = "Pesquisa avançada", order = 203)
   @Filterable(operation = FilterOperation.EQUAL, relation = "pispasep")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -115,7 +115,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private String pispasep;
 
   @Schema(description = "Número exato da identidade civil.")
-  @UISchema(label = "Número exato da identidade civil", group = "Pesquisa avançada", order = 204)
+  @UISchema(label = "Identidade civil", group = "Pesquisa avançada", order = 204)
   @Filterable(operation = FilterOperation.EQUAL, relation = "numrg")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -127,7 +127,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private String numrg;
 
   @Schema(description = "Sexo registral incluído na consulta.")
-  @UISchema(label = "Sexo registral incluído na consulta", group = "Pesquisa avançada", order = 205)
+  @UISchema(label = "Sexo registral", group = "Pesquisa avançada", order = 205)
   @Filterable(operation = FilterOperation.EQUAL, relation = "sexo")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -139,7 +139,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private String sexo;
 
   @Schema(description = "Estados civis incluídos na consulta.")
-  @UISchema(label = "Estados civis incluídos na consulta", group = "Pesquisa avançada", order = 206)
+  @UISchema(label = "Estados civis", group = "Pesquisa avançada", order = 206)
   @Filterable(operation = FilterOperation.IN, relation = "estcivil")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -188,7 +188,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
 
   @Schema(description = "Data civil exata de nascimento.")
   @UISchema(
-      label = "Data civil exata de nascimento",
+      label = "Nascimento na data",
       group = "Pesquisa avançada",
       order = 210,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
@@ -217,7 +217,7 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   private String ufender;
 
   @Schema(description = "Trecho do município de residência.")
-  @UISchema(label = "Trecho do município de residência", group = "Pesquisa avançada", order = 212)
+  @UISchema(label = "Município de residência", group = "Pesquisa avançada", order = 212)
   @Filterable(operation = FilterOperation.LIKE, relation = "cidadeender")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,

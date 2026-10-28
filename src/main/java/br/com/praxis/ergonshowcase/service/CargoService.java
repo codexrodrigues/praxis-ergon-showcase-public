@@ -41,7 +41,12 @@ public class CargoService
         field("nome", "Cargo", "string"),
         field("empCodigo", "Órgão", "integer"),
         field("categoria", "Categoria", "string"),
-        field("vagasAutorizadas", "Vagas autorizadas", "integer"));
+        presentedField("vagasAutorizadas", "Vagas autorizadas", "integer",
+            new org.praxisplatform.uischema.exporting.CollectionExportFieldPresentation(
+                "number", "0", null, "pt-BR", null, null, null, "Não informado")),
+        presentedField("controleVaga", "Controle de vagas", "boolean",
+            new org.praxisplatform.uischema.exporting.CollectionExportFieldPresentation(
+                "boolean", null, null, "pt-BR", null, "Sim", "Não", "Não informado")));
   }
 
   @Override
@@ -67,6 +72,7 @@ public class CargoService
   @Override
   public StatsFieldRegistry getStatsFieldRegistry() {
     return StatsFieldRegistry.builder()
+        .labeledGroupByBucket("id", "cargo", "nome", Set.of(StatsMetric.COUNT, StatsMetric.SUM))
         .categoricalGroupByBucket("categoria", "categoria")
         .numericHistogramMeasureField("vagasAutorizadas", "vagasAutorizadas")
         .build();

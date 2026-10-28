@@ -23,6 +23,15 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
     subtitleField = "pessoaNome",
     metadataFields = {"orgaoNome", "cargoNome", "situacao"})
 public class VinculoResponseDTO extends VinculoDados {
+  @Override
+  @MicroVisualization(kind = MicroVisualizationKind.BULLET, valueExpr = "jornadaSemanal",
+      min = 0, max = 168, total = 168, valueSuffix = " h", compactValue = true,
+      thresholds = @Threshold(min = 1, max = 168, tone = "info", label = "Horas semanais registradas"),
+      fallbackText = "Jornada semanal em horas; escala física de 168 horas, sem meta legal",
+      ariaLabel = "Horas semanais do vínculo; não representa produtividade")
+  public Integer getJornadaSemanal() {
+    return super.getJornadaSemanal();
+  }
   @Schema(
       description =
           "Identidade do único afastamento homologado aberto deste vínculo; nulo quando não há exatamente um.",

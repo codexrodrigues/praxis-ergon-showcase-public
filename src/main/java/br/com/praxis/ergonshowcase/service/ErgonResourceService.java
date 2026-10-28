@@ -44,6 +44,11 @@ public abstract class ErgonResourceService<E, R, I, F extends GenericFilterDTO, 
     return new CollectionExportField(key, label, true, true, type, key);
   }
 
+  protected static CollectionExportField presentedField(
+      String key, String label, String type, CollectionExportFieldPresentation presentation) {
+    return new CollectionExportField(key, label, true, true, type, key, null, presentation);
+  }
+
   private Specification<E> filtered(F filter) {
     return resolveResourceFilterAccessScope()
         .specification()

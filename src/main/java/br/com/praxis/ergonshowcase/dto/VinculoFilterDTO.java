@@ -137,7 +137,7 @@ public class VinculoFilterDTO implements GenericFilterDTO {
 
   @Schema(description = "Código do cargo ocupado pelo vínculo.")
   @UISchema(
-      label = "Código do cargo ocupado pelo vínculo",
+      label = "Cargo titular",
       group = "Pesquisa avançada",
       order = 207,
       type = org.praxisplatform.uischema.FieldDataType.TEXT,
