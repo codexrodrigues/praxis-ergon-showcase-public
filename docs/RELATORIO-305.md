@@ -1,6 +1,45 @@
 # Relatório de rodada — issue 305
 
-## Correções da revisão independente — rodada atual
+## Estado atual — correções da revisão de 61fc36b
+
+Esta seção prevalece sobre os registros históricos abaixo. Plano e mapa de impacto: [execução por fases](PLANO-REVISAO-61fc36b.md). A entrega amplia contrato público e arquitetura do host, conserva o starter local 8.0.0-rc.179 e não altera nenhuma das 16 entidades, 392 colunas ou configuração de criação de schema. Não houve acesso ao código do quickstart, merge ou publicação de biblioteca.
+
+| Achado | Correção / resultado | Evidência |
+|---|---|---|
+| R1: consultas cresciam de 7 para 14 | EntityGraph nas consultas de cargos/vínculos e enriquecimento em lote; medição começa antes de carregar entidades em contexto frio | reviewDerivedFactsUseOneBatchQueryRegardlessOfPageSize; [contagem](evidence/cold-query-counts.json): página, cursor e exportação 4/4 para tamanhos 1/3 |
+| R2: agência de 11 caracteres gerava 500 | Limites reais de armazenamento nos DTOs cadastrais e nos três PATCHs; agência até 10, excesso recusado antes do flush | phaseTwoPartialFormsRejectStorageOverflowBeforeWriting: HTTP 400; limite válido aceito |
+| R3: PUT bloqueava histórico com cargo extinto | Removida validação duplicada incondicional; a invariante central aplica elegibilidade de provimento aos estados ocupantes | phaseTwoHistoricalMaintenanceAllowsExtinctCargo: VACANTE/APOSENTADO aceitos em PUT/PATCH; testes negativos de novo provimento preservados |
+| R4: extremos de contrato invertidos com meio nulo | Comparação direta entre início e prorrogação, além das comparações adjacentes | phaseTwoChronologyRejectsReverseEndpointsWithMissingMiddle: criação e atualização 422 |
+| R5: FKs, valores e referências incompletos | Curadoria explícita de tipo/controle/ícone, opções nomeadas, comissão/aglutinação e setores; dois recursos auxiliares reais, Quick View sem repetição de título/subtítulo | phaseOneAuxiliaryReferencesAreReadOnlyAndResolvable; schemas materializados; auditor com 29 regressões e seis recursos STATIC PASS |
+| R6: determinações, relações e consumidor ausentes | Três definições HOST em CREATE/EDIT, operações somente de avaliação, coleções relacionadas paginadas e matriz de paridade delimitada | quatro testes phaseThree; phaseTwoRelatedCollectionsRespectParentAndPagination; [runtime Angular](evidence/angular-consumer-proof.json); [matriz](MATRIZ-PARIDADE-305.md) |
+
+R6 **não está integralmente encerrado**: o gate de decisões governadas depende da identificação de snapshot aprovado do Config. Foi solicitada identidade e endpoint; não há aprovação presumida, regra estatutária inventada ou dispensa N/A. O [manifesto operacional](evidence/runtime-gates.json) registra awaiting-input e o auditor com --require-runtime-evidence deve retornar falha nesse gate, mesmo com todos os gates estruturais satisfeitos. A próxima revisão independente deve avaliar esse insumo e os limites de paridade antes de aprovar merge.
+
+### Profundidade por recurso
+
+Órgãos agora abrem seu quadro de cargos. Pessoas abrem vínculos funcionais. Cargos abrem ocupantes titulares e em comissão. Todos usam recursos reais, existência do pai, filtro pelo relacionamento, paginação e ERGON_READ. Setores e documentos legais possuem ficha e opções somente de leitura; os outros cadastros auxiliares não ganharam CRUD artificial.
+
+As prévias não persistentes são: PcD pelos cinco indicadores reais, nome/saldo do cargo selecionado e nome do cargo aglutinador elegível. O submit recusa campos de prévia informados pelo cliente e revalida as regras de escrita. Saldo consultado não reserva uma vaga. Nenhuma fórmula foi deslocada ao frontend e nenhum resultado dependente de tenant foi colocado na definição cacheável.
+
+A política de documentos foi explicitada por operação: referência cadastral a norma de emissor externo é permitida quando existente; ato de afastamento exige documento do órgão do vínculo. Isso não certifica a aplicabilidade jurídica de qualquer norma. phaseThreeDocumentScopeIsExplicitPerOperation cobre ambos os casos e a aceitação do ato local.
+
+### Consumo oficial e fricções
+
+O ensaio usa normalizeSchemaFields do Core e ReactiveDeterminationRuntimeService das fontes oficiais do workspace Angular, sem alterações nas bibliotecas, aliases novos ou fórmula local. Foram seis schemas CREATE/EDIT e seis execuções com HTTP real, fonte HOST, saída calculada, proteção contra resposta antiga e erro de avaliação visível. Fixture reservada de cargo aglutinador removida no finally; recibo sem dados pessoais. Os hashes de entrada do consumidor estão em evidence/angular-consumer-input-hashes.json.
+
+Houve divergência entre dist local antigo do Core e o código-fonte atual do Dynamic Form: o dist não exportava normalizeScalarArrayValue. A prova passou a usar o tsconfig oficial do workspace, que resolve as fontes canônicas. Isso comprova consumo de fonte oficial; não comprova pacote npm publicado. O registry Azure local também não forneceu as dependências mínimas; o ensaio privado usou versões pinadas do lockfile Angular e registry público, sem mudar configuração global. Setores/documentos já existentes tiveram de ser publicados como consultas reais para que referências fossem resolvíveis. Não foi necessária mudança nas skills; a orientação de preservar proveniência e distinguir fonte/publicação permanece adequada.
+
+Não houve ensaio visual desktop/narrow: o escopo implementou backend e um harness de contrato/runtime, sem construir tela host Angular. A prova não certifica apresentação visual das fichas/coleções. Não foi executada carga concorrente para a última vaga, nem certificação jurídica de todas as regras estatutárias. A paridade está delimitada na matriz por campo/capacidade; contagem de colunas não equivale ao Ergon inteiro.
+
+### Verificação e preservação
+
+Resultados definitivos e hashes estão nos recibos de evidence. A suíte integral usa Neon real isolado, com rollback; o empacotamento executa os mesmos testes. O transporte do auditor foi aplicado em diretório temporário e passou nos 29 testes. O scorecard distingue estrutura, operação, paridade delimitada e pendências. ddl-auto continua validate; flyway.enabled continua false. Não há migrations DDL, alteração de entidades ou escrita na branch principal do Neon.
+
+Execução definitiva em 27/10/2026: **mvn package aprovado, 52 testes, zero falhas/erros/ignorados, 211,8 segundos na classe de integração**. Smoke do JAR final: health/OpenAPI/consulta de vínculo HTTP 200; seis execuções Angular aprovadas e fixture removida. Processo Java auxiliar encerrado. A conferência posterior por SQL retornou 16 tabelas, 392 colunas e zero fixtures de órgãos, cargos, pessoas, vínculos ou afastamentos; órgão base ativo e vínculo base ATIVO. Recibos: [testes](evidence/neon-integration-tests.txt), [smoke](evidence/packaged-phases-smoke.json), [preservação](evidence/neon-preservation-61fc36b.json) e [auditoria operacional](evidence/operational-audit.md).
+
+Derivados atualizados: schemas por operação, recibos, plano, matriz, README, relatório, scorecard e patch/hashes do auditor canônico. Não houve alteração no starter ou nas bibliotecas Angular que exija release ou sincronização do site/corpus público. PR #1 atualizado para nova revisão; nenhuma alegação de autoaprovação arquitetural.
+
+## Histórico — correções anteriores ao commit 61fc36b
 
 Esta seção substitui o estado da entrega anterior, preservada abaixo como histórico. Classificação e mapa de impacto: [plano de correções](PLANO-CORRECOES-REVIEW-305.md). Mantidos o starter local rc.179, as 16 entidades e as 392 colunas, sem DDL, migrations ou alterações nos mapeamentos JPA.
 

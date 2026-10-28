@@ -1,0 +1,20 @@
+import { createRequire } from 'node:module';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+const root = process.cwd();
+const angularRoot = path.resolve(process.argv[2]);
+const baseUrl = process.argv[3];
+const evidenceDir = path.resolve(process.argv[4] || 'target/proof');
+if (!baseUrl) throw new Error('Usage: node scripts/workspace/prove-angular-consumer.mjs <angular-root> <base-url> [evidence-dir]');
+const require = createRequire(path.join(root, '.local/angular-proof/package.json'));
+const { build } = require('esbuild');
+const source = (await readFile('scripts/workspace/angular-consumer-proof.ts', 'utf8')).replace('OFFICIAL_RUNTIME_PATH', path.join(angularRoot, 'projects/praxis-dynamic-form/src/lib/services/reactive-determination-runtime.service.ts').replaceAll('\\', '/'));
+const entry = path.join(root, '.local/angular-proof/entry.ts');
+const output = path.join(root, '.local/angular-proof/runtime-proof.mjs');
+await writeFile(entry, source);
+await mkdir(evidenceDir, { recursive: true });
+await build({ entryPoints: [entry], outfile: output, bundle: true, format: 'esm', platform: 'node', target: 'es2022', nodePaths: [path.join(root, '.local/angular-proof/node_modules')], tsconfig: path.join(angularRoot, 'tsconfig.json'), logLevel: 'warning' });
+if (process.argv.includes("--build-only")) { console.log("Official consumer bundle compiled"); process.exit(0); }
+const result = spawnSync(process.execPath, [output, baseUrl, evidenceDir], { stdio: 'inherit', env: process.env });
+process.exitCode = result.status ?? 1;

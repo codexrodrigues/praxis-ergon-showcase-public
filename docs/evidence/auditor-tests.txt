@@ -1,24 +1,35 @@
-Patch transport: git apply --check + git apply succeeded in isolated temporary directory.
+Isolated transport: git apply --check and git apply PASS
 test_a_declared_input_without_mapper_is_not_writable (__main__.CompletenessRegression) ... ok
+test_amount_requires_explicit_semantics_but_is_not_assumed_currency (__main__.CompletenessRegression) ... ok
 test_cli_accepts_real_bound_writer_but_only_claims_static_pass (__main__.CompletenessRegression) ... ok
 test_cli_rejects_readonly_column_without_command_even_at_full_reading_coverage (__main__.CompletenessRegression) ... ok
 test_comments_and_strings_do_not_count_as_writes (__main__.CompletenessRegression) ... ok
+test_date_interval_is_not_a_scalar_picker (__main__.CompletenessRegression) ... ok
+test_date_preset_does_not_replace_explicit_presentation (__main__.CompletenessRegression) ... ok
 test_default_gate_also_returns_failure (__main__.CompletenessRegression) ... ok
 test_empty_project_is_not_approved (__main__.CompletenessRegression) ... ok
 test_final_constructor_dependencies_are_parsed (__main__.CompletenessRegression) ... ok
+test_foreign_keys_come_from_join_column_pairs_not_property_suffixes (__main__.CompletenessRegression) ... ok
+test_named_relationship_lookup_is_required (__main__.CompletenessRegression) ... ok
 test_only_readonly_mirrored_relations_are_excluded (__main__.CompletenessRegression) ... ok
 test_other_controller_cannot_supply_write_coverage (__main__.CompletenessRegression) ... ok
 test_partly_writable_join_is_not_discarded (__main__.CompletenessRegression) ... ok
+test_raw_joined_foreign_key_cannot_be_a_generic_input (__main__.CompletenessRegression) ... ok
 test_read_only_resource_does_not_require_mutation_handlers (__main__.CompletenessRegression) ... ok
 test_readonly_projection_is_not_a_command_write (__main__.CompletenessRegression) ... ok
 test_real_self_reference_is_accepted (__main__.CompletenessRegression) ... ok
 test_reference_cannot_point_to_a_missing_resource (__main__.CompletenessRegression) ... ok
 test_reference_cannot_point_to_an_undeclared_surface (__main__.CompletenessRegression) ... ok
+test_relation_display_is_found_from_mapper_access_not_field_label (__main__.CompletenessRegression) ... ok
+test_runtime_evidence_is_fail_closed_when_missing (__main__.CompletenessRegression) ... ok
+test_runtime_evidence_na_requires_reason_and_cannot_hide_a_pending_gate (__main__.CompletenessRegression) ... ok
+test_runtime_evidence_source_change_invalidates_receipt (__main__.CompletenessRegression) ... ok
+test_runtime_pass_needs_actual_artifact_hashes (__main__.CompletenessRegression) ... ok
 test_similar_labels_never_cover_a_column (__main__.CompletenessRegression) ... ok
 test_threshold_cannot_be_weakened (__main__.CompletenessRegression) ... ok
 test_transitive_entity_setter_is_proven_only_from_bound_handler (__main__.CompletenessRegression) ... ok
 
 ----------------------------------------------------------------------
-Ran 18 tests in 1.968s
+Ran 29 tests in 2.191s
 
 OK

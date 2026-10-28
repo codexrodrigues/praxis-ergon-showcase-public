@@ -1,13 +1,11 @@
 package br.com.praxis.ergonshowcase.dto;
 
-import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.praxisplatform.uischema.FieldControlType;
 import org.praxisplatform.uischema.annotation.*;
 import org.praxisplatform.uischema.customfields.CustomFields;
 import org.praxisplatform.uischema.extension.annotation.UISchema;
@@ -27,12 +25,14 @@ public class CargoFilterDTO implements GenericFilterDTO {
   @Schema(description = "Órgão proprietário do quadro de cargos a consultar.")
   @UISchema(
       label = "Órgão",
-      controlType = FieldControlType.ENTITY_LOOKUP,
-      endpoint = ApiPaths.ORGAO_OPTIONS,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      endpoint = "/api/ergon/orgaos/option-sources/orgao/options/filter",
       valueField = "id",
       displayField = "label",
       group = "Pesquisa",
-      order = 20)
+      order = 20,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      icon = "apartment")
   @Filterable(operation = FilterOperation.EQUAL)
   private Integer empCodigo;
 
@@ -97,7 +97,9 @@ public class CargoFilterDTO implements GenericFilterDTO {
       label = "Início do controle de vagas",
       group = "Pesquisa avançada",
       order = 209,
-      controlType = FieldControlType.DATE_RANGE)
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_RANGE,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "event")
   @Filterable(operation = FilterOperation.BETWEEN, relation = "dtInicioContrVaga")
   private List<LocalDate> vigenciaControleVagaRange;
 

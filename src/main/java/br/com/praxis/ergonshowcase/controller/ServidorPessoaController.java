@@ -140,4 +140,110 @@ public class ServidorPessoaController
     return withResourceVersion(
         org.springframework.http.ResponseEntity.ok(), id, service.findById(id));
   }
+
+  @org.springframework.beans.factory.annotation.Autowired private VinculoService relatedService;
+
+  @org.springframework.web.bind.annotation.GetMapping("/{id}/vinculos-funcionais")
+  @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_READ')")
+  @UiSurface(
+      id = "vinculos-funcionais",
+      kind = org.praxisplatform.uischema.surface.SurfaceKind.READ_PROJECTION,
+      scope = org.praxisplatform.uischema.surface.SurfaceScope.ITEM,
+      title = "Vínculos funcionais",
+      description = "Assentamentos funcionais da pessoa, incluindo vínculos históricos.",
+      relatedChildResourceKey = "administracao-pessoal.vinculos",
+      relatedChildResourcePath = "/api/ergon/vinculos",
+      relatedChildParentField = "numfunc",
+      relatedChildOperations = {
+        org.praxisplatform.uischema.surface.RelatedResourceChildOperation.FILTER,
+        org.praxisplatform.uischema.surface.RelatedResourceChildOperation.LIST
+      },
+      requiredAuthorities = {"ERGON_READ"})
+  @io.swagger.v3.oas.annotations.Operation(
+      summary = "Consultar vínculos funcionais",
+      description =
+          "Assentamentos funcionais da pessoa, incluindo vínculos históricos. A paginação é limitada a 200 registros por resposta.")
+  public org.springframework.http.ResponseEntity<
+          org.praxisplatform.uischema.rest.response.RestApiResponse<
+              org.springframework.data.domain.Page<VinculoResponseDTO>>>
+      vinculos_funcionais(
+          @io.swagger.v3.oas.annotations.Parameter(description = "Identidade do cadastro pai")
+              @org.springframework.web.bind.annotation.PathVariable
+              Long id,
+          @io.swagger.v3.oas.annotations.Parameter(
+                  description = "Página a consultar, iniciando em zero")
+              @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0")
+              int page,
+          @io.swagger.v3.oas.annotations.Parameter(
+                  description = "Quantidade de registros da página, de 1 a 200")
+              @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20")
+              int size) {
+    service.findById(id);
+    if (page < 0 || size < 1 || size > 200)
+      throw new org.springframework.web.server.ResponseStatusException(
+          org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
+          "Paginação fora do limite permitido.");
+    var filter = new VinculoFilterDTO();
+    filter.setNumfunc(id);
+    var result =
+        relatedService.filter(
+            filter,
+            org.springframework.data.domain.PageRequest.of(
+                page, size, relatedService.getDefaultSort()),
+            null);
+    return org.springframework.http.ResponseEntity.ok(
+        org.praxisplatform.uischema.rest.response.RestApiResponse.success(
+            result,
+            org.springframework.hateoas.Links.of(
+                org.springframework.hateoas.Link.of("/api/ergon/vinculos", "collection"))));
+  }
+
+  @Override
+  @org.springframework.web.bind.annotation.PostMapping
+  @io.swagger.v3.oas.annotations.Operation(
+      operationId = "createErgonServidorPessoa",
+      summary = "Cadastrar pessoa servidora",
+      description =
+          "Inclui o cadastro validando identidade, órgão e invariantes de domínio; prévias do formulário não são autoridade de persistência.")
+  public org.springframework.http.ResponseEntity<
+          org.praxisplatform.uischema.rest.response.RestApiResponse<ServidorPessoaResponseDTO>>
+      create(
+          @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
+              CreateServidorPessoaDTO dto) {
+    return super.create(dto);
+  }
+
+  @Override
+  @org.springframework.web.bind.annotation.PutMapping("/{id}")
+  @io.swagger.v3.oas.annotations.Operation(
+      operationId = "updateErgonServidorPessoa",
+      summary = "Manter pessoa servidora",
+      description =
+          "Mantém os dados cadastrais com If-Match atual, preservando a identidade e as transições controladas por ações.")
+  public org.springframework.http.ResponseEntity<
+          org.praxisplatform.uischema.rest.response.RestApiResponse<ServidorPessoaResponseDTO>>
+      update(
+          @io.swagger.v3.oas.annotations.Parameter(description = "Identidade imutável do cadastro")
+              @org.springframework.web.bind.annotation.PathVariable
+              Long id,
+          @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
+              UpdateServidorPessoaDTO dto) {
+    return super.update(id, dto);
+  }
+
+  @org.springframework.beans.factory.annotation.Autowired
+  private ErgonDeterminationService determinations;
+
+  @org.springframework.web.bind.annotation.PostMapping("/determinations/pcd")
+  @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_READ')")
+  @io.swagger.v3.oas.annotations.Operation(
+      operationId = "determineErgonPcd",
+      summary = "Consultar prévia de PcD",
+      description =
+          "Calcula a disjunção dos indicadores do draft, sem persistir ou alterar dados pessoais.")
+  public org.springframework.http.ResponseEntity<PcdPreviewDTO> determine(
+      @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
+          PcdDraftDTO draft) {
+    return org.springframework.http.ResponseEntity.ok(determinations.pcd(draft));
+  }
 }

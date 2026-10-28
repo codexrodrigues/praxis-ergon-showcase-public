@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.util.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.praxisplatform.uischema.FieldControlType;
 import org.praxisplatform.uischema.annotation.*;
 import org.praxisplatform.uischema.extension.annotation.UISchema;
 import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
@@ -56,7 +55,13 @@ public class VinculoResponseDTO extends VinculoDados {
       readOnly = true,
       tableHidden = true,
       group = "Lotação",
-      order = 101)
+      order = 101,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      icon = "apartment",
+      endpoint = "/api/ergon/orgaos/option-sources/orgao/options/filter",
+      valueField = "id",
+      displayField = "label")
   private Integer empCodigo;
 
   @Schema(description = "Nome oficial do órgão de origem para leitura do assentamento.")
@@ -84,7 +89,13 @@ public class VinculoResponseDTO extends VinculoDados {
       label = "Número funcional",
       readOnly = true,
       group = "Identificação funcional",
-      order = 1)
+      order = 1,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      icon = "person",
+      endpoint = "/api/ergon/servidor-pessoas/option-sources/pessoa/options/filter",
+      valueField = "id",
+      displayField = "label")
   private Long numfunc;
 
   @Schema(description = "Número sequencial do vínculo da pessoa, segundo componente da identidade.")
@@ -97,9 +108,7 @@ public class VinculoResponseDTO extends VinculoDados {
       readOnly = true,
       formHidden = true,
       group = "Identificação funcional",
-      order = 3,
-      quickViewVisible = true,
-      quickViewOrder = 2)
+      order = 3)
   @ResourceReference(
       resourceKey = "administracao-pessoal.funcionarios",
       valueField = "numfunc",
@@ -149,24 +158,24 @@ public class VinculoResponseDTO extends VinculoDados {
   @UISchema(
       label = "Início de exercício",
       readOnly = true,
-      controlType = FieldControlType.DATE_PICKER,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       group = "Exercício",
       order = 120,
-      quickViewVisible = true,
-      quickViewOrder = 6,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event",
+      quickViewVisible = true,
+      quickViewOrder = 6)
   private LocalDate dtexerc;
 
   @Schema(description = "Data do encerramento funcional por vacância, quando registrado.")
   @UISchema(
       label = "Vacância",
       readOnly = true,
-      controlType = FieldControlType.DATE_PICKER,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       group = "Exercício",
       order = 130,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event")
   private LocalDate dtvac;
 
   @Schema(
@@ -186,7 +195,7 @@ public class VinculoResponseDTO extends VinculoDados {
       formHidden = true,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event")
   private LocalDate dtHomologEstagio;
 
   @Schema(
@@ -255,7 +264,7 @@ public class VinculoResponseDTO extends VinculoDados {
       formHidden = true,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event")
   private LocalDate dtiniCessao;
 
   @Schema(
@@ -269,7 +278,7 @@ public class VinculoResponseDTO extends VinculoDados {
       formHidden = true,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event")
   private LocalDate dtfimCessao;
 
   @Schema(
@@ -283,7 +292,7 @@ public class VinculoResponseDTO extends VinculoDados {
       formHidden = true,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event")
   private LocalDate dtaposent;
 
   @Schema(
@@ -305,7 +314,10 @@ public class VinculoResponseDTO extends VinculoDados {
       group = "Aposentadoria e vacância",
       tableHidden = true,
       readOnly = true,
-      formHidden = true)
+      formHidden = true,
+      type = org.praxisplatform.uischema.FieldDataType.NUMBER,
+      controlType = org.praxisplatform.uischema.FieldControlType.NUMERIC_TEXT_BOX,
+      icon = "percent")
   private java.math.BigDecimal fatorProporcAposent;
 
   @Schema(
@@ -341,7 +353,7 @@ public class VinculoResponseDTO extends VinculoDados {
       formHidden = true,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event")
   private LocalDate dtPgtoAte;
 
   @Schema(
@@ -353,6 +365,12 @@ public class VinculoResponseDTO extends VinculoDados {
       tableHidden = true,
       readOnly = true,
       formHidden = true)
+  @ResourceReference(
+      resourceKey = "administracao-pessoal.setores",
+      valueField = "setor",
+      surfaceId = "ficha-unidade",
+      previewSurfaceId = "ficha-unidade",
+      detailPresentation = "drawer")
   private String setorNome;
 
   @Schema(
@@ -364,6 +382,12 @@ public class VinculoResponseDTO extends VinculoDados {
       tableHidden = true,
       readOnly = true,
       formHidden = true)
+  @ResourceReference(
+      resourceKey = "administracao-pessoal.setores",
+      valueField = "setorExercicio",
+      surfaceId = "ficha-unidade",
+      previewSurfaceId = "ficha-unidade",
+      detailPresentation = "drawer")
   private String setorExercicioNome;
 
   @Schema(
@@ -399,4 +423,22 @@ public class VinculoResponseDTO extends VinculoDados {
       readOnly = true,
       formHidden = true)
   private Boolean emCessaoAtiva;
+
+  @Schema(
+      description =
+          "Denominação do cargo em comissão exercido cumulativamente pelo titular do vínculo.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Cargo em comissão",
+      group = "Enquadramento e lotação",
+      tableHidden = true,
+      formHidden = true,
+      readOnly = true)
+  @ResourceReference(
+      resourceKey = "administracao-pessoal.cargos",
+      valueField = "cargoComissao",
+      surfaceId = "ficha-cargo",
+      previewSurfaceId = "ficha-cargo",
+      detailPresentation = "drawer")
+  private String cargoComissaoNome;
 }

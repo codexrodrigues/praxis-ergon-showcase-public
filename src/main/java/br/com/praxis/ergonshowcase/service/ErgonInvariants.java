@@ -85,6 +85,8 @@ public class ErgonInvariants {
     chronology(v.getDtinicontr(), v.getDtfimcontr(), "Início contratual posterior ao término.");
     chronology(
         v.getDtfimcontr(), v.getDtprorrogcontr(), "Prorrogação anterior ao término contratual.");
+    chronology(
+        v.getDtinicontr(), v.getDtprorrogcontr(), "Prorrogação anterior ao início contratual.");
     setor(v.getSetor(), v.getEmpCodigo());
     setor(v.getSetorExercicio(), v.getEmpCodigo());
     if (v.getCargoComissao() != null)

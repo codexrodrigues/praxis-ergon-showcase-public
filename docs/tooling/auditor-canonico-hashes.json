@@ -1,8 +1,8 @@
 {
   "baseline_sha256": "593fb52b8f256ce6e6bacc181d9c2b5c87071ce38915f8156f8805ec027862ed",
-  "scripts/workspace/audit-java-resource-completeness.py": "58431a30249a6903c8b3d3c8b4f4cbacd0a88e00c4d034fa283f5faac59a2020",
-  "scripts/workspace/java_resource_audit.py": "b158ed69b73a81421fe90179a1ad3402af0d03565ff3e8f4e13a668478e203cc",
-  "scripts/workspace/test_audit_java_resource_completeness.py": "b03264aa2c63354d465e0b7fe4441d29cda2b77972f9d260889bab6cc526dd72",
-  "patch_sha256": "edad51dacfebee0de6390eda464e3f40d6adb183d849e2916b7391acd45ef04f",
-  "isolated_patch_validation": "git apply --check, git apply, 18 regression tests: PASS"
+  "scripts/workspace/audit-java-resource-completeness.py": "a5490f57ca31ef82eb3090c97252f4ed5d31aebceb9fcceac88c1fb5e7e270c1",
+  "scripts/workspace/java_resource_audit.py": "4a62fa5264727bcbc71be84535a0755e86fab6a9bc504448d74d048e463b2b0e",
+  "scripts/workspace/test_audit_java_resource_completeness.py": "e3dd24c10a286d4a470b113ac957bbc32aadd46c6ed4cb3b6afc8408a8c77f4f",
+  "patch_sha256": "b2784f20165af5109e3aee97b675da6eb9385a3ed422b2021a9eabf1eee4798c",
+  "isolated_patch_validation": "git apply --check, git apply, 29 regression tests: PASS"
 }

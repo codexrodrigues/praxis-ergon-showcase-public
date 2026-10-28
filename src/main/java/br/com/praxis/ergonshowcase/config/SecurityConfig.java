@@ -39,6 +39,7 @@ public class SecurityConfig {
                     .hasAuthority("ERGON_READ")
                     .requestMatchers(
                         org.springframework.http.HttpMethod.POST,
+                        "/api/ergon/*/determinations/*",
                         "/api/ergon/*/filter",
                         "/api/ergon/*/filter/cursor",
                         "/api/ergon/*/locate",

@@ -34,9 +34,7 @@ public abstract class ServidorPessoaDados {
       preset = UISchemaPreset.ENTERPRISE_NAME,
       group = "Identificação civil",
       order = 10,
-      icon = "person",
-      quickViewVisible = true,
-      quickViewOrder = 1)
+      icon = "person")
   @ResourceReference(
       resourceKey = "administracao-pessoal.funcionarios",
       valueField = "id",
@@ -60,9 +58,7 @@ public abstract class ServidorPessoaDados {
       label = "Nome social",
       group = "Identificação civil",
       order = 20,
-      icon = "person_outline",
-      quickViewVisible = true,
-      quickViewOrder = 2)
+      icon = "person_outline")
   private String nomeSocial;
 
   @NotBlank
@@ -85,6 +81,7 @@ public abstract class ServidorPessoaDados {
       group = "Identificação civil",
       order = 30,
       icon = "badge")
+  @jakarta.validation.constraints.Size(max = 11)
   private String cpf;
 
   @NotNull
@@ -101,10 +98,10 @@ public abstract class ServidorPessoaDados {
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   @UISchema(
       label = "Nascimento",
-      controlType = FieldControlType.DATE_PICKER,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       group = "Identificação civil",
       order = 40,
-      icon = "cake",
+      icon = "event",
       type = org.praxisplatform.uischema.FieldDataType.DATE)
   private LocalDate dtnasc;
 
@@ -185,6 +182,7 @@ public abstract class ServidorPessoaDados {
       group = "Documentação",
       order = 80,
       icon = "assignment_ind")
+  @jakarta.validation.constraints.Size(max = 11)
   private String pispasep;
 
   @CustomFields(resourceKey = "administracao-pessoal.funcionarios")
@@ -203,6 +201,7 @@ public abstract class ServidorPessoaDados {
       reason = "Tratamento protocolar usado na identificação do servidor.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 20)
   private String tratamento;
 
   @Schema(description = "Sexo registral informado no cadastro civil.")
@@ -218,6 +217,7 @@ public abstract class ServidorPessoaDados {
       reason = "Sexo registral informado no cadastro civil.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 1)
   private String sexo;
 
   @Schema(description = "Identidade de gênero autodeclarada pela pessoa.")
@@ -233,6 +233,7 @@ public abstract class ServidorPessoaDados {
       reason = "Identidade de gênero autodeclarada pela pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 100)
   private String genero;
 
   @Schema(description = "Município de nascimento da pessoa.")
@@ -244,6 +245,7 @@ public abstract class ServidorPessoaDados {
       reason = "Município de nascimento da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 60)
   private String cidnasc;
 
   @Schema(description = "Unidade federativa de nascimento da pessoa.")
@@ -259,6 +261,7 @@ public abstract class ServidorPessoaDados {
       reason = "Unidade federativa de nascimento da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 2)
   private String ufnasc;
 
   @Schema(description = "Grupo sanguíneo informado para o cadastro de saúde do servidor.")
@@ -276,6 +279,7 @@ public abstract class ServidorPessoaDados {
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   @Getter(onMethod_ = @com.fasterxml.jackson.annotation.JsonProperty("gSanguineo"))
   @Setter(onMethod_ = @com.fasterxml.jackson.annotation.JsonProperty("gSanguineo"))
+  @jakarta.validation.constraints.Size(max = 3)
   private String gSanguineo;
 
   @Schema(description = "Raça ou cor autodeclarada para identificação e políticas de pessoal.")
@@ -287,6 +291,7 @@ public abstract class ServidorPessoaDados {
       reason = "Raça ou cor autodeclarada para identificação e políticas de pessoal.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 20)
   private String racaCor;
 
   @Schema(description = "Estado civil declarado pela pessoa.")
@@ -298,6 +303,7 @@ public abstract class ServidorPessoaDados {
       reason = "Estado civil declarado pela pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 20)
   private String estcivil;
 
   @Schema(description = "Indica união estável declarada para fins cadastrais.")
@@ -318,7 +324,7 @@ public abstract class ServidorPessoaDados {
       tableHidden = true,
       order = 209,
       quickViewVisible = true,
-      quickViewOrder = 3)
+      quickViewOrder = 1)
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -326,10 +332,17 @@ public abstract class ServidorPessoaDados {
       reason = "Grau de instrução concluído pela pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 20)
   private String escolaridade;
 
   @Schema(description = "Código da nacionalidade no domínio cadastral Ergon.")
-  @UISchema(label = "Nacionalidade", group = "Identificação civil", tableHidden = true, order = 210)
+  @UISchema(
+      label = "Nacionalidade",
+      group = "Identificação civil",
+      tableHidden = true,
+      order = 210,
+      quickViewVisible = true,
+      quickViewOrder = 4)
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -367,6 +380,7 @@ public abstract class ServidorPessoaDados {
       reason = "UF do emprego anterior para informações trabalhistas.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 2)
   private String ufempant;
 
   @Schema(description = "Ano de ingresso no primeiro emprego informado pela pessoa.")
@@ -393,6 +407,7 @@ public abstract class ServidorPessoaDados {
       reason = "Nome civil do pai constante do assentamento de filiação.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 300)
   private String pai;
 
   @Schema(description = "Nome civil da mãe constante do assentamento de filiação.")
@@ -404,6 +419,7 @@ public abstract class ServidorPessoaDados {
       reason = "Nome civil da mãe constante do assentamento de filiação.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 300)
   private String mae;
 
   @Schema(description = "Número do documento de identidade civil, preservando zeros e letras.")
@@ -419,6 +435,7 @@ public abstract class ServidorPessoaDados {
       reason = "Número do documento de identidade civil, preservando zeros e letras.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 24)
   private String numrg;
 
   @Schema(description = "Tipo do documento civil apresentado como identidade.")
@@ -434,6 +451,7 @@ public abstract class ServidorPessoaDados {
       reason = "Tipo do documento civil apresentado como identidade.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 20)
   private String tiporg;
 
   @Schema(description = "Órgão emissor do documento de identidade civil.")
@@ -449,6 +467,7 @@ public abstract class ServidorPessoaDados {
       reason = "Órgão emissor do documento de identidade civil.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 20)
   private String orgaorg;
 
   @Schema(description = "UF de emissão do documento de identidade.")
@@ -464,6 +483,7 @@ public abstract class ServidorPessoaDados {
       reason = "UF de emissão do documento de identidade.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 2)
   private String ufrg;
 
   @Schema(description = "Data de expedição do documento de identidade civil.")
@@ -474,7 +494,7 @@ public abstract class ServidorPessoaDados {
       order = 220,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -492,7 +512,7 @@ public abstract class ServidorPessoaDados {
       order = 221,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -530,6 +550,7 @@ public abstract class ServidorPessoaDados {
       reason = "Número da Carteira de Trabalho e Previdência Social.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 12)
   private String numcartpro;
 
   @Schema(description = "Série da Carteira de Trabalho, que complementa sua identificação.")
@@ -545,6 +566,7 @@ public abstract class ServidorPessoaDados {
       reason = "Série da Carteira de Trabalho, que complementa sua identificação.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 8)
   private String sercartpro;
 
   @Schema(description = "UF de emissão da Carteira de Trabalho.")
@@ -560,6 +582,7 @@ public abstract class ServidorPessoaDados {
       reason = "UF de emissão da Carteira de Trabalho.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 2)
   private String ufcartpro;
 
   @Schema(description = "Número da inscrição eleitoral da pessoa.")
@@ -575,6 +598,7 @@ public abstract class ServidorPessoaDados {
       reason = "Número da inscrição eleitoral da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 15)
   private String numtitel;
 
   @Schema(description = "Zona eleitoral da inscrição da pessoa.")
@@ -590,6 +614,7 @@ public abstract class ServidorPessoaDados {
       reason = "Zona eleitoral da inscrição da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 6)
   private String zonatitel;
 
   @Schema(description = "Seção eleitoral da inscrição da pessoa.")
@@ -605,6 +630,7 @@ public abstract class ServidorPessoaDados {
       reason = "Seção eleitoral da inscrição da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 6)
   private String sectitel;
 
   @Schema(description = "UF da inscrição eleitoral.")
@@ -620,6 +646,7 @@ public abstract class ServidorPessoaDados {
       reason = "UF da inscrição eleitoral.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 2)
   private String uftitel;
 
   @Schema(description = "Número do documento de situação militar apresentado.")
@@ -635,6 +662,7 @@ public abstract class ServidorPessoaDados {
       reason = "Número do documento de situação militar apresentado.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 20)
   private String numdocmili;
 
   @Schema(description = "Série do documento militar apresentado.")
@@ -650,6 +678,7 @@ public abstract class ServidorPessoaDados {
       reason = "Série do documento militar apresentado.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 10)
   private String serdocmili;
 
   @Schema(description = "Número da Carteira Nacional de Habilitação.")
@@ -665,6 +694,7 @@ public abstract class ServidorPessoaDados {
       reason = "Número da Carteira Nacional de Habilitação.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 15)
   private String cnh;
 
   @Schema(description = "Categoria de habilitação para condução de veículos.")
@@ -680,6 +710,7 @@ public abstract class ServidorPessoaDados {
       reason = "Categoria de habilitação para condução de veículos.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 5)
   private String catcnh;
 
   @Schema(description = "Data limite de validade da habilitação.")
@@ -690,7 +721,7 @@ public abstract class ServidorPessoaDados {
       order = 234,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -713,6 +744,7 @@ public abstract class ServidorPessoaDados {
       reason = "UF emissora da habilitação.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 2)
   private String ufcnh;
 
   @Schema(description = "Registro profissional apresentado pela pessoa; exige o respectivo tipo.")
@@ -728,6 +760,7 @@ public abstract class ServidorPessoaDados {
       reason = "Registro profissional apresentado pela pessoa; exige o respectivo tipo.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 20)
   private String identprof;
 
   @Schema(description = "Tipo ou conselho do registro profissional; exige o número correspondente.")
@@ -743,6 +776,7 @@ public abstract class ServidorPessoaDados {
       reason = "Tipo ou conselho do registro profissional; exige o número correspondente.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 20)
   private String tipoidprof;
 
   @Schema(description = "Identidade do documento legal relacionado ao cadastro civil.")
@@ -750,7 +784,13 @@ public abstract class ServidorPessoaDados {
       label = "Documento legal",
       group = "Documentação civil e trabalhista",
       tableHidden = true,
-      order = 238)
+      order = 238,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      icon = "gavel",
+      endpoint = "/api/ergon/documentos-legais/option-sources/documento/options/filter",
+      valueField = "id",
+      displayField = "label")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -758,6 +798,12 @@ public abstract class ServidorPessoaDados {
       reason = "Identidade do documento legal relacionado ao cadastro civil.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @ResourceReference(
+      resourceKey = "administracao-pessoal.documentos-legais",
+      valueField = "documentoLegalId",
+      surfaceId = "ficha-documento",
+      previewSurfaceId = "ficha-documento",
+      detailPresentation = "drawer")
   private Long documentoLegalId;
 
   @Schema(description = "Tipo do logradouro residencial, como rua ou avenida.")
@@ -773,6 +819,7 @@ public abstract class ServidorPessoaDados {
       reason = "Tipo do logradouro residencial, como rua ou avenida.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 15)
   private String tipologender;
 
   @Schema(description = "Nome do logradouro do endereço residencial.")
@@ -784,6 +831,7 @@ public abstract class ServidorPessoaDados {
       reason = "Nome do logradouro do endereço residencial.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 120)
   private String nomelogender;
 
   @Schema(description = "Número do imóvel residencial, mantido como texto.")
@@ -795,6 +843,7 @@ public abstract class ServidorPessoaDados {
       reason = "Número do imóvel residencial, mantido como texto.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 15)
   private String numender;
 
   @Schema(description = "Complemento do endereço residencial.")
@@ -806,6 +855,7 @@ public abstract class ServidorPessoaDados {
       reason = "Complemento do endereço residencial.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 80)
   private String complender;
 
   @Schema(description = "Bairro de residência da pessoa.")
@@ -817,6 +867,7 @@ public abstract class ServidorPessoaDados {
       reason = "Bairro de residência da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 80)
   private String bairroender;
 
   @Schema(description = "Município de residência da pessoa.")
@@ -826,7 +877,7 @@ public abstract class ServidorPessoaDados {
       tableHidden = true,
       order = 244,
       quickViewVisible = true,
-      quickViewOrder = 4)
+      quickViewOrder = 2)
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -834,6 +885,7 @@ public abstract class ServidorPessoaDados {
       reason = "Município de residência da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 60)
   private String cidadeender;
 
   @Schema(description = "UF de residência da pessoa.")
@@ -843,7 +895,7 @@ public abstract class ServidorPessoaDados {
       tableHidden = true,
       order = 245,
       quickViewVisible = true,
-      quickViewOrder = 5)
+      quickViewOrder = 3)
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -851,6 +903,7 @@ public abstract class ServidorPessoaDados {
       reason = "UF de residência da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 2)
   private String ufender;
 
   @Schema(description = "Código postal do endereço residencial, preservando zeros.")
@@ -862,6 +915,7 @@ public abstract class ServidorPessoaDados {
       reason = "Código postal do endereço residencial, preservando zeros.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 8)
   private String cepender;
 
   @Schema(description = "Ramal de contato administrativo da pessoa.")
@@ -873,6 +927,7 @@ public abstract class ServidorPessoaDados {
       reason = "Ramal de contato administrativo da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 10)
   private String ramal;
 
   @Schema(description = "Código da instituição bancária padrão para pagamento ao servidor.")
@@ -895,6 +950,7 @@ public abstract class ServidorPessoaDados {
       reason = "Agência bancária padrão, incluindo eventual dígito verificador.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 10)
   private String agencia;
 
   @Schema(description = "Conta bancária padrão, preservando zeros e dígito verificador.")
@@ -906,6 +962,7 @@ public abstract class ServidorPessoaDados {
       reason = "Conta bancária padrão, preservando zeros e dígito verificador.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 25)
   private String conta;
 
   @Schema(description = "Modalidade de pagamento associada aos dados bancários padrão.")
@@ -921,6 +978,7 @@ public abstract class ServidorPessoaDados {
       reason = "Modalidade de pagamento associada aos dados bancários padrão.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 10)
   private String tipopag;
 
   @Schema(description = "Indica deficiência física registrada no cadastro da pessoa.")
@@ -1011,6 +1069,7 @@ public abstract class ServidorPessoaDados {
       reason = "Informações complementares sobre acessibilidade e deficiência da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 255)
   private String obsDeficiencia;
 
   @Schema(description = "Data da última conferência cadastral registrada pelo órgão.")
@@ -1021,7 +1080,9 @@ public abstract class ServidorPessoaDados {
       order = 258,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event",
+      quickViewVisible = true,
+      quickViewOrder = 5)
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -1030,4 +1091,26 @@ public abstract class ServidorPessoaDados {
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   private LocalDate dtRecadast;
+
+  @jakarta.validation.constraints.Null(
+      message = "Prévia derivada não pode ser informada no submit.")
+  @Schema(
+      description =
+          "Disjunção informativa dos cinco indicadores específicos; o cadastro definitivo recalcula o fato e não aceita esta prévia como autoridade.")
+  @UISchema(
+      label = "PcD no formulário",
+      group = "Acessibilidade e PcD",
+      readOnly = true,
+      tableHidden = true,
+      icon = "info",
+      type = FieldDataType.BOOLEAN,
+      controlType = FieldControlType.CHECKBOX)
+  @DomainGovernance(
+      kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.RESTRICTED,
+      dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+      reason = "Prévia de indicador de deficiência no formulário.",
+      aiUsage =
+          @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  private Boolean possuiDeficienciaPcDPrevisto;
 }

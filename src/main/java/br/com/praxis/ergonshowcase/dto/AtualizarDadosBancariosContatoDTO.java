@@ -21,6 +21,7 @@ public class AtualizarDadosBancariosContatoDTO {
   @Getter(onMethod_ = @com.fasterxml.jackson.annotation.JsonProperty("eMail"))
   @Setter(onMethod_ = @com.fasterxml.jackson.annotation.JsonProperty("eMail"))
   @jakarta.validation.constraints.Email
+  @jakarta.validation.constraints.Size(max = 120)
   private String eMail;
 
   @Schema(description = "Telefone de contato administrativo da pessoa.")
@@ -32,6 +33,7 @@ public class AtualizarDadosBancariosContatoDTO {
       reason = "Telefone de contato administrativo da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 20)
   private String telefone;
 
   @Schema(description = "Número de telefone celular da pessoa.")
@@ -43,6 +45,7 @@ public class AtualizarDadosBancariosContatoDTO {
       reason = "Número de telefone celular da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 20)
   private String numtelCelular;
 
   @Schema(description = "Tipo do logradouro residencial, como rua ou avenida.")
@@ -54,6 +57,7 @@ public class AtualizarDadosBancariosContatoDTO {
       reason = "Tipo do logradouro residencial, como rua ou avenida.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 15)
   private String tipologender;
 
   @Schema(description = "Nome do logradouro do endereço residencial.")
@@ -65,6 +69,7 @@ public class AtualizarDadosBancariosContatoDTO {
       reason = "Nome do logradouro do endereço residencial.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 120)
   private String nomelogender;
 
   @Schema(description = "Número do imóvel residencial, mantido como texto.")
@@ -76,6 +81,7 @@ public class AtualizarDadosBancariosContatoDTO {
       reason = "Número do imóvel residencial, mantido como texto.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 15)
   private String numender;
 
   @Schema(description = "Complemento do endereço residencial.")
@@ -87,6 +93,7 @@ public class AtualizarDadosBancariosContatoDTO {
       reason = "Complemento do endereço residencial.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 80)
   private String complender;
 
   @Schema(description = "Bairro de residência da pessoa.")
@@ -98,6 +105,7 @@ public class AtualizarDadosBancariosContatoDTO {
       reason = "Bairro de residência da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 80)
   private String bairroender;
 
   @Schema(description = "Município de residência da pessoa.")
@@ -109,6 +117,7 @@ public class AtualizarDadosBancariosContatoDTO {
       reason = "Município de residência da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 60)
   private String cidadeender;
 
   @Schema(description = "UF de residência da pessoa.")
@@ -120,6 +129,7 @@ public class AtualizarDadosBancariosContatoDTO {
       reason = "UF de residência da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 2)
   private String ufender;
 
   @Schema(description = "Código postal do endereço residencial, preservando zeros.")
@@ -131,6 +141,7 @@ public class AtualizarDadosBancariosContatoDTO {
       reason = "Código postal do endereço residencial, preservando zeros.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 8)
   private String cepender;
 
   @Schema(description = "Código da instituição bancária padrão para pagamento ao servidor.")
@@ -153,6 +164,7 @@ public class AtualizarDadosBancariosContatoDTO {
       reason = "Agência bancária padrão, incluindo eventual dígito verificador.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 10)
   private String agencia;
 
   @Schema(description = "Conta bancária padrão, preservando zeros e dígito verificador.")
@@ -164,6 +176,7 @@ public class AtualizarDadosBancariosContatoDTO {
       reason = "Conta bancária padrão, preservando zeros e dígito verificador.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 25)
   private String conta;
 
   @Schema(description = "Modalidade de pagamento associada aos dados bancários padrão.")
@@ -175,5 +188,6 @@ public class AtualizarDadosBancariosContatoDTO {
       reason = "Modalidade de pagamento associada aos dados bancários padrão.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 10)
   private String tipopag;
 }

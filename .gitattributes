@@ -1,2 +1,4 @@
 docs/tooling/auditor-canonico.patch text eol=lf
 docs/tooling/auditor-canonico-base.txt text eol=lf
+docs/evidence/** text eol=lf
+docs/MATRIZ-PARIDADE-305.md text eol=lf

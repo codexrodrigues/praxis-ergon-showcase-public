@@ -1,0 +1,125 @@
+{
+  "schemas": [
+    {
+      "resource": "servidor-pessoas",
+      "operation": "createErgonServidorPessoa",
+      "normalizedFields": 68
+    },
+    {
+      "resource": "servidor-pessoas",
+      "operation": "updateErgonServidorPessoa",
+      "normalizedFields": 67
+    },
+    {
+      "resource": "vinculos",
+      "operation": "createErgonVinculo",
+      "normalizedFields": 48
+    },
+    {
+      "resource": "vinculos",
+      "operation": "updateErgonVinculo",
+      "normalizedFields": 44
+    },
+    {
+      "resource": "cargos",
+      "operation": "createErgonCargo",
+      "normalizedFields": 18
+    },
+    {
+      "resource": "cargos",
+      "operation": "updateErgonCargo",
+      "normalizedFields": 16
+    }
+  ],
+  "executions": [
+    {
+      "resource": "servidor-pessoas",
+      "mode": "post",
+      "statuses": [
+        "pending",
+        "skipped",
+        "success"
+      ],
+      "provenance": {
+        "kind": "host",
+        "source": "ergon-derived-facts",
+        "version": "1"
+      }
+    },
+    {
+      "resource": "servidor-pessoas",
+      "mode": "put",
+      "statuses": [
+        "pending",
+        "skipped",
+        "success"
+      ],
+      "provenance": {
+        "kind": "host",
+        "source": "ergon-derived-facts",
+        "version": "1"
+      }
+    },
+    {
+      "resource": "vinculos",
+      "mode": "post",
+      "statuses": [
+        "skipped",
+        "pending",
+        "success",
+        "error"
+      ],
+      "provenance": {
+        "kind": "host",
+        "source": "ergon-derived-facts",
+        "version": "1"
+      }
+    },
+    {
+      "resource": "vinculos",
+      "mode": "put",
+      "statuses": [
+        "skipped",
+        "pending",
+        "success",
+        "error"
+      ],
+      "provenance": {
+        "kind": "host",
+        "source": "ergon-derived-facts",
+        "version": "1"
+      }
+    },
+    {
+      "resource": "cargos",
+      "mode": "post",
+      "statuses": [
+        "skipped",
+        "pending",
+        "success"
+      ],
+      "provenance": {
+        "kind": "host",
+        "source": "ergon-derived-facts",
+        "version": "1"
+      }
+    },
+    {
+      "resource": "cargos",
+      "mode": "put",
+      "statuses": [
+        "skipped",
+        "pending",
+        "success"
+      ],
+      "provenance": {
+        "kind": "host",
+        "source": "ergon-derived-facts",
+        "version": "1"
+      }
+    }
+  ],
+  "staleResultProtected": true,
+  "rejectionVisible": true,
+  "fixtureRemoved": true
+}

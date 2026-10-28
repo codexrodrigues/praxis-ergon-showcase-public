@@ -1,13 +1,11 @@
 package br.com.praxis.ergonshowcase.dto;
 
-import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.praxisplatform.uischema.FieldControlType;
 import org.praxisplatform.uischema.annotation.*;
 import org.praxisplatform.uischema.extension.annotation.UISchema;
 import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
@@ -25,13 +23,20 @@ public class CreateVinculoDTO extends VinculoDados {
           "Número funcional da pessoa titular do novo vínculo; integra a identidade e permanece imutável.")
   @UISchema(
       label = "Pessoa servidora",
-      controlType = FieldControlType.ENTITY_LOOKUP,
-      endpoint = ApiPaths.PESSOA_OPTIONS,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      endpoint = "/api/ergon/servidor-pessoas/option-sources/pessoa/options/filter",
       valueField = "id",
       displayField = "label",
       group = "Identificação funcional",
       order = 1,
-      icon = "person")
+      icon = "person",
+      type = org.praxisplatform.uischema.FieldDataType.TEXT)
+  @ResourceReference(
+      resourceKey = "administracao-pessoal.funcionarios",
+      valueField = "numfunc",
+      surfaceId = "ficha-cadastral",
+      previewSurfaceId = "ficha-cadastral",
+      detailPresentation = "drawer")
   private Long numfunc;
 
   @NotNull
@@ -53,13 +58,20 @@ public class CreateVinculoDTO extends VinculoDados {
           "Órgão público de origem do vínculo; deve corresponder ao contexto X-Tenant usado na criação.")
   @UISchema(
       label = "Órgão",
-      controlType = FieldControlType.ENTITY_LOOKUP,
-      endpoint = ApiPaths.ORGAO_OPTIONS,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      endpoint = "/api/ergon/orgaos/option-sources/orgao/options/filter",
       valueField = "id",
       displayField = "label",
       group = "Lotação",
       order = 3,
-      icon = "apartment")
+      icon = "apartment",
+      type = org.praxisplatform.uischema.FieldDataType.TEXT)
+  @ResourceReference(
+      resourceKey = "administracao-pessoal.empresas",
+      valueField = "empCodigo",
+      surfaceId = "ficha-institucional",
+      previewSurfaceId = "ficha-institucional",
+      detailPresentation = "drawer")
   private Integer empCodigo;
 
   @NotNull
@@ -69,9 +81,10 @@ public class CreateVinculoDTO extends VinculoDados {
           "Data do início efetivo de exercício que fundamenta a inclusão de um vínculo ativo.")
   @UISchema(
       label = "Início de exercício",
-      controlType = FieldControlType.DATE_PICKER,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       group = "Exercício",
       order = 4,
-      icon = "event")
+      icon = "event",
+      type = org.praxisplatform.uischema.FieldDataType.DATE)
   private LocalDate dtexerc;
 }

@@ -27,9 +27,7 @@ public abstract class CargoDados {
       preset = UISchemaPreset.ENTERPRISE_NAME,
       group = "Identificação",
       order = 10,
-      icon = "work",
-      quickViewVisible = true,
-      quickViewOrder = 1)
+      icon = "work")
   @ResourceReference(
       resourceKey = "administracao-pessoal.cargos",
       valueField = "id",
@@ -43,13 +41,7 @@ public abstract class CargoDados {
   @Schema(
       description =
           "Categoria funcional do cargo, utilizada no enquadramento do servidor e na aplicação das regras estatutárias.")
-  @UISchema(
-      label = "Categoria",
-      group = "Enquadramento",
-      order = 20,
-      icon = "category",
-      quickViewVisible = true,
-      quickViewOrder = 2)
+  @UISchema(label = "Categoria", group = "Enquadramento", order = 20, icon = "category")
   private String categoria;
 
   @Size(max = 40)
@@ -67,7 +59,7 @@ public abstract class CargoDados {
       order = 40,
       icon = "work_outline",
       quickViewVisible = true,
-      quickViewOrder = 3)
+      quickViewOrder = 1)
   private String tipoCargo;
 
   @NotBlank
@@ -82,7 +74,13 @@ public abstract class CargoDados {
   @Schema(
       description =
           "Grau de instrução mínimo exigido para provimento no cargo, conforme o domínio de escolaridade do Ergon.")
-  @UISchema(label = "Escolaridade exigida", group = "Enquadramento", order = 60, icon = "school")
+  @UISchema(
+      label = "Escolaridade exigida",
+      group = "Enquadramento",
+      order = 60,
+      icon = "school",
+      quickViewVisible = true,
+      quickViewOrder = 2)
   private String escolaridade;
 
   @Size(max = 10)
@@ -116,7 +114,9 @@ public abstract class CargoDados {
       preset = UISchemaPreset.BOOLEAN_FLAG,
       group = "Quadro de vagas",
       order = 90,
-      icon = "rule")
+      icon = "rule",
+      quickViewVisible = true,
+      quickViewOrder = 3)
   private Boolean controleVaga = false;
 
   @NotNull
@@ -153,7 +153,19 @@ public abstract class CargoDados {
       label = "Cargo agregador",
       group = "Quadro de Vagas e Vigência",
       tableHidden = true,
-      order = 201)
+      order = 201,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      icon = "hub",
+      endpoint = "/api/ergon/cargos/option-sources/cargo/options/filter",
+      valueField = "id",
+      displayField = "label")
+  @ResourceReference(
+      resourceKey = "administracao-pessoal.cargos",
+      valueField = "cargoAglutinador",
+      surfaceId = "ficha-cargo",
+      previewSurfaceId = "ficha-cargo",
+      detailPresentation = "drawer")
   private Integer cargoAglutinador;
 
   @Schema(description = "Data inicial da vigência do controle de vagas deste cargo.")
@@ -164,7 +176,7 @@ public abstract class CargoDados {
       order = 202,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event")
   private LocalDate dtInicioContrVaga;
 
   @Schema(description = "Documento legal que fundamenta a definição do cargo.")
@@ -172,6 +184,31 @@ public abstract class CargoDados {
       label = "Documento legal",
       group = "Quadro de Vagas e Vigência",
       tableHidden = true,
-      order = 203)
+      order = 203,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      icon = "gavel",
+      endpoint = "/api/ergon/documentos-legais/option-sources/documento/options/filter",
+      valueField = "id",
+      displayField = "label")
+  @ResourceReference(
+      resourceKey = "administracao-pessoal.documentos-legais",
+      valueField = "documentoLegalId",
+      surfaceId = "ficha-documento",
+      previewSurfaceId = "ficha-documento",
+      detailPresentation = "drawer")
   private Long documentoLegalId;
+
+  @jakarta.validation.constraints.Null(
+      message = "Prévia derivada não pode ser informada no submit.")
+  @Schema(
+      description =
+          "Denominação consultada do cargo agregador; a manutenção definitiva verifica novamente sua existência e habilitação.")
+  @UISchema(
+      label = "Cargo agregador selecionado",
+      group = "Quadro de Vagas e Vigência",
+      readOnly = true,
+      tableHidden = true,
+      icon = "info")
+  private String cargoAglutinadorNomePrevisto;
 }

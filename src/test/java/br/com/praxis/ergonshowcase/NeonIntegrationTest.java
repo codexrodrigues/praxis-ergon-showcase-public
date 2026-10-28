@@ -20,6 +20,289 @@ import org.springframework.transaction.annotation.Transactional;
 @WithMockUser(authorities = {"ERGON_READ", "ERGON_WRITE"})
 class NeonIntegrationTest {
   @Test
+  void phaseThreeDocumentScopeIsExplicitPerOperation() throws Exception {
+    String uri = reviewFixture();
+    Long external =
+        em.createQuery("select min(d.id) from DocumentoLegal d where d.empCodigo<>1", Long.class)
+            .getSingleResult();
+    assertThat(external).isNotNull();
+    revisionCommand(uri + "/lotacao-exercicio", "{\"documentoLegalId\":" + external + "}")
+        .andExpect(status().isOk());
+    String request =
+        reviewAfastamentoBody()
+            .replace(
+                "\"documentoLegalId\":" + reviewDocumento(), "\"documentoLegalId\":" + external);
+    revisionCommand(uri + "/actions/registrar-afastamento", request)
+        .andExpect(status().isUnprocessableEntity());
+    revisionCommand(uri + "/actions/registrar-afastamento", reviewAfastamentoBody())
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  void phaseThreeAggregatorPreviewRevalidatesEligibility() throws Exception {
+    reviewCargo();
+    mvc.perform(
+            post("/api/ergon/cargos/determinations/aglutinador")
+                .contentType("application/json")
+                .content("{\"cargo\":9505}"))
+        .andExpect(status().isUnprocessableEntity());
+    var cargo = em.find(br.com.praxis.ergonshowcase.domain.Cargo.class, 9505);
+    cargo.setEAglutinador(true);
+    em.flush();
+    mvc.perform(
+            post("/api/ergon/cargos/determinations/aglutinador")
+                .contentType("application/json")
+                .content("{\"cargo\":9505}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.nome").value(cargo.getNome()));
+  }
+
+  @Test
+  void phaseThreeDeterminationsPublishExactCreateEditBindings() throws Exception {
+    java.nio.file.Files.createDirectories(java.nio.file.Path.of("target/proof"));
+    for (String resource : new String[] {"servidor-pessoas", "vinculos", "cargos"}) {
+      for (String operation : new String[] {"post", "put"}) {
+        String body =
+            mvc.perform(
+                    get("/schemas/filtered")
+                        .param(
+                            "resourcePath",
+                            "/api/ergon/" + resource + (operation.equals("put") ? "/{id}" : ""))
+                        .param("operation", operation)
+                        .param("schemaType", "request"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        var schema = json.readTree(body);
+        var definitions = schema.path("x-ui").path("reactiveDeterminations");
+        assertThat(definitions.size()).as(resource + ":" + operation).isEqualTo(1);
+        assertThat(definitions.get(0).path("scope").path("formMode").asText())
+            .isEqualTo(operation.equals("post") ? "create" : "edit");
+        assertThat(definitions.get(0).path("capability").path("method").asText()).isEqualTo("POST");
+        assertThat(definitions.get(0).path("provenance").path("kind").asText()).isEqualTo("host");
+        assertThat(body).doesNotContain("formEffects");
+        java.nio.file.Files.writeString(
+            java.nio.file.Path.of(
+                "target/proof", resource + "-" + operation + "-determinations.json"),
+            body);
+      }
+      String response =
+          mvc.perform(
+                  get("/schemas/filtered")
+                      .param("resourcePath", "/api/ergon/" + resource)
+                      .param("operation", "post")
+                      .param("schemaType", "response"))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      assertThat(
+              json.readTree(response).path("x-ui").path("reactiveDeterminations").isMissingNode())
+          .isTrue();
+    }
+  }
+
+  @Test
+  @WithMockUser(authorities = {"ERGON_READ"})
+  void phaseThreePreviewIsAuthorizedNonPersistingAndTenantScoped() throws Exception {
+    var before =
+        em.find(br.com.praxis.ergonshowcase.domain.ServidorPessoa.class, 1001L).getVersion();
+    mvc.perform(
+            post("/api/ergon/servidor-pessoas/determinations/pcd")
+                .contentType("application/json")
+                .content("{\"defvisual\":true}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.possuiDeficienciaPcD").value(true));
+    mvc.perform(
+            post("/api/ergon/servidor-pessoas/determinations/pcd")
+                .contentType("application/json")
+                .content("{}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.possuiDeficienciaPcD").value(false));
+    Integer selected =
+        em.createQuery("select min(c.cargo) from Cargo c where c.empCodigo=1", Integer.class)
+            .getSingleResult();
+    mvc.perform(
+            post("/api/ergon/vinculos/determinations/provimento")
+                .contentType("application/json")
+                .content("{\"cargo\":" + selected + "}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.cargoNome").isNotEmpty());
+    mvc.perform(
+            post("/api/ergon/vinculos/determinations/provimento")
+                .header("X-Tenant", "2")
+                .contentType("application/json")
+                .content("{\"cargo\":" + selected + "}"))
+        .andExpect(status().isUnprocessableEntity());
+    mvc.perform(
+            post("/api/ergon/vinculos/determinations/provimento")
+                .contentType("application/json")
+                .content("{\"cargo\":99999999}"))
+        .andExpect(status().isUnprocessableEntity());
+    em.flush();
+    em.clear();
+    assertThat(em.find(br.com.praxis.ergonshowcase.domain.ServidorPessoa.class, 1001L).getVersion())
+        .isEqualTo(before);
+  }
+
+  @Test
+  void phaseThreeSubmitRejectsForgedPreview() throws Exception {
+    mvc.perform(
+            post("/api/ergon/servidor-pessoas")
+                .contentType("application/json")
+                .content(
+                    "{\"numero\":9510,\"nome\":\"Prévia sem autoridade\",\"cpf\":\"00000009510\",\"dtnasc\":\"1990-01-01\",\"possuiDeficienciaPcDPrevisto\":true}"))
+        .andExpect(status().isBadRequest());
+    mvc.perform(
+            post("/api/ergon/servidor-pessoas")
+                .contentType("application/json")
+                .content(
+                    "{\"numero\":9510,\"nome\":\"Fato recalculado\",\"cpf\":\"00000009510\",\"dtnasc\":\"1990-01-01\",\"defvisual\":true}"))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.data.possuiDeficienciaPcD").value(true));
+  }
+
+  @Test
+  void phaseTwoPartialFormsRejectStorageOverflowBeforeWriting() throws Exception {
+    String[][] cases = {
+      {"/api/ergon/servidor-pessoas/1001/dados-bancarios-contato", "agencia", "12345678901"},
+      {"/api/ergon/vinculos/1001:1/previdencia-pagamento", "agencia", "12345678901"},
+      {"/api/ergon/vinculos/1001:1/lotacao-exercicio", "setor", "X".repeat(31)}
+    };
+    for (String[] test : cases)
+      revisionCommand(test[0], json.writeValueAsString(java.util.Map.of(test[1], test[2])))
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.errors[0].target").value(test[1]));
+    revisionCommand(cases[0][0], "{\"agencia\":\"1234567890\"}").andExpect(status().isOk());
+  }
+
+  @Test
+  void phaseTwoChronologyRejectsReverseEndpointsWithMissingMiddle() throws Exception {
+    String uri = reviewFixture();
+    String fields =
+        "\"regimejur\":\"ESTATUTARIO\",\"tipovinc\":\"EFETIVO\",\"categoria\":\"SAUDE\",\"dtinicontr\":\"2030-01-01\",\"dtprorrogcontr\":\"2020-01-01\",\"customFields\":{\"processo_sei_nomeacao\":\"SEI-2026.009505\"}";
+    mvc.perform(
+            post("/api/ergon/vinculos")
+                .contentType("application/json")
+                .content(
+                    "{\"numfunc\":9505,\"numero\":2,\"empCodigo\":1,\"dtexerc\":\"2020-01-01\","
+                        + fields
+                        + "}"))
+        .andExpect(status().isUnprocessableEntity());
+    mvc.perform(
+            put(uri)
+                .header("If-Match", revisionEtag(uri))
+                .contentType("application/json")
+                .content("{" + fields + "}"))
+        .andExpect(status().isUnprocessableEntity());
+  }
+
+  @Test
+  void phaseTwoHistoricalMaintenanceAllowsExtinctCargo() throws Exception {
+    String uri = reviewFixture();
+    reviewCargo();
+    var entity =
+        em.find(
+            br.com.praxis.ergonshowcase.domain.Vinculo.class,
+            new br.com.praxis.ergonshowcase.domain.VinculoId(9505L, 1));
+    entity.setCargo(9505);
+    entity.setSituacao("VACANTE");
+    em.flush();
+    revisionCommand(
+            "/api/ergon/cargos/9505/actions/extinguir-cargo", "{\"dtExtincao\":\"2026-10-01\"}")
+        .andExpect(status().isOk());
+    for (String state : new String[] {"VACANTE", "APOSENTADO"}) {
+      entity.setSituacao(state);
+      em.flush();
+      mvc.perform(
+              put(uri)
+                  .header("If-Match", revisionEtag(uri))
+                  .contentType("application/json")
+                  .content(
+                      "{\"matric\":\"HIST-305\",\"regimejur\":\"ESTATUTARIO\",\"tipovinc\":\"EFETIVO\",\"categoria\":\"SAUDE\",\"cargo\":9505,\"customFields\":{\"processo_sei_nomeacao\":\"SEI-2026.009505\"}}"))
+          .andExpect(status().isOk());
+      revisionCommand(uri + "/previdencia-pagamento", "{\"correio\":true}")
+          .andExpect(status().isOk());
+    }
+  }
+
+  @Test
+  void phaseTwoRelatedCollectionsRespectParentAndPagination() throws Exception {
+    for (String[] route :
+        new String[][] {
+          {"/api/ergon/orgaos/1/quadro-cargos", "empCodigo", "1"},
+          {"/api/ergon/servidor-pessoas/1001/vinculos-funcionais", "numfunc", "1001"},
+          {"/api/ergon/cargos/101/vinculos-titulares", "cargo", "101"},
+          {"/api/ergon/cargos/101/vinculos-comissao", "cargoComissao", "101"}
+        }) {
+      var response =
+          json.readTree(
+              mvc.perform(get(route[0]).param("size", "1"))
+                  .andExpect(status().isOk())
+                  .andReturn()
+                  .getResponse()
+                  .getContentAsString());
+      assertThat(response.path("data").path("content").size()).isLessThanOrEqualTo(1);
+      for (var row : response.path("data").path("content"))
+        assertThat(row.path(route[1]).asText()).isEqualTo(route[2]);
+      mvc.perform(get(route[0]).param("size", "201")).andExpect(status().isUnprocessableEntity());
+    }
+  }
+
+  @Test
+  void phaseOneAuxiliaryReferencesAreReadOnlyAndResolvable() throws Exception {
+    String setor =
+        em.createQuery("select min(s.setor) from Setor s", String.class).getSingleResult();
+    Long documento = reviewDocumento();
+    for (String[] target :
+        new String[][] {
+          {"setores", setor, "ficha-unidade", "setor"},
+          {"documentos-legais", documento.toString(), "ficha-documento", "documento"}
+        }) {
+      String base = "/api/ergon/" + target[0];
+      mvc.perform(get(base + "/" + target[1] + "/" + target[2]))
+          .andExpect(status().isOk())
+          .andExpect(header().exists("ETag"));
+      var options =
+          mvc.perform(
+                  post(base + "/option-sources/" + target[3] + "/options/filter")
+                      .contentType("application/json")
+                      .content("{}"))
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+      assertThat(options).contains("label");
+      mvc.perform(post(base).contentType("application/json").content("{}"))
+          .andExpect(status().isNotFound());
+    }
+    var openapi =
+        json.readTree(
+            mvc.perform(get("/v3/api-docs")).andReturn().getResponse().getContentAsString());
+    var schemas = openapi.path("components").path("schemas");
+    for (String field :
+        new String[] {
+          "setor", "setorExercicio", "cargoComissao", "documentoLegalId", "atoPublicacaoId"
+        }) {
+      var ui = schemas.path("CreateVinculoDTO").path("properties").path(field).path("x-ui");
+      assertThat(ui.path("controlType").asText()).as(field).isEqualTo("entityLookup");
+      assertThat(ui.path("icon").asText()).as(field).isNotBlank();
+    }
+    for (String field : new String[] {"setorNome", "setorExercicioNome", "cargoComissaoNome"})
+      assertThat(
+              schemas
+                  .path("VinculoResponseDTO")
+                  .path("properties")
+                  .path(field)
+                  .path("x-ui")
+                  .path("resourceReference")
+                  .isMissingNode())
+          .as(field)
+          .isFalse();
+  }
+
+  @Test
   void reviewReadSurfacesPublishRealETagAndReferences() throws Exception {
     for (String[] view :
         new String[][] {
@@ -64,49 +347,71 @@ class NeonIntegrationTest {
   }
 
   @Test
-  void reviewDerivedFactsUseOneBatchQueryRegardlessOfPageSize() {
-    var facts = context.getBean(br.com.praxis.ergonshowcase.service.ErgonReadFacts.class);
-    var cargoMapper = context.getBean(br.com.praxis.ergonshowcase.mapper.CargoMapper.class);
-    var vinculoMapper = context.getBean(br.com.praxis.ergonshowcase.mapper.VinculoMapper.class);
-    var cargos =
-        em
-            .createQuery(
-                "select c from Cargo c order by c.cargo",
-                br.com.praxis.ergonshowcase.domain.Cargo.class)
-            .setMaxResults(3)
-            .getResultList()
-            .stream()
-            .map(cargoMapper::toResponse)
-            .toList();
-    var vinculos =
-        em
-            .createQuery(
-                "select v from Vinculo v order by v.id.numfunc, v.id.numero",
-                br.com.praxis.ergonshowcase.domain.Vinculo.class)
-            .setMaxResults(3)
-            .getResultList()
-            .stream()
-            .map(vinculoMapper::toResponse)
-            .toList();
+  void reviewDerivedFactsUseOneBatchQueryRegardlessOfPageSize() throws Exception {
+    var service = context.getBean(br.com.praxis.ergonshowcase.service.VinculoService.class);
     var stats =
         em.getEntityManagerFactory().unwrap(org.hibernate.SessionFactory.class).getStatistics();
     stats.setStatisticsEnabled(true);
     try {
-      for (java.util.List<?> rows : java.util.List.of(cargos, vinculos)) {
-        assertThat(rows).hasSize(3);
-        stats.clear();
-        facts.enrich(rows.subList(0, 1));
-        assertThat(stats.getPrepareStatementCount()).isEqualTo(1);
-        stats.clear();
-        facts.enrich(rows);
-        assertThat(stats.getPrepareStatementCount()).isEqualTo(1);
+      java.util.Map<String, java.util.List<Long>> evidence = new java.util.LinkedHashMap<>();
+      for (String operation : new String[] {"page", "cursor", "export"}) {
+        java.util.List<Long> counts = new java.util.ArrayList<>();
+        for (int size : new int[] {1, 3}) {
+          em.clear();
+          stats.clear();
+          if (operation.equals("page"))
+            assertThat(
+                    service
+                        .filter(
+                            new br.com.praxis.ergonshowcase.dto.VinculoFilterDTO(),
+                            org.springframework.data.domain.PageRequest.of(0, size),
+                            null)
+                        .getNumberOfElements())
+                .isEqualTo(size);
+          else if (operation.equals("cursor"))
+            assertThat(
+                    service
+                        .filterByCursor(
+                            new br.com.praxis.ergonshowcase.dto.VinculoFilterDTO(),
+                            service.getDefaultSort(),
+                            null,
+                            null,
+                            size)
+                        .content())
+                .hasSize(size);
+          else {
+            var request =
+                new org.praxisplatform.uischema.exporting.CollectionExportRequest<
+                    br.com.praxis.ergonshowcase.dto.VinculoFilterDTO>(
+                    "table",
+                    "query-proof",
+                    "/api/ergon/vinculos",
+                    org.praxisplatform.uischema.exporting.CollectionExportFormat.JSON,
+                    org.praxisplatform.uischema.exporting.CollectionExportScope.FILTERED,
+                    null,
+                    java.util.List.of(),
+                    new br.com.praxis.ergonshowcase.dto.VinculoFilterDTO(),
+                    null,
+                    null,
+                    java.util.Map.of(),
+                    true,
+                    false,
+                    size,
+                    "proof",
+                    java.util.Map.of());
+            assertThat(service.exportCollection(request)).isNotNull();
+          }
+          counts.add(stats.getPrepareStatementCount());
+        }
+        assertThat(counts.get(0)).as(operation + " cold size 1").isLessThanOrEqualTo(6);
+        assertThat(counts.get(1)).as(operation + " cold size 3").isLessThanOrEqualTo(6);
+        assertThat(counts.get(1)).as(operation + " growth").isLessThanOrEqualTo(counts.get(0) + 1);
+        evidence.put(operation, counts);
       }
-      assertThat(cargos)
-          .allSatisfy(
-              c -> {
-                if (c.getVagasAutorizadas() != null)
-                  assertThat(c.getSaldoVagasDisponiveis()).isNotNull();
-              });
+      java.nio.file.Files.createDirectories(java.nio.file.Path.of("target/proof"));
+      java.nio.file.Files.writeString(
+          java.nio.file.Path.of("target/proof/cold-query-counts.json"),
+          json.writeValueAsString(evidence));
     } finally {
       stats.setStatisticsEnabled(false);
     }

@@ -153,7 +153,6 @@ public class VinculoService
   protected void beforeCreate(CreateVinculoDTO dto, Vinculo e) {
     invariants.vinculo(e, true);
     checkOrg(e.getEmpCodigo());
-    checkCargo(e.getEmpCodigo(), e.getCargo());
     if (getRepository().existsById(e.getId()))
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Vínculo já cadastrado.");
     Orgao o = entityManager.find(Orgao.class, e.getEmpCodigo());
@@ -167,21 +166,11 @@ public class VinculoService
   @Override
   protected void beforeUpdate(VinculoId id, Vinculo e, UpdateVinculoDTO dto) {
     checkOrg(e.getEmpCodigo());
-    checkCargo(e.getEmpCodigo(), dto.getCargo());
   }
 
   private void checkOrg(Integer orgao) {
     if (!java.util.Objects.equals(orgao, tenant.orgao()))
       throw new ResponseStatusException(
           HttpStatus.UNPROCESSABLE_ENTITY, "Órgão do vínculo diverge de X-Tenant.");
-  }
-
-  private void checkCargo(Integer orgao, Integer codigo) {
-    if (codigo == null) return;
-    Cargo cargo = entityManager.find(Cargo.class, codigo);
-    if (cargo == null || !orgao.equals(cargo.getEmpCodigo()) || cargo.getDtExtincao() != null)
-      throw new ResponseStatusException(
-          HttpStatus.UNPROCESSABLE_ENTITY,
-          "Cargo inexistente, extinto ou pertencente a outro órgão.");
   }
 }

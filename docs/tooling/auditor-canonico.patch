@@ -4,7 +4,7 @@
  import argparse
  import re
  import sys
-+from java_resource_audit import technical_or_mirrored, mapped_input_fields, command_fields
++from java_resource_audit import technical_or_mirrored, mapped_input_fields, command_fields, relationship_key_fields, presentation_issues, relationship_display_fields, runtime_evidence_issues
  from dataclasses import dataclass, field
  from pathlib import Path
  from typing import Dict, List, Optional, Set, Tuple
@@ -49,7 +49,7 @@
  
  
  def main() -> int:
-@@ -253,14 +232,16 @@
+@@ -253,14 +232,18 @@
          description="Audit Praxis Java resource completeness, Quick View readiness, and editorial quality."
      )
      parser.add_argument("project_dir", type=Path, help="Path to the Java host project root")
@@ -60,16 +60,19 @@
          type=float,
 -        default=85.0,
 -        help="Minimum Entity-to-ResponseDTO coverage %% (default: 85)",
+-    )
 +        default=100.0,
 +        help="Minimum reading coverage %% (default: 100; cannot weaken accountability)",
-     )
++    )
++    parser.add_argument("--require-runtime-evidence", action="store_true", help="Also require fresh hashed receipts for operational/consumer/parity gates")
++    parser.add_argument("--evidence-manifest", type=Path, default=None, help="Default: <host>/docs/evidence/runtime-gates.json")
      args = parser.parse_args()
 +    if args.min_dto_coverage != 100.0:
 +        parser.error("The governed completeness gate requires exactly 100% coverage.")
  
      src_main = args.project_dir / "src" / "main" / "java"
      if not src_main.exists():
-@@ -276,17 +257,34 @@
+@@ -276,17 +259,34 @@
      controllers = [c for c in classes.values() if c.is_controller and c.controller_type_args]
      services = [c for c in classes.values() if c.is_service and c.service_type_args]
      entities = [c for c in classes.values() if "@Entity" in c.content]
@@ -94,7 +97,7 @@
      print(f"- **Project**: `{args.project_dir.resolve()}`")
      print(f"- **Mapped JPA Entities**: {len(entities)}")
      print(f"- **Resource Controllers**: {len(controllers)}\n")
-+    print("- **Scope**: static source evidence; not HTTP, concurrency, parity or runtime approval.\n")
++    print("- **Scope**: static source evidence; not HTTP, concurrency, parity or runtime approval. N+1 requires cold full-query/page/cursor/export measurements; this source audit cannot certify it.\n")
  
      print("## 1. Resource & Capability Scorecard")
      print(
@@ -107,7 +110,7 @@
  
      failures: List[str] = []
      unmapped_details: List[Tuple[str, str, List[str]]] = []
-@@ -300,6 +298,7 @@
+@@ -300,6 +300,7 @@
              resp_dto_name, _, filter_dto_name = t_args
              create_dto_name, update_dto_name = "", ""
          else:
@@ -115,7 +118,7 @@
              continue
  
          matched_svc = next(
-@@ -329,20 +328,15 @@
+@@ -329,20 +330,15 @@
  
          entity_biz_fields: List[Tuple[str, str]] = []
          for f_type, f_name, f_annot in entity_all_fields:
@@ -139,7 +142,28 @@
  
          covered_count = 0
          missing_fields: List[str] = []
-@@ -414,8 +408,14 @@
+@@ -398,6 +394,20 @@
+                         f"{filter_dto_name}.{f_name}: label looks like a sentence/description ('{lbl}')"
+                     )
+ 
++        foreign_keys = relationship_key_fields(entity_all_fields)
++        checked_ui = set()
++        for field_type, field_name, annotations in resp_all_fields + create_all_fields + update_all_fields + filter_all_fields:
++            signature = (field_type, field_name, annotations)
++            if signature in checked_ui:
++                continue
++            checked_ui.add(signature)
++            res_editorial_issues.extend(presentation_issues(field_type, field_name, annotations, foreign_keys))
++        display_fields = relationship_display_fields(entity_name, entity_all_fields, classes)
++        for display in display_fields:
++            annotation = next((a for _, n, a in resp_all_fields if n == display), "")
++            if "@ResourceReference" not in annotation:
++                res_editorial_issues.append(f"{display}: mapped relationship display lacks @ResourceReference")
++
+         related_class_names = {
+             ctrl.name,
+             matched_svc.name if matched_svc else "",
+@@ -414,8 +424,14 @@
          combined_sources = "\n".join(
              classes[n].content for n in related_class_names if n and n in classes
          )
@@ -156,7 +180,7 @@
          )
          quick_filter_count = len(re.findall(r"@(?:[\w.]+\.)?QuickFilter\b", combined_sources))
          ui_surface_count = len(re.findall(r"@(?:[\w.]+\.)?UiSurface\b", combined_sources))
-@@ -427,10 +427,29 @@
+@@ -427,10 +443,29 @@
          )
          resource_fact_count = len(re.findall(r"@(?:[\w.]+\.)?ResourceFact\b", combined_sources))
  
@@ -188,12 +212,17 @@
              row_issues.append(f"DTO coverage {coverage_pct:.1f}% < {args.min_dto_coverage:.0f}%")
          if total_ent_biz >= 8 and filterable_count < 5:
              row_issues.append(f"Only {filterable_count} @Filterable")
-@@ -438,10 +457,44 @@
+@@ -438,10 +473,49 @@
              row_issues.append(f"Low FilterOperation diversity ({len(filter_ops)})")
          if quick_filter_count < 2:
              row_issues.append(f"Only {quick_filter_count} @QuickFilter")
 -        if quick_view_cols < 4:
 -            row_issues.append(f"Only {quick_view_cols} QuickView fields (quickViewVisible=true)")
++        identity_fields = set(re.findall(r'(?:titleField|subtitleField)\s*=\s*"([^"]+)"', combined_sources))
++        for _, field_name, annotations in resp_all_fields:
++            if field_name in identity_fields and re.search(r'quickViewVisible\s*=\s*true', annotations):
++                row_issues.append(f"Quick View repeats identity field: {field_name}")
++
 +        if not 4 <= quick_view_cols <= 8:
 +            row_issues.append(f"QuickView field count outside 4..8: {quick_view_cols}")
          if not has_rich_identity:
@@ -231,11 +260,11 @@
 +        if not has_read_surface:
 +            row_issues.append("Missing READ_PROJECTION/VIEW @UiSurface for Quick View 360")
 +        if mapper_n_plus_one:
-+            row_issues.append("N+1 query detected inside ResourceMapper")
++            row_issues.append("Explicit query inside ResourceMapper (runtime query-count proof is required separately)")
          if (
              ui_surface_count + workflow_action_count + resource_intent_count + resource_fact_count
          ) < 1:
-@@ -457,10 +510,12 @@
+@@ -457,10 +531,12 @@
          if res_editorial_issues:
              editorial_details.append((res_label, res_editorial_issues))
  
@@ -249,7 +278,23 @@
          )
  
      if unmapped_details:
-@@ -485,11 +540,10 @@
+@@ -479,17 +555,25 @@
+             if len(issues) > 12:
+                 print(f"  - ... and {len(issues) - 12} more")
+ 
++    if args.require_runtime_evidence:
++        manifest = args.evidence_manifest or args.project_dir / "docs/evidence/runtime-gates.json"
++        issues = runtime_evidence_issues(args.project_dir.resolve(), manifest)
++        print("\n## Operational Evidence Receipts")
++        print("Hashed receipts are checked for freshness; independent review remains required.")
++        failures.extend(issues)
++        for issue in issues:
++            print("- " + issue)
++
+     if failures:
+         print(
+-            f"\n## 4. Verdict: FAILED ({len(failures)} resource(s) below Praxis platform completeness standard)"
++            f"\n## 4. Verdict: FAILED ({len(failures)} structural or operational gate failure(s))"
          )
          for f in failures:
              print(f"- [x] {f}")
@@ -265,7 +310,7 @@
      return 0
 --- /dev/null
 +++ b/scripts/workspace/java_resource_audit.py
-@@ -0,0 +1,101 @@
+@@ -0,0 +1,201 @@
 +"""Conservative static source evidence. This module does not approve runtime behavior."""
 +import re
 +
@@ -367,9 +412,109 @@
 +    for root in roots:
 +        visit(ctrl.name, root)
 +    return result
++
++
++def relationship_key_fields(entity_fields):
++    """Match scalar JPA columns to declared joins; never guess foreign keys by suffix."""
++    joins = {name for _, _, annotations in entity_fields
++             if re.search(r'@(?:\w+\.)*(?:ManyToOne|OneToOne)\b', annotations)
++             for name in re.findall(r'@(?:\w+\.)*JoinColumn\s*\([^)]*?\bname\s*=\s*"([^"]+)"', annotations)}
++    return {field for _, field, annotations in entity_fields
++            if any(column in joins for column in re.findall(r'@(?:\w+\.)*Column\s*\([^)]*?\bname\s*=\s*"([^"]+)"', annotations))}
++
++
++def presentation_issues(type_, field, annotations, foreign_keys=()):
++    ui = re.search(r'@UISchema\s*\((.*?)\)', annotations, re.DOTALL)
++    if not ui:
++        return [f"{field}: missing @UISchema"]
++    body = ui.group(1)
++    reference = "@ResourceReference" in annotations
++    semantic = type_ in {"LocalDate", "LocalDateTime", "BigDecimal", "java.math.BigDecimal"} or field in foreign_keys or reference and "ENTITY_LOOKUP" in body
++    issues = []
++    if semantic:
++        for attr in ("type", "controlType", "icon"):
++            if not re.search(r'\b' + attr + r'\s*=\s*(?:"[^" ]+"|[\w.]+)', body):
++                issues.append(f"{field}: explicit {attr} required for date/amount/relationship")
++    if field in foreign_keys and "ENTITY_LOOKUP" not in body:
++        issues.append(f"{field}: declared relationship requires ENTITY_LOOKUP")
++    if "ENTITY_LOOKUP" in body and not re.search(r'endpoint\s*=\s*"[^"]*/option-sources/[^/]+/options/filter"', body):
++        issues.append(f"{field}: lookup requires a named RESOURCE_ENTITY option source")
++    if type_ in {"LocalDate", "LocalDateTime"} and not re.search(r'FieldControlType\.(?:DATE_PICKER|DATE_TIME_PICKER)\b', body):
++        issues.append(f"{field}: scalar date requires a date control")
++    if type_ == "List<LocalDate>" and "DATE_RANGE" not in body:
++        issues.append(f"{field}: date interval requires DATE_RANGE")
++    return issues
++
++
++def relationship_display_fields(entity, fields, classes):
++    relations = {name for _, name, ann in fields if re.search(r'@(?:ManyToOne|OneToOne)\b', ann)}
++    result = set()
++    for info in classes.values():
++        if not re.search(r'\bResourceMapper\s*<\s*' + re.escape(entity) + r'\s*,', info.content):
++            continue
++        code = masked_java(info.content)
++        for relation in relations:
++            accessor = relation[:1].upper() + relation[1:]
++            pattern = r'dto\.set([A-Z]\w*)\s*\(\s*(?:entity\.get' + accessor + r'\(\)\s*==\s*null\s*\?\s*null\s*:\s*)?entity\.get' + accessor + r'\(\)\.get\w+\s*\('
++            result.update(name[:1].lower() + name[1:] for name in re.findall(pattern, code))
++    return result
++
++
++RUNTIME_GATES = {"schema", "http", "availability", "persistence", "parity", "angularReadiness", "coldQueries", "reactiveDeterminations", "governedDecisions"}
++
++
++def source_fingerprint(project):
++    import hashlib
++    digest = hashlib.sha256()
++    for folder in ("src", "scripts/workspace"):
++        base = project / folder
++        if not base.exists():
++            continue
++        for file in sorted(base.rglob("*")):
++            if file.is_file() and file.suffix in {".java", ".yml", ".yaml", ".ts", ".mjs", ".json"}:
++                digest.update(file.relative_to(project).as_posix().encode())
++                digest.update(b"\0")
++                digest.update(file.read_text(encoding="utf-8-sig").encode())
++                digest.update(b"\0")
++    return digest.hexdigest()
++
++
++def runtime_evidence_issues(project, manifest_path):
++    """Checks receipts/provenance, not the truth of self-authored architectural approval."""
++    import json, hashlib
++    errors = []
++    if not manifest_path.is_file():
++        return ["Runtime evidence manifest is missing"]
++    try:
++        manifest = json.loads(manifest_path.read_text(encoding="utf-8-sig"))
++    except (ValueError, OSError):
++        return ["Runtime evidence manifest is invalid"]
++    if manifest.get("sourceSha256") != source_fingerprint(project):
++        errors.append("Runtime evidence is stale for the current host sources")
++    gates = manifest.get("gates", {})
++    for name in sorted(RUNTIME_GATES):
++        gate = gates.get(name, {})
++        status = gate.get("status")
++        if status == "not-applicable":
++            if not gate.get("reason", "").strip():
++                errors.append(name + ": not-applicable requires an explicit reason")
++            continue
++        if status != "pass":
++            errors.append(name + ": " + str(status or "missing"))
++            continue
++        artifacts = gate.get("artifacts", [])
++        if not artifacts:
++            errors.append(name + ": pass requires hashed evidence artifacts")
++        for artifact in artifacts:
++            file = (project / artifact.get("path", "")).resolve()
++            if not file.is_relative_to(project.resolve()) or not file.is_file():
++                errors.append(name + ": artifact missing or outside project")
++            elif hashlib.sha256(file.read_bytes()).hexdigest() != artifact.get("sha256"):
++                errors.append(name + ": artifact hash mismatch")
++    return errors
 --- /dev/null
 +++ b/scripts/workspace/test_audit_java_resource_completeness.py
-@@ -0,0 +1,142 @@
+@@ -0,0 +1,210 @@
 +"""Regression proofs for the canonical static audit; no product DTO enrichment."""
 +import importlib.util
 +from pathlib import Path
@@ -385,7 +530,7 @@
 +audit=importlib.util.module_from_spec(spec)
 +sys.modules[spec.name]=audit
 +spec.loader.exec_module(audit)
-+from java_resource_audit import technical_or_mirrored, command_fields, mapped_input_fields
++from java_resource_audit import technical_or_mirrored, command_fields, mapped_input_fields, presentation_issues, relationship_key_fields, relationship_display_fields, source_fingerprint, runtime_evidence_issues, RUNTIME_GATES
 +
 +
 +def info(name,content,fields=()):
@@ -397,14 +542,14 @@
 +        with tempfile.TemporaryDirectory() as tmp:
 +            root=Path(tmp,"src/main/java");root.mkdir(parents=True)
 +            names=[f"field{i}" for i in range(8)]
-+            base=" ".join((('@ResourceReference(resourceKey="test.items",surfaceId="view",previewSurfaceId="view") ' if n=="field0" else "") + f'@UISchema(quickViewVisible=true) private String {n};') for n in names)
++            base=" ".join((('@ResourceReference(resourceKey="test.items",surfaceId="view",previewSurfaceId="view") ' if n=="field0" else "") + f'@UISchema(quickViewVisible={str(n not in names[:2]).lower()},quickViewOrder={names.index(n)+1}) private String {n};') for n in names)
 +            entity=" ".join(f'@Column private String {n};' for n in names)
-+            filters=" ".join(f'@Filterable(operation=FilterOperation.{op}) private String filter{i};' for i,op in enumerate(["LIKE","EQUAL","IN","LIKE","EQUAL"]))
++            filters=" ".join(f'@UISchema(label="Filter") @Filterable(operation=FilterOperation.{op}) private String filter{i};' for i,op in enumerate(["LIKE","EQUAL","IN","LIKE","EQUAL"]))
 +            assignments="".join(f'entity.setField{i}(dto.getField{i}());' for i in range(8))
 +            sources={
 +                "Item":f"@Entity public class Item {{ @Id private Long id;{entity} @Column private LocalDate deadline; }}",
 +                "Base":f"public class Base {{{base}}}",
-+                "Response":'@ResourceIdentity(titleField="field0",subtitleField="field1",metadataFields={"field2"}) public class Response extends Base {@Schema(accessMode=Schema.AccessMode.READ_ONLY) @UISchema(label="Deadline",controlType=FieldControlType.DATE_PICKER) private LocalDate deadline;}',
++                "Response":'@ResourceIdentity(titleField="field0",subtitleField="field1",metadataFields={"field2"}) public class Response extends Base {@Schema(accessMode=Schema.AccessMode.READ_ONLY) @UISchema(label="Deadline",type=FieldDataType.DATE,controlType=FieldControlType.DATE_PICKER,icon="event") private LocalDate deadline;}',
 +                "Create":"public class Create extends Base {}",
 +                "Update":"public class Update extends Base {}",
 +                "Filter":f"public class Filter {{{filters}}}",
@@ -453,6 +598,74 @@
 +        result=self.fixture_audit(read_only=True)
 +        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
 +        self.assertIn("N/A (read-only)",result.stdout)
++
++    def test_date_preset_does_not_replace_explicit_presentation(self):
++        self.assertTrue(presentation_issues("LocalDate","when",'@UISchema(preset=Preset.DATE)'))
++
++    def test_amount_requires_explicit_semantics_but_is_not_assumed_currency(self):
++        self.assertEqual(presentation_issues("BigDecimal","ratio",'@UISchema(type=FieldDataType.NUMBER,controlType=FieldControlType.NUMERIC_TEXT_BOX,icon="percent")'),[])
++        self.assertEqual(len(presentation_issues("BigDecimal","amount",'@UISchema(label="Amount")')),3)
++
++    def test_named_relationship_lookup_is_required(self):
++        invalid='@UISchema(type=FieldDataType.TEXT,controlType=FieldControlType.ENTITY_LOOKUP,icon="badge",endpoint="/api/items/options/filter")'
++        self.assertIn("named RESOURCE_ENTITY",presentation_issues("Long","ownerId",invalid,{"ownerId"})[0])
++        valid=invalid.replace('/api/items/options/filter','/api/items/option-sources/item/options/filter')
++        self.assertEqual(presentation_issues("Long","ownerId",valid,{"ownerId"}),[])
++
++    def test_raw_joined_foreign_key_cannot_be_a_generic_input(self):
++        annotations='@UISchema(type=FieldDataType.TEXT,controlType=FieldControlType.INPUT,icon="badge")'
++        self.assertTrue(presentation_issues("Long","ownerId",annotations,{"ownerId"}))
++
++    def test_foreign_keys_come_from_join_column_pairs_not_property_suffixes(self):
++        fields=[("Owner","owner",'@ManyToOne @JoinColumn(name="owner_key",insertable=false,updatable=false)'),("Long","ownerKey",'@Column(name="owner_key")'),("String","notAForeignId",'@Column(name="free_code")')]
++        self.assertEqual(relationship_key_fields(fields),{"ownerKey"})
++
++    def test_date_interval_is_not_a_scalar_picker(self):
++        self.assertTrue(presentation_issues("List<LocalDate>","period",'@UISchema(controlType=FieldControlType.DATE_PICKER)'))
++        self.assertEqual(presentation_issues("List<LocalDate>","period",'@UISchema(controlType=FieldControlType.DATE_RANGE)'),[])
++
++    def test_relation_display_is_found_from_mapper_access_not_field_label(self):
++        mapper=info("Mapper","class Mapper implements ResourceMapper<Item,R,C,U,Long>{R toResponse(Item entity){R dto=new R();dto.setUnitName(entity.getLocation()==null?null:entity.getLocation().getName());return dto;}}")
++        self.assertEqual(relationship_display_fields("Item",[("Location","location","@ManyToOne")],{"Mapper":mapper}),{"unitName"})
++
++    def test_runtime_evidence_is_fail_closed_when_missing(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            project=Path(tmp)
++            self.assertTrue(runtime_evidence_issues(project,project/"missing.json"))
++
++    def test_runtime_evidence_na_requires_reason_and_cannot_hide_a_pending_gate(self):
++        import json
++        with tempfile.TemporaryDirectory() as tmp:
++            project=Path(tmp); manifest=project/"evidence.json"
++            gates={name:{"status":"not-applicable","reason":"No such published feature"} for name in RUNTIME_GATES}
++            manifest.write_text(json.dumps({"sourceSha256":source_fingerprint(project),"gates":gates}))
++            self.assertEqual(runtime_evidence_issues(project,manifest),[])
++            gates["http"]={"status":"pending"}
++            manifest.write_text(json.dumps({"sourceSha256":source_fingerprint(project),"gates":gates}))
++            self.assertIn("http: pending",runtime_evidence_issues(project,manifest))
++            gates["http"]={"status":"not-applicable"}
++            manifest.write_text(json.dumps({"sourceSha256":source_fingerprint(project),"gates":gates}))
++            self.assertTrue(runtime_evidence_issues(project,manifest))
++
++    def test_runtime_evidence_source_change_invalidates_receipt(self):
++        import json
++        with tempfile.TemporaryDirectory() as tmp:
++            project=Path(tmp);src=project/"src";src.mkdir();(src/"A.java").write_text("class A {}")
++            manifest=project/"evidence.json"
++            gates={name:{"status":"not-applicable","reason":"No such published feature"} for name in RUNTIME_GATES}
++            manifest.write_text(json.dumps({"sourceSha256":source_fingerprint(project),"gates":gates}))
++            (src/"A.java").write_text("class A { int changed; }")
++            self.assertIn("Runtime evidence is stale for the current host sources",runtime_evidence_issues(project,manifest))
++
++    def test_runtime_pass_needs_actual_artifact_hashes(self):
++        import json, hashlib
++        with tempfile.TemporaryDirectory() as tmp:
++            project=Path(tmp);manifest=project/"evidence.json";artifact=project/"result.txt";artifact.write_text("pass")
++            gates={name:{"status":"not-applicable","reason":"No such published feature"} for name in RUNTIME_GATES}
++            gates["http"]={"status":"pass","artifacts":[{"path":"result.txt","sha256":hashlib.sha256(artifact.read_bytes()).hexdigest()}]}
++            data={"sourceSha256":source_fingerprint(project),"gates":gates};manifest.write_text(json.dumps(data))
++            self.assertEqual(runtime_evidence_issues(project,manifest),[])
++            artifact.write_text("changed");self.assertIn("http: artifact hash mismatch",runtime_evidence_issues(project,manifest))
 +
 +    def test_comments_and_strings_do_not_count_as_writes(self):
 +        ctrl=info("Controller",'class Controller { @WorkflowAction(id="x") @PostMapping("/actions/x") public void x(){Item e=load();log("e.setDeadline(1)"); /* e.setDeadline(2); */} }')

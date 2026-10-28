@@ -35,6 +35,29 @@ public class ErgonReadFacts {
                       ? null
                       : c.getVagasAutorizadas() - ocupadas.getOrDefault(c.getId(), 0L)));
     }
+    var linkedCargoIds = new HashSet<Integer>();
+    cargos.forEach(
+        c -> {
+          if (c.getCargoAglutinador() != null) linkedCargoIds.add(c.getCargoAglutinador());
+        });
+    responses.stream()
+        .filter(VinculoResponseDTO.class::isInstance)
+        .map(VinculoResponseDTO.class::cast)
+        .forEach(
+            v -> {
+              if (v.getCargoComissao() != null) linkedCargoIds.add(v.getCargoComissao());
+            });
+    Map<Integer, String> cargoNames = new HashMap<>();
+    if (!linkedCargoIds.isEmpty())
+      em.createQuery("select c.cargo,c.nome from Cargo c where c.cargo in :ids", Object[].class)
+          .setParameter("ids", linkedCargoIds)
+          .getResultList()
+          .forEach(row -> cargoNames.put((Integer) row[0], (String) row[1]));
+    cargos.forEach(c -> c.setCargoAglutinadorNome(cargoNames.get(c.getCargoAglutinador())));
+    responses.stream()
+        .filter(VinculoResponseDTO.class::isInstance)
+        .map(VinculoResponseDTO.class::cast)
+        .forEach(v -> v.setCargoComissaoNome(cargoNames.get(v.getCargoComissao())));
     var vinculos =
         responses.stream()
             .filter(VinculoResponseDTO.class::isInstance)

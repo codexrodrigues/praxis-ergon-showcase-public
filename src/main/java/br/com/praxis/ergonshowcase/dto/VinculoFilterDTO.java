@@ -1,13 +1,11 @@
 package br.com.praxis.ergonshowcase.dto;
 
-import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.praxisplatform.uischema.FieldControlType;
 import org.praxisplatform.uischema.annotation.*;
 import org.praxisplatform.uischema.customfields.CustomFields;
 import org.praxisplatform.uischema.extension.annotation.UISchema;
@@ -22,12 +20,14 @@ public class VinculoFilterDTO implements GenericFilterDTO {
   @Schema(description = "Número funcional exato da pessoa cujos vínculos serão consultados.")
   @UISchema(
       label = "Pessoa servidora",
-      controlType = FieldControlType.ENTITY_LOOKUP,
-      endpoint = ApiPaths.PESSOA_OPTIONS,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      endpoint = "/api/ergon/servidor-pessoas/option-sources/pessoa/options/filter",
       valueField = "id",
       displayField = "label",
       group = "Pesquisa",
-      order = 10)
+      order = 10,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      icon = "person")
   @Filterable(operation = FilterOperation.EQUAL, relation = "id.numfunc")
   private Long numfunc;
 
@@ -39,12 +39,14 @@ public class VinculoFilterDTO implements GenericFilterDTO {
   @Schema(description = "Órgão de origem dos assentamentos funcionais pesquisados.")
   @UISchema(
       label = "Órgão",
-      controlType = FieldControlType.ENTITY_LOOKUP,
-      endpoint = ApiPaths.ORGAO_OPTIONS,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      endpoint = "/api/ergon/orgaos/option-sources/orgao/options/filter",
       valueField = "id",
       displayField = "label",
       group = "Pesquisa",
-      order = 30)
+      order = 30,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      icon = "apartment")
   @Filterable(operation = FilterOperation.EQUAL)
   private Integer empCodigo;
 
@@ -57,9 +59,11 @@ public class VinculoFilterDTO implements GenericFilterDTO {
   @Schema(description = "Intervalo inclusivo de início do efetivo exercício do vínculo.")
   @UISchema(
       label = "Período de exercício",
-      controlType = FieldControlType.DATE_RANGE,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_RANGE,
       group = "Pesquisa",
-      order = 50)
+      order = 50,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "event")
   @Filterable(operation = FilterOperation.BETWEEN, relation = "dtexerc")
   private List<LocalDate> exercicio;
 
@@ -135,7 +139,13 @@ public class VinculoFilterDTO implements GenericFilterDTO {
   @UISchema(
       label = "Código do cargo ocupado pelo vínculo",
       group = "Pesquisa avançada",
-      order = 207)
+      order = 207,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      icon = "badge",
+      endpoint = "/api/ergon/cargos/option-sources/cargo/options/filter",
+      valueField = "id",
+      displayField = "label")
   @Filterable(operation = FilterOperation.EQUAL, relation = "cargo")
   private Integer cargo;
 
@@ -145,7 +155,16 @@ public class VinculoFilterDTO implements GenericFilterDTO {
   private String cargoNome;
 
   @Schema(description = "Código exato do cargo em comissão.")
-  @UISchema(label = "Cargo em comissão", group = "Pesquisa avançada", order = 209)
+  @UISchema(
+      label = "Cargo em comissão",
+      group = "Pesquisa avançada",
+      order = 209,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      icon = "badge",
+      endpoint = "/api/ergon/cargos/option-sources/cargo/options/filter",
+      valueField = "id",
+      displayField = "label")
   @Filterable(operation = FilterOperation.EQUAL, relation = "cargoComissao")
   private Integer cargoComissao;
 
@@ -155,12 +174,30 @@ public class VinculoFilterDTO implements GenericFilterDTO {
   private Boolean possuiCargoComissao;
 
   @Schema(description = "Unidade de lotação do vínculo.")
-  @UISchema(label = "Lotação", group = "Pesquisa avançada", order = 211)
+  @UISchema(
+      label = "Lotação",
+      group = "Pesquisa avançada",
+      order = 211,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      icon = "account_tree",
+      endpoint = "/api/ergon/setores/option-sources/setor/options/filter",
+      valueField = "id",
+      displayField = "label")
   @Filterable(operation = FilterOperation.EQUAL, relation = "setor")
   private String setor;
 
   @Schema(description = "Unidade de exercício efetivo do vínculo.")
-  @UISchema(label = "Exercício", group = "Pesquisa avançada", order = 212)
+  @UISchema(
+      label = "Exercício",
+      group = "Pesquisa avançada",
+      order = 212,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      icon = "business",
+      endpoint = "/api/ergon/setores/option-sources/setor/options/filter",
+      valueField = "id",
+      displayField = "label")
   @Filterable(operation = FilterOperation.EQUAL, relation = "setorExercicio")
   private String setorExercicio;
 
@@ -179,7 +216,9 @@ public class VinculoFilterDTO implements GenericFilterDTO {
       label = "Período de nomeação",
       group = "Pesquisa avançada",
       order = 215,
-      controlType = FieldControlType.DATE_RANGE)
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_RANGE,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "event")
   @Filterable(operation = FilterOperation.BETWEEN, relation = "dtnom")
   private List<LocalDate> nomeacaoRange;
 
@@ -188,7 +227,9 @@ public class VinculoFilterDTO implements GenericFilterDTO {
       label = "Período de posse",
       group = "Pesquisa avançada",
       order = 216,
-      controlType = FieldControlType.DATE_RANGE)
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_RANGE,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "event")
   @Filterable(operation = FilterOperation.BETWEEN, relation = "dtposse")
   private List<LocalDate> posseRange;
 
@@ -197,7 +238,9 @@ public class VinculoFilterDTO implements GenericFilterDTO {
       label = "Exercício na data",
       group = "Pesquisa avançada",
       order = 217,
-      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER)
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "event")
   @Filterable(operation = FilterOperation.ON_DATE, relation = "dtexerc")
   private LocalDate exercicioNaData;
 
@@ -211,7 +254,9 @@ public class VinculoFilterDTO implements GenericFilterDTO {
       label = "Período de vacância",
       group = "Pesquisa avançada",
       order = 219,
-      controlType = FieldControlType.DATE_RANGE)
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_RANGE,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "event")
   @Filterable(operation = FilterOperation.BETWEEN, relation = "dtvac")
   private List<LocalDate> vacanciaRange;
 

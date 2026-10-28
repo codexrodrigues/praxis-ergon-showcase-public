@@ -457,4 +457,53 @@ public class VinculoController
     return withResourceVersion(
         org.springframework.http.ResponseEntity.ok(), id, commands.encerrarAfastamento(id, dto, p));
   }
+
+  @Override
+  @org.springframework.web.bind.annotation.PostMapping
+  @io.swagger.v3.oas.annotations.Operation(
+      operationId = "createErgonVinculo",
+      summary = "Cadastrar vinculo",
+      description =
+          "Inclui o cadastro validando identidade, órgão e invariantes de domínio; prévias do formulário não são autoridade de persistência.")
+  public org.springframework.http.ResponseEntity<
+          org.praxisplatform.uischema.rest.response.RestApiResponse<VinculoResponseDTO>>
+      create(
+          @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
+              CreateVinculoDTO dto) {
+    return super.create(dto);
+  }
+
+  @Override
+  @org.springframework.web.bind.annotation.PutMapping("/{id}")
+  @io.swagger.v3.oas.annotations.Operation(
+      operationId = "updateErgonVinculo",
+      summary = "Manter vinculo",
+      description =
+          "Mantém os dados cadastrais com If-Match atual, preservando a identidade e as transições controladas por ações.")
+  public org.springframework.http.ResponseEntity<
+          org.praxisplatform.uischema.rest.response.RestApiResponse<VinculoResponseDTO>>
+      update(
+          @io.swagger.v3.oas.annotations.Parameter(description = "Identidade imutável do cadastro")
+              @org.springframework.web.bind.annotation.PathVariable
+              VinculoId id,
+          @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
+              UpdateVinculoDTO dto) {
+    return super.update(id, dto);
+  }
+
+  @org.springframework.beans.factory.annotation.Autowired
+  private ErgonDeterminationService determinations;
+
+  @org.springframework.web.bind.annotation.PostMapping("/determinations/provimento")
+  @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_READ')")
+  @io.swagger.v3.oas.annotations.Operation(
+      operationId = "determineErgonProvimento",
+      summary = "Consultar cargo e saldo",
+      description =
+          "Consulta fatos atuais do cargo no órgão do contexto, sem reservar vaga; o submit revalida sob bloqueio.")
+  public org.springframework.http.ResponseEntity<ProvimentoPreviewDTO> determine(
+      @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
+          CargoSelectionDTO draft) {
+    return org.springframework.http.ResponseEntity.ok(determinations.provimento(draft));
+  }
 }

@@ -40,7 +40,13 @@ public class CargoResponseDTO extends CargoDados {
       readOnly = true,
       tableHidden = true,
       group = "Lotação",
-      order = 101)
+      order = 101,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      icon = "apartment",
+      endpoint = "/api/ergon/orgaos/option-sources/orgao/options/filter",
+      valueField = "id",
+      displayField = "label")
   private Integer empCodigo;
 
   @Schema(description = "Nome oficial do órgão de origem para leitura do assentamento.")
@@ -72,7 +78,7 @@ public class CargoResponseDTO extends CargoDados {
       formHidden = true,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event")
   private LocalDate dtExtincao;
 
   @Schema(
@@ -99,4 +105,21 @@ public class CargoResponseDTO extends CargoDados {
       quickViewVisible = true,
       quickViewOrder = 5)
   private Long saldoVagasDisponiveis;
+
+  @Schema(
+      description = "Denominação do cargo agregador do quadro ao qual este cargo está associado.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(
+      label = "Cargo agregador",
+      group = "Quadro de Vagas e Vigência",
+      tableHidden = true,
+      formHidden = true,
+      readOnly = true)
+  @ResourceReference(
+      resourceKey = "administracao-pessoal.cargos",
+      valueField = "cargoAglutinador",
+      surfaceId = "ficha-cargo",
+      previewSurfaceId = "ficha-cargo",
+      detailPresentation = "drawer")
+  private String cargoAglutinadorNome;
 }

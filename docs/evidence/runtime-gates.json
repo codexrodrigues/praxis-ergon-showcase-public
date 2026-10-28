@@ -1,0 +1,190 @@
+{
+  "sourceSha256": "933d9c8ccb29e18e1be39694fb495b99636da9bbc9efd05ba937e6b5e88f3408",
+  "validatedAt": "2026-10-28T00:59:32.304899+00:00",
+  "baselineCommit": "61fc36b3c145bb6721bd997ca5e33bbd17e3f412",
+  "gates": {
+    "schema": {
+      "status": "pass",
+      "artifacts": [
+        {
+          "path": "docs/evidence/cargos-request.json",
+          "sha256": "7be4465a8cff41d80307058c0d5ba9ad09e3ff17e0e0c07a3051a3281e276c2d"
+        },
+        {
+          "path": "docs/evidence/orgaos-request.json",
+          "sha256": "eecf55da9e3cfdbe55e09df0a04874c26c380e8090526857a101334b584dab13"
+        },
+        {
+          "path": "docs/evidence/servidor-pessoas-request.json",
+          "sha256": "ea02b11a905cd82b57b7f9abc1ae210a8f8c325195fd73ecdf2190ccb5e476a2"
+        },
+        {
+          "path": "docs/evidence/vinculos-request.json",
+          "sha256": "e1dd0e309ee5b0a642ef5b5f36080a8f89d9805e3f2a4a431058bee1ca74f430"
+        },
+        {
+          "path": "docs/evidence/cargos-response.json",
+          "sha256": "a203ad33708d73aa0ec61042c9971160f7e3944be47b66d6c34f2da45a8e7036"
+        },
+        {
+          "path": "docs/evidence/orgaos-response.json",
+          "sha256": "55802080ba03bfb490548960122d01c1263c30d8197f47725cba3672c2eb568b"
+        },
+        {
+          "path": "docs/evidence/servidor-pessoas-response.json",
+          "sha256": "827c9c17959185fdba5d39966fa6a9c42dc1a660ddaf019c2b11989083f2a739"
+        },
+        {
+          "path": "docs/evidence/vinculos-response.json",
+          "sha256": "8dfcdfba5385767b589d5ab49d1f78d1e392479070bb12a631c6982c382cbf8c"
+        },
+        {
+          "path": "docs/evidence/cargos-post-determinations.json",
+          "sha256": "7be4465a8cff41d80307058c0d5ba9ad09e3ff17e0e0c07a3051a3281e276c2d"
+        },
+        {
+          "path": "docs/evidence/cargos-put-determinations.json",
+          "sha256": "601f74c96af31969c3cf1117d2d338c8a45af0068c848263618cc41f0e8efcfd"
+        },
+        {
+          "path": "docs/evidence/servidor-pessoas-post-determinations.json",
+          "sha256": "ea02b11a905cd82b57b7f9abc1ae210a8f8c325195fd73ecdf2190ccb5e476a2"
+        },
+        {
+          "path": "docs/evidence/servidor-pessoas-put-determinations.json",
+          "sha256": "38efbb08ffc44f2a2e25b528d03314118dadbb7afe769bc75fb347833ab516b0"
+        },
+        {
+          "path": "docs/evidence/vinculos-post-determinations.json",
+          "sha256": "e1dd0e309ee5b0a642ef5b5f36080a8f89d9805e3f2a4a431058bee1ca74f430"
+        },
+        {
+          "path": "docs/evidence/vinculos-put-determinations.json",
+          "sha256": "55243936f83aaf547985783609ee634c7e63b4da47088ec7b9c1f1c39f5f1e5b"
+        }
+      ]
+    },
+    "http": {
+      "status": "pass",
+      "artifacts": [
+        {
+          "path": "docs/evidence/neon-integration-tests.txt",
+          "sha256": "a5bf000e8b7ae750202ad0020cce806e56b962da25e7ff157631560388eec1eb"
+        },
+        {
+          "path": "docs/evidence/packaged-phases-smoke.json",
+          "sha256": "a9078527a862e8a6e0ffef902900770894a567d1c7d6e08130e310b26e2869de"
+        }
+      ]
+    },
+    "availability": {
+      "status": "pass",
+      "artifacts": [
+        {
+          "path": "docs/evidence/neon-integration-tests.txt",
+          "sha256": "a5bf000e8b7ae750202ad0020cce806e56b962da25e7ff157631560388eec1eb"
+        }
+      ],
+      "scope": "Authorizations, versions, workflow states and declared item/collection operations exercised by the suite"
+    },
+    "persistence": {
+      "status": "pass",
+      "artifacts": [
+        {
+          "path": "docs/evidence/neon-integration-tests.txt",
+          "sha256": "a5bf000e8b7ae750202ad0020cce806e56b962da25e7ff157631560388eec1eb"
+        },
+        {
+          "path": "docs/evidence/neon-preservation-61fc36b.json",
+          "sha256": "c830997ccde4bbcd7af154c1f55970543a5dc2510deb285e39a837566dd549b7"
+        }
+      ]
+    },
+    "parity": {
+      "status": "pass",
+      "artifacts": [
+        {
+          "path": "docs/MATRIZ-PARIDADE-305.md",
+          "sha256": "0e8129205152d0750d3ebc097dbfc1328ddf700b3370a4752ee0a152132af44d"
+        },
+        {
+          "path": "docs/evidence/neon-integration-tests.txt",
+          "sha256": "a5bf000e8b7ae750202ad0020cce806e56b962da25e7ff157631560388eec1eb"
+        }
+      ],
+      "scope": "Only mapped pilot registration and listed administrative operations; full statutory/legacy parity is not certified"
+    },
+    "angularReadiness": {
+      "status": "pass",
+      "artifacts": [
+        {
+          "path": "docs/evidence/angular-consumer-proof.json",
+          "sha256": "58335fb9c87f9263c5d8924992e2d130e703509fad8d4292df5d6528ac5997a7"
+        },
+        {
+          "path": "docs/evidence/angular-consumer-input-hashes.json",
+          "sha256": "f758776b08529fa361f5414fda34e91485e706e1d441fb0c568733f67c855d5a"
+        }
+      ],
+      "scope": "Official source normalizer and ReactiveDeterminationRuntimeService; not published npm adoption or visual host acceptance"
+    },
+    "coldQueries": {
+      "status": "pass",
+      "artifacts": [
+        {
+          "path": "docs/evidence/cold-query-counts.json",
+          "sha256": "78ce82dba10613fbee24fc10ed9796209e559e14d0c01b97ee95104dbb6e99bf"
+        },
+        {
+          "path": "docs/evidence/neon-integration-tests.txt",
+          "sha256": "a5bf000e8b7ae750202ad0020cce806e56b962da25e7ff157631560388eec1eb"
+        }
+      ]
+    },
+    "reactiveDeterminations": {
+      "status": "pass",
+      "artifacts": [
+        {
+          "path": "docs/evidence/cargos-post-determinations.json",
+          "sha256": "7be4465a8cff41d80307058c0d5ba9ad09e3ff17e0e0c07a3051a3281e276c2d"
+        },
+        {
+          "path": "docs/evidence/cargos-put-determinations.json",
+          "sha256": "601f74c96af31969c3cf1117d2d338c8a45af0068c848263618cc41f0e8efcfd"
+        },
+        {
+          "path": "docs/evidence/servidor-pessoas-post-determinations.json",
+          "sha256": "ea02b11a905cd82b57b7f9abc1ae210a8f8c325195fd73ecdf2190ccb5e476a2"
+        },
+        {
+          "path": "docs/evidence/servidor-pessoas-put-determinations.json",
+          "sha256": "38efbb08ffc44f2a2e25b528d03314118dadbb7afe769bc75fb347833ab516b0"
+        },
+        {
+          "path": "docs/evidence/vinculos-post-determinations.json",
+          "sha256": "e1dd0e309ee5b0a642ef5b5f36080a8f89d9805e3f2a4a431058bee1ca74f430"
+        },
+        {
+          "path": "docs/evidence/vinculos-put-determinations.json",
+          "sha256": "55243936f83aaf547985783609ee634c7e63b4da47088ec7b9c1f1c39f5f1e5b"
+        },
+        {
+          "path": "docs/evidence/angular-consumer-proof.json",
+          "sha256": "58335fb9c87f9263c5d8924992e2d130e703509fad8d4292df5d6528ac5997a7"
+        },
+        {
+          "path": "docs/evidence/angular-consumer-input-hashes.json",
+          "sha256": "f758776b08529fa361f5414fda34e91485e706e1d441fb0c568733f67c855d5a"
+        },
+        {
+          "path": "docs/evidence/neon-integration-tests.txt",
+          "sha256": "a5bf000e8b7ae750202ad0020cce806e56b962da25e7ff157631560388eec1eb"
+        }
+      ]
+    },
+    "governedDecisions": {
+      "status": "awaiting-input",
+      "reason": "Approved Config snapshot identity and endpoint were requested; no approval or N/A is inferred. Statutory decision consumption is not implemented without that input."
+    }
+  }
+}

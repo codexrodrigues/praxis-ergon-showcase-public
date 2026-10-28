@@ -155,4 +155,61 @@ public class OrgaoController
     return withResourceVersion(
         org.springframework.http.ResponseEntity.ok(), id, service.findById(id));
   }
+
+  @org.springframework.beans.factory.annotation.Autowired private CargoService relatedService;
+
+  @org.springframework.web.bind.annotation.GetMapping("/{id}/quadro-cargos")
+  @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_READ')")
+  @UiSurface(
+      id = "quadro-cargos",
+      kind = org.praxisplatform.uischema.surface.SurfaceKind.READ_PROJECTION,
+      scope = org.praxisplatform.uischema.surface.SurfaceScope.ITEM,
+      title = "Quadro de cargos",
+      description = "Cargos e funções pertencentes ao quadro do órgão.",
+      relatedChildResourceKey = "administracao-pessoal.cargos",
+      relatedChildResourcePath = "/api/ergon/cargos",
+      relatedChildParentField = "empCodigo",
+      relatedChildOperations = {
+        org.praxisplatform.uischema.surface.RelatedResourceChildOperation.FILTER,
+        org.praxisplatform.uischema.surface.RelatedResourceChildOperation.LIST
+      },
+      requiredAuthorities = {"ERGON_READ"})
+  @io.swagger.v3.oas.annotations.Operation(
+      summary = "Consultar quadro de cargos",
+      description =
+          "Cargos e funções pertencentes ao quadro do órgão. A paginação é limitada a 200 registros por resposta.")
+  public org.springframework.http.ResponseEntity<
+          org.praxisplatform.uischema.rest.response.RestApiResponse<
+              org.springframework.data.domain.Page<CargoResponseDTO>>>
+      quadro_cargos(
+          @io.swagger.v3.oas.annotations.Parameter(description = "Identidade do cadastro pai")
+              @org.springframework.web.bind.annotation.PathVariable
+              Integer id,
+          @io.swagger.v3.oas.annotations.Parameter(
+                  description = "Página a consultar, iniciando em zero")
+              @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0")
+              int page,
+          @io.swagger.v3.oas.annotations.Parameter(
+                  description = "Quantidade de registros da página, de 1 a 200")
+              @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20")
+              int size) {
+    service.findById(id);
+    if (page < 0 || size < 1 || size > 200)
+      throw new org.springframework.web.server.ResponseStatusException(
+          org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
+          "Paginação fora do limite permitido.");
+    var filter = new CargoFilterDTO();
+    filter.setEmpCodigo(id);
+    var result =
+        relatedService.filter(
+            filter,
+            org.springframework.data.domain.PageRequest.of(
+                page, size, relatedService.getDefaultSort()),
+            null);
+    return org.springframework.http.ResponseEntity.ok(
+        org.praxisplatform.uischema.rest.response.RestApiResponse.success(
+            result,
+            org.springframework.hateoas.Links.of(
+                org.springframework.hateoas.Link.of("/api/ergon/cargos", "collection"))));
+  }
 }

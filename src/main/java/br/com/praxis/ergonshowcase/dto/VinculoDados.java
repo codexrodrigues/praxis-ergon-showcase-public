@@ -1,6 +1,5 @@
 package br.com.praxis.ergonshowcase.dto;
 
-import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
@@ -8,6 +7,7 @@ import java.util.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.praxisplatform.uischema.FieldControlType;
+import org.praxisplatform.uischema.FieldDataType;
 import org.praxisplatform.uischema.NumericFormat;
 import org.praxisplatform.uischema.annotation.*;
 import org.praxisplatform.uischema.customfields.CustomFields;
@@ -27,9 +27,7 @@ public abstract class VinculoDados {
       preset = UISchemaPreset.ENTERPRISE_CODE,
       group = "Identificação funcional",
       order = 10,
-      icon = "badge",
-      quickViewVisible = true,
-      quickViewOrder = 1)
+      icon = "badge")
   @ResourceReference(
       resourceKey = "administracao-pessoal.vinculos",
       valueField = "id",
@@ -51,7 +49,13 @@ public abstract class VinculoDados {
   @Schema(
       description =
           "Modalidade do vínculo funcional, como efetivo, comissão ou temporário, usada no enquadramento estatutário.")
-  @UISchema(label = "Tipo de vínculo", group = "Enquadramento", order = 30, icon = "work")
+  @UISchema(
+      label = "Tipo de vínculo",
+      group = "Enquadramento",
+      order = 30,
+      icon = "work",
+      quickViewVisible = true,
+      quickViewOrder = 2)
   private String tipovinc;
 
   @NotBlank
@@ -67,14 +71,21 @@ public abstract class VinculoDados {
           "Cargo de provimento ocupado pelo vínculo; deve pertencer ao mesmo órgão do assentamento.")
   @UISchema(
       label = "Cargo",
-      controlType = FieldControlType.ENTITY_LOOKUP,
-      endpoint = ApiPaths.CARGO_OPTIONS,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      endpoint = "/api/ergon/cargos/option-sources/cargo/options/filter",
       valueField = "id",
       displayField = "label",
       tableHidden = true,
       group = "Lotação",
       order = 50,
-      icon = "work")
+      icon = "badge",
+      type = org.praxisplatform.uischema.FieldDataType.TEXT)
+  @ResourceReference(
+      resourceKey = "administracao-pessoal.cargos",
+      valueField = "cargo",
+      surfaceId = "ficha-cargo",
+      previewSurfaceId = "ficha-cargo",
+      detailPresentation = "drawer")
   private Integer cargo;
 
   @Size(max = 20)
@@ -93,7 +104,9 @@ public abstract class VinculoDados {
       numericFormat = NumericFormat.INTEGER,
       group = "Enquadramento",
       order = 70,
-      icon = "schedule")
+      icon = "schedule",
+      quickViewVisible = true,
+      quickViewOrder = 1)
   private Integer jornadaSemanal;
 
   @CustomFields(resourceKey = "administracao-pessoal.vinculos")
@@ -109,6 +122,7 @@ public abstract class VinculoDados {
       group = "Identificação funcional",
       tableHidden = true,
       order = 200)
+  @jakarta.validation.constraints.Size(max = 20)
   private String matriculaExterna;
 
   @Schema(description = "Especialidade ou subcategoria funcional do vínculo.")
@@ -117,14 +131,49 @@ public abstract class VinculoDados {
       group = "Enquadramento e lotação",
       tableHidden = true,
       order = 201)
+  @jakarta.validation.constraints.Size(max = 40)
   private String subcategoria;
 
   @Schema(description = "Código da unidade de lotação do vínculo no mesmo órgão.")
-  @UISchema(label = "Lotação", group = "Enquadramento e lotação", tableHidden = true, order = 202)
+  @UISchema(
+      label = "Lotação",
+      group = "Enquadramento e lotação",
+      tableHidden = true,
+      order = 202,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      icon = "account_tree",
+      endpoint = "/api/ergon/setores/option-sources/setor/options/filter",
+      valueField = "id",
+      displayField = "label")
+  @ResourceReference(
+      resourceKey = "administracao-pessoal.setores",
+      valueField = "setor",
+      surfaceId = "ficha-unidade",
+      previewSurfaceId = "ficha-unidade",
+      detailPresentation = "drawer")
+  @jakarta.validation.constraints.Size(max = 30)
   private String setor;
 
   @Schema(description = "Unidade de efetivo exercício do vínculo no mesmo órgão.")
-  @UISchema(label = "Exercício", group = "Enquadramento e lotação", tableHidden = true, order = 203)
+  @UISchema(
+      label = "Exercício",
+      group = "Enquadramento e lotação",
+      tableHidden = true,
+      order = 203,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      icon = "business",
+      endpoint = "/api/ergon/setores/option-sources/setor/options/filter",
+      valueField = "id",
+      displayField = "label")
+  @ResourceReference(
+      resourceKey = "administracao-pessoal.setores",
+      valueField = "setorExercicio",
+      surfaceId = "ficha-unidade",
+      previewSurfaceId = "ficha-unidade",
+      detailPresentation = "drawer")
+  @jakarta.validation.constraints.Size(max = 30)
   private String setorExercicio;
 
   @Schema(description = "Cargo em comissão ocupado no mesmo órgão do vínculo.")
@@ -132,7 +181,19 @@ public abstract class VinculoDados {
       label = "Cargo em comissão",
       group = "Enquadramento e lotação",
       tableHidden = true,
-      order = 204)
+      order = 204,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      icon = "badge",
+      endpoint = "/api/ergon/cargos/option-sources/cargo/options/filter",
+      valueField = "id",
+      displayField = "label")
+  @ResourceReference(
+      resourceKey = "administracao-pessoal.cargos",
+      valueField = "cargoComissao",
+      surfaceId = "ficha-cargo",
+      previewSurfaceId = "ficha-cargo",
+      detailPresentation = "drawer")
   private Integer cargoComissao;
 
   @Schema(description = "Documento legal que fundamenta o assentamento funcional.")
@@ -140,7 +201,19 @@ public abstract class VinculoDados {
       label = "Documento legal",
       group = "Enquadramento e lotação",
       tableHidden = true,
-      order = 205)
+      order = 205,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      icon = "gavel",
+      endpoint = "/api/ergon/documentos-legais/option-sources/documento/options/filter",
+      valueField = "id",
+      displayField = "label")
+  @ResourceReference(
+      resourceKey = "administracao-pessoal.documentos-legais",
+      valueField = "documentoLegalId",
+      surfaceId = "ficha-documento",
+      previewSurfaceId = "ficha-documento",
+      detailPresentation = "drawer")
   private Long documentoLegalId;
 
   @Schema(description = "Referência à publicação oficial do ato funcional.")
@@ -148,7 +221,19 @@ public abstract class VinculoDados {
       label = "Publicação do ato",
       group = "Enquadramento e lotação",
       tableHidden = true,
-      order = 206)
+      order = 206,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      icon = "article",
+      endpoint = "/api/ergon/documentos-legais/option-sources/documento/options/filter",
+      valueField = "id",
+      displayField = "label")
+  @ResourceReference(
+      resourceKey = "administracao-pessoal.documentos-legais",
+      valueField = "atoPublicacaoId",
+      surfaceId = "ficha-documento",
+      previewSurfaceId = "ficha-documento",
+      detailPresentation = "drawer")
   private Long atoPublicacaoId;
 
   @Schema(description = "Data de nomeação para o provimento do vínculo.")
@@ -159,7 +244,7 @@ public abstract class VinculoDados {
       order = 207,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event")
   private LocalDate dtnom;
 
   @Schema(description = "Data de posse; deve ocorrer entre nomeação e exercício.")
@@ -170,7 +255,7 @@ public abstract class VinculoDados {
       order = 208,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event")
   private LocalDate dtposse;
 
   @Schema(description = "Data de admissão informada nas obrigações trabalhistas.")
@@ -181,7 +266,7 @@ public abstract class VinculoDados {
       order = 209,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event")
   private LocalDate dtadmRais;
 
   @Schema(description = "Classificação obtida no concurso que fundamenta a admissão.")
@@ -200,7 +285,7 @@ public abstract class VinculoDados {
       order = 211,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event")
   private LocalDate dtconc;
 
   @Schema(description = "Número do vínculo anterior na cadeia de continuidade funcional.")
@@ -225,6 +310,7 @@ public abstract class VinculoDados {
       group = "Ingresso, concurso e estágio probatório",
       tableHidden = true,
       order = 214)
+  @jakarta.validation.constraints.Size(max = 2000)
   private String motivo;
 
   @Schema(description = "Data inicial do contrato temporário.")
@@ -235,7 +321,7 @@ public abstract class VinculoDados {
       order = 215,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event")
   private LocalDate dtinicontr;
 
   @Schema(description = "Data final originalmente contratada.")
@@ -246,7 +332,7 @@ public abstract class VinculoDados {
       order = 216,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event")
   private LocalDate dtfimcontr;
 
   @Schema(
@@ -258,7 +344,7 @@ public abstract class VinculoDados {
       order = 217,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event")
   private LocalDate dtprorrogcontr;
 
   @Schema(description = "Regime previdenciário ao qual o vínculo está filiado.")
@@ -274,6 +360,7 @@ public abstract class VinculoDados {
       reason = "Regime previdenciário ao qual o vínculo está filiado.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 30)
   private String regimeprev;
 
   @Schema(description = "Plano previdenciário de enquadramento do vínculo.")
@@ -289,6 +376,7 @@ public abstract class VinculoDados {
       reason = "Plano previdenciário de enquadramento do vínculo.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 40)
   private String planoprev;
 
   @Schema(description = "Indica incidência do desconto de imposto de renda na folha do vínculo.")
@@ -356,6 +444,7 @@ public abstract class VinculoDados {
       reason = "Agência bancária para pagamento deste vínculo.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 10)
   private String agencia;
 
   @Schema(description = "Conta bancária para pagamento deste vínculo.")
@@ -367,6 +456,7 @@ public abstract class VinculoDados {
       reason = "Conta bancária para pagamento deste vínculo.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 25)
   private String conta;
 
   @Schema(description = "Modalidade de pagamento deste vínculo.")
@@ -382,6 +472,7 @@ public abstract class VinculoDados {
       reason = "Modalidade de pagamento deste vínculo.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 10)
   private String tipopag;
 
   @Schema(description = "Data de opção pelo regime do FGTS.")
@@ -392,7 +483,7 @@ public abstract class VinculoDados {
       order = 227,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -410,7 +501,7 @@ public abstract class VinculoDados {
       order = 228,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
-      icon = "calendar_today")
+      icon = "event")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -448,6 +539,7 @@ public abstract class VinculoDados {
       reason = "Agência da conta vinculada do FGTS.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 10)
   private String agenciafgts;
 
   @Schema(description = "Número da conta vinculada do FGTS.")
@@ -463,6 +555,7 @@ public abstract class VinculoDados {
       reason = "Número da conta vinculada do FGTS.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 25)
   private String contafgts;
 
   @Schema(description = "Valor monetário de depósito do FGTS registrado no assentamento.")
@@ -470,7 +563,10 @@ public abstract class VinculoDados {
       label = "Depósito FGTS",
       group = "Previdência, folha e FGTS",
       tableHidden = true,
-      order = 232)
+      order = 232,
+      type = org.praxisplatform.uischema.FieldDataType.NUMBER,
+      controlType = org.praxisplatform.uischema.FieldControlType.CURRENCY_INPUT,
+      icon = "payments")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -479,4 +575,32 @@ public abstract class VinculoDados {
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   private java.math.BigDecimal valorDepFgts;
+
+  @jakarta.validation.constraints.Null(
+      message = "Prévia derivada não pode ser informada no submit.")
+  @Schema(
+      description =
+          "Denominação consultada para o cargo escolhido no formulário; não é gravada no assentamento.")
+  @UISchema(
+      label = "Cargo selecionado",
+      group = "Enquadramento e lotação",
+      readOnly = true,
+      tableHidden = true,
+      icon = "info")
+  private String cargoNomePrevisto;
+
+  @jakarta.validation.constraints.Null(
+      message = "Prévia derivada não pode ser informada no submit.")
+  @Schema(
+      description =
+          "Saldo informativo do cargo selecionado, sem reserva de vaga; o submit verifica novamente a ocupação sob bloqueio.")
+  @UISchema(
+      label = "Saldo atual de vagas",
+      group = "Enquadramento e lotação",
+      readOnly = true,
+      tableHidden = true,
+      icon = "info",
+      type = FieldDataType.NUMBER,
+      controlType = FieldControlType.NUMERIC_TEXT_BOX)
+  private Long saldoVagasPrevisto;
 }

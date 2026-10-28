@@ -1,0 +1,22 @@
+[
+  {
+    "path": "D:\\Developer\\praxis-plataform\\praxis-ui-angular\\tsconfig.json",
+    "sha256": "670706376612c9416d52b2ed79643cdba0a13fc8bbbd28aaa6ef496b8963a89c"
+  },
+  {
+    "path": "D:\\Developer\\praxis-plataform\\praxis-ui-angular\\projects\\praxis-core\\src\\public-api-schema.ts",
+    "sha256": "27f138636f44928fcd1585fd6420f91d2be588c3686d21be6636346dd112f392"
+  },
+  {
+    "path": "D:\\Developer\\praxis-plataform\\praxis-ui-angular\\projects\\praxis-core\\src\\lib\\services\\schema-normalization-kernel.ts",
+    "sha256": "8c914c7a0c6f615e6fb3e01eea004a593a6cd0d5c3a68feaa56d0f44c9f8e022"
+  },
+  {
+    "path": "D:\\Developer\\praxis-plataform\\praxis-ui-angular\\projects\\praxis-core\\src\\lib\\helpers\\scalar-array-value.ts",
+    "sha256": "1b2e37ed647ba0c629f72f5c0865f97f9edaec3c75d199b566e98311a256510f"
+  },
+  {
+    "path": "D:\\Developer\\praxis-plataform\\praxis-ui-angular\\projects\\praxis-dynamic-form\\src\\lib\\services\\reactive-determination-runtime.service.ts",
+    "sha256": "2c90869c4ec81fbb3923902e55568531e08008ee807d789506e6ac7e598dcd9b"
+  }
+]

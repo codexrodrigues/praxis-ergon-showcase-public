@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.util.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.praxisplatform.uischema.FieldControlType;
 import org.praxisplatform.uischema.annotation.*;
 import org.praxisplatform.uischema.customfields.CustomFields;
 import org.praxisplatform.uischema.extension.annotation.UISchema;
@@ -47,9 +46,11 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
       description = "Intervalo inclusivo de nascimento usado para localizar pessoas por período.")
   @UISchema(
       label = "Período de nascimento",
-      controlType = FieldControlType.DATE_RANGE,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_RANGE,
       group = "Pesquisa",
-      order = 20)
+      order = 20,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "event")
   @Filterable(operation = FilterOperation.BETWEEN, relation = "dtnasc")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -190,7 +191,9 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
       label = "Data civil exata de nascimento",
       group = "Pesquisa avançada",
       order = 210,
-      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER)
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      icon = "event")
   @Filterable(operation = FilterOperation.ON_DATE, relation = "dtnasc")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,

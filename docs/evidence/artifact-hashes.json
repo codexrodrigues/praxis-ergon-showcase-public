@@ -1,10 +1,12 @@
-[
-  {
-    "Path": "C:\\Users\\rodrigo.moreira\\.m2\\repository\\io\\github\\codexrodrigues\\praxis-metadata-starter\\8.0.0-rc.179\\praxis-metadata-starter-8.0.0-rc.179.jar",
-    "Hash": "92A01C2973214C1685DE49A132AB37525D8124B00843C83D570B2BB586B4E173"
+{
+  "hostJar": {
+    "path": "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\target\\praxis-ergon-showcase-0.1.0-SNAPSHOT.jar",
+    "sha256": "d35c14b88cd47e7212f1f53c40e2e0b8fb6176d3feff929a80d226cacda7e8ac"
   },
-  {
-    "Path": "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\target\\praxis-ergon-showcase-0.1.0-SNAPSHOT.jar",
-    "Hash": "75ED4C7E06CB894F1EF0FD055DAEFD402F36A6F4A18EF8F155EA11A6ECE1333E"
-  }
-]
+  "starter": {
+    "coordinate": "io.github.codexrodrigues:praxis-metadata-starter:8.0.0-rc.179",
+    "origin": "local Maven repository, not a public artifact adoption proof",
+    "sha256": "92a01c2973214c1685de49a132ab37525d8124b00843c83d570b2bb586b4e173"
+  },
+  "hostSourceSha256": "933d9c8ccb29e18e1be39694fb495b99636da9bbc9efd05ba937e6b5e88f3408"
+}

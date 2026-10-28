@@ -92,11 +92,12 @@ public class ServidorPessoaMapper
                     entity.getDtnasc(), java.time.LocalDate.now(java.time.ZoneOffset.UTC))
                 .getYears());
     dto.setPossuiDeficienciaPcD(
-        Boolean.TRUE.equals(entity.getDeffisica())
-            || Boolean.TRUE.equals(entity.getDefvisual())
-            || Boolean.TRUE.equals(entity.getDefauditiva())
-            || Boolean.TRUE.equals(entity.getDefmental())
-            || Boolean.TRUE.equals(entity.getDefintelectual()));
+        br.com.praxis.ergonshowcase.service.ErgonDerivedFacts.possuiDeficiencia(
+            entity.getDeffisica(),
+            entity.getDefvisual(),
+            entity.getDefauditiva(),
+            entity.getDefmental(),
+            entity.getDefintelectual()));
     return dto;
   }
 

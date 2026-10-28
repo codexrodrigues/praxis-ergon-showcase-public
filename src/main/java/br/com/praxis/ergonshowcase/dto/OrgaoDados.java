@@ -25,9 +25,7 @@ public abstract class OrgaoDados {
       preset = UISchemaPreset.ENTERPRISE_NAME,
       group = "Identificação",
       order = 10,
-      icon = "apartment",
-      quickViewVisible = true,
-      quickViewOrder = 1)
+      icon = "apartment")
   @ResourceReference(
       resourceKey = "administracao-pessoal.empresas",
       valueField = "id",
@@ -40,13 +38,7 @@ public abstract class OrgaoDados {
   @Schema(
       description =
           "Sigla institucional que permite distinguir o ente em consultas e seleções de lotação.")
-  @UISchema(
-      label = "Sigla",
-      group = "Identificação",
-      order = 20,
-      icon = "short_text",
-      quickViewVisible = true,
-      quickViewOrder = 2)
+  @UISchema(label = "Sigla", group = "Identificação", order = 20, icon = "short_text")
   private String fantasia;
 
   @NotBlank
@@ -68,7 +60,9 @@ public abstract class OrgaoDados {
       controlType = FieldControlType.CPF_CNPJ_INPUT,
       group = "Identificação",
       order = 40,
-      icon = "badge")
+      icon = "badge",
+      quickViewVisible = true,
+      quickViewOrder = 3)
   private String cnpj;
 
   @NotBlank
@@ -80,7 +74,8 @@ public abstract class OrgaoDados {
       order = 50,
       icon = "map",
       quickViewVisible = true,
-      quickViewOrder = 4)
+      quickViewOrder = 2)
+  @jakarta.validation.constraints.Size(max = 2)
   private String ufSigla;
 
   @NotBlank
@@ -94,7 +89,7 @@ public abstract class OrgaoDados {
       order = 60,
       icon = "location_city",
       quickViewVisible = true,
-      quickViewOrder = 3)
+      quickViewOrder = 1)
   private String municipio;
 
   @Size(max = 10)
@@ -111,7 +106,13 @@ public abstract class OrgaoDados {
 
   @Size(max = 150)
   @Schema(description = "Logradouro, número e complemento da sede administrativa do órgão.")
-  @UISchema(label = "Endereço", group = "Sede e contato", order = 80, icon = "place")
+  @UISchema(
+      label = "Endereço",
+      group = "Sede e contato",
+      order = 80,
+      icon = "place",
+      quickViewVisible = true,
+      quickViewOrder = 4)
   private String logradouro;
 
   @Size(max = 20)

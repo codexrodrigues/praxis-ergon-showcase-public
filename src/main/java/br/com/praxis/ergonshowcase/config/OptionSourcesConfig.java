@@ -25,6 +25,17 @@ public class OptionSourcesConfig {
         .add(
             Vinculo.class,
             source("vinculo", ApiPaths.VINCULOS, "id", "matric", "administracao-pessoal.vinculos"))
+        .add(
+            Setor.class,
+            source("setor", "/api/ergon/setores", "setor", "nome", "administracao-pessoal.setores"))
+        .add(
+            DocumentoLegal.class,
+            source(
+                "documento",
+                "/api/ergon/documentos-legais",
+                "id",
+                "numeroDocumento",
+                "administracao-pessoal.documentos-legais"))
         .build();
   }
 

@@ -1,0 +1,19 @@
+{
+  "project": "holy-mouse-40140108",
+  "branch": "br-super-sound-b7urizmd",
+  "database": "neondb",
+  "sql": "SELECT (SELECT count(*) FROM information_schema.columns WHERE table_schema='public') AS columns_public, (SELECT count(*) FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE') AS tables_public, (SELECT count(*) FROM empresas WHERE empresa>=9000) AS orgaos_fixture, (SELECT count(*) FROM cargos WHERE cargo>=9000) AS cargos_fixture, (SELECT count(*) FROM funcionarios WHERE numero>=9000) AS pessoas_fixture, (SELECT count(*) FROM vinculos WHERE numfunc>=9000) AS vinculos_fixture, (SELECT count(*) FROM afastamentos WHERE numfunc>=9000) AS afastamentos_fixture, (SELECT ativa FROM empresas WHERE empresa=1) AS orgao_base_ativo, (SELECT situacao FROM vinculos WHERE numfunc=1001 AND numero=1) AS vinculo_base_situacao",
+  "result": [
+    {
+      "columns_public": "392",
+      "tables_public": "16",
+      "orgaos_fixture": "0",
+      "cargos_fixture": "0",
+      "pessoas_fixture": "0",
+      "vinculos_fixture": "0",
+      "afastamentos_fixture": "0",
+      "orgao_base_ativo": true,
+      "vinculo_base_situacao": "ATIVO"
+    }
+  ]
+}

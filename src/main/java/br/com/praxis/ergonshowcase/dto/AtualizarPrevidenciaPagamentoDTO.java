@@ -18,6 +18,7 @@ public class AtualizarPrevidenciaPagamentoDTO {
       reason = "Regime previdenciário ao qual o vínculo está filiado.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 30)
   private String regimeprev;
 
   @Schema(description = "Plano previdenciário de enquadramento do vínculo.")
@@ -29,6 +30,7 @@ public class AtualizarPrevidenciaPagamentoDTO {
       reason = "Plano previdenciário de enquadramento do vínculo.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 40)
   private String planoprev;
 
   @Schema(description = "Indica incidência do desconto de imposto de renda na folha do vínculo.")
@@ -73,6 +75,7 @@ public class AtualizarPrevidenciaPagamentoDTO {
       reason = "Agência bancária para pagamento deste vínculo.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 10)
   private String agencia;
 
   @Schema(description = "Conta bancária para pagamento deste vínculo.")
@@ -84,6 +87,7 @@ public class AtualizarPrevidenciaPagamentoDTO {
       reason = "Conta bancária para pagamento deste vínculo.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 25)
   private String conta;
 
   @Schema(description = "Modalidade de pagamento deste vínculo.")
@@ -95,5 +99,6 @@ public class AtualizarPrevidenciaPagamentoDTO {
       reason = "Modalidade de pagamento deste vínculo.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @jakarta.validation.constraints.Size(max = 10)
   private String tipopag;
 }
