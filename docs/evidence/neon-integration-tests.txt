@@ -1,6 +1,6 @@
-br.com.praxis.ergonshowcase.BulkNeonIntegrationTest: tests=4 failures=0 errors=0 skipped=0 seconds=747.485
-br.com.praxis.ergonshowcase.NeonIntegrationTest: tests=52 failures=0 errors=0 skipped=0 seconds=440.273
-br.com.praxis.ergonshowcase.PillarsNeonIntegrationTest: tests=6 failures=0 errors=0 skipped=0 seconds=24.239
-br.com.praxis.ergonshowcase.PraxisMetadataCompletenessTest: tests=4 failures=0 errors=0 skipped=0 seconds=0.847
-TOTAL: 66 tests, 0 failures, 0 errors, 0 skipped
-Full Maven lifecycle: BUILD SUCCESS
+br.com.praxis.ergonshowcase.BulkNeonIntegrationTest: 6 passed
+br.com.praxis.ergonshowcase.NeonIntegrationTest: 64 passed
+br.com.praxis.ergonshowcase.PillarsNeonIntegrationTest: 6 passed
+br.com.praxis.ergonshowcase.PraxisMetadataCompletenessTest: 4 passed
+TOTAL: 80 tests, 0 failures, 0 errors, 0 skipped
+Single full Maven test lifecycle: BUILD SUCCESS

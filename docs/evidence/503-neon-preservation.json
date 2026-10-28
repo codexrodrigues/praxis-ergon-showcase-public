@@ -1,0 +1,94 @@
+{
+  "recordedAt": "2026-10-28T19:42:56.538198+00:00",
+  "originalBranch": "br-super-sound-b7urizmd",
+  "proofBranch": "br-spring-butterfly-b79ht1rc",
+  "tables": 16,
+  "columns": 392,
+  "domainSchemaEqual": true,
+  "domainDataIdentical": true,
+  "comparison": {
+    "columns": {
+      "count": 392,
+      "sha256": "7fb137aaacebc0d4bd8bfa86402bc7745ac6ee5a303e25e458f058989365e5a2"
+    },
+    "constraints": {
+      "count": 104,
+      "sha256": "dc129e6c72969e9689fcdcb149503908a39a38005200751518af9a43f4bc4b39"
+    },
+    "indexes": {
+      "count": 50,
+      "sha256": "c5d972ccfa4c5c027fca3a46e42089d1dfa52a141a39cf35ec3ac1a69c207834"
+    },
+    "comments": {
+      "count": 408,
+      "sha256": "9aa481f23ee3564174db23cc30cb614f277cd9c3bb612697159954dcfd441f85"
+    },
+    "domainData": {
+      "afastamentos": {
+        "rows": 3,
+        "md5": "122902a28073d57c6469ec53d5a9301d"
+      },
+      "cargos": {
+        "rows": 8,
+        "md5": "ef47e45ab29b7e1de0366ab515973c02"
+      },
+      "codigos_frequencia": {
+        "rows": 12,
+        "md5": "5f7cd03311435b6feaa7153d17fb614a"
+      },
+      "custom_field_definitions": {
+        "rows": 17,
+        "md5": "49d5452aecb0969735ba87716acad743"
+      },
+      "dependentes": {
+        "rows": 4,
+        "md5": "5bda1d9f3120dd92159fb2eaeef5cd13"
+      },
+      "documentos_legais": {
+        "rows": 7,
+        "md5": "40d877002a4f54210976a66ee7fd594c"
+      },
+      "empresas": {
+        "rows": 3,
+        "md5": "b3dd15bf80543a8213ba54f601580792"
+      },
+      "frequencias": {
+        "rows": 5,
+        "md5": "916d9f282f16399b7431cfb903cc3202"
+      },
+      "funcionarios": {
+        "rows": 4,
+        "md5": "07bd36a0d4b29c4083580e0639bfa513"
+      },
+      "itemtabelas": {
+        "rows": 103,
+        "md5": "2ac0dc408fd5dc2cc39fc3cdcf1da69e"
+      },
+      "regras_frequencia_estatutaria": {
+        "rows": 9,
+        "md5": "16ec5e4fa76a5c0e78bfd2dfef66d6b8"
+      },
+      "setores": {
+        "rows": 9,
+        "md5": "ea009493a1a3046286178300c5bc2e00"
+      },
+      "tabelas": {
+        "rows": 25,
+        "md5": "e6fc9c8acdf37f5b34b5d4c3e3fbebcf"
+      },
+      "tipos_dependente": {
+        "rows": 5,
+        "md5": "7e3cc9976a21e688ce1037fae611d382"
+      },
+      "tipos_frequencia": {
+        "rows": 6,
+        "md5": "6568e148146d20654f0fe42f4ae19d46"
+      },
+      "vinculos": {
+        "rows": 5,
+        "md5": "9a3b6cdf6bd0e1f493cef7077735884d"
+      }
+    }
+  },
+  "scope": "All public domain tables: columns, constraints, indexes, comments and row hashes. Technical bulk state intentionally changes during proof. No DDL applied."
+}

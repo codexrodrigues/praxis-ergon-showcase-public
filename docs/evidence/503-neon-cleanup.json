@@ -1,0 +1,16 @@
+{
+  "recordedAt": "2026-10-28T19:43:53.350189+00:00",
+  "project": "holy-mouse-40140108",
+  "deletedBranch": "br-spring-butterfly-b79ht1rc",
+  "deleteToolSucceeded": true,
+  "verifiedAbsentFromActiveBranches": true,
+  "originalBranchPreserved": "br-super-sound-b7urizmd",
+  "activeBranchIds": [
+    "br-super-sound-b7urizmd",
+    "br-bitter-bonus-b7i0vfko"
+  ],
+  "authorization": "User explicitly instructed permanent deletion of agent-created disposable proof branches after evidence is recorded; originals and third-party branches excluded",
+  "domainEvidenceSha256": "372502e5ddabaa6c026d74925fd18a6847b9a5ee439c32b34365d5afc77913e9",
+  "httpEvidenceSha256": "9b4a59589c7c97452dc4653245b3d1735303f45d7a2d7bea44502032fdfa2fa5",
+  "auxiliaryServerStopped": true
+}

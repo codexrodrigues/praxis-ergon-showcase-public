@@ -328,8 +328,8 @@
   "rejectionVisible": true,
   "fixtureRemoved": true,
   "bulkHttpCycle": {
-    "proposalId": "d1186030-dc5f-4b81-a684-5477b620c5f2",
-    "executionId": "33f2f300-559c-426f-91bc-86ba77b0489a",
+    "proposalId": "74abd9a0-7ffa-49f5-a8ef-5f5f933a2000",
+    "executionId": "fca4e845-21c7-4ac3-9dda-ed7977ca123f",
     "confirmed": true,
     "retryStable": true,
     "reloaded": true,
@@ -338,7 +338,7 @@
     "perItemClear": true,
     "transport": "Angular HttpClient over real HTTP",
     "partialResult": {
-      "executionId": "316eac96-adc2-4226-8e96-78366b8c0d28",
+      "executionId": "930761c7-b87b-42e2-b0fc-2b81d15190ca",
       "statuses": [
         "CONFIRMED",
         "CONFLICT"

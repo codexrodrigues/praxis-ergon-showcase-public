@@ -1,0 +1,37 @@
+{
+  "recordedAt": "2026-10-28T18:43:38.162009+00:00",
+  "sourceRevision": "039c9838c92d3b6bffe9383f4d4ab90b27473048",
+  "sourceTree": "0daf95fb562ab8e62813b4b5b2c5d89a700acfb3",
+  "sourceClean": true,
+  "candidate": "8.0.0-bulk.308-consolidation.2-SNAPSHOT",
+  "jarSha256": "df4264a2527b570e9dce9ab83f7381fcefa708e8f7be81515f86186e9bd40a5d",
+  "packagingTransform": "Only root POM version rc.183 -> private candidate, restored after install",
+  "sourcePomSha256": "68f5f6d676cf107f880f18b4ed102a6412ad2fb35c5683becb124d761323ff19",
+  "published": false,
+  "tests": [
+    {
+      "name": "GovernedOpenApiPublicationUnavailableExceptionTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "OpenApiPublicationPreparationTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "OpenApiPublicationInstallationTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "testLogSha256": "6c9912a1d8215a7941ec3a6c00c29d0415cb3d50513e6b24ba9b19875f61b18e",
+  "installLogSha256": "4db2f6e2e5c99ea7df2f13f2acdf2e0c32840480bc12131a48e0cdb4e48f1f48",
+  "scope": "Private code-only diagnostics; no availability fix claimed, no timeout/ACL/schema changes"
+}

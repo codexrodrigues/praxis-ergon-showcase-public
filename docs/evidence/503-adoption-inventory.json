@@ -1,0 +1,86 @@
+{
+  "canonicalInventory": "scripts/workspace/resource-audit-inventories/praxis-ergon-showcase.json",
+  "inventorySha256": "63a800a61c6e78b2a2a63ec2f7a8a3d93e8cfec57a44004b2ffdd02d99d0abbb",
+  "decisionDocument": "docs/DUPLICATE-DRAFT-ADOCAO.md",
+  "decisionSha256": "62c6b7500d9eb1c2cee84f594b076f0d6da4355cd0d9ada30e4172684f708c5a",
+  "resources": [
+    {
+      "resourceKey": "administracao-pessoal.cargos",
+      "controller": "br.com.praxis.ergonshowcase.controller.CargoController",
+      "duplicateDraft": {
+        "status": "pendente",
+        "reason": "AplicÃ¡vel: preparo por allowlist de classificaÃ§Ã£o exige contrato canÃ´nico integrado e provas de nÃ£o persistÃªncia; adoÃ§Ã£o pendente.",
+        "owner": "Codex / frente Ergon Showcase, avaliaÃ§Ã£o solicitada pelo mantenedor",
+        "decision": {
+          "path": "ergon-duplicate-draft-review-20261028.md",
+          "sha256": "62c6b7500d9eb1c2cee84f594b076f0d6da4355cd0d9ada30e4172684f708c5a"
+        }
+      }
+    },
+    {
+      "resourceKey": "administracao-pessoal.documentos-legais",
+      "controller": "br.com.praxis.ergonshowcase.controller.DocumentoLegalController",
+      "duplicateDraft": {
+        "status": "nÃ£o aplicÃ¡vel",
+        "reason": "Consulta de atos existentes sem create; referÃªncia jurÃ­dica nÃ£o constitui modelo de novo ato.",
+        "owner": "Codex / frente Ergon Showcase, avaliaÃ§Ã£o solicitada pelo mantenedor",
+        "decision": {
+          "path": "ergon-duplicate-draft-review-20261028.md",
+          "sha256": "62c6b7500d9eb1c2cee84f594b076f0d6da4355cd0d9ada30e4172684f708c5a"
+        }
+      }
+    },
+    {
+      "resourceKey": "administracao-pessoal.empresas",
+      "controller": "br.com.praxis.ergonshowcase.controller.OrgaoController",
+      "duplicateDraft": {
+        "status": "nÃ£o aplicÃ¡vel",
+        "reason": "InstituiÃ§Ã£o com identidade e CNPJ prÃ³prios; fluxo adotado Ã© criaÃ§Ã£o explÃ­cita, sem modelo interinstitucional aprovado.",
+        "owner": "Codex / frente Ergon Showcase, avaliaÃ§Ã£o solicitada pelo mantenedor",
+        "decision": {
+          "path": "ergon-duplicate-draft-review-20261028.md",
+          "sha256": "62c6b7500d9eb1c2cee84f594b076f0d6da4355cd0d9ada30e4172684f708c5a"
+        }
+      }
+    },
+    {
+      "resourceKey": "administracao-pessoal.funcionarios",
+      "controller": "br.com.praxis.ergonshowcase.controller.ServidorPessoaController",
+      "duplicateDraft": {
+        "status": "nÃ£o aplicÃ¡vel",
+        "reason": "Cadastro de pessoa fÃ­sica Ãºnica; copiar identificaÃ§Ã£o, dados sensÃ­veis e bancÃ¡rios nÃ£o Ã© jornada adotada. Novo vÃ­nculo referencia a pessoa existente.",
+        "owner": "Codex / frente Ergon Showcase, avaliaÃ§Ã£o solicitada pelo mantenedor",
+        "decision": {
+          "path": "ergon-duplicate-draft-review-20261028.md",
+          "sha256": "62c6b7500d9eb1c2cee84f594b076f0d6da4355cd0d9ada30e4172684f708c5a"
+        }
+      }
+    },
+    {
+      "resourceKey": "administracao-pessoal.setores",
+      "controller": "br.com.praxis.ergonshowcase.controller.SetorController",
+      "duplicateDraft": {
+        "status": "nÃ£o aplicÃ¡vel",
+        "reason": "Recurso exclusivamente de consulta, sem create; manutenÃ§Ã£o de organograma estÃ¡ fora desta fronteira.",
+        "owner": "Codex / frente Ergon Showcase, avaliaÃ§Ã£o solicitada pelo mantenedor",
+        "decision": {
+          "path": "ergon-duplicate-draft-review-20261028.md",
+          "sha256": "62c6b7500d9eb1c2cee84f594b076f0d6da4355cd0d9ada30e4172684f708c5a"
+        }
+      }
+    },
+    {
+      "resourceKey": "administracao-pessoal.vinculos",
+      "controller": "br.com.praxis.ergonshowcase.controller.VinculoController",
+      "duplicateDraft": {
+        "status": "nÃ£o aplicÃ¡vel",
+        "reason": "Novo provimento exige ato, vaga, Ã³rgÃ£o, datas e validaÃ§Ã£o de acumulaÃ§Ã£o; cÃ³pia genÃ©rica de assentamento histÃ³rico nÃ£o Ã© a jornada adotada.",
+        "owner": "Codex / frente Ergon Showcase, avaliaÃ§Ã£o solicitada pelo mantenedor",
+        "decision": {
+          "path": "ergon-duplicate-draft-review-20261028.md",
+          "sha256": "62c6b7500d9eb1c2cee84f594b076f0d6da4355cd0d9ada30e4172684f708c5a"
+        }
+      }
+    }
+  ]
+}

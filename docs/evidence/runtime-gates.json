@@ -1,45 +1,56 @@
 {
-  "sourceSha256": "064acba2f51428189df7bb047edcdc986caf92cc6c4c339e4dcadb94b536ee22",
-  "validatedAt": "2026-10-28T18:08:57.584866+00:00",
-  "baselineCommit": "5fd84831a2b3fc237e77e9c14482afe45b730a3a",
+  "sourceSha256": "adfbb84cd8ab0816ae5575b3ab32d970f8854711f32b345054fe91089b494946",
+  "validatedAt": "2026-10-28T19:43:53.350189+00:00",
+  "baselineCommit": "ac6dd29a75f5c764c9ecd477d7af902c00a0eddf",
   "gates": {
     "schema": {
       "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/consolidation-full-test-results.json",
-          "sha256": "aaffc7dd75a4c924e49884d4d91514cce9ce11f93c30a529e4d674c64a08314b"
+          "path": "docs/evidence/503-final-test-results.json",
+          "sha256": "c46dfe1087b5026206d5135f2e7390dc495c6f08a1dc7aa7c3a7d0cb01f35a06"
         },
         {
-          "path": "docs/evidence/consolidation-sdk-provenance.json",
-          "sha256": "12b6a92a7205f3ebcc88e97ebb91c4a4891d8a6a0e8892746aff03f408c006e6"
+          "path": "docs/evidence/503-sdk-provenance.json",
+          "sha256": "e07089bac454079a5d7d976dfad816c8df54502f9e1b15ba6fb0f3d8a500beac"
+        },
+        {
+          "path": "docs/evidence/cargos-response.json",
+          "sha256": "12edab102d3a2b9d8a8ce50be76a24f37672f0ec78b7ce8bcffd4ea3e2f9b40a"
+        },
+        {
+          "path": "docs/evidence/servidor-pessoas-response.json",
+          "sha256": "ffeb2928c96d8cb555eca92134db2c0180c196605516a41f0ae5065c1bc6d3ec"
+        },
+        {
+          "path": "docs/evidence/vinculos-response.json",
+          "sha256": "b12999d2b109d60d14c7666f346e99af9c6548c71a865785d9de6df7a32ba121"
         }
       ]
     },
     "http": {
-      "status": "pending",
+      "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/consolidation-full-test-results.json",
-          "sha256": "aaffc7dd75a4c924e49884d4d91514cce9ce11f93c30a529e4d674c64a08314b"
+          "path": "docs/evidence/503-final-test-results.json",
+          "sha256": "c46dfe1087b5026206d5135f2e7390dc495c6f08a1dc7aa7c3a7d0cb01f35a06"
         },
         {
-          "path": "docs/evidence/consolidation-sdk-provenance.json",
-          "sha256": "12b6a92a7205f3ebcc88e97ebb91c4a4891d8a6a0e8892746aff03f408c006e6"
+          "path": "docs/evidence/503-sdk-provenance.json",
+          "sha256": "e07089bac454079a5d7d976dfad816c8df54502f9e1b15ba6fb0f3d8a500beac"
         }
-      ],
-      "reason": "Full serial campaign: 74 tests, one failure in cargosAndPessoasExecuteBothUpdateModesAndClear; person confirmation returned 503 GOVERNED_OPENAPI_PUBLICATION_UNAVAILABLE. No integral green run."
+      ]
     },
     "availability": {
       "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/consolidation-full-test-results.json",
-          "sha256": "aaffc7dd75a4c924e49884d4d91514cce9ce11f93c30a529e4d674c64a08314b"
+          "path": "docs/evidence/503-final-test-results.json",
+          "sha256": "c46dfe1087b5026206d5135f2e7390dc495c6f08a1dc7aa7c3a7d0cb01f35a06"
         },
         {
-          "path": "docs/evidence/consolidation-sdk-provenance.json",
-          "sha256": "12b6a92a7205f3ebcc88e97ebb91c4a4891d8a6a0e8892746aff03f408c006e6"
+          "path": "docs/evidence/503-sdk-provenance.json",
+          "sha256": "e07089bac454079a5d7d976dfad816c8df54502f9e1b15ba6fb0f3d8a500beac"
         }
       ],
       "scope": "Authorizations, versions, workflow states and declared item/collection operations exercised by the suite"
@@ -48,16 +59,16 @@
       "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/consolidation-full-test-results.json",
-          "sha256": "aaffc7dd75a4c924e49884d4d91514cce9ce11f93c30a529e4d674c64a08314b"
+          "path": "docs/evidence/503-final-test-results.json",
+          "sha256": "c46dfe1087b5026206d5135f2e7390dc495c6f08a1dc7aa7c3a7d0cb01f35a06"
         },
         {
-          "path": "docs/evidence/consolidation-sdk-provenance.json",
-          "sha256": "12b6a92a7205f3ebcc88e97ebb91c4a4891d8a6a0e8892746aff03f408c006e6"
+          "path": "docs/evidence/503-sdk-provenance.json",
+          "sha256": "e07089bac454079a5d7d976dfad816c8df54502f9e1b15ba6fb0f3d8a500beac"
         },
         {
-          "path": "docs/evidence/consolidation-neon-schema-comparison.json",
-          "sha256": "24018cab4935d5347a6407d822a4131b2ab8e34b288860834fe7def202eb8af2"
+          "path": "docs/evidence/503-neon-preservation.json",
+          "sha256": "372502e5ddabaa6c026d74925fd18a6847b9a5ee439c32b34365d5afc77913e9"
         }
       ]
     },
@@ -65,12 +76,12 @@
       "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/consolidation-full-test-results.json",
-          "sha256": "aaffc7dd75a4c924e49884d4d91514cce9ce11f93c30a529e4d674c64a08314b"
+          "path": "docs/evidence/503-final-test-results.json",
+          "sha256": "c46dfe1087b5026206d5135f2e7390dc495c6f08a1dc7aa7c3a7d0cb01f35a06"
         },
         {
-          "path": "docs/evidence/consolidation-sdk-provenance.json",
-          "sha256": "12b6a92a7205f3ebcc88e97ebb91c4a4891d8a6a0e8892746aff03f408c006e6"
+          "path": "docs/evidence/503-sdk-provenance.json",
+          "sha256": "e07089bac454079a5d7d976dfad816c8df54502f9e1b15ba6fb0f3d8a500beac"
         }
       ],
       "scope": "Only mapped pilot registration and listed administrative operations; full statutory/legacy parity is not certified"
@@ -79,16 +90,20 @@
       "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/consolidation-full-test-results.json",
-          "sha256": "aaffc7dd75a4c924e49884d4d91514cce9ce11f93c30a529e4d674c64a08314b"
+          "path": "docs/evidence/503-final-test-results.json",
+          "sha256": "c46dfe1087b5026206d5135f2e7390dc495c6f08a1dc7aa7c3a7d0cb01f35a06"
         },
         {
-          "path": "docs/evidence/consolidation-sdk-provenance.json",
-          "sha256": "12b6a92a7205f3ebcc88e97ebb91c4a4891d8a6a0e8892746aff03f408c006e6"
+          "path": "docs/evidence/503-sdk-provenance.json",
+          "sha256": "e07089bac454079a5d7d976dfad816c8df54502f9e1b15ba6fb0f3d8a500beac"
+        },
+        {
+          "path": "docs/evidence/503-angular-http-results.json",
+          "sha256": "9b4a59589c7c97452dc4653245b3d1735303f45d7a2d7bea44502032fdfa2fa5"
         },
         {
           "path": "docs/evidence/angular-consumer-proof.json",
-          "sha256": "4f37afbb5269ec6acc34645369936cb7b084a4d45adb8f5a0ba41dedffafdd33"
+          "sha256": "2e01dca645829a01dbf7c1f5abaf481c9140356bb564fd39fc892abbee27dbdf"
         },
         {
           "path": "docs/evidence/angular-consumer-input-hashes.json",
@@ -101,12 +116,12 @@
       "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/consolidation-full-test-results.json",
-          "sha256": "aaffc7dd75a4c924e49884d4d91514cce9ce11f93c30a529e4d674c64a08314b"
+          "path": "docs/evidence/503-final-test-results.json",
+          "sha256": "c46dfe1087b5026206d5135f2e7390dc495c6f08a1dc7aa7c3a7d0cb01f35a06"
         },
         {
-          "path": "docs/evidence/consolidation-sdk-provenance.json",
-          "sha256": "12b6a92a7205f3ebcc88e97ebb91c4a4891d8a6a0e8892746aff03f408c006e6"
+          "path": "docs/evidence/503-sdk-provenance.json",
+          "sha256": "e07089bac454079a5d7d976dfad816c8df54502f9e1b15ba6fb0f3d8a500beac"
         },
         {
           "path": "docs/evidence/cold-query-counts.json",
@@ -118,16 +133,20 @@
       "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/consolidation-full-test-results.json",
-          "sha256": "aaffc7dd75a4c924e49884d4d91514cce9ce11f93c30a529e4d674c64a08314b"
+          "path": "docs/evidence/503-final-test-results.json",
+          "sha256": "c46dfe1087b5026206d5135f2e7390dc495c6f08a1dc7aa7c3a7d0cb01f35a06"
         },
         {
-          "path": "docs/evidence/consolidation-sdk-provenance.json",
-          "sha256": "12b6a92a7205f3ebcc88e97ebb91c4a4891d8a6a0e8892746aff03f408c006e6"
+          "path": "docs/evidence/503-sdk-provenance.json",
+          "sha256": "e07089bac454079a5d7d976dfad816c8df54502f9e1b15ba6fb0f3d8a500beac"
+        },
+        {
+          "path": "docs/evidence/503-angular-http-results.json",
+          "sha256": "9b4a59589c7c97452dc4653245b3d1735303f45d7a2d7bea44502032fdfa2fa5"
         },
         {
           "path": "docs/evidence/angular-consumer-proof.json",
-          "sha256": "4f37afbb5269ec6acc34645369936cb7b084a4d45adb8f5a0ba41dedffafdd33"
+          "sha256": "2e01dca645829a01dbf7c1f5abaf481c9140356bb564fd39fc892abbee27dbdf"
         }
       ]
     },
@@ -136,19 +155,23 @@
       "reason": "The responsible user explicitly approved HOST determinations, transactional invariants and Angular proof as PASS for phase 3A at e6b9fa0. No external Config snapshot exists for this phase; Config/rules-engine integration is assigned to a future dedicated phase."
     },
     "bulkOperations": {
-      "status": "pending",
+      "status": "pass",
       "artifacts": [
         {
-          "path": "docs/evidence/consolidation-full-test-results.json",
-          "sha256": "aaffc7dd75a4c924e49884d4d91514cce9ce11f93c30a529e4d674c64a08314b"
+          "path": "docs/evidence/503-final-test-results.json",
+          "sha256": "c46dfe1087b5026206d5135f2e7390dc495c6f08a1dc7aa7c3a7d0cb01f35a06"
         },
         {
-          "path": "docs/evidence/consolidation-sdk-provenance.json",
-          "sha256": "12b6a92a7205f3ebcc88e97ebb91c4a4891d8a6a0e8892746aff03f408c006e6"
+          "path": "docs/evidence/503-sdk-provenance.json",
+          "sha256": "e07089bac454079a5d7d976dfad816c8df54502f9e1b15ba6fb0f3d8a500beac"
         },
         {
           "path": "docs/evidence/bulk-protocol-receipts.json",
           "sha256": "6fdbd8397bd25cd59e31cf361f6ff77fa7015b50aa0717f019cf030a4d02eb9b"
+        },
+        {
+          "path": "docs/evidence/bulk-cargos-pessoas-receipts.json",
+          "sha256": "8dcc70f06eefbf8edba736bf5014723aa42093534b263f95a5a18ddadf710584"
         },
         {
           "path": "docs/evidence/bulk-blocked-preview.json",
@@ -156,13 +179,12 @@
         },
         {
           "path": "docs/evidence/bulk-concurrent-discovery.json",
-          "sha256": "e1b89327e8e388dd2fabf9a4b9e8e3de16a3a6b9fe2a50b81fa0509f74a17bcc"
+          "sha256": "f053abdf7cbea8db7372153851c5483d6c44a827906f5a96ff0be38b07fb09f9"
         }
-      ],
-      "reason": "Full serial campaign: 74 tests, one failure in cargosAndPessoasExecuteBothUpdateModesAndClear; person confirmation returned 503 GOVERNED_OPENAPI_PUBLICATION_UNAVAILABLE. No integral green run."
+      ]
     }
   },
   "historicalSourceSha256": "933d9c8ccb29e18e1be39694fb495b99636da9bbc9efd05ba937e6b5e88f3408",
-  "status": "PARTIAL",
+  "status": "PASS",
   "currentCampaign": "docs/evidence/PILLARS-CAMPAIGN.json"
 }

@@ -1,0 +1,21 @@
+{
+  "recordedAt": "2026-10-28T19:25:33.925330+00:00",
+  "tests": 75,
+  "failures": 0,
+  "scope": "Current source-only auditor regression; earlier snapshots had 120/11 failures then 74/0. Concurrent resolver replacement preserved; 75 current tests pass. Counts are separate source states.",
+  "sources": {
+    "audit-java-resource-completeness.py": "e5f1405a7006ba15ef0d154b16cebbc8dc0a64a5c7c6cb6345cdf7c8a3acae3f",
+    "java_resource_audit.py": "71a4520d7fe7b6de26b5e3342930d6885af7042f1244aab81b754572b5373b21",
+    "java_resource_hierarchy.py": "500fdbc80e85932687b3e5add9f6c9be06dd279cd0de8b23726519496327a4bd",
+    "test_audit_java_resource_completeness.py": "543c216af0383b9400da9e486f7829cb934362743cf45a26dd9cdfa648b6c136",
+    "test_java_resource_binding.py": "8f269ffd750715365a3cc9dbf57da89ae0c8ecdbc263572baa4861e96e57b6f1",
+    "test_java_resource_hierarchy.py": "d626c8b2a979d8e20aab422c984213cccf149ea77fc512632c25911ccb648f22"
+  },
+  "logSha256": "27c71ca73b7576a9f96cb86b3292bb0baff7a1db5e3384cd101111cda13acb70",
+  "previousVerifiedTests": 74,
+  "currentTestClasses": {
+    "CompletenessRegression": 46,
+    "ResourceBindingRegression": 12,
+    "HierarchyRegression": 17
+  }
+}

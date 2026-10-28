@@ -1,6 +1,43 @@
 # Relatório de rodada — issue 305
 
-## Consolidação R1–R7 — estado vigente
+## Rodada vigente — investigação 503 e seis decisões de adoção
+
+**80/80 testes na campanha integral final contra Neon; 77/77 focais do SDK;
+75/75 regressões do auditor; consumidor HTTP aprovado.** O SDK em `21ca36df`
+compõe a identidade bulk sob um único escopo canônico de publicação, com
+revalidação LIVE na entrada/saída. O diagnóstico privado registra somente tipos
+de causa e SQLSTATE validado. Não houve alteração de schema, grants ou deadlines.
+
+A causa específica do 503 histórico não foi reproduzida. A reprodução focal no
+candidato anterior passou 6/6; o candidato de diagnóstico passou 80/80 antes da
+correção adicional. Os resultados são execuções distintas, não prova causal de
+que a indisponibilidade histórica foi eliminada. Duas regressões comprovaram o
+defeito de composição e passaram após a correção.
+
+As seis decisões de adoção foram avaliadas: cinco não aplicáveis com justificativa
+e **Cargo aplicável, pendente** de contrato neutro integrado e provas de adoção.
+O auditor mantém **FAILED, uma pendência**, com todos os gates operacionais verdes
+e hashes atuais. Não há autorização de merge inferida deste resultado.
+
+O candidato é `8.0.0-bulk.308-consolidation.3-SNAPSHOT`, privado, no PR Metadata #311.
+A rc.179 do POM não está certificada. O empacotamento incremental reutilizou um JAR
+antigo; a conferência de hash detectou e rejeitou o arquivo antes da prova HTTP.
+`clean package` produziu os bytes corretos. Os quatro relatórios de teste confirmam
+a dependência .3; o README registra a reconstrução limpa ao trocar o candidato.
+
+Preservados 16 tabelas/392 colunas, constraints, índices, comentários e dados da
+original. A cópia `br-spring-butterfly-b79ht1rc` foi excluída após registrar as provas;
+a original foi confirmada presente. A autorização permanente de limpeza foi
+registrada. Servidor auxiliar encerrado, `.local/` ignorado.
+
+Detalhamento: [investigação e fricções](INVESTIGACAO-503-ADOCAO.md),
+[scorecard](evidence/SCORECARD-COMPLETUDE.md), [campanha](evidence/PILLARS-CAMPAIGN.json).
+Limites: sem release, aceite visual Angular ou SLO corporativo. A biblioteca Angular
+permaneceu sob a frente delegada; houve apenas execução do harness HTTP existente.
+Derivados atualizados: especificação operacional do SDK, README, relatório e recibos
+do host. Não há novo x-ui, endpoint, recipe ou catálogo público a sincronizar.
+
+## Histórico — consolidação R1–R7 em ac6dd29
 
 A nova campanha serial executou **74 testes: 73 aprovados, 1 falha, 0 erros e 0 ignorados**. Os 58 testes de domínio, seis de pilares e quatro de metadados passaram. O ciclo positivo completo de vínculos passou; a confirmação de lote de pessoas recebeu `GOVERNED_OPENAPI_PUBLICATION_UNAVAILABLE` (503). **Não há execução integral verde nem liberação para merge.**
 

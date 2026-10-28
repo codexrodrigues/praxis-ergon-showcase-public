@@ -1,0 +1,64 @@
+{
+  "recordedAt": "2026-10-28T19:00:37.532105+00:00",
+  "sourceRevision": "21ca36df724eeef101101460601c052d2cd53931",
+  "sourceTree": "e2dac91f57140393c242b2988941f389d75058f1",
+  "sourceClean": true,
+  "candidate": "8.0.0-bulk.308-consolidation.3-SNAPSHOT",
+  "jarSha256": "b00609a5f063a750966fcd6942142073e2d0d87d433905db8be3c22ea4b3198d",
+  "packagingTransform": "Only root POM version rc.183 -> private candidate, restored after install",
+  "sourcePomSha256": "68f5f6d676cf107f880f18b4ed102a6412ad2fb35c5683becb124d761323ff19",
+  "published": false,
+  "tests": [
+    {
+      "name": "BulkResourceOperationBindingsTest",
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "OpenApiCanonicalOperationResolverTest",
+      "tests": 18,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "CanonicalResourceOperationBindingTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "GovernedOpenApiPublicationUnavailableExceptionTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "OpenApiPublicationPreparationTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "OpenApiPublicationInstallationTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "testLogSha256": "8901c9e65185ef3c51f53854d4157f3f88b304026173be6f78ae99c2f7514f63",
+  "beforeFix": {
+    "tests": 2,
+    "failures": 2,
+    "errors": 0,
+    "logSha256": "7af8a505a234ac9c50304a0ce1555c71bec6dfcd36838ec930af97b05229c66a"
+  },
+  "installLogSha256": "d40f76960aebda89d36d7ec0eefb422ced5f7308e342d09609a381d2d7cc4a7b",
+  "scope": "Coherent multi-group strict identity fence and safe private diagnostics. No timeout/ACL/schema changes; no exact retrospective cause assigned to the previous 503."
+}

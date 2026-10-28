@@ -1,0 +1,7 @@
+{
+  "hostJarSha256": "c402a9851c290e3bdc682e9c58ed158fd8bfe57d25291b1131c5ba771859071d",
+  "sdkEntry": "BOOT-INF/lib/praxis-metadata-starter-8.0.0-bulk.308-consolidation.3-SNAPSHOT.jar",
+  "sdkJarSha256": "b00609a5f063a750966fcd6942142073e2d0d87d433905db8be3c22ea4b3198d",
+  "build": "clean package -DskipTests after full successful Maven test",
+  "initialPackagingIssue": "Incremental package reused .1 boot jar; rejected before HTTP proof; fresh clean package verified; all four test reports independently confirm .3 classpath"
+}

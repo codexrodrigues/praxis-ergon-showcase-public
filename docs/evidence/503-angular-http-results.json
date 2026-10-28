@@ -1,0 +1,13 @@
+{
+  "validatedAt": "2026-10-28T19:43:15.250683+00:00",
+  "passed": true,
+  "dependency": "8.0.0-bulk.308-consolidation.3-SNAPSHOT",
+  "angularCommit": "421012f90f86335e5f15f7a865a4f83dfbf642ef",
+  "libraryChangesByThisFront": false,
+  "httpLogSha256": "63556300fe94b0a7e26a29f6cf04d305361e1be38a353943ad68a0f76fb6ba5d",
+  "publicationLogSha256": "dac788907ff3b2e51a7e711ad26f4432946745a1c13c2d05c8962937e76439e9",
+  "proofSha256": "2e01dca645829a01dbf7c1f5abaf481c9140356bb564fd39fc892abbee27dbdf",
+  "inputHashesSha256": "ebc21f40f414c6bebca048be5da4b5bd998ba00ce5aad3f4978b50485b84b0f1",
+  "packagedProvenanceSha256": "bdf5786c2f4fc6c2a68f1810c937eac72d112df9983654d1a92590a348372148",
+  "scope": "Official source HTTP consumer, partial submit, bulk cycle and reactive determinations; no browser visual acceptance or public npm installation"
+}

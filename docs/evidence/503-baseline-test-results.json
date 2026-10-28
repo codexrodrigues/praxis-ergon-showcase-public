@@ -1,0 +1,23 @@
+{
+  "recordedAt": "2026-10-28T18:54:28.406125+00:00",
+  "candidate": "8.0.0-bulk.308-consolidation.1-SNAPSHOT",
+  "branch": "br-spring-butterfly-b79ht1rc",
+  "suite": "br.com.praxis.ergonshowcase.BulkNeonIntegrationTest",
+  "tests": 6,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "cases": [
+    "publishesCanonicalBulkOperationsAndEditableFields",
+    "evaluatesThenExecutesUniformItemsAndCollectiveCommands",
+    "blockedProposalExplainsStaleVersionAndInvalidItemWithoutMutation",
+    "cargosAndPessoasExecuteBothUpdateModesAndClear",
+    "concurrentDiscoveryReturnsVerifiedSnapshotOrSafeUnavailable",
+    "readOnlyCannotEvaluateOrConfirmAnyBulkOperation"
+  ],
+  "reproduced503": false,
+  "selectedJfrExceptionCounts": {},
+  "limits": "One instrumented focal run; neither availability guarantee nor correction of the earlier 503. JFR native startup emitted a Surefire channel warning; Maven completed successfully.",
+  "logSha256": "491f599d421fdf4d4a885f64cb897f07c103ec4ef8f37bdb1810dfbfad3a517f",
+  "jfrSha256": "30c971e0191f0d94ecc9a4fe6b23127e36f2458b646e5b86fef607421bf32de9"
+}

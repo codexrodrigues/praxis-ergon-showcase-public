@@ -40,6 +40,31 @@ class NeonIntegrationTest {
     BulkPublicationProof.publish(publicationHttp.withBasicAuth(publicationUsername,publicationPassword),false);
   }
 
+  /** Ausência de adoção não pode habilitar preparo nem gravação por rota implícita. */
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.CsvSource({
+      "orgaos,empresas,empresa", "cargos,cargos,cargo",
+      "servidor-pessoas,funcionarios,numero", "setores,setores,setor",
+      "documentos-legais,documentos_legais,id", "vinculos,vinculos,numfunc"
+  })
+  void unadoptedDuplicateDraftHasNoMappingOrPersistence(String resource, String table, String key)
+      throws Exception {
+    // Nomes fechados da fixture, jamais recebidos de uma requisição.
+    String id = jdbc.queryForObject("select " + key + "::text from public." + table
+        + " order by " + key + " limit 1", String.class);
+    if (resource.equals("vinculos"))
+      id = jdbc.queryForObject("select numfunc::text||':'||numero::text from public.vinculos"
+          + " order by numfunc,numero limit 1", String.class);
+    String snapshotSql = "select md5(string_agg(to_jsonb(t)::text, '|' order by to_jsonb(t)::text))"
+        + " from public." + table + " t";
+    String before = jdbc.queryForObject(snapshotSql, String.class);
+    mvc.perform(get("/api/ergon/" + resource + "/" + id)).andExpect(status().isOk());
+    mvc.perform(post("/api/ergon/" + resource + "/" + id + "/duplicate-draft")
+            .contentType("application/json").content("{}"))
+        .andExpect(status().isNotFound());
+    assertThat(jdbc.queryForObject(snapshotSql, String.class)).isEqualTo(before);
+  }
+
   @Test
   void phaseThreeDocumentScopeIsExplicitPerOperation() throws Exception {
     String uri = reviewFixture();
