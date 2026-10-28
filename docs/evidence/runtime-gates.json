@@ -1,10 +1,10 @@
 {
-  "sourceSha256": "933d9c8ccb29e18e1be39694fb495b99636da9bbc9efd05ba937e6b5e88f3408",
-  "validatedAt": "2026-10-28T00:59:32.304899+00:00",
-  "baselineCommit": "61fc36b3c145bb6721bd997ca5e33bbd17e3f412",
+  "sourceSha256": "108c2aec2f15137f3e1f8063d3386f0b23adcb280ec93f58a6e4e67ee56188b1",
+  "validatedAt": "2026-10-28T09:58:50.307017+00:00",
+  "baselineCommit": "e6b9fa0",
   "gates": {
     "schema": {
-      "status": "pass",
+      "status": "pending",
       "artifacts": [
         {
           "path": "docs/evidence/cargos-request.json",
@@ -62,10 +62,11 @@
           "path": "docs/evidence/vinculos-put-determinations.json",
           "sha256": "55243936f83aaf547985783609ee634c7e63b4da47088ec7b9c1f1c39f5f1e5b"
         }
-      ]
+      ],
+      "reason": "Current Bulking campaign did not complete acceptance; previous artifacts remain historical and are not re-certified."
     },
     "http": {
-      "status": "pass",
+      "status": "failed",
       "artifacts": [
         {
           "path": "docs/evidence/neon-integration-tests.txt",
@@ -75,20 +76,22 @@
           "path": "docs/evidence/packaged-phases-smoke.json",
           "sha256": "a9078527a862e8a6e0ffef902900770894a567d1c7d6e08130e310b26e2869de"
         }
-      ]
+      ],
+      "reason": "Current Bulking campaign did not complete acceptance; previous artifacts remain historical and are not re-certified."
     },
     "availability": {
-      "status": "pass",
+      "status": "pending",
       "artifacts": [
         {
           "path": "docs/evidence/neon-integration-tests.txt",
           "sha256": "a5bf000e8b7ae750202ad0020cce806e56b962da25e7ff157631560388eec1eb"
         }
       ],
-      "scope": "Authorizations, versions, workflow states and declared item/collection operations exercised by the suite"
+      "scope": "Authorizations, versions, workflow states and declared item/collection operations exercised by the suite",
+      "reason": "Current Bulking campaign did not complete acceptance; previous artifacts remain historical and are not re-certified."
     },
     "persistence": {
-      "status": "pass",
+      "status": "pending",
       "artifacts": [
         {
           "path": "docs/evidence/neon-integration-tests.txt",
@@ -98,10 +101,11 @@
           "path": "docs/evidence/neon-preservation-61fc36b.json",
           "sha256": "c830997ccde4bbcd7af154c1f55970543a5dc2510deb285e39a837566dd549b7"
         }
-      ]
+      ],
+      "reason": "Current Bulking campaign did not complete acceptance; previous artifacts remain historical and are not re-certified."
     },
     "parity": {
-      "status": "pass",
+      "status": "pending",
       "artifacts": [
         {
           "path": "docs/MATRIZ-PARIDADE-305.md",
@@ -112,10 +116,11 @@
           "sha256": "a5bf000e8b7ae750202ad0020cce806e56b962da25e7ff157631560388eec1eb"
         }
       ],
-      "scope": "Only mapped pilot registration and listed administrative operations; full statutory/legacy parity is not certified"
+      "scope": "Only mapped pilot registration and listed administrative operations; full statutory/legacy parity is not certified",
+      "reason": "Current Bulking campaign did not complete acceptance; previous artifacts remain historical and are not re-certified."
     },
     "angularReadiness": {
-      "status": "pass",
+      "status": "failed",
       "artifacts": [
         {
           "path": "docs/evidence/angular-consumer-proof.json",
@@ -126,10 +131,11 @@
           "sha256": "f758776b08529fa361f5414fda34e91485e706e1d441fb0c568733f67c855d5a"
         }
       ],
-      "scope": "Official source normalizer and ReactiveDeterminationRuntimeService; not published npm adoption or visual host acceptance"
+      "scope": "Official source normalizer and ReactiveDeterminationRuntimeService; not published npm adoption or visual host acceptance",
+      "reason": "Current Bulking campaign did not complete acceptance; previous artifacts remain historical and are not re-certified."
     },
     "coldQueries": {
-      "status": "pass",
+      "status": "pending",
       "artifacts": [
         {
           "path": "docs/evidence/cold-query-counts.json",
@@ -139,10 +145,11 @@
           "path": "docs/evidence/neon-integration-tests.txt",
           "sha256": "a5bf000e8b7ae750202ad0020cce806e56b962da25e7ff157631560388eec1eb"
         }
-      ]
+      ],
+      "reason": "Current Bulking campaign did not complete acceptance; previous artifacts remain historical and are not re-certified."
     },
     "reactiveDeterminations": {
-      "status": "pass",
+      "status": "pending",
       "artifacts": [
         {
           "path": "docs/evidence/cargos-post-determinations.json",
@@ -180,11 +187,24 @@
           "path": "docs/evidence/neon-integration-tests.txt",
           "sha256": "a5bf000e8b7ae750202ad0020cce806e56b962da25e7ff157631560388eec1eb"
         }
-      ]
+      ],
+      "reason": "Current Bulking campaign did not complete acceptance; previous artifacts remain historical and are not re-certified."
     },
     "governedDecisions": {
-      "status": "awaiting-input",
-      "reason": "Approved Config snapshot identity and endpoint were requested; no approval or N/A is inferred. Statutory decision consumption is not implemented without that input."
+      "status": "not-applicable",
+      "reason": "The responsible user explicitly approved HOST determinations, transactional invariants and Angular proof as PASS for phase 3A at e6b9fa0. No external Config snapshot exists for this phase; Config/rules-engine integration is assigned to a future dedicated phase."
+    },
+    "bulkOperations": {
+      "status": "failed",
+      "reason": "Publication reconciliation/deadline blocks full protocol and live Angular proof. See campaign record.",
+      "artifacts": [
+        {
+          "path": "docs/evidence/BULKING-308-CAMPAIGN.json",
+          "sha256": "1f84b16c63747a41e172cb3ffffbcbe3ec1d1d1ee31bb8771561fa000bcf9c2a"
+        }
+      ]
     }
-  }
+  },
+  "historicalSourceSha256": "933d9c8ccb29e18e1be39694fb495b99636da9bbc9efd05ba937e6b5e88f3408",
+  "status": "acceptance-pending"
 }

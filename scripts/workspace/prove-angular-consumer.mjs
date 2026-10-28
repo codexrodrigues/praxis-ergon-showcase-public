@@ -9,7 +9,10 @@ const evidenceDir = path.resolve(process.argv[4] || 'target/proof');
 if (!baseUrl) throw new Error('Usage: node scripts/workspace/prove-angular-consumer.mjs <angular-root> <base-url> [evidence-dir]');
 const require = createRequire(path.join(root, '.local/angular-proof/package.json'));
 const { build } = require('esbuild');
-const source = (await readFile('scripts/workspace/angular-consumer-proof.ts', 'utf8')).replace('OFFICIAL_RUNTIME_PATH', path.join(angularRoot, 'projects/praxis-dynamic-form/src/lib/services/reactive-determination-runtime.service.ts').replaceAll('\\', '/'));
+const source = (await readFile('scripts/workspace/angular-consumer-proof.ts', 'utf8'))
+  .replace('OFFICIAL_RUNTIME_PATH', path.join(angularRoot, 'projects/praxis-dynamic-form/src/lib/services/reactive-determination-runtime.service.ts').replaceAll('\\', '/'))
+  .replace('OFFICIAL_BULK_RUNTIME_PATH', path.join(angularRoot, 'projects/praxis-core/src/lib/services/bulk-operation-client.service.ts').replaceAll('\\', '/'))
+  .replace('OFFICIAL_DISCOVERY_RUNTIME_PATH', path.join(angularRoot, 'projects/praxis-core/src/lib/services/resource-discovery.service.ts').replaceAll('\\', '/'));
 const entry = path.join(root, '.local/angular-proof/entry.ts');
 const output = path.join(root, '.local/angular-proof/runtime-proof.mjs');
 await writeFile(entry, source);

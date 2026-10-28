@@ -16,6 +16,11 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <dependencies>
+    <!-- Instalador técnico explícito do SDK; Flyway automático permanece desabilitado. -->
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-database-postgresql</artifactId>
+    </dependency>
     <dependency>
       <groupId>io.github.codexrodrigues</groupId>
       <artifactId>praxis-metadata-starter</artifactId>

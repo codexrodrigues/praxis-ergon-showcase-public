@@ -18,7 +18,17 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureMockMvc
 @Transactional
 @WithMockUser(authorities = {"ERGON_READ", "ERGON_WRITE"})
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class NeonIntegrationTest {
+  @Autowired org.springframework.boot.test.web.client.TestRestTemplate publicationHttp;
+  @org.springframework.beans.factory.annotation.Value("${showcase.security.username}") String publicationUsername;
+  @org.springframework.beans.factory.annotation.Value("${showcase.security.password}") String publicationPassword;
+
+  @BeforeAll
+  void reconcileBulkPhotographBeforeTransactionalResourceProofs() throws Exception {
+    BulkPublicationProof.publish(publicationHttp.withBasicAuth(publicationUsername,publicationPassword),false);
+  }
+
   @Test
   void phaseThreeDocumentScopeIsExplicitPerOperation() throws Exception {
     String uri = reviewFixture();

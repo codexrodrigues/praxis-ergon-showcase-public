@@ -282,7 +282,7 @@ public abstract class ServidorPessoaDados {
   @jakarta.validation.constraints.Size(max = 3)
   private String gSanguineo;
 
-  @Schema(description = "Raça ou cor autodeclarada para identificação e políticas de pessoal.")
+  @Schema(nullable = true, description = "Raça ou cor autodeclarada para identificação e políticas de pessoal.")
   @UISchema(label = "Raça/cor", group = "Identificação civil", tableHidden = true, order = 206)
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -292,6 +292,7 @@ public abstract class ServidorPessoaDados {
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   @jakarta.validation.constraints.Size(max = 20)
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private String racaCor;
 
   @Schema(description = "Estado civil declarado pela pessoa.")
@@ -317,7 +318,7 @@ public abstract class ServidorPessoaDados {
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   private Boolean uniaoEstavel = false;
 
-  @Schema(description = "Grau de instrução concluído pela pessoa.")
+  @Schema(nullable = true, description = "Grau de instrução concluído pela pessoa.")
   @UISchema(
       label = "Escolaridade",
       group = "Identificação civil",
@@ -333,6 +334,7 @@ public abstract class ServidorPessoaDados {
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   @jakarta.validation.constraints.Size(max = 20)
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private String escolaridade;
 
   @Schema(description = "Código da nacionalidade no domínio cadastral Ergon.")
@@ -870,7 +872,7 @@ public abstract class ServidorPessoaDados {
   @jakarta.validation.constraints.Size(max = 80)
   private String bairroender;
 
-  @Schema(description = "Município de residência da pessoa.")
+  @Schema(nullable = true, description = "Município de residência da pessoa.")
   @UISchema(
       label = "Município",
       group = "Endereço e contato",
@@ -886,9 +888,10 @@ public abstract class ServidorPessoaDados {
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   @jakarta.validation.constraints.Size(max = 60)
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private String cidadeender;
 
-  @Schema(description = "UF de residência da pessoa.")
+  @Schema(nullable = true, description = "UF de residência da pessoa.")
   @UISchema(
       label = "UF de residência",
       group = "Endereço e contato",
@@ -904,6 +907,7 @@ public abstract class ServidorPessoaDados {
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   @jakarta.validation.constraints.Size(max = 2)
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private String ufender;
 
   @Schema(description = "Código postal do endereço residencial, preservando zeros.")
@@ -930,7 +934,7 @@ public abstract class ServidorPessoaDados {
   @jakarta.validation.constraints.Size(max = 10)
   private String ramal;
 
-  @Schema(description = "Código da instituição bancária padrão para pagamento ao servidor.")
+  @Schema(nullable = true, description = "Código da instituição bancária padrão para pagamento ao servidor.")
   @UISchema(label = "Banco", group = "Dados bancários padrão", tableHidden = true, order = 248)
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -939,9 +943,10 @@ public abstract class ServidorPessoaDados {
       reason = "Código da instituição bancária padrão para pagamento ao servidor.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private Integer banco;
 
-  @Schema(description = "Agência bancária padrão, incluindo eventual dígito verificador.")
+  @Schema(nullable = true, description = "Agência bancária padrão, incluindo eventual dígito verificador.")
   @UISchema(label = "Agência", group = "Dados bancários padrão", tableHidden = true, order = 249)
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -951,6 +956,7 @@ public abstract class ServidorPessoaDados {
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   @jakarta.validation.constraints.Size(max = 10)
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private String agencia;
 
   @Schema(description = "Conta bancária padrão, preservando zeros e dígito verificador.")
@@ -965,7 +971,7 @@ public abstract class ServidorPessoaDados {
   @jakarta.validation.constraints.Size(max = 25)
   private String conta;
 
-  @Schema(description = "Modalidade de pagamento associada aos dados bancários padrão.")
+  @Schema(nullable = true, description = "Modalidade de pagamento associada aos dados bancários padrão.")
   @UISchema(
       label = "Tipo de pagamento",
       group = "Dados bancários padrão",
@@ -979,6 +985,7 @@ public abstract class ServidorPessoaDados {
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   @jakarta.validation.constraints.Size(max = 10)
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private String tipopag;
 
   @Schema(description = "Indica deficiência física registrada no cadastro da pessoa.")

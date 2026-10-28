@@ -1,5 +1,16 @@
 package br.com.praxis.ergonshowcase.controller;
 
+import br.com.praxis.ergonshowcase.bulk.*;
+import br.com.praxis.ergonshowcase.bulk.ErgonBulkDomain.Resource;
+import org.praxisplatform.uischema.bulk.*;
+import org.praxisplatform.uischema.action.*;
+import org.praxisplatform.uischema.dto.CursorPage;
+import org.praxisplatform.uischema.rest.response.RestApiResponse;
+import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import java.util.UUID;
+
 import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import br.com.praxis.ergonshowcase.domain.*;
 import br.com.praxis.ergonshowcase.dto.*;
@@ -22,7 +33,7 @@ import org.praxisplatform.uischema.fact.ResourceFact;
     key = "emEstagioProbatorio",
     resourceKey = "administracao-pessoal.vinculos",
     label =
-        "Indica vínculo ativo em exercício cujo estágio ainda não foi homologado; não certifica elegibilidade jurídica",
+        "Em estágio probatório",
     description =
         "Indica vínculo ativo em exercício cujo estágio ainda não foi homologado; não certifica elegibilidade jurídica.",
     dataType = "boolean",
@@ -30,17 +41,24 @@ import org.praxisplatform.uischema.fact.ResourceFact;
 @org.praxisplatform.uischema.fact.ResourceFact(
     key = "possuiCargoComissao",
     resourceKey = "administracao-pessoal.vinculos",
-    label = "Indica cargo em comissão associado ao vínculo",
+    label = "Cargo em comissão",
     description = "Indica cargo em comissão associado ao vínculo.",
     dataType = "boolean",
     sourceKind = "computed")
 @org.praxisplatform.uischema.fact.ResourceFact(
     key = "emCessaoAtiva",
     resourceKey = "administracao-pessoal.vinculos",
-    label = "Indica estado funcional CEDIDO persistido",
+    label = "Cessão ativa",
     description = "Indica estado funcional CEDIDO persistido.",
     dataType = "boolean",
     sourceKind = "computed")
+@BulkResourceOperations(
+    proposalOperationId="ergon.vinculos.bulk.proposal",
+    proposalResultsOperationId="ergon.vinculos.bulk.proposal-results",
+    executionOperationId="ergon.vinculos.bulk.execution",
+    executionResultsOperationId="ergon.vinculos.bulk.results",
+    cancelOperationId="ergon.vinculos.bulk.cancel",
+    updateSourceOperationId="updateErgonVinculo", protectedUpdateFields={"cargo","dtnom","dtposse"})
 @ApiResource(
     quickFilters = {
       @QuickFilter(id = "ativos", label = "ATIVO", filter = "{\"situacoes\":[\"ATIVO\"]}"),
@@ -475,6 +493,7 @@ public class VinculoController
 
   @Override
   @org.springframework.web.bind.annotation.PutMapping("/{id}")
+  @BulkResourceOperation(BulkResourceOperation.Role.UPDATE_SOURCE)
   @io.swagger.v3.oas.annotations.Operation(
       operationId = "updateErgonVinculo",
       summary = "Manter vinculo",
@@ -505,5 +524,100 @@ public class VinculoController
       @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
           CargoSelectionDTO draft) {
     return org.springframework.http.ResponseEntity.ok(determinations.provimento(draft));
+  }
+
+  @org.springframework.beans.factory.annotation.Autowired private ErgonBulkOperations bulk;
+
+  @PostMapping("/bulk/update/evaluation")
+  @Operation(operationId="ergon.vinculos.bulk.uniform.evaluation", summary="Avaliar edição uniforme",description="Avalia seleção, versões e alterações sem modificar o cadastro; produz uma proposta protegida.")
+  public RestApiResponse<BulkProposal> bulkEvaluate(@io.swagger.v3.oas.annotations.parameters.RequestBody(content=@io.swagger.v3.oas.annotations.media.Content(schema=@io.swagger.v3.oas.annotations.media.Schema(implementation=ErgonBulkSchema.VinculoUniform.class))) @RequestBody BulkUniformEvaluationRequest<String,VinculoFilterDTO> request) {
+    return RestApiResponse.success(bulk.uniform(Resource.VINCULOS,request),null);
+  }
+  @PostMapping("/bulk/update-items/evaluation")
+  @Operation(operationId="ergon.vinculos.bulk.items.evaluation",summary="Avaliar edições por registro",description="Avalia deltas distintos e a versão esperada de cada registro, com impedimentos individualizados.")
+  public RestApiResponse<BulkProposal> bulkEvaluateItems(@io.swagger.v3.oas.annotations.parameters.RequestBody(content=@io.swagger.v3.oas.annotations.media.Content(schema=@io.swagger.v3.oas.annotations.media.Schema(implementation=ErgonBulkSchema.VinculoItems.class))) @RequestBody BulkItemEvaluationRequest<String> request) {
+    return RestApiResponse.success(bulk.items(Resource.VINCULOS,request),null);
+  }
+  @PostMapping("/bulk/update")
+  @BulkOperation(mode=BulkMode.UNIFORM_UPDATE,evaluationOperationId="ergon.vinculos.bulk.uniform.evaluation",atomicity=ActionCollectionAtomicity.PER_ITEM)
+  @Operation(operationId="ergon.vinculos.bulk.uniform",summary="Confirmar edição uniforme",description="Confirma uma proposta avaliada; cada registro é revalidado e possui recibo durável, sem repetir efeitos no replay.")
+  public RestApiResponse<BulkExecution> bulkConfirm(@RequestBody BulkConfirmationRequest request,
+      @Parameter(description="Chave estável desta confirmação; repetir a mesma chave recupera a execução.") @RequestHeader("Idempotency-Key") String key) {
+    return RestApiResponse.success(bulk.confirm(Resource.VINCULOS,"ergon.vinculos.bulk.uniform",request,key),null);
+  }
+  @PostMapping("/bulk/update-items")
+  @BulkOperation(mode=BulkMode.PER_ITEM_UPDATE,evaluationOperationId="ergon.vinculos.bulk.items.evaluation",atomicity=ActionCollectionAtomicity.PER_ITEM)
+  @Operation(operationId="ergon.vinculos.bulk.items",summary="Confirmar edições por registro",description="Aplica os deltas individualizados preservados na proposta, com versão e resultado próprios por registro.")
+  public RestApiResponse<BulkExecution> bulkConfirmItems(@RequestBody BulkConfirmationRequest request,
+      @Parameter(description="Chave estável de confirmação para recuperar a mesma execução em caso de repetição.") @RequestHeader("Idempotency-Key") String key) {
+    return RestApiResponse.success(bulk.confirm(Resource.VINCULOS,"ergon.vinculos.bulk.items",request,key),null);
+  }
+  @GetMapping("/bulk/proposals/{proposalId}")
+  @BulkResourceOperation(BulkResourceOperation.Role.PROPOSAL)
+  @Operation(operationId="ergon.vinculos.bulk.proposal",summary="Consultar proposta de lote",description="Consulta totais e intenção pública da proposta após conferir acesso ao conjunto completo de registros.")
+  public RestApiResponse<BulkProposal> bulkProposal(@Parameter(description="Identidade da proposta avaliada.") @PathVariable UUID proposalId) {
+    return RestApiResponse.success(bulk.proposal(Resource.VINCULOS,bulk.locate(Resource.VINCULOS,proposalId,false),proposalId),null);
+  }
+  @GetMapping("/bulk/proposals/{proposalId}/results")
+  @BulkResourceOperation(BulkResourceOperation.Role.PROPOSAL_RESULTS)
+  @Operation(operationId="ergon.vinculos.bulk.proposal-results",summary="Inspecionar avaliação do lote",description="Pagina registros executáveis e bloqueados, com diagnósticos seguros e cursor vinculado ao solicitante.")
+  public RestApiResponse<CursorPage<BulkProposalItemResult<Object>>> bulkProposalResults(
+      @Parameter(description="Identidade da proposta avaliada.") @PathVariable UUID proposalId,
+      @Parameter(description="Quantidade de registros por página, de 1 a 200.") @RequestParam(defaultValue="50") int size,
+      @Parameter(description="Cursor opaco emitido na página anterior; preserve o tamanho da página.") @RequestParam(required=false) String after) {
+    return RestApiResponse.success(bulk.proposalResults(Resource.VINCULOS,bulk.locate(Resource.VINCULOS,proposalId,false),proposalId,size,after),null);
+  }
+  @GetMapping("/bulk/executions/{executionId}")
+  @BulkResourceOperation(BulkResourceOperation.Role.EXECUTION)
+  @Operation(operationId="ergon.vinculos.bulk.execution",summary="Consultar execução do lote",description="Retorna estado e contadores reconciliados a partir dos recibos persistidos.")
+  public RestApiResponse<BulkExecution> bulkExecution(@Parameter(description="Identidade da execução confirmada.") @PathVariable UUID executionId) {
+    return RestApiResponse.success(bulk.execution(Resource.VINCULOS,bulk.locate(Resource.VINCULOS,executionId,true),executionId),null);
+  }
+  @GetMapping("/bulk/executions/{executionId}/results")
+  @BulkResourceOperation(BulkResourceOperation.Role.EXECUTION_RESULTS)
+  @Operation(operationId="ergon.vinculos.bulk.results",summary="Consultar recibos do lote",description="Pagina resultados por registro sem expor fatos protegidos, versões ou dados bancários da proposta.")
+  public RestApiResponse<CursorPage<BulkItemResult<Object>>> bulkResults(
+      @Parameter(description="Identidade da execução confirmada.") @PathVariable UUID executionId,
+      @Parameter(description="Quantidade de recibos por página, de 1 a 200.") @RequestParam(defaultValue="50") int size,
+      @Parameter(description="Cursor opaco da página anterior de recibos.") @RequestParam(required=false) String after) {
+    return RestApiResponse.success(bulk.results(Resource.VINCULOS,bulk.locate(Resource.VINCULOS,executionId,true),executionId,size,after),null);
+  }
+  @PostMapping("/bulk/executions/{executionId}/cancel")
+  @BulkResourceOperation(BulkResourceOperation.Role.CANCEL)
+  @Operation(operationId="ergon.vinculos.bulk.cancel",summary="Solicitar parada do lote",description="Registra a solicitação de parada sem desfazer alterações já confirmadas e sem reabrir efeitos no replay.")
+  public RestApiResponse<BulkExecution> bulkCancel(@Parameter(description="Identidade da execução a interromper.") @PathVariable UUID executionId) {
+    return RestApiResponse.success(bulk.cancel(Resource.VINCULOS,bulk.locate(Resource.VINCULOS,executionId,true),executionId),null);
+  }
+
+  @PostMapping("/bulk/realocar-setor-lote/evaluation")
+  @Operation(operationId="ergon.vinculos.realocar-setor-lote.evaluation",summary="Avaliar ato coletivo",description="Realoca vínculos ativos ou cedidos por portaria do mesmo órgão, preservando versão e recibo por registro. A avaliação não grava alterações funcionais.")
+  public RestApiResponse<BulkProposal> bulkRealocarEvaluate(@io.swagger.v3.oas.annotations.parameters.RequestBody(content=@io.swagger.v3.oas.annotations.media.Content(schema=@io.swagger.v3.oas.annotations.media.Schema(implementation=ErgonBulkSchema.RealocarCommand.class))) @RequestBody BulkCommandEvaluationRequest<RealocarSetorLoteDTO,String,VinculoFilterDTO> request) {
+    return RestApiResponse.success(bulk.command("realocar-setor-lote",request),null);
+  }
+  @PostMapping("/actions/realocar-setor-lote")
+  @WorkflowAction(id="realocar-setor-lote",title="Realocar setor em lote",description="Realoca vínculos ativos ou cedidos por portaria do mesmo órgão, preservando versão e recibo por registro.",scope=ActionScope.COLLECTION,
+      requiredAuthorities={"ERGON_WRITE"},confirmationRequired=true,idempotencyKey=ActionRequirement.REQUIRED,
+      atomicity=ActionCollectionAtomicity.PER_ITEM,outcomeMode=ActionOutcomeMode.PER_ITEM,maxSelection=200)
+  @BulkOperation(mode=BulkMode.DOMAIN_COMMAND,evaluationOperationId="ergon.vinculos.realocar-setor-lote.evaluation",atomicity=ActionCollectionAtomicity.PER_ITEM)
+  @Operation(operationId="ergon.vinculos.realocar-setor-lote",summary="Realocar setor em lote",description="Realoca vínculos ativos ou cedidos por portaria do mesmo órgão, preservando versão e recibo por registro.")
+  public RestApiResponse<BulkExecution> bulkRealocarConfirm(@RequestBody BulkConfirmationRequest request,
+      @Parameter(description="Chave estável do ato coletivo para impedir efeitos duplicados.") @RequestHeader("Idempotency-Key") String key) {
+    return RestApiResponse.success(bulk.confirm(Resource.VINCULOS,"ergon.vinculos.realocar-setor-lote",request,key),null);
+  }
+
+  @PostMapping("/bulk/homologar-estagio-lote/evaluation")
+  @Operation(operationId="ergon.vinculos.homologar-estagio-lote.evaluation",summary="Avaliar ato coletivo",description="Homologa estágios ainda pendentes de vínculos ativos, com data coerente e documento do órgão. A avaliação não grava alterações funcionais.")
+  public RestApiResponse<BulkProposal> bulkHomologarEvaluate(@io.swagger.v3.oas.annotations.parameters.RequestBody(content=@io.swagger.v3.oas.annotations.media.Content(schema=@io.swagger.v3.oas.annotations.media.Schema(implementation=ErgonBulkSchema.HomologarCommand.class))) @RequestBody BulkCommandEvaluationRequest<HomologarEstagioLoteDTO,String,VinculoFilterDTO> request) {
+    return RestApiResponse.success(bulk.command("homologar-estagio-lote",request),null);
+  }
+  @PostMapping("/actions/homologar-estagio-lote")
+  @WorkflowAction(id="homologar-estagio-lote",title="Homologar estágio em lote",description="Homologa estágios ainda pendentes de vínculos ativos, com data coerente e documento do órgão.",scope=ActionScope.COLLECTION,
+      requiredAuthorities={"ERGON_WRITE"},confirmationRequired=true,idempotencyKey=ActionRequirement.REQUIRED,
+      atomicity=ActionCollectionAtomicity.PER_ITEM,outcomeMode=ActionOutcomeMode.PER_ITEM,maxSelection=200)
+  @BulkOperation(mode=BulkMode.DOMAIN_COMMAND,evaluationOperationId="ergon.vinculos.homologar-estagio-lote.evaluation",atomicity=ActionCollectionAtomicity.PER_ITEM)
+  @Operation(operationId="ergon.vinculos.homologar-estagio-lote",summary="Homologar estágio em lote",description="Homologa estágios ainda pendentes de vínculos ativos, com data coerente e documento do órgão.")
+  public RestApiResponse<BulkExecution> bulkHomologarConfirm(@RequestBody BulkConfirmationRequest request,
+      @Parameter(description="Chave estável do ato coletivo para impedir efeitos duplicados.") @RequestHeader("Idempotency-Key") String key) {
+    return RestApiResponse.success(bulk.confirm(Resource.VINCULOS,"ergon.vinculos.homologar-estagio-lote",request,key),null);
   }
 }

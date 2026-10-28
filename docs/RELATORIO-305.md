@@ -1,5 +1,38 @@
 # Relatório de rodada — issue 305
 
+## Rodada atual — Bulking #2 / Metadata #308: aceite pendente
+
+Classificação: contrato público e arquitetura; impacto e fases em [PLANO-BULKING-308.md](PLANO-BULKING-308.md). Esta seção prevalece sobre os resultados históricos abaixo.
+
+Implementados os três modos de lote nos três recursos solicitados: 10 campos elegíveis em vínculos, 7 em pessoas e 5 em cargos; duas confirmações de CRUD por recurso e dois comandos de coleção em vínculos. O host usa captura, controle, execução, recibos, leitores autorizados e cursores do kernel canônico, com runtime JPA/JDBC compartilhado e control plane separado. QUERY conserva o FilterDTO completo, incluindo BETWEEN e exclusões, e congela a seleção na avaliação. ETag, escopo e invariantes são revalidados por unidade. Os rótulos dos facts foram encurtados; seis colunas principais de setores/documentos legais ficaram visíveis.
+
+| Gate atual | Resultado e limite |
+|---|---|
+| Compilação e JAR | PASS com candidato Maven privado; health HTTP 200 |
+| Metadata canônico | 192 testes focais PASS; mais uma prova Neon distinta de ACL após aquecimento e restauração exata de grants: 193 casos distintos |
+| Auditor e transporte | 39 regressões PASS; patch aplicado em Git temporário independente e conteúdo normalizado comparado |
+| Auditor estrito do host | FAIL na versão vigente da raiz: faltam MicroVisualization/UiAnalytics em cargos, pessoas e vínculos; EntityLookupDescriptor permanece esquelético. BulkEditable/BulkOps são contabilizados; não foram removidos gates para produzir PASS |
+| `mvn test` no Neon | FAIL: campanha integral reportou 5 testes, 3 falhas e 1 erro. Os 52 testes anteriores não chegaram a executar: BeforeAll falhou na reconciliação da publicação. O teste de segurança de lote passou |
+| Protocolo durável | Tentativa anterior gravou 2 recibos CONFIRMED, mas a perda de conexão interrompeu a leitura HTTP. Isso não aprova PER_ITEM, QUERY, comandos coletivos ou o fluxo inteiro |
+| Angular | Bundle oficial compilado; execução real interrompida por HTTP 503 em capabilities. Sem PASS de consumo final ou prova de UI |
+| Preservação Neon | 16 tabelas/392 colunas, hash estrutural idêntico nas duas branches; zero fixtures de pessoas/vínculos antes da limpeza. Branch descartável excluída com autorização explícita e ausência confirmada; original preservada |
+
+Evidências: [campanha](evidence/BULKING-308-CAMPAIGN.json), [testes](evidence/bulk-neon-test-results.txt), [scorecard](evidence/SCORECARD-COMPLETUDE.md), [reconciliação dos campos](RECONCILIACAO-CAMPOS-BULK-308.md). O manifesto atual registra failed/pending; os recibos de e6b9fa0 continuam históricos.
+
+Fricções canônicas: o leitor rc.179 recusava o intervalo emitido pelo próprio resolver; exceções tipadas do kernel viravam 500; falhas transacionais do guard escapavam da classificação 503. Correções no [PR Metadata #311](https://github.com/codexrodrigues/praxis-metadata-starter/pull/311), commit `a178fe1f14`, provadas localmente como `8.0.0-ergon-bulk.308-SNAPSHOT`. O POM do host continua em rc.179; não houve release nem alegação de funcionamento integral com a dependência padrão.
+
+Bloqueio operacional restante: atestação LIVE e locks de publicação ultrapassam o prazo canônico no ambiente Neon desta execução. Foram medidos JDBC direto, pooler oficial, buffers, query simples, SQL único e JPA versus JDBC, sem margem consistente. Experiências sem ganho foram descartadas. Não foram ampliados prazos nem introduzidos retry automático, cache positivo de autorização ou recaptura automática de READY. A reconciliação administrativa ainda pode retornar 500 para timeout fora do guard de leitura; essa fronteira precisa de correção canônica e prova própria.
+
+A investigação ampliada confirmou que adiantamento e jornada padrão não existem como colunas, chaves JSONB utilizadas ou definições customizadas aprovadas no banco provisionado. O legado modela esses conceitos em outras estruturas. Não foram chamados de implementados nem substituídos por campos com outra semântica. CLEAR de correio permanece incompatível com NOT NULL.
+
+Fricções de guidance: a referência de bulk CRUD restringe UPDATE a EXPLICIT, embora UNIFORM_UPDATE admita QUERY; deve distinguir PER_ITEM/EXPLICIT de UNIFORM/EXPLICIT ou QUERY e exigir o FilterDTO completo. Provas negativas de ACL precisam restaurar grants de coluna após REVOKE de tabela. A fonte `praxis-codex-skills` já tinha alterações extensas anteriores; não houve sincronização ou sobrescrita dessa árvore nesta rodada. O ajuste de guidance permanece pendente. Os erros iniciais de leitura de RestApiResponse.data, nome de campo de recibo e restauração de ACL foram erros do harness corrigidos nesta execução, não defeitos atribuídos às skills.
+
+Derivados atualizados: prova Angular do host, relatório, manifesto, scorecard e transporte do auditor; especificação no PR canônico. Sem alteração de lib Angular, landing page, corpus HTTP público, release, merge ou consulta ao quickstart. O servidor empacotado e os auxiliares desta campanha foram encerrados.
+
+## Aceite da Fase 3A e início de Bulking
+
+O responsável aprovou explicitamente o escopo HOST de e6b9fa0: determinações reativas, invariantes e prova Angular encerram a Fase 3A com PASS. Não existe snapshot externo do Config para esta etapa; Config/rules-engine foi alocado a fase futura dedicada. Assim, a pendência de decisão governada descrita na rodada abaixo deixa de impedir o aceite daquela fase por decisão explícita do responsável. A execução atual das Issues host #2 / Metadata #308 está em andamento conforme [plano de Bulking](PLANO-BULKING-308.md); os recibos anteriores continuam identificados como evidência do commit e6b9fa0.
+
 ## Estado atual — correções da revisão de 61fc36b
 
 Esta seção prevalece sobre os registros históricos abaixo. Plano e mapa de impacto: [execução por fases](PLANO-REVISAO-61fc36b.md). A entrega amplia contrato público e arquitetura do host, conserva o starter local 8.0.0-rc.179 e não altera nenhuma das 16 entidades, 392 colunas ou configuração de criação de schema. Não houve acesso ao código do quickstart, merge ou publicação de biblioteca.
@@ -13,7 +46,7 @@ Esta seção prevalece sobre os registros históricos abaixo. Plano e mapa de im
 | R5: FKs, valores e referências incompletos | Curadoria explícita de tipo/controle/ícone, opções nomeadas, comissão/aglutinação e setores; dois recursos auxiliares reais, Quick View sem repetição de título/subtítulo | phaseOneAuxiliaryReferencesAreReadOnlyAndResolvable; schemas materializados; auditor com 29 regressões e seis recursos STATIC PASS |
 | R6: determinações, relações e consumidor ausentes | Três definições HOST em CREATE/EDIT, operações somente de avaliação, coleções relacionadas paginadas e matriz de paridade delimitada | quatro testes phaseThree; phaseTwoRelatedCollectionsRespectParentAndPagination; [runtime Angular](evidence/angular-consumer-proof.json); [matriz](MATRIZ-PARIDADE-305.md) |
 
-R6 **não está integralmente encerrado**: o gate de decisões governadas depende da identificação de snapshot aprovado do Config. Foi solicitada identidade e endpoint; não há aprovação presumida, regra estatutária inventada ou dispensa N/A. O [manifesto operacional](evidence/runtime-gates.json) registra awaiting-input e o auditor com --require-runtime-evidence deve retornar falha nesse gate, mesmo com todos os gates estruturais satisfeitos. A próxima revisão independente deve avaliar esse insumo e os limites de paridade antes de aprovar merge.
+R6 foi encerrado no escopo da Fase 3A por aprovação explícita do responsável após `e6b9fa0`: determinações HOST, invariantes transacionais e consumo do runtime Angular receberam PASS. Não existe snapshot externo destinado a esta etapa; Config/rules-engine foi reservado para fase futura. O gate `governedDecisions` é não aplicável por essa delimitação expressa. Esse aceite não aprova o novo Bulking nem o merge do PR.
 
 ### Profundidade por recurso
 

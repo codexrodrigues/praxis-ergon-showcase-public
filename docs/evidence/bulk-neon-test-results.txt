@@ -1,0 +1,19 @@
+Current candidate campaign: FAILED; not approved for merge.
+Command: mvn -Dpraxis.core.version=8.0.0-ergon-bulk.308-SNAPSHOT -Dmaven.repo.local=.local/m2-bulk308 test
+Target: isolated disposable Neon child (deleted after evidence by explicit user authorization).
+
+BulkNeonIntegrationTest: tests=4 failures=3 errors=0 skipped=0
+  FAIL publishesCanonicalBulkOperationsAndEditableFields
+  FAIL evaluatesThenExecutesUniformItemsAndCollectiveCommands
+  FAIL blockedProposalExplainsStaleVersionAndInvalidItemWithoutMutation
+  PASS readOnlyCannotEvaluateOrConfirmAnyBulkOperation
+NeonIntegrationTest: tests=1 failures=1 errors=0 skipped=0
+  FAIL [BeforeAll / class setup]
+
+Publication/capability reconciliation timed out under canonical lifecycle budget.
+Original 52 resource tests were blocked by BeforeAll, not passed or skipped by an opt-out.
+Metadata candidate focal suite: 192 tests, 0 failures/errors/skips.
+Separate Neon role proof: 1 pass, exact grants restored.
+Auditor transport: 39 regressions pass.
+Packaged JAR: builds; health 200; explicit reconciliation 500.
+Angular: official consumer bundles; actual live run fails with capabilities HTTP 503.

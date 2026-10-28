@@ -1,8 +1,14 @@
 {
   "baseline_sha256": "593fb52b8f256ce6e6bacc181d9c2b5c87071ce38915f8156f8805ec027862ed",
-  "scripts/workspace/audit-java-resource-completeness.py": "a5490f57ca31ef82eb3090c97252f4ed5d31aebceb9fcceac88c1fb5e7e270c1",
-  "scripts/workspace/java_resource_audit.py": "4a62fa5264727bcbc71be84535a0755e86fab6a9bc504448d74d048e463b2b0e",
-  "scripts/workspace/test_audit_java_resource_completeness.py": "e3dd24c10a286d4a470b113ac957bbc32aadd46c6ed4cb3b6afc8408a8c77f4f",
-  "patch_sha256": "b2784f20165af5109e3aee97b675da6eb9385a3ed422b2021a9eabf1eee4798c",
-  "isolated_patch_validation": "git apply --check, git apply, 29 regression tests: PASS"
+  "hash_semantics": "Transported source files are UTF-8/LF; source_byte_sha256 records original workspace bytes.",
+  "scripts/workspace/audit-java-resource-completeness.py": "b49d4b6a620732d77958944694b6df7955c4068d098d367ced1eaa14a0d18a22",
+  "scripts/workspace/java_resource_audit.py": "b53e60aa510ac52ef98201cc25e30794ec4c4d38ad217961fec95280baaa4ae8",
+  "scripts/workspace/test_audit_java_resource_completeness.py": "b4593db4f44daa5cd76e70d20bcaffcef02c4bf1394428bf7ec249ee67e8e6b7",
+  "source_byte_sha256": {
+    "scripts/workspace/audit-java-resource-completeness.py": "b49d4b6a620732d77958944694b6df7955c4068d098d367ced1eaa14a0d18a22",
+    "scripts/workspace/java_resource_audit.py": "b53e60aa510ac52ef98201cc25e30794ec4c4d38ad217961fec95280baaa4ae8",
+    "scripts/workspace/test_audit_java_resource_completeness.py": "b4593db4f44daa5cd76e70d20bcaffcef02c4bf1394428bf7ec249ee67e8e6b7"
+  },
+  "patch_sha256": "181e50a604e5a321d7afb63aaa3b4bc33dc31ed724560909887180b5cc0c8243",
+  "isolated_patch_validation": "git apply --check, git apply, 39 regression tests and normalized UTF-8/LF source identity: PASS"
 }

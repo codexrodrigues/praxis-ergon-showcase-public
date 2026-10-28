@@ -36,7 +36,7 @@ public class DocumentoLegalResponseDTO {
       label = "Órgão emissor",
       group = "Identificação",
       readOnly = true,
-      tableHidden = true,
+      tableHidden = false,
       quickViewVisible = true,
       quickViewOrder = 1,
       type = org.praxisplatform.uischema.FieldDataType.TEXT,
@@ -54,7 +54,7 @@ public class DocumentoLegalResponseDTO {
       label = "Espécie documental",
       group = "Identificação",
       readOnly = true,
-      tableHidden = true)
+      tableHidden = false)
   private String tipoDocumento;
 
   @Schema(
@@ -64,7 +64,7 @@ public class DocumentoLegalResponseDTO {
       label = "Número oficial",
       group = "Identificação",
       readOnly = true,
-      tableHidden = true,
+      tableHidden = false,
       quickViewVisible = true,
       quickViewOrder = 2)
   private String numeroDocumento;
@@ -76,7 +76,7 @@ public class DocumentoLegalResponseDTO {
       label = "Ano do ato",
       group = "Identificação",
       readOnly = true,
-      tableHidden = true,
+      tableHidden = false,
       quickViewVisible = true,
       quickViewOrder = 3)
   private Integer anoDocumento;
@@ -88,7 +88,7 @@ public class DocumentoLegalResponseDTO {
       label = "Publicação",
       group = "Publicação",
       readOnly = true,
-      tableHidden = true,
+      tableHidden = false,
       quickViewVisible = true,
       quickViewOrder = 4,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
@@ -124,7 +124,7 @@ public class DocumentoLegalResponseDTO {
       description =
           "Assunto jurídico ou administrativo que permite identificar a finalidade do ato.",
       accessMode = Schema.AccessMode.READ_ONLY)
-  @UISchema(label = "Ementa", group = "Fundamentação", readOnly = true, tableHidden = true)
+  @UISchema(label = "Ementa", group = "Fundamentação", readOnly = true, tableHidden = false)
   private String ementa;
 
   @DomainGovernance(

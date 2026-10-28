@@ -42,11 +42,13 @@ public abstract class CargoDados {
       description =
           "Categoria funcional do cargo, utilizada no enquadramento do servidor e na aplicação das regras estatutárias.")
   @UISchema(label = "Categoria", group = "Enquadramento", order = 20, icon = "category")
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = false)
   private String categoria;
 
   @Size(max = 40)
-  @Schema(description = "Especialidade ou classe funcional que detalha a categoria do cargo.")
+  @Schema(nullable = true, description = "Especialidade ou classe funcional que detalha a categoria do cargo.")
   @UISchema(label = "Subcategoria", group = "Enquadramento", order = 30, icon = "label")
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private String subcategoria;
 
   @Size(max = 40)
@@ -60,6 +62,7 @@ public abstract class CargoDados {
       icon = "work_outline",
       quickViewVisible = true,
       quickViewOrder = 1)
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = false)
   private String tipoCargo;
 
   @NotBlank
@@ -71,7 +74,7 @@ public abstract class CargoDados {
   private String cargoFuncao = "C";
 
   @Size(max = 20)
-  @Schema(
+  @Schema(nullable = true,
       description =
           "Grau de instrução mínimo exigido para provimento no cargo, conforme o domínio de escolaridade do Ergon.")
   @UISchema(
@@ -81,6 +84,7 @@ public abstract class CargoDados {
       icon = "school",
       quickViewVisible = true,
       quickViewOrder = 2)
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private String escolaridade;
 
   @Size(max = 10)
@@ -117,6 +121,7 @@ public abstract class CargoDados {
       icon = "rule",
       quickViewVisible = true,
       quickViewOrder = 3)
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = false)
   private Boolean controleVaga = false;
 
   @NotNull

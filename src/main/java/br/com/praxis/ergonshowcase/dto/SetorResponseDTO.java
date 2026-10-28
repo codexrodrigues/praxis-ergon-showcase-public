@@ -25,7 +25,7 @@ public class SetorResponseDTO {
       label = "Código da unidade",
       group = "Identificação",
       readOnly = true,
-      tableHidden = true)
+      tableHidden = false)
   private String id;
 
   @ResourceReference(
@@ -41,7 +41,7 @@ public class SetorResponseDTO {
       label = "Órgão",
       group = "Identificação",
       readOnly = true,
-      tableHidden = true,
+      tableHidden = false,
       quickViewVisible = true,
       quickViewOrder = 1,
       type = org.praxisplatform.uischema.FieldDataType.TEXT,
@@ -65,13 +65,13 @@ public class SetorResponseDTO {
       label = "Unidade organizacional",
       group = "Identificação",
       readOnly = true,
-      tableHidden = true)
+      tableHidden = false)
   private String nome;
 
   @Schema(
       description = "Denominação abreviada usada para distinguir a unidade em organogramas.",
       accessMode = Schema.AccessMode.READ_ONLY)
-  @UISchema(label = "Sigla", group = "Identificação", readOnly = true, tableHidden = true)
+  @UISchema(label = "Sigla", group = "Identificação", readOnly = true, tableHidden = false)
   private String sigla;
 
   @ResourceReference(
@@ -103,7 +103,7 @@ public class SetorResponseDTO {
       label = "Tipo de unidade",
       group = "Organograma",
       readOnly = true,
-      tableHidden = true,
+      tableHidden = false,
       quickViewVisible = true,
       quickViewOrder = 2)
   private String tipoSetor;
@@ -130,7 +130,7 @@ public class SetorResponseDTO {
       label = "Fim da vigência",
       group = "Vigência",
       readOnly = true,
-      tableHidden = true,
+      tableHidden = false,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
       icon = "event")

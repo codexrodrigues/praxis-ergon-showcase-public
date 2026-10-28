@@ -4,13 +4,19 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { normalizeSchemaFields } from '@praxisui/core/schema';
 import { Observable } from 'rxjs';
 import { ReactiveDeterminationRuntimeService } from 'OFFICIAL_RUNTIME_PATH';
+import { BulkOperationClientService } from 'OFFICIAL_BULK_RUNTIME_PATH';
+import { ResourceDiscoveryService } from 'OFFICIAL_DISCOVERY_RUNTIME_PATH';
+import { HttpClient } from '@angular/common/http';
+import { Injector, runInInjectionContext } from '@angular/core';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
 const [baseUrl, evidenceDir] = process.argv.slice(2);
 assert(baseUrl && evidenceDir);
-assert.equal(process.env.PROOF_NEON_BRANCH, 'br-super-sound-b7urizmd', 'Only the isolated proof branch is permitted');
+const expectedProofBranch = process.env.BULK_PROOF_DISPOSABLE_BRANCH ?? 'br-super-sound-b7urizmd';
+assert.match(expectedProofBranch, /^br-[a-z0-9-]+$/u);
+assert.equal(process.env.PROOF_NEON_BRANCH, expectedProofBranch, 'Use the explicitly provisioned isolated proof branch');
 const auth = 'Basic ' + Buffer.from(process.env.SHOWCASE_USERNAME + ':' + process.env.SHOWCASE_PASSWORD).toString('base64');
 async function http(url: string, method = 'GET', body?: unknown, extra: any = {}) {
   const response = await fetch(new URL(url, baseUrl), { method, headers: { Authorization: auth, 'Content-Type': 'application/json', 'X-Tenant': '1', ...extra }, body: body === undefined ? undefined : JSON.stringify(body) });
@@ -19,7 +25,27 @@ async function http(url: string, method = 'GET', body?: unknown, extra: any = {}
   return result?.data ?? result;
 }
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
-const receipt: any = { schemas: [], executions: [], staleResultProtected: false, rejectionVisible: false, fixtureRemoved: false };
+const receipt: any = { schemas: [], executions: [], bulkContracts: [], staleResultProtected: false, rejectionVisible: false, fixtureRemoved: false };
+// This proof exercises the official contract reader, not its transport methods.
+const injector = Injector.create({providers: [
+  {provide: HttpClient, useValue: {}}, {provide: ResourceDiscoveryService, useValue: {}}
+]});
+const bulkClient = runInInjectionContext(injector, () => new BulkOperationClientService());
+for (const resource of ['vinculos', 'servidor-pessoas', 'cargos']) {
+  const capabilities = await http('/api/ergon/' + resource + '/capabilities');
+  for (const operationId of ['bulk-update', 'bulk-update-items']) {
+    const contract = bulkClient.fromCapability(capabilities.operations[operationId]);
+    assert(contract.editableFields?.writableFields.length, 'Backend must publish writable fields');
+    assert(contract.editableFields?.clearableFields.length, 'Backend must publish nullable clearable fields');
+    assert(contract.editableFields!.clearableFields.every(field => contract.editableFields!.writableFields.includes(field)));
+    assert.equal(contract.evaluationOperation.operation.method, 'POST');
+    assert.equal(contract.confirmationOperation.operation.method, 'POST');
+    assert.notEqual(contract.evaluationOperation.operation.operationId, contract.confirmationOperation.operation.operationId);
+    receipt.bulkContracts.push({ resource, operationId, mode: contract.mode,
+      writableFields: contract.editableFields!.writableFields, clearableFields: contract.editableFields!.clearableFields,
+      evaluation: contract.evaluationOperation.operation, confirmation: contract.confirmationOperation.operation });
+  }
+}
 let fixtureCreated = false;
 try {
   const existing = await fetch(new URL('/api/ergon/cargos/9590', baseUrl), { headers: { Authorization: auth } });
@@ -91,4 +117,4 @@ try {
   }
 }
 await fs.writeFile(path.join(evidenceDir, 'angular-consumer-proof.json'), JSON.stringify(receipt, null, 2));
-console.log(JSON.stringify({ schemas: receipt.schemas.length, executions: receipt.executions.length, staleResultProtected: receipt.staleResultProtected, rejectionVisible: receipt.rejectionVisible, fixtureRemoved: receipt.fixtureRemoved }));
+console.log(JSON.stringify({ schemas: receipt.schemas.length, executions: receipt.executions.length, bulkContracts: receipt.bulkContracts.length, staleResultProtected: receipt.staleResultProtected, rejectionVisible: receipt.rejectionVisible, fixtureRemoved: receipt.fixtureRemoved }));

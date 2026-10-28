@@ -1,14 +1,53 @@
+diff --git a/scripts/workspace/audit-java-resource-completeness.py b/scripts/workspace/audit-java-resource-completeness.py
 --- a/scripts/workspace/audit-java-resource-completeness.py
 +++ b/scripts/workspace/audit-java-resource-completeness.py
-@@ -19,6 +19,7 @@
+@@ -6,9 +6,11 @@
+ 1. Entity-to-DTO truncation (percentage of @Entity business fields exposed in ResponseDTO/CreateDTO/UpdateDTO).
+ 2. Quick View / 360° readiness (@ResourceIdentity subtitleField/metadataFields, @UISchema quickViewVisible/quickViewOrder,
+    @ResourceReference with previewSurfaceId, and READ_PROJECTION / VIEW @UiSurface).
+-3. @UISchema editorial quality (detects descriptions pasted as labels, LocalDate fields without DATE_PICKER, etc.).
++3. @UISchema & @ResourceFact editorial quality (detects descriptions pasted as labels, LocalDate fields without DATE_PICKER,
++   skeletal EntityLookupDescriptor, and excessive unhidden table columns in DTOs).
+ 4. FilterDTO density (count of @Filterable fields, variety of FilterOperation, and @QuickFilter presence).
+-5. Praxis semantic capabilities (@UiSurface, @WorkflowAction, @ResourceIntent, @ResourceFact).
++5. Praxis semantic capabilities (@UiSurface, @WorkflowAction, @ResourceIntent, @ResourceFact, @MicroVisualization, @UiAnalytics,
++   and Governed Bulking @BulkEditable / @BulkResourceOperations / @BulkOperation).
+ 
+ Usage:
+     python scripts/workspace/audit-java-resource-completeness.py <path-to-java-host-project> [--strict]
+@@ -19,6 +21,19 @@
  import argparse
  import re
  import sys
-+from java_resource_audit import technical_or_mirrored, mapped_input_fields, command_fields, relationship_key_fields, presentation_issues, relationship_display_fields, runtime_evidence_issues
++from java_resource_audit import (
++    technical_or_mirrored,
++    mapped_input_fields,
++    command_fields,
++    relationship_key_fields,
++    presentation_issues,
++    relationship_display_fields,
++    runtime_evidence_issues,
++    bulk_source_summary,
++    resource_fact_editorial_issues,
++    dto_table_visibility_issues,
++    entity_lookup_descriptor_issues,
++)
  from dataclasses import dataclass, field
  from pathlib import Path
  from typing import Dict, List, Optional, Set, Tuple
-@@ -109,7 +110,7 @@
+@@ -79,7 +94,10 @@
+     n = len(body)
+     while i < n:
+         ch = body[i]
+-        if ch == "{":
++        if ch in "{}" and paren_depth > 0:
++            if brace_depth == 0:
++                current_token.append(ch)
++        elif ch == "{":
+             brace_depth += 1
+             if brace_depth == 1:
+                 current_token.append("{")
+@@ -109,7 +127,7 @@
          i += 1
  
      field_re = re.compile(
@@ -17,7 +56,7 @@
          re.DOTALL,
      )
      for stmt in top_statements:
-@@ -222,30 +223,8 @@
+@@ -222,30 +240,8 @@
      return list(merged.values())
  
  
@@ -49,7 +88,7 @@
  
  
  def main() -> int:
-@@ -253,14 +232,18 @@
+@@ -253,14 +249,18 @@
          description="Audit Praxis Java resource completeness, Quick View readiness, and editorial quality."
      )
      parser.add_argument("project_dir", type=Path, help="Path to the Java host project root")
@@ -60,10 +99,9 @@
          type=float,
 -        default=85.0,
 -        help="Minimum Entity-to-ResponseDTO coverage %% (default: 85)",
--    )
 +        default=100.0,
 +        help="Minimum reading coverage %% (default: 100; cannot weaken accountability)",
-+    )
+     )
 +    parser.add_argument("--require-runtime-evidence", action="store_true", help="Also require fresh hashed receipts for operational/consumer/parity gates")
 +    parser.add_argument("--evidence-manifest", type=Path, default=None, help="Default: <host>/docs/evidence/runtime-gates.json")
      args = parser.parse_args()
@@ -72,7 +110,7 @@
  
      src_main = args.project_dir / "src" / "main" / "java"
      if not src_main.exists():
-@@ -276,17 +259,34 @@
+@@ -276,17 +276,34 @@
      controllers = [c for c in classes.values() if c.is_controller and c.controller_type_args]
      services = [c for c in classes.values() if c.is_service and c.service_type_args]
      entities = [c for c in classes.values() if "@Entity" in c.content]
@@ -102,15 +140,14 @@
      print("## 1. Resource & Capability Scorecard")
      print(
 -        "| Resource (`resourceKey`) | Entity | BizCols | RespCols | Cov % | FilterCols | FilterOps | `@QuickFilter` | QuickViewCols | RichIdentity | `@ResourceRef` (`preview`) | `@UiSurface` | `@WorkflowAction` | `@ResourceIntent` | `@ResourceFact` | EditorialIssues | Status |"
--    )
++        "| Resource (`resourceKey`) | Entity | BizCols | RespCols | Cov % | Accounted writes | FilterCols | FilterOps | `@QuickFilter` | QuickViewCols | RichIdentity | `@ResourceRef` (`preview`) | `@UiSurface` | `@WorkflowAction` | `@ResourceIntent` | `@ResourceFact` | `MicroViz` | `UiAnalytics` | BulkEditable | BulkOps | EditorialIssues | Status |"
+     )
 -    print("|---|---|---:|---:|---:|---:|---|---:|---:|:---:|---|---:|---:|---:|---:|---:|---|")
-+        "| Resource (`resourceKey`) | Entity | BizCols | RespCols | Cov % | Accounted writes | FilterCols | FilterOps | `@QuickFilter` | QuickViewCols | RichIdentity | `@ResourceRef` (`preview`) | `@UiSurface` | `@WorkflowAction` | `@ResourceIntent` | `@ResourceFact` | EditorialIssues | Status |"
-+    )
-+    print("|---|---|---:|---:|---:|---:|---:|---|---:|---:|:---:|---|---:|---:|---:|---:|---:|---|")
++    print("|---|---|---:|---:|---:|---:|---:|---|---:|---:|:---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|")
  
      failures: List[str] = []
      unmapped_details: List[Tuple[str, str, List[str]]] = []
-@@ -300,6 +300,7 @@
+@@ -300,6 +317,7 @@
              resp_dto_name, _, filter_dto_name = t_args
              create_dto_name, update_dto_name = "", ""
          else:
@@ -118,7 +155,7 @@
              continue
  
          matched_svc = next(
-@@ -329,20 +330,15 @@
+@@ -329,20 +347,15 @@
  
          entity_biz_fields: List[Tuple[str, str]] = []
          for f_type, f_name, f_annot in entity_all_fields:
@@ -142,7 +179,7 @@
  
          covered_count = 0
          missing_fields: List[str] = []
-@@ -398,6 +394,20 @@
+@@ -398,6 +411,20 @@
                          f"{filter_dto_name}.{f_name}: label looks like a sentence/description ('{lbl}')"
                      )
  
@@ -163,7 +200,7 @@
          related_class_names = {
              ctrl.name,
              matched_svc.name if matched_svc else "",
-@@ -414,8 +424,14 @@
+@@ -414,8 +441,14 @@
          combined_sources = "\n".join(
              classes[n].content for n in related_class_names if n and n in classes
          )
@@ -180,16 +217,27 @@
          )
          quick_filter_count = len(re.findall(r"@(?:[\w.]+\.)?QuickFilter\b", combined_sources))
          ui_surface_count = len(re.findall(r"@(?:[\w.]+\.)?UiSurface\b", combined_sources))
-@@ -427,10 +443,29 @@
+@@ -425,12 +458,40 @@
+         resource_intent_count = len(
+             re.findall(r"@(?:[\w.]+\.)?ResourceIntent\b", combined_sources)
          )
++        bulk_editable_count, bulk_operation_count, bulk_issues = bulk_source_summary(ctrl.content, update_all_fields)
          resource_fact_count = len(re.findall(r"@(?:[\w.]+\.)?ResourceFact\b", combined_sources))
- 
++        micro_viz_count = sum(1 for _, _, ann in resp_all_fields if re.search(r"@(?:[\w.]+\.)?MicroVisualization\b", ann))
++        ui_analytics_count = len(re.findall(r"@(?:[\w.]+\.)?AnalyticsProjection\b", combined_sources))
++        res_editorial_issues.extend(resource_fact_editorial_issues(ctrl.content, ctrl.name))
++        res_editorial_issues.extend(dto_table_visibility_issues(resp_dto_name, resp_all_fields))
++        for proj_dto in set(re.findall(r'\bResponseEntity<\s*([\w.]+)\s*>', strip_comments(ctrl.content))):
++            proj_short = proj_dto.split(".")[-1]
++            if proj_short != resp_dto_name and proj_short in classes:
++                res_editorial_issues.extend(dto_table_visibility_issues(proj_short, get_all_fields_with_inheritance(proj_short, classes)))
++
 +        mapper_n_plus_one = False
 +        for info in classes.values():
 +            if re.search(r"\bResourceMapper\s*<\s*" + re.escape(entity_name) + r"\s*,", info.content):
 +                if re.search(r"\b(?:createQuery|createNativeQuery)\s*\(", strip_comments(info.content)):
 +                    mapper_n_plus_one = True
-+
+ 
          res_label = ctrl.resource_key or ctrl.name
          row_issues: List[str] = []
 -
@@ -212,7 +260,7 @@
              row_issues.append(f"DTO coverage {coverage_pct:.1f}% < {args.min_dto_coverage:.0f}%")
          if total_ent_biz >= 8 and filterable_count < 5:
              row_issues.append(f"Only {filterable_count} @Filterable")
-@@ -438,10 +473,49 @@
+@@ -438,10 +499,49 @@
              row_issues.append(f"Low FilterOperation diversity ({len(filter_ops)})")
          if quick_filter_count < 2:
              row_issues.append(f"Only {quick_filter_count} @QuickFilter")
@@ -264,7 +312,21 @@
          if (
              ui_surface_count + workflow_action_count + resource_intent_count + resource_fact_count
          ) < 1:
-@@ -457,10 +531,12 @@
+@@ -449,6 +549,13 @@
+         if res_editorial_issues:
+             row_issues.append(f"{len(res_editorial_issues)} @UISchema editorial issues")
+ 
++        row_issues.extend(bulk_issues)
++        if writable_resource and total_ent_biz >= 15 and (bulk_editable_count < 1 or bulk_operation_count < 1):
++            row_issues.append(f"Enterprise mutable resource (>=15 biz cols) missing @BulkEditable/@BulkOperation ({bulk_editable_count}/{bulk_operation_count})")
++        if writable_resource and total_ent_biz >= 15 and micro_viz_count < 1:
++            row_issues.append("Enterprise mutable resource (>=15 biz cols) missing @MicroVisualization")
++        if writable_resource and total_ent_biz >= 15 and ui_analytics_count < 1:
++            row_issues.append("Enterprise mutable resource (>=15 biz cols) missing @UiAnalytics/@AnalyticsProjection")
+         status_str = "PASS" if not row_issues else "FAIL (" + "; ".join(row_issues) + ")"
+         if row_issues:
+             failures.append(f"{res_label}: {status_str}")
+@@ -457,11 +564,19 @@
          if res_editorial_issues:
              editorial_details.append((res_label, res_editorial_issues))
  
@@ -274,11 +336,19 @@
          rich_id_str = "YES" if has_rich_identity else "NO"
          print(
 -            f"| `{res_label}` | `{entity_name}` | {total_ent_biz} | {len(resp_fields)} | {coverage_pct:.1f}% | {filterable_count} | {ops_str} | {quick_filter_count} | {quick_view_cols} | {rich_id_str} | {res_ref_count} ({res_ref_preview_count}) | {ui_surface_count} | {workflow_action_count} | {resource_intent_count} | {resource_fact_count} | {len(res_editorial_issues)} | **{status_str}** |"
-+            f"| `{res_label}` | `{entity_name}` | {total_ent_biz} | {len(resp_fields)} | {coverage_pct:.1f}% | {accounted_writes} | {filterable_count} | {ops_str} | {quick_filter_count} | {quick_view_cols} | {rich_id_str} | {res_ref_count} ({res_ref_preview_count}) | {ui_surface_count} | {workflow_action_count} | {resource_intent_count} | {resource_fact_count} | {len(res_editorial_issues)} | **{status_str}** |"
-         )
+-        )
++            f"| `{res_label}` | `{entity_name}` | {total_ent_biz} | {len(resp_fields)} | {coverage_pct:.1f}% | {accounted_writes} | {filterable_count} | {ops_str} | {quick_filter_count} | {quick_view_cols} | {rich_id_str} | {res_ref_count} ({res_ref_preview_count}) | {ui_surface_count} | {workflow_action_count} | {resource_intent_count} | {resource_fact_count} | {micro_viz_count} | {ui_analytics_count} | {bulk_editable_count} | {bulk_operation_count} | {len(res_editorial_issues)} | **{status_str}** |"
++        )
++
++    lookup_issues = entity_lookup_descriptor_issues(classes)
++    if lookup_issues:
++        editorial_details.append(("OptionSources / EntityLookupDescriptor", lookup_issues))
++        for li in lookup_issues:
++            failures.append(f"OptionSources: FAIL ({li})")
  
      if unmapped_details:
-@@ -479,17 +555,25 @@
+         print("\n## 2. Unmapped Entity Business Columns (Entity -> ResponseDTO Gaps)")
+@@ -479,17 +594,25 @@
              if len(issues) > 12:
                  print(f"  - ... and {len(issues) - 12} more")
  
@@ -308,9 +378,11 @@
          )
  
      return 0
+diff --git a/scripts/workspace/java_resource_audit.py b/scripts/workspace/java_resource_audit.py
+new file mode 100644
 --- /dev/null
 +++ b/scripts/workspace/java_resource_audit.py
-@@ -0,0 +1,201 @@
+@@ -0,0 +1,283 @@
 +"""Conservative static source evidence. This module does not approve runtime behavior."""
 +import re
 +
@@ -446,6 +518,53 @@
 +    return issues
 +
 +
++def resource_fact_editorial_issues(source, owner_name):
++    issues = []
++    for fact in re.findall(r'@(?:\w+\.)*ResourceFact\s*\((.*?)\)', source, re.DOTALL):
++        key_m = re.search(r'key\s*=\s*"([^"]+)"', fact)
++        lbl_m = re.search(r'label\s*=\s*"([^"]+)"', fact)
++        if lbl_m:
++            lbl = lbl_m.group(1).strip()
++            if len(lbl) > 36 or lbl.endswith("."):
++                key_name = key_m.group(1) if key_m else "unknown"
++                issues.append(f"{owner_name}@ResourceFact({key_name}): label looks like a sentence/description ('{lbl}')")
++    return issues
++
++
++def dto_table_visibility_issues(dto_name, fields):
++    ui_fields = [(name, ann) for _, name, ann in fields if "@UISchema" in ann]
++    if len(ui_fields) < 15:
++        return []
++    hidden = [
++        name for name, ann in ui_fields
++        if re.search(r'tableHidden\s*=\s*true', ann)
++    ]
++    if len(hidden) == 0:
++        return [
++            f"{dto_name}: {len(ui_fields)} @UISchema fields have 0 tableHidden=true (>= 15 fields); mark secondary detail fields with tableHidden=true"
++        ]
++    return []
++
++
++def entity_lookup_descriptor_issues(classes):
++    issues = []
++    for info in classes.values():
++        cleaned = re.sub(r"/\*.*?\*/|//.*?$", "", info.content, flags=re.DOTALL | re.MULTILINE)
++        for match in re.finditer(r'new\s+EntityLookupDescriptor\s*\(', cleaned):
++            start = cleaned.find("(", match.start())
++            end = end_delimiter(cleaned, start, "(", ")")
++            if end < 0:
++                continue
++            args_body = cleaned[start + 1 : end]
++            null_count = len(re.findall(r'\bnull\b', args_body))
++            if null_count >= 3:
++                issues.append(
++                    f"{info.name}: skeletal EntityLookupDescriptor ({null_count} null arguments; populate LookupSelectionPolicy, LookupDetailDescriptor, LookupDisplayDescriptor, LookupFilteringDescriptor)"
++                )
++                break
++    return issues
++
++
 +def relationship_display_fields(entity, fields, classes):
 +    relations = {name for _, name, ann in fields if re.search(r'@(?:ManyToOne|OneToOne)\b', ann)}
 +    result = set()
@@ -460,12 +579,47 @@
 +    return result
 +
 +
-+RUNTIME_GATES = {"schema", "http", "availability", "persistence", "parity", "angularReadiness", "coldQueries", "reactiveDeterminations", "governedDecisions"}
++RUNTIME_GATES = {"schema", "http", "availability", "persistence", "parity", "angularReadiness", "coldQueries", "reactiveDeterminations", "governedDecisions", "bulkOperations"}
++
++
++def bulk_source_summary(controller_source, update_fields):
++    """Reports structural opt-ins, never durable readiness or authorization."""
++    editable = {name: ann for _, name, ann in update_fields
++                if re.search(r'@(?:\w+\.)*BulkEditable\b', ann)}
++    methods = java_methods(controller_source)
++    operations = {name: header for name, (header, _, _) in methods.items()
++                  if re.search(r'@(?:\w+\.)*BulkOperation\s*\(', masked_java(header))}
++    issues = []
++    declared = bool(re.search(r'@(?:\w+\.)*BulkResourceOperations\b', masked_java(controller_source)))
++    if (editable or operations) and not declared:
++        issues.append("Bulk opt-in requires @BulkResourceOperations on the resource")
++    for name, ann in editable.items():
++        if 'BulkMode.DOMAIN_COMMAND' in ann:
++            issues.append(name + ': DOMAIN_COMMAND is not a field-editing mode')
++        if re.search(r'allowClear\s*=\s*true', ann) and not re.search(r'nullable\s*=\s*true', ann):
++            issues.append(name + ': CLEAR requires explicit schema nullability')
++    if editable:
++        for mode in ('UNIFORM_UPDATE', 'PER_ITEM_UPDATE'):
++            if any('BulkMode.' + mode in ann or not re.search(r'\bmodes\s*=', ann) for ann in editable.values()) and not any('BulkMode.' + mode in header for header in operations.values()):
++                issues.append(mode + ': editable fields lack a real confirmation handler')
++    operation_ids = set(re.findall(r'operationId\s*=\s*"([^"]+)"', controller_source))
++    for name, header in operations.items():
++        match = re.search(r'evaluationOperationId\s*=\s*"([^"]+)"', header)
++        if not match or match[1] not in operation_ids:
++            issues.append(name + ': evaluation operation is unresolved')
++        if 'BulkMode.DOMAIN_COMMAND' in header and not re.search(r'@(?:\w+\.)*WorkflowAction\s*\([^)]*ActionScope\.COLLECTION', header, re.S):
++            issues.append(name + ': DOMAIN_COMMAND requires COLLECTION WorkflowAction')
++    return len(editable), len(operations), issues
 +
 +
 +def source_fingerprint(project):
 +    import hashlib
 +    digest = hashlib.sha256()
++    pom = project / "pom.xml"
++    if pom.is_file():
++        digest.update(b"pom.xml\0")
++        digest.update(pom.read_text(encoding="utf-8-sig").encode())
++        digest.update(b"\0")
 +    for folder in ("src", "scripts/workspace"):
 +        base = project / folder
 +        if not base.exists():
@@ -512,9 +666,11 @@
 +            elif hashlib.sha256(file.read_bytes()).hexdigest() != artifact.get("sha256"):
 +                errors.append(name + ": artifact hash mismatch")
 +    return errors
+diff --git a/scripts/workspace/test_audit_java_resource_completeness.py b/scripts/workspace/test_audit_java_resource_completeness.py
+new file mode 100644
 --- /dev/null
 +++ b/scripts/workspace/test_audit_java_resource_completeness.py
-@@ -0,0 +1,210 @@
+@@ -0,0 +1,276 @@
 +"""Regression proofs for the canonical static audit; no product DTO enrichment."""
 +import importlib.util
 +from pathlib import Path
@@ -530,7 +686,21 @@
 +audit=importlib.util.module_from_spec(spec)
 +sys.modules[spec.name]=audit
 +spec.loader.exec_module(audit)
-+from java_resource_audit import technical_or_mirrored, command_fields, mapped_input_fields, presentation_issues, relationship_key_fields, relationship_display_fields, source_fingerprint, runtime_evidence_issues, RUNTIME_GATES
++from java_resource_audit import (
++    technical_or_mirrored,
++    command_fields,
++    mapped_input_fields,
++    presentation_issues,
++    relationship_key_fields,
++    relationship_display_fields,
++    source_fingerprint,
++    runtime_evidence_issues,
++    RUNTIME_GATES,
++    bulk_source_summary,
++    resource_fact_editorial_issues,
++    dto_table_visibility_issues,
++    entity_lookup_descriptor_issues,
++)
 +
 +
 +def info(name,content,fields=()):
@@ -591,7 +761,6 @@
 +
 +    def test_real_self_reference_is_accepted(self):
 +        result=self.fixture_audit(True,reference='@ResourceReference(resourceKey="test.items",surfaceId="view",previewSurfaceId="view")')
-+        # The fixture declares its real surface id explicitly below.
 +        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
 +
 +    def test_read_only_resource_does_not_require_mutation_handlers(self):
@@ -722,6 +891,59 @@
 +            result=subprocess.run([sys.executable,str(ROOT/"audit-java-resource-completeness.py"),tmp,"--strict"],capture_output=True,text=True)
 +            self.assertEqual(result.returncode,2)
 +
++    def test_bulk_counts_effective_inherited_fields_and_real_handlers(self):
++        fields=[("String","name",'@Schema(nullable=true) @BulkEditable(modes={BulkMode.UNIFORM_UPDATE,BulkMode.PER_ITEM_UPDATE},allowClear=true)')]
++        source='@BulkResourceOperations class C { @Operation(operationId="eval") @PostMapping("/evaluation") public R eval(){return evaluate();} @BulkOperation(mode=BulkMode.UNIFORM_UPDATE,evaluationOperationId="eval") @PostMapping("/bulk") public R uniform(){return execute();} @BulkOperation(mode=BulkMode.PER_ITEM_UPDATE,evaluationOperationId="eval") @PostMapping("/items") public R items(){return execute();} }'
++        self.assertEqual(bulk_source_summary(source,fields),(1,2,[]))
++
++    def test_bulk_annotations_without_executable_confirmation_fail(self):
++        count,ops,issues=bulk_source_summary('@BulkResourceOperations class C {}',[("String","name",'@BulkEditable')])
++        self.assertEqual((count,ops),(1,0))
++        self.assertEqual(len(issues),2)
++
++    def test_bulk_clear_requires_real_schema_nullability(self):
++        _,_,issues=bulk_source_summary('class C {}',[("String","name",'@BulkEditable(allowClear=true)')])
++        self.assertTrue(any('schema nullability' in issue for issue in issues))
++        self.assertTrue(any('@BulkResourceOperations' in issue for issue in issues))
++
++    def test_bulk_domain_command_requires_collection_action_and_resolved_evaluation(self):
++        source='@BulkResourceOperations class C { @BulkOperation(mode=BulkMode.DOMAIN_COMMAND,evaluationOperationId="absent") @WorkflowAction(scope=ActionScope.ITEM) @PostMapping("/command") public R command(){return execute();} }'
++        count,ops,issues=bulk_source_summary(source,[])
++        self.assertEqual((count,ops),(0,1))
++        self.assertEqual(len(issues),2)
++
++    def test_read_only_resource_requires_no_bulk(self):
++        self.assertEqual(bulk_source_summary('class C {}',[]),(0,0,[]))
++
++    def test_annotation_arrays_preserve_preceding_schema_and_ui_metadata(self):
++        fields=audit.extract_fields('class D { @Schema(nullable=true) @UISchema(label="Lotação",quickViewVisible=true) @BulkEditable(modes={BulkMode.UNIFORM_UPDATE,BulkMode.PER_ITEM_UPDATE},allowClear=true) private String setor; }')
++        self.assertEqual(len(fields),1)
++        self.assertIn('@Schema',fields[0][2])
++        self.assertIn('@UISchema',fields[0][2])
++        self.assertIn('@BulkEditable',fields[0][2])
++
++    def test_maven_dependency_changes_invalidate_operational_receipts(self):
++        with tempfile.TemporaryDirectory() as tmp:
++            project=Path(tmp);(project/"pom.xml").write_text("<version>first</version>")
++            before=source_fingerprint(project)
++            (project/"pom.xml").write_text("<version>second</version>")
++            self.assertNotEqual(before,source_fingerprint(project))
++
++    def test_resource_fact_label_sentence_is_flagged(self):
++        src='@ResourceFact(key="saldo", label="Saldo disponível de vagas autorizadas no quadro de pessoal.") class C {}'
++        self.assertEqual(len(resource_fact_editorial_issues(src,"C")),1)
++        ok='@ResourceFact(key="saldo", label="Saldo de Vagas") class C {}'
++        self.assertEqual(resource_fact_editorial_issues(ok,"C"),[])
++
++    def test_dto_excessive_visible_table_columns_is_flagged(self):
++        fields=[("String",f"f{i}",'@UISchema(label="Col")') for i in range(15)]
++        self.assertEqual(len(dto_table_visibility_issues("ProjectionDTO",fields)),1)
++        curated=[("String",f"f{i}",'@UISchema(label="Col"' + (',tableHidden=true' if i>=8 else '') + ')') for i in range(15)]
++        self.assertEqual(dto_table_visibility_issues("ProjectionDTO",curated),[])
++
++    def test_skeletal_entity_lookup_descriptor_is_flagged(self):
++        cfg=info("OptionSourcesConfig",'class OptionSourcesConfig { void reg(){ new EntityLookupDescriptor("k","id","lbl",null,List.of(),null,null,null,null,null,LookupCapabilities.defaults()); } }')
++        self.assertEqual(len(entity_lookup_descriptor_issues({"OptionSourcesConfig":cfg})),1)
 +
 +if __name__=="__main__":
 +    unittest.main()

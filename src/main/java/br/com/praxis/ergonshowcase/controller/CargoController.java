@@ -1,5 +1,16 @@
 package br.com.praxis.ergonshowcase.controller;
 
+import br.com.praxis.ergonshowcase.bulk.*;
+import br.com.praxis.ergonshowcase.bulk.ErgonBulkDomain.Resource;
+import org.praxisplatform.uischema.bulk.*;
+import org.praxisplatform.uischema.action.*;
+import org.praxisplatform.uischema.dto.CursorPage;
+import org.praxisplatform.uischema.rest.response.RestApiResponse;
+import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import java.util.UUID;
+
 import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import br.com.praxis.ergonshowcase.domain.*;
 import br.com.praxis.ergonshowcase.dto.*;
@@ -11,7 +22,7 @@ import org.praxisplatform.uischema.controller.base.AbstractResourceController;
 @org.praxisplatform.uischema.fact.ResourceFact(
     key = "cargoExtinto",
     resourceKey = "administracao-pessoal.cargos",
-    label = "Indica existência de extinção registrada para o cargo",
+    label = "Cargo extinto",
     description = "Indica existência de extinção registrada para o cargo.",
     dataType = "boolean",
     sourceKind = "computed")
@@ -20,11 +31,18 @@ import org.praxisplatform.uischema.controller.base.AbstractResourceController;
     unit = "positions",
     resourceKey = "administracao-pessoal.cargos",
     label =
-        "Vagas autorizadas menos vínculos ativos, afastados ou cedidos; nulo quando não há quantitativo autorizado",
+        "Saldo de vagas",
     description =
         "Vagas autorizadas menos vínculos ativos, afastados ou cedidos; nulo quando não há quantitativo autorizado.",
     dataType = "integer",
     sourceKind = "computed")
+@BulkResourceOperations(
+    proposalOperationId="ergon.cargos.bulk.proposal",
+    proposalResultsOperationId="ergon.cargos.bulk.proposal-results",
+    executionOperationId="ergon.cargos.bulk.execution",
+    executionResultsOperationId="ergon.cargos.bulk.results",
+    cancelOperationId="ergon.cargos.bulk.cancel",
+    updateSourceOperationId="updateErgonCargo", protectedUpdateFields={})
 @ApiResource(
     quickFilters = {
       @QuickFilter(
@@ -268,6 +286,7 @@ public class CargoController
 
   @Override
   @org.springframework.web.bind.annotation.PutMapping("/{id}")
+  @BulkResourceOperation(BulkResourceOperation.Role.UPDATE_SOURCE)
   @io.swagger.v3.oas.annotations.Operation(
       operationId = "updateErgonCargo",
       summary = "Manter cargo",
@@ -298,5 +317,68 @@ public class CargoController
       @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
           CargoSelectionDTO draft) {
     return org.springframework.http.ResponseEntity.ok(determinations.aglutinador(draft));
+  }
+
+  @org.springframework.beans.factory.annotation.Autowired private ErgonBulkOperations bulk;
+
+  @PostMapping("/bulk/update/evaluation")
+  @Operation(operationId="ergon.cargos.bulk.uniform.evaluation", summary="Avaliar edição uniforme",description="Avalia seleção, versões e alterações sem modificar o cadastro; produz uma proposta protegida.")
+  public RestApiResponse<BulkProposal> bulkEvaluate(@io.swagger.v3.oas.annotations.parameters.RequestBody(content=@io.swagger.v3.oas.annotations.media.Content(schema=@io.swagger.v3.oas.annotations.media.Schema(implementation=ErgonBulkSchema.CargoUniform.class))) @RequestBody BulkUniformEvaluationRequest<Integer,CargoFilterDTO> request) {
+    return RestApiResponse.success(bulk.uniform(Resource.CARGOS,request),null);
+  }
+  @PostMapping("/bulk/update-items/evaluation")
+  @Operation(operationId="ergon.cargos.bulk.items.evaluation",summary="Avaliar edições por registro",description="Avalia deltas distintos e a versão esperada de cada registro, com impedimentos individualizados.")
+  public RestApiResponse<BulkProposal> bulkEvaluateItems(@io.swagger.v3.oas.annotations.parameters.RequestBody(content=@io.swagger.v3.oas.annotations.media.Content(schema=@io.swagger.v3.oas.annotations.media.Schema(implementation=ErgonBulkSchema.CargoItems.class))) @RequestBody BulkItemEvaluationRequest<Integer> request) {
+    return RestApiResponse.success(bulk.items(Resource.CARGOS,request),null);
+  }
+  @PostMapping("/bulk/update")
+  @BulkOperation(mode=BulkMode.UNIFORM_UPDATE,evaluationOperationId="ergon.cargos.bulk.uniform.evaluation",atomicity=ActionCollectionAtomicity.PER_ITEM)
+  @Operation(operationId="ergon.cargos.bulk.uniform",summary="Confirmar edição uniforme",description="Confirma uma proposta avaliada; cada registro é revalidado e possui recibo durável, sem repetir efeitos no replay.")
+  public RestApiResponse<BulkExecution> bulkConfirm(@RequestBody BulkConfirmationRequest request,
+      @Parameter(description="Chave estável desta confirmação; repetir a mesma chave recupera a execução.") @RequestHeader("Idempotency-Key") String key) {
+    return RestApiResponse.success(bulk.confirm(Resource.CARGOS,"ergon.cargos.bulk.uniform",request,key),null);
+  }
+  @PostMapping("/bulk/update-items")
+  @BulkOperation(mode=BulkMode.PER_ITEM_UPDATE,evaluationOperationId="ergon.cargos.bulk.items.evaluation",atomicity=ActionCollectionAtomicity.PER_ITEM)
+  @Operation(operationId="ergon.cargos.bulk.items",summary="Confirmar edições por registro",description="Aplica os deltas individualizados preservados na proposta, com versão e resultado próprios por registro.")
+  public RestApiResponse<BulkExecution> bulkConfirmItems(@RequestBody BulkConfirmationRequest request,
+      @Parameter(description="Chave estável de confirmação para recuperar a mesma execução em caso de repetição.") @RequestHeader("Idempotency-Key") String key) {
+    return RestApiResponse.success(bulk.confirm(Resource.CARGOS,"ergon.cargos.bulk.items",request,key),null);
+  }
+  @GetMapping("/bulk/proposals/{proposalId}")
+  @BulkResourceOperation(BulkResourceOperation.Role.PROPOSAL)
+  @Operation(operationId="ergon.cargos.bulk.proposal",summary="Consultar proposta de lote",description="Consulta totais e intenção pública da proposta após conferir acesso ao conjunto completo de registros.")
+  public RestApiResponse<BulkProposal> bulkProposal(@Parameter(description="Identidade da proposta avaliada.") @PathVariable UUID proposalId) {
+    return RestApiResponse.success(bulk.proposal(Resource.CARGOS,bulk.locate(Resource.CARGOS,proposalId,false),proposalId),null);
+  }
+  @GetMapping("/bulk/proposals/{proposalId}/results")
+  @BulkResourceOperation(BulkResourceOperation.Role.PROPOSAL_RESULTS)
+  @Operation(operationId="ergon.cargos.bulk.proposal-results",summary="Inspecionar avaliação do lote",description="Pagina registros executáveis e bloqueados, com diagnósticos seguros e cursor vinculado ao solicitante.")
+  public RestApiResponse<CursorPage<BulkProposalItemResult<Object>>> bulkProposalResults(
+      @Parameter(description="Identidade da proposta avaliada.") @PathVariable UUID proposalId,
+      @Parameter(description="Quantidade de registros por página, de 1 a 200.") @RequestParam(defaultValue="50") int size,
+      @Parameter(description="Cursor opaco emitido na página anterior; preserve o tamanho da página.") @RequestParam(required=false) String after) {
+    return RestApiResponse.success(bulk.proposalResults(Resource.CARGOS,bulk.locate(Resource.CARGOS,proposalId,false),proposalId,size,after),null);
+  }
+  @GetMapping("/bulk/executions/{executionId}")
+  @BulkResourceOperation(BulkResourceOperation.Role.EXECUTION)
+  @Operation(operationId="ergon.cargos.bulk.execution",summary="Consultar execução do lote",description="Retorna estado e contadores reconciliados a partir dos recibos persistidos.")
+  public RestApiResponse<BulkExecution> bulkExecution(@Parameter(description="Identidade da execução confirmada.") @PathVariable UUID executionId) {
+    return RestApiResponse.success(bulk.execution(Resource.CARGOS,bulk.locate(Resource.CARGOS,executionId,true),executionId),null);
+  }
+  @GetMapping("/bulk/executions/{executionId}/results")
+  @BulkResourceOperation(BulkResourceOperation.Role.EXECUTION_RESULTS)
+  @Operation(operationId="ergon.cargos.bulk.results",summary="Consultar recibos do lote",description="Pagina resultados por registro sem expor fatos protegidos, versões ou dados bancários da proposta.")
+  public RestApiResponse<CursorPage<BulkItemResult<Object>>> bulkResults(
+      @Parameter(description="Identidade da execução confirmada.") @PathVariable UUID executionId,
+      @Parameter(description="Quantidade de recibos por página, de 1 a 200.") @RequestParam(defaultValue="50") int size,
+      @Parameter(description="Cursor opaco da página anterior de recibos.") @RequestParam(required=false) String after) {
+    return RestApiResponse.success(bulk.results(Resource.CARGOS,bulk.locate(Resource.CARGOS,executionId,true),executionId,size,after),null);
+  }
+  @PostMapping("/bulk/executions/{executionId}/cancel")
+  @BulkResourceOperation(BulkResourceOperation.Role.CANCEL)
+  @Operation(operationId="ergon.cargos.bulk.cancel",summary="Solicitar parada do lote",description="Registra a solicitação de parada sem desfazer alterações já confirmadas e sem reabrir efeitos no replay.")
+  public RestApiResponse<BulkExecution> bulkCancel(@Parameter(description="Identidade da execução a interromper.") @PathVariable UUID executionId) {
+    return RestApiResponse.success(bulk.cancel(Resource.CARGOS,bulk.locate(Resource.CARGOS,executionId,true),executionId),null);
   }
 }

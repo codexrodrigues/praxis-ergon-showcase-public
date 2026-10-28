@@ -26,7 +26,7 @@ Manutenção cadastral, lotação, aposentadoria e estágio aceitam uma referên
 
 Há seis contratos por operação e seis execuções do runtime oficial Angular, com proteção contra resultado obsoleto e rejeição visível. Os previews são informativos e recusados no submit; a decisão de persistência continua nos serviços.
 
-**Pendente de insumo:** não foi identificado um snapshot aprovado do Config para regras estatutárias do showcase. Foi solicitada sua identidade e endpoint ao responsável. O gate governedDecisions permanece awaiting-input, sem conversão em N/A ou aprovação presumida. Integrar regras governadas exige o snapshot aprovado e sua compatibilidade, escopo, hash e identidade de ativação. O fluxo administrativo já homologado de afastamento não é um motor de elegibilidade estatutária; acumulação e aposentadoria não recebem certificação jurídica integral nesta entrega.
+**Escopo aprovado pelo responsável após e6b9fa0:** não existe snapshot externo de Decisões Governadas destinado a esta etapa. As determinações HOST, as invariantes transacionais e a prova do runtime Angular encerram a Fase 3A com PASS. O gate governedDecisions é NOT_APPLICABLE nesta fase por decisão explícita do responsável; Config/rules-engine pertence a uma fase futura dedicada. O fluxo administrativo de afastamento não é um motor de elegibilidade estatutária; acumulação e aposentadoria não recebem certificação jurídica integral nesta entrega.
 
 ## Limites de aceitação
 

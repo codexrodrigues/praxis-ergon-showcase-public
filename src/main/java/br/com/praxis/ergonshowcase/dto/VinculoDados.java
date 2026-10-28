@@ -107,6 +107,7 @@ public abstract class VinculoDados {
       icon = "schedule",
       quickViewVisible = true,
       quickViewOrder = 1)
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = false)
   private Integer jornadaSemanal;
 
   @CustomFields(resourceKey = "administracao-pessoal.vinculos")
@@ -134,7 +135,7 @@ public abstract class VinculoDados {
   @jakarta.validation.constraints.Size(max = 40)
   private String subcategoria;
 
-  @Schema(description = "Código da unidade de lotação do vínculo no mesmo órgão.")
+  @Schema(nullable = true, description = "Código da unidade de lotação do vínculo no mesmo órgão.")
   @UISchema(
       label = "Lotação",
       group = "Enquadramento e lotação",
@@ -153,9 +154,10 @@ public abstract class VinculoDados {
       previewSurfaceId = "ficha-unidade",
       detailPresentation = "drawer")
   @jakarta.validation.constraints.Size(max = 30)
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private String setor;
 
-  @Schema(description = "Unidade de efetivo exercício do vínculo no mesmo órgão.")
+  @Schema(nullable = true, description = "Unidade de efetivo exercício do vínculo no mesmo órgão.")
   @UISchema(
       label = "Exercício",
       group = "Enquadramento e lotação",
@@ -174,6 +176,7 @@ public abstract class VinculoDados {
       previewSurfaceId = "ficha-unidade",
       detailPresentation = "drawer")
   @jakarta.validation.constraints.Size(max = 30)
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private String setorExercicio;
 
   @Schema(description = "Cargo em comissão ocupado no mesmo órgão do vínculo.")
@@ -347,7 +350,7 @@ public abstract class VinculoDados {
       icon = "event")
   private LocalDate dtprorrogcontr;
 
-  @Schema(description = "Regime previdenciário ao qual o vínculo está filiado.")
+  @Schema(nullable = true, description = "Regime previdenciário ao qual o vínculo está filiado.")
   @UISchema(
       label = "Regime previdenciário",
       group = "Previdência, folha e FGTS",
@@ -361,9 +364,10 @@ public abstract class VinculoDados {
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   @jakarta.validation.constraints.Size(max = 30)
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private String regimeprev;
 
-  @Schema(description = "Plano previdenciário de enquadramento do vínculo.")
+  @Schema(nullable = true, description = "Plano previdenciário de enquadramento do vínculo.")
   @UISchema(
       label = "Plano previdenciário",
       group = "Previdência, folha e FGTS",
@@ -377,6 +381,7 @@ public abstract class VinculoDados {
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   @jakarta.validation.constraints.Size(max = 40)
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private String planoprev;
 
   @Schema(description = "Indica incidência do desconto de imposto de renda na folha do vínculo.")
@@ -392,6 +397,7 @@ public abstract class VinculoDados {
       reason = "Indica incidência do desconto de imposto de renda na folha do vínculo.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = false)
   private Boolean descontaIr = false;
 
   @Schema(description = "Indica opção de envio de comunicação relativa ao vínculo.")
@@ -407,6 +413,7 @@ public abstract class VinculoDados {
       reason = "Indica opção de envio de comunicação relativa ao vínculo.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = false)
   private Boolean correio = false;
 
   @Schema(description = "Indica enquadramento do vínculo em informação de cota.")
@@ -424,7 +431,7 @@ public abstract class VinculoDados {
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   private Boolean infoCota = false;
 
-  @Schema(description = "Banco destinatário do pagamento deste vínculo.")
+  @Schema(nullable = true, description = "Banco destinatário do pagamento deste vínculo.")
   @UISchema(label = "Banco", group = "Previdência, folha e FGTS", tableHidden = true, order = 223)
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -433,9 +440,10 @@ public abstract class VinculoDados {
       reason = "Banco destinatário do pagamento deste vínculo.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private Integer banco;
 
-  @Schema(description = "Agência bancária para pagamento deste vínculo.")
+  @Schema(nullable = true, description = "Agência bancária para pagamento deste vínculo.")
   @UISchema(label = "Agência", group = "Previdência, folha e FGTS", tableHidden = true, order = 224)
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
@@ -445,6 +453,7 @@ public abstract class VinculoDados {
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   @jakarta.validation.constraints.Size(max = 10)
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private String agencia;
 
   @Schema(description = "Conta bancária para pagamento deste vínculo.")
@@ -459,7 +468,7 @@ public abstract class VinculoDados {
   @jakarta.validation.constraints.Size(max = 25)
   private String conta;
 
-  @Schema(description = "Modalidade de pagamento deste vínculo.")
+  @Schema(nullable = true, description = "Modalidade de pagamento deste vínculo.")
   @UISchema(
       label = "Tipo de pagamento",
       group = "Previdência, folha e FGTS",
@@ -473,6 +482,7 @@ public abstract class VinculoDados {
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   @jakarta.validation.constraints.Size(max = 10)
+  @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private String tipopag;
 
   @Schema(description = "Data de opção pelo regime do FGTS.")

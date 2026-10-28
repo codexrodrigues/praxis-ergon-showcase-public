@@ -1,0 +1,83 @@
+{
+  "recordedAt": "2026-10-28T09:58:50.307017+00:00",
+  "status": "FAILED_ACCEPTANCE_PENDING",
+  "hostBaseline": "e6b9fa0",
+  "metadataCandidateCommit": "a178fe1f14d822e926c3e69a4a37b1a3ed5fb05c",
+  "mavenOverride": "8.0.0-ergon-bulk.308-SNAPSHOT",
+  "publicDependencyInPom": "8.0.0-rc.179",
+  "privateCandidateOnly": true,
+  "metadataFocalTests": {
+    "tests": 192,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "metadataDistinctLiveRoleProof": {
+    "tests": 1,
+    "status": "pass",
+    "scope": "Excess grant refused after warmup; exact original column grants restored; real FOR SHARE works"
+  },
+  "auditorRegressions": {
+    "tests": 39,
+    "status": "pass",
+    "transport": "git apply --check, git apply and exact normalized source identity"
+  },
+  "hostFullMavenTest": {
+    "status": "failed",
+    "testsReported": 5,
+    "failures": 3,
+    "errors": 1,
+    "original52Tests": "Not executed because BeforeAll publication reconciliation failed",
+    "bulkSecurityTest": "pass",
+    "bulkFunctionalTests": "blocked by publication setup failure"
+  },
+  "packagedJar": {
+    "build": "pass",
+    "healthHttp": 200,
+    "publicationReconciliationHttp": 500
+  },
+  "angular": {
+    "officialConsumerBuild": "pass",
+    "liveRun": "failed",
+    "capabilitiesHttp": 503,
+    "transportMethodsExercised": false
+  },
+  "observedEarlierPartialExecution": {
+    "executions": 1,
+    "confirmedReceipts": 2,
+    "acceptance": "Not a completed HTTP campaign; network failure interrupted receipt reading"
+  },
+  "domainPreservation": {
+    "tables": 16,
+    "columns": 392,
+    "originalSchemaSha256": "cc8e64f6676eabfceb6b7d37cd39bd98f9a02ac541c8e01e45d3654a7680f7ff",
+    "disposableSchemaSha256": "cc8e64f6676eabfceb6b7d37cd39bd98f9a02ac541c8e01e45d3654a7680f7ff",
+    "ddlAuto": "validate",
+    "flywayEnabled": false,
+    "personFixturesRemaining": 0,
+    "linkFixturesRemaining": 0
+  },
+  "cleanup": {
+    "branch": "br-delicate-cloud-b7mcn4wm",
+    "userAuthorizedDeletion": true,
+    "deleted": true,
+    "originalPreserved": "br-super-sound-b7urizmd",
+    "technicalRowsBeforeDeletion": {
+      "proposals": 4,
+      "executions": 1,
+      "confirmedReceipts": 2
+    }
+  },
+  "missingRequirements": [
+    "No existing column, populated JSONB key or governed custom definition for recebeAdiantamento",
+    "No provisioned cargo journey history or equivalent for cargaHorariaPadrao",
+    "correio is NOT NULL: CLEAR refused; SET true/false supported"
+  ],
+  "blockingGates": [
+    "Canonical lifecycle deadline exceeded against Neon during publication/readiness",
+    "SDK changes exist only in draft PR311 and private Maven candidate",
+    "Current canonical auditor additionally flags missing MicroVisualization/UiAnalytics and skeletal EntityLookupDescriptor"
+  ],
+  "scopeDecision": "Phase3A PASS explicitly approved by responsible user; Config/rules-engine future phase; no external snapshot required",
+  "sourceSha256": "108c2aec2f15137f3e1f8063d3386f0b23adcb280ec93f58a6e4e67ee56188b1"
+}

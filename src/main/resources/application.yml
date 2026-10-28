@@ -24,6 +24,10 @@ spring:
     deserialization:
       fail-on-unknown-properties: true
 springdoc:
+  swagger-ui:
+    oauth2-redirect-url: http://localhost:${SERVER_PORT:8080}/swagger-ui/oauth2-redirect.html
+  cache:
+    disabled: true
   api-docs:
     version: OPENAPI_3_0
   writer-with-order-by-keys: true
