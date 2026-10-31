@@ -71,4 +71,14 @@ public interface RegraFrequenciaEstatutariaRepository
         "documentoLegal"
       })
   Optional<RegraFrequenciaEstatutaria> findById(Long id);
+
+  /** Consulta candidatos do mesmo escopo funcional para validação de concomitância da RN-013 (ERG-08393). */
+  List<RegraFrequenciaEstatutaria> findByEmpCodigoAndRegimeJuridicoAndTipofreqAndCodfreq(
+      Integer empCodigo, String regimeJuridico, String tipofreq, Integer codfreq);
+
+  /**
+   * Consulta candidatos pela dupla obrigatória {@code (tipofreq, codfreq)} quando {@code empCodigo}
+   * ou {@code regimeJuridico} for {@code null} (regra geral do ente público em {@code PCK_REGRAS_FREQ.MAIN_POS}).
+   */
+  List<RegraFrequenciaEstatutaria> findByTipofreqAndCodfreq(String tipofreq, Integer codfreq);
 }

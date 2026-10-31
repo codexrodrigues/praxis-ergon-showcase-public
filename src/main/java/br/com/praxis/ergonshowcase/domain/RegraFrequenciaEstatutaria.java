@@ -221,6 +221,7 @@ public class RegraFrequenciaEstatutaria {
   @Column(name = "ativa", nullable = false)
   private Boolean ativa = true;
 
+  @com.fasterxml.jackson.annotation.JsonIgnore
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(
       name = "emp_codigo",
@@ -229,6 +230,7 @@ public class RegraFrequenciaEstatutaria {
       updatable = false)
   private Orgao orgao;
 
+  @com.fasterxml.jackson.annotation.JsonIgnore
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(
       name = "tipofreq",
@@ -237,6 +239,7 @@ public class RegraFrequenciaEstatutaria {
       updatable = false)
   private TipoFrequencia tipoFrequenciaEntidade;
 
+  @com.fasterxml.jackson.annotation.JsonIgnore
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumns({
     @JoinColumn(
@@ -252,6 +255,7 @@ public class RegraFrequenciaEstatutaria {
   })
   private CodigoFrequencia codigoFrequenciaEntidade;
 
+  @com.fasterxml.jackson.annotation.JsonIgnore
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(
       name = "documento_legal_id",

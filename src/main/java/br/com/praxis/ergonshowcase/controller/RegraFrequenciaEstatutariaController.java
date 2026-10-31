@@ -83,4 +83,40 @@ public class RegraFrequenciaEstatutariaController
   public ResponseEntity<RegraFrequenciaEstatutariaResponseDTO> ficha(@PathVariable Long id) {
     return withResourceVersion(ResponseEntity.ok(), id, service.findById(id));
   }
+
+  @GetMapping("/rn013/plan")
+  @PreAuthorize("hasAuthority('ERGON_READ')")
+  @Operation(
+      operationId = "getRn013RuleDecisionPlan",
+      summary = "Consultar plano compilado e catálogo de erros da RN-013 (PCK_REGRAS_FREQ)",
+      description =
+          "Retorna o RuleDecisionPlan compilado para o órgão (slots, bindings ativos PRODUCT vs CUSTOMER e catálogo ERG-08380..ERG-08393 / ERG-00019).")
+  public ResponseEntity<java.util.Map<String, Object>> rn013Plan(
+      @RequestParam(name = "empCodigo", required = false) Integer empCodigo) {
+    return ResponseEntity.ok(service.getRn013PlanSummary(empCodigo));
+  }
+
+  @PostMapping("/rn013/evaluate")
+  @PreAuthorize("hasAuthority('ERGON_READ')")
+  @Operation(
+      operationId = "evaluateRn013RegraFrequencia",
+      summary = "Simular avaliação determinística da RN-013 sobre rascunho de regra estatutária",
+      description =
+          "Avalia todas as 15 decisões da RN-013 para o órgão sem lançar exceção, retornando o diagnóstico por slot, códigos ERG-*/CERG-* e rastreabilidade PRODUCT vs CUSTOMER.")
+  public ResponseEntity<java.util.Map<String, Object>> evaluateRn013(
+      @RequestBody br.com.praxis.ergonshowcase.domain.RegraFrequenciaEstatutaria draft) {
+    return ResponseEntity.ok(service.evaluateRn013Diagnostic(draft));
+  }
+
+  @PostMapping("/rn013/validate")
+  @PreAuthorize("hasAuthority('ERGON_READ')")
+  @Operation(
+      operationId = "validateRn013RegraFrequencia",
+      summary = "Validar rascunho de regra estatutária na RN-013 em modo fail-closed",
+      description =
+          "Executa validação determinística fail-closed da RN-013, retornando HTTP 200 em caso de ALLOW ou HTTP 422 (ProblemDetail com violações estruturadas) quando DENY/INCONCLUSIVE.")
+  public ResponseEntity<java.util.Map<String, Object>> validateRn013(
+      @RequestBody br.com.praxis.ergonshowcase.domain.RegraFrequenciaEstatutaria draft) {
+    return ResponseEntity.ok(service.validateRn013Diagnostic(draft));
+  }
 }
