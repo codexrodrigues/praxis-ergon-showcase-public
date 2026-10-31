@@ -1,6 +1,8 @@
 package br.com.praxis.ergonshowcase.service;
 
 import br.com.praxis.ergonshowcase.config.TenantContext;
+import br.com.praxis.ergonshowcase.domain.Afastamento;
+import br.com.praxis.ergonshowcase.domain.Frequencia;
 import br.com.praxis.ergonshowcase.domain.PeriodoAquisitivoFerias;
 import br.com.praxis.ergonshowcase.dto.*;
 import br.com.praxis.ergonshowcase.mapper.PeriodoAquisitivoFeriasMapper;
@@ -8,6 +10,9 @@ import br.com.praxis.ergonshowcase.repository.PeriodoAquisitivoFeriasRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Consumer;
 import org.praxisplatform.uischema.concurrency.ResourceRepresentationResult;
@@ -16,6 +21,7 @@ import org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition
 import org.praxisplatform.uischema.customfields.CustomFieldSupport;
 import org.praxisplatform.uischema.exporting.CollectionExportField;
 import org.praxisplatform.uischema.exporting.CollectionExportFieldPresentation;
+import org.praxisplatform.uischema.service.base.ResourceFilterAccessScope;
 import org.praxisplatform.uischema.service.base.VersionedCreateUpdateResourceService;
 import org.praxisplatform.uischema.stats.StatsFieldRegistry;
 import org.praxisplatform.uischema.stats.StatsMetric;
@@ -115,6 +121,13 @@ public class PeriodoAquisitivoFeriasService
   }
 
   @Override
+  protected ResourceFilterAccessScope<PeriodoAquisitivoFerias> resolveResourceFilterAccessScope() {
+    int orgao = tenant.orgao();
+    return ResourceFilterAccessScope.restricted(
+        (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
+  }
+
+  @Override
   public StatsFieldRegistry getStatsFieldRegistry() {
     return StatsFieldRegistry.builder()
         .labeledGroupByBucket(
@@ -188,7 +201,9 @@ public class PeriodoAquisitivoFeriasService
     afterUpdate(id, saved, dto);
     entityManager.flush();
     entityManager.refresh(saved);
-    return toResourceRepresentation(saved);
+    return readFacts != null
+        ? enriched(toResourceRepresentation(saved))
+        : toResourceRepresentation(saved);
   }
 
   private ResourceRepresentationResult<PeriodoAquisitivoFeriasResponseDTO> command(
@@ -208,7 +223,9 @@ public class PeriodoAquisitivoFeriasService
     var saved = getRepository().save(entity);
     entityManager.flush();
     entityManager.refresh(saved);
-    return toResourceRepresentation(saved);
+    return readFacts != null
+        ? enriched(toResourceRepresentation(saved))
+        : toResourceRepresentation(saved);
   }
 
   @Transactional
@@ -317,7 +334,21 @@ public class PeriodoAquisitivoFeriasService
           Long id,
           TransicaoPeriodoAquisitivoFeriasDTO dto,
           ResourceVersionUpdatePrecondition<Long> precondition) {
-    return homologarPeriodoAquisitivo(id, dto, precondition);
+    return command(
+        id,
+        precondition,
+        (PeriodoAquisitivoFerias pa) -> {
+          if (!"SUSPENSO".equals(pa.getSituacao())) {
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Somente períodos aquisitivos suspensos podem ser reativados.");
+          }
+          if (dto.getDtPrescricao() != null) pa.setDtPrescricao(dto.getDtPrescricao());
+          if (dto.getDocumentoLegalId() != null) pa.setDocumentoLegalId(dto.getDocumentoLegalId());
+          pa.setObservacoes(dto.getObservacoes());
+          pa.setSituacao("DISPONIVEL");
+          PeriodoAquisitivoFeriasMapper.recomputeSaldoAndSituacao(pa);
+        });
   }
 
   @Transactional
@@ -407,6 +438,109 @@ public class PeriodoAquisitivoFeriasService
           if (dto.getDocumentoLegalId() != null) pa.setDocumentoLegalId(dto.getDocumentoLegalId());
           pa.setObservacoes(dto.getObservacoes());
         });
+  }
+
+  @Transactional
+  public ResourceRepresentationResult<PeriodoAquisitivoFeriasResponseDTO>
+      recalcularFaltasDireitoPeriodo(
+          Long id,
+          TransicaoPeriodoAquisitivoFeriasDTO dto,
+          ResourceVersionUpdatePrecondition<Long> precondition) {
+    return command(
+        id,
+        precondition,
+        (PeriodoAquisitivoFerias pa) -> {
+          if (!Set.of("EM_AQUISICAO", "DISPONIVEL", "PARCIALMENTE_GOZADO", "SUSPENSO")
+              .contains(pa.getSituacao())) {
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Somente períodos em aquisição, disponíveis, parcialmente gozados ou suspensos admitem recálculo de faltas e direito.");
+          }
+          int faltas = 0;
+          int diasSuspensivos = 0;
+          LocalDate iniPa = pa.getDtini();
+          LocalDate fimPa = pa.getDtfim();
+          if (entityManager != null && iniPa != null && fimPa != null) {
+            var qFreq =
+                entityManager.createQuery(
+                    "select f from Frequencia f where f.numfunc=:f and f.numvinc=:v and f.situacao='HOMOLOGADO'",
+                    Frequencia.class);
+            if (qFreq != null) {
+              var p1 = qFreq.setParameter("f", pa.getNumfunc());
+              var p2 = p1 != null ? p1.setParameter("v", pa.getNumvinc()) : null;
+              var freqs = p2 != null ? p2.getResultList() : List.<Frequencia>of();
+              if (freqs != null) {
+                for (Frequencia f : freqs) {
+                  if (f.getDtini() == null) continue;
+                  LocalDate fEnd = f.getDtfim() != null ? f.getDtfim() : f.getDtini();
+                  if (f.getDtini().isAfter(fimPa) || fEnd.isBefore(iniPa)) continue;
+                  boolean desconta =
+                      "FALTA".equalsIgnoreCase(f.getTipofreq())
+                          || (f.getCodigoFrequenciaEntidade() != null
+                              && f.getCodigoFrequenciaEntidade().getQtdFaltas() != null
+                              && f.getCodigoFrequenciaEntidade()
+                                      .getQtdFaltas()
+                                      .compareTo(BigDecimal.ZERO)
+                                  > 0);
+                  if (desconta) {
+                    int qtd =
+                        f.getQuantidade() != null && f.getQuantidade().intValue() > 0
+                            ? f.getQuantidade().intValue()
+                            : Math.max(
+                                1,
+                                Math.toIntExact(
+                                    ChronoUnit.DAYS.between(
+                                            f.getDtini().isBefore(iniPa) ? iniPa : f.getDtini(),
+                                            fEnd.isAfter(fimPa) ? fimPa : fEnd)
+                                        + 1));
+                    faltas += qtd;
+                  }
+                }
+              }
+            }
+            var qAfast =
+                entityManager.createQuery(
+                    "select a from Afastamento a where a.numfunc=:f and a.numvinc=:v and a.situacao='HOMOLOGADO'",
+                    Afastamento.class);
+            if (qAfast != null) {
+              var p1 = qAfast.setParameter("f", pa.getNumfunc());
+              var p2 = p1 != null ? p1.setParameter("v", pa.getNumvinc()) : null;
+              var afasts = p2 != null ? p2.getResultList() : List.<Afastamento>of();
+              if (afasts != null) {
+                for (Afastamento a : afasts) {
+                  if (a.getDtini() == null) continue;
+                  LocalDate aEnd =
+                      a.getDtfim() != null
+                          ? a.getDtfim()
+                          : (a.getDtprevfim() != null ? a.getDtprevfim() : fimPa);
+                  if (a.getDtini().isAfter(fimPa) || aEnd.isBefore(iniPa)) continue;
+                  LocalDate overlapIni = a.getDtini().isBefore(iniPa) ? iniPa : a.getDtini();
+                  LocalDate overlapFim = aEnd.isAfter(fimPa) ? fimPa : aEnd;
+                  int dias =
+                      Math.max(1, Math.toIntExact(ChronoUnit.DAYS.between(overlapIni, overlapFim) + 1));
+                  diasSuspensivos += dias;
+                }
+              }
+            }
+          }
+          pa.setFaltasApuradas(faltas);
+          pa.setDiasAfastamentoSuspensivo(diasSuspensivos);
+          int diasDireito = calcularDiasDireitoPorFaltas(faltas);
+          pa.setTotDiasDireito(diasDireito);
+          if (dto != null) {
+            if (dto.getDocumentoLegalId() != null) pa.setDocumentoLegalId(dto.getDocumentoLegalId());
+            if (dto.getObservacoes() != null) pa.setObservacoes(dto.getObservacoes());
+          }
+          PeriodoAquisitivoFeriasMapper.recomputeSaldoAndSituacao(pa);
+        });
+  }
+
+  public static int calcularDiasDireitoPorFaltas(int faltasInjustificadas) {
+    if (faltasInjustificadas <= 5) return 30;
+    if (faltasInjustificadas <= 14) return 24;
+    if (faltasInjustificadas <= 23) return 18;
+    if (faltasInjustificadas <= 32) return 12;
+    return 0;
   }
 
   private void checkOrg(Integer orgao) {

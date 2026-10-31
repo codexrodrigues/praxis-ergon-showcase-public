@@ -28,6 +28,7 @@ public final class ApiPaths {
   public static final String PARAMETROS_CONTAGEM_FERIAS = BASE + "/parametros-contagem-ferias";
   public static final String PERIODOS_AQUISITIVOS_FERIAS = BASE + "/periodos-aquisitivos-ferias";
   public static final String FERIAS_GOZO = BASE + "/ferias-gozo";
+  public static final String RADAR_FERIAS_PRESCRICAO = BASE + "/radar-ferias-prescricao";
 
   public static final String ORGAO_SOURCE = "orgao";
   public static final String CARGO_SOURCE = "cargo";

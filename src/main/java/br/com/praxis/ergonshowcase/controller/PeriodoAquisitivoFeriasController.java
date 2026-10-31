@@ -474,6 +474,101 @@ public class PeriodoAquisitivoFeriasController
         ResponseEntity.ok(), id, service.prescreverPeriodoAquisitivo(id, dto, p));
   }
 
+  @PostMapping("/{id}/actions/reativar-periodo-aquisitivo")
+  @PreAuthorize("hasAuthority('ERGON_WRITE')")
+  @Operation(
+      summary = "Reativar período aquisitivo suspenso",
+      description =
+          "Restabelece a contagem e o saldo disponível de um período aquisitivo anteriormente suspenso. Exige If-Match.")
+  @WorkflowAction(
+      id = "reativar-periodo-aquisitivo",
+      title = "Reativar período aquisitivo",
+      description = "Retoma a vigência e recalcula a situação operacional do período suspenso.",
+      scope = ActionScope.ITEM,
+      requiredAuthorities = {"ERGON_WRITE"},
+      allowedStates = {"SUSPENSO"},
+      confirmationRequired = true,
+      resourceVersion = ActionRequirement.REQUIRED,
+      resourceVersionTransport = ActionResourceVersionTransport.IF_MATCH)
+  public ResponseEntity<PeriodoAquisitivoFeriasResponseDTO> reativar(
+      @PathVariable Long id,
+      @RequestHeader(value = "If-Match", required = false) String ifMatch,
+      @Valid @RequestBody TransicaoPeriodoAquisitivoFeriasDTO dto) {
+    var p =
+        new ResourceVersionUpdatePrecondition<Long>(
+            etags,
+            ifMatch,
+            scopes.currentScope(),
+            "administracao-pessoal.periodos-aquisitivos-ferias",
+            id);
+    return withResourceVersion(
+        ResponseEntity.ok(), id, service.reativarPeriodoAquisitivo(id, dto, p));
+  }
+
+  @PostMapping("/{id}/actions/cancelar-periodo-aquisitivo")
+  @PreAuthorize("hasAuthority('ERGON_WRITE')")
+  @Operation(
+      summary = "Cancelar período aquisitivo de férias",
+      description =
+          "Cancela administrativamente o período aquisitivo em razão de revisão cadastral ou vacância e zera o saldo disponível. Exige If-Match.")
+  @WorkflowAction(
+      id = "cancelar-periodo-aquisitivo",
+      title = "Cancelar período aquisitivo",
+      description = "Inativa administrativamente o ciclo aquisitivo e zera seu saldo disponível.",
+      scope = ActionScope.ITEM,
+      requiredAuthorities = {"ERGON_WRITE"},
+      allowedStates = {"EM_AQUISICAO", "DISPONIVEL", "PARCIALMENTE_GOZADO", "SUSPENSO"},
+      riskLevel = ActionRiskLevel.HIGH,
+      confirmationRequired = true,
+      resourceVersion = ActionRequirement.REQUIRED,
+      resourceVersionTransport = ActionResourceVersionTransport.IF_MATCH)
+  public ResponseEntity<PeriodoAquisitivoFeriasResponseDTO> cancelar(
+      @PathVariable Long id,
+      @RequestHeader(value = "If-Match", required = false) String ifMatch,
+      @Valid @RequestBody TransicaoPeriodoAquisitivoFeriasDTO dto) {
+    var p =
+        new ResourceVersionUpdatePrecondition<Long>(
+            etags,
+            ifMatch,
+            scopes.currentScope(),
+            "administracao-pessoal.periodos-aquisitivos-ferias",
+            id);
+    return withResourceVersion(
+        ResponseEntity.ok(), id, service.cancelarPeriodoAquisitivo(id, dto, p));
+  }
+
+  @PostMapping("/{id}/actions/recalcular-faltas-direito-periodo")
+  @PreAuthorize("hasAuthority('ERGON_WRITE')")
+  @Operation(
+      summary = "Recalcular faltas apuradas, suspensões e dias de direito do período aquisitivo",
+      description =
+          "Apura ocorrências homologadas de Frequencia e Afastamento no intervalo aquisitivo (dtini..dtfim), aplica a redução progressiva de direito e recalcula o saldo disponível. Exige If-Match.")
+  @WorkflowAction(
+      id = "recalcular-faltas-direito-periodo",
+      title = "Recalcular faltas e direito",
+      description =
+          "Apura faltas injustificadas e afastamentos suspensivos do ciclo e recalcula o direito e o saldo de férias.",
+      scope = ActionScope.ITEM,
+      requiredAuthorities = {"ERGON_WRITE"},
+      allowedStates = {"EM_AQUISICAO", "DISPONIVEL", "PARCIALMENTE_GOZADO", "SUSPENSO"},
+      confirmationRequired = true,
+      resourceVersion = ActionRequirement.REQUIRED,
+      resourceVersionTransport = ActionResourceVersionTransport.IF_MATCH)
+  public ResponseEntity<PeriodoAquisitivoFeriasResponseDTO> recalcularFaltasDireito(
+      @PathVariable Long id,
+      @RequestHeader(value = "If-Match", required = false) String ifMatch,
+      @Valid @RequestBody TransicaoPeriodoAquisitivoFeriasDTO dto) {
+    var p =
+        new ResourceVersionUpdatePrecondition<Long>(
+            etags,
+            ifMatch,
+            scopes.currentScope(),
+            "administracao-pessoal.periodos-aquisitivos-ferias",
+            id);
+    return withResourceVersion(
+        ResponseEntity.ok(), id, service.recalcularFaltasDireitoPeriodo(id, dto, p));
+  }
+
   @PostMapping("/determinations/previa")
   @PreAuthorize("hasAuthority('ERGON_READ')")
   @Operation(

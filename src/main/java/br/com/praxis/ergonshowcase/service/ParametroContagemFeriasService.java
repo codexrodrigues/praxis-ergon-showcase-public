@@ -111,6 +111,16 @@ public class ParametroContagemFeriasService
   }
 
   @Override
+  protected org.praxisplatform.uischema.service.base.ResourceFilterAccessScope<
+          ParametroContagemFerias>
+      resolveResourceFilterAccessScope() {
+    int orgao = tenant.orgao();
+    return org.praxisplatform.uischema.service.base.ResourceFilterAccessScope.restricted(
+        (root, query, cb) ->
+            cb.or(cb.isNull(root.get("empCodigo")), cb.equal(root.get("empCodigo"), orgao)));
+  }
+
+  @Override
   public StatsFieldRegistry getStatsFieldRegistry() {
     return StatsFieldRegistry.builder()
         .labeledGroupByBucket(
@@ -183,7 +193,9 @@ public class ParametroContagemFeriasService
     afterUpdate(id, saved, dto);
     entityManager.flush();
     entityManager.refresh(saved);
-    return toResourceRepresentation(saved);
+    return readFacts != null
+        ? enriched(toResourceRepresentation(saved))
+        : toResourceRepresentation(saved);
   }
 
   private ResourceRepresentationResult<ParametroContagemFeriasResponseDTO> command(
@@ -203,7 +215,9 @@ public class ParametroContagemFeriasService
     var saved = getRepository().save(entity);
     entityManager.flush();
     entityManager.refresh(saved);
-    return toResourceRepresentation(saved);
+    return readFacts != null
+        ? enriched(toResourceRepresentation(saved))
+        : toResourceRepresentation(saved);
   }
 
   @Transactional

@@ -177,7 +177,7 @@ public class ErgonBulkDomain {
         "optionTabelaDescricaoPrevista","requerTabelaOpcoesPrevisto","escopoGlobalPrevisto",
         "orgaoNome","escopoGlobal","resumoParametro",
         "pessoaNome","vinculoSituacao","periodoResumo","saldoDiasDisponivel",
-        "parcelaResumo","diasGozo","totalDiasConsumidosPa","saldoPaAposParcela"));
+        "parcelaResumo","totalDiasConsumidosPa","saldoPaAposParcela"));
     response.retain(allowed);
     return response;
   }
@@ -240,7 +240,11 @@ public class ErgonBulkDomain {
   public boolean apply(Resource r, Object e, Object dto) {
     ObjectNode before=prior(r,e); mapper(r).applyUpdate(e,dto);
     boolean changed=!before.equals(prior(r,e));
-    validateEntity(r,e); em.flush(); return changed;
+    validateEntity(r,e);
+    if (e instanceof FeriasGozo fg && feriasGozoService != null) {
+      feriasGozoService.sincronizarContabilidadePeriodoAquisitivo(fg.getPeriodoAquisitivoId());
+    }
+    em.flush(); return changed;
   }
   public List<Object> query(Resource r, Object filter, int excluded) {
     validate(filter);
@@ -405,6 +409,9 @@ public class ErgonBulkDomain {
       current.setDocumentoLegalId(next.getDocumentoLegalId());
       current.setAtoPublicacaoId(next.getAtoPublicacaoId());
       current.setObservacoes(next.getObservacoes());
+      if (feriasGozoService != null) {
+        feriasGozoService.sincronizarContabilidadePeriodoAquisitivo(current.getPeriodoAquisitivoId());
+      }
       em.flush(); return changed;
     }
     if (entity instanceof DefinicaoCampoCustomizado current && candidate instanceof DefinicaoCampoCustomizado next) {

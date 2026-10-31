@@ -114,6 +114,14 @@ public class FeriasGozoService
   }
 
   @Override
+  protected org.praxisplatform.uischema.service.base.ResourceFilterAccessScope<FeriasGozo>
+      resolveResourceFilterAccessScope() {
+    int orgao = tenant.orgao();
+    return org.praxisplatform.uischema.service.base.ResourceFilterAccessScope.restricted(
+        (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
+  }
+
+  @Override
   public StatsFieldRegistry getStatsFieldRegistry() {
     return StatsFieldRegistry.builder()
         .labeledGroupByBucket(
@@ -191,7 +199,9 @@ public class FeriasGozoService
     afterUpdate(id, saved, dto);
     entityManager.flush();
     entityManager.refresh(saved);
-    return toResourceRepresentation(saved);
+    return readFacts != null
+        ? enriched(toResourceRepresentation(saved))
+        : toResourceRepresentation(saved);
   }
 
   private ResourceRepresentationResult<FeriasGozoResponseDTO> command(
@@ -210,7 +220,9 @@ public class FeriasGozoService
     sincronizarContabilidadePeriodoAquisitivo(saved.getPeriodoAquisitivoId());
     entityManager.flush();
     entityManager.refresh(saved);
-    return toResourceRepresentation(saved);
+    return readFacts != null
+        ? enriched(toResourceRepresentation(saved))
+        : toResourceRepresentation(saved);
   }
 
   @Transactional
@@ -325,22 +337,32 @@ public class FeriasGozoService
         id,
         precondition,
         (FeriasGozo fg) -> {
-          if (!"EM_GOZO".equals(fg.getSituacao())) {
+          if (!Set.of("HOMOLOGADA", "EM_GOZO").contains(fg.getSituacao())) {
             throw new ResponseStatusException(
                 HttpStatus.CONFLICT,
-                "Somente parcelas efetivamente em gozo podem ser interrompidas.");
+                "Somente parcelas homologadas ou efetivamente em gozo podem ser interrompidas.");
           }
           ErgonInvariants.chronology(
               fg.getDtini(),
               dto.getDtInterrupcao(),
               "A data de interrupção não pode anteceder a data de início do gozo.");
+          if (fg.getDtprevfim() != null) {
+            ErgonInvariants.chronology(
+                dto.getDtInterrupcao(),
+                fg.getDtprevfim(),
+                "A data de interrupção não pode ultrapassar o término previsto da parcela de férias.");
+          }
           fg.setDtInterrupcao(dto.getDtInterrupcao());
           fg.setDtfim(dto.getDtInterrupcao());
           fg.setMotivoInterrupcao(dto.getMotivoInterrupcao());
+          int diasOriginais = fg.getDiasGozo() != null ? fg.getDiasGozo() : Integer.MAX_VALUE;
           int diasEfetivos =
-              Math.max(
-                  1,
-                  Math.toIntExact(ChronoUnit.DAYS.between(fg.getDtini(), dto.getDtInterrupcao())));
+              Math.min(
+                  diasOriginais,
+                  Math.max(
+                      1,
+                      Math.toIntExact(
+                          ChronoUnit.DAYS.between(fg.getDtini(), dto.getDtInterrupcao()))));
           fg.setDiasGozo(diasEfetivos);
           fg.setSituacao("INTERROMPIDA");
           if (dto.getDocumentoLegalId() != null) fg.setDocumentoLegalId(dto.getDocumentoLegalId());
@@ -369,7 +391,23 @@ public class FeriasGozoService
         });
   }
 
-  private void sincronizarContabilidadePeriodoAquisitivo(Long periodoAquisitivoId) {
+  @Transactional
+  public ResourceRepresentationResult<FeriasGozoResponseDTO> iniciarGozo(
+      Long id,
+      TransicaoFeriasGozoDTO dto,
+      ResourceVersionUpdatePrecondition<Long> precondition) {
+    return iniciarFeriasGozo(id, dto, precondition);
+  }
+
+  @Transactional
+  public ResourceRepresentationResult<FeriasGozoResponseDTO> concluirGozo(
+      Long id,
+      TransicaoFeriasGozoDTO dto,
+      ResourceVersionUpdatePrecondition<Long> precondition) {
+    return concluirFeriasGozo(id, dto, precondition);
+  }
+
+  public void sincronizarContabilidadePeriodoAquisitivo(Long periodoAquisitivoId) {
     if (periodoAquisitivoId == null || entityManager == null) return;
     PeriodoAquisitivoFerias pa =
         entityManager.find(

@@ -36,7 +36,7 @@ class ApiPathsContractTest {
         FrequenciaController.class, TabelaController.class,
         ItemTabelaController.class, DefinicaoCampoCustomizadoController.class,
         ParametroContagemFeriasController.class, PeriodoAquisitivoFeriasController.class,
-        FeriasGozoController.class)) {
+        FeriasGozoController.class, RadarFeriasPrescricaoController.class)) {
       var mapping = AnnotatedElementUtils.findMergedAnnotation(controller, RequestMapping.class);
       assertThat(mapping).as(controller.getSimpleName()).isNotNull();
       controllerPaths.addAll(Arrays.asList(mapping.value()));

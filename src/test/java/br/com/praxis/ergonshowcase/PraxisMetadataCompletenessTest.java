@@ -44,14 +44,16 @@ class PraxisMetadataCompletenessTest {
             CreateDefinicaoCampoCustomizadoDTO.class, UpdateDefinicaoCampoCustomizadoDTO.class, DefinicaoCampoCustomizadoFilterDTO.class,
             CreateParametroContagemFeriasDTO.class, UpdateParametroContagemFeriasDTO.class, ParametroContagemFeriasFilterDTO.class,
             CreatePeriodoAquisitivoFeriasDTO.class, UpdatePeriodoAquisitivoFeriasDTO.class, PeriodoAquisitivoFeriasFilterDTO.class,
-            CreateFeriasGozoDTO.class, UpdateFeriasGozoDTO.class, FeriasGozoFilterDTO.class)
+            CreateFeriasGozoDTO.class, UpdateFeriasGozoDTO.class, FeriasGozoFilterDTO.class,
+            RadarFeriasPrescricaoFilterDTO.class)
         .contains(CargoResponseDTO.class, ServidorPessoaResponseDTO.class, VinculoResponseDTO.class,
             OrgaoResponseDTO.class, DocumentoLegalResponseDTO.class, SetorResponseDTO.class,
             DependenteResponseDTO.class, TipoDependenteResponseDTO.class,
             TipoFrequenciaResponseDTO.class, CodigoFrequenciaResponseDTO.class, AfastamentoResponseDTO.class,
             RegraFrequenciaEstatutariaResponseDTO.class, FrequenciaResponseDTO.class,
             TabelaResponseDTO.class, ItemTabelaResponseDTO.class, DefinicaoCampoCustomizadoResponseDTO.class,
-            ParametroContagemFeriasResponseDTO.class, PeriodoAquisitivoFeriasResponseDTO.class, FeriasGozoResponseDTO.class);
+            ParametroContagemFeriasResponseDTO.class, PeriodoAquisitivoFeriasResponseDTO.class, FeriasGozoResponseDTO.class,
+            RadarFeriasPrescricaoResponseDTO.class);
     return classes;
   }
 
@@ -73,7 +75,8 @@ class PraxisMetadataCompletenessTest {
         VinculoResponseDTO.class, DependenteResponseDTO.class, AfastamentoResponseDTO.class,
         RegraFrequenciaEstatutariaResponseDTO.class, FrequenciaResponseDTO.class,
         DefinicaoCampoCustomizadoResponseDTO.class, ParametroContagemFeriasResponseDTO.class,
-        PeriodoAquisitivoFeriasResponseDTO.class, FeriasGozoResponseDTO.class)) {
+        PeriodoAquisitivoFeriasResponseDTO.class, FeriasGozoResponseDTO.class,
+        RadarFeriasPrescricaoResponseDTO.class)) {
       var resolved = converters.resolveAsResolvedSchema(new AnnotatedType(dto).resolveAsRef(false));
       var schema = resolved.schema;
       assertThat(schema.getProperties()).as(dto.getSimpleName()).isNotEmpty();

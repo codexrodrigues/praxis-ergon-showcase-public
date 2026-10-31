@@ -11,6 +11,7 @@ import br.com.praxis.ergonshowcase.repository.FrequenciaRepository;
 import br.com.praxis.ergonshowcase.repository.OrgaoRepository;
 import br.com.praxis.ergonshowcase.repository.ParametroContagemFeriasRepository;
 import br.com.praxis.ergonshowcase.repository.PeriodoAquisitivoFeriasRepository;
+import br.com.praxis.ergonshowcase.repository.RadarFeriasPrescricaoRepository;
 import br.com.praxis.ergonshowcase.repository.VinculoRepository;
 import java.util.Map;
 import java.util.Optional;
@@ -39,6 +40,9 @@ public class VinculoStateProvider implements ResourceStateSnapshotProvider {
   @Autowired private PeriodoAquisitivoFeriasRepository periodosAquisitivosFerias;
 
   @Autowired private FeriasGozoRepository feriasGozo;
+
+  @Autowired(required = false)
+  private RadarFeriasPrescricaoRepository radarFeriasPrescricao;
 
   @Autowired private TenantContext tenant;
 
@@ -120,6 +124,57 @@ public class VinculoStateProvider implements ResourceStateSnapshotProvider {
                         "interrompida", interrompida,
                         "parcelaInterrompida", interrompida));
               });
+    }
+    if ("administracao-pessoal.radar-ferias-prescricao".equals(key) && id != null) {
+      Long radarId = id instanceof Long typed ? typed : Long.valueOf(id.toString());
+      if (radarFeriasPrescricao != null) {
+        return radarFeriasPrescricao
+            .findById(radarId)
+            .filter(r -> java.util.Objects.equals(r.getEmpCodigo(), tenant.orgao()))
+            .map(
+                r -> {
+                  String faixa =
+                      r.getFaixaUrgenciaPrescricao() != null
+                          ? r.getFaixaUrgenciaPrescricao()
+                          : "REGULAR";
+                  boolean critica =
+                      "VENCIDO_PRESCRITO".equals(faixa) || "CRITICO_30D".equals(faixa);
+                  boolean descoberto =
+                      r.getSaldoSemProgramacao() != null && r.getSaldoSemProgramacao() > 0;
+                  boolean acumulo = Boolean.TRUE.equals(r.getEmRiscoAcumuloPeriodos());
+                  return new ResourceStateSnapshot(
+                      faixa,
+                      Map.of(
+                          "urgenciaCriticaOuVencida", critica,
+                          "possuiSaldoDescoberto", descoberto,
+                          "emRiscoImediatoGovernanca", critica || acumulo));
+                });
+      }
+      if (periodosAquisitivosFerias != null) {
+        return periodosAquisitivosFerias
+            .findById(radarId)
+            .filter(pa -> java.util.Objects.equals(pa.getEmpCodigo(), tenant.orgao()))
+            .map(
+                pa -> {
+                  String faixa =
+                      br.com.praxis.ergonshowcase.mapper.RadarFeriasPrescricaoMapper
+                          .calcularFaixaUrgencia(
+                              pa.getSituacao(),
+                              pa.getSaldoDiasDisponivel(),
+                              pa.getDtPrescricao(),
+                              java.time.LocalDate.now());
+                  boolean critica =
+                      "VENCIDO_PRESCRITO".equals(faixa) || "CRITICO_30D".equals(faixa);
+                  boolean descoberto =
+                      pa.getSaldoDiasDisponivel() != null && pa.getSaldoDiasDisponivel() > 0;
+                  return new ResourceStateSnapshot(
+                      faixa,
+                      Map.of(
+                          "urgenciaCriticaOuVencida", critica,
+                          "possuiSaldoDescoberto", descoberto,
+                          "emRiscoImediatoGovernanca", critica));
+                });
+      }
     }
     if ("administracao-pessoal.campos-customizados".equals(key) && id != null) {
       Long campoId = id instanceof Long typed ? typed : Long.valueOf(id.toString());
