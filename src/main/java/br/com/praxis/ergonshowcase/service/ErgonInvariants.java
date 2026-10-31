@@ -398,6 +398,440 @@ public class ErgonInvariants {
     }
   }
 
+  public void parametroContagemFerias(ParametroContagemFerias p, boolean creating) {
+    if (blank(p.getRegimeJuridico()) || blank(p.getTipoVinculo()) || blank(p.getCategoria()))
+      fail("Regime jurídico, tipo de vínculo e categoria são obrigatórios na regra de férias.");
+    if (p.getDtini() == null)
+      fail("Data de início de vigência é obrigatória na regra de contagem de férias.");
+    if (p.getEmpCodigo() != null) {
+      Orgao orgao = em.find(Orgao.class, p.getEmpCodigo(), LockModeType.PESSIMISTIC_READ);
+      if (orgao == null) fail("Órgão público inexistente para a regra de contagem de férias.");
+    }
+    chronology(
+        p.getDtini(),
+        p.getDtfim(),
+        "O término de vigência da regra de férias não pode anteceder a data de início (ERG-01873).");
+    if (Boolean.TRUE.equals(p.getTemFerias())) {
+      if (p.getTotDiasFer() == null
+          || p.getTotDiasFer() <= 0
+          || p.getMinPerFer() == null
+          || p.getMaxPerFer() == null
+          || p.getMinDiasPerFer() == null
+          || p.getMaxDiasPerFer() == null)
+        fail(
+            "Quando o direito a férias está habilitado, total de dias, parcelas mínima/máxima e dias mínimo/máximo por parcela são obrigatórios (ERG-01800).");
+      if (p.getMinPerFer() > p.getMaxPerFer())
+        fail(
+            "A quantidade mínima de parcelas não pode exceder a quantidade máxima de parcelas (ERG-01809).");
+      if (p.getMinDiasPerFer() > p.getMaxDiasPerFer())
+        fail(
+            "A quantidade mínima de dias por parcela não pode exceder o máximo de dias por parcela (ERG-01810).");
+      if (p.getMaxDiasPerFer() > p.getTotDiasFer())
+        fail("O máximo de dias por parcela não pode exceder o total de dias de direito a férias.");
+      if (p.getMinDiasPerPrincFer() != null && p.getMinDiasPerPrincFer() < p.getMinDiasPerFer())
+        fail(
+            "O mínimo de dias na parcela principal não pode ser inferior ao mínimo geral por parcela.");
+      if (p.getAbonoDirGozo() != null && !"N".equals(p.getAbonoDirGozo())) {
+        if (!Set.of("D", "G").contains(p.getAbonoDirGozo()))
+          fail("Base do abono pecuniário inválida; use D, G ou N (ERG-01801).");
+        if (p.getNumDiasAbonoFer() == null
+            || p.getDenDiasAbonoFer() == null
+            || p.getDenDiasAbonoFer() <= 0
+            || p.getNumDiasAbonoFer() > p.getDenDiasAbonoFer())
+          fail(
+              "A fração de abono pecuniário exige numerador válido menor ou igual ao denominador positivo (ERG-01802..01805).");
+        if (p.getMinDiasPvendFer() != null
+            && p.getMaxDiasVendFer() != null
+            && p.getMinDiasPvendFer() > p.getMaxDiasVendFer())
+          fail(
+              "O mínimo de dias para venda de abono pecuniário não pode exceder o máximo vendável (ERG-01807).");
+        if (p.getMaxDiasVendFer() != null && p.getMaxDiasVendFer() > p.getTotDiasFer())
+          fail(
+              "O máximo de dias vendidos em abono pecuniário não pode exceder o total de dias de direito (ERG-01808).");
+      }
+    }
+    if (Boolean.TRUE.equals(p.getContDobroFerias())
+        && p.getMinDiasPeraqfer() != null
+        && p.getMaxDiasPeraqfer() != null
+        && p.getMinDiasPeraqfer() > p.getMaxDiasPeraqfer())
+      fail(
+          "O mínimo de dias para contagem em dobro de férias não pode exceder o máximo permitido (ERG-00606).");
+    if (Boolean.TRUE.equals(p.getTemLicEsp())
+        && (p.getAnosLicEsp() == null
+            || p.getAnosLicEsp() <= 0
+            || p.getMesesLicEspPer() == null
+            || p.getMesesLicEspPer() <= 0))
+      fail(
+          "Licença especial habilitada exige informar anos de interstício e meses de direito positivos (ERG-01813).");
+    if (p.getDocumentoLegalFeriasId() != null) {
+      DocumentoLegal doc = em.find(DocumentoLegal.class, p.getDocumentoLegalFeriasId());
+      if (doc == null || (p.getEmpCodigo() != null && !Objects.equals(doc.getEmpCodigo(), p.getEmpCodigo())))
+        fail("Ato legal de férias inexistente ou pertence a outro órgão.");
+    }
+    if (p.getDocumentoLegalProgressaoId() != null) {
+      DocumentoLegal doc = em.find(DocumentoLegal.class, p.getDocumentoLegalProgressaoId());
+      if (doc == null || (p.getEmpCodigo() != null && !Objects.equals(doc.getEmpCodigo(), p.getEmpCodigo())))
+        fail("Ato legal de progressão inexistente ou pertence a outro órgão.");
+    }
+    if (!Boolean.FALSE.equals(p.getActive())) {
+      var q =
+          em.createQuery(
+              "select x from ParametroContagemFerias x where x.active=true and x.regimeJuridico=:rj and x.tipoVinculo=:tv and x.categoria=:cat",
+              ParametroContagemFerias.class);
+      if (q != null) {
+        var r1 = q.setParameter("rj", p.getRegimeJuridico());
+        var r2 = r1 != null ? r1.setParameter("tv", p.getTipoVinculo()) : null;
+        var r3 = r2 != null ? r2.setParameter("cat", p.getCategoria()) : null;
+        var flushed = r3 != null ? r3.setFlushMode(FlushModeType.COMMIT) : null;
+        var candidatos =
+            (flushed != null ? flushed : r3) != null
+                ? (flushed != null ? flushed : r3).getResultList()
+                : List.<ParametroContagemFerias>of();
+        LocalDate startA = p.getDtini();
+        LocalDate endA = p.getDtfim() != null ? p.getDtfim() : LocalDate.MAX;
+        for (ParametroContagemFerias other : candidatos) {
+          if (p.getId() != null && Objects.equals(p.getId(), other.getId())) continue;
+          if (!Objects.equals(p.getEmpCodigo(), other.getEmpCodigo())) continue;
+          if (!Objects.equals(p.getSubcategoria(), other.getSubcategoria())) continue;
+          if (other.getDtini() == null) continue;
+          LocalDate startB = other.getDtini();
+          LocalDate endB = other.getDtfim() != null ? other.getDtfim() : LocalDate.MAX;
+          if (!startA.isAfter(endB) && !startB.isAfter(endA)) {
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Já existe regra ativa de contagem de férias com vigência sobreposta para o mesmo escopo estatutário (ERG-01874).");
+          }
+        }
+      }
+    }
+    Integer emp = p.getEmpCodigo() != null ? p.getEmpCodigo() : (tenant != null ? tenant.orgao() : 1);
+    customFields(
+        "administracao-pessoal.parametros-contagem-ferias", emp, p.getCustomFields(), p);
+  }
+
+  public void periodoAquisitivoFerias(PeriodoAquisitivoFerias pa, boolean creating) {
+    if (pa.getEmpCodigo() == null
+        || pa.getNumfunc() == null
+        || pa.getNumvinc() == null
+        || pa.getChave() == null)
+      fail(
+          "Órgão, servidor, vínculo e chave sequencial são obrigatórios para o período aquisitivo.");
+    Vinculo vinculo =
+        em.find(
+            Vinculo.class,
+            new VinculoId(pa.getNumfunc(), pa.getNumvinc()),
+            LockModeType.PESSIMISTIC_READ);
+    if (vinculo == null || !Objects.equals(vinculo.getEmpCodigo(), pa.getEmpCodigo()))
+      fail("Vínculo funcional inexistente ou pertence a outro órgão.");
+    ServidorPessoa pessoa =
+        em.find(ServidorPessoa.class, pa.getNumfunc(), LockModeType.PESSIMISTIC_READ);
+    if (pessoa == null) fail("Servidor titular inexistente para o período aquisitivo.");
+    chronology(
+        vinculo.getDtexerc(),
+        pa.getDtini(),
+        "O início do período aquisitivo não pode anteceder a data de exercício do vínculo (ERG-01850).");
+    chronology(
+        pa.getDtini(),
+        pa.getDtfim(),
+        "O término do período aquisitivo não pode anteceder a data de início (ERG-01851).");
+    chronology(
+        pa.getDtfim(),
+        pa.getDtPrescricao(),
+        "A data de prescrição não pode anteceder o término do período aquisitivo (ERG-00592).");
+    chronology(
+        pa.getDtfim(),
+        pa.getDtPgtoComMulta(),
+        "A data limite sem multa não pode anteceder o término do período aquisitivo.");
+    int direito = pa.getTotDiasDireito() != null ? pa.getTotDiasDireito() : 30;
+    int gozados = pa.getDiasGozados() != null ? pa.getDiasGozados() : 0;
+    int vendidos = pa.getDiasVendidosAbono() != null ? pa.getDiasVendidosAbono() : 0;
+    int dobro = pa.getDiasConvertidosDobro() != null ? pa.getDiasConvertidosDobro() : 0;
+    if (gozados + vendidos + dobro > direito)
+      fail(
+          "A soma de dias gozados, vendidos em abono e convertidos em dobro não pode exceder o total de dias de direito do período aquisitivo.");
+    if (pa.getMinPerFer() != null && pa.getMaxPerFer() != null && pa.getMinPerFer() > pa.getMaxPerFer())
+      fail(
+          "O override individual de mínimo de parcelas não pode exceder o máximo de parcelas (ERG-01809).");
+    if (pa.getMinDiasPerFer() != null
+        && pa.getMaxDiasPerFer() != null
+        && pa.getMinDiasPerFer() > pa.getMaxDiasPerFer())
+      fail(
+          "O override individual de mínimo de dias por parcela não pode exceder o máximo (ERG-01810).");
+    var existentes =
+        em.createQuery(
+                "select x from PeriodoAquisitivoFerias x where x.numfunc=:f and x.numvinc=:v and x.chave=:c",
+                PeriodoAquisitivoFerias.class)
+            .setParameter("f", pa.getNumfunc())
+            .setParameter("v", pa.getNumvinc())
+            .setParameter("c", pa.getChave())
+            .setFlushMode(FlushModeType.COMMIT)
+            .getResultList();
+    for (PeriodoAquisitivoFerias other : existentes) {
+      if (pa.getId() != null && Objects.equals(pa.getId(), other.getId())) continue;
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "Já existe período aquisitivo com a mesma chave sequencial para este vínculo funcional.");
+    }
+    if (pa.getDocumentoLegalId() != null) {
+      DocumentoLegal doc = em.find(DocumentoLegal.class, pa.getDocumentoLegalId());
+      if (doc == null || !Objects.equals(doc.getEmpCodigo(), pa.getEmpCodigo()))
+        fail("Documento comprobatório inexistente ou pertence a outro órgão.");
+    }
+    if (pa.getAtoPublicacaoId() != null) {
+      DocumentoLegal pub = em.find(DocumentoLegal.class, pa.getAtoPublicacaoId());
+      if (pub == null || !Objects.equals(pub.getEmpCodigo(), pa.getEmpCodigo()))
+        fail("Ato de publicação inexistente ou pertence a outro órgão.");
+    }
+    customFields(
+        "administracao-pessoal.periodos-aquisitivos-ferias",
+        pa.getEmpCodigo(),
+        pa.getCustomFields(),
+        pa);
+  }
+
+  public void feriasGozo(FeriasGozo fg, boolean creating) {
+    if (fg.getEmpCodigo() == null
+        || fg.getNumfunc() == null
+        || fg.getNumvinc() == null
+        || fg.getPeriodoAquisitivoId() == null)
+      fail(
+          "Órgão, servidor, vínculo e período aquisitivo são obrigatórios para a parcela de férias.");
+    Vinculo vinculo =
+        em.find(
+            Vinculo.class,
+            new VinculoId(fg.getNumfunc(), fg.getNumvinc()),
+            LockModeType.PESSIMISTIC_READ);
+    if (vinculo == null || !Objects.equals(vinculo.getEmpCodigo(), fg.getEmpCodigo()))
+      fail("Vínculo funcional inexistente ou pertence a outro órgão.");
+    ServidorPessoa pessoa =
+        em.find(ServidorPessoa.class, fg.getNumfunc(), LockModeType.PESSIMISTIC_READ);
+    if (pessoa == null) fail("Servidor titular inexistente para a parcela de férias.");
+    PeriodoAquisitivoFerias pa =
+        em.find(
+            PeriodoAquisitivoFerias.class,
+            fg.getPeriodoAquisitivoId(),
+            LockModeType.PESSIMISTIC_READ);
+    if (pa == null
+        || !Objects.equals(pa.getEmpCodigo(), fg.getEmpCodigo())
+        || !Objects.equals(pa.getNumfunc(), fg.getNumfunc())
+        || !Objects.equals(pa.getNumvinc(), fg.getNumvinc()))
+      fail("Período aquisitivo inexistente ou não pertence ao mesmo vínculo funcional e órgão.");
+    if (fg.getChavePeraqfer() == null) {
+      fg.setChavePeraqfer(pa.getChave());
+    } else if (!Objects.equals(fg.getChavePeraqfer(), pa.getChave())) {
+      fail("A chave do período aquisitivo informada na parcela diverge do período aquisitivo selecionado.");
+    }
+    if (creating && Set.of("PRESCRITO", "CANCELADO", "SUSPENSO").contains(pa.getSituacao()))
+      fail("Não é permitido programar férias sobre período aquisitivo em situação " + pa.getSituacao() + ".");
+    chronology(
+        fg.getDtini(),
+        fg.getDtprevfim(),
+        "O término previsto da parcela de férias não pode anteceder a data de início (ERG-01851).");
+    chronology(
+        fg.getDtini(),
+        fg.getDtfim(),
+        "O término efetivo da parcela de férias não pode anteceder a data de início.");
+    chronology(
+        fg.getDtini(),
+        fg.getDtInterrupcao(),
+        "A data de interrupção das férias não pode anteceder a data de início do gozo.");
+    ParametroContagemFerias param =
+        resolveEffectiveParametroFerias(
+            vinculo, pa.getDtini() != null ? pa.getDtini() : fg.getDtini());
+    int maxParcelas =
+        pa.getMaxPerFer() != null
+            ? pa.getMaxPerFer()
+            : (param != null && param.getMaxPerFer() != null ? param.getMaxPerFer() : 3);
+    if (fg.getOrdemParcela() == null || fg.getOrdemParcela() < 1 || fg.getOrdemParcela() > maxParcelas)
+      fail(
+          "A ordem da parcela ("
+              + fg.getOrdemParcela()
+              + ") deve estar entre 1 e o limite máximo aplicável ao período aquisitivo ("
+              + maxParcelas
+              + ").");
+    int minDiasParcela =
+        pa.getMinDiasPerFer() != null
+            ? pa.getMinDiasPerFer()
+            : (param != null && param.getMinDiasPerFer() != null ? param.getMinDiasPerFer() : 5);
+    int maxDiasParcela =
+        pa.getMaxDiasPerFer() != null
+            ? pa.getMaxDiasPerFer()
+            : (param != null && param.getMaxDiasPerFer() != null ? param.getMaxDiasPerFer() : 30);
+    boolean interrompida = "INTERROMPIDA".equals(fg.getSituacao());
+    if (fg.getDiasGozo() == null
+        || fg.getDiasGozo() <= 0
+        || (!interrompida && fg.getDiasGozo() < minDiasParcela)
+        || fg.getDiasGozo() > maxDiasParcela)
+      fail(
+          "A duração da parcela de férias ("
+              + fg.getDiasGozo()
+              + " dias) deve respeitar os limites aplicáveis ao período aquisitivo ("
+              + minDiasParcela
+              + " a "
+              + maxDiasParcela
+              + " dias).");
+    if (fg.getDtini() != null && pa.getDtfim() != null && fg.getDtini().isBefore(pa.getDtfim())) {
+      boolean proibeGozoAntesFimPa =
+          "N".equalsIgnoreCase(pa.getPermiteFerEstePer())
+              || ((pa.getPermiteFerEstePer() == null || "I".equalsIgnoreCase(pa.getPermiteFerEstePer()))
+                  && param != null
+                  && Boolean.FALSE.equals(param.getPermiteGozoAntesPaFer()));
+      if (proibeGozoAntesFimPa)
+        fail(
+            "A regra aplicável ao período aquisitivo não permite início de gozo antes do término do período aquisitivo ("
+                + pa.getDtfim()
+                + ").");
+    }
+    if (Boolean.TRUE.equals(fg.getAbonoPecuniario())) {
+      String effectiveAbonoDirGozo =
+          (pa.getAbonoDirGozo() != null && !"I".equalsIgnoreCase(pa.getAbonoDirGozo()))
+              ? pa.getAbonoDirGozo()
+              : (param != null && param.getAbonoDirGozo() != null ? param.getAbonoDirGozo() : "D");
+      if ("N".equalsIgnoreCase(effectiveAbonoDirGozo))
+        fail("A regra aplicável ao período aquisitivo veda conversão em abono pecuniário.");
+      if (fg.getDiasAbonoVendidos() == null || fg.getDiasAbonoVendidos() <= 0)
+        fail(
+            "Parcela com abono pecuniário habilitado exige quantidade estritamente positiva de dias vendidos.");
+      int maxDiasVend =
+          pa.getMaxDiasVendFer() != null
+              ? pa.getMaxDiasVendFer()
+              : (param != null && param.getMaxDiasVendFer() != null
+                  ? param.getMaxDiasVendFer()
+                  : 30);
+      if (fg.getDiasAbonoVendidos() > maxDiasVend)
+        fail(
+            "A quantidade de dias vendidos em abono pecuniário ("
+                + fg.getDiasAbonoVendidos()
+                + ") excede o máximo aplicável ao período aquisitivo ("
+                + maxDiasVend
+                + " dias).");
+      if (fg.getIniFimAbono() == null || !Set.of("I", "F").contains(fg.getIniFimAbono()))
+        fail(
+            "Parcela com abono pecuniário exige indicar a posição do abono (I = início ou F = final).");
+    }
+    if ((fg.getNumfuncSubstituto() == null) != (fg.getNumvincSubstituto() == null))
+      fail(
+          "A designação de substituto nas férias exige informar simultaneamente o servidor e o vínculo substituto (ERG-00502).");
+    if (fg.getNumfuncSubstituto() != null) {
+      if (Objects.equals(fg.getNumfuncSubstituto(), fg.getNumfunc()))
+        fail("O servidor em gozo de férias não pode ser designado como substituto de si próprio (ERG-00503).");
+      Vinculo subst =
+          em.find(
+              Vinculo.class,
+              new VinculoId(fg.getNumfuncSubstituto(), fg.getNumvincSubstituto()),
+              LockModeType.PESSIMISTIC_READ);
+      if (subst == null
+          || !Objects.equals(subst.getEmpCodigo(), fg.getEmpCodigo())
+          || !"ATIVO".equals(subst.getSituacao()))
+        fail(
+            "O vínculo do servidor substituto deve existir no mesmo órgão e estar em situação ATIVO (ERG-00504).");
+    }
+    if (!"CANCELADA".equals(fg.getSituacao()) && fg.getDtini() != null) {
+      var existentes =
+          em.createQuery(
+                  "select x from FeriasGozo x where x.numfunc=:f and x.numvinc=:v and x.situacao<>'CANCELADA'",
+                  FeriasGozo.class)
+              .setParameter("f", fg.getNumfunc())
+              .setParameter("v", fg.getNumvinc())
+              .setFlushMode(FlushModeType.COMMIT)
+              .getResultList();
+      LocalDate startA = fg.getDtini();
+      LocalDate endA = fg.getDtfim() != null ? fg.getDtfim() : fg.getDtprevfim();
+      int diasConsumidosPa =
+          (fg.getDiasGozo() != null ? fg.getDiasGozo() : 0)
+              + (Boolean.TRUE.equals(fg.getAbonoPecuniario()) && fg.getDiasAbonoVendidos() != null
+                  ? fg.getDiasAbonoVendidos()
+                  : 0);
+      for (FeriasGozo other : existentes) {
+        if (fg.getId() != null && Objects.equals(fg.getId(), other.getId())) continue;
+        if (Objects.equals(fg.getPeriodoAquisitivoId(), other.getPeriodoAquisitivoId())) {
+          if (Objects.equals(fg.getOrdemParcela(), other.getOrdemParcela())) {
+            throw new ResponseStatusException(
+                HttpStatus.CONFLICT,
+                "Já existe parcela ativa com a mesma ordem sequencial ("
+                    + fg.getOrdemParcela()
+                    + ") para este período aquisitivo.");
+          }
+          diasConsumidosPa +=
+              (other.getDiasGozo() != null ? other.getDiasGozo() : 0)
+                  + (Boolean.TRUE.equals(other.getAbonoPecuniario())
+                          && other.getDiasAbonoVendidos() != null
+                      ? other.getDiasAbonoVendidos()
+                      : 0);
+        }
+        if (other.getDtini() == null) continue;
+        LocalDate startB = other.getDtini();
+        LocalDate endB = other.getDtfim() != null ? other.getDtfim() : other.getDtprevfim();
+        if (endA != null && endB != null && !startA.isAfter(endB) && !startB.isAfter(endA))
+          throw new ResponseStatusException(
+              HttpStatus.CONFLICT,
+              "Já existe parcela de férias ativa concomitante para o mesmo vínculo no período informado.");
+      }
+      int tetoLiquidoPa =
+          (pa.getTotDiasDireito() != null ? pa.getTotDiasDireito() : 30)
+              - (pa.getDiasConvertidosDobro() != null ? pa.getDiasConvertidosDobro() : 0);
+      if (diasConsumidosPa > tetoLiquidoPa)
+        fail(
+            "A soma de dias de gozo e abono pecuniário das parcelas ativas ("
+                + diasConsumidosPa
+                + " dias) excede o total líquido disponível no período aquisitivo ("
+                + tetoLiquidoPa
+                + " dias).");
+    }
+    if (fg.getDocumentoLegalId() != null) {
+      DocumentoLegal doc = em.find(DocumentoLegal.class, fg.getDocumentoLegalId());
+      if (doc == null || !Objects.equals(doc.getEmpCodigo(), fg.getEmpCodigo()))
+        fail("Documento de concessão inexistente ou pertence a outro órgão.");
+    }
+    if (fg.getAtoPublicacaoId() != null) {
+      DocumentoLegal pub = em.find(DocumentoLegal.class, fg.getAtoPublicacaoId());
+      if (pub == null || !Objects.equals(pub.getEmpCodigo(), fg.getEmpCodigo()))
+        fail("Ato de publicação inexistente ou pertence a outro órgão.");
+    }
+    customFields("administracao-pessoal.ferias-gozo", fg.getEmpCodigo(), fg.getCustomFields(), fg);
+  }
+
+  private ParametroContagemFerias resolveEffectiveParametroFerias(
+      Vinculo vinculo, LocalDate refDate) {
+    if (vinculo == null || blank(vinculo.getRegimejur()) || blank(vinculo.getTipovinc())) {
+      return null;
+    }
+    var q =
+        em.createQuery(
+            "select x from ParametroContagemFerias x where x.active=true and x.regimeJuridico=:rj and x.tipoVinculo=:tv",
+            ParametroContagemFerias.class);
+    if (q == null) return null;
+    var r1 = q.setParameter("rj", vinculo.getRegimejur());
+    var r2 = r1 != null ? r1.setParameter("tv", vinculo.getTipovinc()) : null;
+    var flushed = r2 != null ? r2.setFlushMode(FlushModeType.COMMIT) : null;
+    var lista =
+        (flushed != null ? flushed : r2) != null
+            ? (flushed != null ? flushed : r2).getResultList()
+            : List.<ParametroContagemFerias>of();
+    if (lista == null || lista.isEmpty()) return null;
+    return lista.stream()
+        .filter(
+            p ->
+                p.getEmpCodigo() == null
+                    || Objects.equals(p.getEmpCodigo(), vinculo.getEmpCodigo()))
+        .filter(
+            p ->
+                vinculo.getCategoria() == null
+                    || Objects.equals(p.getCategoria(), vinculo.getCategoria()))
+        .filter(
+            p ->
+                refDate == null
+                    || ((p.getDtini() == null || !refDate.isBefore(p.getDtini()))
+                        && (p.getDtfim() == null || !refDate.isAfter(p.getDtfim()))))
+        .sorted(
+            Comparator.comparing((ParametroContagemFerias p) -> p.getEmpCodigo() != null ? 0 : 1)
+                .thenComparing(
+                    p -> p.getDtini() != null ? p.getDtini() : LocalDate.MIN,
+                    Comparator.reverseOrder()))
+        .findFirst()
+        .orElse(null);
+  }
+
   public void vinculo(Vinculo v, boolean creating) {
     Orgao orgao = null;
     if (creating) {

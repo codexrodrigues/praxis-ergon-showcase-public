@@ -34,12 +34,14 @@ class ApiPathsContractTest {
         TipoFrequenciaController.class, CodigoFrequenciaController.class,
         AfastamentoController.class, RegraFrequenciaEstatutariaController.class,
         FrequenciaController.class, TabelaController.class,
-        ItemTabelaController.class, DefinicaoCampoCustomizadoController.class)) {
+        ItemTabelaController.class, DefinicaoCampoCustomizadoController.class,
+        ParametroContagemFeriasController.class, PeriodoAquisitivoFeriasController.class,
+        FeriasGozoController.class)) {
       var mapping = AnnotatedElementUtils.findMergedAnnotation(controller, RequestMapping.class);
       assertThat(mapping).as(controller.getSimpleName()).isNotNull();
       controllerPaths.addAll(Arrays.asList(mapping.value()));
     }
-    assertThat(descriptors).hasSize(16);
+    assertThat(descriptors).hasSize(19);
     for (var source : descriptors) {
       assertThat(controllerPaths).contains(source.resourcePath());
       assertThat(source.runtimeContract().byIdsEndpoint()).isNotBlank();

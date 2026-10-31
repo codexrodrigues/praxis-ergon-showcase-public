@@ -90,7 +90,61 @@ public class ErgonDeterminationConfig {
                     new ReactiveDeterminationOutputBinding(
                         "/requerTabelaOpcoesPrevisto", "/requerTabelaOpcoesPrevisto"),
                     new ReactiveDeterminationOutputBinding(
-                        "/escopoGlobalPrevisto", "/escopoGlobalPrevisto"))));
+                        "/escopoGlobalPrevisto", "/escopoGlobalPrevisto"))),
+            definition(
+                "ergon.parametroContagemFerias.previa",
+                "ParametroContagemFerias",
+                "determineErgonParametroContagemFeriasPrevia",
+                List.of(
+                    "temFerias",
+                    "totDiasFer",
+                    "abonoDirGozo",
+                    "numDiasAbonoFer",
+                    "denDiasAbonoFer"),
+                List.of(
+                    "temFerias",
+                    "totDiasFer",
+                    "abonoDirGozo",
+                    "numDiasAbonoFer",
+                    "denDiasAbonoFer"),
+                List.of(
+                    new ReactiveDeterminationOutputBinding("/maxDiasVendFer", "/maxDiasVendFer"),
+                    new ReactiveDeterminationOutputBinding(
+                        "/minDiasPerPrincFer", "/minDiasPerPrincFer"))),
+            definition(
+                "ergon.periodoAquisitivoFerias.previa",
+                "PeriodoAquisitivoFerias",
+                "determineErgonPeriodoAquisitivoPrevia",
+                List.of(
+                    "dtini",
+                    "dtfim",
+                    "totDiasDireito",
+                    "diasGozados",
+                    "diasVendidosAbono",
+                    "diasConvertidosDobro"),
+                List.of(
+                    "dtini",
+                    "dtfim",
+                    "totDiasDireito",
+                    "diasGozados",
+                    "diasVendidosAbono",
+                    "diasConvertidosDobro"),
+                List.of(
+                    new ReactiveDeterminationOutputBinding(
+                        "/saldoDiasDisponivel", "/saldoDiasDisponivel"),
+                    new ReactiveDeterminationOutputBinding("/dtPrescricao", "/dtPrescricao"))),
+            definition(
+                "ergon.feriasGozo.previa",
+                "FeriasGozo",
+                "determineErgonFeriasGozoPrevia",
+                List.of("periodoAquisitivoId", "dtini", "dtprevfim", "diasGozo"),
+                List.of("periodoAquisitivoId", "dtini", "dtprevfim", "diasGozo"),
+                List.of(
+                    new ReactiveDeterminationOutputBinding("/chavePeraqfer", "/chavePeraqfer"),
+                    new ReactiveDeterminationOutputBinding(
+                        "/totDiasDireitoPa", "/totDiasDireitoPa"),
+                    new ReactiveDeterminationOutputBinding("/diasGozo", "/diasGozo"),
+                    new ReactiveDeterminationOutputBinding("/dtprevfim", "/dtprevfim"))));
   }
 
   private ReactiveDeterminationDefinition definition(

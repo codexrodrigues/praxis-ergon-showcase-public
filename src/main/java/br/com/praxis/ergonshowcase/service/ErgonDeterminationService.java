@@ -152,4 +152,69 @@ public class ErgonDeterminationService {
     }
     return preview;
   }
+
+  public ParametroContagemFeriasPreviaPreviewDTO previaParametroContagemFerias(
+      ParametroContagemFeriasPreviaDraftDTO draft) {
+    if (Boolean.FALSE.equals(draft.getTemFerias())) {
+      return new ParametroContagemFeriasPreviaPreviewDTO(0, 0);
+    }
+    int tot = draft.getTotDiasFer() != null ? draft.getTotDiasFer() : 30;
+    int minPrinc = Math.max(10, Math.min(14, tot));
+    if ("N".equalsIgnoreCase(draft.getAbonoDirGozo())) {
+      return new ParametroContagemFeriasPreviaPreviewDTO(0, minPrinc);
+    }
+    int num = draft.getNumDiasAbonoFer() != null ? draft.getNumDiasAbonoFer() : 1;
+    int den =
+        draft.getDenDiasAbonoFer() != null && draft.getDenDiasAbonoFer() > 0
+            ? draft.getDenDiasAbonoFer()
+            : 3;
+    if (num < 0 || num > den) {
+      ErgonInvariants.fail("Numerador da fração de abono não pode exceder o denominador.");
+    }
+    int maxVend = (tot * num) / den;
+    return new ParametroContagemFeriasPreviaPreviewDTO(maxVend, minPrinc);
+  }
+
+  public PeriodoAquisitivoPreviaPreviewDTO previaPeriodoAquisitivo(
+      PeriodoAquisitivoPreviaDraftDTO draft) {
+    if (draft.getDtini() != null
+        && draft.getDtfim() != null
+        && draft.getDtfim().isBefore(draft.getDtini())) {
+      ErgonInvariants.fail(
+          "O término do período aquisitivo não pode anteceder a data de início.");
+    }
+    int direito = draft.getTotDiasDireito() != null ? draft.getTotDiasDireito() : 30;
+    int gozados = draft.getDiasGozados() != null ? draft.getDiasGozados() : 0;
+    int vendidos = draft.getDiasVendidosAbono() != null ? draft.getDiasVendidosAbono() : 0;
+    int dobro = draft.getDiasConvertidosDobro() != null ? draft.getDiasConvertidosDobro() : 0;
+    int saldo = Math.max(0, direito - gozados - vendidos - dobro);
+    LocalDate dtPrescricao = draft.getDtfim() != null ? draft.getDtfim().plusYears(2) : null;
+    return new PeriodoAquisitivoPreviaPreviewDTO(saldo, dtPrescricao);
+  }
+
+  public FeriasGozoPreviaPreviewDTO previaFeriasGozo(FeriasGozoPreviaDraftDTO draft) {
+    Integer chave = null;
+    Integer totDiasPa = null;
+    if (draft.getPeriodoAquisitivoId() != null) {
+      PeriodoAquisitivoFerias pa =
+          em.find(PeriodoAquisitivoFerias.class, draft.getPeriodoAquisitivoId());
+      if (pa == null) {
+        ErgonInvariants.fail("Período aquisitivo selecionado não encontrado.");
+      }
+      chave = pa.getChave();
+      totDiasPa = pa.getTotDiasDireito();
+    }
+    Integer dias = draft.getDiasGozo();
+    LocalDate dtprevfim = draft.getDtprevfim();
+    if (draft.getDtini() != null && dtprevfim != null) {
+      if (dtprevfim.isBefore(draft.getDtini())) {
+        ErgonInvariants.fail(
+            "O término previsto da parcela de férias não pode anteceder a data de início.");
+      }
+      dias = Math.toIntExact(ChronoUnit.DAYS.between(draft.getDtini(), dtprevfim) + 1);
+    } else if (draft.getDtini() != null && dias != null && dias > 0) {
+      dtprevfim = draft.getDtini().plusDays(dias - 1L);
+    }
+    return new FeriasGozoPreviaPreviewDTO(chave, totDiasPa, dias, dtprevfim);
+  }
 }

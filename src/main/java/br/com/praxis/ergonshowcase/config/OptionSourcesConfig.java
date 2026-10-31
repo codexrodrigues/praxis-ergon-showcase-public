@@ -93,18 +93,48 @@ public class OptionSourcesConfig {
             "active", List.of("true"), List.of("false"), List.of("resourceKey", "fieldKey"), true,
             "Definição de campo customizado inativa; mantenha apenas referências históricas já existentes.",
             Map.of("true", "Ativo", "false", "Inativo")))
+        .add(ParametroContagemFerias.class, source(ApiPaths.PARAMETRO_CONTAGEM_FERIAS_SOURCE,
+            ApiPaths.PARAMETROS_CONTAGEM_FERIAS, "id", "regimeJuridico",
+            "administracao-pessoal.parametros-contagem-ferias", "ficha-parametro-contagem-ferias",
+            "active", List.of("true"), List.of("false"), List.of("tipoVinculo", "categoria"), true,
+            "Parâmetro estatutário de férias inativo; mantenha apenas referências históricas já existentes.",
+            Map.of("true", "Ativo", "false", "Inativo")))
+        .add(PeriodoAquisitivoFerias.class, source(ApiPaths.PERIODO_AQUISITIVO_FERIAS_SOURCE,
+            ApiPaths.PERIODOS_AQUISITIVOS_FERIAS, "id", "chave",
+            "administracao-pessoal.periodos-aquisitivos-ferias", "ficha-periodo-aquisitivo",
+            "situacao", List.of("DISPONIVEL", "PARCIALMENTE_GOZADO", "EM_AQUISICAO"),
+            List.of("QUITADO", "PRESCRITO", "CANCELADO", "SUSPENSO"), List.of("exercicio", "dtini"), true,
+            "Período aquisitivo sem saldo disponível ou encerrado; mantenha apenas referências históricas.",
+            Map.of("EM_AQUISICAO", "Em aquisição", "DISPONIVEL", "Disponível",
+                "PARCIALMENTE_GOZADO", "Parcialmente gozado", "QUITADO", "Quitado",
+                "PRESCRITO", "Prescrito", "SUSPENSO", "Suspenso", "CANCELADO", "Cancelado")))
+        .add(FeriasGozo.class, source(ApiPaths.FERIAS_GOZO_SOURCE, ApiPaths.FERIAS_GOZO,
+            "id", "chavePeraqfer", "administracao-pessoal.ferias-gozo", "ficha-ferias-gozo",
+            "situacao", List.of("PROGRAMADA", "HOMOLOGADA", "EM_GOZO", "GOZADA"),
+            List.of("CANCELADA", "INTERROMPIDA"), List.of("ordemParcela", "dtini"), true,
+            "Parcela de gozo de férias cancelada ou interrompida; mantenha apenas referências históricas.",
+            Map.of("PROGRAMADA", "Programada", "HOMOLOGADA", "Homologada", "EM_GOZO", "Em gozo",
+                "GOZADA", "Gozada", "INTERROMPIDA", "Interrompida", "CANCELADA", "Cancelada")))
         .build();
   }
 
   private OptionSourceDescriptor source(String key, String path, String id, String label,
       String entityKey, String surface, String status, List<String> allowed, List<String> blocked,
       List<String> descriptions, boolean scoped, String disabledReason, Map<String, String> statusLabels) {
-    var dependencies = scoped ? Map.of("empCodigo", "empCodigo")
+    var dependencies = key.equals(ApiPaths.PERIODO_AQUISITIVO_FERIAS_SOURCE)
+        ? Map.of("empCodigo", "empCodigo", "numfunc", "numfunc", "numvinc", "numvinc")
+        : key.equals(ApiPaths.FERIAS_GOZO_SOURCE)
+        ? Map.of("empCodigo", "empCodigo", "periodoAquisitivoId", "periodoAquisitivoId")
+        : scoped ? Map.of("empCodigo", "empCodigo")
         : key.equals(ApiPaths.DEPENDENTE_SOURCE) ? Map.of("numfunc", "numfunc")
         : key.equals(ApiPaths.CODIGO_FREQUENCIA_SOURCE) ? Map.of("tipofreq", "tipofreq")
         : key.equals(ApiPaths.ITEM_TABELA_SOURCE) ? Map.of("tab", "tab")
         : Map.<String, String>of();
-    var dependsOn = scoped ? List.of("empCodigo")
+    var dependsOn = key.equals(ApiPaths.PERIODO_AQUISITIVO_FERIAS_SOURCE)
+        ? List.of("empCodigo", "numfunc", "numvinc")
+        : key.equals(ApiPaths.FERIAS_GOZO_SOURCE)
+        ? List.of("empCodigo", "periodoAquisitivoId")
+        : scoped ? List.of("empCodigo")
         : key.equals(ApiPaths.DEPENDENTE_SOURCE) ? List.of("numfunc")
         : key.equals(ApiPaths.CODIGO_FREQUENCIA_SOURCE) ? List.of("tipofreq")
         : key.equals(ApiPaths.ITEM_TABELA_SOURCE) ? List.of("tab")
@@ -144,6 +174,8 @@ public class OptionSourcesConfig {
       case "item" -> display(property, "Item", "vpn_key");
       case "resourceKey" -> display(property, "Recurso alvo", "extension");
       case "fieldKey" -> display(property, "Chave técnica", "vpn_key");
+      case "exercicio" -> display(property, "Exercício", "calendar_month");
+      case "ordemParcela" -> display(property, "Parcela", "format_list_numbered");
       default -> throw new IllegalArgumentException("Campo de diretório sem curadoria: " + property);
     }).toList();
     String codeProperty = key.equals(ApiPaths.VINCULO_SOURCE)
@@ -154,7 +186,11 @@ public class OptionSourcesConfig {
                 ? "mnemonico"
                 : key.equals(ApiPaths.ITEM_TABELA_SOURCE)
                     ? "item"
-                    : key.equals(ApiPaths.CAMPO_CUSTOMIZADO_SOURCE) ? "fieldKey" : id;
+                    : key.equals(ApiPaths.CAMPO_CUSTOMIZADO_SOURCE)
+                        ? "fieldKey"
+                        : key.equals(ApiPaths.PERIODO_AQUISITIVO_FERIAS_SOURCE)
+                            ? "chave"
+                            : key.equals(ApiPaths.FERIAS_GOZO_SOURCE) ? "ordemParcela" : id;
     var lookup = new EntityLookupDescriptor(entityKey, codeProperty, descriptions, status, null, null,
         List.of(label), dependencies,
         new LookupSelectionPolicy(null, status, allowed, blocked, true, disabledReason, disabledReason),

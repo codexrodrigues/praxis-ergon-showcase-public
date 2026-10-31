@@ -14,7 +14,7 @@ public final class InstallBulkStorage {
 
   public static List<BulkOperationControlIdentity> identities() {
     var ids = new ArrayList<BulkOperationControlIdentity>();
-    for (String resource : List.of("vinculos", "funcionarios", "cargos", "dependentes", "afastamentos", "frequencias", "campos-customizados")) {
+    for (String resource : List.of("vinculos", "funcionarios", "cargos", "dependentes", "afastamentos", "frequencias", "campos-customizados", "parametros-contagem-ferias", "periodos-aquisitivos-ferias", "ferias-gozo")) {
       for (String mode : List.of("uniform", "items"))
         ids.add(new BulkOperationControlIdentity(NAMESPACE, "ergon." + resource + ".bulk." + mode));
     }
@@ -24,6 +24,9 @@ public final class InstallBulkStorage {
     ids.add(new BulkOperationControlIdentity(NAMESPACE, "ergon.afastamentos.homologar-afastamento-lote"));
     ids.add(new BulkOperationControlIdentity(NAMESPACE, "ergon.frequencias.homologar-frequencia-lote"));
     ids.add(new BulkOperationControlIdentity(NAMESPACE, "ergon.campos-customizados.ativar-campo-customizado-lote"));
+    ids.add(new BulkOperationControlIdentity(NAMESPACE, "ergon.parametros-contagem-ferias.ativar-parametro-ferias-lote"));
+    ids.add(new BulkOperationControlIdentity(NAMESPACE, "ergon.periodos-aquisitivos-ferias.homologar-periodo-aquisitivo-lote"));
+    ids.add(new BulkOperationControlIdentity(NAMESPACE, "ergon.ferias-gozo.homologar-ferias-gozo-lote"));
     return List.copyOf(ids);
   }
 

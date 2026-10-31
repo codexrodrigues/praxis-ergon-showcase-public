@@ -28,7 +28,10 @@ public class ErgonBulkDomain {
     DEPENDENTES("administracao-pessoal.dependentes", "dependentes", "updateErgonDependente", Dependente.class, UpdateDependenteDTO.class),
     AFASTAMENTOS("administracao-pessoal.afastamentos", "afastamentos", "updateErgonAfastamento", Afastamento.class, UpdateAfastamentoDTO.class),
     FREQUENCIAS("administracao-pessoal.frequencias", "frequencias", "updateErgonFrequencia", Frequencia.class, UpdateFrequenciaDTO.class),
-    CAMPOS_CUSTOMIZADOS("administracao-pessoal.campos-customizados", "campos-customizados", "updateErgonCampoCustomizado", DefinicaoCampoCustomizado.class, UpdateDefinicaoCampoCustomizadoDTO.class);
+    CAMPOS_CUSTOMIZADOS("administracao-pessoal.campos-customizados", "campos-customizados", "updateErgonCampoCustomizado", DefinicaoCampoCustomizado.class, UpdateDefinicaoCampoCustomizadoDTO.class),
+    PARAMETROS_CONTAGEM_FERIAS("administracao-pessoal.parametros-contagem-ferias", "parametros-contagem-ferias", "updateErgonParametroContagemFerias", ParametroContagemFerias.class, UpdateParametroContagemFeriasDTO.class),
+    PERIODOS_AQUISITIVOS_FERIAS("administracao-pessoal.periodos-aquisitivos-ferias", "periodos-aquisitivos-ferias", "updateErgonPeriodoAquisitivoFerias", PeriodoAquisitivoFerias.class, UpdatePeriodoAquisitivoFeriasDTO.class),
+    FERIAS_GOZO("administracao-pessoal.ferias-gozo", "ferias-gozo", "updateErgonFeriasGozo", FeriasGozo.class, UpdateFeriasGozoDTO.class);
     public final String key, name, updateOperation;
     public final Class<?> entity, update;
     Resource(String key, String name, String op, Class<?> entity, Class<?> update) { this.key=key;this.name=name;this.updateOperation=op;this.entity=entity;this.update=update; }
@@ -40,6 +43,9 @@ public class ErgonBulkDomain {
         case DEPENDENTES -> Set.of("nome", "dtnasc", "invalido");
         case AFASTAMENTOS, FREQUENCIAS -> Set.of("tipofreq", "codfreq", "dtini");
         case CAMPOS_CUSTOMIZADOS -> Set.of("resourceKey", "fieldKey", "fieldType", "validationRules", "governancePolicy");
+        case PARAMETROS_CONTAGEM_FERIAS -> Set.of("dtini", "active");
+        case PERIODOS_AQUISITIVOS_FERIAS -> Set.of("empCodigo", "numfunc", "numvinc", "chave", "dtini", "saldoDiasDisponivel", "situacao");
+        case FERIAS_GOZO -> Set.of("empCodigo", "numfunc", "numvinc", "periodoAquisitivoId", "chavePeraqfer", "ordemParcela", "dtini", "situacao");
       };
     }
   }
@@ -55,6 +61,9 @@ public class ErgonBulkDomain {
   @Autowired AfastamentoMapper afastamentos;
   @Autowired FrequenciaMapper frequencias;
   @Autowired DefinicaoCampoCustomizadoMapper camposCustomizados;
+  @Autowired ParametroContagemFeriasMapper parametrosContagemFerias;
+  @Autowired PeriodoAquisitivoFeriasMapper periodosAquisitivosFerias;
+  @Autowired FeriasGozoMapper feriasGozo;
   @Autowired VinculoService vinculoService;
   @Autowired ServidorPessoaService pessoaService;
   @Autowired CargoService cargoService;
@@ -62,6 +71,9 @@ public class ErgonBulkDomain {
   @Autowired AfastamentoService afastamentoService;
   @Autowired FrequenciaService frequenciaService;
   @Autowired DefinicaoCampoCustomizadoService campoCustomizadoService;
+  @Autowired ParametroContagemFeriasService parametroContagemFeriasService;
+  @Autowired PeriodoAquisitivoFeriasService periodoAquisitivoFeriasService;
+  @Autowired FeriasGozoService feriasGozoService;
 
   ResourceMapper mapper(Resource r) {
     return switch(r) {
@@ -72,19 +84,24 @@ public class ErgonBulkDomain {
       case AFASTAMENTOS -> afastamentos;
       case FREQUENCIAS -> frequencias;
       case CAMPOS_CUSTOMIZADOS -> camposCustomizados;
+      case PARAMETROS_CONTAGEM_FERIAS -> parametrosContagemFerias;
+      case PERIODOS_AQUISITIVOS_FERIAS -> periodosAquisitivosFerias;
+      case FERIAS_GOZO -> feriasGozo;
     };
   }
   public BulkIdentityCodec codec(Resource r) {
     return switch(r) {
       case CARGOS -> BulkIdentityCodecs.integers();
-      case PESSOAS, AFASTAMENTOS, FREQUENCIAS, CAMPOS_CUSTOMIZADOS -> BulkIdentityCodecs.longs();
+      case PESSOAS, AFASTAMENTOS, FREQUENCIAS, CAMPOS_CUSTOMIZADOS,
+          PARAMETROS_CONTAGEM_FERIAS, PERIODOS_AQUISITIVOS_FERIAS, FERIAS_GOZO -> BulkIdentityCodecs.longs();
       case VINCULOS, DEPENDENTES -> BulkIdentityCodecs.strings();
     };
   }
   public Object identity(Resource r, Object wire) {
     return switch(r) {
       case CARGOS -> BulkIdentityCodecs.integers().decode((Integer) wire);
-      case PESSOAS, AFASTAMENTOS, FREQUENCIAS, CAMPOS_CUSTOMIZADOS -> BulkIdentityCodecs.longs().decode((String) wire);
+      case PESSOAS, AFASTAMENTOS, FREQUENCIAS, CAMPOS_CUSTOMIZADOS,
+          PARAMETROS_CONTAGEM_FERIAS, PERIODOS_AQUISITIVOS_FERIAS, FERIAS_GOZO -> BulkIdentityCodecs.longs().decode((String) wire);
       case VINCULOS -> {
         VinculoId id=CompositeIdSupport.decode((String)wire,VinculoId.class);
         if(!wire.equals(CompositeIdSupport.encode(id))) throw new IllegalArgumentException("Identidade composta não canônica.");
@@ -104,6 +121,9 @@ public class ErgonBulkDomain {
       case AFASTAMENTOS -> ((Afastamento)e).getId().toString();
       case FREQUENCIAS -> ((Frequencia)e).getId().toString();
       case CAMPOS_CUSTOMIZADOS -> ((DefinicaoCampoCustomizado)e).getId().toString();
+      case PARAMETROS_CONTAGEM_FERIAS -> ((ParametroContagemFerias)e).getId().toString();
+      case PERIODOS_AQUISITIVOS_FERIAS -> ((PeriodoAquisitivoFerias)e).getId().toString();
+      case FERIAS_GOZO -> ((FeriasGozo)e).getId().toString();
       case VINCULOS -> CompositeIdSupport.encode(((Vinculo)e).getId());
       case DEPENDENTES -> CompositeIdSupport.encode(((Dependente)e).getId());
     };
@@ -115,6 +135,9 @@ public class ErgonBulkDomain {
         : e instanceof Afastamento a ? a.getVersion()
         : e instanceof Frequencia f ? f.getVersion()
         : e instanceof DefinicaoCampoCustomizado cc ? cc.getVersion()
+        : e instanceof ParametroContagemFerias pcf ? pcf.getVersion()
+        : e instanceof PeriodoAquisitivoFerias paf ? paf.getVersion()
+        : e instanceof FeriasGozo fg ? fg.getVersion()
         : ((ServidorPessoa)e).getVersion();
   }
   public Object load(Resource r, Object wire, boolean lock) {
@@ -128,11 +151,17 @@ public class ErgonBulkDomain {
       Integer emp = ((DefinicaoCampoCustomizado) e).getEmpCodigo();
       return emp == null || Objects.equals(emp, tenant.orgao());
     }
+    if (r == Resource.PARAMETROS_CONTAGEM_FERIAS) {
+      Integer emp = ((ParametroContagemFerias) e).getEmpCodigo();
+      return emp == null || Objects.equals(emp, tenant.orgao());
+    }
     return r == Resource.PESSOAS || r == Resource.DEPENDENTES
         || Objects.equals(
             r == Resource.CARGOS ? ((Cargo)e).getEmpCodigo()
                 : r == Resource.AFASTAMENTOS ? ((Afastamento)e).getEmpCodigo()
                 : r == Resource.FREQUENCIAS ? ((Frequencia)e).getEmpCodigo()
+                : r == Resource.PERIODOS_AQUISITIVOS_FERIAS ? ((PeriodoAquisitivoFerias)e).getEmpCodigo()
+                : r == Resource.FERIAS_GOZO ? ((FeriasGozo)e).getEmpCodigo()
                 : ((Vinculo)e).getEmpCodigo(),
             tenant.orgao());
   }
@@ -145,7 +174,10 @@ public class ErgonBulkDomain {
         "possuiDeficienciaPcDPrevisto","tipoDependenteDescricaoPrevista","idadeCalculadaAnos","elegivelIrrfPrevisto",
         "codigoFrequenciaNomePrevisto","quantidadeDiasPrevista","comOnusPrevisto",
         "formatoQuantidadePrevisto","exigeHorarioPrevisto",
-        "optionTabelaDescricaoPrevista","requerTabelaOpcoesPrevisto","escopoGlobalPrevisto"));
+        "optionTabelaDescricaoPrevista","requerTabelaOpcoesPrevisto","escopoGlobalPrevisto",
+        "orgaoNome","escopoGlobal","resumoParametro",
+        "pessoaNome","vinculoSituacao","periodoResumo","saldoDiasDisponivel",
+        "parcelaResumo","diasGozo","totalDiasConsumidosPa","saldoPaAposParcela"));
     response.retain(allowed);
     return response;
   }
@@ -200,6 +232,9 @@ public class ErgonBulkDomain {
         invariants.frequencia((Frequencia) e, false);
       }
       case CAMPOS_CUSTOMIZADOS -> invariants.campoCustomizado((DefinicaoCampoCustomizado)e,false);
+      case PARAMETROS_CONTAGEM_FERIAS -> invariants.parametroContagemFerias((ParametroContagemFerias) e, false);
+      case PERIODOS_AQUISITIVOS_FERIAS -> invariants.periodoAquisitivoFerias((PeriodoAquisitivoFerias) e, false);
+      case FERIAS_GOZO -> invariants.feriasGozo((FeriasGozo) e, false);
     }
   }
   public boolean apply(Resource r, Object e, Object dto) {
@@ -231,9 +266,54 @@ public class ErgonBulkDomain {
       case CAMPOS_CUSTOMIZADOS -> campoCustomizadoService.selectBulkIdentities((DefinicaoCampoCustomizadoFilterDTO)filter,
           (root,q,cb)->cb.or(cb.isNull(root.get("empCodigo")), cb.equal(root.get("empCodigo"),orgao)),limit).stream()
           .map(id->(Object)id.toString()).toList();
+      case PARAMETROS_CONTAGEM_FERIAS -> parametroContagemFeriasService.selectBulkIdentities((ParametroContagemFeriasFilterDTO)filter,
+          (root,q,cb)->cb.or(cb.isNull(root.get("empCodigo")), cb.equal(root.get("empCodigo"),orgao)),limit).stream()
+          .map(id->(Object)id.toString()).toList();
+      case PERIODOS_AQUISITIVOS_FERIAS -> periodoAquisitivoFeriasService.selectBulkIdentities((PeriodoAquisitivoFeriasFilterDTO)filter,
+          (root,q,cb)->cb.equal(root.get("empCodigo"),orgao),limit).stream()
+          .map(id->(Object)id.toString()).toList();
+      case FERIAS_GOZO -> feriasGozoService.selectBulkIdentities((FeriasGozoFilterDTO)filter,
+          (root,q,cb)->cb.equal(root.get("empCodigo"),orgao),limit).stream()
+          .map(id->(Object)id.toString()).toList();
     };
   }
   public Object commandCandidate(Object current, String operation, JsonNode parameters) {
+    if (current instanceof ParametroContagemFerias pcf) {
+      ParametroContagemFerias copy = new ParametroContagemFerias(); BeanUtils.copyProperties(pcf, copy);
+      var dto = json.convertValue(parameters, AlterarVigenciaParametroFeriasDTO.class); validate(dto);
+      if (Boolean.TRUE.equals(copy.getActive()))
+        throw new IllegalArgumentException("Parâmetro de contagem de férias já se encontra ativo.");
+      copy.setActive(true);
+      if (dto.getDtfim() != null) copy.setDtfim(dto.getDtfim());
+      invariants.parametroContagemFerias(copy, false);
+      return copy;
+    }
+    if (current instanceof PeriodoAquisitivoFerias paf) {
+      PeriodoAquisitivoFerias copy = new PeriodoAquisitivoFerias(); BeanUtils.copyProperties(paf, copy);
+      var dto = json.convertValue(parameters, TransicaoPeriodoAquisitivoFeriasDTO.class); validate(dto);
+      if (!Set.of("EM_AQUISICAO", "SUSPENSO").contains(copy.getSituacao()))
+        throw new IllegalArgumentException("Período aquisitivo não está em aquisição ou suspenso para homologação.");
+      if (dto.getDocumentoLegalId() != null) document(dto.getDocumentoLegalId(), copy.getEmpCodigo());
+      copy.setSituacao(copy.getDiasGozados() != null && copy.getDiasGozados() > 0 ? "PARCIALMENTE_GOZADO" : "DISPONIVEL");
+      if (dto.getDocumentoLegalId() != null) copy.setDocumentoLegalId(dto.getDocumentoLegalId());
+      copy.setObservacoes((copy.getObservacoes() == null ? "" : copy.getObservacoes() + " | ") + "Homologação em lote: " + dto.getObservacoes());
+      invariants.periodoAquisitivoFerias(copy, false);
+      return copy;
+    }
+    if (current instanceof FeriasGozo fg) {
+      FeriasGozo copy = new FeriasGozo(); BeanUtils.copyProperties(fg, copy);
+      var dto = json.convertValue(parameters, TransicaoFeriasGozoDTO.class); validate(dto);
+      if (!"PROGRAMADA".equals(copy.getSituacao()))
+        throw new IllegalArgumentException("Parcela de férias não está em estado PROGRAMADA para homologação.");
+      if (dto.getDocumentoLegalId() != null) document(dto.getDocumentoLegalId(), copy.getEmpCodigo());
+      if (dto.getAtoPublicacaoId() != null) document(dto.getAtoPublicacaoId(), copy.getEmpCodigo());
+      copy.setSituacao("HOMOLOGADA");
+      if (dto.getDocumentoLegalId() != null) copy.setDocumentoLegalId(dto.getDocumentoLegalId());
+      if (dto.getAtoPublicacaoId() != null) copy.setAtoPublicacaoId(dto.getAtoPublicacaoId());
+      copy.setObservacoes((copy.getObservacoes() == null ? "" : copy.getObservacoes() + " | ") + "Homologação em lote: " + dto.getObservacoes());
+      invariants.feriasGozo(copy, false);
+      return copy;
+    }
     if (current instanceof DefinicaoCampoCustomizado cc) {
       DefinicaoCampoCustomizado copy=new DefinicaoCampoCustomizado(); BeanUtils.copyProperties(cc,copy);
       var dto=json.convertValue(parameters,AtivarCampoCustomizadoLoteDTO.class); validate(dto);
@@ -300,6 +380,33 @@ public class ErgonBulkDomain {
     if (document==null || !Objects.equals(document.getEmpCodigo(),owner)) throw new IllegalArgumentException("Ato coletivo deve pertencer ao órgão do vínculo.");
   }
   public boolean applyCommand(Object entity, Object candidate) {
+    if (entity instanceof ParametroContagemFerias current && candidate instanceof ParametroContagemFerias next) {
+      boolean changed = !Objects.equals(current.getActive(), next.getActive())
+          || !Objects.equals(current.getDtfim(), next.getDtfim());
+      current.setActive(next.getActive());
+      current.setDtfim(next.getDtfim());
+      em.flush(); return changed;
+    }
+    if (entity instanceof PeriodoAquisitivoFerias current && candidate instanceof PeriodoAquisitivoFerias next) {
+      boolean changed = !Objects.equals(current.getSituacao(), next.getSituacao())
+          || !Objects.equals(current.getDocumentoLegalId(), next.getDocumentoLegalId())
+          || !Objects.equals(current.getObservacoes(), next.getObservacoes());
+      current.setSituacao(next.getSituacao());
+      current.setDocumentoLegalId(next.getDocumentoLegalId());
+      current.setObservacoes(next.getObservacoes());
+      em.flush(); return changed;
+    }
+    if (entity instanceof FeriasGozo current && candidate instanceof FeriasGozo next) {
+      boolean changed = !Objects.equals(current.getSituacao(), next.getSituacao())
+          || !Objects.equals(current.getDocumentoLegalId(), next.getDocumentoLegalId())
+          || !Objects.equals(current.getAtoPublicacaoId(), next.getAtoPublicacaoId())
+          || !Objects.equals(current.getObservacoes(), next.getObservacoes());
+      current.setSituacao(next.getSituacao());
+      current.setDocumentoLegalId(next.getDocumentoLegalId());
+      current.setAtoPublicacaoId(next.getAtoPublicacaoId());
+      current.setObservacoes(next.getObservacoes());
+      em.flush(); return changed;
+    }
     if (entity instanceof DefinicaoCampoCustomizado current && candidate instanceof DefinicaoCampoCustomizado next) {
       boolean changed=!Objects.equals(current.getActive(),next.getActive());
       current.setActive(next.getActive());

@@ -27,8 +27,9 @@ class PraxisMetadataCompletenessTest {
     var classes = new ArrayList<Class<?>>();
     for (var bean : scanner.findCandidateComponents("br.com.praxis.ergonshowcase.dto"))
       classes.add(Class.forName(bean.getBeanClassName()));
-    assertThat(classes).hasSizeGreaterThanOrEqualTo(100)
+    assertThat(classes).hasSizeGreaterThanOrEqualTo(125)
         .contains(CargoDados.class, OrgaoDados.class, ServidorPessoaDados.class, VinculoDados.class, DependenteDados.class, AfastamentoDados.class, FrequenciaDados.class, DefinicaoCampoCustomizadoDados.class,
+            ParametroContagemFeriasDados.class, PeriodoAquisitivoFeriasDados.class, FeriasGozoDados.class,
             CreateCargoDTO.class, UpdateCargoDTO.class, CargoFilterDTO.class,
             CreateOrgaoDTO.class, UpdateOrgaoDTO.class, OrgaoFilterDTO.class,
             CreateServidorPessoaDTO.class, UpdateServidorPessoaDTO.class, ServidorPessoaFilterDTO.class,
@@ -40,13 +41,17 @@ class PraxisMetadataCompletenessTest {
             RegraFrequenciaEstatutariaFilterDTO.class,
             CreateFrequenciaDTO.class, UpdateFrequenciaDTO.class, FrequenciaFilterDTO.class,
             TabelaFilterDTO.class, ItemTabelaFilterDTO.class,
-            CreateDefinicaoCampoCustomizadoDTO.class, UpdateDefinicaoCampoCustomizadoDTO.class, DefinicaoCampoCustomizadoFilterDTO.class)
+            CreateDefinicaoCampoCustomizadoDTO.class, UpdateDefinicaoCampoCustomizadoDTO.class, DefinicaoCampoCustomizadoFilterDTO.class,
+            CreateParametroContagemFeriasDTO.class, UpdateParametroContagemFeriasDTO.class, ParametroContagemFeriasFilterDTO.class,
+            CreatePeriodoAquisitivoFeriasDTO.class, UpdatePeriodoAquisitivoFeriasDTO.class, PeriodoAquisitivoFeriasFilterDTO.class,
+            CreateFeriasGozoDTO.class, UpdateFeriasGozoDTO.class, FeriasGozoFilterDTO.class)
         .contains(CargoResponseDTO.class, ServidorPessoaResponseDTO.class, VinculoResponseDTO.class,
             OrgaoResponseDTO.class, DocumentoLegalResponseDTO.class, SetorResponseDTO.class,
             DependenteResponseDTO.class, TipoDependenteResponseDTO.class,
             TipoFrequenciaResponseDTO.class, CodigoFrequenciaResponseDTO.class, AfastamentoResponseDTO.class,
             RegraFrequenciaEstatutariaResponseDTO.class, FrequenciaResponseDTO.class,
-            TabelaResponseDTO.class, ItemTabelaResponseDTO.class, DefinicaoCampoCustomizadoResponseDTO.class);
+            TabelaResponseDTO.class, ItemTabelaResponseDTO.class, DefinicaoCampoCustomizadoResponseDTO.class,
+            ParametroContagemFeriasResponseDTO.class, PeriodoAquisitivoFeriasResponseDTO.class, FeriasGozoResponseDTO.class);
     return classes;
   }
 
@@ -67,7 +72,8 @@ class PraxisMetadataCompletenessTest {
     for (var dto : List.of(CargoResponseDTO.class, ServidorPessoaResponseDTO.class,
         VinculoResponseDTO.class, DependenteResponseDTO.class, AfastamentoResponseDTO.class,
         RegraFrequenciaEstatutariaResponseDTO.class, FrequenciaResponseDTO.class,
-        DefinicaoCampoCustomizadoResponseDTO.class)) {
+        DefinicaoCampoCustomizadoResponseDTO.class, ParametroContagemFeriasResponseDTO.class,
+        PeriodoAquisitivoFeriasResponseDTO.class, FeriasGozoResponseDTO.class)) {
       var resolved = converters.resolveAsResolvedSchema(new AnnotatedType(dto).resolveAsRef(false));
       var schema = resolved.schema;
       assertThat(schema.getProperties()).as(dto.getSimpleName()).isNotEmpty();
@@ -99,9 +105,12 @@ class PraxisMetadataCompletenessTest {
         new OptionSourcePublicationCandidate("frequencia", "/api/ergon/frequencias", "ergon"),
         new OptionSourcePublicationCandidate("tabela", "/api/ergon/tabelas", "ergon"),
         new OptionSourcePublicationCandidate("itemTabela", "/api/ergon/itens-tabela", "ergon"),
-        new OptionSourcePublicationCandidate("campoCustomizado", "/api/ergon/campos-customizados", "ergon"));
+        new OptionSourcePublicationCandidate("campoCustomizado", "/api/ergon/campos-customizados", "ergon"),
+        new OptionSourcePublicationCandidate("parametroContagemFerias", "/api/ergon/parametros-contagem-ferias", "ergon"),
+        new OptionSourcePublicationCandidate("periodoAquisitivoFerias", "/api/ergon/periodos-aquisitivos-ferias", "ergon"),
+        new OptionSourcePublicationCandidate("feriasGozo", "/api/ergon/ferias-gozo", "ergon"));
     var diagnostics = new OptionSourcePublicationDiagnostics(registry, List.of(inventory));
-    assertThat(diagnostics.diagnose()).hasSize(16);
+    assertThat(diagnostics.diagnose()).hasSize(19);
     assertThat(diagnostics.unpublishedOrMismatched()).isEmpty();
     for (var descriptor : registry.descriptors()) {
       var lookup = descriptor.entityLookup();
@@ -114,7 +123,7 @@ class PraxisMetadataCompletenessTest {
       assertThat(descriptor.dependsOn()).containsAll(descriptor.dependencyFilterMap().keySet());
     }
     var missing = new OptionSourcePublicationDiagnostics(org.praxisplatform.uischema.options.OptionSourceRegistry.empty(), List.of(inventory));
-    assertThat(missing.unpublishedOrMismatched()).hasSize(16);
+    assertThat(missing.unpublishedOrMismatched()).hasSize(19);
   }
 
   @Test

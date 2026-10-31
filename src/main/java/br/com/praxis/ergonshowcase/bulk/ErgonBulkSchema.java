@@ -193,4 +193,88 @@ public final class ErgonBulkSchema {
       @Schema(description="SYNC avalia a elegibilidade nesta requisição, sem registrar a ativação.") BulkExecutionMode executionMode,
       @Schema(description="Campos customizados selecionados com versão individual para ativação coletiva.") CampoCustomizadoSelection selection,
       @Schema(description="Justificativa administrativa que formaliza a ativação coletiva.") AtivarCampoCustomizadoLoteDTO parameters) {}
+  public record ParametroContagemFeriasTarget(
+      @Schema(type="string",format="int64-decimal",pattern="^(?:0|[1-9][0-9]*|-[1-9][0-9]*)$",maxLength=20,
+          description="Canonical decimal string in the inclusive range -9223372036854775808 to 9223372036854775807; validated by this codec.") String id,
+      @Schema(description="ETag forte do parâmetro de contagem de férias selecionado, preservado até a confirmação.") String expectedVersion) {}
+  public record PeriodoAquisitivoFeriasTarget(
+      @Schema(type="string",format="int64-decimal",pattern="^(?:0|[1-9][0-9]*|-[1-9][0-9]*)$",maxLength=20,
+          description="Canonical decimal string in the inclusive range -9223372036854775808 to 9223372036854775807; validated by this codec.") String id,
+      @Schema(description="ETag forte do período aquisitivo de férias selecionado, preservado até a confirmação.") String expectedVersion) {}
+  public record FeriasGozoTarget(
+      @Schema(type="string",format="int64-decimal",pattern="^(?:0|[1-9][0-9]*|-[1-9][0-9]*)$",maxLength=20,
+          description="Canonical decimal string in the inclusive range -9223372036854775808 to 9223372036854775807; validated by this codec.") String id,
+      @Schema(description="ETag forte da parcela de gozo de férias selecionada, preservado até a confirmação.") String expectedVersion) {}
+  public record ParametroContagemFeriasSelection(
+      @Schema(description="Modalidade de seleção explícita ou por filtro de parâmetros de contagem de férias.") BulkSelectionMode mode,
+      @Schema(description="Parâmetros de contagem de férias e versões explicitamente selecionados.") List<ParametroContagemFeriasTarget> targets,
+      @Schema(description="Filtro oficial de parâmetros de contagem de férias para congelamento da seleção QUERY.") ParametroContagemFeriasFilterDTO filter,
+      @Schema(description="Identificadores excluídos do resultado QUERY antes de avaliar, em representação decimal textual.") List<String> excludedIds) {}
+  public record PeriodoAquisitivoFeriasSelection(
+      @Schema(description="Modalidade de seleção explícita ou por filtro de períodos aquisitivos de férias.") BulkSelectionMode mode,
+      @Schema(description="Períodos aquisitivos de férias e versões explicitamente selecionados.") List<PeriodoAquisitivoFeriasTarget> targets,
+      @Schema(description="Filtro oficial de períodos aquisitivos de férias para congelamento da seleção QUERY.") PeriodoAquisitivoFeriasFilterDTO filter,
+      @Schema(description="Identificadores excluídos do resultado QUERY antes de avaliar, em representação decimal textual.") List<String> excludedIds) {}
+  public record FeriasGozoSelection(
+      @Schema(description="Modalidade de seleção explícita ou por filtro de parcelas de gozo de férias.") BulkSelectionMode mode,
+      @Schema(description="Parcelas de gozo de férias e versões explicitamente selecionadas.") List<FeriasGozoTarget> targets,
+      @Schema(description="Filtro oficial de parcelas de gozo de férias para congelamento da seleção QUERY.") FeriasGozoFilterDTO filter,
+      @Schema(description="Identificadores excluídos do resultado QUERY antes de avaliar, em representação decimal textual.") List<String> excludedIds) {}
+  @Schema(description="Avaliação de atualização uniforme dos parâmetros de contagem de férias selecionados, preservando início de vigência e situação.")
+  public record ParametroContagemFeriasUniform(
+      @Schema(description="SYNC avalia os parâmetros de contagem de férias nesta requisição, sem efetivar alterações.") BulkExecutionMode executionMode,
+      @Schema(description="Parâmetros de contagem de férias e versões explícitos ou resultado congelado do filtro.") ParametroContagemFeriasSelection selection,
+      @Schema(description="Intenções comuns sobre parcelamento, abono pecuniário, prescrição e licença especial.") List<BulkFieldChange> changes) {}
+  @Schema(description="Avaliação de atualização uniforme dos períodos aquisitivos de férias selecionados, preservando vínculo, chave e situação.")
+  public record PeriodoAquisitivoFeriasUniform(
+      @Schema(description="SYNC avalia os períodos aquisitivos nesta requisição, sem efetivar alterações.") BulkExecutionMode executionMode,
+      @Schema(description="Períodos aquisitivos e versões explícitos ou resultado congelado do filtro.") PeriodoAquisitivoFeriasSelection selection,
+      @Schema(description="Intenções comuns sobre overrides individuais, prescrição, multa e documento legal.") List<BulkFieldChange> changes) {}
+  @Schema(description="Avaliação de atualização uniforme das parcelas de gozo de férias selecionadas, preservando vínculo, PA e ordem da parcela.")
+  public record FeriasGozoUniform(
+      @Schema(description="SYNC avalia as parcelas de férias nesta requisição, sem efetivar alterações.") BulkExecutionMode executionMode,
+      @Schema(description="Parcelas de férias e versões explícitas ou resultado congelado do filtro.") FeriasGozoSelection selection,
+      @Schema(description="Intenções comuns sobre abono pecuniário, efeitos financeiros, folha de pagamento e atos legais.") List<BulkFieldChange> changes) {}
+  public record ParametroContagemFeriasItem(
+      @Schema(type="string",format="int64-decimal",pattern="^(?:0|[1-9][0-9]*|-[1-9][0-9]*)$",maxLength=20,
+          description="Canonical decimal string in the inclusive range -9223372036854775808 to 9223372036854775807; validated by this codec.") String id,
+      @Schema(description="ETag forte do parâmetro de contagem de férias lido antes de propor suas alterações individualizadas.") String expectedVersion,
+      @Schema(description="Alterações exclusivas deste parâmetro de contagem de férias.") List<BulkFieldChange> changes) {}
+  public record PeriodoAquisitivoFeriasItem(
+      @Schema(type="string",format="int64-decimal",pattern="^(?:0|[1-9][0-9]*|-[1-9][0-9]*)$",maxLength=20,
+          description="Canonical decimal string in the inclusive range -9223372036854775808 to 9223372036854775807; validated by this codec.") String id,
+      @Schema(description="ETag forte do período aquisitivo lido antes de propor suas alterações individualizadas.") String expectedVersion,
+      @Schema(description="Alterações exclusivas deste período aquisitivo de férias.") List<BulkFieldChange> changes) {}
+  public record FeriasGozoItem(
+      @Schema(type="string",format="int64-decimal",pattern="^(?:0|[1-9][0-9]*|-[1-9][0-9]*)$",maxLength=20,
+          description="Canonical decimal string in the inclusive range -9223372036854775808 to 9223372036854775807; validated by this codec.") String id,
+      @Schema(description="ETag forte da parcela de gozo de férias lida antes de propor suas alterações individualizadas.") String expectedVersion,
+      @Schema(description="Alterações exclusivas desta parcela de gozo de férias.") List<BulkFieldChange> changes) {}
+  @Schema(description="Avaliação de alterações individualizadas em planilha para cada parâmetro de contagem de férias selecionado.")
+  public record ParametroContagemFeriasItems(
+      @Schema(description="SYNC avalia os parâmetros de contagem de férias sem gravar as alterações propostas.") BulkExecutionMode executionMode,
+      @Schema(description="Parâmetros distintos com versão e alterações próprias.") List<ParametroContagemFeriasItem> items) {}
+  @Schema(description="Avaliação de alterações individualizadas em planilha para cada período aquisitivo de férias selecionado.")
+  public record PeriodoAquisitivoFeriasItems(
+      @Schema(description="SYNC avalia os períodos aquisitivos sem gravar as alterações propostas.") BulkExecutionMode executionMode,
+      @Schema(description="Períodos aquisitivos distintos com versão e alterações próprias.") List<PeriodoAquisitivoFeriasItem> items) {}
+  @Schema(description="Avaliação de alterações individualizadas em planilha para cada parcela de gozo de férias selecionada.")
+  public record FeriasGozoItems(
+      @Schema(description="SYNC avalia as parcelas de férias sem gravar as alterações propostas.") BulkExecutionMode executionMode,
+      @Schema(description="Parcelas distintas com versão e alterações próprias.") List<FeriasGozoItem> items) {}
+  @Schema(description="Avaliação de ativação coletiva de parâmetros de contagem de férias inativos no catálogo do órgão.")
+  public record AtivarParametroContagemFeriasCommand(
+      @Schema(description="SYNC avalia a elegibilidade nesta requisição, sem registrar a ativação.") BulkExecutionMode executionMode,
+      @Schema(description="Parâmetros de contagem de férias selecionados com versão individual para ativação coletiva.") ParametroContagemFeriasSelection selection,
+      @Schema(description="Vigência e fundamentação administrativa que formalizam a ativação coletiva.") AlterarVigenciaParametroFeriasDTO parameters) {}
+  @Schema(description="Avaliação de homologação coletiva de períodos aquisitivos de férias em aquisição ou suspensos.")
+  public record HomologarPeriodoAquisitivoFeriasCommand(
+      @Schema(description="SYNC avalia a elegibilidade nesta requisição, sem registrar a homologação.") BulkExecutionMode executionMode,
+      @Schema(description="Períodos aquisitivos selecionados com versão individual para homologação coletiva.") PeriodoAquisitivoFeriasSelection selection,
+      @Schema(description="Ato legal e despacho que formalizam a homologação coletiva dos períodos aquisitivos.") TransicaoPeriodoAquisitivoFeriasDTO parameters) {}
+  @Schema(description="Avaliação de homologação coletiva de parcelas de gozo de férias programadas mediante portaria ou escala.")
+  public record HomologarFeriasGozoCommand(
+      @Schema(description="SYNC avalia a elegibilidade nesta requisição, sem registrar a homologação.") BulkExecutionMode executionMode,
+      @Schema(description="Parcelas de férias selecionadas com versão individual para homologação coletiva.") FeriasGozoSelection selection,
+      @Schema(description="Portaria, ato de publicação e despacho que formalizam a homologação coletiva da escala de férias.") TransicaoFeriasGozoDTO parameters) {}
 }

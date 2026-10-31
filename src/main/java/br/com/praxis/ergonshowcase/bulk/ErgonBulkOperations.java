@@ -243,10 +243,17 @@ public class ErgonBulkOperations {
         String idExpression=resource==Resource.VINCULOS ? "numfunc::text || ':' || numero::text"
             : resource==Resource.DEPENDENTES ? "numfunc::text || ':' || numdep::text"
             : resource==Resource.PESSOAS ? "numero::text"
-            : resource==Resource.AFASTAMENTOS || resource==Resource.FREQUENCIAS ? "id::text" : "cargo::text";
-        String table=resource.name;String placeholders=String.join(",",Collections.nCopies(targets.size(),"?"));
+            : resource==Resource.CARGOS ? "cargo::text" : "id::text";
+        String table=resource==Resource.CAMPOS_CUSTOMIZADOS ? "custom_field_definitions"
+            : resource==Resource.PARAMETROS_CONTAGEM_FERIAS ? "parametros_contagem_ferias"
+            : resource==Resource.PERIODOS_AQUISITIVOS_FERIAS ? "periodos_aquisitivos_ferias"
+            : resource==Resource.FERIAS_GOZO ? "ferias_gozo"
+            : resource.name;
+        String placeholders=String.join(",",Collections.nCopies(targets.size(),"?"));
         boolean crossTenant=resource==Resource.PESSOAS || resource==Resource.DEPENDENTES;
-        String sql="select count(*) from public."+table+" where ("+idExpression+") in ("+placeholders+")"+(crossTenant ? "" : " and emp_codigo=?");
+        boolean nullableTenant=resource==Resource.CAMPOS_CUSTOMIZADOS || resource==Resource.PARAMETROS_CONTAGEM_FERIAS;
+        String tenantClause=crossTenant ? "" : nullableTenant ? " and (emp_codigo is null or emp_codigo=?)" : " and emp_codigo=?";
+        String sql="select count(*) from public."+table+" where ("+idExpression+") in ("+placeholders+")"+tenantClause;
         try {
           var holder=(org.springframework.jdbc.datasource.ConnectionHolder)TransactionSynchronizationManager.getResource(infrastructure.dataSource());
           if(holder==null) return ScopeDecision.unavailable();

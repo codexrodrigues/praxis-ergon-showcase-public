@@ -25,6 +25,9 @@ public final class ApiPaths {
   public static final String TABELAS = BASE + "/tabelas";
   public static final String ITENS_TABELA = BASE + "/itens-tabela";
   public static final String CAMPOS_CUSTOMIZADOS = BASE + "/campos-customizados";
+  public static final String PARAMETROS_CONTAGEM_FERIAS = BASE + "/parametros-contagem-ferias";
+  public static final String PERIODOS_AQUISITIVOS_FERIAS = BASE + "/periodos-aquisitivos-ferias";
+  public static final String FERIAS_GOZO = BASE + "/ferias-gozo";
 
   public static final String ORGAO_SOURCE = "orgao";
   public static final String CARGO_SOURCE = "cargo";
@@ -42,6 +45,9 @@ public final class ApiPaths {
   public static final String TABELA_SOURCE = "tabela";
   public static final String ITEM_TABELA_SOURCE = "itemTabela";
   public static final String CAMPO_CUSTOMIZADO_SOURCE = "campoCustomizado";
+  public static final String PARAMETRO_CONTAGEM_FERIAS_SOURCE = "parametroContagemFerias";
+  public static final String PERIODO_AQUISITIVO_FERIAS_SOURCE = "periodoAquisitivoFerias";
+  public static final String FERIAS_GOZO_SOURCE = "feriasGozo";
 
   private static final String OPTION_SOURCES = "/option-sources/";
   private static final String OPTIONS_FILTER = "/options/filter";
@@ -63,6 +69,12 @@ public final class ApiPaths {
   public static final String ITEM_TABELA_OPTIONS = ITENS_TABELA + OPTION_SOURCES + ITEM_TABELA_SOURCE + OPTIONS_FILTER;
   public static final String CAMPO_CUSTOMIZADO_OPTIONS =
       CAMPOS_CUSTOMIZADOS + OPTION_SOURCES + CAMPO_CUSTOMIZADO_SOURCE + OPTIONS_FILTER;
+  public static final String PARAMETRO_CONTAGEM_FERIAS_OPTIONS =
+      PARAMETROS_CONTAGEM_FERIAS + OPTION_SOURCES + PARAMETRO_CONTAGEM_FERIAS_SOURCE + OPTIONS_FILTER;
+  public static final String PERIODO_AQUISITIVO_FERIAS_OPTIONS =
+      PERIODOS_AQUISITIVOS_FERIAS + OPTION_SOURCES + PERIODO_AQUISITIVO_FERIAS_SOURCE + OPTIONS_FILTER;
+  public static final String FERIAS_GOZO_OPTIONS =
+      FERIAS_GOZO + OPTION_SOURCES + FERIAS_GOZO_SOURCE + OPTIONS_FILTER;
 
   public static final String BULK_OPERATIONS = BASE + "/operations/bulk";
   public static final String BULK_PUBLICATION_SEGMENT = "/publication";

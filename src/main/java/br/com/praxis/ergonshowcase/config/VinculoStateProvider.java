@@ -6,8 +6,11 @@ import br.com.praxis.ergonshowcase.repository.AfastamentoRepository;
 import br.com.praxis.ergonshowcase.repository.CargoRepository;
 import br.com.praxis.ergonshowcase.repository.DefinicaoCampoCustomizadoRepository;
 import br.com.praxis.ergonshowcase.repository.DependenteRepository;
+import br.com.praxis.ergonshowcase.repository.FeriasGozoRepository;
 import br.com.praxis.ergonshowcase.repository.FrequenciaRepository;
 import br.com.praxis.ergonshowcase.repository.OrgaoRepository;
+import br.com.praxis.ergonshowcase.repository.ParametroContagemFeriasRepository;
+import br.com.praxis.ergonshowcase.repository.PeriodoAquisitivoFeriasRepository;
 import br.com.praxis.ergonshowcase.repository.VinculoRepository;
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +34,12 @@ public class VinculoStateProvider implements ResourceStateSnapshotProvider {
 
   @Autowired private DefinicaoCampoCustomizadoRepository camposCustomizados;
 
+  @Autowired private ParametroContagemFeriasRepository parametrosContagemFerias;
+
+  @Autowired private PeriodoAquisitivoFeriasRepository periodosAquisitivosFerias;
+
+  @Autowired private FeriasGozoRepository feriasGozo;
+
   @Autowired private TenantContext tenant;
 
   private final VinculoRepository repository;
@@ -41,6 +50,77 @@ public class VinculoStateProvider implements ResourceStateSnapshotProvider {
 
   @Override
   public Optional<ResourceStateSnapshot> resolve(String key, Object id) {
+    if ("administracao-pessoal.parametros-contagem-ferias".equals(key) && id != null) {
+      Long paramId = id instanceof Long typed ? typed : Long.valueOf(id.toString());
+      return parametrosContagemFerias
+          .findById(paramId)
+          .filter(
+              p ->
+                  p.getEmpCodigo() == null
+                      || java.util.Objects.equals(p.getEmpCodigo(), tenant.orgao()))
+          .map(
+              p ->
+                  new ResourceStateSnapshot(
+                      Boolean.TRUE.equals(p.getActive()) ? "ATIVO" : "INATIVO",
+                      Map.of(
+                          "temFerias", Boolean.TRUE.equals(p.getTemFerias()),
+                          "vigenciaAberta", p.getDtfim() == null,
+                          "escopoGlobal", p.getEmpCodigo() == null,
+                          "permiteParcelamento", p.getMaxPerFer() != null && p.getMaxPerFer() > 1,
+                          "permiteAbonoPecuniario",
+                              Boolean.TRUE.equals(p.getTemFerias())
+                                  && p.getAbonoDirGozo() != null
+                                  && !"N".equals(p.getAbonoDirGozo()))));
+    }
+    if ("administracao-pessoal.periodos-aquisitivos-ferias".equals(key) && id != null) {
+      Long paId = id instanceof Long typed ? typed : Long.valueOf(id.toString());
+      return periodosAquisitivosFerias
+          .findById(paId)
+          .filter(pa -> java.util.Objects.equals(pa.getEmpCodigo(), tenant.orgao()))
+          .map(
+              pa -> {
+                boolean saldoPositivo =
+                    pa.getSaldoDiasDisponivel() != null && pa.getSaldoDiasDisponivel() > 0;
+                return new ResourceStateSnapshot(
+                    pa.getSituacao(),
+                    Map.of(
+                        "saldoPositivo",
+                        saldoPositivo,
+                        "possuiSaldoDisponivel",
+                        saldoPositivo,
+                        "possuiOverridesAtivos",
+                        br.com.praxis.ergonshowcase.mapper.PeriodoAquisitivoFeriasMapper
+                            .hasActiveOverrides(pa),
+                        "emRiscoPrescricao",
+                        "PRESCRITO".equals(pa.getSituacao())
+                            || (pa.getDtPrescricao() != null && saldoPositivo),
+                        "geradoPorAverbacao",
+                        Boolean.TRUE.equals(pa.getGeradoPorAverbacao())));
+              });
+    }
+    if ("administracao-pessoal.ferias-gozo".equals(key) && id != null) {
+      Long fgId = id instanceof Long typed ? typed : Long.valueOf(id.toString());
+      return feriasGozo
+          .findById(fgId)
+          .filter(fg -> java.util.Objects.equals(fg.getEmpCodigo(), tenant.orgao()))
+          .map(
+              fg -> {
+                boolean comAbono =
+                    Boolean.TRUE.equals(fg.getAbonoPecuniario())
+                        || (fg.getDiasAbonoVendidos() != null && fg.getDiasAbonoVendidos() > 0);
+                boolean interrompida =
+                    "INTERROMPIDA".equals(fg.getSituacao()) || fg.getDtInterrupcao() != null;
+                return new ResourceStateSnapshot(
+                    fg.getSituacao(),
+                    Map.of(
+                        "abonoPecuniario", comAbono,
+                        "comAbonoVendido", comAbono,
+                        "comSubstitutoDesignado",
+                            fg.getNumfuncSubstituto() != null && fg.getNumvincSubstituto() != null,
+                        "interrompida", interrompida,
+                        "parcelaInterrompida", interrompida));
+              });
+    }
     if ("administracao-pessoal.campos-customizados".equals(key) && id != null) {
       Long campoId = id instanceof Long typed ? typed : Long.valueOf(id.toString());
       return camposCustomizados

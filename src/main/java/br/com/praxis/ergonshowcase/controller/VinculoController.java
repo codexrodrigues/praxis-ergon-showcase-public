@@ -95,6 +95,8 @@ public class VinculoController
   private final VinculoService service;
   @org.springframework.beans.factory.annotation.Autowired private AfastamentoService afastamentosService;
   @org.springframework.beans.factory.annotation.Autowired private FrequenciaService frequenciasService;
+  @org.springframework.beans.factory.annotation.Autowired private PeriodoAquisitivoFeriasService periodosAquisitivosFeriasService;
+  @org.springframework.beans.factory.annotation.Autowired private FeriasGozoService feriasGozoService;
 
   @Override
   @PostMapping("/stats/group-by")
@@ -265,6 +267,121 @@ public class VinculoController
             result,
             org.springframework.hateoas.Links.of(
                 org.springframework.hateoas.Link.of(ApiPaths.FREQUENCIAS, "collection"))));
+  }
+
+  @org.springframework.web.bind.annotation.GetMapping("/{id}/periodos-aquisitivos-ferias")
+  @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_READ')")
+  @UiSurface(
+      id = "periodos-aquisitivos-vinculo",
+      kind = org.praxisplatform.uischema.surface.SurfaceKind.READ_PROJECTION,
+      scope = org.praxisplatform.uischema.surface.SurfaceScope.ITEM,
+      title = "Períodos aquisitivos de férias",
+      description =
+          "Ciclos aquisitivos de férias apurados e saldos disponíveis do vínculo funcional selecionado.",
+      relatedChildResourceKey = "administracao-pessoal.periodos-aquisitivos-ferias",
+      relatedChildResourcePath = ApiPaths.PERIODOS_AQUISITIVOS_FERIAS,
+      relatedChildParentField = "vinculoId",
+      relatedChildOperations = {
+        org.praxisplatform.uischema.surface.RelatedResourceChildOperation.FILTER,
+        org.praxisplatform.uischema.surface.RelatedResourceChildOperation.LIST
+      },
+      requiredAuthorities = {"ERGON_READ"})
+  @io.swagger.v3.oas.annotations.Operation(
+      summary = "Consultar períodos aquisitivos de férias do vínculo",
+      description =
+          "Lista períodos aquisitivos de férias vinculados ao assentamento funcional. A paginação é limitada a 200 registros por resposta.")
+  public org.springframework.http.ResponseEntity<
+          org.praxisplatform.uischema.rest.response.RestApiResponse<
+              org.springframework.data.domain.Page<PeriodoAquisitivoFeriasResponseDTO>>>
+      periodosAquisitivosFerias(
+          @io.swagger.v3.oas.annotations.Parameter(
+                  description = "Identidade composta pessoa:número do vínculo")
+              @org.springframework.web.bind.annotation.PathVariable
+              VinculoId id,
+          @io.swagger.v3.oas.annotations.Parameter(
+                  description = "Página a consultar, iniciando em zero")
+              @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0")
+              int page,
+          @io.swagger.v3.oas.annotations.Parameter(
+                  description = "Quantidade de registros da página, de 1 a 200")
+              @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20")
+              int size) {
+    service.findById(id);
+    if (page < 0 || size < 1 || size > 200)
+      throw new org.springframework.web.server.ResponseStatusException(
+          org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
+          "Paginação fora do limite permitido.");
+    var filter = new PeriodoAquisitivoFeriasFilterDTO();
+    filter.setVinculoId(id);
+    var result =
+        periodosAquisitivosFeriasService.filter(
+            filter,
+            org.springframework.data.domain.PageRequest.of(
+                page, size, periodosAquisitivosFeriasService.getDefaultSort()),
+            null);
+    return org.springframework.http.ResponseEntity.ok(
+        org.praxisplatform.uischema.rest.response.RestApiResponse.success(
+            result,
+            org.springframework.hateoas.Links.of(
+                org.springframework.hateoas.Link.of(
+                    ApiPaths.PERIODOS_AQUISITIVOS_FERIAS, "collection"))));
+  }
+
+  @org.springframework.web.bind.annotation.GetMapping("/{id}/ferias-gozo")
+  @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_READ')")
+  @UiSurface(
+      id = "ferias-gozo-vinculo",
+      kind = org.praxisplatform.uischema.surface.SurfaceKind.READ_PROJECTION,
+      scope = org.praxisplatform.uischema.surface.SurfaceScope.ITEM,
+      title = "Programação e gozo de férias",
+      description =
+          "Parcelas de programação e gozo de férias e abono pecuniário associadas ao vínculo funcional selecionado.",
+      relatedChildResourceKey = "administracao-pessoal.ferias-gozo",
+      relatedChildResourcePath = ApiPaths.FERIAS_GOZO,
+      relatedChildParentField = "vinculoId",
+      relatedChildOperations = {
+        org.praxisplatform.uischema.surface.RelatedResourceChildOperation.FILTER,
+        org.praxisplatform.uischema.surface.RelatedResourceChildOperation.LIST
+      },
+      requiredAuthorities = {"ERGON_READ"})
+  @io.swagger.v3.oas.annotations.Operation(
+      summary = "Consultar parcelas de gozo de férias do vínculo",
+      description =
+          "Lista parcelas de programação e gozo de férias vinculadas ao assentamento funcional. A paginação é limitada a 200 registros por resposta.")
+  public org.springframework.http.ResponseEntity<
+          org.praxisplatform.uischema.rest.response.RestApiResponse<
+              org.springframework.data.domain.Page<FeriasGozoResponseDTO>>>
+      feriasGozo(
+          @io.swagger.v3.oas.annotations.Parameter(
+                  description = "Identidade composta pessoa:número do vínculo")
+              @org.springframework.web.bind.annotation.PathVariable
+              VinculoId id,
+          @io.swagger.v3.oas.annotations.Parameter(
+                  description = "Página a consultar, iniciando em zero")
+              @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0")
+              int page,
+          @io.swagger.v3.oas.annotations.Parameter(
+                  description = "Quantidade de registros da página, de 1 a 200")
+              @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20")
+              int size) {
+    service.findById(id);
+    if (page < 0 || size < 1 || size > 200)
+      throw new org.springframework.web.server.ResponseStatusException(
+          org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
+          "Paginação fora do limite permitido.");
+    var filter = new FeriasGozoFilterDTO();
+    filter.setVinculoId(id);
+    var result =
+        feriasGozoService.filter(
+            filter,
+            org.springframework.data.domain.PageRequest.of(
+                page, size, feriasGozoService.getDefaultSort()),
+            null);
+    return org.springframework.http.ResponseEntity.ok(
+        org.praxisplatform.uischema.rest.response.RestApiResponse.success(
+            result,
+            org.springframework.hateoas.Links.of(
+                org.springframework.hateoas.Link.of(ApiPaths.FERIAS_GOZO, "collection"))));
   }
 
   @org.springframework.web.bind.annotation.PostMapping("/{id}/actions/registrar-vacancia")
