@@ -80,6 +80,19 @@ public class OptionSourcesConfig {
             "Ocorrência de frequência rejeitada ou cancelada; mantenha apenas referências históricas já existentes.",
             Map.of("HOMOLOGADO", "Homologado", "PENDENTE_HOMOLOGACAO", "Pendente",
                 "REJEITADO", "Rejeitado", "CANCELADO", "Cancelado")))
+        .add(Tabela.class, source(ApiPaths.TABELA_SOURCE, ApiPaths.TABELAS,
+            "tab", "descr", "administracao-pessoal.tabelas", "ficha-tabela",
+            null, List.of(), List.of(), List.of("sis", "tipo"), false,
+            "Tabela geral indisponível no escopo autorizado.", Map.of()))
+        .add(ItemTabela.class, source(ApiPaths.ITEM_TABELA_SOURCE, ApiPaths.ITENS_TABELA,
+            "id", "descr", "administracao-pessoal.itens-tabela", "ficha-item-tabela",
+            null, List.of(), List.of(), List.of("tab", "item"), false,
+            "Item de tabela indisponível no escopo autorizado.", Map.of()))
+        .add(DefinicaoCampoCustomizado.class, source(ApiPaths.CAMPO_CUSTOMIZADO_SOURCE, ApiPaths.CAMPOS_CUSTOMIZADOS,
+            "id", "label", "administracao-pessoal.campos-customizados", "ficha-campo-customizado",
+            "active", List.of("true"), List.of("false"), List.of("resourceKey", "fieldKey"), true,
+            "Definição de campo customizado inativa; mantenha apenas referências históricas já existentes.",
+            Map.of("true", "Ativo", "false", "Inativo")))
         .build();
   }
 
@@ -89,10 +102,12 @@ public class OptionSourcesConfig {
     var dependencies = scoped ? Map.of("empCodigo", "empCodigo")
         : key.equals(ApiPaths.DEPENDENTE_SOURCE) ? Map.of("numfunc", "numfunc")
         : key.equals(ApiPaths.CODIGO_FREQUENCIA_SOURCE) ? Map.of("tipofreq", "tipofreq")
+        : key.equals(ApiPaths.ITEM_TABELA_SOURCE) ? Map.of("tab", "tab")
         : Map.<String, String>of();
     var dependsOn = scoped ? List.of("empCodigo")
         : key.equals(ApiPaths.DEPENDENTE_SOURCE) ? List.of("numfunc")
         : key.equals(ApiPaths.CODIGO_FREQUENCIA_SOURCE) ? List.of("tipofreq")
+        : key.equals(ApiPaths.ITEM_TABELA_SOURCE) ? List.of("tab")
         : List.<String>of();
     var filtering = new LookupFilteringDescriptor(List.of(), Map.of(),
         List.of(new LookupSortOption("descricao", label, "asc", "Descrição crescente"),
@@ -123,13 +138,23 @@ public class OptionSourcesConfig {
       case "formatoQtd" -> display(property, "Unidade", "straighten");
       case "tipofreq" -> display(property, "Tipo de frequência", "category");
       case "dtini" -> display(property, "Início", "event_available");
+      case "sis" -> display(property, "Subsistema", "apps");
+      case "tipo" -> display(property, "Tipo de dado", "data_object");
+      case "tab" -> display(property, "Tabela", "table_view");
+      case "item" -> display(property, "Item", "vpn_key");
+      case "resourceKey" -> display(property, "Recurso alvo", "Extension");
+      case "fieldKey" -> display(property, "Chave técnica", "vpn_key");
       default -> throw new IllegalArgumentException("Campo de diretório sem curadoria: " + property);
     }).toList();
     String codeProperty = key.equals(ApiPaths.VINCULO_SOURCE)
         ? "matric"
         : key.equals(ApiPaths.DEPENDENTE_SOURCE)
             ? "cpf"
-            : key.equals(ApiPaths.CODIGO_FREQUENCIA_SOURCE) ? "mnemonico" : id;
+            : key.equals(ApiPaths.CODIGO_FREQUENCIA_SOURCE)
+                ? "mnemonico"
+                : key.equals(ApiPaths.ITEM_TABELA_SOURCE)
+                    ? "item"
+                    : key.equals(ApiPaths.CAMPO_CUSTOMIZADO_SOURCE) ? "fieldKey" : id;
     var lookup = new EntityLookupDescriptor(entityKey, codeProperty, descriptions, status, null, null,
         List.of(label), dependencies,
         new LookupSelectionPolicy(null, status, allowed, blocked, true, disabledReason, disabledReason),

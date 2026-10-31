@@ -27,8 +27,8 @@ class PraxisMetadataCompletenessTest {
     var classes = new ArrayList<Class<?>>();
     for (var bean : scanner.findCandidateComponents("br.com.praxis.ergonshowcase.dto"))
       classes.add(Class.forName(bean.getBeanClassName()));
-    assertThat(classes).hasSizeGreaterThanOrEqualTo(90)
-        .contains(CargoDados.class, OrgaoDados.class, ServidorPessoaDados.class, VinculoDados.class, DependenteDados.class, AfastamentoDados.class, FrequenciaDados.class,
+    assertThat(classes).hasSizeGreaterThanOrEqualTo(100)
+        .contains(CargoDados.class, OrgaoDados.class, ServidorPessoaDados.class, VinculoDados.class, DependenteDados.class, AfastamentoDados.class, FrequenciaDados.class, DefinicaoCampoCustomizadoDados.class,
             CreateCargoDTO.class, UpdateCargoDTO.class, CargoFilterDTO.class,
             CreateOrgaoDTO.class, UpdateOrgaoDTO.class, OrgaoFilterDTO.class,
             CreateServidorPessoaDTO.class, UpdateServidorPessoaDTO.class, ServidorPessoaFilterDTO.class,
@@ -38,12 +38,15 @@ class PraxisMetadataCompletenessTest {
             TipoFrequenciaFilterDTO.class, CodigoFrequenciaFilterDTO.class,
             CreateAfastamentoDTO.class, UpdateAfastamentoDTO.class, AfastamentoFilterDTO.class,
             RegraFrequenciaEstatutariaFilterDTO.class,
-            CreateFrequenciaDTO.class, UpdateFrequenciaDTO.class, FrequenciaFilterDTO.class)
+            CreateFrequenciaDTO.class, UpdateFrequenciaDTO.class, FrequenciaFilterDTO.class,
+            TabelaFilterDTO.class, ItemTabelaFilterDTO.class,
+            CreateDefinicaoCampoCustomizadoDTO.class, UpdateDefinicaoCampoCustomizadoDTO.class, DefinicaoCampoCustomizadoFilterDTO.class)
         .contains(CargoResponseDTO.class, ServidorPessoaResponseDTO.class, VinculoResponseDTO.class,
             OrgaoResponseDTO.class, DocumentoLegalResponseDTO.class, SetorResponseDTO.class,
             DependenteResponseDTO.class, TipoDependenteResponseDTO.class,
             TipoFrequenciaResponseDTO.class, CodigoFrequenciaResponseDTO.class, AfastamentoResponseDTO.class,
-            RegraFrequenciaEstatutariaResponseDTO.class, FrequenciaResponseDTO.class);
+            RegraFrequenciaEstatutariaResponseDTO.class, FrequenciaResponseDTO.class,
+            TabelaResponseDTO.class, ItemTabelaResponseDTO.class, DefinicaoCampoCustomizadoResponseDTO.class);
     return classes;
   }
 
@@ -63,7 +66,8 @@ class PraxisMetadataCompletenessTest {
     var validator = new PraxisExpressionStaticValidator();
     for (var dto : List.of(CargoResponseDTO.class, ServidorPessoaResponseDTO.class,
         VinculoResponseDTO.class, DependenteResponseDTO.class, AfastamentoResponseDTO.class,
-        RegraFrequenciaEstatutariaResponseDTO.class, FrequenciaResponseDTO.class)) {
+        RegraFrequenciaEstatutariaResponseDTO.class, FrequenciaResponseDTO.class,
+        DefinicaoCampoCustomizadoResponseDTO.class)) {
       var resolved = converters.resolveAsResolvedSchema(new AnnotatedType(dto).resolveAsRef(false));
       var schema = resolved.schema;
       assertThat(schema.getProperties()).as(dto.getSimpleName()).isNotEmpty();
@@ -92,9 +96,12 @@ class PraxisMetadataCompletenessTest {
         new OptionSourcePublicationCandidate("codigoFrequencia", "/api/ergon/codigos-frequencia", "ergon"),
         new OptionSourcePublicationCandidate("afastamento", "/api/ergon/afastamentos", "ergon"),
         new OptionSourcePublicationCandidate("regraFrequenciaEstatutaria", "/api/ergon/regras-frequencia-estatutaria", "ergon"),
-        new OptionSourcePublicationCandidate("frequencia", "/api/ergon/frequencias", "ergon"));
+        new OptionSourcePublicationCandidate("frequencia", "/api/ergon/frequencias", "ergon"),
+        new OptionSourcePublicationCandidate("tabela", "/api/ergon/tabelas", "ergon"),
+        new OptionSourcePublicationCandidate("itemTabela", "/api/ergon/itens-tabela", "ergon"),
+        new OptionSourcePublicationCandidate("campoCustomizado", "/api/ergon/campos-customizados", "ergon"));
     var diagnostics = new OptionSourcePublicationDiagnostics(registry, List.of(inventory));
-    assertThat(diagnostics.diagnose()).hasSize(13);
+    assertThat(diagnostics.diagnose()).hasSize(16);
     assertThat(diagnostics.unpublishedOrMismatched()).isEmpty();
     for (var descriptor : registry.descriptors()) {
       var lookup = descriptor.entityLookup();
@@ -107,7 +114,7 @@ class PraxisMetadataCompletenessTest {
       assertThat(descriptor.dependsOn()).containsAll(descriptor.dependencyFilterMap().keySet());
     }
     var missing = new OptionSourcePublicationDiagnostics(org.praxisplatform.uischema.options.OptionSourceRegistry.empty(), List.of(inventory));
-    assertThat(missing.unpublishedOrMismatched()).hasSize(13);
+    assertThat(missing.unpublishedOrMismatched()).hasSize(16);
   }
 
   @Test

@@ -6,6 +6,8 @@ import java.util.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Comment;
+import org.praxisplatform.uischema.annotation.OptionLabel;
+import org.praxisplatform.uischema.service.base.annotation.DefaultSortColumn;
 
 /**
  * Itens das tabelas gerais de domínio do Ergon/Hades (equivalente a HADES.ITEMTABELA_). Preserva a
@@ -24,6 +26,7 @@ public class ItemTabela {
 
   /** Descrição legível do item apresentada em selects, tabelas e relatórios. */
   @Comment("Descrição legível do item apresentada em selects, tabelas e relatórios.")
+  @OptionLabel
   @Column(name = "descr", nullable = false, length = 200)
   private String descr;
 
@@ -60,6 +63,7 @@ public class ItemTabela {
 
   /** Ordem numérica de exibição do item em listas de seleção. */
   @Comment("Ordem numérica de exibição do item em listas de seleção.")
+  @DefaultSortColumn
   @Column(name = "ordem", nullable = true)
   private Integer ordem;
 
@@ -67,6 +71,22 @@ public class ItemTabela {
   @Comment("Indica se o item de domínio está ativo para seleção em novos cadastros.")
   @Column(name = "ativo", nullable = false)
   private Boolean ativo = true;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "tab",
+      referencedColumnName = "tab",
+      insertable = false,
+      updatable = false)
+  private Tabela tabelaEntidade;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "emp_codigo",
+      referencedColumnName = "empresa",
+      insertable = false,
+      updatable = false)
+  private Orgao orgao;
 
   /** Versão do registro para controle de concorrência otimista (@Version / ETag / If-Match). */
   @Comment(

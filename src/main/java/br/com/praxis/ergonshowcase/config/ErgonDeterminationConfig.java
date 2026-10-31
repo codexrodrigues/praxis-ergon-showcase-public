@@ -77,7 +77,20 @@ public class ErgonDeterminationConfig {
                     new ReactiveDeterminationOutputBinding(
                         "/formatoQuantidadePrevisto", "/formatoQuantidadePrevisto"),
                     new ReactiveDeterminationOutputBinding(
-                        "/exigeHorarioPrevisto", "/exigeHorarioPrevisto"))));
+                        "/exigeHorarioPrevisto", "/exigeHorarioPrevisto"))),
+            definition(
+                "ergon.campoCustomizado.previa",
+                "CampoCustomizado",
+                "determineErgonCampoCustomizadoPrevia",
+                List.of("empCodigo", "fieldType", "controlType", "optionTabela"),
+                List.of("empCodigo", "fieldType", "controlType", "optionTabela"),
+                List.of(
+                    new ReactiveDeterminationOutputBinding(
+                        "/optionTabelaDescricaoPrevista", "/optionTabelaDescricaoPrevista"),
+                    new ReactiveDeterminationOutputBinding(
+                        "/requerTabelaOpcoesPrevisto", "/requerTabelaOpcoesPrevisto"),
+                    new ReactiveDeterminationOutputBinding(
+                        "/escopoGlobalPrevisto", "/escopoGlobalPrevisto"))));
   }
 
   private ReactiveDeterminationDefinition definition(

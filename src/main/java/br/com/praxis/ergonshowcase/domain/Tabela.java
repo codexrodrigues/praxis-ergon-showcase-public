@@ -6,6 +6,8 @@ import java.util.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Comment;
+import org.praxisplatform.uischema.annotation.OptionLabel;
+import org.praxisplatform.uischema.service.base.annotation.DefaultSortColumn;
 
 /**
  * Catálogo mestre de tabelas gerais de domínio do Ergon/Hades (equivalente a HADES.TABELA). Agrupa
@@ -26,6 +28,7 @@ public class Tabela {
    */
   @Comment(
       "Identificador textual único da tabela geral de domínio (ex.: ERG_ESTCIVIL, ERG_ESCOLA, ERG_REGIME_JUR, Parentesco).")
+  @DefaultSortColumn
   @Column(name = "tab", nullable = false, length = 40)
   private String tab;
 
@@ -36,6 +39,7 @@ public class Tabela {
 
   /** Descrição funcional da finalidade da tabela geral de domínio. */
   @Comment("Descrição funcional da finalidade da tabela geral de domínio.")
+  @OptionLabel
   @Column(name = "descr", nullable = false, length = 180)
   private String descr;
 

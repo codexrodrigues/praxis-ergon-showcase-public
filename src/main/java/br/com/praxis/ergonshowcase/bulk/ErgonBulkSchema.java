@@ -29,6 +29,10 @@ public final class ErgonBulkSchema {
       @Schema(type="string",format="int64-decimal",pattern="^(?:0|[1-9][0-9]*|-[1-9][0-9]*)$",maxLength=20,
           description="Canonical decimal string in the inclusive range -9223372036854775808 to 9223372036854775807; validated by this codec.") String id,
       @Schema(description="ETag forte da ocorrência de frequência selecionada, preservado até a confirmação.") String expectedVersion) {}
+  public record CampoCustomizadoTarget(
+      @Schema(type="string",format="int64-decimal",pattern="^(?:0|[1-9][0-9]*|-[1-9][0-9]*)$",maxLength=20,
+          description="Canonical decimal string in the inclusive range -9223372036854775808 to 9223372036854775807; validated by this codec.") String id,
+      @Schema(description="ETag forte da definição de campo customizado selecionada, preservado até a confirmação.") String expectedVersion) {}
   public record VinculoSelection(
       @Schema(description="EXPLICIT usa identidades e versões; QUERY congela o resultado do filtro na avaliação.") BulkSelectionMode mode,
       @Schema(description="Vínculos explicitamente selecionados, com versão individual.") List<VinculoTarget> targets,
@@ -58,6 +62,11 @@ public final class ErgonBulkSchema {
       @Schema(description="Modalidade de seleção explícita ou por filtro de ocorrências de frequência.") BulkSelectionMode mode,
       @Schema(description="Ocorrências de frequência e versões explicitamente selecionadas.") List<FrequenciaTarget> targets,
       @Schema(description="Filtro oficial de ocorrências de frequência para congelamento da seleção QUERY.") FrequenciaFilterDTO filter,
+      @Schema(description="Identificadores excluídos do resultado QUERY antes de avaliar, em representação decimal textual.") List<String> excludedIds) {}
+  public record CampoCustomizadoSelection(
+      @Schema(description="Modalidade de seleção explícita ou por filtro de definições de campos customizados.") BulkSelectionMode mode,
+      @Schema(description="Campos customizados e versões explicitamente selecionados.") List<CampoCustomizadoTarget> targets,
+      @Schema(description="Filtro oficial de campos customizados para congelamento da seleção QUERY.") DefinicaoCampoCustomizadoFilterDTO filter,
       @Schema(description="Identificadores excluídos do resultado QUERY antes de avaliar, em representação decimal textual.") List<String> excludedIds) {}
   @Schema(description="Avaliação de uma alteração comum de lotação, jornada ou pagamento dos vínculos selecionados, sem efetivar a alteração.")
   public record VinculoUniform(
@@ -89,6 +98,11 @@ public final class ErgonBulkSchema {
       @Schema(description="SYNC avalia as ocorrências de frequência nesta requisição, sem efetivar alterações.") BulkExecutionMode executionMode,
       @Schema(description="Ocorrências de frequência e versões explícitas ou resultado congelado do filtro.") FrequenciaSelection selection,
       @Schema(description="Intenções comuns sobre data final, quantidade, horários, justificativa e documento comprobatório.") List<BulkFieldChange> changes) {}
+  @Schema(description="Avaliação de atualização uniforme das definições de campos customizados selecionadas, preservando recurso, chave técnica e tipo de dado.")
+  public record CampoCustomizadoUniform(
+      @Schema(description="SYNC avalia as definições de campos customizados nesta requisição, sem efetivar alterações.") BulkExecutionMode executionMode,
+      @Schema(description="Campos customizados e versões explícitas ou resultado congelado do filtro.") CampoCustomizadoSelection selection,
+      @Schema(description="Intenções comuns sobre agrupamento, controle visual, obrigatoriedade e tabela de opções.") List<BulkFieldChange> changes) {}
   public record VinculoItem(
       @Schema(minLength=1) String id,
       @Schema(description="ETag forte do vínculo lido antes de propor suas alterações individualizadas.") String expectedVersion,
@@ -116,6 +130,11 @@ public final class ErgonBulkSchema {
           description="Canonical decimal string in the inclusive range -9223372036854775808 to 9223372036854775807; validated by this codec.") String id,
       @Schema(description="ETag forte da ocorrência de frequência lida antes de propor suas alterações individualizadas.") String expectedVersion,
       @Schema(description="Alterações exclusivas desta ocorrência de frequência.") List<BulkFieldChange> changes) {}
+  public record CampoCustomizadoItem(
+      @Schema(type="string",format="int64-decimal",pattern="^(?:0|[1-9][0-9]*|-[1-9][0-9]*)$",maxLength=20,
+          description="Canonical decimal string in the inclusive range -9223372036854775808 to 9223372036854775807; validated by this codec.") String id,
+      @Schema(description="ETag forte da definição de campo customizado lida antes de propor suas alterações individualizadas.") String expectedVersion,
+      @Schema(description="Alterações exclusivas desta definição de campo customizado.") List<BulkFieldChange> changes) {}
   @Schema(description="Avaliação de jornadas, lotações ou condições de pagamento diferentes por vínculo.")
   public record VinculoItems(
       @Schema(description="SYNC conclui a avaliação nesta requisição; a gravação depende de confirmação posterior.") BulkExecutionMode executionMode,
@@ -140,6 +159,10 @@ public final class ErgonBulkSchema {
   public record FrequenciaItems(
       @Schema(description="SYNC avalia as ocorrências de frequência sem gravar as alterações propostas.") BulkExecutionMode executionMode,
       @Schema(description="Ocorrências distintas com versão e alterações próprias.") List<FrequenciaItem> items) {}
+  @Schema(description="Avaliação de alterações individualizadas em planilha para cada definição de campo customizado selecionada.")
+  public record CampoCustomizadoItems(
+      @Schema(description="SYNC avalia os campos customizados sem gravar as alterações propostas.") BulkExecutionMode executionMode,
+      @Schema(description="Definições distintas com versão e alterações próprias.") List<CampoCustomizadoItem> items) {}
   @Schema(description="Avaliação de uma portaria coletiva de realocação de vínculos ativos ou cedidos dentro de seus órgãos.")
   public record RealocarCommand(
       @Schema(description="SYNC avalia a realocação nesta requisição, sem mudar lotação ou exercício.") BulkExecutionMode executionMode,
@@ -165,4 +188,9 @@ public final class ErgonBulkSchema {
       @Schema(description="SYNC avalia a elegibilidade nesta requisição, sem registrar a homologação.") BulkExecutionMode executionMode,
       @Schema(description="Ocorrências de frequência selecionadas com versão individual para homologação coletiva.") FrequenciaSelection selection,
       @Schema(description="Documento comprobatório e despacho que formalizam a homologação coletiva.") HomologarFrequenciaLoteDTO parameters) {}
+  @Schema(description="Avaliação de ativação coletiva de definições de campos customizados inativas no catálogo do órgão.")
+  public record AtivarCampoCustomizadoCommand(
+      @Schema(description="SYNC avalia a elegibilidade nesta requisição, sem registrar a ativação.") BulkExecutionMode executionMode,
+      @Schema(description="Campos customizados selecionados com versão individual para ativação coletiva.") CampoCustomizadoSelection selection,
+      @Schema(description="Justificativa administrativa que formaliza a ativação coletiva.") AtivarCampoCustomizadoLoteDTO parameters) {}
 }

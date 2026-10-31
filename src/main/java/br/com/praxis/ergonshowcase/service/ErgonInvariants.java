@@ -320,6 +320,43 @@ public class ErgonInvariants {
     }
   }
 
+  public void campoCustomizado(DefinicaoCampoCustomizado d, boolean creating) {
+    if (d.getEmpCodigo() == null || blank(d.getResourceKey()) || blank(d.getFieldKey()))
+      fail("Órgão, recurso alvo e chave técnica são obrigatórios para o campo customizado.");
+    Orgao orgao = em.find(Orgao.class, d.getEmpCodigo(), LockModeType.PESSIMISTIC_READ);
+    if (orgao == null) fail("Órgão inexistente para a definição de campo customizado.");
+    if (blank(d.getFieldType())
+        || !Set.of("STRING", "INTEGER", "NUMBER", "BOOLEAN", "DATE", "SELECT")
+            .contains(d.getFieldType()))
+      fail(
+          "Tipo de dado inválido para o campo customizado; use STRING, INTEGER, NUMBER, BOOLEAN, DATE ou SELECT.");
+    if (blank(d.getControlType()))
+      fail("Controle visual é obrigatório para a definição de campo customizado.");
+    if ("SELECT".equals(d.getFieldType()) && blank(d.getOptionTabela()))
+      fail("Campo customizado do tipo SELECT exige informar a tabela geral de opções.");
+    if (d.getFieldOrder() != null && (d.getFieldOrder() < 1 || d.getFieldOrder() > 999))
+      fail("A ordem no grupo do campo customizado deve estar entre 1 e 999.");
+    if (!blank(d.getOptionTabela())) {
+      Tabela tab = em.find(Tabela.class, d.getOptionTabela());
+      if (tab == null) fail("Tabela geral de opções (HADES.TABELA) inexistente: " + d.getOptionTabela());
+    }
+    var duplicados =
+        em.createQuery(
+                "select x from DefinicaoCampoCustomizado x where x.empCodigo=:e and x.resourceKey=:r and x.fieldKey=:k",
+                DefinicaoCampoCustomizado.class)
+            .setParameter("e", d.getEmpCodigo())
+            .setParameter("r", d.getResourceKey())
+            .setParameter("k", d.getFieldKey())
+            .setFlushMode(FlushModeType.COMMIT)
+            .getResultList();
+    for (DefinicaoCampoCustomizado other : duplicados) {
+      if (d.getId() != null && Objects.equals(d.getId(), other.getId())) continue;
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "Já existe definição de campo customizado para o mesmo órgão, recurso e chave técnica.");
+    }
+  }
+
   public void vinculo(Vinculo v, boolean creating) {
     if (creating) {
       Orgao orgao = em.find(Orgao.class, v.getEmpCodigo(), LockModeType.PESSIMISTIC_READ);

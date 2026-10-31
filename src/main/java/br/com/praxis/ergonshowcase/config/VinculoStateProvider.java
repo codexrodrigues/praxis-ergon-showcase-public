@@ -4,6 +4,7 @@ import br.com.praxis.ergonshowcase.domain.DependenteId;
 import br.com.praxis.ergonshowcase.domain.VinculoId;
 import br.com.praxis.ergonshowcase.repository.AfastamentoRepository;
 import br.com.praxis.ergonshowcase.repository.CargoRepository;
+import br.com.praxis.ergonshowcase.repository.DefinicaoCampoCustomizadoRepository;
 import br.com.praxis.ergonshowcase.repository.DependenteRepository;
 import br.com.praxis.ergonshowcase.repository.FrequenciaRepository;
 import br.com.praxis.ergonshowcase.repository.OrgaoRepository;
@@ -28,6 +29,8 @@ public class VinculoStateProvider implements ResourceStateSnapshotProvider {
 
   @Autowired private FrequenciaRepository frequencias;
 
+  @Autowired private DefinicaoCampoCustomizadoRepository camposCustomizados;
+
   @Autowired private TenantContext tenant;
 
   private final VinculoRepository repository;
@@ -38,6 +41,17 @@ public class VinculoStateProvider implements ResourceStateSnapshotProvider {
 
   @Override
   public Optional<ResourceStateSnapshot> resolve(String key, Object id) {
+    if ("administracao-pessoal.campos-customizados".equals(key) && id != null) {
+      Long campoId = id instanceof Long typed ? typed : Long.valueOf(id.toString());
+      return camposCustomizados
+          .findById(campoId)
+          .filter(c -> java.util.Objects.equals(c.getEmpCodigo(), tenant.orgao()))
+          .map(
+              c ->
+                  new ResourceStateSnapshot(
+                      Boolean.TRUE.equals(c.getActive()) ? "ATIVO" : "INATIVO",
+                      Map.of("required", Boolean.TRUE.equals(c.getRequired()))));
+    }
     if ("administracao-pessoal.frequencias".equals(key) && id != null) {
       Long freqId = id instanceof Long typed ? typed : Long.valueOf(id.toString());
       return frequencias

@@ -133,4 +133,23 @@ public class ErgonDeterminationService {
     }
     return preview;
   }
+
+  public CampoCustomizadoPreviaPreviewDTO previaCampoCustomizado(
+      CampoCustomizadoPreviaDraftDTO draft) {
+    CampoCustomizadoPreviaPreviewDTO preview = new CampoCustomizadoPreviaPreviewDTO();
+    preview.setEscopoGlobalPrevisto(draft.getEmpCodigo() == null);
+    boolean requiresTabela =
+        "SELECT".equalsIgnoreCase(draft.getFieldType())
+            || "SELECT".equalsIgnoreCase(draft.getControlType())
+            || "SEARCHABLE_SELECT".equalsIgnoreCase(draft.getControlType());
+    preview.setRequerTabelaOpcoesPrevisto(requiresTabela);
+    if (draft.getOptionTabela() != null && !draft.getOptionTabela().isBlank()) {
+      Tabela tab = em.find(Tabela.class, draft.getOptionTabela().trim());
+      if (tab == null) {
+        ErgonInvariants.fail("Tabela geral de opções (HADES.TABELA) inexistente.");
+      }
+      preview.setOptionTabelaDescricaoPrevista(tab.getDescr());
+    }
+    return preview;
+  }
 }

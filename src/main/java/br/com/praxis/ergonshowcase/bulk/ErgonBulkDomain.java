@@ -27,7 +27,8 @@ public class ErgonBulkDomain {
     CARGOS("administracao-pessoal.cargos", "cargos", "updateErgonCargo", Cargo.class, UpdateCargoDTO.class),
     DEPENDENTES("administracao-pessoal.dependentes", "dependentes", "updateErgonDependente", Dependente.class, UpdateDependenteDTO.class),
     AFASTAMENTOS("administracao-pessoal.afastamentos", "afastamentos", "updateErgonAfastamento", Afastamento.class, UpdateAfastamentoDTO.class),
-    FREQUENCIAS("administracao-pessoal.frequencias", "frequencias", "updateErgonFrequencia", Frequencia.class, UpdateFrequenciaDTO.class);
+    FREQUENCIAS("administracao-pessoal.frequencias", "frequencias", "updateErgonFrequencia", Frequencia.class, UpdateFrequenciaDTO.class),
+    CAMPOS_CUSTOMIZADOS("administracao-pessoal.campos-customizados", "campos-customizados", "updateErgonCampoCustomizado", DefinicaoCampoCustomizado.class, UpdateDefinicaoCampoCustomizadoDTO.class);
     public final String key, name, updateOperation;
     public final Class<?> entity, update;
     Resource(String key, String name, String op, Class<?> entity, Class<?> update) { this.key=key;this.name=name;this.updateOperation=op;this.entity=entity;this.update=update; }
@@ -38,6 +39,7 @@ public class ErgonBulkDomain {
         case CARGOS -> Set.of();
         case DEPENDENTES -> Set.of("nome", "dtnasc", "invalido");
         case AFASTAMENTOS, FREQUENCIAS -> Set.of("tipofreq", "codfreq", "dtini");
+        case CAMPOS_CUSTOMIZADOS -> Set.of("resourceKey", "fieldKey", "fieldType", "validationRules", "governancePolicy");
       };
     }
   }
@@ -52,12 +54,14 @@ public class ErgonBulkDomain {
   @Autowired DependenteMapper dependentes;
   @Autowired AfastamentoMapper afastamentos;
   @Autowired FrequenciaMapper frequencias;
+  @Autowired DefinicaoCampoCustomizadoMapper camposCustomizados;
   @Autowired VinculoService vinculoService;
   @Autowired ServidorPessoaService pessoaService;
   @Autowired CargoService cargoService;
   @Autowired DependenteService dependenteService;
   @Autowired AfastamentoService afastamentoService;
   @Autowired FrequenciaService frequenciaService;
+  @Autowired DefinicaoCampoCustomizadoService campoCustomizadoService;
 
   ResourceMapper mapper(Resource r) {
     return switch(r) {
@@ -67,19 +71,20 @@ public class ErgonBulkDomain {
       case DEPENDENTES -> dependentes;
       case AFASTAMENTOS -> afastamentos;
       case FREQUENCIAS -> frequencias;
+      case CAMPOS_CUSTOMIZADOS -> camposCustomizados;
     };
   }
   public BulkIdentityCodec codec(Resource r) {
     return switch(r) {
       case CARGOS -> BulkIdentityCodecs.integers();
-      case PESSOAS, AFASTAMENTOS, FREQUENCIAS -> BulkIdentityCodecs.longs();
+      case PESSOAS, AFASTAMENTOS, FREQUENCIAS, CAMPOS_CUSTOMIZADOS -> BulkIdentityCodecs.longs();
       case VINCULOS, DEPENDENTES -> BulkIdentityCodecs.strings();
     };
   }
   public Object identity(Resource r, Object wire) {
     return switch(r) {
       case CARGOS -> BulkIdentityCodecs.integers().decode((Integer) wire);
-      case PESSOAS, AFASTAMENTOS, FREQUENCIAS -> BulkIdentityCodecs.longs().decode((String) wire);
+      case PESSOAS, AFASTAMENTOS, FREQUENCIAS, CAMPOS_CUSTOMIZADOS -> BulkIdentityCodecs.longs().decode((String) wire);
       case VINCULOS -> {
         VinculoId id=CompositeIdSupport.decode((String)wire,VinculoId.class);
         if(!wire.equals(CompositeIdSupport.encode(id))) throw new IllegalArgumentException("Identidade composta não canônica.");
@@ -98,6 +103,7 @@ public class ErgonBulkDomain {
       case PESSOAS -> ((ServidorPessoa)e).getNumero().toString();
       case AFASTAMENTOS -> ((Afastamento)e).getId().toString();
       case FREQUENCIAS -> ((Frequencia)e).getId().toString();
+      case CAMPOS_CUSTOMIZADOS -> ((DefinicaoCampoCustomizado)e).getId().toString();
       case VINCULOS -> CompositeIdSupport.encode(((Vinculo)e).getId());
       case DEPENDENTES -> CompositeIdSupport.encode(((Dependente)e).getId());
     };
@@ -108,6 +114,7 @@ public class ErgonBulkDomain {
         : e instanceof Dependente d ? d.getVersion()
         : e instanceof Afastamento a ? a.getVersion()
         : e instanceof Frequencia f ? f.getVersion()
+        : e instanceof DefinicaoCampoCustomizado cc ? cc.getVersion()
         : ((ServidorPessoa)e).getVersion();
   }
   public Object load(Resource r, Object wire, boolean lock) {
@@ -122,6 +129,7 @@ public class ErgonBulkDomain {
             r == Resource.CARGOS ? ((Cargo)e).getEmpCodigo()
                 : r == Resource.AFASTAMENTOS ? ((Afastamento)e).getEmpCodigo()
                 : r == Resource.FREQUENCIAS ? ((Frequencia)e).getEmpCodigo()
+                : r == Resource.CAMPOS_CUSTOMIZADOS ? ((DefinicaoCampoCustomizado)e).getEmpCodigo()
                 : ((Vinculo)e).getEmpCodigo(),
             tenant.orgao());
   }
@@ -133,7 +141,8 @@ public class ErgonBulkDomain {
     allowed.removeAll(Set.of("cargoNomePrevisto","saldoVagasPrevisto","cargoAglutinadorNomePrevisto",
         "possuiDeficienciaPcDPrevisto","tipoDependenteDescricaoPrevista","idadeCalculadaAnos","elegivelIrrfPrevisto",
         "codigoFrequenciaNomePrevisto","quantidadeDiasPrevista","comOnusPrevisto",
-        "formatoQuantidadePrevisto","exigeHorarioPrevisto"));
+        "formatoQuantidadePrevisto","exigeHorarioPrevisto",
+        "optionTabelaDescricaoPrevista","requerTabelaOpcoesPrevisto","escopoGlobalPrevisto"));
     response.retain(allowed);
     return response;
   }
@@ -175,6 +184,7 @@ public class ErgonBulkDomain {
       case DEPENDENTES -> invariants.dependente((Dependente)e,false);
       case AFASTAMENTOS -> invariants.afastamento((Afastamento)e,false);
       case FREQUENCIAS -> invariants.frequencia((Frequencia)e,false);
+      case CAMPOS_CUSTOMIZADOS -> invariants.campoCustomizado((DefinicaoCampoCustomizado)e,false);
     }
   }
   public boolean apply(Resource r, Object e, Object dto) {
@@ -203,9 +213,20 @@ public class ErgonBulkDomain {
       case FREQUENCIAS -> frequenciaService.selectBulkIdentities((FrequenciaFilterDTO)filter,
           (root,q,cb)->cb.equal(root.get("empCodigo"),orgao),limit).stream()
           .map(id->(Object)id.toString()).toList();
+      case CAMPOS_CUSTOMIZADOS -> campoCustomizadoService.selectBulkIdentities((DefinicaoCampoCustomizadoFilterDTO)filter,
+          (root,q,cb)->cb.equal(root.get("empCodigo"),orgao),limit).stream()
+          .map(id->(Object)id.toString()).toList();
     };
   }
   public Object commandCandidate(Object current, String operation, JsonNode parameters) {
+    if (current instanceof DefinicaoCampoCustomizado cc) {
+      DefinicaoCampoCustomizado copy=new DefinicaoCampoCustomizado(); BeanUtils.copyProperties(cc,copy);
+      var dto=json.convertValue(parameters,AtivarCampoCustomizadoLoteDTO.class); validate(dto);
+      if (Boolean.TRUE.equals(copy.getActive()))
+        throw new IllegalArgumentException("Campo customizado já se encontra ativo.");
+      copy.setActive(true);
+      invariants.campoCustomizado(copy,false); return copy;
+    }
     if (current instanceof Frequencia freq) {
       Frequencia copy=new Frequencia(); BeanUtils.copyProperties(freq,copy);
       var dto=json.convertValue(parameters,HomologarFrequenciaLoteDTO.class); validate(dto);
@@ -258,6 +279,11 @@ public class ErgonBulkDomain {
     if (document==null || !Objects.equals(document.getEmpCodigo(),owner)) throw new IllegalArgumentException("Ato coletivo deve pertencer ao órgão do vínculo.");
   }
   public boolean applyCommand(Object entity, Object candidate) {
+    if (entity instanceof DefinicaoCampoCustomizado current && candidate instanceof DefinicaoCampoCustomizado next) {
+      boolean changed=!Objects.equals(current.getActive(),next.getActive());
+      current.setActive(next.getActive());
+      em.flush(); return changed;
+    }
     if (entity instanceof Frequencia current && candidate instanceof Frequencia next) {
       boolean changed=!Objects.equals(current.getSituacao(),next.getSituacao())
           || !Objects.equals(current.getDocumentoLegalId(),next.getDocumentoLegalId())

@@ -14,7 +14,7 @@ public final class InstallBulkStorage {
 
   public static List<BulkOperationControlIdentity> identities() {
     var ids = new ArrayList<BulkOperationControlIdentity>();
-    for (String resource : List.of("vinculos", "funcionarios", "cargos", "dependentes", "afastamentos", "frequencias")) {
+    for (String resource : List.of("vinculos", "funcionarios", "cargos", "dependentes", "afastamentos", "frequencias", "campos-customizados")) {
       for (String mode : List.of("uniform", "items"))
         ids.add(new BulkOperationControlIdentity(NAMESPACE, "ergon." + resource + ".bulk." + mode));
     }
@@ -23,6 +23,7 @@ public final class InstallBulkStorage {
     ids.add(new BulkOperationControlIdentity(NAMESPACE, "ergon.dependentes.encerrar-dependencia-lote"));
     ids.add(new BulkOperationControlIdentity(NAMESPACE, "ergon.afastamentos.homologar-afastamento-lote"));
     ids.add(new BulkOperationControlIdentity(NAMESPACE, "ergon.frequencias.homologar-frequencia-lote"));
+    ids.add(new BulkOperationControlIdentity(NAMESPACE, "ergon.campos-customizados.ativar-campo-customizado-lote"));
     return List.copyOf(ids);
   }
 

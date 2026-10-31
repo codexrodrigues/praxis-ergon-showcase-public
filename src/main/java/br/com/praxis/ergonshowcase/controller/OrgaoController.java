@@ -157,6 +157,8 @@ public class OrgaoController
   }
 
   @org.springframework.beans.factory.annotation.Autowired private CargoService relatedService;
+  @org.springframework.beans.factory.annotation.Autowired
+  private DefinicaoCampoCustomizadoService camposCustomizadosService;
 
   @org.springframework.web.bind.annotation.GetMapping("/{id}/quadro-cargos")
   @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_READ')")
@@ -211,5 +213,60 @@ public class OrgaoController
             result,
             org.springframework.hateoas.Links.of(
                 org.springframework.hateoas.Link.of(ApiPaths.CARGOS, "collection"))));
+  }
+
+  @org.springframework.web.bind.annotation.GetMapping("/{id}/campos-customizados")
+  @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_READ')")
+  @UiSurface(
+      id = "campos-customizados-orgao",
+      kind = org.praxisplatform.uischema.surface.SurfaceKind.READ_PROJECTION,
+      scope = org.praxisplatform.uischema.surface.SurfaceScope.ITEM,
+      title = "Campos customizados do órgão",
+      description = "Definições de campos customizados JSONB configuradas para este órgão.",
+      relatedChildResourceKey = "administracao-pessoal.campos-customizados",
+      relatedChildResourcePath = ApiPaths.CAMPOS_CUSTOMIZADOS,
+      relatedChildParentField = "empCodigo",
+      relatedChildOperations = {
+        org.praxisplatform.uischema.surface.RelatedResourceChildOperation.FILTER,
+        org.praxisplatform.uischema.surface.RelatedResourceChildOperation.LIST
+      },
+      requiredAuthorities = {"ERGON_READ"})
+  @io.swagger.v3.oas.annotations.Operation(
+      summary = "Consultar campos customizados do órgão",
+      description =
+          "Retorna as definições de campos customizados configuradas para o órgão selecionado.")
+  public org.springframework.http.ResponseEntity<
+          org.praxisplatform.uischema.rest.response.RestApiResponse<
+              org.springframework.data.domain.Page<DefinicaoCampoCustomizadoResponseDTO>>>
+      camposCustomizados(
+          @io.swagger.v3.oas.annotations.Parameter(description = "Identidade do órgão")
+              @org.springframework.web.bind.annotation.PathVariable
+              Integer id,
+          @io.swagger.v3.oas.annotations.Parameter(
+                  description = "Página a consultar, iniciando em zero")
+              @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0")
+              int page,
+          @io.swagger.v3.oas.annotations.Parameter(
+                  description = "Quantidade de registros da página, de 1 a 200")
+              @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20")
+              int size) {
+    service.findById(id);
+    if (page < 0 || size < 1 || size > 200)
+      throw new org.springframework.web.server.ResponseStatusException(
+          org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
+          "Paginação fora do limite permitido.");
+    var filter = new DefinicaoCampoCustomizadoFilterDTO();
+    filter.setEmpCodigo(id);
+    var result =
+        camposCustomizadosService.filter(
+            filter,
+            org.springframework.data.domain.PageRequest.of(
+                page, size, camposCustomizadosService.getDefaultSort()),
+            null);
+    return org.springframework.http.ResponseEntity.ok(
+        org.praxisplatform.uischema.rest.response.RestApiResponse.success(
+            result,
+            org.springframework.hateoas.Links.of(
+                org.springframework.hateoas.Link.of(ApiPaths.CAMPOS_CUSTOMIZADOS, "collection"))));
   }
 }

@@ -22,6 +22,9 @@ public final class ApiPaths {
   public static final String AFASTAMENTOS = BASE + "/afastamentos";
   public static final String REGRAS_FREQUENCIA_ESTATUTARIA = BASE + "/regras-frequencia-estatutaria";
   public static final String FREQUENCIAS = BASE + "/frequencias";
+  public static final String TABELAS = BASE + "/tabelas";
+  public static final String ITENS_TABELA = BASE + "/itens-tabela";
+  public static final String CAMPOS_CUSTOMIZADOS = BASE + "/campos-customizados";
 
   public static final String ORGAO_SOURCE = "orgao";
   public static final String CARGO_SOURCE = "cargo";
@@ -36,6 +39,9 @@ public final class ApiPaths {
   public static final String AFASTAMENTO_SOURCE = "afastamento";
   public static final String REGRA_FREQUENCIA_ESTATUTARIA_SOURCE = "regraFrequenciaEstatutaria";
   public static final String FREQUENCIA_SOURCE = "frequencia";
+  public static final String TABELA_SOURCE = "tabela";
+  public static final String ITEM_TABELA_SOURCE = "itemTabela";
+  public static final String CAMPO_CUSTOMIZADO_SOURCE = "campoCustomizado";
 
   private static final String OPTION_SOURCES = "/option-sources/";
   private static final String OPTIONS_FILTER = "/options/filter";
@@ -53,6 +59,10 @@ public final class ApiPaths {
   public static final String REGRA_FREQUENCIA_ESTATUTARIA_OPTIONS =
       REGRAS_FREQUENCIA_ESTATUTARIA + OPTION_SOURCES + REGRA_FREQUENCIA_ESTATUTARIA_SOURCE + OPTIONS_FILTER;
   public static final String FREQUENCIA_OPTIONS = FREQUENCIAS + OPTION_SOURCES + FREQUENCIA_SOURCE + OPTIONS_FILTER;
+  public static final String TABELA_OPTIONS = TABELAS + OPTION_SOURCES + TABELA_SOURCE + OPTIONS_FILTER;
+  public static final String ITEM_TABELA_OPTIONS = ITENS_TABELA + OPTION_SOURCES + ITEM_TABELA_SOURCE + OPTIONS_FILTER;
+  public static final String CAMPO_CUSTOMIZADO_OPTIONS =
+      CAMPOS_CUSTOMIZADOS + OPTION_SOURCES + CAMPO_CUSTOMIZADO_SOURCE + OPTIONS_FILTER;
 
   public static final String BULK_OPERATIONS = BASE + "/operations/bulk";
   public static final String BULK_PUBLICATION_SEGMENT = "/publication";

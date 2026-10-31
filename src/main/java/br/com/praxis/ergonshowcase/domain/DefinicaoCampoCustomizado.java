@@ -8,6 +8,8 @@ import lombok.Setter;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.praxisplatform.uischema.annotation.OptionLabel;
+import org.praxisplatform.uischema.service.base.annotation.DefaultSortColumn;
 
 /**
  * Catálogo governado de metadados de campos customizados multi-órgão (inspirado em Workday Custom
@@ -79,6 +81,7 @@ public class DefinicaoCampoCustomizado {
    */
   @Comment(
       "Rótulo de negócio em português apresentado nos formulários dinâmicos e cabeçalhos de tabela.")
+  @OptionLabel
   @Column(name = "label", nullable = false, length = 120)
   private String label;
 
@@ -99,6 +102,7 @@ public class DefinicaoCampoCustomizado {
 
   /** Ordem numérica de posicionamento do campo dentro do grupo visual. */
   @Comment("Ordem numérica de posicionamento do campo dentro do grupo visual.")
+  @DefaultSortColumn
   @Column(name = "field_order", nullable = false)
   private Integer fieldOrder;
 
@@ -147,6 +151,22 @@ public class DefinicaoCampoCustomizado {
       "Indica se a definição do campo customizado está ativa para publicação no schema e validação de payload.")
   @Column(name = "active", nullable = false)
   private Boolean active = true;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "emp_codigo",
+      referencedColumnName = "empresa",
+      insertable = false,
+      updatable = false)
+  private Orgao orgao;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "option_tabela",
+      referencedColumnName = "tab",
+      insertable = false,
+      updatable = false)
+  private Tabela optionTabelaEntidade;
 
   /** Versão do registro para controle de concorrência otimista (@Version / ETag / If-Match). */
   @Comment(
