@@ -2,7 +2,7 @@
 
 Host Java 21 / Spring Boot 3.5.15 criado do zero para a [issue 305](https://github.com/codexrodrigues/praxis-metadata-starter/issues/305). O POM declara `8.0.0-rc.183`, que na `main` do `praxis-metadata-starter` (`d6845671b5`, após integração dos PRs [#311](https://github.com/codexrodrigues/praxis-metadata-starter/pull/311) e [#312](https://github.com/codexrodrigues/praxis-metadata-starter/issues/312)) reúne a hierarquia canônica de `duplicate-draft`, `PartialUpdateInput`, consolidação de lote (#308) e mapeamento canônico de conflitos de constraint para HTTP 409.
 
-A rodada T08 integra `duplicate-draft` de Cargos (`AbstractDuplicateDraftResourceController` + `DuplicateDraftResourceService` + `CargoDraftAvailability`) e a centralização de endpoints em `ApiPaths`, aprovada no gate estático (`STATIC PASS`, `exit code 0`) e na bateria focal local (`20/20` testes verdes). A prova usa candidato Maven privado do [PR Metadata #311](https://github.com/codexrodrigues/praxis-metadata-starter/pull/311). Consulte o [relatório](docs/RELATORIO-305.md), o [scorecard](docs/evidence/SCORECARD-COMPLETUDE.md) e a [reconciliação dos campos](docs/RECONCILIACAO-CAMPOS-BULK-308.md).
+A rodada T08 integra `duplicate-draft` de Cargos (`AbstractDuplicateDraftResourceController` + `DuplicateDraftResourceService` + `CargoDraftAvailability`) e a centralização de endpoints em `ApiPaths`, aprovada no gate estático (`STATIC PASS`, `exit code 0`) e na bateria focal local (`20/20` testes verdes). Consulte o [relatório](docs/RELATORIO-305.md), o [scorecard](docs/evidence/SCORECARD-COMPLETUDE.md) e a [reconciliação dos campos](docs/RECONCILIACAO-CAMPOS-BULK-308.md).
 
 ## Execução
 
@@ -11,9 +11,9 @@ Defina as variáveis de [.env.example](.env.example) no ambiente do processo. Sp
 ```powershell
 $env:JAVA_HOME='D:\Developer\praxis-plataform\.codex-jdk-21'
 $env:PATH="$env:JAVA_HOME\bin;$env:PATH"
-# Candidato privado instalado a partir do PR #311; não equivale à rc.179 pública.
-mvn '-Dpraxis.core.version=8.0.0-bulk.308-consolidation.5-SNAPSHOT' '-Dmaven.repo.local=.local/m2-bulk308' test
-mvn '-Dpraxis.core.version=8.0.0-bulk.308-consolidation.5-SNAPSHOT' '-Dmaven.repo.local=.local/m2-bulk308' clean package -DskipTests
+# Com o praxis-metadata-starter 8.0.0-rc.183 instalado a partir da main (d6845671b5):
+mvn test
+mvn clean package -DskipTests
 java -jar target/praxis-ergon-showcase-0.1.0-SNAPSHOT.jar
 ```
 
@@ -60,7 +60,7 @@ PcD usa as cinco colunas existentes (`deffisica`, `defvisual`, `defauditiva`, `d
 
 ## Operações em lote — Issues #2 / #308
 
-A campanha de lote usa o candidato do [PR Metadata #311](https://github.com/codexrodrigues/praxis-metadata-starter/pull/311), com coordenada distinta `8.0.0-bulk.308-consolidation.5-SNAPSHOT` e cache Maven isolado. O POM do host ainda conserva rc.179; não houve substituição dos bytes dessa coordenada nem release público. Consulte o [plano e as reconciliações de schema](docs/PLANO-BULKING-308.md) e o scorecard para o estado de aceitação. A presença de endpoints e annotations não certifica a execução do lote.
+O host consome a coordenada `8.0.0-rc.183` da `main` do `praxis-metadata-starter` (`d6845671b5`), que consolida o PR [#311](https://github.com/codexrodrigues/praxis-metadata-starter/pull/311) e a issue [#312](https://github.com/codexrodrigues/praxis-metadata-starter/issues/312). Consulte o [plano e as reconciliações de schema](docs/PLANO-BULKING-308.md) e o scorecard para o estado de aceitação. A presença de endpoints e annotations não certifica a execução do lote.
 
 Vínculos, pessoas e cargos declaram respectivamente 10, 7 e 5 campos BulkEditable. Cada recurso oferece avaliação uniforme e por item, proposta/preview paginado, confirmação com Idempotency-Key, execução/recibos e cancelamento. Vínculos acrescentam realocar-setor-lote e homologar-estagio-lote, com documento legal do mesmo órgão. A avaliação conserva a intenção protegida; a confirmação revalida domínio, autorização e versão por registro. QUERY aplica o órgão de operação antes do limite e congela a população na avaliação, incluindo exclusões. Pessoas são globais neste modelo; X-Tenant ainda não constitui autorização multi-órgão.
 
