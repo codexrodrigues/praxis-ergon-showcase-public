@@ -41,7 +41,19 @@ public class VinculoResponseDTO extends VinculoDados {
       label = "Afastamento aberto",
       group = "Afastamentos",
       readOnly = true,
-      tableHidden = true)
+      tableHidden = true,
+      type = org.praxisplatform.uischema.FieldDataType.NUMBER,
+      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
+      icon = "event_busy",
+      endpoint = ApiPaths.AFASTAMENTO_OPTIONS,
+      valueField = "id",
+      displayField = "label")
+  @ResourceReference(
+      resourceKey = "administracao-pessoal.afastamentos",
+      valueField = "afastamentoAbertoId",
+      surfaceId = "ficha-afastamento",
+      previewSurfaceId = "ficha-afastamento",
+      detailPresentation = "drawer")
   private Long afastamentoAbertoId;
 
   @Schema(

@@ -19,6 +19,15 @@ import org.hibernate.annotations.Comment;
 @Comment(
     "Catálogo de classificações legais de dependência funcional e previdenciária (equivalente a TIPO_DEPEN na tela ERGadm00001 do legado Ergon). Define a elegibilidade base a dedução de IRRF e cota de salário-família.")
 public class TipoDependente {
+  /** Referência relacional para leitura de documentoLegal no catálogo de tipos de dependente. */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "documento_legal_id",
+      referencedColumnName = "id",
+      insertable = false,
+      updatable = false)
+  private DocumentoLegal documentoLegal;
+
   @Id
   /**
    * Código textual identificador único do tipo de dependência (chave pública estável até 20
@@ -29,6 +38,8 @@ public class TipoDependente {
   @Column(name = "tipodepen", nullable = false, length = 20)
   private String tipodepen;
 
+  @org.praxisplatform.uischema.annotation.OptionLabel
+  @org.praxisplatform.uischema.service.base.annotation.DefaultSortColumn
   /** Descrição detalhada da modalidade de dependência e sua regra de enquadramento legal. */
   @Comment("Descrição detalhada da modalidade de dependência e sua regra de enquadramento legal.")
   @Column(name = "descricao", nullable = false, length = 200)

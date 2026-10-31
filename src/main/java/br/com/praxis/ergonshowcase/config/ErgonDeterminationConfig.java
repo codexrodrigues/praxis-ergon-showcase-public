@@ -8,7 +8,7 @@ import org.springframework.context.annotation.*;
 @Configuration
 public class ErgonDeterminationConfig {
   @Bean
-  ReactiveDeterminationDefinitionProvider ergonDeterminations() {
+  public ReactiveDeterminationDefinitionProvider ergonDeterminations() {
     return () ->
         List.of(
             definition(
@@ -38,7 +38,46 @@ public class ErgonDeterminationConfig {
                 List.of("cargo"),
                 List.of(
                     new ReactiveDeterminationOutputBinding(
-                        "/nome", "/cargoAglutinadorNomePrevisto"))));
+                        "/nome", "/cargoAglutinadorNomePrevisto"))),
+            definition(
+                "ergon.dependente.elegibilidade",
+                "Dependente",
+                "determineErgonDependenteElegibilidade",
+                List.of("tipodepen", "dtnasc", "universitario", "invalido"),
+                List.of("tipodepen", "dtnasc", "universitario", "invalido"),
+                List.of(
+                    new ReactiveDeterminationOutputBinding(
+                        "/tipoDependenteDescricaoPrevista", "/tipoDependenteDescricaoPrevista"),
+                    new ReactiveDeterminationOutputBinding(
+                        "/idadeCalculadaAnos", "/idadeCalculadaAnos"),
+                    new ReactiveDeterminationOutputBinding(
+                        "/elegivelIrrfPrevisto", "/elegivelIrrfPrevisto"))),
+            definition(
+                "ergon.afastamento.previa",
+                "Afastamento",
+                "determineErgonAfastamentoPrevia",
+                List.of("tipofreq", "codfreq", "dtini", "dtprevfim"),
+                List.of("tipofreq", "codfreq", "dtini", "dtprevfim"),
+                List.of(
+                    new ReactiveDeterminationOutputBinding(
+                        "/codigoFrequenciaNomePrevisto", "/codigoFrequenciaNomePrevisto"),
+                    new ReactiveDeterminationOutputBinding(
+                        "/quantidadeDiasPrevista", "/quantidadeDiasPrevista"),
+                    new ReactiveDeterminationOutputBinding(
+                        "/comOnusPrevisto", "/comOnusPrevisto"))),
+            definition(
+                "ergon.frequencia.previa",
+                "Frequencia",
+                "determineErgonFrequenciaPrevia",
+                List.of("tipofreq", "codfreq", "dtini", "dtfim"),
+                List.of("tipofreq", "codfreq", "dtini", "dtfim"),
+                List.of(
+                    new ReactiveDeterminationOutputBinding(
+                        "/codigoFrequenciaNomePrevisto", "/codigoFrequenciaNomePrevisto"),
+                    new ReactiveDeterminationOutputBinding(
+                        "/formatoQuantidadePrevisto", "/formatoQuantidadePrevisto"),
+                    new ReactiveDeterminationOutputBinding(
+                        "/exigeHorarioPrevisto", "/exigeHorarioPrevisto"))));
   }
 
   private ReactiveDeterminationDefinition definition(

@@ -108,6 +108,9 @@ public class ErgonBulkOperations {
   public BulkProposal command(String action, BulkCommandEvaluationRequest request) {
     return evaluate(Resource.VINCULOS,"ergon.vinculos."+action,null,null,request);
   }
+  public BulkProposal command(Resource resource, String action, BulkCommandEvaluationRequest request) {
+    return evaluate(resource,"ergon."+resource.name+"."+action,null,null,request);
+  }
   private BulkProposal evaluate(Resource resource,String operation,BulkUniformEvaluationRequest uniform,BulkItemEvaluationRequest items,BulkCommandEvaluationRequest command) {
     authority("ERGON_WRITE");outside();
     BulkMode mode=uniform!=null ? BulkMode.UNIFORM_UPDATE : items!=null ? BulkMode.PER_ITEM_UPDATE : BulkMode.DOMAIN_COMMAND;
@@ -156,7 +159,7 @@ public class ErgonBulkOperations {
               if(entity==null) throw new IllegalArgumentException("Registro inexistente.");
               observed=etags.create(scopes.currentScope(),resource.key,domain.identity(resource,target.id()),domain.version(entity));
               if(!observed.equals(target.expectedVersion())) { plan.put("blockedReason","CONFLICT");throw new IllegalArgumentException("Versão defasada."); }
-              if(command!=null) domain.commandCandidate((Vinculo)entity,operation,plan.path("parameters"));
+              if(command!=null) domain.commandCandidate(entity,operation,plan.path("parameters"));
               else domain.candidate(resource,entity,changes,fields,mode);
               LOG.debug("Validação do candidato concluída: ordinal={}",all.size());
               eligibility=BulkTargetEligibility.executable();
@@ -193,8 +196,6 @@ public class ErgonBulkOperations {
     UUID proposalId=UUID.fromString(request.proposalId());
     var requestContext=context(resource,operation);
     BulkStoredProposal stored=transaction(TransactionDefinition.ISOLATION_READ_COMMITTED,()->store().find(requestContext,proposalId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND)));
-    // Structural policy is immutable for this request. The SDK's control/revision fence and
-    // the published photograph are rechecked per unit; this is never an authorization cache.
     BulkEditableFields updateFields=stored.snapshot().mode()==BulkMode.DOMAIN_COMMAND ? null : editable(resource);
     var executor=executor();
     var reservation=executor.reserve(stored.snapshot().context(),proposalId,key,"ergon-http",stored.controlExpectation().structuralRevision(),Instant.now().plus(Duration.ofMinutes(5)));
@@ -211,10 +212,7 @@ public class ErgonBulkOperations {
         if(entity==null) return BulkUnitAdmission.invalid(BulkUnitReasonCode.TARGET_NOT_FOUND);
         if(!etags.matches(evidence.target().expectedVersion(),scopes.currentScope(),resource.key,domain.identity(resource,evidence.target().id()),domain.version(entity)))
           return BulkUnitAdmission.conflict(BulkUnitReasonCode.TARGET_VERSION_CONFLICT);
-        // The SDK locks publication-current control and checks generation, descriptor and
-        // revision inside each unit. Re-composing discovery here would duplicate that
-        // boundary inside the mutation budget. Current domain authority still runs here.
-        if(unit.originalIntent().mode()==BulkMode.DOMAIN_COMMAND) domain.commandCandidate((Vinculo)entity,operation,plan.path("parameters"));
+        if(unit.originalIntent().mode()==BulkMode.DOMAIN_COMMAND) domain.commandCandidate(entity,operation,plan.path("parameters"));
         else domain.candidate(resource,entity,changes(plan),updateFields,unit.originalIntent().mode());
         remaining(unit::remainingBudget);return BulkUnitAdmission.admit();
       } catch(SecurityException denied) { return BulkUnitAdmission.denied(BulkUnitReasonCode.TARGET_DENIED); }
@@ -222,7 +220,7 @@ public class ErgonBulkOperations {
     },unit->{
       remaining(unit::remainingBudget);Object entity=domain.load(resource,unit.targetEvidence().target().id(),true);
       boolean changed;
-      if(unit.originalIntent().mode()==BulkMode.DOMAIN_COMMAND) changed=domain.applyCommand((Vinculo)entity,(Vinculo)domain.commandCandidate((Vinculo)entity,operation,unit.targetEvidence().plan().path("parameters")));
+      if(unit.originalIntent().mode()==BulkMode.DOMAIN_COMMAND) changed=domain.applyCommand(entity,domain.commandCandidate(entity,operation,unit.targetEvidence().plan().path("parameters")));
       else changed=domain.apply(resource,entity,domain.candidate(resource,entity,changes(unit.targetEvidence().plan()),updateFields,unit.originalIntent().mode()));
       remaining(unit::remainingBudget);return changed ? BulkUnitMutationResult.confirmed() : BulkUnitMutationResult.unchanged();
     });
@@ -242,16 +240,20 @@ public class ErgonBulkOperations {
       public ScopeDecision authorize(Context context,String creator,List<Target> targets,Duration remaining) {
         if(!creator.equals(subject()) || remaining.toMillis()<1) return ScopeDecision.denied();
         if(targets.stream().anyMatch(t->t.facts().path("orgao").asInt()!=tenant.orgao())) return ScopeDecision.denied();
-        String idExpression=resource==Resource.VINCULOS ? "numfunc::text || ':' || numero::text" : resource==Resource.PESSOAS ? "numero::text" : "cargo::text";
+        String idExpression=resource==Resource.VINCULOS ? "numfunc::text || ':' || numero::text"
+            : resource==Resource.DEPENDENTES ? "numfunc::text || ':' || numdep::text"
+            : resource==Resource.PESSOAS ? "numero::text"
+            : resource==Resource.AFASTAMENTOS || resource==Resource.FREQUENCIAS ? "id::text" : "cargo::text";
         String table=resource.name;String placeholders=String.join(",",Collections.nCopies(targets.size(),"?"));
-        String sql="select count(*) from public."+table+" where ("+idExpression+") in ("+placeholders+")"+(resource==Resource.PESSOAS ? "" : " and emp_codigo=?");
+        boolean crossTenant=resource==Resource.PESSOAS || resource==Resource.DEPENDENTES;
+        String sql="select count(*) from public."+table+" where ("+idExpression+") in ("+placeholders+")"+(crossTenant ? "" : " and emp_codigo=?");
         try {
           var holder=(org.springframework.jdbc.datasource.ConnectionHolder)TransactionSynchronizationManager.getResource(infrastructure.dataSource());
           if(holder==null) return ScopeDecision.unavailable();
           try(var statement=holder.getConnection().prepareStatement(sql)) {
             statement.setQueryTimeout(Math.max(1,(int)Math.min(2,remaining.toSeconds())));
             int index=1;for(var target:targets) statement.setString(index++,target.wireIdentity().toString());
-            if(resource!=Resource.PESSOAS) statement.setInt(index,tenant.orgao());
+            if(!crossTenant) statement.setInt(index,tenant.orgao());
             try(var rows=statement.executeQuery()) { if(!rows.next() || rows.getInt(1)!=targets.size()) return ScopeDecision.denied(); }
           }
           return ScopeDecision.authorized(HexFormat.of().parseHex(fingerprint()));

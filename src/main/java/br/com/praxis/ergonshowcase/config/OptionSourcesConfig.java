@@ -43,13 +43,57 @@ public class OptionSourcesConfig {
             "numeroDocumento", "administracao-pessoal.documentos-legais", "ficha-documento", null,
             List.of(), List.of(), List.of("tipoDocumento", "anoDocumento"), true,
             "Ato legal indisponível no escopo autorizado.", Map.of()))
+        .add(TipoDependente.class, source(ApiPaths.TIPO_DEPENDENTE_SOURCE, ApiPaths.TIPOS_DEPENDENTE,
+            "tipodepen", "descricao", "administracao-pessoal.tipos-dependente", "ficha-tipo-dependente",
+            null, List.of(), List.of(), List.of("geraIr", "idadeLimite"), false,
+            "Classificação de dependência indisponível no escopo autorizado.", Map.of()))
+        .add(Dependente.class, source(ApiPaths.DEPENDENTE_SOURCE, ApiPaths.DEPENDENTES, "id", "nome",
+            "administracao-pessoal.dependentes", "ficha-dependente", "situacaoLookup",
+            List.of("VIGENTE"), List.of("ENCERRADO", "FUTURO"), List.of("parentesco", "tipodepen"),
+            false, "Dependência encerrada ou futura; mantenha apenas referências históricas já existentes.",
+            Map.of("VIGENTE", "Vigente", "ENCERRADO", "Encerrado", "FUTURO", "Vigência futura")))
+        .add(TipoFrequencia.class, source(ApiPaths.TIPO_FREQUENCIA_SOURCE, ApiPaths.TIPOS_FREQUENCIA,
+            "tipo", "nome", "administracao-pessoal.tipos-frequencia", "ficha-tipo-frequencia",
+            null, List.of(), List.of(), List.of("influiConta", "horaExtra"), false,
+            "Natureza de frequência indisponível no escopo autorizado.", Map.of()))
+        .add(CodigoFrequencia.class, source(ApiPaths.CODIGO_FREQUENCIA_SOURCE, ApiPaths.CODIGOS_FREQUENCIA,
+            "id", "nome", "administracao-pessoal.codigos-frequencia", "ficha-codigo-frequencia",
+            null, List.of(), List.of(), List.of("nomeAbrev", "formatoQtd"), false,
+            "Código de frequência indisponível no escopo autorizado.", Map.of()))
+        .add(Afastamento.class, source(ApiPaths.AFASTAMENTO_SOURCE, ApiPaths.AFASTAMENTOS,
+            "id", "motivo", "administracao-pessoal.afastamentos", "ficha-afastamento",
+            "situacao", List.of("HOMOLOGADO", "PENDENTE_HOMOLOGACAO"),
+            List.of("REJEITADO", "CANCELADO"), List.of("tipofreq", "dtini"), true,
+            "Licença rejeitada ou cancelada; mantenha apenas referências históricas já existentes.",
+            Map.of("HOMOLOGADO", "Homologado", "PENDENTE_HOMOLOGACAO", "Pendente",
+                "REJEITADO", "Rejeitado", "CANCELADO", "Cancelado")))
+        .add(RegraFrequenciaEstatutaria.class, source(ApiPaths.REGRA_FREQUENCIA_ESTATUTARIA_SOURCE,
+            ApiPaths.REGRAS_FREQUENCIA_ESTATUTARIA, "id", "ruleKey",
+            "administracao-pessoal.regras-frequencia-estatutaria", "ficha-regra-frequencia-estatutaria",
+            "ativa", List.of("true"), List.of("false"), List.of("regimeJuridico", "tipoVinculo"), false,
+            "Regra estatutária inativa; mantenha apenas referências históricas já existentes.",
+            Map.of("true", "Ativa", "false", "Inativa")))
+        .add(Frequencia.class, source(ApiPaths.FREQUENCIA_SOURCE, ApiPaths.FREQUENCIAS,
+            "id", "obs", "administracao-pessoal.frequencias", "ficha-frequencia",
+            "situacao", List.of("HOMOLOGADO", "PENDENTE_HOMOLOGACAO"),
+            List.of("REJEITADO", "CANCELADO"), List.of("tipofreq", "dtini"), true,
+            "Ocorrência de frequência rejeitada ou cancelada; mantenha apenas referências históricas já existentes.",
+            Map.of("HOMOLOGADO", "Homologado", "PENDENTE_HOMOLOGACAO", "Pendente",
+                "REJEITADO", "Rejeitado", "CANCELADO", "Cancelado")))
         .build();
   }
 
   private OptionSourceDescriptor source(String key, String path, String id, String label,
       String entityKey, String surface, String status, List<String> allowed, List<String> blocked,
       List<String> descriptions, boolean scoped, String disabledReason, Map<String, String> statusLabels) {
-    var dependencies = scoped ? Map.of("empCodigo", "empCodigo") : Map.<String, String>of();
+    var dependencies = scoped ? Map.of("empCodigo", "empCodigo")
+        : key.equals(ApiPaths.DEPENDENTE_SOURCE) ? Map.of("numfunc", "numfunc")
+        : key.equals(ApiPaths.CODIGO_FREQUENCIA_SOURCE) ? Map.of("tipofreq", "tipofreq")
+        : Map.<String, String>of();
+    var dependsOn = scoped ? List.of("empCodigo")
+        : key.equals(ApiPaths.DEPENDENTE_SOURCE) ? List.of("numfunc")
+        : key.equals(ApiPaths.CODIGO_FREQUENCIA_SOURCE) ? List.of("tipofreq")
+        : List.<String>of();
     var filtering = new LookupFilteringDescriptor(List.of(), Map.of(),
         List.of(new LookupSortOption("descricao", label, "asc", "Descrição crescente"),
             new LookupSortOption("descricao-desc", label, "desc", "Descrição decrescente")),
@@ -62,14 +106,31 @@ public class OptionSourcesConfig {
       case "tipoCargo" -> display(property, "Tipo de cargo", "work");
       case "nomeSocial" -> display(property, "Nome social", "person");
       case "regimejur" -> display(property, "Regime jurídico", "gavel");
+      case "regimeJuridico" -> display(property, "Regime jurídico", "gavel");
       case "tipovinc" -> display(property, "Tipo de vínculo", "badge");
+      case "tipoVinculo" -> display(property, "Tipo de vínculo", "badge");
       case "sigla" -> display(property, "Sigla", "account_tree");
       case "tipoSetor" -> display(property, "Tipo de unidade", "account_tree");
       case "tipoDocumento" -> display(property, "Espécie do ato", "description");
       case "anoDocumento" -> display(property, "Ano do ato", "event");
+      case "geraIr" -> display(property, "Deduz IRRF", "receipt_long");
+      case "idadeLimite" -> display(property, "Idade limite", "cake");
+      case "parentesco" -> display(property, "Parentesco", "family_restroom");
+      case "tipodepen" -> display(property, "Modalidade", "category");
+      case "influiConta" -> display(property, "Influi contagem", "schedule");
+      case "horaExtra" -> display(property, "Hora extra", "more_time");
+      case "nomeAbrev" -> display(property, "Abreviação", "short_text");
+      case "formatoQtd" -> display(property, "Unidade", "straighten");
+      case "tipofreq" -> display(property, "Tipo de frequência", "category");
+      case "dtini" -> display(property, "Início", "event_available");
       default -> throw new IllegalArgumentException("Campo de diretório sem curadoria: " + property);
     }).toList();
-    var lookup = new EntityLookupDescriptor(entityKey, key.equals(ApiPaths.VINCULO_SOURCE) ? "matric" : id, descriptions, status, null, null,
+    String codeProperty = key.equals(ApiPaths.VINCULO_SOURCE)
+        ? "matric"
+        : key.equals(ApiPaths.DEPENDENTE_SOURCE)
+            ? "cpf"
+            : key.equals(ApiPaths.CODIGO_FREQUENCIA_SOURCE) ? "mnemonico" : id;
+    var lookup = new EntityLookupDescriptor(entityKey, codeProperty, descriptions, status, null, null,
         List.of(label), dependencies,
         new LookupSelectionPolicy(null, status, allowed, blocked, true, disabledReason, disabledReason),
         new LookupCapabilities(true, true, true, false, false, true, true, false, false, false),
@@ -79,7 +140,7 @@ public class OptionSourcesConfig {
             displayFields, descriptions, List.of(), null, false, true, true, status != null,
             false, true, statusLabels, 0), filtering);
     return new OptionSourceDescriptor(key, OptionSourceType.RESOURCE_ENTITY, path, null, null,
-        label, id, scoped ? List.of("empCodigo") : List.of(), dependencies,
+        label, id, dependsOn, dependencies,
         OptionSourcePolicy.defaults(), lookup);
   }
 

@@ -9,6 +9,8 @@ import lombok.Setter;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.praxisplatform.uischema.annotation.OptionLabel;
+import org.praxisplatform.uischema.service.base.annotation.DefaultSortColumn;
 
 /**
  * Matriz parametrizada de regras e limites estatutários de frequência e afastamento por órgão,
@@ -191,6 +193,8 @@ public class RegraFrequenciaEstatutaria {
    */
   @Comment(
       "Chave canônica do RuleSet no praxis-rules-engine que consome esta parametrização (ex.: administracao-pessoal.afastamentos.validacao-estatutaria).")
+  @OptionLabel
+  @DefaultSortColumn(ascending = true)
   @Column(name = "rule_key", nullable = false, length = 120)
   private String ruleKey;
 
@@ -216,6 +220,45 @@ public class RegraFrequenciaEstatutaria {
   @Comment("Indica se a regra parametrizada está ativa para avaliação pelo motor de regras.")
   @Column(name = "ativa", nullable = false)
   private Boolean ativa = true;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "emp_codigo",
+      referencedColumnName = "empresa",
+      insertable = false,
+      updatable = false)
+  private Orgao orgao;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "tipofreq",
+      referencedColumnName = "tipo",
+      insertable = false,
+      updatable = false)
+  private TipoFrequencia tipoFrequenciaEntidade;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumns({
+    @JoinColumn(
+        name = "tipofreq",
+        referencedColumnName = "tipofreq",
+        insertable = false,
+        updatable = false),
+    @JoinColumn(
+        name = "codfreq",
+        referencedColumnName = "codigo",
+        insertable = false,
+        updatable = false)
+  })
+  private CodigoFrequencia codigoFrequenciaEntidade;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "documento_legal_id",
+      referencedColumnName = "id",
+      insertable = false,
+      updatable = false)
+  private DocumentoLegal documentoLegal;
 
   /** Versão do registro para controle de concorrência otimista (@Version / ETag / If-Match). */
   @Comment(

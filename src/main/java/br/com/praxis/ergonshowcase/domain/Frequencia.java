@@ -9,6 +9,8 @@ import lombok.Setter;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.praxisplatform.uischema.annotation.OptionLabel;
+import org.praxisplatform.uischema.service.base.annotation.DefaultSortColumn;
 
 /**
  * Ocorrências operacionais de frequência, faltas, abonos, atrasos e horas extraordinárias por
@@ -47,6 +49,7 @@ public class Frequencia {
 
   /** Data de início da ocorrência de frequência ou falta. */
   @Comment("Data de início da ocorrência de frequência ou falta.")
+  @DefaultSortColumn(ascending = false)
   @Column(name = "dtini", nullable = false)
   private LocalDate dtini;
 
@@ -99,6 +102,7 @@ public class Frequencia {
 
   /** Justificativa, motivo de abono ou observação operacional registrada para a ocorrência. */
   @Comment("Justificativa, motivo de abono ou observação operacional registrada para a ocorrência.")
+  @OptionLabel
   @Column(name = "obs", nullable = true, length = 2000)
   private String obs;
 
@@ -110,6 +114,68 @@ public class Frequencia {
       "Referência relacional explícita ao documento comprobatório, portaria de abono ou processo anexo.")
   @Column(name = "documento_legal_id", nullable = true)
   private Long documentoLegalId;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "emp_codigo",
+      referencedColumnName = "empresa",
+      insertable = false,
+      updatable = false)
+  private Orgao orgao;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "numfunc",
+      referencedColumnName = "numero",
+      insertable = false,
+      updatable = false)
+  private ServidorPessoa pessoa;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumns({
+    @JoinColumn(
+        name = "numfunc",
+        referencedColumnName = "numfunc",
+        insertable = false,
+        updatable = false),
+    @JoinColumn(
+        name = "numvinc",
+        referencedColumnName = "numero",
+        insertable = false,
+        updatable = false)
+  })
+  private Vinculo vinculo;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "tipofreq",
+      referencedColumnName = "tipo",
+      insertable = false,
+      updatable = false)
+  private TipoFrequencia tipoFrequenciaEntidade;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumns({
+    @JoinColumn(
+        name = "tipofreq",
+        referencedColumnName = "tipofreq",
+        insertable = false,
+        updatable = false),
+    @JoinColumn(
+        name = "codfreq",
+        referencedColumnName = "codigo",
+        insertable = false,
+        updatable = false)
+  })
+  private CodigoFrequencia codigoFrequenciaEntidade;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "documento_legal_id",
+      referencedColumnName = "id",
+      insertable = false,
+      updatable = false)
+  private DocumentoLegal documentoLegal;
 
   /**
    * Atributos de negócio customizados por órgão em formato JSONB governado por

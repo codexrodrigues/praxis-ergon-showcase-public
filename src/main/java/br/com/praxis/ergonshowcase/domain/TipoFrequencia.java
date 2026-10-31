@@ -20,6 +20,15 @@ import org.hibernate.annotations.Comment;
 @Comment(
     "Catálogo de naturezas/tipos macro de ocorrências de frequência e afastamento (equivalente a TIPO_FREQ_ na tela ERGadm00033 do legado Ergon). Agrupa os códigos de frequência e define reflexos em contagem de tempo e sobrejornada.")
 public class TipoFrequencia {
+  /** Referência relacional para leitura do dispositivo legal no catálogo de tipos de frequência. */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "documento_legal_id",
+      referencedColumnName = "id",
+      insertable = false,
+      updatable = false)
+  private DocumentoLegal documentoLegal;
+
   @Id
   /**
    * Código identificador único do tipo de frequência (ex.: NORMAL, FALTA, LICENCA, AFASTAMENTO,

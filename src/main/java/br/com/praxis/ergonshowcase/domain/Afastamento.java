@@ -22,6 +22,101 @@ import org.hibernate.type.SqlTypes;
 @Comment(
     "Licenças e afastamentos funcionais do servidor por vínculo e período (equivalente a LIC_AFAST no legado Ergon, sem a tabela sombra LIC_AFAST_PND). Adota Surrogate PK id imutável + UNIQUE natural (numfunc, numvinc, dtini, codfreq) e integra-se ao praxis-rules-engine para controle de concomitância, limites estatutários e workflow de homologação.")
 public class Afastamento {
+  /** Referência relacional para leitura do órgão público do vínculo afastado. */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "emp_codigo",
+      referencedColumnName = "empresa",
+      insertable = false,
+      updatable = false)
+  private Orgao orgao;
+
+  /** Referência relacional para leitura da pessoa servidora titular do afastamento. */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "numfunc",
+      referencedColumnName = "numero",
+      insertable = false,
+      updatable = false)
+  private ServidorPessoa pessoa;
+
+  /** Referência relacional para leitura do vínculo funcional titular do afastamento. */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumns({
+    @JoinColumn(
+        name = "numfunc",
+        referencedColumnName = "numfunc",
+        insertable = false,
+        updatable = false),
+    @JoinColumn(
+        name = "numvinc",
+        referencedColumnName = "numero",
+        insertable = false,
+        updatable = false)
+  })
+  private Vinculo vinculo;
+
+  /** Referência relacional para leitura do tipo macro de frequência do afastamento. */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "tipofreq",
+      referencedColumnName = "tipo",
+      insertable = false,
+      updatable = false)
+  private TipoFrequencia tipoFrequenciaEntidade;
+
+  /** Referência relacional para leitura do código de frequência específico do afastamento. */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumns({
+    @JoinColumn(
+        name = "tipofreq",
+        referencedColumnName = "tipofreq",
+        insertable = false,
+        updatable = false),
+    @JoinColumn(
+        name = "codfreq",
+        referencedColumnName = "codigo",
+        insertable = false,
+        updatable = false)
+  })
+  private CodigoFrequencia codigoFrequenciaEntidade;
+
+  /** Referência relacional para leitura do afastamento original prorrogado. */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "afastamento_origem_id",
+      referencedColumnName = "id",
+      insertable = false,
+      updatable = false)
+  private Afastamento afastamentoOrigem;
+
+  /** Referência relacional para leitura do servidor designado como substituto. */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "numfunc_substituto",
+      referencedColumnName = "numero",
+      insertable = false,
+      updatable = false)
+  private ServidorPessoa pessoaSubstituta;
+
+  /** Referência relacional para leitura da portaria ou laudo pericial de concessão. */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "documento_legal_id",
+      referencedColumnName = "id",
+      insertable = false,
+      updatable = false)
+  private DocumentoLegal documentoLegal;
+
+  /** Referência relacional para leitura do ato de publicação oficial do afastamento. */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "ato_publicacao_id",
+      referencedColumnName = "id",
+      insertable = false,
+      updatable = false)
+  private DocumentoLegal atoPublicacao;
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   /** Chave primária surrogate imutável do registro de licença ou afastamento. */
@@ -90,6 +185,8 @@ public class Afastamento {
   @Column(name = "situacao", nullable = false, length = 30)
   private String situacao;
 
+  @org.praxisplatform.uischema.annotation.OptionLabel
+  @org.praxisplatform.uischema.service.base.annotation.DefaultSortColumn
   /** Fundamentação clínica, administrativa ou jurídica detalhada do afastamento (MOTIVO). */
   @Comment("Fundamentação clínica, administrativa ou jurídica detalhada do afastamento (MOTIVO).")
   @Column(name = "motivo", nullable = true, length = 4000)

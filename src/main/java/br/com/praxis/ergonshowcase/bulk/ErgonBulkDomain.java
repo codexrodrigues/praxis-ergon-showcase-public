@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.persistence.*;
 import jakarta.validation.Validator;
-import java.time.LocalDate;
 import java.util.*;
 import org.praxisplatform.uischema.bulk.*;
 import org.praxisplatform.uischema.id.CompositeIdSupport;
@@ -25,7 +24,10 @@ public class ErgonBulkDomain {
   public enum Resource {
     VINCULOS("administracao-pessoal.vinculos", "vinculos", "updateErgonVinculo", Vinculo.class, UpdateVinculoDTO.class),
     PESSOAS("administracao-pessoal.funcionarios", "funcionarios", "updateErgonServidorPessoa", ServidorPessoa.class, UpdateServidorPessoaDTO.class),
-    CARGOS("administracao-pessoal.cargos", "cargos", "updateErgonCargo", Cargo.class, UpdateCargoDTO.class);
+    CARGOS("administracao-pessoal.cargos", "cargos", "updateErgonCargo", Cargo.class, UpdateCargoDTO.class),
+    DEPENDENTES("administracao-pessoal.dependentes", "dependentes", "updateErgonDependente", Dependente.class, UpdateDependenteDTO.class),
+    AFASTAMENTOS("administracao-pessoal.afastamentos", "afastamentos", "updateErgonAfastamento", Afastamento.class, UpdateAfastamentoDTO.class),
+    FREQUENCIAS("administracao-pessoal.frequencias", "frequencias", "updateErgonFrequencia", Frequencia.class, UpdateFrequenciaDTO.class);
     public final String key, name, updateOperation;
     public final Class<?> entity, update;
     Resource(String key, String name, String op, Class<?> entity, Class<?> update) { this.key=key;this.name=name;this.updateOperation=op;this.entity=entity;this.update=update; }
@@ -34,6 +36,8 @@ public class ErgonBulkDomain {
         case VINCULOS -> Set.of("cargo", "dtnom", "dtposse");
         case PESSOAS -> Set.of("cpf", "nome", "dtnasc");
         case CARGOS -> Set.of();
+        case DEPENDENTES -> Set.of("nome", "dtnasc", "invalido");
+        case AFASTAMENTOS, FREQUENCIAS -> Set.of("tipofreq", "codfreq", "dtini");
       };
     }
   }
@@ -45,28 +49,66 @@ public class ErgonBulkDomain {
   @Autowired VinculoMapper vinculos;
   @Autowired ServidorPessoaMapper pessoas;
   @Autowired CargoMapper cargos;
+  @Autowired DependenteMapper dependentes;
+  @Autowired AfastamentoMapper afastamentos;
+  @Autowired FrequenciaMapper frequencias;
   @Autowired VinculoService vinculoService;
   @Autowired ServidorPessoaService pessoaService;
   @Autowired CargoService cargoService;
+  @Autowired DependenteService dependenteService;
+  @Autowired AfastamentoService afastamentoService;
+  @Autowired FrequenciaService frequenciaService;
 
-  ResourceMapper mapper(Resource r) { return switch(r) { case VINCULOS -> vinculos; case PESSOAS -> pessoas; case CARGOS -> cargos; }; }
-  public BulkIdentityCodec codec(Resource r) { return switch(r) { case CARGOS -> BulkIdentityCodecs.integers(); case PESSOAS -> BulkIdentityCodecs.longs(); case VINCULOS -> BulkIdentityCodecs.strings(); }; }
+  ResourceMapper mapper(Resource r) {
+    return switch(r) {
+      case VINCULOS -> vinculos;
+      case PESSOAS -> pessoas;
+      case CARGOS -> cargos;
+      case DEPENDENTES -> dependentes;
+      case AFASTAMENTOS -> afastamentos;
+      case FREQUENCIAS -> frequencias;
+    };
+  }
+  public BulkIdentityCodec codec(Resource r) {
+    return switch(r) {
+      case CARGOS -> BulkIdentityCodecs.integers();
+      case PESSOAS, AFASTAMENTOS, FREQUENCIAS -> BulkIdentityCodecs.longs();
+      case VINCULOS, DEPENDENTES -> BulkIdentityCodecs.strings();
+    };
+  }
   public Object identity(Resource r, Object wire) {
     return switch(r) {
       case CARGOS -> BulkIdentityCodecs.integers().decode((Integer) wire);
-      case PESSOAS -> BulkIdentityCodecs.longs().decode((String) wire);
+      case PESSOAS, AFASTAMENTOS, FREQUENCIAS -> BulkIdentityCodecs.longs().decode((String) wire);
       case VINCULOS -> {
         VinculoId id=CompositeIdSupport.decode((String)wire,VinculoId.class);
+        if(!wire.equals(CompositeIdSupport.encode(id))) throw new IllegalArgumentException("Identidade composta não canônica.");
+        yield id;
+      }
+      case DEPENDENTES -> {
+        DependenteId id=CompositeIdSupport.decode((String)wire,DependenteId.class);
         if(!wire.equals(CompositeIdSupport.encode(id))) throw new IllegalArgumentException("Identidade composta não canônica.");
         yield id;
       }
     };
   }
   public Object wire(Resource r, Object e) {
-    return switch(r) { case CARGOS -> ((Cargo)e).getCargo(); case PESSOAS -> ((ServidorPessoa)e).getNumero().toString(); case VINCULOS -> CompositeIdSupport.encode(((Vinculo)e).getId()); };
+    return switch(r) {
+      case CARGOS -> ((Cargo)e).getCargo();
+      case PESSOAS -> ((ServidorPessoa)e).getNumero().toString();
+      case AFASTAMENTOS -> ((Afastamento)e).getId().toString();
+      case FREQUENCIAS -> ((Frequencia)e).getId().toString();
+      case VINCULOS -> CompositeIdSupport.encode(((Vinculo)e).getId());
+      case DEPENDENTES -> CompositeIdSupport.encode(((Dependente)e).getId());
+    };
   }
   public long version(Object e) {
-    return e instanceof Vinculo v ? v.getVersion() : e instanceof Cargo c ? c.getVersion() : ((ServidorPessoa)e).getVersion();
+    return e instanceof Vinculo v ? v.getVersion()
+        : e instanceof Cargo c ? c.getVersion()
+        : e instanceof Dependente d ? d.getVersion()
+        : e instanceof Afastamento a ? a.getVersion()
+        : e instanceof Frequencia f ? f.getVersion()
+        : ((ServidorPessoa)e).getVersion();
   }
   public Object load(Resource r, Object wire, boolean lock) {
     if (em.unwrap(org.hibernate.Session.class).isDirty()) throw new IllegalStateException("Contexto de persistência deve estar limpo antes do lote.");
@@ -75,14 +117,23 @@ public class ErgonBulkDomain {
     return e;
   }
   public boolean scope(Resource r, Object e) {
-    return r == Resource.PESSOAS || Objects.equals(r == Resource.CARGOS ? ((Cargo)e).getEmpCodigo() : ((Vinculo)e).getEmpCodigo(), tenant.orgao());
+    return r == Resource.PESSOAS || r == Resource.DEPENDENTES
+        || Objects.equals(
+            r == Resource.CARGOS ? ((Cargo)e).getEmpCodigo()
+                : r == Resource.AFASTAMENTOS ? ((Afastamento)e).getEmpCodigo()
+                : r == Resource.FREQUENCIAS ? ((Frequencia)e).getEmpCodigo()
+                : ((Vinculo)e).getEmpCodigo(),
+            tenant.orgao());
   }
   public ObjectNode prior(Resource r, Object e) {
     ObjectNode response=json.valueToTree(mapper(r).toResponse(e));
     var allowed=new HashSet<String>();
     json.getDeserializationConfig().introspect(json.constructType(r.update)).findProperties().stream()
         .filter(p -> p.couldDeserialize()).forEach(p -> allowed.add(p.getName()));
-    allowed.removeAll(Set.of("cargoNomePrevisto","saldoVagasPrevisto","cargoAglutinadorNomePrevisto","possuiDeficienciaPcDPrevisto"));
+    allowed.removeAll(Set.of("cargoNomePrevisto","saldoVagasPrevisto","cargoAglutinadorNomePrevisto",
+        "possuiDeficienciaPcDPrevisto","tipoDependenteDescricaoPrevista","idadeCalculadaAnos","elegivelIrrfPrevisto",
+        "codigoFrequenciaNomePrevisto","quantidadeDiasPrevista","comOnusPrevisto",
+        "formatoQuantidadePrevisto","exigeHorarioPrevisto"));
     response.retain(allowed);
     return response;
   }
@@ -99,9 +150,11 @@ public class ErgonBulkDomain {
       var property=bean.findProperties().stream().filter(p -> p.getName().equals(change.field())).findFirst()
           .orElseThrow(()->new IllegalArgumentException("Campo não pertence ao contrato cadastral de atualização."));
       Class<?> type=property.getPrimaryType().getRawClass(); var value=change.value();
-      boolean valid=type==String.class ? value.isTextual() : type==Boolean.class ? value.isBoolean()
+      boolean valid=type==String.class || type==java.time.LocalDate.class || type==java.time.LocalTime.class ? value.isTextual()
+          : type==Boolean.class ? value.isBoolean()
           : type==Integer.class ? value.isIntegralNumber() && value.canConvertToInt()
-          : type==Long.class ? value.isIntegralNumber() && value.canConvertToLong() : false;
+          : type==Long.class ? value.isIntegralNumber() && value.canConvertToLong()
+          : type==java.math.BigDecimal.class ? value.isNumber() : false;
       if (!valid) throw new IllegalArgumentException("Tipo de valor incompatível com o campo do cadastro.");
     }
   }
@@ -115,7 +168,14 @@ public class ErgonBulkDomain {
     } catch (ReflectiveOperationException failure) { throw new IllegalStateException("Tipo de entidade não construível."); }
   }
   public void validateEntity(Resource r, Object e) {
-    switch(r) { case CARGOS -> invariants.cargo((Cargo)e); case PESSOAS -> invariants.pessoa((ServidorPessoa)e); case VINCULOS -> invariants.vinculo((Vinculo)e,false); }
+    switch(r) {
+      case CARGOS -> invariants.cargo((Cargo)e);
+      case PESSOAS -> invariants.pessoa((ServidorPessoa)e);
+      case VINCULOS -> invariants.vinculo((Vinculo)e,false);
+      case DEPENDENTES -> invariants.dependente((Dependente)e,false);
+      case AFASTAMENTOS -> invariants.afastamento((Afastamento)e,false);
+      case FREQUENCIAS -> invariants.frequencia((Frequencia)e,false);
+    }
   }
   public boolean apply(Resource r, Object e, Object dto) {
     ObjectNode before=prior(r,e); mapper(r).applyUpdate(e,dto);
@@ -134,9 +194,51 @@ public class ErgonBulkDomain {
           (root,q,cb)->cb.conjunction(),limit).stream().map(id->(Object)id.toString()).toList();
       case CARGOS -> cargoService.selectBulkIdentities((CargoFilterDTO)filter,
           (root,q,cb)->cb.equal(root.get("empCodigo"),orgao),limit).stream().map(id->(Object)id).toList();
+      case DEPENDENTES -> dependenteService.selectBulkIdentities((DependenteFilterDTO)filter,
+          (root,q,cb)->cb.conjunction(),limit).stream()
+          .map(id->(Object)CompositeIdSupport.encode(id)).toList();
+      case AFASTAMENTOS -> afastamentoService.selectBulkIdentities((AfastamentoFilterDTO)filter,
+          (root,q,cb)->cb.equal(root.get("empCodigo"),orgao),limit).stream()
+          .map(id->(Object)id.toString()).toList();
+      case FREQUENCIAS -> frequenciaService.selectBulkIdentities((FrequenciaFilterDTO)filter,
+          (root,q,cb)->cb.equal(root.get("empCodigo"),orgao),limit).stream()
+          .map(id->(Object)id.toString()).toList();
     };
   }
-  public Object commandCandidate(Vinculo current, String operation, JsonNode parameters) {
+  public Object commandCandidate(Object current, String operation, JsonNode parameters) {
+    if (current instanceof Frequencia freq) {
+      Frequencia copy=new Frequencia(); BeanUtils.copyProperties(freq,copy);
+      var dto=json.convertValue(parameters,HomologarFrequenciaLoteDTO.class); validate(dto);
+      if (!"PENDENTE_HOMOLOGACAO".equals(copy.getSituacao()))
+        throw new IllegalArgumentException("Ocorrência de frequência não está pendente de homologação.");
+      if (dto.getDocumentoLegalId()!=null) document(dto.getDocumentoLegalId(),copy.getEmpCodigo());
+      copy.setSituacao("HOMOLOGADO");
+      if (dto.getDocumentoLegalId()!=null) copy.setDocumentoLegalId(dto.getDocumentoLegalId());
+      copy.setObs((copy.getObs()==null ? "" : copy.getObs()+" | ") + "Homologação em lote: " + dto.getObservacoes());
+      invariants.frequencia(copy,false); return copy;
+    }
+    if (current instanceof Afastamento afast) {
+      Afastamento copy=new Afastamento(); BeanUtils.copyProperties(afast,copy);
+      var dto=json.convertValue(parameters,HomologarAfastamentoLoteDTO.class); validate(dto);
+      if (!"PENDENTE_HOMOLOGACAO".equals(copy.getSituacao()))
+        throw new IllegalArgumentException("Afastamento não está pendente de homologação.");
+      document(dto.documentoLegalId(),copy.getEmpCodigo());
+      if (dto.atoPublicacaoId()!=null) document(dto.atoPublicacaoId(),copy.getEmpCodigo());
+      copy.setSituacao("HOMOLOGADO");
+      copy.setDocumentoLegalId(dto.documentoLegalId());
+      if (dto.atoPublicacaoId()!=null) copy.setAtoPublicacaoId(dto.atoPublicacaoId());
+      invariants.afastamento(copy,false); return copy;
+    }
+    if (current instanceof Dependente dep) {
+      Dependente copy=new Dependente(); BeanUtils.copyProperties(dep,copy);
+      var dto=json.convertValue(parameters,EncerrarDependenciaLoteDTO.class); validate(dto);
+      if (copy.getDtfim()!=null) throw new IllegalArgumentException("Dependência já encerrada.");
+      ErgonInvariants.chronology(copy.getDtini(),dto.dtfim(),"Encerramento anterior ao início da dependência.");
+      if (em.find(DocumentoLegal.class,dto.documentoLegalId())==null) throw new IllegalArgumentException("Documento legal inexistente.");
+      copy.setDtfim(dto.dtfim()); copy.setDepIr(false); copy.setDepSalarioFamilia(false); copy.setDepPlanoSaude(false);
+      copy.setDocumentoLegalId(dto.documentoLegalId());
+      invariants.dependente(copy,false); return copy;
+    }
     Vinculo copy=new Vinculo(); BeanUtils.copyProperties(current,copy);
     if (operation.endsWith("realocar-setor-lote")) {
       var dto=json.convertValue(parameters,RealocarSetorLoteDTO.class); validate(dto);
@@ -155,10 +257,44 @@ public class ErgonBulkDomain {
     var document=em.find(DocumentoLegal.class,id);
     if (document==null || !Objects.equals(document.getEmpCodigo(),owner)) throw new IllegalArgumentException("Ato coletivo deve pertencer ao órgão do vínculo.");
   }
-  public boolean applyCommand(Vinculo entity, Vinculo candidate) {
-    boolean changed=!Objects.equals(entity.getSetor(),candidate.getSetor()) || !Objects.equals(entity.getSetorExercicio(),candidate.getSetorExercicio())
-        || !Objects.equals(entity.getDtHomologEstagio(),candidate.getDtHomologEstagio()) || !Objects.equals(entity.getDocumentoLegalId(),candidate.getDocumentoLegalId());
-    entity.setSetor(candidate.getSetor());entity.setSetorExercicio(candidate.getSetorExercicio());
-    entity.setDtHomologEstagio(candidate.getDtHomologEstagio());entity.setDocumentoLegalId(candidate.getDocumentoLegalId());em.flush();return changed;
+  public boolean applyCommand(Object entity, Object candidate) {
+    if (entity instanceof Frequencia current && candidate instanceof Frequencia next) {
+      boolean changed=!Objects.equals(current.getSituacao(),next.getSituacao())
+          || !Objects.equals(current.getDocumentoLegalId(),next.getDocumentoLegalId())
+          || !Objects.equals(current.getObs(),next.getObs());
+      current.setSituacao(next.getSituacao());
+      current.setDocumentoLegalId(next.getDocumentoLegalId());
+      current.setObs(next.getObs());
+      em.flush(); return changed;
+    }
+    if (entity instanceof Afastamento current && candidate instanceof Afastamento next) {
+      boolean changed=!Objects.equals(current.getSituacao(),next.getSituacao())
+          || !Objects.equals(current.getDocumentoLegalId(),next.getDocumentoLegalId())
+          || !Objects.equals(current.getAtoPublicacaoId(),next.getAtoPublicacaoId());
+      current.setSituacao(next.getSituacao());
+      current.setDocumentoLegalId(next.getDocumentoLegalId());
+      current.setAtoPublicacaoId(next.getAtoPublicacaoId());
+      var vinculo=em.find(Vinculo.class,new VinculoId(current.getNumfunc(),current.getNumvinc()));
+      if (vinculo!=null && "ATIVO".equals(vinculo.getSituacao()) && current.getDtfim()==null) {
+        vinculo.setSituacao("AFASTADO");
+        vinculo.setDocumentoLegalId(current.getDocumentoLegalId());
+      }
+      em.flush(); return changed;
+    }
+    if (entity instanceof Dependente current && candidate instanceof Dependente next) {
+      boolean changed=!Objects.equals(current.getDtfim(),next.getDtfim())
+          || !Objects.equals(current.getDepIr(),next.getDepIr())
+          || !Objects.equals(current.getDepSalarioFamilia(),next.getDepSalarioFamilia())
+          || !Objects.equals(current.getDepPlanoSaude(),next.getDepPlanoSaude())
+          || !Objects.equals(current.getDocumentoLegalId(),next.getDocumentoLegalId());
+      current.setDtfim(next.getDtfim());current.setDepIr(next.getDepIr());
+      current.setDepSalarioFamilia(next.getDepSalarioFamilia());current.setDepPlanoSaude(next.getDepPlanoSaude());
+      current.setDocumentoLegalId(next.getDocumentoLegalId());em.flush();return changed;
+    }
+    Vinculo v=(Vinculo)entity; Vinculo c=(Vinculo)candidate;
+    boolean changed=!Objects.equals(v.getSetor(),c.getSetor()) || !Objects.equals(v.getSetorExercicio(),c.getSetorExercicio())
+        || !Objects.equals(v.getDtHomologEstagio(),c.getDtHomologEstagio()) || !Objects.equals(v.getDocumentoLegalId(),c.getDocumentoLegalId());
+    v.setSetor(c.getSetor());v.setSetorExercicio(c.getSetorExercicio());
+    v.setDtHomologEstagio(c.getDtHomologEstagio());v.setDocumentoLegalId(c.getDocumentoLegalId());em.flush();return changed;
   }
 }

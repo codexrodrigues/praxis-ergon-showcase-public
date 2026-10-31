@@ -21,6 +21,38 @@ import org.hibernate.type.SqlTypes;
 @Comment(
     "Dependentes legais e econômicos vinculados ao servidor público para fins de Imposto de Renda, salário-família, pensão e benefícios assistenciais (equivalente a DEPENDENTES e HIST_DEPEN na tela ERGadm00217 do legado Ergon). Preserva a chave composta natural (numfunc, numdep).")
 public class Dependente {
+  /** Vigência para novas seleções; referências históricas continuam reidratáveis por identidade. */
+  @org.hibernate.annotations.Formula(
+      "case when dtini > current_date then 'FUTURO' when dtfim is not null then 'ENCERRADO' else 'VIGENTE' end")
+  private String situacaoLookup;
+
+  /** Referência relacional para leitura de pessoa titular no assentamento de dependente. */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "numfunc",
+      referencedColumnName = "numero",
+      insertable = false,
+      updatable = false)
+  private ServidorPessoa pessoa;
+
+  /** Referência relacional para leitura da modalidade de tipo de dependente no assentamento. */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "tipodepen",
+      referencedColumnName = "tipodepen",
+      insertable = false,
+      updatable = false)
+  private TipoDependente tipoDependenteEntidade;
+
+  /** Referência relacional para leitura de documentoLegal no assentamento de dependente. */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "documento_legal_id",
+      referencedColumnName = "id",
+      insertable = false,
+      updatable = false)
+  private DocumentoLegal documentoLegal;
+
   /** Identidade natural composta, imutável após inclusão. */
   @EmbeddedId private DependenteId id;
 

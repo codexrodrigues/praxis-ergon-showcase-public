@@ -27,14 +27,23 @@ class PraxisMetadataCompletenessTest {
     var classes = new ArrayList<Class<?>>();
     for (var bean : scanner.findCandidateComponents("br.com.praxis.ergonshowcase.dto"))
       classes.add(Class.forName(bean.getBeanClassName()));
-    assertThat(classes).hasSizeGreaterThanOrEqualTo(43)
-        .contains(CargoDados.class, OrgaoDados.class, ServidorPessoaDados.class, VinculoDados.class,
+    assertThat(classes).hasSizeGreaterThanOrEqualTo(90)
+        .contains(CargoDados.class, OrgaoDados.class, ServidorPessoaDados.class, VinculoDados.class, DependenteDados.class, AfastamentoDados.class, FrequenciaDados.class,
             CreateCargoDTO.class, UpdateCargoDTO.class, CargoFilterDTO.class,
             CreateOrgaoDTO.class, UpdateOrgaoDTO.class, OrgaoFilterDTO.class,
             CreateServidorPessoaDTO.class, UpdateServidorPessoaDTO.class, ServidorPessoaFilterDTO.class,
-            CreateVinculoDTO.class, UpdateVinculoDTO.class, VinculoFilterDTO.class)
+            CreateVinculoDTO.class, UpdateVinculoDTO.class, VinculoFilterDTO.class,
+            CreateDependenteDTO.class, UpdateDependenteDTO.class, DependenteFilterDTO.class,
+            TipoDependenteFilterDTO.class,
+            TipoFrequenciaFilterDTO.class, CodigoFrequenciaFilterDTO.class,
+            CreateAfastamentoDTO.class, UpdateAfastamentoDTO.class, AfastamentoFilterDTO.class,
+            RegraFrequenciaEstatutariaFilterDTO.class,
+            CreateFrequenciaDTO.class, UpdateFrequenciaDTO.class, FrequenciaFilterDTO.class)
         .contains(CargoResponseDTO.class, ServidorPessoaResponseDTO.class, VinculoResponseDTO.class,
-            OrgaoResponseDTO.class, DocumentoLegalResponseDTO.class, SetorResponseDTO.class);
+            OrgaoResponseDTO.class, DocumentoLegalResponseDTO.class, SetorResponseDTO.class,
+            DependenteResponseDTO.class, TipoDependenteResponseDTO.class,
+            TipoFrequenciaResponseDTO.class, CodigoFrequenciaResponseDTO.class, AfastamentoResponseDTO.class,
+            RegraFrequenciaEstatutariaResponseDTO.class, FrequenciaResponseDTO.class);
     return classes;
   }
 
@@ -52,7 +61,9 @@ class PraxisMetadataCompletenessTest {
     var converters = new ModelConverters();
     converters.addConverter(new CustomOpenApiResolver(new ObjectMapper().findAndRegisterModules()));
     var validator = new PraxisExpressionStaticValidator();
-    for (var dto : List.of(CargoResponseDTO.class, ServidorPessoaResponseDTO.class, VinculoResponseDTO.class)) {
+    for (var dto : List.of(CargoResponseDTO.class, ServidorPessoaResponseDTO.class,
+        VinculoResponseDTO.class, DependenteResponseDTO.class, AfastamentoResponseDTO.class,
+        RegraFrequenciaEstatutariaResponseDTO.class, FrequenciaResponseDTO.class)) {
       var resolved = converters.resolveAsResolvedSchema(new AnnotatedType(dto).resolveAsRef(false));
       var schema = resolved.schema;
       assertThat(schema.getProperties()).as(dto.getSimpleName()).isNotEmpty();
@@ -74,9 +85,16 @@ class PraxisMetadataCompletenessTest {
         new OptionSourcePublicationCandidate("pessoa", "/api/ergon/servidor-pessoas", "ergon"),
         new OptionSourcePublicationCandidate("vinculo", "/api/ergon/vinculos", "ergon"),
         new OptionSourcePublicationCandidate("setor", "/api/ergon/setores", "ergon"),
-        new OptionSourcePublicationCandidate("documento", "/api/ergon/documentos-legais", "ergon"));
+        new OptionSourcePublicationCandidate("documento", "/api/ergon/documentos-legais", "ergon"),
+        new OptionSourcePublicationCandidate("tipoDependente", "/api/ergon/tipos-dependente", "ergon"),
+        new OptionSourcePublicationCandidate("dependente", "/api/ergon/dependentes", "ergon"),
+        new OptionSourcePublicationCandidate("tipoFrequencia", "/api/ergon/tipos-frequencia", "ergon"),
+        new OptionSourcePublicationCandidate("codigoFrequencia", "/api/ergon/codigos-frequencia", "ergon"),
+        new OptionSourcePublicationCandidate("afastamento", "/api/ergon/afastamentos", "ergon"),
+        new OptionSourcePublicationCandidate("regraFrequenciaEstatutaria", "/api/ergon/regras-frequencia-estatutaria", "ergon"),
+        new OptionSourcePublicationCandidate("frequencia", "/api/ergon/frequencias", "ergon"));
     var diagnostics = new OptionSourcePublicationDiagnostics(registry, List.of(inventory));
-    assertThat(diagnostics.diagnose()).hasSize(6);
+    assertThat(diagnostics.diagnose()).hasSize(13);
     assertThat(diagnostics.unpublishedOrMismatched()).isEmpty();
     for (var descriptor : registry.descriptors()) {
       var lookup = descriptor.entityLookup();
@@ -89,7 +107,7 @@ class PraxisMetadataCompletenessTest {
       assertThat(descriptor.dependsOn()).containsAll(descriptor.dependencyFilterMap().keySet());
     }
     var missing = new OptionSourcePublicationDiagnostics(org.praxisplatform.uischema.options.OptionSourceRegistry.empty(), List.of(inventory));
-    assertThat(missing.unpublishedOrMismatched()).hasSize(6);
+    assertThat(missing.unpublishedOrMismatched()).hasSize(13);
   }
 
   @Test

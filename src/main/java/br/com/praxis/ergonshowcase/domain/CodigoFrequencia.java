@@ -20,6 +20,24 @@ import org.hibernate.annotations.Comment;
 @Comment(
     "Catálogo detalhado de códigos de ocorrência de frequência, faltas, abonos e licenças/afastamentos (equivalente a CODIGOS_FREQ_ na tela ERGadm00034 do legado Ergon). Preserva a chave composta natural (tipofreq, codigo).")
 public class CodigoFrequencia {
+  /** Referência relacional para leitura do tipo macro de frequência no catálogo de códigos. */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "tipofreq",
+      referencedColumnName = "tipo",
+      insertable = false,
+      updatable = false)
+  private TipoFrequencia tipoFrequenciaEntidade;
+
+  /** Referência relacional para leitura do diploma legal no catálogo de códigos de frequência. */
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(
+      name = "documento_legal_id",
+      referencedColumnName = "id",
+      insertable = false,
+      updatable = false)
+  private DocumentoLegal documentoLegal;
+
   /** Identidade natural composta, imutável após inclusão. */
   @EmbeddedId private CodigoFrequenciaId id;
 

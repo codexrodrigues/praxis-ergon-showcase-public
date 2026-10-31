@@ -1,8 +1,11 @@
 package br.com.praxis.ergonshowcase.dto;
 
+import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
+import org.praxisplatform.uischema.FieldControlType;
+import org.praxisplatform.uischema.FieldDataType;
 import org.praxisplatform.uischema.annotation.*;
 import org.praxisplatform.uischema.extension.annotation.UISchema;
 
@@ -11,21 +14,34 @@ public record RegistrarAfastamentoDTO(
     @NotBlank
         @Size(max = 20)
         @Schema(description = "Tipo de frequência do domínio de licenças e afastamentos.")
-        @UISchema(label = "Tipo de frequência", group = "Modalidade")
+        @UISchema(
+            label = "Tipo de frequência",
+            group = "Modalidade",
+            type = FieldDataType.TEXT,
+            controlType = FieldControlType.ENTITY_LOOKUP,
+            icon = "category",
+            endpoint = ApiPaths.TIPO_FREQUENCIA_OPTIONS,
+            valueField = "id",
+            displayField = "label")
         String tipofreq,
     @NotNull
         @PositiveOrZero
         @Schema(
             description =
                 "Código específico habilitado para afastamento no catálogo de frequência.")
-        @UISchema(label = "Código de frequência", group = "Modalidade")
+        @UISchema(
+            label = "Código de frequência",
+            group = "Modalidade",
+            type = FieldDataType.NUMBER,
+            controlType = FieldControlType.INPUT,
+            icon = "tag")
         Integer codfreq,
     @NotNull
         @PastOrPresent
         @Schema(description = "Primeiro dia do afastamento; não pode anteceder o exercício.")
         @UISchema(
-            type = org.praxisplatform.uischema.FieldDataType.DATE,
-            controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+            type = FieldDataType.DATE,
+            controlType = FieldControlType.DATE_PICKER,
             icon = "calendar_today",
             label = "Início",
             group = "Período")
@@ -34,8 +50,8 @@ public record RegistrarAfastamentoDTO(
             description =
                 "Último dia previsto da licença; quando preenchido, não pode anteceder o início.")
         @UISchema(
-            type = org.praxisplatform.uischema.FieldDataType.DATE,
-            controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
+            type = FieldDataType.DATE,
+            controlType = FieldControlType.DATE_PICKER,
             icon = "calendar_today",
             label = "Término previsto",
             group = "Período")
@@ -59,5 +75,13 @@ public record RegistrarAfastamentoDTO(
     @NotNull
         @Positive
         @Schema(description = "Documento legal do mesmo órgão que fundamenta a concessão.")
-        @UISchema(label = "Documento legal", group = "Ato")
+        @UISchema(
+            label = "Documento legal",
+            group = "Ato",
+            type = FieldDataType.NUMBER,
+            controlType = FieldControlType.ENTITY_LOOKUP,
+            icon = "description",
+            endpoint = ApiPaths.DOCUMENTO_OPTIONS,
+            valueField = "id",
+            displayField = "label")
         Long documentoLegalId) {}

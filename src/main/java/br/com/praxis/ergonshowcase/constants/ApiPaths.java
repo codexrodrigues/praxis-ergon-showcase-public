@@ -15,6 +15,13 @@ public final class ApiPaths {
   public static final String VINCULOS = BASE + "/vinculos";
   public static final String SETORES = BASE + "/setores";
   public static final String DOCUMENTOS_LEGAIS = BASE + "/documentos-legais";
+  public static final String DEPENDENTES = BASE + "/dependentes";
+  public static final String TIPOS_DEPENDENTE = BASE + "/tipos-dependente";
+  public static final String TIPOS_FREQUENCIA = BASE + "/tipos-frequencia";
+  public static final String CODIGOS_FREQUENCIA = BASE + "/codigos-frequencia";
+  public static final String AFASTAMENTOS = BASE + "/afastamentos";
+  public static final String REGRAS_FREQUENCIA_ESTATUTARIA = BASE + "/regras-frequencia-estatutaria";
+  public static final String FREQUENCIAS = BASE + "/frequencias";
 
   public static final String ORGAO_SOURCE = "orgao";
   public static final String CARGO_SOURCE = "cargo";
@@ -22,14 +29,30 @@ public final class ApiPaths {
   public static final String VINCULO_SOURCE = "vinculo";
   public static final String SETOR_SOURCE = "setor";
   public static final String DOCUMENTO_SOURCE = "documento";
+  public static final String DEPENDENTE_SOURCE = "dependente";
+  public static final String TIPO_DEPENDENTE_SOURCE = "tipoDependente";
+  public static final String TIPO_FREQUENCIA_SOURCE = "tipoFrequencia";
+  public static final String CODIGO_FREQUENCIA_SOURCE = "codigoFrequencia";
+  public static final String AFASTAMENTO_SOURCE = "afastamento";
+  public static final String REGRA_FREQUENCIA_ESTATUTARIA_SOURCE = "regraFrequenciaEstatutaria";
+  public static final String FREQUENCIA_SOURCE = "frequencia";
 
   private static final String OPTION_SOURCES = "/option-sources/";
   private static final String OPTIONS_FILTER = "/options/filter";
   public static final String ORGAO_OPTIONS = ORGAOS + OPTION_SOURCES + ORGAO_SOURCE + OPTIONS_FILTER;
   public static final String CARGO_OPTIONS = CARGOS + OPTION_SOURCES + CARGO_SOURCE + OPTIONS_FILTER;
   public static final String PESSOA_OPTIONS = PESSOAS + OPTION_SOURCES + PESSOA_SOURCE + OPTIONS_FILTER;
+  public static final String VINCULO_OPTIONS = VINCULOS + OPTION_SOURCES + VINCULO_SOURCE + OPTIONS_FILTER;
   public static final String SETOR_OPTIONS = SETORES + OPTION_SOURCES + SETOR_SOURCE + OPTIONS_FILTER;
   public static final String DOCUMENTO_OPTIONS = DOCUMENTOS_LEGAIS + OPTION_SOURCES + DOCUMENTO_SOURCE + OPTIONS_FILTER;
+  public static final String DEPENDENTE_OPTIONS = DEPENDENTES + OPTION_SOURCES + DEPENDENTE_SOURCE + OPTIONS_FILTER;
+  public static final String TIPO_DEPENDENTE_OPTIONS = TIPOS_DEPENDENTE + OPTION_SOURCES + TIPO_DEPENDENTE_SOURCE + OPTIONS_FILTER;
+  public static final String TIPO_FREQUENCIA_OPTIONS = TIPOS_FREQUENCIA + OPTION_SOURCES + TIPO_FREQUENCIA_SOURCE + OPTIONS_FILTER;
+  public static final String CODIGO_FREQUENCIA_OPTIONS = CODIGOS_FREQUENCIA + OPTION_SOURCES + CODIGO_FREQUENCIA_SOURCE + OPTIONS_FILTER;
+  public static final String AFASTAMENTO_OPTIONS = AFASTAMENTOS + OPTION_SOURCES + AFASTAMENTO_SOURCE + OPTIONS_FILTER;
+  public static final String REGRA_FREQUENCIA_ESTATUTARIA_OPTIONS =
+      REGRAS_FREQUENCIA_ESTATUTARIA + OPTION_SOURCES + REGRA_FREQUENCIA_ESTATUTARIA_SOURCE + OPTIONS_FILTER;
+  public static final String FREQUENCIA_OPTIONS = FREQUENCIAS + OPTION_SOURCES + FREQUENCIA_SOURCE + OPTIONS_FILTER;
 
   public static final String BULK_OPERATIONS = BASE + "/operations/bulk";
   public static final String BULK_PUBLICATION_SEGMENT = "/publication";

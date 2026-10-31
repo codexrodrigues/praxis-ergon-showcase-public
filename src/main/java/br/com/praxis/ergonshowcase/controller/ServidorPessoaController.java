@@ -182,6 +182,62 @@ public class ServidorPessoaController
   }
 
   @org.springframework.beans.factory.annotation.Autowired private VinculoService relatedService;
+  @org.springframework.beans.factory.annotation.Autowired private DependenteService dependentesService;
+
+  @org.springframework.web.bind.annotation.GetMapping("/{id}/dependentes")
+  @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_READ')")
+  @UiSurface(
+      id = "dependentes",
+      kind = org.praxisplatform.uischema.surface.SurfaceKind.READ_PROJECTION,
+      scope = org.praxisplatform.uischema.surface.SurfaceScope.ITEM,
+      title = "Dependentes",
+      description = "Dependentes legais e econômicos vinculados ao servidor para fins de IRRF, salário-família e saúde.",
+      relatedChildResourceKey = "administracao-pessoal.dependentes",
+      relatedChildResourcePath = ApiPaths.DEPENDENTES,
+      relatedChildParentField = "numfunc",
+      relatedChildOperations = {
+        org.praxisplatform.uischema.surface.RelatedResourceChildOperation.FILTER,
+        org.praxisplatform.uischema.surface.RelatedResourceChildOperation.LIST
+      },
+      requiredAuthorities = {"ERGON_READ"})
+  @io.swagger.v3.oas.annotations.Operation(
+      summary = "Consultar dependentes do servidor",
+      description =
+          "Dependentes legais e econômicos vinculados ao servidor. A paginação é limitada a 200 registros por resposta.")
+  public org.springframework.http.ResponseEntity<
+          org.praxisplatform.uischema.rest.response.RestApiResponse<
+              org.springframework.data.domain.Page<DependenteResponseDTO>>>
+      dependentes(
+          @io.swagger.v3.oas.annotations.Parameter(description = "Identidade do servidor titular")
+              @org.springframework.web.bind.annotation.PathVariable
+              Long id,
+          @io.swagger.v3.oas.annotations.Parameter(
+                  description = "Página a consultar, iniciando em zero")
+              @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0")
+              int page,
+          @io.swagger.v3.oas.annotations.Parameter(
+                  description = "Quantidade de registros da página, de 1 a 200")
+              @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20")
+              int size) {
+    service.findById(id);
+    if (page < 0 || size < 1 || size > 200)
+      throw new org.springframework.web.server.ResponseStatusException(
+          org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
+          "Paginação fora do limite permitido.");
+    var filter = new DependenteFilterDTO();
+    filter.setNumfunc(id);
+    var result =
+        dependentesService.filter(
+            filter,
+            org.springframework.data.domain.PageRequest.of(
+                page, size, dependentesService.getDefaultSort()),
+            null);
+    return org.springframework.http.ResponseEntity.ok(
+        org.praxisplatform.uischema.rest.response.RestApiResponse.success(
+            result,
+            org.springframework.hateoas.Links.of(
+                org.springframework.hateoas.Link.of(ApiPaths.DEPENDENTES, "collection"))));
+  }
 
   @org.springframework.web.bind.annotation.GetMapping("/{id}/vinculos-funcionais")
   @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_READ')")

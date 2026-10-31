@@ -29,12 +29,16 @@ class ApiPathsContractTest {
     var controllerPaths = new ArrayList<String>();
     for (var controller : List.of(OrgaoController.class, CargoController.class,
         ServidorPessoaController.class, VinculoController.class,
-        SetorController.class, DocumentoLegalController.class)) {
+        SetorController.class, DocumentoLegalController.class,
+        DependenteController.class, TipoDependenteController.class,
+        TipoFrequenciaController.class, CodigoFrequenciaController.class,
+        AfastamentoController.class, RegraFrequenciaEstatutariaController.class,
+        FrequenciaController.class)) {
       var mapping = AnnotatedElementUtils.findMergedAnnotation(controller, RequestMapping.class);
       assertThat(mapping).as(controller.getSimpleName()).isNotNull();
       controllerPaths.addAll(Arrays.asList(mapping.value()));
     }
-    assertThat(descriptors).hasSize(6);
+    assertThat(descriptors).hasSize(13);
     for (var source : descriptors) {
       assertThat(controllerPaths).contains(source.resourcePath());
       assertThat(source.runtimeContract().byIdsEndpoint()).isNotBlank();
@@ -58,7 +62,7 @@ class ApiPathsContractTest {
         checked++;
       }
     }
-    assertThat(checked).isGreaterThanOrEqualTo(40);
+    assertThat(checked).isGreaterThanOrEqualTo(48);
   }
 
   @Test

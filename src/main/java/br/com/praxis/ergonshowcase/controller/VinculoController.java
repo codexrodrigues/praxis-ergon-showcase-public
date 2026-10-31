@@ -93,6 +93,9 @@ public class VinculoController
     extends AbstractResourceController<
         VinculoResponseDTO, VinculoId, VinculoFilterDTO, CreateVinculoDTO, UpdateVinculoDTO> {
   private final VinculoService service;
+  @org.springframework.beans.factory.annotation.Autowired private AfastamentoService afastamentosService;
+  @org.springframework.beans.factory.annotation.Autowired private FrequenciaService frequenciasService;
+
   @Override
   @PostMapping("/stats/group-by")
   @Operation(summary = "Vínculos por situação",
@@ -148,6 +151,122 @@ public class VinculoController
           VinculoId id) {
     return withResourceVersion(
         org.springframework.http.ResponseEntity.ok(), id, service.findById(id));
+  }
+
+  @org.springframework.web.bind.annotation.GetMapping("/{id}/afastamentos")
+  @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_READ')")
+  @UiSurface(
+      id = "afastamentos-vinculo",
+      kind = org.praxisplatform.uischema.surface.SurfaceKind.READ_PROJECTION,
+      scope = org.praxisplatform.uischema.surface.SurfaceScope.ITEM,
+      title = "Licenças e afastamentos",
+      description =
+          "Histórico e licenças em aberto associadas ao vínculo funcional selecionado.",
+      relatedChildResourceKey = "administracao-pessoal.afastamentos",
+      relatedChildResourcePath = ApiPaths.AFASTAMENTOS,
+      relatedChildParentField = "numvinc",
+      relatedChildOperations = {
+        org.praxisplatform.uischema.surface.RelatedResourceChildOperation.FILTER,
+        org.praxisplatform.uischema.surface.RelatedResourceChildOperation.LIST
+      },
+      requiredAuthorities = {"ERGON_READ"})
+  @io.swagger.v3.oas.annotations.Operation(
+      summary = "Consultar afastamentos do vínculo",
+      description =
+          "Lista licenças e afastamentos vinculados ao assentamento funcional. A paginação é limitada a 200 registros por resposta.")
+  public org.springframework.http.ResponseEntity<
+          org.praxisplatform.uischema.rest.response.RestApiResponse<
+              org.springframework.data.domain.Page<AfastamentoResponseDTO>>>
+      afastamentos(
+          @io.swagger.v3.oas.annotations.Parameter(
+                  description = "Identidade composta pessoa:número do vínculo")
+              @org.springframework.web.bind.annotation.PathVariable
+              VinculoId id,
+          @io.swagger.v3.oas.annotations.Parameter(
+                  description = "Página a consultar, iniciando em zero")
+              @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0")
+              int page,
+          @io.swagger.v3.oas.annotations.Parameter(
+                  description = "Quantidade de registros da página, de 1 a 200")
+              @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20")
+              int size) {
+    service.findById(id);
+    if (page < 0 || size < 1 || size > 200)
+      throw new org.springframework.web.server.ResponseStatusException(
+          org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
+          "Paginação fora do limite permitido.");
+    var filter = new AfastamentoFilterDTO();
+    filter.setNumfunc(id.numfunc());
+    filter.setNumvinc(id.numero());
+    var result =
+        afastamentosService.filter(
+            filter,
+            org.springframework.data.domain.PageRequest.of(
+                page, size, afastamentosService.getDefaultSort()),
+            null);
+    return org.springframework.http.ResponseEntity.ok(
+        org.praxisplatform.uischema.rest.response.RestApiResponse.success(
+            result,
+            org.springframework.hateoas.Links.of(
+                org.springframework.hateoas.Link.of(ApiPaths.AFASTAMENTOS, "collection"))));
+  }
+
+  @org.springframework.web.bind.annotation.GetMapping("/{id}/frequencias")
+  @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_READ')")
+  @UiSurface(
+      id = "frequencias-vinculo",
+      kind = org.praxisplatform.uischema.surface.SurfaceKind.READ_PROJECTION,
+      scope = org.praxisplatform.uischema.surface.SurfaceScope.ITEM,
+      title = "Ocorrências de frequência",
+      description =
+          "Histórico de ocorrências operacionais de frequência, faltas, abonos e horas extras do vínculo selecionado.",
+      relatedChildResourceKey = "administracao-pessoal.frequencias",
+      relatedChildResourcePath = ApiPaths.FREQUENCIAS,
+      relatedChildParentField = "numvinc",
+      relatedChildOperations = {
+        org.praxisplatform.uischema.surface.RelatedResourceChildOperation.FILTER,
+        org.praxisplatform.uischema.surface.RelatedResourceChildOperation.LIST
+      },
+      requiredAuthorities = {"ERGON_READ"})
+  @io.swagger.v3.oas.annotations.Operation(
+      summary = "Consultar frequências do vínculo",
+      description =
+          "Lista ocorrências operacionais de frequência vinculadas ao assentamento funcional. A paginação é limitada a 200 registros por resposta.")
+  public org.springframework.http.ResponseEntity<
+          org.praxisplatform.uischema.rest.response.RestApiResponse<
+              org.springframework.data.domain.Page<FrequenciaResponseDTO>>>
+      frequencias(
+          @io.swagger.v3.oas.annotations.Parameter(
+                  description = "Identidade composta pessoa:número do vínculo")
+              @org.springframework.web.bind.annotation.PathVariable
+              VinculoId id,
+          @io.swagger.v3.oas.annotations.Parameter(
+                  description = "Página a consultar, iniciando em zero")
+              @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0")
+              int page,
+          @io.swagger.v3.oas.annotations.Parameter(
+                  description = "Quantidade de registros da página, de 1 a 200")
+              @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20")
+              int size) {
+    service.findById(id);
+    if (page < 0 || size < 1 || size > 200)
+      throw new org.springframework.web.server.ResponseStatusException(
+          org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
+          "Paginação fora do limite permitido.");
+    var filter = new FrequenciaFilterDTO();
+    filter.setNumfunc(id.numfunc());
+    filter.setNumvinc(id.numero());
+    var result =
+        frequenciasService.filter(
+            filter,
+            org.springframework.data.domain.PageRequest.of(
+                page, size, frequenciasService.getDefaultSort()),
+            null);
+    return org.springframework.http.ResponseEntity.ok(
+        org.praxisplatform.uischema.rest.response.RestApiResponse.success(
+            result,
+            org.springframework.hateoas.Links.of(
+                org.springframework.hateoas.Link.of(ApiPaths.FREQUENCIAS, "collection"))));
   }
 
   @org.springframework.web.bind.annotation.PostMapping("/{id}/actions/registrar-vacancia")
