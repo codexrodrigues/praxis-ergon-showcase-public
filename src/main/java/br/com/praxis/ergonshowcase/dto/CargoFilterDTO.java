@@ -1,5 +1,6 @@
 package br.com.praxis.ergonshowcase.dto;
 
+import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
@@ -31,7 +32,7 @@ public class CargoFilterDTO implements GenericFilterDTO {
   @UISchema(
       label = "Órgão",
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
-      endpoint = "/api/ergon/orgaos/option-sources/orgao/options/filter",
+      endpoint = ApiPaths.ORGAO_OPTIONS,
       valueField = "id",
       displayField = "label",
       group = "Pesquisa",

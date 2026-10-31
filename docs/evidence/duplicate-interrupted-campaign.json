@@ -1,0 +1,21 @@
+{
+  "recordedAt": "2026-10-28T21:49:49.312336+00:00",
+  "status": "INTERRUPTED_NOT_CERTIFIED",
+  "completedSuites": {
+    "BulkNeonIntegrationTest": {
+      "tests": 6,
+      "failures": 0
+    },
+    "CargoDuplicateDraftNeonTest": {
+      "setupFailure": true
+    }
+  },
+  "findings": [
+    "Publication preparation received 503: Internal OpenAPI HTTP response budget exhausted",
+    "Ambient test transaction rejected by canonical discovery guard",
+    "Concurrent ApiPaths edits in shared checkout invalidate attribution to one immutable host source snapshot"
+  ],
+  "logSha256": "b78e60e7f609e3a2f537146da6a48cb9fca8bc16cdd1fc78146a67b303cf868f",
+  "sourceProvenance": "Shared checkout changed during execution; no final source fingerprint attested",
+  "action": "Stopped only owned test JVM after thread capture during read-only Cargo filter; moved own scope into isolated worktree"
+}

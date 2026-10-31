@@ -16,7 +16,7 @@ import br.com.praxis.ergonshowcase.domain.*;
 import br.com.praxis.ergonshowcase.dto.*;
 import br.com.praxis.ergonshowcase.service.*;
 import org.praxisplatform.uischema.annotation.*;
-import org.praxisplatform.uischema.controller.base.AbstractResourceController;
+import org.praxisplatform.uischema.controller.base.AbstractDuplicateDraftResourceController;
 
 /** Publica o contrato de cargos através da hierarquia canônica Praxis. */
 @org.praxisplatform.uischema.fact.ResourceFact(
@@ -77,8 +77,8 @@ import org.praxisplatform.uischema.controller.base.AbstractResourceController;
     description = "Cadastros civis e assentamentos funcionais dos órgãos públicos.",
     icon = "groups")
 public class CargoController
-    extends AbstractResourceController<
-        CargoResponseDTO, Integer, CargoFilterDTO, CreateCargoDTO, UpdateCargoDTO> {
+    extends AbstractDuplicateDraftResourceController<
+        CargoResponseDTO, Integer, CargoFilterDTO, CreateCargoDTO, UpdateCargoDTO, CargoDuplicateDraftDTO> {
   private final CargoService service;
   @Override
   @PostMapping("/stats/group-by")
@@ -110,6 +110,25 @@ public class CargoController
   @Override
   protected CargoService getService() {
     return service;
+  }
+
+  @Override
+  @PostMapping("/{id}/duplicate-draft")
+  @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_READ') and hasAuthority('ERGON_WRITE')")
+  @Operation(operationId = "prepareErgonCargoDraft", summary = "Preparar novo cargo",
+      description = "Prepara um novo cadastro a partir da classificação de um cargo vigente do órgão corrente, sem gravar. "
+          + "Não copia identidade, órgão, autorização de vagas, documento legal, datas, agregação ou atributos adicionais. "
+          + "Complete e revise o rascunho no POST de criação, que revalida todas as invariantes; descartar não altera a origem.")
+  @WorkflowAction(id = "duplicate-draft", title = "Preparar novo cargo",
+      description = "Preenche nome e enquadramento a partir de um cargo acessível, sem persistência. "
+          + "A identidade e o órgão devem ser informados no novo cadastro.",
+      requiredAuthorities = {"ERGON_READ", "ERGON_WRITE"},
+      allowedStates = {"VIGENTE"},
+      tags = {"duplicate-draft", "draft", "business-command"}, order = 90)
+  public org.springframework.http.ResponseEntity<RestApiResponse<CargoDuplicateDraftDTO>> duplicateDraft(
+      @Parameter(description = "Código do cargo de referência classificatória no órgão corrente.")
+      @PathVariable Integer id) {
+    return super.duplicateDraft(id);
   }
 
   @Override
@@ -190,7 +209,7 @@ public class CargoController
       title = "Vínculos titulares",
       description = "Assentamentos cujo cargo de provimento é o cargo consultado.",
       relatedChildResourceKey = "administracao-pessoal.vinculos",
-      relatedChildResourcePath = "/api/ergon/vinculos",
+      relatedChildResourcePath = ApiPaths.VINCULOS,
       relatedChildParentField = "cargo",
       relatedChildOperations = {
         org.praxisplatform.uischema.surface.RelatedResourceChildOperation.FILTER,
@@ -233,7 +252,7 @@ public class CargoController
         org.praxisplatform.uischema.rest.response.RestApiResponse.success(
             result,
             org.springframework.hateoas.Links.of(
-                org.springframework.hateoas.Link.of("/api/ergon/vinculos", "collection"))));
+                org.springframework.hateoas.Link.of(ApiPaths.VINCULOS, "collection"))));
   }
 
   @org.springframework.web.bind.annotation.GetMapping("/{id}/vinculos-comissao")
@@ -245,7 +264,7 @@ public class CargoController
       title = "Vínculos em comissão",
       description = "Assentamentos que exercem este cargo em comissão.",
       relatedChildResourceKey = "administracao-pessoal.vinculos",
-      relatedChildResourcePath = "/api/ergon/vinculos",
+      relatedChildResourcePath = ApiPaths.VINCULOS,
       relatedChildParentField = "cargoComissao",
       relatedChildOperations = {
         org.praxisplatform.uischema.surface.RelatedResourceChildOperation.FILTER,
@@ -288,7 +307,7 @@ public class CargoController
         org.praxisplatform.uischema.rest.response.RestApiResponse.success(
             result,
             org.springframework.hateoas.Links.of(
-                org.springframework.hateoas.Link.of("/api/ergon/vinculos", "collection"))));
+                org.springframework.hateoas.Link.of(ApiPaths.VINCULOS, "collection"))));
   }
 
   @Override

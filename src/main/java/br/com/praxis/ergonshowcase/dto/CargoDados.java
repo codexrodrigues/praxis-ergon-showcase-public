@@ -1,5 +1,6 @@
 package br.com.praxis.ergonshowcase.dto;
 
+import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
@@ -52,7 +53,7 @@ public abstract class CargoDados {
   private String subcategoria;
 
   @Size(max = 40)
-  @Schema(
+  @Schema(nullable = true,
       description =
           "Classificação estrutural do provimento, como cargo efetivo, comissionado ou função gratificada.")
   @UISchema(
@@ -88,7 +89,7 @@ public abstract class CargoDados {
   private String escolaridade;
 
   @Size(max = 10)
-  @Schema(
+  @Schema(nullable = true,
       description =
           "Código da Classificação Brasileira de Ocupações associado ao cargo; tratado como identificador textual.")
   @UISchema(
@@ -100,7 +101,7 @@ public abstract class CargoDados {
   private String cbo;
 
   @PositiveOrZero
-  @Schema(
+  @Schema(nullable = true,
       description = "Total de vagas legalmente autorizadas para provimento neste cargo ou função.")
   @UISchema(
       label = "Vagas autorizadas",
@@ -115,14 +116,17 @@ public abstract class CargoDados {
       description = "Indica que o provimento requer controle do saldo de vagas autorizadas em lei.")
   @UISchema(
       label = "Controle de vagas",
-      preset = UISchemaPreset.BOOLEAN_FLAG,
+      type = FieldDataType.BOOLEAN,
+      controlType = org.praxisplatform.uischema.FieldControlType.SELECT,
+      options = "[{\"value\":true,\"label\":\"Sim\"},{\"value\":false,\"label\":\"Não\"}]",
+      helpText = "Selecione sim ou não; no novo cadastro esta escolha é obrigatória.",
       group = "Quadro de vagas",
       order = 90,
       icon = "rule",
       quickViewVisible = true,
       quickViewOrder = 3)
   @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = false)
-  private Boolean controleVaga = false;
+  private Boolean controleVaga;
 
   @NotNull
   @Schema(
@@ -130,11 +134,14 @@ public abstract class CargoDados {
           "Indica remuneração estruturada por tabela de vencimentos e referências salariais.")
   @UISchema(
       label = "Por referência salarial",
-      preset = UISchemaPreset.BOOLEAN_FLAG,
+      type = FieldDataType.BOOLEAN,
+      controlType = org.praxisplatform.uischema.FieldControlType.SELECT,
+      options = "[{\"value\":true,\"label\":\"Sim\"},{\"value\":false,\"label\":\"Não\"}]",
+      helpText = "Selecione sim ou não; no novo cadastro esta escolha é obrigatória.",
       group = "Quadro de vagas",
       order = 100,
       icon = "payments")
-  private Boolean porReferencia = false;
+  private Boolean porReferencia;
 
   @CustomFields(resourceKey = "administracao-pessoal.cargos")
   @Schema(
@@ -143,17 +150,24 @@ public abstract class CargoDados {
   @UISchema(label = "Características do órgão", group = "Características adicionais", order = 110)
   private Map<String, Object> customFields = new LinkedHashMap<>();
 
+  @NotNull
   @Schema(description = "Indica cargo que reúne outros cargos para controle agregado do quadro.")
   @UISchema(
       label = "Cargo aglutinador",
+      type = FieldDataType.BOOLEAN,
+      controlType = org.praxisplatform.uischema.FieldControlType.SELECT,
+      options = "[{\"value\":true,\"label\":\"Sim\"},{\"value\":false,\"label\":\"Não\"}]",
+      icon = "hub",
+      helpText = "Selecione sim ou não; a condição da origem não é transferida ao novo cargo.",
       group = "Quadro de Vagas e Vigência",
       tableHidden = true,
       order = 200)
   @Getter(onMethod_ = @com.fasterxml.jackson.annotation.JsonProperty("eAglutinador"))
   @Setter(onMethod_ = @com.fasterxml.jackson.annotation.JsonProperty("eAglutinador"))
-  private Boolean eAglutinador = false;
+  @com.fasterxml.jackson.annotation.JsonProperty("eAglutinador")
+  private Boolean eAglutinador;
 
-  @Schema(description = "Cargo agregador do mesmo órgão ao qual este cargo está vinculado.")
+  @Schema(nullable = true, description = "Cargo agregador do mesmo órgão ao qual este cargo está vinculado.")
   @UISchema(
       label = "Cargo agregador",
       group = "Quadro de Vagas e Vigência",
@@ -162,7 +176,7 @@ public abstract class CargoDados {
       type = org.praxisplatform.uischema.FieldDataType.TEXT,
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
       icon = "hub",
-      endpoint = "/api/ergon/cargos/option-sources/cargo/options/filter",
+      endpoint = ApiPaths.CARGO_OPTIONS,
       valueField = "id",
       displayField = "label")
   @ResourceReference(
@@ -173,7 +187,7 @@ public abstract class CargoDados {
       detailPresentation = "drawer")
   private Integer cargoAglutinador;
 
-  @Schema(description = "Data inicial da vigência do controle de vagas deste cargo.")
+  @Schema(nullable = true, description = "Data inicial da vigência do controle de vagas deste cargo.")
   @UISchema(
       label = "Início do controle de vagas",
       group = "Quadro de Vagas e Vigência",
@@ -184,7 +198,7 @@ public abstract class CargoDados {
       icon = "event")
   private LocalDate dtInicioContrVaga;
 
-  @Schema(description = "Documento legal que fundamenta a definição do cargo.")
+  @Schema(nullable = true, description = "Documento legal que fundamenta a definição do cargo.")
   @UISchema(
       label = "Documento legal",
       group = "Quadro de Vagas e Vigência",
@@ -193,7 +207,7 @@ public abstract class CargoDados {
       type = org.praxisplatform.uischema.FieldDataType.TEXT,
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
       icon = "gavel",
-      endpoint = "/api/ergon/documentos-legais/option-sources/documento/options/filter",
+      endpoint = ApiPaths.DOCUMENTO_OPTIONS,
       valueField = "id",
       displayField = "label")
   @ResourceReference(

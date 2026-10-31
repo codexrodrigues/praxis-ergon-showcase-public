@@ -1,5 +1,6 @@
 package br.com.praxis.ergonshowcase.config;
 
+import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -44,7 +45,7 @@ public class SecurityConfig {
             a ->
                 a.requestMatchers("/actuator/health", "/v3/api-docs/**")
                     .permitAll()
-                    .requestMatchers("/api/ergon/operations/bulk/publication")
+                    .requestMatchers(ApiPaths.BULK_PUBLICATION)
                     .hasAuthority("ERGON_BULK_ADMIN")
                     .requestMatchers("/praxis/cockpit/**")
                     .hasAuthority("ERGON_READ")
@@ -52,14 +53,14 @@ public class SecurityConfig {
                     .hasAuthority("ERGON_READ")
                     .requestMatchers(
                         org.springframework.http.HttpMethod.POST,
-                        "/api/ergon/*/determinations/*",
-                        "/api/ergon/*/filter",
-                        "/api/ergon/*/filter/cursor",
-                        "/api/ergon/*/locate",
-                        "/api/ergon/*/stats/*",
-                        "/api/ergon/*/options/**",
-                        "/api/ergon/*/option-sources/**",
-                        "/api/ergon/*/export")
+                        ApiPaths.BASE + "/*/determinations/*",
+                        ApiPaths.BASE + "/*/filter",
+                        ApiPaths.BASE + "/*/filter/cursor",
+                        ApiPaths.BASE + "/*/locate",
+                        ApiPaths.BASE + "/*/stats/*",
+                        ApiPaths.BASE + "/*/options/**",
+                        ApiPaths.BASE + "/*/option-sources/**",
+                        ApiPaths.BASE + "/*/export")
                     .hasAuthority("ERGON_READ")
                     .anyRequest()
                     .hasAuthority("ERGON_WRITE"))

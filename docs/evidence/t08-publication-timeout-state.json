@@ -1,0 +1,51 @@
+{
+  "stage": "OBSERVED_BEFORE_EXPLICIT_RECONCILIATION",
+  "branch": "br-orange-smoke-b7ma4hie",
+  "operation": "ergon.funcionarios.bulk.items",
+  "httpStatus": 503,
+  "code": "TRANSACTION_TIMEOUT",
+  "states": [
+    {
+      "operation_id": "ergon.cargos.bulk.items",
+      "state": "READY",
+      "generation": "13"
+    },
+    {
+      "operation_id": "ergon.cargos.bulk.uniform",
+      "state": "READY",
+      "generation": "13"
+    },
+    {
+      "operation_id": "ergon.funcionarios.bulk.items",
+      "state": "SUSPENDED",
+      "generation": "11"
+    },
+    {
+      "operation_id": "ergon.funcionarios.bulk.uniform",
+      "state": "SUSPENDED",
+      "generation": "11"
+    },
+    {
+      "operation_id": "ergon.vinculos.bulk.items",
+      "state": "SUSPENDED",
+      "generation": "10"
+    },
+    {
+      "operation_id": "ergon.vinculos.bulk.uniform",
+      "state": "SUSPENDED",
+      "generation": "12"
+    },
+    {
+      "operation_id": "ergon.vinculos.homologar-estagio-lote",
+      "state": "SUSPENDED",
+      "generation": "10"
+    },
+    {
+      "operation_id": "ergon.vinculos.realocar-setor-lote",
+      "state": "SUSPENDED",
+      "generation": "10"
+    }
+  ],
+  "recovery": "One explicit test preparation with BULK_PROOF_RESET_PUBLICATION=false after reading committed generations; READY operations reconcile and suspended operations publish through the existing administrative endpoint. No catch/retry loop or changed SDK deadlines.",
+  "physicalCauseEstablished": false
+}

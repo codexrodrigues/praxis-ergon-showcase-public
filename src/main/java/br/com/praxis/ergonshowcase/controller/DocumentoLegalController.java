@@ -1,5 +1,6 @@
 package br.com.praxis.ergonshowcase.controller;
 
+import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import br.com.praxis.ergonshowcase.dto.*;
 import br.com.praxis.ergonshowcase.service.*;
 import io.swagger.v3.oas.annotations.*;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 /** Consulta auxiliar que sustenta opções e referências 360° dos pilotos. */
 @ApiResource(
-    value = "/api/ergon/documentos-legais",
+    value = ApiPaths.DOCUMENTOS_LEGAIS,
     resourceKey = "administracao-pessoal.documentos-legais",
     title = "Documentos legais",
     description = "Consulta do cadastro auxiliar para inspeção das referências funcionais.",

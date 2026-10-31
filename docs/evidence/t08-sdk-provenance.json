@@ -1,0 +1,15 @@
+{
+  "version": "8.0.0-bulk.308-consolidation.5-SNAPSHOT",
+  "sourceRevision": "e53a13534b7b475ba6383e4802dd1e6b176ed6d0",
+  "published": false,
+  "pomDependency": "8.0.0-rc.179",
+  "mavenOverride": "praxis.core.version",
+  "packaging": "Local install; tests executed before packaging; no deploy or release",
+  "focusedTests": "t08-sdk-constraint-tests.json",
+  "files": {
+    "praxis-metadata-starter-8.0.0-bulk.308-consolidation.5-SNAPSHOT-sources.jar": "ab970e41368749a1342e6ab46eb83a5b92f2cb4bb917da2c14385c3688e8ce92",
+    "praxis-metadata-starter-8.0.0-bulk.308-consolidation.5-SNAPSHOT.jar": "11194e06878268a184fbeb476f7b1a4fbd09a287c91badf36cb86e3e7072abd0",
+    "praxis-metadata-starter-8.0.0-bulk.308-consolidation.5-SNAPSHOT.pom": "69a03fdb84720a79fa9e6c5c8d1a097e8ddf727e9f8338e60f07db7b39759baf"
+  },
+  "recordedAt": "2026-10-28T22:28:20.833888+00:00"
+}

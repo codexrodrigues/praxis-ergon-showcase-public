@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "host": "praxis-ergon-showcase",
+  "owner": "Praxis Platform maintainers / praxis-ergon-showcase",
+  "provenance": "T04 static baseline 2026-10-28; additions/removals require independent resource-scope review; not runtime acceptance",
+  "resources": [
+    {
+      "resourceKey": "administracao-pessoal.cargos",
+      "controller": "br.com.praxis.ergonshowcase.controller.CargoController",
+      "duplicateDraft": {
+        "status": "pendente",
+        "reason": "Aplicável e integrada no host com SDK privado; aceite bloqueado por 503 recorrente no discovery: integral 112/113 e focal reforçada 2/3. Exige diagnóstico canônico e nova prova revisada.",
+        "owner": "Codex / frente Ergon Showcase, avaliação solicitada pelo mantenedor",
+        "decision": {
+          "path": "ergon-cargo-duplicate-draft-adoption-20261028.md",
+          "sha256": "c4141d39a80b735029c3899727655c45611996851d782ab249c4dc9c9f46851c"
+        }
+      }
+    },
+    {
+      "resourceKey": "administracao-pessoal.documentos-legais",
+      "controller": "br.com.praxis.ergonshowcase.controller.DocumentoLegalController",
+      "duplicateDraft": {
+        "status": "não aplicável",
+        "reason": "Consulta de atos existentes sem create; referência jurídica não constitui modelo de novo ato.",
+        "owner": "Codex / frente Ergon Showcase, avaliação solicitada pelo mantenedor",
+        "decision": {
+          "path": "ergon-duplicate-draft-review-20261028.md",
+          "sha256": "62c6b7500d9eb1c2cee84f594b076f0d6da4355cd0d9ada30e4172684f708c5a"
+        }
+      }
+    },
+    {
+      "resourceKey": "administracao-pessoal.empresas",
+      "controller": "br.com.praxis.ergonshowcase.controller.OrgaoController",
+      "duplicateDraft": {
+        "status": "não aplicável",
+        "reason": "Instituição com identidade e CNPJ próprios; fluxo adotado é criação explícita, sem modelo interinstitucional aprovado.",
+        "owner": "Codex / frente Ergon Showcase, avaliação solicitada pelo mantenedor",
+        "decision": {
+          "path": "ergon-duplicate-draft-review-20261028.md",
+          "sha256": "62c6b7500d9eb1c2cee84f594b076f0d6da4355cd0d9ada30e4172684f708c5a"
+        }
+      }
+    },
+    {
+      "resourceKey": "administracao-pessoal.funcionarios",
+      "controller": "br.com.praxis.ergonshowcase.controller.ServidorPessoaController",
+      "duplicateDraft": {
+        "status": "não aplicável",
+        "reason": "Cadastro de pessoa física única; copiar identificação, dados sensíveis e bancários não é jornada adotada. Novo vínculo referencia a pessoa existente.",
+        "owner": "Codex / frente Ergon Showcase, avaliação solicitada pelo mantenedor",
+        "decision": {
+          "path": "ergon-duplicate-draft-review-20261028.md",
+          "sha256": "62c6b7500d9eb1c2cee84f594b076f0d6da4355cd0d9ada30e4172684f708c5a"
+        }
+      }
+    },
+    {
+      "resourceKey": "administracao-pessoal.setores",
+      "controller": "br.com.praxis.ergonshowcase.controller.SetorController",
+      "duplicateDraft": {
+        "status": "não aplicável",
+        "reason": "Recurso exclusivamente de consulta, sem create; manutenção de organograma está fora desta fronteira.",
+        "owner": "Codex / frente Ergon Showcase, avaliação solicitada pelo mantenedor",
+        "decision": {
+          "path": "ergon-duplicate-draft-review-20261028.md",
+          "sha256": "62c6b7500d9eb1c2cee84f594b076f0d6da4355cd0d9ada30e4172684f708c5a"
+        }
+      }
+    },
+    {
+      "resourceKey": "administracao-pessoal.vinculos",
+      "controller": "br.com.praxis.ergonshowcase.controller.VinculoController",
+      "duplicateDraft": {
+        "status": "não aplicável",
+        "reason": "Novo provimento exige ato, vaga, órgão, datas e validação de acumulação; cópia genérica de assentamento histórico não é a jornada adotada.",
+        "owner": "Codex / frente Ergon Showcase, avaliação solicitada pelo mantenedor",
+        "decision": {
+          "path": "ergon-duplicate-draft-review-20261028.md",
+          "sha256": "62c6b7500d9eb1c2cee84f594b076f0d6da4355cd0d9ada30e4172684f708c5a"
+        }
+      }
+    }
+  ]
+}

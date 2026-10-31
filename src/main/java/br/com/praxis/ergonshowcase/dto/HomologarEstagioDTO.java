@@ -1,5 +1,6 @@
 package br.com.praxis.ergonshowcase.dto;
 
+import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
@@ -20,5 +21,5 @@ public record HomologarEstagioDTO(
         @UISchema(label = "Ato de homologação", group = "Fundamentação do ato",
             type = org.praxisplatform.uischema.FieldDataType.TEXT,
             controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP, icon = "gavel",
-            endpoint = "/api/ergon/documentos-legais/option-sources/documento/options/filter", valueField = "id", displayField = "label")
+            endpoint = ApiPaths.DOCUMENTO_OPTIONS, valueField = "id", displayField = "label")
         Long documentoLegalId) {}

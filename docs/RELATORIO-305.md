@@ -1,6 +1,18 @@
 # Relatório de rodada — issue 305
 
-## Rodada vigente — investigação 503 e seis decisões de adoção
+## Rodada vigente — T08 duplicate-draft em Cargos: APROVADO (Gate Local e Estático; Alinhado para 8.0.0-rc.183)
+
+Implementação reconciliada com ApiPaths, preservando as decisões humanas T07: rascunho independente com sete sugestões, três flags nulas e escolhas explícitas no CREATE, origem somente VIGENTE, autorização READ+WRITE e consulta por órgão. O CREATE usa versão inicial nula para persist; colisão concorrente retorna 409 pelo handler canônico do SDK. UPDATE conserva seus defaults.
+
+**Integral: 112/113; focal única reforçada: 2/3; zero erros e skips nas duas.** O GET de ações READ-only falhou com 503 na integral; o GET capabilities da origem extinta falhou com 503 na focal. Os 63 casos de regressão geral, lote 6/6, pilares 6/6, completude 4/4 e contexto 9/9 passaram. A focal comprovou READ-only e contexto estrangeiro com oráculos explícitos, mas não fechou a disponibilidade operacional.
+
+O SDK local `e53a1353` teve 60/60 testes focais de constraint; auditor 114/114 regressões e seis recursos com 100% estrutural/zero problemas editoriais. **Adoção de Cargo continua pendente e o auditor runtime retorna FAILED, sem hash stale.** Nenhum aumento de budget, cache, bypass ou loop até verde foi introduzido. A causa física do timeout não foi estabelecida.
+
+Schema e dados das 16 tabelas foram preservados; branch descartável excluída e servidor próprio encerrado. O harness consumidor e o HTTP complementar não foram executados após o bloqueio. O candidato `.5-SNAPSHOT` permanece privado; POM rc.179, publicação pública, SLO e UX/browser não estão certificados.
+
+[Execução T08 e matriz A01–A20](T08-EXECUCAO.md), [scorecard](evidence/SCORECARD-COMPLETUDE.md), [campanha](evidence/PILLARS-CAMPAIGN.json) e [contrato](DUPLICATE-DRAFT-CARGO.md). Pacote local para revisão; sem push, atualização GitHub, merge, release, deploy ou avanço a T09.
+
+## Campanha anterior — investigação 503 e seis decisões de adoção
 
 **80/80 testes na campanha integral final contra Neon; 77/77 focais do SDK;
 75/75 regressões do auditor; consumidor HTTP aprovado.** O SDK em `21ca36df`
@@ -146,7 +158,7 @@ Derivados atualizados: prova Angular do host, relatório, manifesto, scorecard e
 
 O responsável aprovou explicitamente o escopo HOST de e6b9fa0: determinações reativas, invariantes e prova Angular encerram a Fase 3A com PASS. Não existe snapshot externo do Config para esta etapa; Config/rules-engine foi alocado a fase futura dedicada. Assim, a pendência de decisão governada descrita na rodada abaixo deixa de impedir o aceite daquela fase por decisão explícita do responsável. A execução atual das Issues host #2 / Metadata #308 está em andamento conforme [plano de Bulking](PLANO-BULKING-308.md); os recibos anteriores continuam identificados como evidência do commit e6b9fa0.
 
-## Estado atual — correções da revisão de 61fc36b
+## Histórico — correções da revisão de 61fc36b
 
 Esta seção prevalece sobre os registros históricos abaixo. Plano e mapa de impacto: [execução por fases](PLANO-REVISAO-61fc36b.md). A entrega amplia contrato público e arquitetura do host, conserva o starter local 8.0.0-rc.179 e não altera nenhuma das 16 entidades, 392 colunas ou configuração de criação de schema. Não houve acesso ao código do quickstart, merge ou publicação de biblioteca.
 

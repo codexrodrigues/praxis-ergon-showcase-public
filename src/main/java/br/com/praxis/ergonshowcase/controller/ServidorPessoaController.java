@@ -192,7 +192,7 @@ public class ServidorPessoaController
       title = "Vínculos funcionais",
       description = "Assentamentos funcionais da pessoa, incluindo vínculos históricos.",
       relatedChildResourceKey = "administracao-pessoal.vinculos",
-      relatedChildResourcePath = "/api/ergon/vinculos",
+      relatedChildResourcePath = ApiPaths.VINCULOS,
       relatedChildParentField = "numfunc",
       relatedChildOperations = {
         org.praxisplatform.uischema.surface.RelatedResourceChildOperation.FILTER,
@@ -235,7 +235,7 @@ public class ServidorPessoaController
         org.praxisplatform.uischema.rest.response.RestApiResponse.success(
             result,
             org.springframework.hateoas.Links.of(
-                org.springframework.hateoas.Link.of("/api/ergon/vinculos", "collection"))));
+                org.springframework.hateoas.Link.of(ApiPaths.VINCULOS, "collection"))));
   }
 
   @Override

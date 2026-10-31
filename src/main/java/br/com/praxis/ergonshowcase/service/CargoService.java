@@ -22,16 +22,46 @@ public class CargoService
     extends ErgonResourceService<
         Cargo, CargoResponseDTO, Integer, CargoFilterDTO, CreateCargoDTO, UpdateCargoDTO>
     implements VersionedCreateUpdateResourceService<
-        CargoResponseDTO, Integer, CargoFilterDTO, CreateCargoDTO, UpdateCargoDTO> {
+        CargoResponseDTO, Integer, CargoFilterDTO, CreateCargoDTO, UpdateCargoDTO>,
+        DuplicateDraftResourceService<CargoResponseDTO, Integer, CargoFilterDTO,
+            CreateCargoDTO, UpdateCargoDTO, CargoDuplicateDraftDTO> {
   @org.springframework.beans.factory.annotation.Autowired private ErgonInvariants invariants;
   @PersistenceContext protected EntityManager entityManager;
   protected final CargoMapper mapper;
   private final TenantContext tenant;
+  private final CargoRepository cargos;
 
   public CargoService(CargoRepository repository, CargoMapper mapper, TenantContext tenant) {
     super(repository, Cargo.class, "cargo");
     this.mapper = mapper;
     this.tenant = tenant;
+    this.cargos = repository;
+  }
+
+  /**
+   * Preenchimento inicial de classificação, sem reproduzir autorização legal de vagas.
+   * Identidade, órgão, ato, datas, agregação e atributos livres não são copiados.
+   * A transação própria de leitura não descarrega alterações pendentes do chamador.
+   */
+  @Override
+  @org.springframework.security.access.prepost.PreAuthorize(
+      "hasAuthority('ERGON_READ') and hasAuthority('ERGON_WRITE')")
+  @Transactional(readOnly = true, propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
+  public CargoDuplicateDraftDTO duplicateDraft(Integer sourceId) {
+    var source = cargos.findByCargoAndEmpCodigo(sourceId, tenant.orgao())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "duplicate-draft-unavailable"));
+    if (source.getDtExtincao() != null)
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "duplicate-draft-unavailable");
+    var draft = new CargoDuplicateDraftDTO();
+    draft.setNome(source.getNome());
+    draft.setCategoria(source.getCategoria());
+    draft.setSubcategoria(source.getSubcategoria());
+    draft.setTipoCargo(source.getTipoCargo());
+    draft.setCargoFuncao(source.getCargoFuncao());
+    draft.setEscolaridade(source.getEscolaridade());
+    draft.setCbo(source.getCbo());
+    return draft;
   }
 
   @Override
@@ -122,6 +152,9 @@ public class CargoService
 
   @Override
   protected void beforeCreate(CreateCargoDTO dto, Cargo e) {
+    if (dto.getControleVaga() == null || dto.getPorReferencia() == null || dto.getEAglutinador() == null)
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Informe controle de vagas, referência salarial e aglutinação explicitamente.");
     invariants.cargo(e);
     checkOrg(e.getEmpCodigo());
     if (getRepository().existsById(e.getCargo()))

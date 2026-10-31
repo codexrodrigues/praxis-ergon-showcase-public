@@ -1,0 +1,14 @@
+{
+  "sourceSha256": "8f4d93e777f3338ca7af7f4b32f4ba1815cffc4265c9a1170fc4d03fc484f723",
+  "previousIntegralSourceSha256": "891ee0799cd95beeb496e4249fe10a029b503044814784247ee0f295eb183f0d",
+  "changedFiles": [
+    "src/test/java/br/com/praxis/ergonshowcase/CargoDuplicateDraftNeonTest.java"
+  ],
+  "productionSdkConfigurationUnchanged": true,
+  "reviewedByThread": "01a1846a-89ec-7531-a3b9-0c7170bd0d7d",
+  "reviewScope": "Five explicit boolean nodes, successful response and envelope shape, scoped state metadata; no GET missing-capability equivalence",
+  "testFileSha256": "b00b0fc01c97a45a4624c275e7cef4b83223e482ddef58cd55b3ed3da90676c8",
+  "plannedDiffSha256": "e4b3a14e0a9034867d67a5ecf462eb52d2f51ad80983533b23e8fe906a68141e",
+  "campaignPolicy": "One focal execution of the three whole methods; no retry loop or special administrative recovery; full red receipt preserved",
+  "independentIntegrationFingerprint": "914df16fb108898af3653ce195ecb5d941f9e710b092b73e66a51bb7bcda07e5"
+}

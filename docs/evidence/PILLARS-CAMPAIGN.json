@@ -1,79 +1,92 @@
 {
-  "validatedAt": "2026-10-28T19:43:53.350189+00:00",
-  "sourceSha256": "adfbb84cd8ab0816ae5575b3ab32d970f8854711f32b345054fe91089b494946",
-  "baselineCommit": "ac6dd29a75f5c764c9ecd477d7af902c00a0eddf",
-  "status": "PARTIAL",
-  "runtimeStatus": "PASS",
+  "validatedAt": "2026-10-29T02:53:37.755430+00:00",
+  "sourceSha256": "8f4d93e777f3338ca7af7f4b32f4ba1815cffc4265c9a1170fc4d03fc484f723",
+  "baselineCommit": "1769b0958bbb3499e02843619415b7c373a95745",
+  "status": "FAILED",
+  "runtimeStatus": "FAILED",
   "mergeReady": false,
-  "dependency": "8.0.0-bulk.308-consolidation.3-SNAPSHOT",
+  "adoptionStatus": "PENDING",
+  "dependency": "8.0.0-bulk.308-consolidation.5-SNAPSHOT",
   "pomDependency": "8.0.0-rc.179",
   "published": false,
-  "sdkRevision": "21ca36df724eeef101101460601c052d2cd53931",
-  "sdkProvenance": "503-sdk-provenance.json",
-  "disposableBranch": "br-spring-butterfly-b79ht1rc",
+  "sdkRevision": "e53a13534b7b475ba6383e4802dd1e6b176ed6d0",
+  "sdkProvenance": "t08-sdk-provenance.json",
+  "disposableBranch": "br-orange-smoke-b7ma4hie",
   "disposableBranchDeleted": true,
   "domainSchema": {
     "tables": 16,
-    "columns": 392,
-    "equalToOriginal": true,
-    "domainDataIdentical": true,
-    "evidence": "503-neon-preservation.json"
+    "schemaAndDataPreserved": true,
+    "evidence": "t08-neon-preservation.json"
   },
   "fullCampaign": {
-    "tests": 80,
-    "failures": 0,
+    "tests": 113,
+    "passed": 112,
+    "failures": 1,
     "errors": 0,
     "skipped": 0,
-    "passed": 80,
-    "evidence": "503-final-test-results.json"
+    "sourceSha256": "891ee0799cd95beeb496e4249fe10a029b503044814784247ee0f295eb183f0d",
+    "evidence": "t08-final-test-results.json"
+  },
+  "singleStrengthenedFocal": {
+    "tests": 3,
+    "passed": 2,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "sourceSha256": "8f4d93e777f3338ca7af7f4b32f4ba1815cffc4265c9a1170fc4d03fc484f723",
+    "allRequestedMethodsExecuted": true,
+    "evidence": "t08-negative-contract-focal-results.json"
+  },
+  "sourceLineage": {
+    "integral": "891ee0799cd95beeb496e4249fe10a029b503044814784247ee0f295eb183f0d",
+    "current": "8f4d93e777f3338ca7af7f4b32f4ba1815cffc4265c9a1170fc4d03fc484f723",
+    "change": "Reviewed strengthening in one test file only; production/configuration/SDK unchanged",
+    "evidence": "docs/evidence/t08-negative-oracle-change.json"
   },
   "sdkValidation": {
-    "focusedTests": 77,
+    "focusedTests": 60,
     "failures": 0,
-    "errors": 0,
-    "skipped": 0,
-    "beforeFixRegressions": {
-      "tests": 2,
-      "failures": 2,
-      "errors": 0
-    },
-    "evidence": "503-sdk-provenance.json"
+    "evidence": "t08-sdk-constraint-tests.json"
   },
   "auditorRegression": {
-    "tests": 75,
+    "tests": 114,
     "failures": 0,
-    "evidence": "503-auditor-regression.json"
+    "evidence": "t08-auditor-regression.json"
   },
   "angular": {
-    "httpHarnessPassed": true,
-    "schemas": 6,
-    "executions": 6,
-    "bulkContracts": 6,
-    "commit": "421012f90f86335e5f15f7a865a4f83dfbf642ef",
-    "libraryOwner": "Separate delegated agent, PR #661; no library edits in this backend round",
-    "scope": "Official source HTTP harness; no browser visual or public npm acceptance",
-    "evidence": "503-angular-http-results.json"
+    "httpHarnessPassed": false,
+    "executedThisCut": false,
+    "inputsVerified": 676,
+    "scope": "No Angular library changes; no consumer HTTP/browser/public npm acceptance in this cut",
+    "evidence": "t08-http-preparation.json"
   },
   "adoption": {
     "notApplicable": 5,
     "pendingApplicable": [
       "administracao-pessoal.cargos"
     ],
-    "evidence": "503-adoption-inventory.json"
+    "evidence": "t08-adoption-inventory.json",
+    "review": "t08-adoption-review.md"
   },
-  "remainingGap": "Cargo duplicate-draft adoption requires integrated canonical neutral contract and explicit allowlist/non-persistence/authorization/final-create proofs. Not waived as N/A.",
-  "historical503": {
-    "exactCauseEstablished": false,
-    "reproducedThisRound": false,
-    "historicalFailureEvidence": "consolidation-full-test-results.json",
-    "separateDiagnosticCampaign": "503-diagnostic-full-test-results.json",
-    "previousCandidateFocal": "503-baseline-test-results.json"
+  "remainingGap": "Recurrent 503 in governed metadata discovery blocks Cargo adoption and T08 integrated acceptance. Independent review required before a corrective cut; no speculative timeout/cache/retry change.",
+  "recurring503": {
+    "fullCampaign": "t08-cargo-integrated-results.json",
+    "singleFocal": "t08-negative-contract-focal-results.json",
+    "secondDiagnostic": "t08-second-timeout-diagnostic.json",
+    "physicalRootCauseEstablished": false,
+    "administrativeStateChanged": false,
+    "stateEvidence": "t08-final-publication-state.json"
   },
   "freshProofFiles": [
     "bulk-blocked-preview.json",
     "bulk-cargos-pessoas-receipts.json",
     "bulk-concurrent-discovery.json",
     "bulk-protocol-receipts.json",
+    "cargo-create-schema.json",
+    "cargo-duplicate-actions.json",
+    "cargo-duplicate-capabilities.json",
+    "cargo-duplicate-draft.json",
+    "cargo-duplicate-schema.json",
     "cargos-bulk-capabilities.json",
     "cargos-post-determinations.json",
     "cargos-put-determinations.json",
@@ -94,15 +107,16 @@
     "vinculos-post-determinations.json",
     "vinculos-put-determinations.json",
     "vinculos-request.json",
-    "vinculos-response.json",
-    "angular-consumer-proof.json"
+    "vinculos-response.json"
   ],
+  "proofSourceSha256": "891ee0799cd95beeb496e4249fe10a029b503044814784247ee0f295eb183f0d",
   "limits": [
-    "Private SDK only; default rc.179 not certified",
-    "Historical 503 exact cause and corporate availability SLO not established",
-    "Cargo duplicate-draft remains pending",
-    "Config/rules-engine deferred by user",
-    "No public Maven/npm release, browser visual acceptance or independent merge approval"
+    "Full campaign 112/113 and single focal 2/3 remain red; no approval inferred from structural 100%.",
+    "Current fingerprint includes a test-only change; full campaign remains bound to891ee...",
+    "Private SDK only; default rc.179 and public artifacts not certified.",
+    "HTTP consumer and browser/UI acceptance not executed in this cut.",
+    "Config/rules-engine deferred by user; corporate identity/entitlement and SLO not certified.",
+    "No push, GitHub messages, merge, release, deploy or T09 advancement."
   ],
-  "cleanupEvidence": "503-neon-cleanup.json"
+  "cleanupEvidence": "t08-neon-cleanup.json"
 }

@@ -1,0 +1,103 @@
+{
+  "recordedAt": "2026-10-29T01:22:16.628144+00:00",
+  "stage": "COMPLETED_SUITE_WITHIN_RUNNING_FULL_CAMPAIGN",
+  "sourceSha256": "891ee0799cd95beeb496e4249fe10a029b503044814784247ee0f295eb183f0d",
+  "dependency": "8.0.0-bulk.308-consolidation.5-SNAPSHOT",
+  "tests": 14,
+  "failures": 1,
+  "errors": 0,
+  "skipped": 0,
+  "xmlSha256": "afba184ffe4717cd4e8eaa24ae2fc7c4d817f83ea0c461daee3779f9336a8c7f",
+  "cases": [
+    {
+      "name": "publishesCanonicalSupportLinksActionAndCreateCompatibleSchema",
+      "status": "passed"
+    },
+    {
+      "name": "concurrentCreateCannotOverwriteTheWinner",
+      "status": "passed"
+    },
+    {
+      "name": "readWithoutCreatePermissionCannotPrepareOrDiscoverExecutableAction",
+      "status": "failed"
+    },
+    {
+      "name": "preparesAllowlistedDraftWithoutAnyWriteOrVersionChangeAndCanBeDiscarded",
+      "status": "passed"
+    },
+    {
+      "name": "directServiceAlsoRequiresPermissionsAndDoesNotExposeMissingOrigin",
+      "status": "passed"
+    },
+    {
+      "name": "functionOptionalNullsAndTextualCboArePreserved",
+      "status": "passed"
+    },
+    {
+      "name": "finalCreateRevalidatesRequiredIdentityOrganizationVacanciesAndUniqueness",
+      "status": "passed"
+    },
+    {
+      "name": "preparingDraftDoesNotFlushCallerOwnedDirtyPersistenceContext",
+      "status": "passed"
+    },
+    {
+      "name": "extinctOriginIncludingFutureDateIsDeniedInEveryBoundary",
+      "status": "passed"
+    },
+    {
+      "name": "explicitFlagsAreRequiredAndFalseRemainsValid",
+      "status": "passed"
+    },
+    {
+      "name": "contextAndUntrustedProjectionInputsAreRevalidatedAtCreate",
+      "status": "passed"
+    },
+    {
+      "name": "assignedIdentityWithNullVersionIsNew",
+      "status": "passed"
+    },
+    {
+      "name": "finalCreateUsesCurrentCustomFieldCatalogInsteadOfOriginValues",
+      "status": "passed"
+    },
+    {
+      "name": "missingAndOtherOrganizationOriginsAreIndistinguishableAndDoNotLeakState",
+      "status": "passed"
+    }
+  ],
+  "failure": {
+    "test": "readWithoutCreatePermissionCannotPrepareOrDiscoverExecutableAction",
+    "line": 299,
+    "operation": "GET /api/ergon/cargos/{id}/actions as read-only user",
+    "expectedStatus": 200,
+    "actualStatus": 503,
+    "loggedException": "GovernedOpenApiPublicationUnavailableException",
+    "causeType": "TransactionTimedOutException",
+    "logTimestamp": "2026-10-28T22:08:05.731-03:00",
+    "earlierAssertionsPassed": [
+      "prepare forbidden",
+      "capability denied",
+      "GET item without duplicate-draft link"
+    ],
+    "notReached": [
+      "action availability denied",
+      "final snapshot equality"
+    ]
+  },
+  "diagnostic": {
+    "recording": "private JFR snapshot",
+    "socketReadMilliseconds": 584.17424,
+    "socketReadTimestamp": "2026-10-28T22:08:00.102634052-03:00",
+    "stack": [
+      "BulkCatalogPhase.Reader.finish",
+      "BulkCatalogPhase.captureLive",
+      "BulkExecutionMigrator.validateLiveRuntimeRoleAccess",
+      "BulkExecutionInfrastructure.withLifecycleRead",
+      "BulkOperationLifecycle.readPublicationForDocumentGuard",
+      "CachedOpenApiDocumentService.requirePublishedSnapshot",
+      "ActionCatalogService.toCatalogItem"
+    ],
+    "causalLimit": "The multiresult read cannot be assigned to one SQL or establish physical cause of exhaustion; no timeout increase, bypass, cache or automatic retry was introduced."
+  }
+}

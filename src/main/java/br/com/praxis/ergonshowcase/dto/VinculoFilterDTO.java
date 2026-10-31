@@ -1,5 +1,6 @@
 package br.com.praxis.ergonshowcase.dto;
 
+import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
@@ -27,7 +28,7 @@ public class VinculoFilterDTO implements GenericFilterDTO {
   @UISchema(
       label = "Pessoa servidora",
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
-      endpoint = "/api/ergon/servidor-pessoas/option-sources/pessoa/options/filter",
+      endpoint = ApiPaths.PESSOA_OPTIONS,
       valueField = "id",
       displayField = "label",
       group = "Pesquisa",
@@ -46,7 +47,7 @@ public class VinculoFilterDTO implements GenericFilterDTO {
   @UISchema(
       label = "Órgão",
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
-      endpoint = "/api/ergon/orgaos/option-sources/orgao/options/filter",
+      endpoint = ApiPaths.ORGAO_OPTIONS,
       valueField = "id",
       displayField = "label",
       group = "Pesquisa",
@@ -149,7 +150,7 @@ public class VinculoFilterDTO implements GenericFilterDTO {
       type = org.praxisplatform.uischema.FieldDataType.TEXT,
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
       icon = "badge",
-      endpoint = "/api/ergon/cargos/option-sources/cargo/options/filter",
+      endpoint = ApiPaths.CARGO_OPTIONS,
       valueField = "id",
       displayField = "label")
   @Filterable(operation = FilterOperation.EQUAL, relation = "cargo")
@@ -168,7 +169,7 @@ public class VinculoFilterDTO implements GenericFilterDTO {
       type = org.praxisplatform.uischema.FieldDataType.TEXT,
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
       icon = "badge",
-      endpoint = "/api/ergon/cargos/option-sources/cargo/options/filter",
+      endpoint = ApiPaths.CARGO_OPTIONS,
       valueField = "id",
       displayField = "label")
   @Filterable(operation = FilterOperation.EQUAL, relation = "cargoComissao")
@@ -187,7 +188,7 @@ public class VinculoFilterDTO implements GenericFilterDTO {
       type = org.praxisplatform.uischema.FieldDataType.TEXT,
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
       icon = "account_tree",
-      endpoint = "/api/ergon/setores/option-sources/setor/options/filter",
+      endpoint = ApiPaths.SETOR_OPTIONS,
       valueField = "id",
       displayField = "label")
   @Filterable(operation = FilterOperation.EQUAL, relation = "setor")
@@ -201,7 +202,7 @@ public class VinculoFilterDTO implements GenericFilterDTO {
       type = org.praxisplatform.uischema.FieldDataType.TEXT,
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
       icon = "business",
-      endpoint = "/api/ergon/setores/option-sources/setor/options/filter",
+      endpoint = ApiPaths.SETOR_OPTIONS,
       valueField = "id",
       displayField = "label")
   @Filterable(operation = FilterOperation.EQUAL, relation = "setorExercicio")

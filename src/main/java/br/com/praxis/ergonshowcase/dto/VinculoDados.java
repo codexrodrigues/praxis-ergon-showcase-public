@@ -1,5 +1,6 @@
 package br.com.praxis.ergonshowcase.dto;
 
+import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
@@ -72,7 +73,7 @@ public abstract class VinculoDados {
   @UISchema(
       label = "Cargo",
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
-      endpoint = "/api/ergon/cargos/option-sources/cargo/options/filter",
+      endpoint = ApiPaths.CARGO_OPTIONS,
       valueField = "id",
       displayField = "label",
       tableHidden = true,
@@ -144,7 +145,7 @@ public abstract class VinculoDados {
       type = org.praxisplatform.uischema.FieldDataType.TEXT,
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
       icon = "account_tree",
-      endpoint = "/api/ergon/setores/option-sources/setor/options/filter",
+      endpoint = ApiPaths.SETOR_OPTIONS,
       valueField = "id",
       displayField = "label")
   @ResourceReference(
@@ -166,7 +167,7 @@ public abstract class VinculoDados {
       type = org.praxisplatform.uischema.FieldDataType.TEXT,
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
       icon = "business",
-      endpoint = "/api/ergon/setores/option-sources/setor/options/filter",
+      endpoint = ApiPaths.SETOR_OPTIONS,
       valueField = "id",
       displayField = "label")
   @ResourceReference(
@@ -188,7 +189,7 @@ public abstract class VinculoDados {
       type = org.praxisplatform.uischema.FieldDataType.TEXT,
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
       icon = "badge",
-      endpoint = "/api/ergon/cargos/option-sources/cargo/options/filter",
+      endpoint = ApiPaths.CARGO_OPTIONS,
       valueField = "id",
       displayField = "label")
   @ResourceReference(
@@ -208,7 +209,7 @@ public abstract class VinculoDados {
       type = org.praxisplatform.uischema.FieldDataType.TEXT,
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
       icon = "gavel",
-      endpoint = "/api/ergon/documentos-legais/option-sources/documento/options/filter",
+      endpoint = ApiPaths.DOCUMENTO_OPTIONS,
       valueField = "id",
       displayField = "label")
   @ResourceReference(
@@ -228,7 +229,7 @@ public abstract class VinculoDados {
       type = org.praxisplatform.uischema.FieldDataType.TEXT,
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
       icon = "article",
-      endpoint = "/api/ergon/documentos-legais/option-sources/documento/options/filter",
+      endpoint = ApiPaths.DOCUMENTO_OPTIONS,
       valueField = "id",
       displayField = "label")
   @ResourceReference(

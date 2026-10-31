@@ -1,0 +1,55 @@
+{
+  "recordedAt": "2026-10-29T02:49:47.817Z",
+  "stage": "AFTER_HTTP_BOOTSTRAP_AND_HOST_STOP_BEFORE_BRANCH_DELETION",
+  "operations": [
+    {
+      "namespace_id": "ergon-showcase",
+      "operation_id": "ergon.cargos.bulk.items",
+      "state": "READY",
+      "generation": "13"
+    },
+    {
+      "namespace_id": "ergon-showcase",
+      "operation_id": "ergon.cargos.bulk.uniform",
+      "state": "READY",
+      "generation": "13"
+    },
+    {
+      "namespace_id": "ergon-showcase",
+      "operation_id": "ergon.funcionarios.bulk.items",
+      "state": "READY",
+      "generation": "12"
+    },
+    {
+      "namespace_id": "ergon-showcase",
+      "operation_id": "ergon.funcionarios.bulk.uniform",
+      "state": "READY",
+      "generation": "12"
+    },
+    {
+      "namespace_id": "ergon-showcase",
+      "operation_id": "ergon.vinculos.bulk.items",
+      "state": "READY",
+      "generation": "11"
+    },
+    {
+      "namespace_id": "ergon-showcase",
+      "operation_id": "ergon.vinculos.bulk.uniform",
+      "state": "READY",
+      "generation": "13"
+    },
+    {
+      "namespace_id": "ergon-showcase",
+      "operation_id": "ergon.vinculos.homologar-estagio-lote",
+      "state": "READY",
+      "generation": "11"
+    },
+    {
+      "namespace_id": "ergon-showcase",
+      "operation_id": "ergon.vinculos.realocar-setor-lote",
+      "state": "READY",
+      "generation": "11"
+    }
+  ],
+  "unchangedFromFocal": true
+}

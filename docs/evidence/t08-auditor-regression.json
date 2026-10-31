@@ -1,0 +1,23 @@
+{
+  "recordedAt": "2026-10-28T23:10:34.059523+00:00",
+  "tests": 114,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "command": "python -m unittest discover -s scripts/workspace -p 'test_*.py'",
+  "ownership": "Read-only validation of canonical auditor maintained by the concurrent ApiPaths front; no auditor implementation changes in T08",
+  "files": {
+    "audit-java-resource-completeness.py": "1e8c1de53a9fbe095c55ffbab255d4df60b3e5b9083b201c0677951dc04cdb99",
+    "java_resource_audit.py": "644d193bcc21ba448aa8491e201ed8ce4a219e695fee4303955bb300bd9bab44",
+    "java_resource_hierarchy.py": "09b060e079c442167efe62d38ea2148982b53a455e1755a5e24d9d36955b508e",
+    "java_string_constants.py": "ac8f627d23fd7203503ce0fa7b68763a2f10958306d77db2e49a8770ee3855e1",
+    "test_audit_java_resource_completeness.py": "d914c42597b2d6ab253be4ff78242ac4d333dcfbceebdcf48e13018bffaf5a37",
+    "test_java_resource_binding.py": "8f269ffd750715365a3cc9dbf57da89ae0c8ecdbc263572baa4861e96e57b6f1",
+    "test_java_resource_hierarchy.py": "d626c8b2a979d8e20aab422c984213cccf149ea77fc512632c25911ccb648f22",
+    "test_java_string_constants.py": "f145ac88183315a80a074a75c0652cf3e12deee7b1bd4f21955d786e034f6756",
+    "test_java_string_constants_javac.py": "dd4391994db190584c40b0d687671b35567f3a1b6bd3729ff5227366d82fb666",
+    "test_java_string_hierarchy.py": "abb4534e68dfb700a762a913e85da86b7793348a1d333f2fc94c8e7ecfea9d0f"
+  },
+  "previousPassingCount": 94,
+  "logSha256": "531b9c085b69f79bedd385ff1f7ecbf7674ca9895a952c3422ab742fd3800354"
+}

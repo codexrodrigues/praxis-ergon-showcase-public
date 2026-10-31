@@ -1,0 +1,16 @@
+{
+  "recordedAt": "2026-10-28T21:13:08.528008+00:00",
+  "tests": 75,
+  "failures": 0,
+  "errors": 0,
+  "scope": "Current canonical auditor regression; no auditor logic changes required for neutral duplicate-draft binding",
+  "sources": {
+    "audit-java-resource-completeness.py": "e5f1405a7006ba15ef0d154b16cebbc8dc0a64a5c7c6cb6345cdf7c8a3acae3f",
+    "java_resource_audit.py": "71a4520d7fe7b6de26b5e3342930d6885af7042f1244aab81b754572b5373b21",
+    "java_resource_hierarchy.py": "500fdbc80e85932687b3e5add9f6c9be06dd279cd0de8b23726519496327a4bd",
+    "test_audit_java_resource_completeness.py": "543c216af0383b9400da9e486f7829cb934362743cf45a26dd9cdfa648b6c136",
+    "test_java_resource_binding.py": "8f269ffd750715365a3cc9dbf57da89ae0c8ecdbc263572baa4861e96e57b6f1",
+    "test_java_resource_hierarchy.py": "d626c8b2a979d8e20aab422c984213cccf149ea77fc512632c25911ccb648f22"
+  },
+  "logSha256": "4d19e7723571eb5adaaa905a84918c5693809278301dec805d701f83fa55500d"
+}

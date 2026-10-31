@@ -1,5 +1,6 @@
 package br.com.praxis.ergonshowcase.dto;
 
+import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
@@ -16,7 +17,7 @@ public record HomologarEstagioLoteDTO(
     LocalDate dtHomologEstagio,
     @NotNull @Positive
     @Schema(description="Documento do órgão responsável que formaliza a homologação coletiva dos estágios selecionados.")
-    @UISchema(label="Ato de homologação",group="Fundamentação",type=FieldDataType.TEXT,controlType=FieldControlType.ENTITY_LOOKUP,icon="gavel",endpoint="/api/ergon/documentos-legais/option-sources/documento/options/filter",valueField="id",displayField="label")
+    @UISchema(label="Ato de homologação",group="Fundamentação",type=FieldDataType.TEXT,controlType=FieldControlType.ENTITY_LOOKUP,icon="gavel",endpoint=ApiPaths.DOCUMENTO_OPTIONS,valueField="id",displayField="label")
     Long documentoLegalId,
     @Size(max=2000)
     @DomainGovernance(kind=DomainGovernanceKind.PRIVACY, classification=DomainClassification.CONFIDENTIAL,

@@ -1,0 +1,110 @@
+{
+  "suites": [
+    {
+      "name": "org.praxisplatform.uischema.openapi.CustomProblemDetailHttpSerializationTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "47.939",
+      "cases": [
+        "commandAdapterPreservesTheLegitimateOutcomeBesideUniqueTypedCodeAndTarget",
+        "handlerPayloadsContainUniqueTypedMembersAndPreserveCorrelation(String, int, String, String, String)[1]",
+        "handlerPayloadsContainUniqueTypedMembersAndPreserveCorrelation(String, int, String, String, String)[2]",
+        "handlerPayloadsContainUniqueTypedMembersAndPreserveCorrelation(String, int, String, String, String)[3]",
+        "handlerPayloadsContainUniqueTypedMembersAndPreserveCorrelation(String, int, String, String, String)[4]"
+      ],
+      "rawReportSha256": "f6bd65eec47d67e25f381ec1ffc716bc68e55546370dc6bcc16c70b36e1bccf8"
+    },
+    {
+      "name": "org.praxisplatform.uischema.rest.exceptionhandler.GlobalExceptionHandlerTest",
+      "tests": "29",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.148",
+      "cases": [
+        "shouldMapMissingRequestParameterToBadRequest",
+        "shouldMapNoResourceFoundToNotFound",
+        "shouldReturnEnglishTopLevelMessageForBusinessException",
+        "shouldMapSchemaIllegalArgumentExceptionWithPrefixedPathToBadRequest",
+        "shouldReturnEnglishTopLevelMessageForEntityNotFound",
+        "shouldMapOpenApiResourceNotFoundToNotFound",
+        "shouldPropagateRequestTraceIdWhenPresent",
+        "shouldMapHttpRequestMethodNotSupportedToMethodNotAllowed",
+        "shouldMapGenericIllegalArgumentExceptionToInternalServerError",
+        "shouldPublishCanonicalResourceVersionPrecondition",
+        "shouldTreatAsyncRequestNotUsableAsClientAbort",
+        "shouldMapDataIntegrityViolationToConflict",
+        "shouldMapInvalidDataAccessUsageWithoutFilterCauseToInternalServerError",
+        "shouldMaterializeGovernedDuplicateFailureWithoutLeakingPrivateCause",
+        "shouldMapForbiddenToSecurityCategory",
+        "shouldKeepGenericExceptionAsInternalServerError",
+        "shouldMapHttpMessageNotReadableToBadRequest",
+        "shouldKeepDistinctMissingAndMalformedResourceVersionContracts",
+        "shouldMapInvalidDataAccessUsageWithFilterPayloadCauseToBadRequest",
+        "shouldRejectUnexpectedFailureAsPublicFunctionalException",
+        "shouldMapIllegalArgumentExceptionToBadRequest",
+        "shouldTreatNestedClientAbortAsNoContentInGenericHandler",
+        "shouldMapMissingRequestHeaderToBadRequest",
+        "shouldKeepGenericIllegalArgumentInHttpMessageNotReadableAsRequestPayloadInvalid",
+        "shouldPublishOptimisticCollisionAsStaleResourceVersionWithoutPersistenceDetails",
+        "shouldRespectResponseStatusAnnotationInsideGenericHandler",
+        "shouldPreserveStatusAndReasonForResponseStatusException",
+        "shouldExposeFilterPayloadRootCauseInHttpMessageNotReadable",
+        "shouldReturnEnglishTopLevelMessageForValidationException"
+      ],
+      "rawReportSha256": "b8d1290dabfadc734491270dc7559d49ad6863ced11d22a8c8b5b7d9e224e67e"
+    },
+    {
+      "name": "org.praxisplatform.uischema.rest.exceptionhandler.PersistenceConstraintHttpTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.577",
+      "cases": [
+        "nativeFlushConflictUsesExistingSanitizedContract"
+      ],
+      "rawReportSha256": "e29383c25df63c8fcdf19398e94559ba745e0418522ae03241af9d5cf92f1a1d"
+    },
+    {
+      "name": "org.praxisplatform.uischema.rest.response.CustomProblemDetailTest",
+      "tests": "25",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.211",
+      "cases": [
+        "duplicateDetectionRejectsDuplicatesBeforeTreeMaterialization",
+        "nullExtensionNamesAreRejectedWithoutReplacingTheMap",
+        "objectReadPolicyRejectsEveryPropertiesWrapper(String)[1]",
+        "objectReadPolicyRejectsEveryPropertiesWrapper(String)[2]",
+        "objectReadPolicyRejectsEveryPropertiesWrapper(String)[3]",
+        "objectReadPolicyRejectsEveryPropertiesWrapper(String)[4]",
+        "objectReadPolicyRejectsEveryPropertiesWrapper(String)[5]",
+        "objectReadPolicyRejectsEveryPropertiesWrapper(String)[6]",
+        "objectReadPolicyRejectsEveryPropertiesWrapper(String)[7]",
+        "objectReadPolicyRejectsEveryPropertiesWrapper(String)[8]",
+        "reservedMembersCannotBeInsertedOrPartiallyReplaceExtensions(String)[1]",
+        "reservedMembersCannotBeInsertedOrPartiallyReplaceExtensions(String)[2]",
+        "reservedMembersCannotBeInsertedOrPartiallyReplaceExtensions(String)[3]",
+        "reservedMembersCannotBeInsertedOrPartiallyReplaceExtensions(String)[4]",
+        "reservedMembersCannotBeInsertedOrPartiallyReplaceExtensions(String)[5]",
+        "reservedMembersCannotBeInsertedOrPartiallyReplaceExtensions(String)[6]",
+        "reservedMembersCannotBeInsertedOrPartiallyReplaceExtensions(String)[7]",
+        "reservedMembersCannotBeInsertedOrPartiallyReplaceExtensions(String)[8]",
+        "reservedMembersCannotBeInsertedOrPartiallyReplaceExtensions(String)[9]",
+        "reservedMembersCannotBeInsertedOrPartiallyReplaceExtensions(String)[10]",
+        "extensionSnapshotsAndCallerMapsCannotMutateTheProblem",
+        "plainMapperRoundTripsFlatTypedMembersAndExtensionsWithoutSpringMixin",
+        "typedSettersReplaceAndClearWithoutCreatingExtensions",
+        "springMapperRoundTripsTypedRfcMembersAndLegitimateFlattenedExtensions",
+        "objectReadPolicyRejectsImplicitStringProblems"
+      ],
+      "rawReportSha256": "7dd27912dd94191cf84fc78795bd53ba422ecfeb2f87944d62c0bce941e39362"
+    }
+  ],
+  "tests": 60,
+  "scope": "Focused canonical error mapping and wire serialization; no database claim"
+}

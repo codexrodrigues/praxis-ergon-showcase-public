@@ -14,16 +14,26 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Propagation;
 
-/** Integração Neon: rollback por padrão; provas de discovery com commit limpam fixtures em finally. */
+/** HTTP sem transação externa; fixtures restauradas na cópia Neon e invariantes diretas com rollback. */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@Transactional
 @WithMockUser(authorities = {"ERGON_READ", "ERGON_WRITE"})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class NeonIntegrationTest {
   @Autowired org.springframework.boot.test.web.client.TestRestTemplate publicationHttp;
   @Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;
+  @Autowired org.praxisplatform.uischema.openapi.OpenApiDocumentService documents;
   @Autowired org.springframework.transaction.PlatformTransactionManager transactionManager;
+  private NeonDomainFixture domainFixture;
+
+  @BeforeEach void captureDomainFixture() throws Exception {
+    domainFixture = org.springframework.test.context.transaction.TestTransaction.isActive()
+        ? null : new NeonDomainFixture();
+  }
+
+  @AfterEach void restoreDomainFixture() throws Exception {
+    if (domainFixture != null) domainFixture.restore();
+  }
 
   private void cleanupCommandFixture() {
     new org.springframework.transaction.support.TransactionTemplate(transactionManager).executeWithoutResult(status -> {
@@ -36,14 +46,14 @@ class NeonIntegrationTest {
   @org.springframework.beans.factory.annotation.Value("${showcase.security.password}") String publicationPassword;
 
   @BeforeAll
-  void reconcileBulkPhotographBeforeTransactionalResourceProofs() throws Exception {
-    BulkPublicationProof.publish(publicationHttp.withBasicAuth(publicationUsername,publicationPassword),false);
+  void establishPublicationBeforeResourceProofs() throws Exception {
+    BulkPublicationProof.ensurePublished(documents, publicationHttp.withBasicAuth(publicationUsername,publicationPassword));
   }
 
   /** Ausência de adoção não pode habilitar preparo nem gravação por rota implícita. */
   @org.junit.jupiter.params.ParameterizedTest
   @org.junit.jupiter.params.provider.CsvSource({
-      "orgaos,empresas,empresa", "cargos,cargos,cargo",
+      "orgaos,empresas,empresa",
       "servidor-pessoas,funcionarios,numero", "setores,setores,setor",
       "documentos-legais,documentos_legais,id", "vinculos,vinculos,numfunc"
   })
@@ -92,9 +102,8 @@ class NeonIntegrationTest {
                 .contentType("application/json")
                 .content("{\"cargo\":9505}"))
         .andExpect(status().isUnprocessableEntity());
+    jdbc.update("update cargos set e_aglutinador=true where cargo=9505");
     var cargo = em.find(br.com.praxis.ergonshowcase.domain.Cargo.class, 9505);
-    cargo.setEAglutinador(true);
-    em.flush();
     mvc.perform(
             post("/api/ergon/cargos/determinations/aglutinador")
                 .contentType("application/json")
@@ -186,7 +195,6 @@ class NeonIntegrationTest {
                 .contentType("application/json")
                 .content("{\"cargo\":99999999}"))
         .andExpect(status().isUnprocessableEntity());
-    em.flush();
     em.clear();
     assertThat(em.find(br.com.praxis.ergonshowcase.domain.ServidorPessoa.class, 1001L).getVersion())
         .isEqualTo(before);
@@ -248,19 +256,12 @@ class NeonIntegrationTest {
   void phaseTwoHistoricalMaintenanceAllowsExtinctCargo() throws Exception {
     String uri = reviewFixture();
     reviewCargo();
-    var entity =
-        em.find(
-            br.com.praxis.ergonshowcase.domain.Vinculo.class,
-            new br.com.praxis.ergonshowcase.domain.VinculoId(9505L, 1));
-    entity.setCargo(9505);
-    entity.setSituacao("VACANTE");
-    em.flush();
+    jdbc.update("update vinculos set cargo=9505,situacao='VACANTE' where numfunc=9505 and numero=1");
     revisionCommand(
             "/api/ergon/cargos/9505/actions/extinguir-cargo", "{\"dtExtincao\":\"2026-10-01\"}")
         .andExpect(status().isOk());
     for (String state : new String[] {"VACANTE", "APOSENTADO"}) {
-      entity.setSituacao(state);
-      em.flush();
+      jdbc.update("update vinculos set situacao=? where numfunc=9505 and numero=1",state);
       mvc.perform(
               put(uri)
                   .header("If-Match", revisionEtag(uri))
@@ -465,9 +466,7 @@ class NeonIntegrationTest {
 
   @Test
   void reviewInactiveOrgaoRejectsNewAdmission() throws Exception {
-    var orgao = em.find(br.com.praxis.ergonshowcase.domain.Orgao.class, 1);
-    orgao.setAtiva(false);
-    em.flush();
+    jdbc.update("update empresas set ativa=false where empresa=1");
     mvc.perform(
             post("/api/ergon/vinculos")
                 .contentType("application/json")
@@ -489,12 +488,12 @@ class NeonIntegrationTest {
     legacy.setDtfim(java.time.LocalDate.of(2026, 10, 5));
     legacy.setSituacao("HOMOLOGADO");
     legacy.setDocumentoLegalId(reviewDocumento());
-    em.persist(legacy);
-    em.flush();
+    new org.springframework.transaction.support.TransactionTemplate(transactionManager)
+        .executeWithoutResult(status -> { em.persist(legacy); em.flush(); });
     revisionCommand(uri + "/actions/registrar-afastamento", reviewAfastamentoBody())
         .andExpect(status().isUnprocessableEntity());
-    em.remove(legacy);
-    em.flush();
+    new org.springframework.transaction.support.TransactionTemplate(transactionManager)
+        .executeWithoutResult(status -> em.remove(em.merge(legacy)));
     var response =
         revisionCommand(uri + "/actions/registrar-afastamento", reviewAfastamentoBody())
             .andExpect(status().isOk())
@@ -585,10 +584,9 @@ class NeonIntegrationTest {
   @Test
   void reviewAggregatorCannotBeDisabledWithDependentCargo() throws Exception {
     reviewCargo();
-    var parent=em.find(br.com.praxis.ergonshowcase.domain.Cargo.class,9505);
-    parent.setEAglutinador(true); em.flush();
+    jdbc.update("update cargos set e_aglutinador=true where cargo=9505");
     mvc.perform(post("/api/ergon/cargos").contentType("application/json").content(
-        "{\"cargo\":9506,\"empCodigo\":1,\"nome\":\"Dependente da prova\",\"categoria\":\"SAUDE\",\"cargoAglutinador\":9505}"))
+        "{\"cargo\":9506,\"empCodigo\":1,\"nome\":\"Dependente da prova\",\"categoria\":\"SAUDE\",\"cargoAglutinador\":9505,\"controleVaga\":false,\"porReferencia\":false,\"eAglutinador\":false}"))
         .andExpect(status().isCreated());
     mvc.perform(put("/api/ergon/cargos/9505").header("If-Match",revisionEtag("/api/ergon/cargos/9505"))
         .contentType("application/json").content("{\"nome\":\"Agregador\",\"categoria\":\"SAUDE\",\"eAglutinador\":false}"))
@@ -664,7 +662,7 @@ class NeonIntegrationTest {
             post("/api/ergon/cargos")
                 .contentType("application/json")
                 .content(
-                    "{\"cargo\":9505,\"empCodigo\":1,\"nome\":\"Cargo para prova em comissão\",\"categoria\":\"SAUDE\",\"controleVaga\":true,\"vagasAutorizadas\":1}"))
+                    "{\"cargo\":9505,\"empCodigo\":1,\"nome\":\"Cargo para prova em comissão\",\"categoria\":\"SAUDE\",\"controleVaga\":true,\"vagasAutorizadas\":1,\"porReferencia\":false,\"eAglutinador\":false}"))
         .andExpect(status().isCreated());
   }
 
@@ -726,12 +724,7 @@ class NeonIntegrationTest {
     mvc.perform(get("/api/ergon/cargos/9505"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.saldoVagasDisponiveis").value(0));
-    var v =
-        em.find(
-            br.com.praxis.ergonshowcase.domain.Vinculo.class,
-            new br.com.praxis.ergonshowcase.domain.VinculoId(9505L, 1));
-    v.setCargo(9505);
-    em.flush();
+    jdbc.update("update vinculos set cargo=9505 where numfunc=9505 and numero=1");
     assertThat(
             context
                 .getBean(br.com.praxis.ergonshowcase.service.ErgonInvariants.class)
@@ -757,12 +750,7 @@ class NeonIntegrationTest {
   void reviewCommissionCannotExceedVacancies() throws Exception {
     String uri = reviewFixture();
     reviewCargo();
-    var seeded =
-        em.find(
-            br.com.praxis.ergonshowcase.domain.Vinculo.class,
-            new br.com.praxis.ergonshowcase.domain.VinculoId(1001L, 1));
-    seeded.setCargoComissao(9505);
-    em.flush();
+    jdbc.update("update vinculos set cargo_comissao=9505 where numfunc=1001 and numero=1");
     revisionCommand(uri + "/lotacao-exercicio", "{\"cargoComissao\":9505}")
         .andExpect(status().isUnprocessableEntity());
   }
@@ -938,7 +926,7 @@ class NeonIntegrationTest {
     }
   }
 
-  @Test
+  @Test @Transactional
   void revisionVacancyBalancePreventsOverProvision() {
     var rules = context.getBean(br.com.praxis.ergonshowcase.service.ErgonInvariants.class);
     Integer id =
@@ -955,7 +943,7 @@ class NeonIntegrationTest {
     assertThatThrownBy(() -> rules.vinculo(v, true)).hasMessageContaining("Saldo de vagas");
   }
 
-  @Test
+  @Test @Transactional
   void revisionBusinessRulesRejectInvalidVacanciesAndAggregation() {
     var rules = context.getBean(br.com.praxis.ergonshowcase.service.ErgonInvariants.class);
     var cargo = new br.com.praxis.ergonshowcase.domain.Cargo();
@@ -991,7 +979,7 @@ class NeonIntegrationTest {
     return v;
   }
 
-  @Test
+  @Test @Transactional
   void revisionBusinessRulesRejectChronologyAndAccumulation() {
     var rules = context.getBean(br.com.praxis.ergonshowcase.service.ErgonInvariants.class);
     var v = revisionNewVinculo();
@@ -1007,7 +995,7 @@ class NeonIntegrationTest {
     assertThatThrownBy(() -> rules.vinculo(v, true)).hasMessageContaining("contratual");
   }
 
-  @Test
+  @Test @Transactional
   void revisionBusinessRulesRejectCrossOrgAndExtinctCargo() {
     var rules = context.getBean(br.com.praxis.ergonshowcase.service.ErgonInvariants.class);
     var v = revisionNewVinculo();
@@ -1243,12 +1231,7 @@ class NeonIntegrationTest {
 
   @Test
   void revisionHomologacaoAndCargoExtinction() throws Exception {
-    var vinculo =
-        em.find(
-            br.com.praxis.ergonshowcase.domain.Vinculo.class,
-            new br.com.praxis.ergonshowcase.domain.VinculoId(1001L, 1));
-    vinculo.setDtHomologEstagio(null);
-    em.flush();
+    jdbc.update("update vinculos set dt_homolog_estagio=null where numfunc=1001 and numero=1");
     Long doc =
         em.createQuery("select min(d.id) from DocumentoLegal d", Long.class).getSingleResult();
     revisionCommand(
@@ -1260,7 +1243,7 @@ class NeonIntegrationTest {
             post("/api/ergon/cargos")
                 .contentType("application/json")
                 .content(
-                    "{\"cargo\":9405,\"empCodigo\":1,\"nome\":\"Cargo para extinção\",\"categoria\":\"GERAL\"}"))
+                    "{\"cargo\":9405,\"empCodigo\":1,\"nome\":\"Cargo para extinção\",\"categoria\":\"GERAL\",\"controleVaga\":false,\"porReferencia\":false,\"eAglutinador\":false}"))
         .andExpect(status().isCreated());
     revisionCommand(
             "/api/ergon/cargos/9405/actions/extinguir-cargo", "{\"dtExtincao\":\"2026-10-01\"}")
@@ -1368,7 +1351,7 @@ class NeonIntegrationTest {
       {
         "cargos",
         "9305",
-        "{\"cargo\":9305,\"empCodigo\":1,\"nome\":\"Cargo de prova\",\"categoria\":\"ADMINISTRATIVO\"}",
+        "{\"cargo\":9305,\"empCodigo\":1,\"nome\":\"Cargo de prova\",\"categoria\":\"ADMINISTRATIVO\",\"controleVaga\":false,\"porReferencia\":false,\"eAglutinador\":false}",
         "cargo"
       },
       {

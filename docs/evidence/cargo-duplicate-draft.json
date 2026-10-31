@@ -1,0 +1,1 @@
+{"noDomainOrBulkWrite":true,"discardHasNoEffect":true,"allowlistedFields":["nome","categoria","subcategoria","tipoCargo","cargoFuncao","escolaridade","cbo"],"sourceVersionUnchanged":true}

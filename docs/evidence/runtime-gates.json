@@ -1,127 +1,159 @@
 {
-  "sourceSha256": "adfbb84cd8ab0816ae5575b3ab32d970f8854711f32b345054fe91089b494946",
-  "validatedAt": "2026-10-28T19:43:53.350189+00:00",
-  "baselineCommit": "ac6dd29a75f5c764c9ecd477d7af902c00a0eddf",
+  "sourceSha256": "8f4d93e777f3338ca7af7f4b32f4ba1815cffc4265c9a1170fc4d03fc484f723",
+  "validatedAt": "2026-10-29T02:53:37.755430+00:00",
+  "status": "FAILED",
   "gates": {
     "schema": {
       "status": "pass",
+      "scope": "Schema shape/publication tests on unchanged production sources; operational availability is failed separately.",
       "artifacts": [
         {
-          "path": "docs/evidence/503-final-test-results.json",
-          "sha256": "c46dfe1087b5026206d5135f2e7390dc495c6f08a1dc7aa7c3a7d0cb01f35a06"
+          "path": "docs/evidence/t08-final-test-results.json",
+          "sha256": "16e8a969a96e75bf880563a9ade4cca455e51be9789eaa749b38aa0ce6e976ef"
         },
         {
-          "path": "docs/evidence/503-sdk-provenance.json",
-          "sha256": "e07089bac454079a5d7d976dfad816c8df54502f9e1b15ba6fb0f3d8a500beac"
+          "path": "docs/evidence/t08-negative-oracle-change.json",
+          "sha256": "69f4a2769533030032de54ad26ccdbc4378cc2057e378da473d31d264032b00b"
         },
         {
-          "path": "docs/evidence/cargos-response.json",
-          "sha256": "12edab102d3a2b9d8a8ce50be76a24f37672f0ec78b7ce8bcffd4ea3e2f9b40a"
+          "path": "docs/evidence/t08-sdk-provenance.json",
+          "sha256": "104a78c55733f24d226609a9577c609bc680efb20bbf56331f4b5d0547675106"
         },
         {
-          "path": "docs/evidence/servidor-pessoas-response.json",
-          "sha256": "ffeb2928c96d8cb555eca92134db2c0180c196605516a41f0ae5065c1bc6d3ec"
+          "path": "docs/evidence/cargo-duplicate-schema.json",
+          "sha256": "a28e91329977384c42d9c77b172cf089b0bd038b99739a9c3788a3f9b5c421cc"
         },
         {
-          "path": "docs/evidence/vinculos-response.json",
-          "sha256": "b12999d2b109d60d14c7666f346e99af9c6548c71a865785d9de6df7a32ba121"
+          "path": "docs/evidence/cargo-create-schema.json",
+          "sha256": "801b3ad65f90d5657f7f9fa4fe5384951772fb3d6ac630c002bf53cc74708dbb"
         }
       ]
     },
     "http": {
-      "status": "pass",
+      "status": "failed",
+      "scope": "Full campaign GET actions returned503; single strengthened focal GET capabilities also returned503. No retry-to-green.",
       "artifacts": [
         {
-          "path": "docs/evidence/503-final-test-results.json",
-          "sha256": "c46dfe1087b5026206d5135f2e7390dc495c6f08a1dc7aa7c3a7d0cb01f35a06"
+          "path": "docs/evidence/t08-final-test-results.json",
+          "sha256": "16e8a969a96e75bf880563a9ade4cca455e51be9789eaa749b38aa0ce6e976ef"
         },
         {
-          "path": "docs/evidence/503-sdk-provenance.json",
-          "sha256": "e07089bac454079a5d7d976dfad816c8df54502f9e1b15ba6fb0f3d8a500beac"
+          "path": "docs/evidence/t08-negative-oracle-change.json",
+          "sha256": "69f4a2769533030032de54ad26ccdbc4378cc2057e378da473d31d264032b00b"
+        },
+        {
+          "path": "docs/evidence/t08-sdk-provenance.json",
+          "sha256": "104a78c55733f24d226609a9577c609bc680efb20bbf56331f4b5d0547675106"
+        },
+        {
+          "path": "docs/evidence/t08-negative-contract-focal-results.json",
+          "sha256": "67f9f8625a517caed621bd893d4c95657ff68edb92cdfa3de506e55f66d19ed8"
         }
       ]
     },
     "availability": {
-      "status": "pass",
+      "status": "failed",
+      "scope": "Two governed metadata timeouts prevent the integrated availability gate; READ-only and foreign-context focal assertions passed, extinct-origin focal was interrupted.",
       "artifacts": [
         {
-          "path": "docs/evidence/503-final-test-results.json",
-          "sha256": "c46dfe1087b5026206d5135f2e7390dc495c6f08a1dc7aa7c3a7d0cb01f35a06"
+          "path": "docs/evidence/t08-final-test-results.json",
+          "sha256": "16e8a969a96e75bf880563a9ade4cca455e51be9789eaa749b38aa0ce6e976ef"
         },
         {
-          "path": "docs/evidence/503-sdk-provenance.json",
-          "sha256": "e07089bac454079a5d7d976dfad816c8df54502f9e1b15ba6fb0f3d8a500beac"
+          "path": "docs/evidence/t08-negative-oracle-change.json",
+          "sha256": "69f4a2769533030032de54ad26ccdbc4378cc2057e378da473d31d264032b00b"
+        },
+        {
+          "path": "docs/evidence/t08-sdk-provenance.json",
+          "sha256": "104a78c55733f24d226609a9577c609bc680efb20bbf56331f4b5d0547675106"
+        },
+        {
+          "path": "docs/evidence/t08-cargo-integrated-results.json",
+          "sha256": "64a632306316f00609cdde3f30f6a220677e599844f5d53810e5f4d7f70b64a0"
+        },
+        {
+          "path": "docs/evidence/t08-negative-contract-focal-results.json",
+          "sha256": "67f9f8625a517caed621bd893d4c95657ff68edb92cdfa3de506e55f66d19ed8"
+        },
+        {
+          "path": "docs/evidence/t08-second-timeout-diagnostic.json",
+          "sha256": "118da1c223a09ccccc50df036ead64d7964de8df36a82615562d6c214f97379f"
         }
-      ],
-      "scope": "Authorizations, versions, workflow states and declared item/collection operations exercised by the suite"
+      ]
     },
     "persistence": {
       "status": "pass",
+      "scope": "Completed write/non-persistence/concurrency cases and final equality of all 16 domain tables/schema. Does not assert unexecuted assertions in failed cases.",
       "artifacts": [
         {
-          "path": "docs/evidence/503-final-test-results.json",
-          "sha256": "c46dfe1087b5026206d5135f2e7390dc495c6f08a1dc7aa7c3a7d0cb01f35a06"
+          "path": "docs/evidence/t08-final-test-results.json",
+          "sha256": "16e8a969a96e75bf880563a9ade4cca455e51be9789eaa749b38aa0ce6e976ef"
         },
         {
-          "path": "docs/evidence/503-sdk-provenance.json",
-          "sha256": "e07089bac454079a5d7d976dfad816c8df54502f9e1b15ba6fb0f3d8a500beac"
+          "path": "docs/evidence/t08-negative-oracle-change.json",
+          "sha256": "69f4a2769533030032de54ad26ccdbc4378cc2057e378da473d31d264032b00b"
         },
         {
-          "path": "docs/evidence/503-neon-preservation.json",
-          "sha256": "372502e5ddabaa6c026d74925fd18a6847b9a5ee439c32b34365d5afc77913e9"
+          "path": "docs/evidence/t08-sdk-provenance.json",
+          "sha256": "104a78c55733f24d226609a9577c609bc680efb20bbf56331f4b5d0547675106"
+        },
+        {
+          "path": "docs/evidence/t08-neon-preservation.json",
+          "sha256": "7e4ff896bb4f740a5df3df9d8d24d32b54774c68ac1e8faff8604adb55e02ed7"
+        },
+        {
+          "path": "docs/evidence/t08-neon-cleanup.json",
+          "sha256": "fc226168533467ecc5abd6e58db02040d24470bd5c06e05e2d0e4e840b3c5e8f"
         }
       ]
     },
     "parity": {
       "status": "pass",
+      "scope": "Only mapped pilot registration and listed operations/invariants exercised by 63 Neon regression cases; full statutory/legacy parity is not certified.",
       "artifacts": [
         {
-          "path": "docs/evidence/503-final-test-results.json",
-          "sha256": "c46dfe1087b5026206d5135f2e7390dc495c6f08a1dc7aa7c3a7d0cb01f35a06"
+          "path": "docs/evidence/t08-final-test-results.json",
+          "sha256": "16e8a969a96e75bf880563a9ade4cca455e51be9789eaa749b38aa0ce6e976ef"
         },
         {
-          "path": "docs/evidence/503-sdk-provenance.json",
-          "sha256": "e07089bac454079a5d7d976dfad816c8df54502f9e1b15ba6fb0f3d8a500beac"
+          "path": "docs/evidence/t08-negative-oracle-change.json",
+          "sha256": "69f4a2769533030032de54ad26ccdbc4378cc2057e378da473d31d264032b00b"
+        },
+        {
+          "path": "docs/evidence/t08-sdk-provenance.json",
+          "sha256": "104a78c55733f24d226609a9577c609bc680efb20bbf56331f4b5d0547675106"
         }
-      ],
-      "scope": "Only mapped pilot registration and listed administrative operations; full statutory/legacy parity is not certified"
+      ]
     },
     "angularReadiness": {
-      "status": "pass",
+      "status": "not-run",
+      "scope": "676 official-source inputs verified and host prepared; consumer harness not executed in this cut after recurrent gate failure. No browser/public npm acceptance.",
       "artifacts": [
         {
-          "path": "docs/evidence/503-final-test-results.json",
-          "sha256": "c46dfe1087b5026206d5135f2e7390dc495c6f08a1dc7aa7c3a7d0cb01f35a06"
+          "path": "docs/evidence/t08-http-preparation.json",
+          "sha256": "bebcce4b9d6925ef430733a94cdea4183e70167c893277cee345ce537bda2b19"
         },
         {
-          "path": "docs/evidence/503-sdk-provenance.json",
-          "sha256": "e07089bac454079a5d7d976dfad816c8df54502f9e1b15ba6fb0f3d8a500beac"
-        },
-        {
-          "path": "docs/evidence/503-angular-http-results.json",
-          "sha256": "9b4a59589c7c97452dc4653245b3d1735303f45d7a2d7bea44502032fdfa2fa5"
-        },
-        {
-          "path": "docs/evidence/angular-consumer-proof.json",
-          "sha256": "2e01dca645829a01dbf7c1f5abaf481c9140356bb564fd39fc892abbee27dbdf"
-        },
-        {
-          "path": "docs/evidence/angular-consumer-input-hashes.json",
-          "sha256": "ebc21f40f414c6bebca048be5da4b5bd998ba00ce5aad3f4978b50485b84b0f1"
+          "path": "docs/evidence/t08-angular-inputs.json",
+          "sha256": "4e1a9f6a67cd0b7f0bf1d12654adfc0f3c3d0f078441a7d9265346eb8290e84b"
         }
-      ],
-      "scope": "Official source normalizer and ReactiveDeterminationRuntimeService; not published npm adoption or visual host acceptance"
+      ]
     },
     "coldQueries": {
       "status": "pass",
+      "scope": "Measured page/cursor/export scenarios only; not a corporate latency or availability SLO.",
       "artifacts": [
         {
-          "path": "docs/evidence/503-final-test-results.json",
-          "sha256": "c46dfe1087b5026206d5135f2e7390dc495c6f08a1dc7aa7c3a7d0cb01f35a06"
+          "path": "docs/evidence/t08-final-test-results.json",
+          "sha256": "16e8a969a96e75bf880563a9ade4cca455e51be9789eaa749b38aa0ce6e976ef"
         },
         {
-          "path": "docs/evidence/503-sdk-provenance.json",
-          "sha256": "e07089bac454079a5d7d976dfad816c8df54502f9e1b15ba6fb0f3d8a500beac"
+          "path": "docs/evidence/t08-negative-oracle-change.json",
+          "sha256": "69f4a2769533030032de54ad26ccdbc4378cc2057e378da473d31d264032b00b"
+        },
+        {
+          "path": "docs/evidence/t08-sdk-provenance.json",
+          "sha256": "104a78c55733f24d226609a9577c609bc680efb20bbf56331f4b5d0547675106"
         },
         {
           "path": "docs/evidence/cold-query-counts.json",
@@ -130,40 +162,54 @@
       ]
     },
     "reactiveDeterminations": {
-      "status": "pass",
+      "status": "partial",
+      "scope": "HOST Java contracts tested; official consumer HTTP runtime was not rerun for this candidate.",
       "artifacts": [
         {
-          "path": "docs/evidence/503-final-test-results.json",
-          "sha256": "c46dfe1087b5026206d5135f2e7390dc495c6f08a1dc7aa7c3a7d0cb01f35a06"
+          "path": "docs/evidence/t08-final-test-results.json",
+          "sha256": "16e8a969a96e75bf880563a9ade4cca455e51be9789eaa749b38aa0ce6e976ef"
         },
         {
-          "path": "docs/evidence/503-sdk-provenance.json",
-          "sha256": "e07089bac454079a5d7d976dfad816c8df54502f9e1b15ba6fb0f3d8a500beac"
+          "path": "docs/evidence/t08-negative-oracle-change.json",
+          "sha256": "69f4a2769533030032de54ad26ccdbc4378cc2057e378da473d31d264032b00b"
         },
         {
-          "path": "docs/evidence/503-angular-http-results.json",
-          "sha256": "9b4a59589c7c97452dc4653245b3d1735303f45d7a2d7bea44502032fdfa2fa5"
+          "path": "docs/evidence/t08-sdk-provenance.json",
+          "sha256": "104a78c55733f24d226609a9577c609bc680efb20bbf56331f4b5d0547675106"
         },
         {
-          "path": "docs/evidence/angular-consumer-proof.json",
-          "sha256": "2e01dca645829a01dbf7c1f5abaf481c9140356bb564fd39fc892abbee27dbdf"
+          "path": "docs/evidence/cargos-post-determinations.json",
+          "sha256": "801b3ad65f90d5657f7f9fa4fe5384951772fb3d6ac630c002bf53cc74708dbb"
+        },
+        {
+          "path": "docs/evidence/servidor-pessoas-post-determinations.json",
+          "sha256": "bd4ea97b3d955aabbef9d2ad95c29d5b978eb2f37113feea8a09fc286f5a615e"
+        },
+        {
+          "path": "docs/evidence/vinculos-post-determinations.json",
+          "sha256": "0f58db6a55ffc66af2911e126517a5aeee8d2e641bffab65e80e225d94703b4a"
         }
       ]
     },
     "governedDecisions": {
       "status": "not-applicable",
-      "reason": "The responsible user explicitly approved HOST determinations, transactional invariants and Angular proof as PASS for phase 3A at e6b9fa0. No external Config snapshot exists for this phase; Config/rules-engine integration is assigned to a future dedicated phase."
+      "reason": "The user explicitly approved HOST determinations/invariants and prior Angular proof for phase 3A at e6b9fa0; no external Config snapshot exists and Config/rules-engine is a future dedicated phase."
     },
     "bulkOperations": {
       "status": "pass",
+      "scope": "Six BulkNeonIntegrationTest cases passed; this does not erase governed metadata read timeouts in other suites.",
       "artifacts": [
         {
-          "path": "docs/evidence/503-final-test-results.json",
-          "sha256": "c46dfe1087b5026206d5135f2e7390dc495c6f08a1dc7aa7c3a7d0cb01f35a06"
+          "path": "docs/evidence/t08-final-test-results.json",
+          "sha256": "16e8a969a96e75bf880563a9ade4cca455e51be9789eaa749b38aa0ce6e976ef"
         },
         {
-          "path": "docs/evidence/503-sdk-provenance.json",
-          "sha256": "e07089bac454079a5d7d976dfad816c8df54502f9e1b15ba6fb0f3d8a500beac"
+          "path": "docs/evidence/t08-negative-oracle-change.json",
+          "sha256": "69f4a2769533030032de54ad26ccdbc4378cc2057e378da473d31d264032b00b"
+        },
+        {
+          "path": "docs/evidence/t08-sdk-provenance.json",
+          "sha256": "104a78c55733f24d226609a9577c609bc680efb20bbf56331f4b5d0547675106"
         },
         {
           "path": "docs/evidence/bulk-protocol-receipts.json",
@@ -171,7 +217,7 @@
         },
         {
           "path": "docs/evidence/bulk-cargos-pessoas-receipts.json",
-          "sha256": "8dcc70f06eefbf8edba736bf5014723aa42093534b263f95a5a18ddadf710584"
+          "sha256": "56aebb404ffa39f58451d9ace14dfaaa7890168dc91f0d8970f510afe1f96f0f"
         },
         {
           "path": "docs/evidence/bulk-blocked-preview.json",
@@ -184,7 +230,11 @@
       ]
     }
   },
-  "historicalSourceSha256": "933d9c8ccb29e18e1be39694fb495b99636da9bbc9efd05ba937e6b5e88f3408",
-  "status": "PASS",
+  "sourceLineage": {
+    "integral": "891ee0799cd95beeb496e4249fe10a029b503044814784247ee0f295eb183f0d",
+    "current": "8f4d93e777f3338ca7af7f4b32f4ba1815cffc4265c9a1170fc4d03fc484f723",
+    "change": "Reviewed strengthening in one test file only; production/configuration/SDK unchanged",
+    "evidence": "docs/evidence/t08-negative-oracle-change.json"
+  },
   "currentCampaign": "docs/evidence/PILLARS-CAMPAIGN.json"
 }

@@ -1,5 +1,6 @@
 package br.com.praxis.ergonshowcase.dto;
 
+import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.praxisplatform.uischema.extension.annotation.UISchema;
@@ -30,7 +31,7 @@ public class DocumentoLegalFilterDTO implements GenericFilterDTO {
       type = org.praxisplatform.uischema.FieldDataType.TEXT,
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
       icon = "apartment",
-      endpoint = "/api/ergon/orgaos/option-sources/orgao/options/filter",
+      endpoint = ApiPaths.ORGAO_OPTIONS,
       valueField = "id",
       displayField = "label")
   @Filterable(operation = FilterOperation.EQUAL, relation = "empCodigo")

@@ -1,0 +1,11 @@
+{
+  "recordedAt": "2026-10-29T00:41:39.765299+00:00",
+  "sourceSha256": "a28522851ef2bbe2b1ac7f89e772703d8411af7b304628cc78a8f85a5a2ad148",
+  "tests": 1,
+  "failures": 1,
+  "errors": 0,
+  "skipped": 0,
+  "xmlSha256": "0ae71a92124a03cee4cd632899b111927d3391850f12df49172e40b67d33334e",
+  "status": "TEST_ORACLE_WRONG_ABOUT_UNKNOWN_FIELDS",
+  "explanation": "Header400 and catalog400 then tenant422 passed. Existing fail-on-unknown-properties=true correctly rejected version/dtExtincao/saldo/auditoria instead of the test expected201. Production policy unchanged; next test proves strict rejection and separate explicitly ignored id."
+}

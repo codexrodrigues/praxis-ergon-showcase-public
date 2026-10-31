@@ -10,6 +10,12 @@ import org.springframework.http.HttpStatus;
 /** Fixture administrativa explícita; somente o kernel realiza transições de controle. */
 final class BulkPublicationProof {
   private BulkPublicationProof() {}
+  /** Um contexto já publicado conserva sua fotografia; cada request continua reatestando o fence LIVE. */
+  static void ensurePublished(org.praxisplatform.uischema.openapi.OpenApiDocumentService documents,
+      TestRestTemplate runtimeHttp) throws Exception {
+    if (!documents.hasLocalPublishedBulkOpenApiPublication()) publish(runtimeHttp,
+        Boolean.parseBoolean(System.getenv().getOrDefault("BULK_PROOF_RESET_PUBLICATION", "false")));
+  }
   static void publish(TestRestTemplate runtimeHttp, boolean reset) throws Exception {
     String admin = System.getenv("SHOWCASE_BULK_ADMIN_USERNAME");
     String secret = System.getenv("SHOWCASE_BULK_ADMIN_PASSWORD");

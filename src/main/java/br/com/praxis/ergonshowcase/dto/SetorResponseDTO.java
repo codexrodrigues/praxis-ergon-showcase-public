@@ -1,5 +1,6 @@
 package br.com.praxis.ergonshowcase.dto;
 
+import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.Map;
@@ -47,7 +48,7 @@ public class SetorResponseDTO {
       type = org.praxisplatform.uischema.FieldDataType.TEXT,
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
       icon = "apartment",
-      endpoint = "/api/ergon/orgaos/option-sources/orgao/options/filter",
+      endpoint = ApiPaths.ORGAO_OPTIONS,
       valueField = "id",
       displayField = "label")
   private Integer empCodigo;
@@ -91,7 +92,7 @@ public class SetorResponseDTO {
       type = org.praxisplatform.uischema.FieldDataType.TEXT,
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
       icon = "account_tree",
-      endpoint = "/api/ergon/setores/option-sources/setor/options/filter",
+      endpoint = ApiPaths.SETOR_OPTIONS,
       valueField = "id",
       displayField = "label")
   private String setorPai;
@@ -184,7 +185,7 @@ public class SetorResponseDTO {
       type = org.praxisplatform.uischema.FieldDataType.TEXT,
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
       icon = "gavel",
-      endpoint = "/api/ergon/documentos-legais/option-sources/documento/options/filter",
+      endpoint = ApiPaths.DOCUMENTO_OPTIONS,
       valueField = "id",
       displayField = "label")
   private Long documentoLegalId;

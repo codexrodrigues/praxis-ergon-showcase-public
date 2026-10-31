@@ -1,0 +1,10 @@
+{
+  "recordedAt": "2026-10-29T02:40:25.007343+00:00",
+  "artifact": "praxis-ergon-showcase-0.1.0-SNAPSHOT.jar",
+  "artifactSha256": "0ebb019e7126eccea0014caa561c65157ffdaf4f7d792840ac6991562d8d86ce",
+  "embeddedSdk": "BOOT-INF/lib/praxis-metadata-starter-8.0.0-bulk.308-consolidation.5-SNAPSHOT.jar",
+  "embeddedSdkSha256": "11194e06878268a184fbeb476f7b1a4fbd09a287c91badf36cb86e3e7072abd0",
+  "sourceSha256": "8f4d93e777f3338ca7af7f4b32f4ba1815cffc4265c9a1170fc4d03fc484f723",
+  "buildCommand": "mvn -o -Dmaven.repo.local=<private-cache> -Dpraxis.core.version=8.0.0-bulk.308-consolidation.5-SNAPSHOT -DskipTests package",
+  "scope": "Packaging only; test outcomes are in separate full and focal receipts"
+}

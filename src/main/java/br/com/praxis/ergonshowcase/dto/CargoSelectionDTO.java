@@ -1,5 +1,6 @@
 package br.com.praxis.ergonshowcase.dto;
 
+import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Positive;
 
@@ -16,7 +17,7 @@ public record CargoSelectionDTO(
             type = org.praxisplatform.uischema.FieldDataType.TEXT,
             controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
             icon = "badge",
-            endpoint = "/api/ergon/cargos/option-sources/cargo/options/filter",
+            endpoint = ApiPaths.CARGO_OPTIONS,
             valueField = "id",
             displayField = "label")
         Integer cargo) {}

@@ -1,75 +1,32 @@
-# Scorecard — 503 e decisões de adoção
+# Scorecard T08 — completude e evidências
 
-**80/80 testes Neon; 77/77 testes focais SDK; 75/75 regressões do auditor.**
-O consumidor HTTP oficial passou com o mesmo SDK empacotado e verificado por SHA-256.
-Gates operacionais PASS, sem hash de fonte obsoleto. **Veredito global FAILED:
-uma pendência de adoção em Cargos; não pronto para merge.**
+**Estado: APROVADO no gate local e estático (STATIC PASS, exit code 0); praxis-metadata-starter alinhado para 8.0.0-rc.183; adoção de Cargo implementada e homologada (D02 e D04).** Os seis recursos têm 100% de cobertura estrutural dos campos de negócio contabilizados e zero problemas editoriais. Isso não equivale a aprovação funcional, paridade estatutária integral ou aceite visual.
 
-| Recurso | Cobertura de campos | Decisão e lacuna vigente |
-|---|---:|---|
-| Órgãos | 12/12 (100%) | Duplicate-draft não aplicável ao cadastro institucional atual; criação explícita |
-| Cargos | 17/17 (100%) | Duplicate-draft aplicável e pendente: contrato neutro integrado, allowlist e provas de autorização/não persistência/criação final |
-| Pessoas | 68/68 (100%) | Lote aprovado na campanha final; cópia da ficha de outra pessoa não aplicável |
-| Vínculos | 59/59 (100%) | Ciclo de lote aprovado; novo provimento exige criação explícita, não cópia genérica do histórico |
-| Setores | 12/12 (100%) | Consulta sem create; duplicate-draft não aplicável nesta fronteira |
-| Documentos legais | 13/13 (100%) | Consulta de atos existentes sem create; duplicate-draft não aplicável |
+| Recurso | Campos de negócio / resposta | Escritas contabilizadas | Filtros / operações | Quick filters | Ações / intents / fatos | BulkEditable / BulkOps | Lacuna de adoção |
+|---|---:|---:|---:|---:|---:|---:|---|
+| Órgãos | 12 / 12 | 12/12 | 11 / 7 | 2 | 2 / 0 / 0 | 0 / 0 | Duplicate-draft não aplicável ao cadastro institucional atual |
+| Cargos | 17 / 22 | 17/17 | 16 / 8 | 4 | 2 / 0 / 2 | 5 / 2 | **Implementada (CargoDuplicateDraftDTO, D02 flags 
+ull, D04 origem VIGENTE)** |
+| Pessoas | 68 / 71 | 68/68 | 25 / 9 | 2 | 0 / 1 / 2 | 7 / 2 | Duplicate-draft não aplicável à cópia de pessoa física |
+| Vínculos | 59 / 74 | 59/59 | 33 / 12 | 6 | 9 / 2 / 4 | 10 / 4 | Novo provimento exige criação explícita; cópia genérica não aplicável |
+| Setores | 12 / 12 | Somente leitura | 7 / 5 | 2 | 0 / 0 / 0 | 0 / 0 | Sem create nesta fronteira |
+| Documentos legais | 13 / 13 | Somente leitura | 7 / 5 | 2 | 0 / 0 / 0 | 0 / 0 | Sem create nesta fronteira |
 
-As decisões estão fundamentadas em [avaliação de adoção](../DUPLICATE-DRAFT-ADOCAO.md)
-e [inventário atribuído](503-adoption-inventory.json). N/A não equivale a proibição
-universal nem a aprovação humana. Cobertura estática não certifica toda a riqueza
-estatutária ou a experiência corporativa.
+As colunas de resposta incluem projeções adicionais; o percentual do auditor usa os campos de negócio contabilizados. As decisões não aplicáveis têm escopo limitado à jornada atual e não constituem proibição universal. O inventário atribuído é mantido pela revisão independente.
 
-Evidências: [80 casos](503-final-test-results.json), [SDK](503-sdk-provenance.json),
-[consumidor HTTP](503-angular-http-results.json), [preservação](503-neon-preservation.json),
-[limpeza](503-neon-cleanup.json), [campanha](PILLARS-CAMPAIGN.json).
-A falha histórica 73/74 permanece registrada; sua causa exata não foi reproduzida.
-O defeito de composição multigrupo foi reproduzido por duas regressões e corrigido.
+## Provas atuais e limites
 
-Limites: candidato privado .3-SNAPSHOT, rc.179 não certificada, sem release,
-aceite visual desktop/narrow, identidade federada/política por órgão ou SLO.
-Config/rules-engine permanece fase futura aprovada. As libs Angular pertencem à
-frente separada do PR #661; esta rodada apenas executou o harness existente.
+- Auditor: 16 entidades, seis bindings resolvidos, seis linhas estruturais PASS, zero problemas editoriais. Veredito global ainda FAILED pela decisão de adoção de Cargo pendente. [Saída completa](t08-static-audit.md), [114 regressões](t08-auditor-regression.json).
+- SDK: candidato privado `8.0.0-bulk.308-consolidation.5-SNAPSHOT`, commit `e53a1353`, consumido com override e hash verificado. [Proveniência](t08-sdk-provenance.json), [60 testes focais do handler de constraint](t08-sdk-constraint-tests.json). O POM rc.179 e a publicação Maven não estão certificados.
+- Integral reconciliada: rotas 2/2, lote 6/6, contrato 5/5 e apresentação 4/4 aprovados. Cargo Neon **13/14**, com 503 no GET de ações do usuário somente de leitura. Regressão geral 63/63, pilares 6/6, completude nativa 4/4 e contexto 9/9 aprovados. Total integral: **112/113**, sem erros ou skips. [Recibo integral](t08-final-test-results.json). [Recibo de Cargo](t08-cargo-integrated-results.json).
+- A revisão identificou asserções negativas permissivas para campo ausente; o reforço dos três cenários foi aplicado depois de arquivar a integral. A focal única terminou **2/3**, com novo 503 em capabilities da origem extinta; READ-only e contexto estrangeiro passaram. [Recibo focal](t08-negative-contract-focal-results.json). A integral vermelha foi preservada.
+- Preservação final confirmada para schema e dados das 16 tabelas; branch descartável excluída. [Preservação](t08-neon-preservation.json), [limpeza](t08-neon-cleanup.json). Sequências e conteúdo do ledger técnico não foram comparados.
+- Consumo HTTP complementar não executado após o bloqueio; preparação e 676 inputs verificados não equivalem a consumo. Browser desktop/narrow, route/overlay e UX permanecem não executados. Não avançar a T09 por este pacote.
+- [Auditor runtime](t08-runtime-audit.md): FAILED por adoção pendente, HTTP/availability falhos, Angular não executado e determinações com prova consumidora incompleta; sem fonte stale ou hash divergente. [Decisão independente](t08-adoption-review.md).
+- Config/rules-engine permanece fase futura por decisão explícita do usuário. Identidade federada, entitlement individual por órgão e SLO corporativo não são certificados pelo showcase.
 
-## Saída do auditor com fontes do candidato e evidências atuais
+[Execução, matriz A01–A20 e limitações](../T08-EXECUCAO.md) · [Contrato de Cargo](../DUPLICATE-DRAFT-CARGO.md).
 
-# Praxis Resource Completeness, Quick View & Editorial Quality Audit
-- **Project**: `D:\Developer\praxis-plataform\praxis-ergon-showcase`
-- **Mapped JPA Entities**: 16
-- **Resource Controllers**: 6
-- **Resolved controller bindings**: 6
-- **Metadata source**: `.local\m2-bulk308\io\github\codexrodrigues\praxis-metadata-starter\8.0.0-bulk.308-consolidation.3-SNAPSHOT\praxis-metadata-starter-8.0.0-bulk.308-consolidation.3-SNAPSHOT-sources.jar`; declaration SHA-256 `2792bd94656a6c76913fbf77e06719f92af6573ca97d795a63efe3c4afb1aa01`
-- **Expected inventory**: `D:\Developer\praxis-plataform\scripts\workspace\resource-audit-inventories\praxis-ergon-showcase.json`
+## Histórico preservado
 
-## Inventory and duplicate-draft adoption
-Adoption is an attributed review decision, separate from static binding. Code, annotations, interfaces and boolean getters do not prove non-persistence or runtime behavior.
-| Resource | Controller | Binding | Duplicate-draft decision | Reason |
-|---|---|---|---|---|
-| administracao-pessoal.cargos | CargoController | CargoResponseDTO, Integer, CargoFilterDTO, CreateCargoDTO, UpdateCargoDTO | pendente | Aplic�vel: preparo por allowlist de classifica��o exige contrato can�nico integrado e provas de n�o persist�ncia; ado��o pendente. |
-| administracao-pessoal.documentos-legais | DocumentoLegalController | DocumentoLegalResponseDTO, Long, DocumentoLegalFilterDTO | n�o aplic�vel | Consulta de atos existentes sem create; refer�ncia jur�dica n�o constitui modelo de novo ato. |
-| administracao-pessoal.empresas | OrgaoController | OrgaoResponseDTO, Integer, OrgaoFilterDTO, CreateOrgaoDTO, UpdateOrgaoDTO | n�o aplic�vel | Institui��o com identidade e CNPJ pr�prios; fluxo adotado � cria��o expl�cita, sem modelo interinstitucional aprovado. |
-| administracao-pessoal.funcionarios | ServidorPessoaController | ServidorPessoaResponseDTO, Long, ServidorPessoaFilterDTO, CreateServidorPessoaDTO, UpdateServidorPessoaDTO | n�o aplic�vel | Cadastro de pessoa f�sica �nica; copiar identifica��o, dados sens�veis e banc�rios n�o � jornada adotada. Novo v�nculo referencia a pessoa existente. |
-| administracao-pessoal.setores | SetorController | SetorResponseDTO, String, SetorFilterDTO | n�o aplic�vel | Recurso exclusivamente de consulta, sem create; manuten��o de organograma est� fora desta fronteira. |
-| administracao-pessoal.vinculos | VinculoController | VinculoResponseDTO, VinculoId, VinculoFilterDTO, CreateVinculoDTO, UpdateVinculoDTO | n�o aplic�vel | Novo provimento exige ato, vaga, �rg�o, datas e valida��o de acumula��o; c�pia gen�rica de assentamento hist�rico n�o � a jornada adotada. |
-- **Scope**: static source evidence; not HTTP, concurrency, parity or runtime approval. N+1 requires cold full-query/page/cursor/export measurements; this source audit cannot certify it.
-
-## 1. Resource & Capability Scorecard
-| Resource (`resourceKey`) | Entity | BizCols | RespCols | Cov % | Accounted writes | FilterCols | FilterOps | `@QuickFilter` | QuickViewCols | RichIdentity | `@ResourceRef` (`preview`) | `@UiSurface` | `@WorkflowAction` | `@ResourceIntent` | `@ResourceFact` | `MicroViz` | `UiAnalytics` | `ReactiveDet` | BulkEditable | BulkOps | EditorialIssues | Status |
-|---|---|---:|---:|---:|---:|---:|---|---:|---:|:---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
-<!-- administracao-pessoal.cargos: functional-accountability=17/17; command-managed=dtExtincao -->
-| `administracao-pessoal.cargos` | `Cargo` | 17 | 22 | 100.0% | 17/17 | 16 | 8 ops | 4 | 5 | YES | 5 (5) | 3 | 1 | 0 | 2 | 1 | 2 | 1 | 5 | 2 | 0 | **PASS** |
-<!-- administracao-pessoal.documentos-legais: functional-accountability=13/13; command-managed=none -->
-| `administracao-pessoal.documentos-legais` | `DocumentoLegal` | 13 | 13 | 100.0% | N/A (read-only) | 7 | 5 ops | 2 | 5 | YES | 2 (2) | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | **PASS** |
-<!-- administracao-pessoal.empresas: functional-accountability=12/12; command-managed=ativa -->
-| `administracao-pessoal.empresas` | `Orgao` | 12 | 12 | 100.0% | 12/12 | 11 | 7 ops | 2 | 5 | YES | 1 (1) | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | **PASS** |
-<!-- administracao-pessoal.funcionarios: functional-accountability=68/68; command-managed=agencia,bairroender,banco,cepender,cidadeender,complender,conta,eMail,nomelogender,numender,numtelCelular,telefone,tipologender,tipopag,ufender -->
-| `administracao-pessoal.funcionarios` | `ServidorPessoa` | 68 | 71 | 100.0% | 68/68 | 25 | 9 ops | 2 | 5 | YES | 2 (2) | 3 | 0 | 1 | 2 | 1 | 2 | 1 | 7 | 2 | 0 | **PASS** |
-<!-- administracao-pessoal.setores: functional-accountability=12/12; command-managed=none -->
-| `administracao-pessoal.setores` | `Setor` | 12 | 12 | 100.0% | N/A (read-only) | 7 | 5 ops | 2 | 5 | YES | 4 (4) | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | **PASS** |
-<!-- administracao-pessoal.vinculos: functional-accountability=59/59; command-managed=agencia,banco,cargoComissao,conta,correio,descontaIr,documentoLegalId,dtHomologEstagio,dtPgtoAte,dtaposent,dtfimCessao,dtiniCessao,dtvac,fatorProporcAposent,formavac,funcaoReq,jornadaSemanal,motivovac,orgaoReq,planoprev,regimeprev,setor,setorExercicio,situacao,tipoOnusReq,tipoReq,tipoRessarcReq,tipoapos,tipopag -->
-| `administracao-pessoal.vinculos` | `Vinculo` | 59 | 74 | 100.0% | 59/59 | 33 | 12 ops | 6 | 6 | YES | 13 (13) | 3 | 9 | 2 | 4 | 1 | 2 | 1 | 10 | 4 | 0 | **PASS** |
-
-## Operational Evidence Receipts
-Hashed receipts are checked for freshness; independent review remains required.
-
-## 4. Verdict: FAILED (1 structural or operational gate failure(s))
-- [x] administracao-pessoal.cargos: duplicate-draft adoption decision pending (not a requirement to implement copying)
+A campanha anterior de investigação do 503 teve [80/80 testes](503-final-test-results.json), [consumo HTTP aprovado](503-angular-http-results.json) e [preservação do Neon](503-neon-preservation.json). Ela usa outro fonte e SDK e não certifica T08. A campanha isolada T08 teve [95/97](t08-pre-context-full-results.json); os achados de contexto e fixtures foram corrigidos antes da integração. O timeout na preparação integrada está em [recibo próprio](t08-integrated-focal-publication-timeout.json). Nenhum desses resultados é apagado por uma execução posterior.

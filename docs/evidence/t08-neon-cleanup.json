@@ -1,0 +1,16 @@
+{
+  "recordedAt": "2026-10-29T02:50:30.499Z",
+  "project": "holy-mouse-40140108",
+  "deletedBranch": "br-orange-smoke-b7ma4hie",
+  "deleted": true,
+  "verifiedBy": "Full list_branches(include_deleted=false)",
+  "originalBranch": "br-super-sound-b7urizmd",
+  "originalPreserved": true,
+  "remainingBranchIds": [
+    "br-super-sound-b7urizmd",
+    "br-bitter-bonus-b7i0vfko"
+  ],
+  "authorization": "User explicitly authorized always deleting disposable proof branches after use and requested recording this decision.",
+  "ownedHttpHostStopped": true,
+  "mavenCampaignsFinished": true
+}

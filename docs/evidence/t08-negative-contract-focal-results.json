@@ -1,0 +1,37 @@
+{
+  "recordedAt": "2026-10-29T02:36:42.198033+00:00",
+  "scope": "Single reviewed focal of three complete negative scenarios; does not replace red full campaign",
+  "sourceSha256": "8f4d93e777f3338ca7af7f4b32f4ba1815cffc4265c9a1170fc4d03fc484f723",
+  "originalIntegralSourceSha256": "891ee0799cd95beeb496e4249fe10a029b503044814784247ee0f295eb183f0d",
+  "dependency": "8.0.0-bulk.308-consolidation.5-SNAPSHOT",
+  "actualSdkSha256": "11194e06878268a184fbeb476f7b1a4fbd09a287c91badf36cb86e3e7072abd0",
+  "productionConfigurationUnchangedFromIntegral": true,
+  "sourceFilesUnchangedDuringFocal": true,
+  "specialPublicationReset": false,
+  "retryLoop": false,
+  "xmlSha256": "3a1289846f27910fb028c95b8ebcdfe547eccb571315d3e60053a5ee21c6f425",
+  "logSha256": "663e427e4731d02370a078e5bfb430988da10c61b702ccdcdb0ad2ebe77eb008",
+  "tests": 3,
+  "failures": 1,
+  "errors": 0,
+  "skipped": 0,
+  "seconds": 358.574,
+  "cases": [
+    {
+      "name": "readWithoutCreatePermissionCannotPrepareOrDiscoverExecutableAction",
+      "status": "passed"
+    },
+    {
+      "name": "extinctOriginIncludingFutureDateIsDeniedInEveryBoundary",
+      "status": "failed"
+    },
+    {
+      "name": "missingAndOtherOrganizationOriginsAreIndistinguishableAndDoNotLeakState",
+      "status": "passed"
+    }
+  ],
+  "allRequestedMethodsExecuted": true,
+  "missingRequestedMethods": [],
+  "diagnostics": "Same JFR default settings as integrated campaign",
+  "passed": 2
+}

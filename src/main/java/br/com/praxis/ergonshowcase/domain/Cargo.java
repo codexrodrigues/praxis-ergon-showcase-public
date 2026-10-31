@@ -157,7 +157,8 @@ public class Cargo {
       "Versão do registro para controle de concorrência otimista (@Version / ETag / If-Match).")
   @Version
   @Column(name = "version", nullable = false)
-  private Long version = 0L;
+  // Versão nula identifica entidade nova com código atribuído; JPA inicializa ao persistir.
+  private Long version;
 
   /**
    * Código na Classificação Brasileira de Ocupações (CBO/MTE) de 6 dígitos associado ao cargo para

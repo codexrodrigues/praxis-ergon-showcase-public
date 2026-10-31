@@ -1,0 +1,117 @@
+{
+  "recordedAt": "2026-10-29T02:49:17.938Z",
+  "originalBranch": "br-super-sound-b7urizmd",
+  "proofBranch": "br-orange-smoke-b7ma4hie",
+  "schemaEqual": true,
+  "domainDataEqual": true,
+  "domainTables": 16,
+  "schemaScope": "public and praxis_bulk: columns, constraints, indexes and actual pg_description relation comments",
+  "schema": [
+    {
+      "part": "columns",
+      "total": "618",
+      "hash": "3cbdea4cd98a550a1dde631e0629cbd3"
+    },
+    {
+      "part": "comments",
+      "total": "408",
+      "hash": "1aaf29a7d9af2b43d9b21f31c4015737"
+    },
+    {
+      "part": "constraints",
+      "total": "332",
+      "hash": "b27435c2867c92dd66ed1c22e86f70ad"
+    },
+    {
+      "part": "indexes",
+      "total": "115",
+      "hash": "f95482b8700940bac2543141abd2648e"
+    }
+  ],
+  "data": [
+    {
+      "tabela": "afastamentos",
+      "total": "3",
+      "hash": "122902a28073d57c6469ec53d5a9301d"
+    },
+    {
+      "tabela": "cargos",
+      "total": "8",
+      "hash": "ef47e45ab29b7e1de0366ab515973c02"
+    },
+    {
+      "tabela": "codigos_frequencia",
+      "total": "12",
+      "hash": "5f7cd03311435b6feaa7153d17fb614a"
+    },
+    {
+      "tabela": "custom_field_definitions",
+      "total": "17",
+      "hash": "49d5452aecb0969735ba87716acad743"
+    },
+    {
+      "tabela": "dependentes",
+      "total": "4",
+      "hash": "5bda1d9f3120dd92159fb2eaeef5cd13"
+    },
+    {
+      "tabela": "documentos_legais",
+      "total": "7",
+      "hash": "40d877002a4f54210976a66ee7fd594c"
+    },
+    {
+      "tabela": "empresas",
+      "total": "3",
+      "hash": "b3dd15bf80543a8213ba54f601580792"
+    },
+    {
+      "tabela": "frequencias",
+      "total": "5",
+      "hash": "916d9f282f16399b7431cfb903cc3202"
+    },
+    {
+      "tabela": "funcionarios",
+      "total": "4",
+      "hash": "07bd36a0d4b29c4083580e0639bfa513"
+    },
+    {
+      "tabela": "itemtabelas",
+      "total": "103",
+      "hash": "2ac0dc408fd5dc2cc39fc3cdcf1da69e"
+    },
+    {
+      "tabela": "regras_frequencia_estatutaria",
+      "total": "9",
+      "hash": "16ec5e4fa76a5c0e78bfd2dfef66d6b8"
+    },
+    {
+      "tabela": "setores",
+      "total": "9",
+      "hash": "ea009493a1a3046286178300c5bc2e00"
+    },
+    {
+      "tabela": "tabelas",
+      "total": "25",
+      "hash": "e6fc9c8acdf37f5b34b5d4c3e3fbebcf"
+    },
+    {
+      "tabela": "tipos_dependente",
+      "total": "5",
+      "hash": "7e3cc9976a21e688ce1037fae611d382"
+    },
+    {
+      "tabela": "tipos_frequencia",
+      "total": "6",
+      "hash": "6568e148146d20654f0fe42f4ae19d46"
+    },
+    {
+      "tabela": "vinculos",
+      "total": "5",
+      "hash": "9a3b6cdf6bd0e1f493cef7077735884d"
+    }
+  ],
+  "sequencesCompared": false,
+  "technicalLedgerCompared": false,
+  "notes": "Technical proposal/receipt/publication records intentionally differ; no domain/schema migration or grants were applied.",
+  "originalAndProofMatchPreReconciliationBaseline": true
+}

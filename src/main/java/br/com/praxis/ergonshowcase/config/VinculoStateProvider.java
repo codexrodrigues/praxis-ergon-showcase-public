@@ -15,6 +15,8 @@ public class VinculoStateProvider implements ResourceStateSnapshotProvider {
   @org.springframework.beans.factory.annotation.Autowired
   private br.com.praxis.ergonshowcase.repository.CargoRepository cargos;
 
+  @org.springframework.beans.factory.annotation.Autowired private TenantContext tenant;
+
   private final VinculoRepository repository;
 
   public VinculoStateProvider(VinculoRepository repository) {
@@ -31,7 +33,7 @@ public class VinculoStateProvider implements ResourceStateSnapshotProvider {
                       Boolean.TRUE.equals(o.getAtiva()) ? "ATIVO" : "INATIVO"));
     if ("administracao-pessoal.cargos".equals(key) && id != null)
       return cargos
-          .findById(Integer.valueOf(id.toString()))
+          .findByCargoAndEmpCodigo(Integer.valueOf(id.toString()), tenant.orgao())
           .map(c -> ResourceStateSnapshot.of(c.getDtExtincao() == null ? "VIGENTE" : "EXTINTO"));
     if (!"administracao-pessoal.vinculos".equals(key) || id == null) return Optional.empty();
     String[] parts = id.toString().split(":");

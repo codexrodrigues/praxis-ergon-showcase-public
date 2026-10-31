@@ -15,17 +15,25 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 /** Provas dos contratos novos contra PostgreSQL real; toda alteração de fixture é revertida. */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@Transactional
 @WithMockUser(authorities = {"ERGON_READ", "ERGON_WRITE"})
 class PillarsNeonIntegrationTest {
   @Autowired MockMvc mvc;
   @Autowired ObjectMapper json;
   @Autowired EntityManager em;
+  @Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;
+  @Autowired org.praxisplatform.uischema.openapi.OpenApiDocumentService documents;
+  private NeonDomainFixture domainFixture;
+  @org.junit.jupiter.api.BeforeEach void prepareDomainFixture() throws Exception {
+    BulkPublicationProof.ensurePublished(documents, publicationHttp.withBasicAuth(username, password));
+    domainFixture = new NeonDomainFixture();
+  }
+  @org.junit.jupiter.api.AfterEach void restoreDomainFixture() throws Exception {
+    if (domainFixture != null) domainFixture.restore();
+  }
   @Autowired org.springframework.boot.test.web.client.TestRestTemplate publicationHttp;
   @org.springframework.beans.factory.annotation.Value("${showcase.security.username}") String username;
   @org.springframework.beans.factory.annotation.Value("${showcase.security.password}") String password;
@@ -37,9 +45,8 @@ class PillarsNeonIntegrationTest {
 
   @Test
   void broadSearchUsesTheSameCriterionForNameCpfAndParentage() throws Exception {
+    jdbc.update("update funcionarios set mae=? where numero=1001", "Filiação exclusiva prova omnibox");
     var pessoa = em.find(ServidorPessoa.class, 1001L);
-    pessoa.setMae("Filiação exclusiva prova omnibox");
-    em.flush();
     for (String term : List.of(pessoa.getNome(), pessoa.getCpf(), pessoa.getMae())) {
       var result = postJson("/api/ergon/servidor-pessoas/filter",
           json.writeValueAsString(Map.of("buscaAmpla", term))).path("data").path("content");
@@ -67,8 +74,7 @@ class PillarsNeonIntegrationTest {
     // de um valor real sem exigir que campos ausentes produzam itens visuais vazios.
     var pessoa = em.createQuery("select p from ServidorPessoa p order by p.nome", ServidorPessoa.class)
         .setMaxResults(1).getSingleResult();
-    pessoa.setNomeSocial("Nome social de prova");
-    em.flush();
+    jdbc.update("update funcionarios set nome_social=? where numero=?", "Nome social de prova", pessoa.getNumero());
     for (String[] resource : new String[][] {{"orgaos","orgao"},{"cargos","cargo"},
         {"servidor-pessoas","pessoa"},{"vinculos","vinculo"},{"setores","setor"},
         {"documentos-legais","documento"}}) {
@@ -91,8 +97,7 @@ class PillarsNeonIntegrationTest {
   void historicExtinctCargoIsRetainedButDisabledAndCompanyDependencyIsEffective() throws Exception {
     var cargo = em.createQuery("select c from Cargo c where c.empCodigo=1 order by c.cargo", Cargo.class)
         .setMaxResults(1).getSingleResult();
-    cargo.setDtExtincao(LocalDate.now().minusDays(1));
-    em.flush(); em.clear();
+    jdbc.update("update cargos set dt_extincao=? where cargo=?", LocalDate.now().minusDays(1), cargo.getCargo());
     String base = "/api/ergon/cargos/option-sources/cargo/options";
     String ids = json.writeValueAsString(Map.of("ids", List.of(cargo.getCargo()), "filter", Map.of("empCodigo",1)));
     var selected = postJson(base + "/by-ids", ids);
@@ -134,9 +139,7 @@ class PillarsNeonIntegrationTest {
 
   @Test
   void publicSchemasActuallyPublishAnalyticsAndMicrovisualizations() throws Exception {
-    // Publicação é uma operação administrativa explícita, fora da transação de fixtures.
-    org.springframework.test.context.transaction.TestTransaction.end();
-    BulkPublicationProof.publish(publicationHttp.withBasicAuth(username, password), false);
+    // A publicação explícita do contexto precede a prova; não há transação externa.
     var openapi = json.readTree(mvc.perform(get("/v3/api-docs")).andExpect(status().isOk())
         .andReturn().getResponse().getContentAsString());
     for (String resource : List.of("cargos", "servidor-pessoas", "vinculos")) {

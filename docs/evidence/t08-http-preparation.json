@@ -1,0 +1,13 @@
+{
+  "recordedAt": "2026-10-29T02:48:28.378767+00:00",
+  "hostPackaged": true,
+  "hostPort": 8080,
+  "hostStopped": true,
+  "publicationBootstrap": "Normal explicit RECONCILE without forced reset; completed",
+  "publicationLogSha256": "529585bb2adfc19b4300402e43eefce795b931e8aeffb9cfce6b72bd667ba18e",
+  "consumerInputsVerified": 676,
+  "consumerHarnessExecuted": false,
+  "additionalHttpScriptExecuted": false,
+  "reason": "Cut closed after recurrent governed-metadata timeout in full and single focal campaigns; preserve evidence for independent review before any new campaign.",
+  "scope": "Preparation only, not an HTTP consumer acceptance receipt"
+}

@@ -178,7 +178,8 @@ class BulkNeonIntegrationTest {
     assertThat(publicationReady).isTrue(); requireDisposableTarget();
     try {
       assertThat(rest.postForEntity("/api/ergon/cargos",Map.of("cargo",9621,"empCodigo",1,
-          "nome","Cargo BULK-308-9621","categoria","SAUDE"),JsonNode.class).getStatusCode()).isEqualTo(HttpStatus.CREATED);
+          "nome","Cargo BULK-308-9621","categoria","SAUDE",
+          "controleVaga",false,"porReferencia",false,"eAglutinador",false),JsonNode.class).getStatusCode()).isEqualTo(HttpStatus.CREATED);
       assertThat(rest.postForEntity("/api/ergon/servidor-pessoas",Map.of("numero",9621,"nome","Pessoa BULK-308-9621",
           "cpf","00000009621","dtnasc","1990-01-01"),JsonNode.class).getStatusCode()).isEqualTo(HttpStatus.CREATED);
       var evidence=new java.util.ArrayList<JsonNode>();

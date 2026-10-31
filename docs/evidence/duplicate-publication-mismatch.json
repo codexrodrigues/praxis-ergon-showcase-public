@@ -1,0 +1,31 @@
+{
+  "status": "FAILED",
+  "cause": "Explicit RECONCILE rejected a changed OpenAPI photograph; a new candidate requires explicit SUSPEND/PUBLISH preparation",
+  "suites": [
+    {
+      "suite": "br.com.praxis.ergonshowcase.CargoDuplicateDraftNeonTest",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "reportSha256": "19f396b6d3a511ead734386bc83edd8fdb416ff0e5f87e00972fd6e8122b6284"
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.NeonIntegrationTest",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "reportSha256": "18b5c0548594ea6c0f0af696276eb1823b6511d0ef611ae27b80d4b1cf198be7"
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.PillarsNeonIntegrationTest",
+      "tests": 6,
+      "failures": 6,
+      "errors": 0,
+      "skipped": 0,
+      "reportSha256": "986c34e9d20114cf0e878392c63c6ff6ef38b777b3c5d127ffc9360c337cedfb"
+    }
+  ],
+  "logSha256": "89af38a691691991ca8c6b940a454db62ae8b8f4d633a3ee21adb545f6c367bc"
+}

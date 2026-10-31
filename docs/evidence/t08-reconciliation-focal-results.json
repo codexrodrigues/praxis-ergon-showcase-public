@@ -1,0 +1,26 @@
+{
+  "recordedAt": "2026-10-29T00:36:05.740849+00:00",
+  "sourceSha256": "8cd2c63b2f494032df4776f43e2ffb58d895caa1a04fe39bf7da64c811ae56df",
+  "dependency": "8.0.0-bulk.308-consolidation.5-SNAPSHOT",
+  "status": "FAILED_FIXTURE_MISSING_CURRENT_TENANT_REQUIRED_CUSTOM_FIELD",
+  "tests": 3,
+  "failures": 1,
+  "errors": 0,
+  "skipped": 0,
+  "xmlSha256": "e92f7fea98f77fcba0f9c01046c5a936babba9ae11a660acd30d26970835474f",
+  "cases": [
+    {
+      "name": "publishesCanonicalSupportLinksActionAndCreateCompatibleSchema",
+      "status": "passed"
+    },
+    {
+      "name": "contextAndUntrustedProjectionInputsAreRevalidatedAtCreate",
+      "status": "failed"
+    },
+    {
+      "name": "assignedIdentityWithNullVersionIsNew",
+      "status": "passed"
+    }
+  ],
+  "explanation": "Malformed header400 passed; organization2 requires exige_porte_arma BOOLEAN, so empty customFields fails400 before body/context consistency422. Next fixture proves both layers without changing catalog or business rules."
+}

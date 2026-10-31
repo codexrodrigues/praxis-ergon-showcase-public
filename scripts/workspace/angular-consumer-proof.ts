@@ -81,7 +81,7 @@ let secondCargoCreated = false;
 try {
   const existing = await fetch(new URL('/api/ergon/cargos/9590', baseUrl), { headers: { Authorization: auth } });
   assert.equal(existing.status, 404, 'Reserved fixture identity must be absent');
-  await http('/api/ergon/cargos', 'POST', { cargo: 9590, empCodigo: 1, nome: 'Agregador temporário da prova de consumo', categoria: 'SAUDE', controleVaga: false, eAglutinador: true });
+  await http('/api/ergon/cargos', 'POST', { cargo: 9590, empCodigo: 1, nome: 'Agregador temporário da prova de consumo', categoria: 'SAUDE', controleVaga: false, porReferencia: false, eAglutinador: true });
   fixtureCreated = true;
   const capabilities = await http('/api/ergon/cargos/capabilities');
   const contract = bulkClient.fromCapability(capabilities.operations['bulk-update']);
@@ -117,9 +117,36 @@ try {
     reloaded: true, terminalCancellationPreserved: true, staleProposalBlocked: true, perItemClear: true,
     transport: 'Angular HttpClient over real HTTP'};
   assert.equal((await fetch(new URL('/api/ergon/cargos/9592', baseUrl), {headers: {Authorization: auth}})).status, 404);
-  await http('/api/ergon/cargos', 'POST', {cargo: 9592, empCodigo: 1,
-    nome: 'Cargo da prova de conflito concorrente', categoria: 'SAUDE'});
+  const originBeforeDraft = await fetch(new URL('/api/ergon/cargos/9590', baseUrl), {headers: {Authorization: auth, 'X-Tenant': '1'}});
+  assert.equal(originBeforeDraft.status, 200);
+  const originEnvelope = await originBeforeDraft.json();
+  const draftLink = originEnvelope._links?.['duplicate-draft']?.href;
+  assert(draftLink, 'The canonical item link must authorize preparation; no inferred fallback URL');
+  const draftCapabilities = await http('/api/ergon/cargos/9590/capabilities');
+  assert.equal(draftCapabilities.operations['duplicate-draft'].availability.allowed, true);
+  const cargoDraft = await http(draftLink, 'POST');
+  assert.equal(cargoDraft.cargo ?? null, null);
+  assert.equal(cargoDraft.empCodigo ?? null, null);
+  for (const flag of ['controleVaga', 'porReferencia', 'eAglutinador']) assert.equal(cargoDraft[flag], null);
+  assert.deepEqual(cargoDraft.customFields, {});
+  const originAfterDraft = await fetch(new URL('/api/ergon/cargos/9590', baseUrl), {headers: {Authorization: auth, 'X-Tenant': '1'}});
+  assert.equal(originAfterDraft.headers.get('ETag'), originBeforeDraft.headers.get('ETag'));
+  const cargoCreateSchema = await http('/schemas/filtered?' + new URLSearchParams({
+    resourcePath: '/api/ergon/cargos', operation: 'post', schemaType: 'request'}));
+  const cargoCreateFields = normalizeSchemaFields(cargoCreateSchema);
+  assert.equal(cargoCreateSchema.properties.cargo['x-ui'].controlType, 'input');
+  const completedDraft = {...cargoDraft, cargo: 9592, empCodigo: 1,
+    nome: 'Cargo da prova de conflito concorrente', controleVaga: false, porReferencia: false, eAglutinador: false};
+  const createPayload = prepareSubmitPayload(completedDraft, cargoCreateFields as any);
+  assert.equal(createPayload.cargo, 9592);
+  assert.equal(createPayload.empCodigo, 1);
+  assert(!('id' in createPayload) && !('version' in createPayload) && !('dtExtincao' in createPayload));
+  await http('/api/ergon/cargos', 'POST', createPayload);
   secondCargoCreated = true;
+  receipt.duplicateDraft = {canonicalLinkUsed: true, availabilityChecked: true,
+    identityAndOrganizationNotCopied: true, sourceEtagUnchanged: true,
+    createSchemaNormalized: true, createPayloadPrepared: true, explicitCreationSucceeded: true,
+    scope: 'Official schema/submit pipeline over HTTP; no visual or duplicate-action UI orchestration acceptance'};
   const firstMixedTarget = await firstValueFrom(bulkClient.readTargetVersion({self: {href: '/api/ergon/cargos/9590'}}, 9590, 'id'));
   const secondMixedTarget = await firstValueFrom(bulkClient.readTargetVersion({self: {href: '/api/ergon/cargos/9592'}}, 9592, 'id'));
   const mixed = await firstValueFrom(bulkClient.evaluate(contract, {executionMode: 'SYNC',

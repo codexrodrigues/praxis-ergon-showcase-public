@@ -1,0 +1,14 @@
+{
+  "recordedAt": "2026-10-29T00:46:57.011245+00:00",
+  "sourceSha256": "891ee0799cd95beeb496e4249fe10a029b503044814784247ee0f295eb183f0d",
+  "dependency": "8.0.0-bulk.308-consolidation.5-SNAPSHOT",
+  "tests": 1,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "xmlSha256": "a77bfd4d0a2adb923f925c3a01b8a5fe74c54698523e6f539b0ff65da6085f78",
+  "cases": [
+    "contextAndUntrustedProjectionInputsAreRevalidatedAtCreate"
+  ],
+  "scope": "HTTP anonymous/malformed/default tenant; current required catalog field; body/context mismatch; preview and unknown-field rejection; explicitly ignored id; server version/audit and complete snapshot restoration"
+}

@@ -1,0 +1,11 @@
+{
+  "recordedAt": "2026-10-28T21:22:22.896749+00:00",
+  "tests": 7,
+  "failures": 2,
+  "errors": 0,
+  "passed": 5,
+  "status": "FAILED",
+  "cause": "Two assertions compared unordered UNION ALL table snapshots as ordered lists. Explicit ORDER BY tabela added; no production workaround.",
+  "logSha256": "6d85ebc98898958d715f38d49d169d5c4ac755447a1a288a3f95cf48cec534ba",
+  "finalCampaign": "duplicate-final-test-results.json"
+}

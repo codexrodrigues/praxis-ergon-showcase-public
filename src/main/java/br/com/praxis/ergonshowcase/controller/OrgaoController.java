@@ -167,7 +167,7 @@ public class OrgaoController
       title = "Quadro de cargos",
       description = "Cargos e funções pertencentes ao quadro do órgão.",
       relatedChildResourceKey = "administracao-pessoal.cargos",
-      relatedChildResourcePath = "/api/ergon/cargos",
+      relatedChildResourcePath = ApiPaths.CARGOS,
       relatedChildParentField = "empCodigo",
       relatedChildOperations = {
         org.praxisplatform.uischema.surface.RelatedResourceChildOperation.FILTER,
@@ -210,6 +210,6 @@ public class OrgaoController
         org.praxisplatform.uischema.rest.response.RestApiResponse.success(
             result,
             org.springframework.hateoas.Links.of(
-                org.springframework.hateoas.Link.of("/api/ergon/cargos", "collection"))));
+                org.springframework.hateoas.Link.of(ApiPaths.CARGOS, "collection"))));
   }
 }

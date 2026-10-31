@@ -1,0 +1,572 @@
+{
+  "recordedAt": "2026-10-29T02:27:32.162859+00:00",
+  "command": "mvn -o -Dmaven.repo.local=<private-cache> -Dpraxis.core.version=8.0.0-bulk.308-consolidation.5-SNAPSHOT clean test",
+  "sourceSha256": "891ee0799cd95beeb496e4249fe10a029b503044814784247ee0f295eb183f0d",
+  "baselineCommit": "1769b0958bbb3499e02843619415b7c373a95745",
+  "dependency": "8.0.0-bulk.308-consolidation.5-SNAPSHOT",
+  "sourceFilesUnchanged": true,
+  "proofBranch": "br-orange-smoke-b7ma4hie",
+  "suites": [
+    {
+      "suite": "br.com.praxis.ergonshowcase.ApiPathsContractTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.497,
+      "xmlSha256": "4945a13beafde97b2500818937e6621f6418b9fff8d5f7f14383707508c0e1cd",
+      "cases": [
+        {
+          "name": "productionCodeDoesNotScatterHostPathLiterals",
+          "status": "passed"
+        },
+        {
+          "name": "lookupEndpointsResolveToPublishedSourcesAndControllerMappings",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.BulkNeonIntegrationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1033.588,
+      "xmlSha256": "4f5ea07702ac921932889eb9e649d8939327d88a97834dc622bb11247181742b",
+      "cases": [
+        {
+          "name": "publishesCanonicalBulkOperationsAndEditableFields",
+          "status": "passed"
+        },
+        {
+          "name": "evaluatesThenExecutesUniformItemsAndCollectiveCommands",
+          "status": "passed"
+        },
+        {
+          "name": "blockedProposalExplainsStaleVersionAndInvalidItemWithoutMutation",
+          "status": "passed"
+        },
+        {
+          "name": "cargosAndPessoasExecuteBothUpdateModesAndClear",
+          "status": "passed"
+        },
+        {
+          "name": "concurrentDiscoveryReturnsVerifiedSnapshotOrSafeUnavailable",
+          "status": "passed"
+        },
+        {
+          "name": "readOnlyCannotEvaluateOrConfirmAnyBulkOperation",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.CargoDraftContractTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.338,
+      "xmlSha256": "6f1053b86d20c546750dee6e9ef117e0601392378bdbc99742513b755c0951ae",
+      "cases": [
+        {
+          "name": "ordinaryCreateValidatesIdentityClassificationAndUntrustedPreview",
+          "status": "passed"
+        },
+        {
+          "name": "canonicalCustomFieldValidationRejectsReadOnlyInput",
+          "status": "passed"
+        },
+        {
+          "name": "draftNullabilityIsIndependentFromCreateRequirements(boolean)[1]",
+          "status": "passed"
+        },
+        {
+          "name": "draftNullabilityIsIndependentFromCreateRequirements(boolean)[2]",
+          "status": "passed"
+        },
+        {
+          "name": "createRequiresExplicitFlagsWhileUpdateKeepsItsExistingDefaults",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.CargoDraftPresentationContractTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.333,
+      "xmlSha256": "f4a92a398ebd16b3de4cf6a91e0aab1c7ee71cb6d79230a5d57b05276b7175a8",
+      "cases": [
+        {
+          "name": "draftReferencesPublishTheSameLookupSourcesAsCreate(boolean)[1]",
+          "status": "passed"
+        },
+        {
+          "name": "draftReferencesPublishTheSameLookupSourcesAsCreate(boolean)[2]",
+          "status": "passed"
+        },
+        {
+          "name": "draftFlagsPublishExplicitChoicesWithoutInventingAnAnswer(boolean)[1]",
+          "status": "passed"
+        },
+        {
+          "name": "draftFlagsPublishExplicitChoicesWithoutInventingAnAnswer(boolean)[2]",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.CargoDuplicateDraftNeonTest",
+      "tests": 14,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 941.203,
+      "xmlSha256": "afba184ffe4717cd4e8eaa24ae2fc7c4d817f83ea0c461daee3779f9336a8c7f",
+      "cases": [
+        {
+          "name": "publishesCanonicalSupportLinksActionAndCreateCompatibleSchema",
+          "status": "passed"
+        },
+        {
+          "name": "concurrentCreateCannotOverwriteTheWinner",
+          "status": "passed"
+        },
+        {
+          "name": "readWithoutCreatePermissionCannotPrepareOrDiscoverExecutableAction",
+          "status": "failed"
+        },
+        {
+          "name": "preparesAllowlistedDraftWithoutAnyWriteOrVersionChangeAndCanBeDiscarded",
+          "status": "passed"
+        },
+        {
+          "name": "directServiceAlsoRequiresPermissionsAndDoesNotExposeMissingOrigin",
+          "status": "passed"
+        },
+        {
+          "name": "functionOptionalNullsAndTextualCboArePreserved",
+          "status": "passed"
+        },
+        {
+          "name": "finalCreateRevalidatesRequiredIdentityOrganizationVacanciesAndUniqueness",
+          "status": "passed"
+        },
+        {
+          "name": "preparingDraftDoesNotFlushCallerOwnedDirtyPersistenceContext",
+          "status": "passed"
+        },
+        {
+          "name": "extinctOriginIncludingFutureDateIsDeniedInEveryBoundary",
+          "status": "passed"
+        },
+        {
+          "name": "explicitFlagsAreRequiredAndFalseRemainsValid",
+          "status": "passed"
+        },
+        {
+          "name": "contextAndUntrustedProjectionInputsAreRevalidatedAtCreate",
+          "status": "passed"
+        },
+        {
+          "name": "assignedIdentityWithNullVersionIsNew",
+          "status": "passed"
+        },
+        {
+          "name": "finalCreateUsesCurrentCustomFieldCatalogInsteadOfOriginValues",
+          "status": "passed"
+        },
+        {
+          "name": "missingAndOtherOrganizationOriginsAreIndistinguishableAndDoNotLeakState",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.NeonIntegrationTest",
+      "tests": 63,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3761.493,
+      "xmlSha256": "484633d7d885e1169b653377f3f1540dffcf65df06e11f0ac0028e4f578f2145",
+      "cases": [
+        {
+          "name": "reviewAggregatorCannotBeDisabledWithDependentCargo",
+          "status": "passed"
+        },
+        {
+          "name": "phaseTwoPartialFormsRejectStorageOverflowBeforeWriting",
+          "status": "passed"
+        },
+        {
+          "name": "revisionFiltersExecuteTheirDeclaredPredicates",
+          "status": "passed"
+        },
+        {
+          "name": "schemaShowsCompositeKeyGovernanceAndTenantFields",
+          "status": "passed"
+        },
+        {
+          "name": "revisionResponsesCoverEveryPersistentBusinessField",
+          "status": "passed"
+        },
+        {
+          "name": "phaseThreePreviewIsAuthorizedNonPersistingAndTenantScoped",
+          "status": "passed"
+        },
+        {
+          "name": "reviewAfastamentoRejectsEndBeforeStart",
+          "status": "passed"
+        },
+        {
+          "name": "phaseThreeSubmitRejectsForgedPreview",
+          "status": "passed"
+        },
+        {
+          "name": "reviewServiceAlsoRejectsInvalidJornada",
+          "status": "passed"
+        },
+        {
+          "name": "statisticsExecuteAndRejectIdentifierMeasures",
+          "status": "passed"
+        },
+        {
+          "name": "revisionBusinessRulesRejectChronologyAndAccumulation",
+          "status": "passed"
+        },
+        {
+          "name": "revisionBusinessRulesRejectCrossOrgAndExtinctCargo",
+          "status": "passed"
+        },
+        {
+          "name": "revisionProfessionalRegistrationAndUniqueness",
+          "status": "passed"
+        },
+        {
+          "name": "allSixteenEntitiesMatchPostgres17",
+          "status": "passed"
+        },
+        {
+          "name": "reviewAfastamentoRejectsInvalidCodeAndChronology",
+          "status": "passed"
+        },
+        {
+          "name": "reviewDerivedFactsUseOneBatchQueryRegardlessOfPageSize",
+          "status": "passed"
+        },
+        {
+          "name": "vacanciaEnforcesVersionAndPersistsTransition",
+          "status": "passed"
+        },
+        {
+          "name": "revisionBusinessRulesRejectInvalidVacanciesAndAggregation",
+          "status": "passed"
+        },
+        {
+          "name": "compositeIdentityAndSurface",
+          "status": "passed"
+        },
+        {
+          "name": "reviewAfastamentoRejectsOverlappingPeriodAndEarlyReturn",
+          "status": "passed"
+        },
+        {
+          "name": "phaseThreeAggregatorPreviewRevalidatesEligibility",
+          "status": "passed"
+        },
+        {
+          "name": "phaseTwoHistoricalMaintenanceAllowsExtinctCargo",
+          "status": "passed"
+        },
+        {
+          "name": "reviewOrgaoStateIsNotWritableByCadastralPut",
+          "status": "passed"
+        },
+        {
+          "name": "reviewCommissionCannotExceedVacancies",
+          "status": "passed"
+        },
+        {
+          "name": "phaseThreeDeterminationsPublishExactCreateEditBindings",
+          "status": "passed"
+        },
+        {
+          "name": "cursorContinuityLocateAndCompositeOptions",
+          "status": "passed"
+        },
+        {
+          "name": "reviewInstitutionalActionsProtectStateAndETag",
+          "status": "passed"
+        },
+        {
+          "name": "reviewPublicationAdministratorCannotWriteDomainRecords",
+          "status": "passed"
+        },
+        {
+          "name": "reviewVacancyMaintainsPaymentLimit",
+          "status": "passed"
+        },
+        {
+          "name": "reviewCommissionCannotUseExtinctOrFullCargo",
+          "status": "passed"
+        },
+        {
+          "name": "reviewAggregatorSerializesConcurrentChildAdmissionAndDisable",
+          "status": "passed"
+        },
+        {
+          "name": "phaseTwoChronologyRejectsReverseEndpointsWithMissingMiddle",
+          "status": "passed"
+        },
+        {
+          "name": "reviewDomainWriterCannotAdministerPublication",
+          "status": "passed"
+        },
+        {
+          "name": "reviewReadSurfacesPublishRealETagAndReferences",
+          "status": "passed"
+        },
+        {
+          "name": "customFieldsAreTenantScopedAndValidated",
+          "status": "passed"
+        },
+        {
+          "name": "reviewCommissionOccupancyPreventsExtinctionAndDoubleCounting",
+          "status": "passed"
+        },
+        {
+          "name": "phaseOneAuxiliaryReferencesAreReadOnlyAndResolvable",
+          "status": "passed"
+        },
+        {
+          "name": "reviewBulkSelectionAppliesOrganizationBeforeLimit",
+          "status": "passed"
+        },
+        {
+          "name": "crudFourPilotsAndImmutableIdentifiers",
+          "status": "passed"
+        },
+        {
+          "name": "unadoptedDuplicateDraftHasNoMappingOrPersistence(String, String, String)[1]",
+          "status": "passed"
+        },
+        {
+          "name": "unadoptedDuplicateDraftHasNoMappingOrPersistence(String, String, String)[2]",
+          "status": "passed"
+        },
+        {
+          "name": "unadoptedDuplicateDraftHasNoMappingOrPersistence(String, String, String)[3]",
+          "status": "passed"
+        },
+        {
+          "name": "unadoptedDuplicateDraftHasNoMappingOrPersistence(String, String, String)[4]",
+          "status": "passed"
+        },
+        {
+          "name": "unadoptedDuplicateDraftHasNoMappingOrPersistence(String, String, String)[5]",
+          "status": "passed"
+        },
+        {
+          "name": "reviewRetornoRejectsForeignLicense",
+          "status": "passed"
+        },
+        {
+          "name": "phaseTwoRelatedCollectionsRespectParentAndPagination",
+          "status": "passed"
+        },
+        {
+          "name": "reviewPartialUpdatesDistinguishOmissionClearAndRequiredBooleans",
+          "status": "passed"
+        },
+        {
+          "name": "reviewPatchRejectsBothInvalidJornadaBounds",
+          "status": "passed"
+        },
+        {
+          "name": "revisionCessaoAndRetirementTransitions",
+          "status": "passed"
+        },
+        {
+          "name": "revisionDiscoveryAndRichSchemas",
+          "status": "passed"
+        },
+        {
+          "name": "revisionHomologacaoAndCargoExtinction",
+          "status": "passed"
+        },
+        {
+          "name": "phaseThreeDocumentScopeIsExplicitPerOperation",
+          "status": "passed"
+        },
+        {
+          "name": "revisionPartialFormsPreserveIdentityAndUntouchedValues",
+          "status": "passed"
+        },
+        {
+          "name": "structuralAndSemanticMetadataArePublished",
+          "status": "passed"
+        },
+        {
+          "name": "reviewVacancyRejectsPaymentBeforeDeparture",
+          "status": "passed"
+        },
+        {
+          "name": "optionsCursorStatsAndExportExecuteOnNeon",
+          "status": "passed"
+        },
+        {
+          "name": "filtersAndExportPolicyAreEffective",
+          "status": "passed"
+        },
+        {
+          "name": "fourResourcesExposeDataAndCapabilities",
+          "status": "passed"
+        },
+        {
+          "name": "realHttpOpenApiAndAuthentication",
+          "status": "passed"
+        },
+        {
+          "name": "reviewAfastamentoRoundTripPersistsLicenseAndVersion",
+          "status": "passed"
+        },
+        {
+          "name": "mappingCoversEveryDocumentedColumn",
+          "status": "passed"
+        },
+        {
+          "name": "reviewInactiveOrgaoRejectsNewAdmission",
+          "status": "passed"
+        },
+        {
+          "name": "revisionVacancyBalancePreventsOverProvision",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.PillarsNeonIntegrationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 224.566,
+      "xmlSha256": "e210103cb2c0b6b21c0143849383421721b6db5f21d113a4b1f2fe75f953413a",
+      "cases": [
+        {
+          "name": "historicExtinctCargoIsRetainedButDisabledAndCompanyDependencyIsEffective",
+          "status": "passed"
+        },
+        {
+          "name": "analyticMeasuresUseRegisteredFieldsAndRejectDocumentSummation",
+          "status": "passed"
+        },
+        {
+          "name": "broadSearchUsesTheSameCriterionForNameCpfAndParentage",
+          "status": "passed"
+        },
+        {
+          "name": "sixRichDirectoriesFilterAndReloadActualIdentities",
+          "status": "passed"
+        },
+        {
+          "name": "nominalAnalyticsBucketsCarryRealIdsForThePublishedSurfaces",
+          "status": "passed"
+        },
+        {
+          "name": "publicSchemasActuallyPublishAnalyticsAndMicrovisualizations",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.PraxisMetadataCompletenessTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 4.866,
+      "xmlSha256": "080e8c736f206d34a2088807df9367f2ad8b4710ba58a321745bf2e89c0a4536",
+      "cases": [
+        {
+          "name": "derivedIndicatorsPreserveUnknownAndDoNotInventValidity",
+          "status": "passed"
+        },
+        {
+          "name": "expectedLookupInventoryIsPublishedAndRich",
+          "status": "passed"
+        },
+        {
+          "name": "actualResolvedMicrovisualizationsHaveValidExpressions",
+          "status": "passed"
+        },
+        {
+          "name": "allDomainDtosPassSemanticReview",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.TenantRequestValidationTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.301,
+      "xmlSha256": "172a00b1e3117edeb3ef22267f355412550fd555cac2c1042457a900df949827",
+      "cases": [
+        {
+          "name": "validContextKeepsItsValue(String)[1]",
+          "status": "passed"
+        },
+        {
+          "name": "validContextKeepsItsValue(String)[2]",
+          "status": "passed"
+        },
+        {
+          "name": "validContextKeepsItsValue(String)[3]",
+          "status": "passed"
+        },
+        {
+          "name": "malformedContextIsRejectedBeforeResourceInvocation(String)[1]",
+          "status": "passed"
+        },
+        {
+          "name": "malformedContextIsRejectedBeforeResourceInvocation(String)[2]",
+          "status": "passed"
+        },
+        {
+          "name": "malformedContextIsRejectedBeforeResourceInvocation(String)[3]",
+          "status": "passed"
+        },
+        {
+          "name": "malformedContextIsRejectedBeforeResourceInvocation(String)[4]",
+          "status": "passed"
+        },
+        {
+          "name": "absentContextKeepsTheDocumentedDefault",
+          "status": "passed"
+        },
+        {
+          "name": "unrelatedHandlersDoNotAcquireTenantSemantics",
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "tests": 113,
+  "failures": 1,
+  "errors": 0,
+  "skipped": 0,
+  "diagnostics": "JFR default recording enabled for this run; raw recording remains private",
+  "actualSdkClasspathArtifact": {
+    "name": "praxis-metadata-starter-8.0.0-bulk.308-consolidation.5-SNAPSHOT.jar",
+    "sha256": "11194e06878268a184fbeb476f7b1a4fbd09a287c91badf36cb86e3e7072abd0"
+  },
+  "passed": 112
+}

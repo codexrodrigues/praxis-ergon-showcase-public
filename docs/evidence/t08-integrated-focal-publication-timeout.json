@@ -1,0 +1,172 @@
+{
+  "recordedAt": "2026-10-29T00:24:59.287915+00:00",
+  "sourceSha256": "8cd2c63b2f494032df4776f43e2ffb58d895caa1a04fe39bf7da64c811ae56df",
+  "dependency": "8.0.0-bulk.308-consolidation.5-SNAPSHOT",
+  "status": "FAILED_DURING_PUBLICATION_PREPARATION",
+  "suites": [
+    {
+      "suite": "br.com.praxis.ergonshowcase.ApiPathsContractTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "42d766796476a96721d99786c5464b7b12e4d887b0cc7fdde68d78d447e0704f",
+      "cases": [
+        {
+          "name": "productionCodeDoesNotScatterHostPathLiterals",
+          "status": "passed"
+        },
+        {
+          "name": "lookupEndpointsResolveToPublishedSourcesAndControllerMappings",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.CargoDraftContractTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "be5874f67aaff338bf03c8c9569adc46b46d9e232b67ee179c1a100347143900",
+      "cases": [
+        {
+          "name": "ordinaryCreateValidatesIdentityClassificationAndUntrustedPreview",
+          "status": "passed"
+        },
+        {
+          "name": "canonicalCustomFieldValidationRejectsReadOnlyInput",
+          "status": "passed"
+        },
+        {
+          "name": "draftNullabilityIsIndependentFromCreateRequirements(boolean)[1]",
+          "status": "passed"
+        },
+        {
+          "name": "draftNullabilityIsIndependentFromCreateRequirements(boolean)[2]",
+          "status": "passed"
+        },
+        {
+          "name": "createRequiresExplicitFlagsWhileUpdateKeepsItsExistingDefaults",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.CargoDraftPresentationContractTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "08b900da125f926e483361ba1c1555296e78a55be1f9e1e137232ccd3e45ca90",
+      "cases": [
+        {
+          "name": "draftReferencesPublishTheSameLookupSourcesAsCreate(boolean)[1]",
+          "status": "passed"
+        },
+        {
+          "name": "draftReferencesPublishTheSameLookupSourcesAsCreate(boolean)[2]",
+          "status": "passed"
+        },
+        {
+          "name": "draftFlagsPublishExplicitChoicesWithoutInventingAnAnswer(boolean)[1]",
+          "status": "passed"
+        },
+        {
+          "name": "draftFlagsPublishExplicitChoicesWithoutInventingAnAnswer(boolean)[2]",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.CargoDuplicateDraftNeonTest",
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "1fab3713d9cb0ec01cdb75c99c483c8255d264a34bf8acbc55e3c98fad36c0e0",
+      "cases": [
+        {
+          "name": "",
+          "status": "failed"
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.NeonIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "933904c88f84f9023940445485786f22ec9fc44e9ffb8d75e8b522808c688e5b",
+      "cases": [
+        {
+          "name": "crudFourPilotsAndImmutableIdentifiers",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.TenantRequestValidationTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "295e380e5bdad577603e2b548bb3a2f04c1767eb147d9f5067ce158fbee5afe5",
+      "cases": [
+        {
+          "name": "validContextKeepsItsValue(String)[1]",
+          "status": "passed"
+        },
+        {
+          "name": "validContextKeepsItsValue(String)[2]",
+          "status": "passed"
+        },
+        {
+          "name": "validContextKeepsItsValue(String)[3]",
+          "status": "passed"
+        },
+        {
+          "name": "malformedContextIsRejectedBeforeResourceInvocation(String)[1]",
+          "status": "passed"
+        },
+        {
+          "name": "malformedContextIsRejectedBeforeResourceInvocation(String)[2]",
+          "status": "passed"
+        },
+        {
+          "name": "malformedContextIsRejectedBeforeResourceInvocation(String)[3]",
+          "status": "passed"
+        },
+        {
+          "name": "malformedContextIsRejectedBeforeResourceInvocation(String)[4]",
+          "status": "passed"
+        },
+        {
+          "name": "absentContextKeepsTheDocumentedDefault",
+          "status": "passed"
+        },
+        {
+          "name": "unrelatedHandlersDoNotAcquireTenantSemantics",
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "tests": 22,
+  "failures": 1,
+  "errors": 0,
+  "skipped": 0,
+  "notExecuted": [
+    "CargoDuplicateDraftNeonTest#contextAndUntrustedProjectionInputsAreRevalidatedAtCreate",
+    "CargoDuplicateDraftNeonTest#assignedIdentityWithNullVersionIsNew",
+    "CargoDuplicateDraftNeonTest#publishesCanonicalSupportLinksActionAndCreateCompatibleSchema"
+  ],
+  "failure": {
+    "httpStatus": 503,
+    "code": "TRANSACTION_TIMEOUT",
+    "operation": "ergon.funcionarios.bulk.items",
+    "stage": "BeforeAll administrative publication"
+  },
+  "limits": "No automatic retry or timeout increase; physical cause not established. Zero Surefire skips does not mean the three requested methods ran."
+}

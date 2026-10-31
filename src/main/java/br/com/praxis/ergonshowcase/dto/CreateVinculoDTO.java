@@ -1,5 +1,6 @@
 package br.com.praxis.ergonshowcase.dto;
 
+import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
@@ -24,7 +25,7 @@ public class CreateVinculoDTO extends VinculoDados {
   @UISchema(
       label = "Pessoa servidora",
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
-      endpoint = "/api/ergon/servidor-pessoas/option-sources/pessoa/options/filter",
+      endpoint = ApiPaths.PESSOA_OPTIONS,
       valueField = "id",
       displayField = "label",
       group = "Identificação funcional",
@@ -59,7 +60,7 @@ public class CreateVinculoDTO extends VinculoDados {
   @UISchema(
       label = "Órgão",
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
-      endpoint = "/api/ergon/orgaos/option-sources/orgao/options/filter",
+      endpoint = ApiPaths.ORGAO_OPTIONS,
       valueField = "id",
       displayField = "label",
       group = "Lotação",

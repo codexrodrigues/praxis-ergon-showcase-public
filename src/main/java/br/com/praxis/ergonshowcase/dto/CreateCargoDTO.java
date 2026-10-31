@@ -1,5 +1,6 @@
 package br.com.praxis.ergonshowcase.dto;
 
+import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import java.util.*;
@@ -16,7 +17,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
 public class CreateCargoDTO extends CargoDados {
   @NotNull
   @Positive
-  @Schema(description = "Código imutável que identifica o cargo ou função no quadro de pessoal.")
+  @Schema(description = "Novo código imutável do cargo ou função no quadro de pessoal; deve ser positivo e ainda não cadastrado. O preparo de rascunho não copia nem reserva esse código.")
   @UISchema(
       label = "Código",
       preset = UISchemaPreset.ENTERPRISE_ID,
@@ -24,16 +25,8 @@ public class CreateCargoDTO extends CargoDados {
       order = 1,
       icon = "badge",
       type = org.praxisplatform.uischema.FieldDataType.TEXT,
-      controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
-      endpoint = "/api/ergon/cargos/option-sources/cargo/options/filter",
-      valueField = "id",
-      displayField = "label")
-  @ResourceReference(
-      resourceKey = "administracao-pessoal.cargos",
-      valueField = "cargo",
-      surfaceId = "ficha-cargo",
-      previewSurfaceId = "ficha-cargo",
-      detailPresentation = "drawer")
+      controlType = org.praxisplatform.uischema.FieldControlType.INPUT,
+      helpText = "Informe um novo código positivo. A criação verificará se ele está disponível.")
   private Integer cargo;
 
   @NotNull
@@ -43,7 +36,7 @@ public class CreateCargoDTO extends CargoDados {
   @UISchema(
       label = "Órgão",
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
-      endpoint = "/api/ergon/orgaos/option-sources/orgao/options/filter",
+      endpoint = ApiPaths.ORGAO_OPTIONS,
       valueField = "id",
       displayField = "label",
       group = "Identificação",

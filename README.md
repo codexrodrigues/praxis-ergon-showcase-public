@@ -1,8 +1,8 @@
 # Praxis Ergon Showcase
 
-Host Java 21 / Spring Boot 3.5.15 criado do zero para a [issue 305](https://github.com/codexrodrigues/praxis-metadata-starter/issues/305). A rc.179 permanece declarada no POM; as correções atuais dependem do candidato privado indicado abaixo. A compilação contra o artefato público não está certificada.
+Host Java 21 / Spring Boot 3.5.15 criado do zero para a [issue 305](https://github.com/codexrodrigues/praxis-metadata-starter/issues/305). O POM declara `8.0.0-rc.183` (que publica a hierarquia canônica de `duplicate-draft`); as correções de `PartialUpdateInput` e lote (#308) utilizam o candidato privado indicado abaixo até o merge do [PR Metadata #311](https://github.com/codexrodrigues/praxis-metadata-starter/pull/311).
 
-Bulking #2/#308 está em correção após a revisão de `2013442`; os resultados anteriores não certificam o código desta rodada. O estado vigente está no relatório e no scorecard. A prova usa candidato Maven privado do [PR Metadata #311](https://github.com/codexrodrigues/praxis-metadata-starter/pull/311), sem substituir os bytes da rc.179. O comando padrão abaixo não é uma prova aprovada do novo lote. Consulte o [relatório](docs/RELATORIO-305.md), o [scorecard](docs/evidence/SCORECARD-COMPLETUDE.md) e a [reconciliação dos campos](docs/RECONCILIACAO-CAMPOS-BULK-308.md).
+A rodada T08 integra `duplicate-draft` de Cargos (`AbstractDuplicateDraftResourceController` + `DuplicateDraftResourceService` + `CargoDraftAvailability`) e a centralização de endpoints em `ApiPaths`, aprovada no gate estático (`STATIC PASS`, `exit code 0`) e na bateria focal local (`20/20` testes verdes). A prova usa candidato Maven privado do [PR Metadata #311](https://github.com/codexrodrigues/praxis-metadata-starter/pull/311). Consulte o [relatório](docs/RELATORIO-305.md), o [scorecard](docs/evidence/SCORECARD-COMPLETUDE.md) e a [reconciliação dos campos](docs/RECONCILIACAO-CAMPOS-BULK-308.md).
 
 ## Execução
 
@@ -12,8 +12,8 @@ Defina as variáveis de [.env.example](.env.example) no ambiente do processo. Sp
 $env:JAVA_HOME='D:\Developer\praxis-plataform\.codex-jdk-21'
 $env:PATH="$env:JAVA_HOME\bin;$env:PATH"
 # Candidato privado instalado a partir do PR #311; não equivale à rc.179 pública.
-mvn '-Dpraxis.core.version=8.0.0-bulk.308-consolidation.3-SNAPSHOT' '-Dmaven.repo.local=.local/m2-bulk308' test
-mvn '-Dpraxis.core.version=8.0.0-bulk.308-consolidation.3-SNAPSHOT' '-Dmaven.repo.local=.local/m2-bulk308' clean package -DskipTests
+mvn '-Dpraxis.core.version=8.0.0-bulk.308-consolidation.5-SNAPSHOT' '-Dmaven.repo.local=.local/m2-bulk308' test
+mvn '-Dpraxis.core.version=8.0.0-bulk.308-consolidation.5-SNAPSHOT' '-Dmaven.repo.local=.local/m2-bulk308' clean package -DskipTests
 java -jar target/praxis-ergon-showcase-0.1.0-SNAPSHOT.jar
 ```
 
@@ -54,9 +54,13 @@ As invariantes verificam cronologia de ingresso e contrato, cargo extinto, saldo
 
 PcD usa as cinco colunas existentes (`deffisica`, `defvisual`, `defauditiva`, `defmental`, `defintelectual`) e `obsDeficiencia`. O fato e o filtro `somentePcD` usam a disjunção desses indicadores, preservando deficiências múltiplas. Não há coluna sintética ou alteração do schema.
 
+## Preparar novo cargo
+
+`POST /api/ergon/cargos/{id}/duplicate-draft` usa o contrato canônico do Starter e devolve um `CargoDuplicateDraftDTO` parcial sem persistir. Copia somente nome e enquadramento; código, órgão, vagas, ato legal e datas devem ser definidos no novo cadastro. Exige leitura e escrita e origem vigente no órgão corrente. As três flags iniciam null; o CREATE exige escolhas explícitas. Descartar não altera a origem; o POST final revalida todas as invariantes. Consulte [a decisão de domínio e os limites da prova](docs/DUPLICATE-DRAFT-CARGO.md).
+
 ## Operações em lote — Issues #2 / #308
 
-A campanha de lote usa o candidato do [PR Metadata #311](https://github.com/codexrodrigues/praxis-metadata-starter/pull/311), com coordenada distinta `8.0.0-bulk.308-consolidation.3-SNAPSHOT` e cache Maven isolado. O POM do host ainda conserva rc.179; não houve substituição dos bytes dessa coordenada nem release público. Consulte o [plano e as reconciliações de schema](docs/PLANO-BULKING-308.md) e o scorecard para o estado de aceitação. A presença de endpoints e annotations não certifica a execução do lote.
+A campanha de lote usa o candidato do [PR Metadata #311](https://github.com/codexrodrigues/praxis-metadata-starter/pull/311), com coordenada distinta `8.0.0-bulk.308-consolidation.5-SNAPSHOT` e cache Maven isolado. O POM do host ainda conserva rc.179; não houve substituição dos bytes dessa coordenada nem release público. Consulte o [plano e as reconciliações de schema](docs/PLANO-BULKING-308.md) e o scorecard para o estado de aceitação. A presença de endpoints e annotations não certifica a execução do lote.
 
 Vínculos, pessoas e cargos declaram respectivamente 10, 7 e 5 campos BulkEditable. Cada recurso oferece avaliação uniforme e por item, proposta/preview paginado, confirmação com Idempotency-Key, execução/recibos e cancelamento. Vínculos acrescentam realocar-setor-lote e homologar-estagio-lote, com documento legal do mesmo órgão. A avaliação conserva a intenção protegida; a confirmação revalida domínio, autorização e versão por registro. QUERY aplica o órgão de operação antes do limite e congela a população na avaliação, incluindo exclusões. Pessoas são globais neste modelo; X-Tenant ainda não constitui autorização multi-órgão.
 
@@ -91,3 +95,7 @@ As descrições de negócio foram redigidas a partir dos comentários do banco e
 Fechamento da revisão 61fc36b: [plano por fases](docs/PLANO-REVISAO-61fc36b.md) e [matriz de paridade e limites](docs/MATRIZ-PARIDADE-305.md). O teste de consultas mede o caminho inteiro em contexto frio. O auditor distingue STATIC PASS de recibos operacionais; execute `python ../scripts/workspace/audit-java-resource-completeness.py . --strict --require-runtime-evidence` para incluir os gates do manifesto. governedDecisions é NOT_APPLICABLE por decisão explícita de escopo; bulkOperations exige novas provas e não herda o aceite da Fase 3A.
 
 O helper `scripts/workspace/prove-angular-consumer.mjs` compila e executa o normalizador Core e ReactiveDeterminationRuntimeService das fontes oficiais do workspace Angular, usando seu tsconfig oficial. Preparação: copie angular-consumer-package.json e angular-consumer-package-lock.json para `.local/angular-proof/package.json` e `package-lock.json`, execute npm ci nesse diretório (registry público disponível), carregue SHOWCASE_USERNAME/SHOWCASE_PASSWORD por ambiente e defina PROOF_NEON_BRANCH e BULK_PROOF_DISPOSABLE_BRANCH com a cópia descartável provisionada. Não há fallback para a branch original. Com o host iniciado contra essa branch e schemas gerados por mvn test, execute `node scripts/workspace/prove-angular-consumer.mjs ../praxis-ui-angular <base-url-do-host> target/proof`. O helper exige a ausência dos cargos reservados 9590/9592 e da pessoa 9591 e remove as fixtures em finally. Além dos seis schemas e execuções reativas, exercita avaliação/confirmação, recibos, idempotência, retomada, cancelamento terminal, resultado parcial por edição concorrente, CLEAR e submit parcial. O recibo só aprova a execução quando completed e fixtureRemoved forem true; não certifica pacote npm publicado nem composição visual desktop/narrow. A rodada de correção completa o método de cancelamento no cliente oficial Core. A prova usa suas fontes locais; não implica publicação npm.
+
+## Autoria de caminhos
+
+Controllers, DTOs, filtros, comandos e registro de fontes compartilham `constants/ApiPaths.java`. Consulte [a decisão e o mapa de impacto](docs/API-PATHS.md).

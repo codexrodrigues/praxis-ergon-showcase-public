@@ -12,34 +12,34 @@ public class OptionSourcesConfig {
   @Bean
   public OptionSourceRegistry options() {
     return OptionSourceRegistry.builder()
-        .add(Orgao.class, source("orgao", ApiPaths.ORGAOS, "empresa", "nome",
+        .add(Orgao.class, source(ApiPaths.ORGAO_SOURCE, ApiPaths.ORGAOS, "empresa", "nome",
             "administracao-pessoal.empresas", "ficha-institucional", "ativa",
             List.of("true"), List.of("false"), List.of("fantasia", "municipio"), false,
             "Órgão inativo; mantenha apenas referências históricas já existentes.",
             Map.of("true", "Ativo", "false", "Inativo")))
-        .add(Cargo.class, source("cargo", ApiPaths.CARGOS, "cargo", "nome",
+        .add(Cargo.class, source(ApiPaths.CARGO_SOURCE, ApiPaths.CARGOS, "cargo", "nome",
             "administracao-pessoal.cargos", "ficha-cargo", "situacaoLookup",
             List.of("VIGENTE"), List.of("EXTINTO"), List.of("categoria", "tipoCargo"), true,
             "Cargo extinto; novos provimentos não são permitidos.",
             Map.of("VIGENTE", "Vigente", "EXTINTO", "Extinto")))
         // Pessoas e atos legais não têm estado ativo/inativo no schema. Não inventar elegibilidade.
-        .add(ServidorPessoa.class, source("pessoa", ApiPaths.PESSOAS, "numero", "nome",
+        .add(ServidorPessoa.class, source(ApiPaths.PESSOA_SOURCE, ApiPaths.PESSOAS, "numero", "nome",
             "administracao-pessoal.funcionarios", "ficha-cadastral", null,
             List.of(), List.of(), List.of("nomeSocial"), false,
             "Cadastro civil indisponível no escopo autorizado.", Map.of()))
-        .add(Vinculo.class, source("vinculo", ApiPaths.VINCULOS, "id", "matric",
+        .add(Vinculo.class, source(ApiPaths.VINCULO_SOURCE, ApiPaths.VINCULOS, "id", "matric",
             "administracao-pessoal.vinculos", "resumo-funcional", "situacao",
             List.of("ATIVO", "AFASTADO", "CEDIDO"), List.of("VACANTE", "APOSENTADO"),
             List.of("regimejur", "tipovinc"), true,
             "Vínculo encerrado; mantenha apenas referências históricas já existentes.",
             Map.of("ATIVO", "Ativo", "AFASTADO", "Afastado", "CEDIDO", "Cedido",
                 "VACANTE", "Vacante", "APOSENTADO", "Aposentado")))
-        .add(Setor.class, source("setor", "/api/ergon/setores", "setor", "nome",
+        .add(Setor.class, source(ApiPaths.SETOR_SOURCE, ApiPaths.SETORES, "setor", "nome",
             "administracao-pessoal.setores", "ficha-unidade", "situacaoLookup",
             List.of("VIGENTE"), List.of("ENCERRADO", "FUTURO"), List.of("sigla", "tipoSetor"), true,
             "Unidade fora da vigência; mantenha apenas referências históricas já existentes.",
             Map.of("VIGENTE", "Vigente", "ENCERRADO", "Encerrado", "FUTURO", "Vigência futura")))
-        .add(DocumentoLegal.class, source("documento", "/api/ergon/documentos-legais", "id",
+        .add(DocumentoLegal.class, source(ApiPaths.DOCUMENTO_SOURCE, ApiPaths.DOCUMENTOS_LEGAIS, "id",
             "numeroDocumento", "administracao-pessoal.documentos-legais", "ficha-documento", null,
             List.of(), List.of(), List.of("tipoDocumento", "anoDocumento"), true,
             "Ato legal indisponível no escopo autorizado.", Map.of()))
@@ -69,7 +69,7 @@ public class OptionSourcesConfig {
       case "anoDocumento" -> display(property, "Ano do ato", "event");
       default -> throw new IllegalArgumentException("Campo de diretório sem curadoria: " + property);
     }).toList();
-    var lookup = new EntityLookupDescriptor(entityKey, key.equals("vinculo") ? "matric" : id, descriptions, status, null, null,
+    var lookup = new EntityLookupDescriptor(entityKey, key.equals(ApiPaths.VINCULO_SOURCE) ? "matric" : id, descriptions, status, null, null,
         List.of(label), dependencies,
         new LookupSelectionPolicy(null, status, allowed, blocked, true, disabledReason, disabledReason),
         new LookupCapabilities(true, true, true, false, false, true, true, false, false, false),

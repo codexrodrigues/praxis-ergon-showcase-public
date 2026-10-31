@@ -1,0 +1,108 @@
+{
+  "dependency": "8.0.0-bulk.308-consolidation.4-SNAPSHOT",
+  "suites": [
+    {
+      "name": "br.com.praxis.ergonshowcase.CargoDraftContractTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "1.524",
+      "cases": [
+        {
+          "name": "draftNullabilityIsIndependentFromCreateRequirements(boolean)[1]",
+          "passed": true
+        },
+        {
+          "name": "draftNullabilityIsIndependentFromCreateRequirements(boolean)[2]",
+          "passed": true
+        },
+        {
+          "name": "createRequiresExplicitFlagsWhileUpdateKeepsItsExistingDefaults",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "br.com.praxis.ergonshowcase.CargoDuplicateDraftNeonTest",
+      "tests": "11",
+      "failures": "1",
+      "errors": "0",
+      "skipped": "0",
+      "time": "966.261",
+      "cases": [
+        {
+          "name": "publishesCanonicalSupportLinksActionAndCreateCompatibleSchema",
+          "passed": true
+        },
+        {
+          "name": "concurrentCreateCannotOverwriteTheWinner",
+          "passed": false
+        },
+        {
+          "name": "readWithoutCreatePermissionCannotPrepareOrDiscoverExecutableAction",
+          "passed": true
+        },
+        {
+          "name": "preparesAllowlistedDraftWithoutAnyWriteOrVersionChangeAndCanBeDiscarded",
+          "passed": true
+        },
+        {
+          "name": "directServiceAlsoRequiresPermissionsAndDoesNotExposeMissingOrigin",
+          "passed": true
+        },
+        {
+          "name": "functionOptionalNullsAndTextualCboArePreserved",
+          "passed": true
+        },
+        {
+          "name": "finalCreateRevalidatesRequiredIdentityOrganizationVacanciesAndUniqueness",
+          "passed": true
+        },
+        {
+          "name": "preparingDraftDoesNotFlushCallerOwnedDirtyPersistenceContext",
+          "passed": true
+        },
+        {
+          "name": "extinctOriginIncludingFutureDateIsDeniedInEveryBoundary",
+          "passed": true
+        },
+        {
+          "name": "explicitFlagsAreRequiredAndFalseRemainsValid",
+          "passed": true
+        },
+        {
+          "name": "missingAndOtherOrganizationOriginsAreIndistinguishableAndDoNotLeakState",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "br.com.praxis.ergonshowcase.PraxisMetadataCompletenessTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "1.856",
+      "cases": [
+        {
+          "name": "derivedIndicatorsPreserveUnknownAndDoNotInventValidity",
+          "passed": true
+        },
+        {
+          "name": "expectedLookupInventoryIsPublishedAndRich",
+          "passed": true
+        },
+        {
+          "name": "actualResolvedMicrovisualizationsHaveValidExpressions",
+          "passed": true
+        },
+        {
+          "name": "allDomainDtosPassSemanticReview",
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "finding": "Concurrent create returns 201/500 instead of 201/409; native Hibernate constraint exception not mapped. PostgreSQL rejected the duplicate key; winner readback assertion was not reached after the status assertion failed. Subsequent sources extend cases and nullability; this receipt is historical."
+}
