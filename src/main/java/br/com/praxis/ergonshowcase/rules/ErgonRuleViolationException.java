@@ -83,6 +83,54 @@ public class ErgonRuleViolationException extends ResponseStatusException {
     populateProblemDetailProperties();
   }
 
+  public ErgonRuleViolationException(
+      String code,
+      String slotKey,
+      String bindingKey,
+      DecisionSource source,
+      DecisionStage stage,
+      String targetField,
+      String messagePtBr) {
+    super(
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        "["
+            + code
+            + " | "
+            + source
+            + " | slot="
+            + slotKey
+            + " | field="
+            + targetField
+            + "] "
+            + messagePtBr);
+    this.plan = null;
+    this.evaluationResult = null;
+    this.reasonCodes = List.of(code);
+    this.descriptors = ErgonRuleErrorCatalog.find(code).stream().toList();
+    this.violations =
+        List.of(
+            new SlotViolationDetail(
+                code,
+                slotKey,
+                bindingKey,
+                source,
+                stage,
+                RuleDecision.DENY,
+                targetField,
+                messagePtBr,
+                this.descriptors.isEmpty()
+                    ? "PraxisJsonLogicEngine"
+                    : this.descriptors.get(0).plsqlOrigin()));
+    ProblemDetail body = getBody();
+    body.setTitle("Violação determinística de regra de negócio");
+    body.setProperty("decision", RuleDecision.DENY.name());
+    body.setProperty("reasonCodes", this.reasonCodes);
+    body.setProperty("slotKeys", getSlotKeys());
+    body.setProperty(
+        "decisionSources", getDecisionSources().stream().map(Enum::name).toList());
+    body.setProperty("violations", this.violations);
+  }
+
   public RuleDecisionPlan getPlan() {
     return plan;
   }

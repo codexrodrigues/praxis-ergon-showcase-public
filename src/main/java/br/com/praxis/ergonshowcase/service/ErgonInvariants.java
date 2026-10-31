@@ -1,9 +1,12 @@
 package br.com.praxis.ergonshowcase.service;
 
+import br.com.praxis.ergonshowcase.config.TenantContext;
 import br.com.praxis.ergonshowcase.domain.*;
+import br.com.praxis.ergonshowcase.rules.ErgonRuleEngineFacade;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
@@ -12,6 +15,19 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 public class ErgonInvariants {
   @PersistenceContext private EntityManager em;
+
+  @Autowired(required = false)
+  private ErgonRuleEngineFacade ruleEngineFacade;
+
+  @Autowired(required = false)
+  private TenantContext tenant;
+
+  public ErgonRuleEngineFacade ruleEngine() {
+    if (ruleEngineFacade == null) {
+      ruleEngineFacade = new ErgonRuleEngineFacade();
+    }
+    return ruleEngineFacade;
+  }
 
   public long ocupadas(Integer codigo, VinculoId excluir) {
     return em.createQuery(
@@ -45,6 +61,7 @@ public class ErgonInvariants {
           || !Boolean.TRUE.equals(parent.getEAglutinador()))
         fail("Cargo aglutinador deve existir no mesmo órgão e estar habilitado.");
     }
+    customFields("administracao-pessoal.cargos", c.getEmpCodigo(), c.getCustomFields(), c);
   }
 
   public void pessoa(ServidorPessoa p) {
@@ -60,6 +77,8 @@ public class ErgonInvariants {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "CPF já utilizado por outra pessoa.");
     if (blank(p.getIdentprof()) != blank(p.getTipoidprof()))
       fail("Registro profissional exige número e tipo correspondentes.");
+    Integer emp = tenant != null ? tenant.orgao() : 1;
+    customFields("administracao-pessoal.funcionarios", emp, p.getCustomFields(), p);
   }
 
   public void orgao(Orgao o) {
@@ -115,8 +134,9 @@ public class ErgonInvariants {
     } else if (Boolean.TRUE.equals(d.getDepIr())) {
       fail("O CPF do dependente é obrigatório quando habilitado para dedução de IRRF.");
     }
+    TipoDependente tipo = null;
     if (!blank(d.getTipodepen())) {
-      TipoDependente tipo = em.find(TipoDependente.class, d.getTipodepen());
+      tipo = em.find(TipoDependente.class, d.getTipodepen());
       if (tipo == null) fail("Modalidade de tipo de dependência inexistente.");
       if (Boolean.TRUE.equals(d.getDepIr()) && !Boolean.TRUE.equals(tipo.getGeraIr()))
         fail("A modalidade de dependência selecionada não permite dedução de IRRF.");
@@ -124,14 +144,22 @@ public class ErgonInvariants {
           && !Boolean.TRUE.equals(tipo.getGeraSalarioFamilia()))
         fail("A modalidade de dependência selecionada não gera cota de salário-família.");
     }
-    if (d.getDocumentoLegalId() != null
-        && em.find(DocumentoLegal.class, d.getDocumentoLegalId()) == null)
-      fail("Documento comprobatório inexistente.");
+    DocumentoLegal doc = null;
+    if (d.getDocumentoLegalId() != null) {
+      doc = em.find(DocumentoLegal.class, d.getDocumentoLegalId());
+      if (doc == null) fail("Documento comprobatório inexistente.");
+    }
     if (d.getDtfim() != null
         && (Boolean.TRUE.equals(d.getDepIr())
             || Boolean.TRUE.equals(d.getDepSalarioFamilia())
             || Boolean.TRUE.equals(d.getDepPlanoSaude())))
       fail("Dependência encerrada não pode manter benefícios ativos de IRRF, salário-família ou saúde.");
+    Integer emp = tenant != null ? tenant.orgao() : 1;
+    ruleEngine()
+        .enforceDependente(
+            new ErgonRuleEngineFacade.DependenteRuleContext(
+                d, emp, titular, tipo, doc, List.of(), null));
+    customFields("administracao-pessoal.dependentes", emp, d.getCustomFields(), d);
   }
 
   public void afastamento(Afastamento a, boolean creating) {
@@ -247,6 +275,7 @@ public class ErgonInvariants {
       if (pub == null || !Objects.equals(pub.getEmpCodigo(), a.getEmpCodigo()))
         fail("Ato de publicação oficial inexistente ou pertence a outro órgão.");
     }
+    customFields("administracao-pessoal.afastamentos", a.getEmpCodigo(), a.getCustomFields(), a);
   }
 
   public void frequencia(Frequencia f, boolean creating) {
@@ -318,6 +347,7 @@ public class ErgonInvariants {
       if (doc == null || !Objects.equals(doc.getEmpCodigo(), f.getEmpCodigo()))
         fail("Documento comprobatório inexistente ou pertence a outro órgão.");
     }
+    customFields("administracao-pessoal.frequencias", f.getEmpCodigo(), f.getCustomFields(), f);
   }
 
   public void campoCustomizado(DefinicaoCampoCustomizado d, boolean creating) {
@@ -342,6 +372,7 @@ public class ErgonInvariants {
       Tabela tab = em.find(Tabela.class, d.getOptionTabela());
       if (tab == null) fail("Tabela geral de opções (HADES.TABELA) inexistente: " + d.getOptionTabela());
     }
+    ruleEngine().validateCustomFieldValidationRules(d.getValidationRules());
     var duplicados =
         d.getEmpCodigo() == null
             ? em.createQuery(
@@ -368,10 +399,18 @@ public class ErgonInvariants {
   }
 
   public void vinculo(Vinculo v, boolean creating) {
+    Orgao orgao = null;
     if (creating) {
-      Orgao orgao = em.find(Orgao.class, v.getEmpCodigo(), LockModeType.PESSIMISTIC_READ);
+      orgao = em.find(Orgao.class, v.getEmpCodigo(), LockModeType.PESSIMISTIC_READ);
       if (orgao == null || !Boolean.TRUE.equals(orgao.getAtiva()))
         fail("Nova admissão exige órgão ativo.");
+    } else if (v.getEmpCodigo() != null) {
+      orgao = em.find(Orgao.class, v.getEmpCodigo());
+      if (orgao == null) {
+        orgao = new Orgao();
+        orgao.setEmpresa(v.getEmpCodigo());
+        orgao.setAtiva(true);
+      }
     }
     if (v.getJornadaSemanal() != null
         && (v.getJornadaSemanal() <= 0 || v.getJornadaSemanal() > 168))
@@ -387,16 +426,25 @@ public class ErgonInvariants {
         v.getDtfimcontr(), v.getDtprorrogcontr(), "Prorrogação anterior ao término contratual.");
     chronology(
         v.getDtinicontr(), v.getDtprorrogcontr(), "Prorrogação anterior ao início contratual.");
-    setor(v.getSetor(), v.getEmpCodigo());
-    setor(v.getSetorExercicio(), v.getEmpCodigo());
-    if (v.getCargoComissao() != null)
-      validarProvimento(v, checkCargo(v.getCargoComissao(), v.getEmpCodigo()));
-    if (v.getCargo() != null) {
-      Cargo c = checkCargo(v.getCargo(), v.getEmpCodigo());
-      validarProvimento(v, c);
+    Setor lotacao = setor(v.getSetor(), v.getEmpCodigo());
+    Setor exercicio = setor(v.getSetorExercicio(), v.getEmpCodigo());
+    Cargo cargoComissao = null;
+    long comissaoOcupadas = 0L;
+    if (v.getCargoComissao() != null) {
+      cargoComissao = checkCargo(v.getCargoComissao(), v.getEmpCodigo());
+      validarProvimento(v, cargoComissao);
+      comissaoOcupadas = ocupadas(cargoComissao.getCargo(), v.getId());
     }
+    Cargo cargo = null;
+    long cargoOcupadas = 0L;
+    if (v.getCargo() != null) {
+      cargo = checkCargo(v.getCargo(), v.getEmpCodigo());
+      validarProvimento(v, cargo);
+      cargoOcupadas = ocupadas(cargo.getCargo(), v.getId());
+    }
+    List<Vinculo> others = List.of();
     if ("ATIVO".equals(v.getSituacao())) {
-      var others =
+      others =
           em.createQuery(
                   "select v from Vinculo v where v.id.numfunc=:p and v.id.numero<>:n and v.situacao='ATIVO'",
                   Vinculo.class)
@@ -406,10 +454,99 @@ public class ErgonInvariants {
               .getResultList();
       if (!others.isEmpty()
           && (others.size() >= 2
-              || !acumulavel(v.getCategoria())
-              || others.stream().anyMatch(x -> !acumulavel(x.getCategoria()))))
+              || others.stream()
+                  .anyMatch(
+                      x ->
+                          !ErgonRuleEngineFacade.isConstitutionalAccumulationPair(
+                              v.getCategoria(), x.getCategoria()))))
         fail("Acumulação limitada a dois vínculos nas categorias MAGISTERIO ou SAUDE.");
     }
+    long openAfastamentosCount = 0L;
+    if (v.getDtvac() != null && v.getId() != null && v.getId().numfunc() != null && v.getId().numero() != null) {
+      var qa =
+          em.createQuery(
+              "select count(a) from Afastamento a where a.numfunc=:p and a.numvinc=:v and a.situacao='HOMOLOGADO' and a.dtfim is null",
+              Long.class);
+      if (qa != null) {
+        var p1 = qa.setParameter("p", v.getId().numfunc());
+        var p2 = p1 != null ? p1.setParameter("v", v.getId().numero()) : null;
+        var flushed = p2 != null ? p2.setFlushMode(FlushModeType.COMMIT) : null;
+        Long cnt = (flushed != null ? flushed : p2) != null ? (flushed != null ? flushed : p2).getSingleResult() : 0L;
+        openAfastamentosCount = cnt != null ? cnt : 0L;
+      }
+    }
+    DocumentoLegal doc =
+        v.getDocumentoLegalId() != null
+            ? em.find(DocumentoLegal.class, v.getDocumentoLegalId())
+            : null;
+    ruleEngine()
+        .enforceVinculo(
+            new ErgonRuleEngineFacade.VinculoRuleContext(
+                v,
+                orgao,
+                pessoa,
+                cargo,
+                cargoOcupadas,
+                cargoComissao,
+                comissaoOcupadas,
+                lotacao,
+                exercicio,
+                doc,
+                others,
+                openAfastamentosCount,
+                creating));
+    customFields("administracao-pessoal.vinculos", v.getEmpCodigo(), v.getCustomFields(), v);
+  }
+
+  public void customFields(
+      String resourceKey, Integer empCodigo, Map<String, Object> values, Object draftEntity) {
+    customFields(
+        resourceKey,
+        empCodigo,
+        values,
+        draftEntity,
+        loadActiveCustomFieldDefinitions(resourceKey, empCodigo));
+  }
+
+  public void customFields(String resourceKey, Integer empCodigo, Map<String, Object> values) {
+    customFields(resourceKey, empCodigo, values, null);
+  }
+
+  public void customFields(
+      String resourceKey,
+      Integer empCodigo,
+      Map<String, Object> values,
+      Object draftEntity,
+      List<DefinicaoCampoCustomizado> activeDefinitions) {
+    ruleEngine()
+        .evaluateCustomFieldsJsonLogic(
+            resourceKey, empCodigo, values, draftEntity, activeDefinitions);
+  }
+
+  private List<DefinicaoCampoCustomizado> loadActiveCustomFieldDefinitions(
+      String resourceKey, Integer empCodigo) {
+    if (em == null || blank(resourceKey)) {
+      return List.of();
+    }
+    Integer effectiveOrg = empCodigo != null ? empCodigo : 1;
+    var q =
+        em.createQuery(
+            "select d from DefinicaoCampoCustomizado d where d.active=true and d.resourceKey=:r and (d.empCodigo is null or d.empCodigo=:o) order by d.empCodigo nulls first, d.fieldOrder",
+            DefinicaoCampoCustomizado.class);
+    if (q == null) {
+      return List.of();
+    }
+    var p1 = q.setParameter("r", resourceKey);
+    if (p1 == null) {
+      return List.of();
+    }
+    var p2 = p1.setParameter("o", effectiveOrg);
+    if (p2 == null) {
+      return List.of();
+    }
+    var flushed = p2.setFlushMode(FlushModeType.COMMIT);
+    List<DefinicaoCampoCustomizado> rows = (flushed != null ? flushed : p2).getResultList();
+    return rows != null ? rows : List.of();
   }
 
   private boolean acumulavel(String categoria) {
@@ -432,11 +569,12 @@ public class ErgonInvariants {
     return c;
   }
 
-  private void setor(String id, Integer orgao) {
-    if (id == null) return;
+  private Setor setor(String id, Integer orgao) {
+    if (id == null) return null;
     Setor s = em.find(Setor.class, id);
     if (s == null || !Objects.equals(s.getEmpCodigo(), orgao))
       fail("Unidade de lotação/exercício pertence a outro órgão ou não existe.");
+    return s;
   }
 
   public static boolean blank(String s) {

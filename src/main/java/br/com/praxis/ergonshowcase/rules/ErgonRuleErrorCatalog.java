@@ -37,7 +37,236 @@ public final class ErgonRuleErrorCatalog {
       String targetField,
       String messagePtBr,
       String plsqlOrigin,
-      String plsqlLineage) {}
+      String plsqlLineage) {
+    public String message() {
+      return messagePtBr;
+    }
+  }
+
+  // ===========================================================================
+  // Constantes Canônicas — Dependentes (PCK_DEPENDENTES / PCK_DEPENDENCIAS)
+  // ===========================================================================
+  public static final RuleErrorDescriptor ERG_03162 =
+      new RuleErrorDescriptor(
+          "ERG-03162",
+          DependenteElegibilidadeRuleSet.SLOT_PERIODO_VIGENCIA,
+          "dtfim",
+          "A data de início da dependência ou de expedição do RG não pode anteceder a data de nascimento, e a data de término da dependência não pode anteceder a data de início.",
+          "PCK_DEPENDENTES.MAIN_PRE",
+          "IF v_row_new.dtini < v_row_new.dtnasc OR v_row_new.dtfim < v_row_new.dtini THEN pack_hades.trata_erro(3162); END IF;");
+
+  public static final RuleErrorDescriptor ERG_03182 =
+      new RuleErrorDescriptor(
+          "ERG-03182",
+          DependenteElegibilidadeRuleSet.SLOT_DATA_NASCIMENTO,
+          "dtnasc",
+          "A data de nascimento do dependente não pode ser futura nem ultrapassar o limite máximo de 120 anos de idade.",
+          "PCK_DEPENDENTES.VALID_IDADE_LIMITE",
+          "IF p_depen.dtnasc > sysdate THEN pack_hades.trata_erro(3182); ELSIF add_months(p_depen.dtnasc, 1440) < sysdate THEN pack_hades.trata_erro(3181); END IF;");
+
+  public static final RuleErrorDescriptor ERG_03183 =
+      new RuleErrorDescriptor(
+          "ERG-03183",
+          DependenteElegibilidadeRuleSet.SLOT_COERENCIA_PARENTESCO,
+          "parentesco",
+          "Inconsistência genealógica ou documental entre dependente e servidor titular: filhos/enteados devem nascer após o titular, pais/avós antes do titular e o CPF do dependente não pode coincidir com o CPF do servidor.",
+          "PCK_DEPENDENTES.VALID_IDADE_LIMITE / PRC_VALID_CPF",
+          "IF v_dtnasc_func > p_depen.dtnasc THEN pack_hades.trata_erro(3183); ELSIF v_dtnasc_func < p_depen.dtnasc THEN pack_hades.trata_erro(3184); END IF;");
+
+  public static final RuleErrorDescriptor ERG_03185 =
+      new RuleErrorDescriptor(
+          "ERG-03185",
+          DependenteElegibilidadeRuleSet.SLOT_CPF_OBRIGATORIO_IRRF,
+          "cpf",
+          "Dependente elegível para dedução de IRRF exige CPF válido informado.",
+          "PCK_DEPENDENTES.VALIDA_OBRIGATORIEDADE_CPF",
+          "IF p_depen.dep_ir = 'S' AND p_depen.cpf IS NULL THEN pack_hades.trata_erro(3185); END IF;");
+
+  public static final RuleErrorDescriptor ERG_03171 =
+      new RuleErrorDescriptor(
+          "ERG-03171",
+          DependenteElegibilidadeRuleSet.SLOT_COMPATIBILIDADE_TIPO,
+          "tipodepen",
+          "O tipo de dependente informado não existe ou não permite a concessão de dedução de IRRF ou cota de salário-família solicitada.",
+          "PCK_DEPENDENTES.MAIN_PRE",
+          "IF NOT pack_hades.valida_itemtab('ERG_TIPO_DEPEN', v_row_new.tipodepen) THEN pack_hades.trata_erro(3171); END IF;");
+
+  public static final RuleErrorDescriptor ERG_03177 =
+      new RuleErrorDescriptor(
+          "ERG-03177",
+          DependenteElegibilidadeRuleSet.SLOT_ELEGIBILIDADE_ETARIA,
+          "dtnasc",
+          "Dependente excede o limite etário regulamentar do benefício: Elegibilidade ao IRRF exige idade até 21 anos (ou até 24 anos quando universitário), Salário-família exige idade até 14 anos e Plano de saúde exige idade dentro do teto do órgão, salvo invalidez ou excepcionalidade.",
+          "PCK_DEPENDENTES.VALID_IDADE_LIMITE / PCK_DEPENDENCIAS",
+          "IF v_idade > v_teto_beneficio AND p_depen.invalido <> 'S' AND p_depen.excepcional <> 'S' THEN pack_hades.trata_erro(3177); END IF;");
+
+  public static final RuleErrorDescriptor ERG_03188 =
+      new RuleErrorDescriptor(
+          "ERG-03188",
+          DependenteElegibilidadeRuleSet.SLOT_ENCERRAMENTO_SEM_BENEFICIOS,
+          "dtfim",
+          "Dependência encerrada não pode manter benefícios ativos: Dependente com data de término informada não pode manter benefícios ativos (IRRF, salário-família ou plano de saúde).",
+          "PCK_DEPENDENTES.MAIN_PRE",
+          "IF v_row_new.dtfim IS NOT NULL AND (v_row_new.dep_ir = 'S' OR v_row_new.dep_sal_fam = 'S' OR v_row_new.dep_plano_saude = 'S') THEN pack_hades.trata_erro(3188); END IF;");
+
+  public static final RuleErrorDescriptor ERG_21400 =
+      new RuleErrorDescriptor(
+          "ERG-21400",
+          DependenteElegibilidadeRuleSet.SLOT_EXIGENCIA_DOCUMENTO,
+          "documentoLegalId",
+          "Condição de invalidez, excepcionalidade, guarda judicial, tutela/curatela ou representação legal exige documento legal comprobatório válido do órgão e dados completos de RG/certidão.",
+          "PCK_DEPENDENTES.CONSISTE_DOC_DEP",
+          "IF (v_row_new.invalido = 'S' OR v_row_new.excepcional = 'S' OR v_row_new.representante_legal = 'S') AND v_row_new.documento_legal_id IS NULL THEN pack_hades.trata_erro(21400); END IF;");
+
+  public static final RuleErrorDescriptor ERG_03198 =
+      new RuleErrorDescriptor(
+          "ERG-03198",
+          DependenteElegibilidadeRuleSet.SLOT_POLITICA_PLANO_SAUDE,
+          "depPlanoSaude",
+          "Inclusão de dependente agregado no plano de saúde institucional exige documento legal comprobatório.",
+          "PCK_DEPENDENCIAS.MAIN_PRE",
+          "IF v_row_new.dep_plano_saude = 'S' AND v_row_new.parentesco = 'AGREGADO' AND v_row_new.documento_legal_id IS NULL THEN pack_hades.trata_erro(3198); END IF;");
+
+  public static final RuleErrorDescriptor ERG_03193 =
+      new RuleErrorDescriptor(
+          "ERG-03193",
+          DependenteElegibilidadeRuleSet.SLOT_UNICIDADE_CPF,
+          "cpf",
+          "Já existe outro dependente cadastrado para este servidor com o mesmo CPF informado.",
+          "PCK_DEPENDENTES.PRC_VALID_CPF",
+          "SELECT COUNT(1) FROM dependentes WHERE numfunc = p_numfunc AND cpf = p_cpf AND numero <> p_numero -> pack_hades.trata_erro(3193);");
+
+  public static final RuleErrorDescriptor CERG_09301 =
+      new RuleErrorDescriptor(
+          "CERG-09301",
+          DependenteElegibilidadeRuleSet.SLOT_EXIGENCIA_DOCUMENTO,
+          "documentoLegalId",
+          "Customização do Órgão 2: dependente universitário exige documento legal comprobatório da matrícula em instituição de ensino superior.",
+          "EPB__DEPENDENTES (AUGMENT)",
+          "Customização aditiva do Órgão 2 em DependenteElegibilidadeRuleSet (OverridePolicy.RESTRICT_ONLY + SlotPatchMode.AUGMENT sob DENY_OVERRIDES)");
+
+  public static final RuleErrorDescriptor CERG_03198 =
+      new RuleErrorDescriptor(
+          "CERG-03198",
+          DependenteElegibilidadeRuleSet.SLOT_POLITICA_PLANO_SAUDE,
+          "documentoLegalId",
+          "Política substitutiva do Órgão 2: toda adesão de dependente ao plano de saúde institucional exige documento legal comprobatório.",
+          "EPB__DEPENDENCIAS (REPLACE_EXACT)",
+          "Substituição atômica de slot autorizado em DependenteElegibilidadeRuleSet (OverridePolicy.REPLACEABLE + SlotPatchMode.REPLACE_EXACT)");
+
+  // ===========================================================================
+  // Constantes Canônicas — Vínculos (PCK_VINCULOS / PCK_FUNCIONARIOS)
+  // ===========================================================================
+  public static final RuleErrorDescriptor ERG_00324 =
+      new RuleErrorDescriptor(
+          "ERG-00324",
+          VinculoProvimentoRuleSet.SLOT_CADEIA_CRONOLOGICA,
+          "dtexerc",
+          "Inconsistência na cadeia cronológica do vínculo: Nomeação, posse, exercício, vacância, aposentadoria, pagamento, vigência contratual, prorrogação contratual, cessão e homologação de estágio devem respeitar a ordem temporal.",
+          "PCK_VINCULOS.VALID_VINCULOS",
+          "IF p_vinculos.dtnom > p_vinculos.dtposse OR p_vinculos.dtposse > p_vinculos.dtexerc OR p_vinculos.dtvac < p_vinculos.dtexerc THEN ergon_erro_pack.trata_erro(324); END IF;");
+
+  public static final RuleErrorDescriptor ERG_00325 =
+      new RuleErrorDescriptor(
+          "ERG-00325",
+          VinculoProvimentoRuleSet.SLOT_IDADE_MINIMA_INGRESSO,
+          "dtposse",
+          "Servidor titular não existe ou não possui a idade mínima constitucional de 18 anos na data de posse ou entrada em exercício.",
+          "PCK_VINCULOS.VALID_VINCULOS / EP__VINCULOS_DTIDADE",
+          "IF p_vinculos.dtposse < add_months(v_dtnasc, v_idade_minima * 12) THEN ergon_erro_pack.trata_erro(325); END IF;");
+
+  public static final RuleErrorDescriptor ERG_00354 =
+      new RuleErrorDescriptor(
+          "ERG-00354",
+          VinculoProvimentoRuleSet.SLOT_COMPATIBILIDADE_REGIME_CARGO,
+          "regimejur",
+          "Órgão inativo para admissão, incompatibilidade entre regime jurídico, tipo de vínculo e cargo, ou referência funcional (setor, cargo ou função) vinculada a outro órgão.",
+          "PCK_VINCULOS.VERIFICA_TIPOVINC_VALID",
+          "SELECT 'X' FROM erg_tipovinc_valid WHERE tipovinc = p_tipovinc AND categoria = p_categoria AND regimejur = p_regimejur -> ergon_erro_pack.trata_erro(354);");
+
+  public static final RuleErrorDescriptor ERG_00359 =
+      new RuleErrorDescriptor(
+          "ERG-00359",
+          VinculoProvimentoRuleSet.SLOT_VIGENCIA_CARGO_VAGAS,
+          "cargo",
+          "Provimento bloqueado no quadro de cargos: não é permitido vincular cargo ou função extinto em vínculo ativo, nem prover ocupação quando o Saldo de vagas disponíveis estiver esgotado.",
+          "PCK_VINCULOS.VERIFICA_CATEG_CARGO_PROV",
+          "Validação de vigência do cargo (dtExtincao IS NULL) e saldo positivo de vagas autorizadas em cargos com controleVaga = true.");
+
+  public static final RuleErrorDescriptor ERG_00315 =
+      new RuleErrorDescriptor(
+          "ERG-00315",
+          VinculoProvimentoRuleSet.SLOT_LIMITES_JORNADA_EXERCICIO,
+          "jornadaSemanal",
+          "A jornada semanal deve estar entre 1 e 168 horas (respeitando o teto operacional do órgão) e o prazo entre a posse e a entrada em exercício não pode exceder o limite regulamentar.",
+          "PCK_VINCULOS.VALID_VINCULOS",
+          "Validação parametrizável por órgão de carga horária máxima semanal (maxWeeklyHours) e prazo entre posse e exercício (maxDaysPosseToExercicio).");
+
+  public static final RuleErrorDescriptor ERG_00342 =
+      new RuleErrorDescriptor(
+          "ERG-00342",
+          VinculoProvimentoRuleSet.SLOT_VACANCIA_SEM_AFASTAMENTO,
+          "dtvac",
+          "Vacância exige forma de desligamento e inexistência de afastamento em aberto no vínculo funcional.",
+          "PCK_VINCULOS.VALID_VINCULOS / VERIFICA_LICAFAST",
+          "IF p_vinculos.formavac IS NULL AND p_vinculos.dtvac IS NOT NULL THEN ergon_erro_pack.trata_erro(342); END IF; VERIFICA_LICAFAST(numfunc, numero, dtvac, 'vacância');");
+
+  public static final RuleErrorDescriptor ERG_00330 =
+      new RuleErrorDescriptor(
+          "ERG-00330",
+          VinculoProvimentoRuleSet.SLOT_POLITICA_CONTRATO_TEMPORARIO,
+          "dtinicontr",
+          "Contrato temporário exige datas de início e término da vigência contratual, e requisição/cessão formalizada exige identificação do órgão requisitante.",
+          "PCK_VINCULOS.VALID_VINCULOS",
+          "IF p_vinculos.dtinicontr IS NOT NULL AND p_vinculos.dtfimcontr IS NULL THEN ergon_erro_pack.trata_erro(330); END IF;");
+
+  public static final RuleErrorDescriptor ERG_00300 =
+      new RuleErrorDescriptor(
+          "ERG-00300",
+          VinculoProvimentoRuleSet.SLOT_ACUMULACAO_CONSTITUCIONAL,
+          "categoria",
+          "Acumulação de vínculos ativos exige até dois cargos constitucionalmente acumuláveis (MAGISTERIO ou SAUDE) ou períodos de exercício não concomitantes.",
+          "PCK_VINCULOS.VALID_VINC_CONCOMIT",
+          "Verificação constitucional (CF/88 Art. 37, XVI) de acumulação de até 2 vínculos ativos concomitantes para o mesmo ServidorPessoa.");
+
+  public static final RuleErrorDescriptor CERG_09401 =
+      new RuleErrorDescriptor(
+          "CERG-09401",
+          VinculoProvimentoRuleSet.SLOT_VACANCIA_SEM_AFASTAMENTO,
+          "documentoLegalId",
+          "Customização do Órgão 2: designação para cargo em comissão ou registro de vacância exige documento legal comprobatório válido do órgão.",
+          "EPB__VINCULOS (AUGMENT)",
+          "Customização aditiva do Órgão 2 em VinculoProvimentoRuleSet (OverridePolicy.RESTRICT_ONLY + SlotPatchMode.AUGMENT sob DENY_OVERRIDES)");
+
+  public static final RuleErrorDescriptor CERG_00330 =
+      new RuleErrorDescriptor(
+          "CERG-00330",
+          VinculoProvimentoRuleSet.SLOT_POLITICA_CONTRATO_TEMPORARIO,
+          "dtfimcontr",
+          "Política substitutiva do Órgão 2: contrato temporário exige datas de início e fim, documento legal comprobatório e duração contratual máxima de 730 dias (2 anos).",
+          "EPB__VINCULOS (REPLACE_EXACT)",
+          "Substituição atômica de slot autorizado em VinculoProvimentoRuleSet (OverridePolicy.REPLACEABLE + SlotPatchMode.REPLACE_EXACT)");
+
+  // ===========================================================================
+  // Constantes Canônicas — Campos Customizados JSON Logic
+  // ===========================================================================
+  public static final RuleErrorDescriptor ERG_21501 =
+      new RuleErrorDescriptor(
+          "ERG-21501",
+          "customField.validationRules.syntax",
+          "validationRules",
+          "A expressão JSON Logic informada em validationRules possui sintaxe, aridade, operador ou referência de variável inválida.",
+          "PraxisJsonLogicEngine.validate",
+          "Validação sintática e estrutural da árvore JSON Logic de DefinicaoCampoCustomizado.validationRules.");
+
+  public static final RuleErrorDescriptor ERG_21502 =
+      new RuleErrorDescriptor(
+          "ERG-21502",
+          "customField.validationRules.evaluation",
+          "customFields",
+          "O valor informado para o campo customizado violou a regra determinística JSON Logic configurada para o recurso.",
+          "PraxisJsonLogicEngine.evaluate",
+          "Avaliação determinística em runtime de DefinicaoCampoCustomizado.validationRules sobre {value, customFields, draft}.");
 
   private static final Map<String, RuleErrorDescriptor> CATALOG;
 
@@ -527,6 +756,42 @@ public final class ErgonRuleErrorCatalog {
             "Para este órgão, é estritamente vedado conceder afastamento sobre período com frequência ativa registrada, mesmo quando a regra estatutária prevê concomitância.",
             "EPB__LIC_AFAST.valid_licafast (REPLACE_EXACT)",
             "Substituição atômica de slot autorizado em AfastamentoConcessaoRuleSet (OverridePolicy.REPLACEABLE + CompositionPolicy.REPLACE_EXACT)"));
+
+    // =========================================================================
+    // 5. Família Dependentes e Elegibilidade (PCK_DEPENDENTES / PCK_DEPENDENCIAS)
+    // =========================================================================
+    register(map, ERG_03162);
+    register(map, ERG_03182);
+    register(map, ERG_03183);
+    register(map, ERG_03185);
+    register(map, ERG_03171);
+    register(map, ERG_03177);
+    register(map, ERG_03188);
+    register(map, ERG_21400);
+    register(map, ERG_03198);
+    register(map, ERG_03193);
+    register(map, CERG_09301);
+    register(map, CERG_03198);
+
+    // =========================================================================
+    // 6. Família Vínculos e Provimento (PCK_VINCULOS / PCK_FUNCIONARIOS)
+    // =========================================================================
+    register(map, ERG_00324);
+    register(map, ERG_00325);
+    register(map, ERG_00354);
+    register(map, ERG_00359);
+    register(map, ERG_00315);
+    register(map, ERG_00342);
+    register(map, ERG_00330);
+    register(map, ERG_00300);
+    register(map, CERG_09401);
+    register(map, CERG_00330);
+
+    // =========================================================================
+    // 7. Família Campos Customizados JSON Logic
+    // =========================================================================
+    register(map, ERG_21501);
+    register(map, ERG_21502);
 
     CATALOG = Collections.unmodifiableMap(map);
   }

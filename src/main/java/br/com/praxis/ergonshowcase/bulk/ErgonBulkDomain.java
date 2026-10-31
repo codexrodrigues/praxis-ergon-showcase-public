@@ -183,8 +183,14 @@ public class ErgonBulkDomain {
     switch(r) {
       case CARGOS -> invariants.cargo((Cargo)e);
       case PESSOAS -> invariants.pessoa((ServidorPessoa)e);
-      case VINCULOS -> invariants.vinculo((Vinculo)e,false);
-      case DEPENDENTES -> invariants.dependente((Dependente)e,false);
+      case VINCULOS -> {
+        invariants.vinculo((Vinculo) e, false);
+        vinculoService.validateVinculoProvimento((Vinculo) e, false);
+      }
+      case DEPENDENTES -> {
+        invariants.dependente((Dependente) e, false);
+        dependenteService.validateDependenteElegibilidade((Dependente) e);
+      }
       case AFASTAMENTOS -> {
         afastamentoService.validateAfastamentoConcessao((Afastamento) e, false);
         invariants.afastamento((Afastamento) e, false);
@@ -269,7 +275,9 @@ public class ErgonBulkDomain {
       document(dto.documentoLegalId(),tenant.orgao());
       copy.setDtfim(dto.dtfim()); copy.setDepIr(false); copy.setDepSalarioFamilia(false); copy.setDepPlanoSaude(false);
       copy.setDocumentoLegalId(dto.documentoLegalId());
-      invariants.dependente(copy,false); return copy;
+      invariants.dependente(copy,false);
+      dependenteService.validateDependenteElegibilidade(copy);
+      return copy;
     }
     Vinculo copy=new Vinculo(); BeanUtils.copyProperties(current,copy);
     if (operation.endsWith("realocar-setor-lote")) {
@@ -283,7 +291,9 @@ public class ErgonBulkDomain {
       ErgonInvariants.chronology(copy.getDtexerc(),dto.dtHomologEstagio(),"Homologação anterior ao exercício.");
       document(dto.documentoLegalId(),copy.getEmpCodigo()); copy.setDtHomologEstagio(dto.dtHomologEstagio()); copy.setDocumentoLegalId(dto.documentoLegalId());
     }
-    invariants.vinculo(copy,false); return copy;
+    invariants.vinculo(copy,false);
+    vinculoService.validateVinculoProvimento(copy, false);
+    return copy;
   }
   private void document(Long id, Integer owner) {
     var document=em.find(DocumentoLegal.class,id);

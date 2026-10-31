@@ -1,12 +1,16 @@
 package br.com.praxis.ergonshowcase.service;
 
+import br.com.praxis.ergonshowcase.config.TenantContext;
 import br.com.praxis.ergonshowcase.domain.*;
 import br.com.praxis.ergonshowcase.dto.*;
 import br.com.praxis.ergonshowcase.mapper.DependenteMapper;
 import br.com.praxis.ergonshowcase.repository.DependenteRepository;
+import br.com.praxis.ergonshowcase.rules.ErgonRuleEngineFacade;
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
+import org.praxisplatform.rules.contract.RuleEvaluationResult;
 import org.praxisplatform.uischema.concurrency.*;
 import org.praxisplatform.uischema.customfields.CustomFieldSupport;
 import org.praxisplatform.uischema.exporting.CollectionExportField;
@@ -35,13 +39,139 @@ public class DependenteService
         CreateDependenteDTO,
         UpdateDependenteDTO> {
 
-  @Autowired private ErgonInvariants invariants;
+  @Autowired(required = false)
+  private ErgonInvariants invariants;
+
   @PersistenceContext protected EntityManager entityManager;
   protected final DependenteMapper mapper;
+  private final TenantContext tenant;
+  private final ErgonRuleEngineFacade ruleEngineFacade;
 
   public DependenteService(DependenteRepository repository, DependenteMapper mapper) {
+    this(repository, mapper, new TenantContext(), new ErgonRuleEngineFacade());
+  }
+
+  @Autowired
+  public DependenteService(
+      DependenteRepository repository,
+      DependenteMapper mapper,
+      TenantContext tenant,
+      ErgonRuleEngineFacade ruleEngineFacade) {
     super(repository, Dependente.class, "id.numfunc", "id.numdep");
     this.mapper = mapper;
+    this.tenant = tenant != null ? tenant : new TenantContext();
+    this.ruleEngineFacade =
+        ruleEngineFacade != null ? ruleEngineFacade : new ErgonRuleEngineFacade();
+  }
+
+  public ErgonRuleEngineFacade getRuleEngineFacade() {
+    return ruleEngineFacade;
+  }
+
+  /**
+   * Avalia deterministicamente o rascunho de {@link Dependente} contra o
+   * {@link br.com.praxis.ergonshowcase.rules.DependenteElegibilidadeRuleSet} do órgão corrente.
+   */
+  public RuleEvaluationResult evaluateDependenteElegibilidade(Dependente draft) {
+    return evaluateDependenteElegibilidade(draft, null, null);
+  }
+
+  /**
+   * Avalia deterministicamente o rascunho de {@link Dependente} informando o órgão e a data de
+   * referência explícitos.
+   */
+  public RuleEvaluationResult evaluateDependenteElegibilidade(
+      Dependente draft, Integer empCodigo, LocalDate referenceDate) {
+    ErgonRuleEngineFacade.DependenteRuleContext ctx =
+        buildDependenteRuleContext(draft, empCodigo, referenceDate);
+    return ruleEngineFacade.evaluateDependente(ctx);
+  }
+
+  /**
+   * Valida o rascunho de {@link Dependente} em modo <i>fail-closed</i>, lançando
+   * {@link br.com.praxis.ergonshowcase.rules.ErgonRuleViolationException} (HTTP 422) se negado.
+   */
+  public RuleEvaluationResult validateDependenteElegibilidade(Dependente draft) {
+    return validateDependenteElegibilidade(draft, null, null);
+  }
+
+  /**
+   * Valida o rascunho de {@link Dependente} em modo <i>fail-closed</i> com órgão e data de
+   * referência explícitos.
+   */
+  public RuleEvaluationResult validateDependenteElegibilidade(
+      Dependente draft, Integer empCodigo, LocalDate referenceDate) {
+    ErgonRuleEngineFacade.DependenteRuleContext ctx =
+        buildDependenteRuleContext(draft, empCodigo, referenceDate);
+    return ruleEngineFacade.enforceDependente(ctx);
+  }
+
+  /** Retorna o diagnóstico estruturado da avaliação determinística de elegibilidade de dependente. */
+  public Map<String, Object> evaluateDependenteDiagnostic(
+      Dependente draft, Integer empCodigo, LocalDate referenceDate) {
+    Integer effectiveOrg = empCodigo != null ? empCodigo : (tenant != null ? tenant.orgao() : 1);
+    RuleEvaluationResult result = evaluateDependenteElegibilidade(draft, effectiveOrg, referenceDate);
+    return ruleEngineFacade.toDiagnosticPayload(
+        ruleEngineFacade.resolveDependentePlan(effectiveOrg), result);
+  }
+
+  /** Constrói o contexto determinístico de avaliação de {@link Dependente}. */
+  public ErgonRuleEngineFacade.DependenteRuleContext buildDependenteRuleContext(
+      Dependente draft, Integer empCodigo, LocalDate referenceDate) {
+    Integer effectiveOrg = empCodigo != null ? empCodigo : (tenant != null ? tenant.orgao() : 1);
+    if (draft == null) {
+      return new ErgonRuleEngineFacade.DependenteRuleContext(
+          null, effectiveOrg, null, null, null, List.of(), referenceDate);
+    }
+    ServidorPessoa pessoa = draft.getPessoa();
+    if (draft.getId() == null || draft.getId().numfunc() == null) {
+      pessoa = null;
+    } else if (pessoa != null && !Objects.equals(pessoa.getNumero(), draft.getId().numfunc())) {
+      pessoa = null;
+    }
+    if (pessoa == null
+        && entityManager != null
+        && draft.getId() != null
+        && draft.getId().numfunc() != null) {
+      pessoa = entityManager.find(ServidorPessoa.class, draft.getId().numfunc());
+    }
+    TipoDependente tipo = draft.getTipoDependenteEntidade();
+    if (draft.getTipodepen() == null || draft.getTipodepen().isBlank()) {
+      tipo = null;
+    } else if (tipo != null && !Objects.equals(tipo.getTipodepen(), draft.getTipodepen())) {
+      tipo = null;
+    }
+    if (tipo == null
+        && entityManager != null
+        && draft.getTipodepen() != null
+        && !draft.getTipodepen().isBlank()) {
+      tipo = entityManager.find(TipoDependente.class, draft.getTipodepen());
+    }
+    DocumentoLegal doc = draft.getDocumentoLegal();
+    if (draft.getDocumentoLegalId() == null) {
+      doc = null;
+    } else if (doc != null && !Objects.equals(doc.getId(), draft.getDocumentoLegalId())) {
+      doc = null;
+    }
+    if (doc == null && entityManager != null && draft.getDocumentoLegalId() != null) {
+      doc = entityManager.find(DocumentoLegal.class, draft.getDocumentoLegalId());
+    }
+    List<Dependente> existing = List.of();
+    if (entityManager != null && draft.getId() != null && draft.getId().numfunc() != null) {
+      var q =
+          entityManager.createQuery(
+              "select x from Dependente x where x.id.numfunc=:f and (:n is null or x.id.numdep<>:n)",
+              Dependente.class);
+      if (q != null) {
+        existing =
+            q.setParameter("f", draft.getId().numfunc())
+                .setParameter("n", draft.getId().numdep())
+                .setFlushMode(FlushModeType.COMMIT)
+                .getResultList();
+      }
+    }
+    return new ErgonRuleEngineFacade.DependenteRuleContext(
+        draft, effectiveOrg, pessoa, tipo, doc, existing, referenceDate);
   }
 
   @Override
@@ -134,7 +264,10 @@ public class DependenteService
     beforeUpdate(id, entity, dto);
     var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
     mapper.applyUpdate(entity, dto);
-    invariants.dependente(entity, false);
+    if (invariants != null) {
+      invariants.dependente(entity, false);
+    }
+    validateDependenteElegibilidade(entity);
     CustomFieldSupport.restoreReadOnlyValues(entity, readOnlyKeys, old);
     var saved = getRepository().save(entity);
     afterUpdate(id, saved, dto);
@@ -145,7 +278,10 @@ public class DependenteService
 
   @Override
   protected void beforeCreate(CreateDependenteDTO dto, Dependente entity) {
-    invariants.dependente(entity, true);
+    if (invariants != null) {
+      invariants.dependente(entity, true);
+    }
+    validateDependenteElegibilidade(entity);
     if (getRepository().existsById(entity.getId())) {
       throw new ResponseStatusException(
           HttpStatus.CONFLICT, "Dependente já cadastrado para este servidor e sequencial.");
@@ -162,7 +298,10 @@ public class DependenteService
     entityManager.refresh(entity);
     precondition.requireMatch(entity.getVersion());
     action.accept(entity);
-    invariants.dependente(entity, false);
+    if (invariants != null) {
+      invariants.dependente(entity, false);
+    }
+    validateDependenteElegibilidade(entity);
     var saved = getRepository().save(entity);
     entityManager.flush();
     entityManager.refresh(saved);

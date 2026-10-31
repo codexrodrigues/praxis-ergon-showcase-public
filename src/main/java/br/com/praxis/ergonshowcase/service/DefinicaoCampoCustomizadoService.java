@@ -11,6 +11,7 @@ import br.com.praxis.ergonshowcase.dto.DefinicaoCampoCustomizadoResponseDTO;
 import br.com.praxis.ergonshowcase.dto.UpdateDefinicaoCampoCustomizadoDTO;
 import br.com.praxis.ergonshowcase.mapper.DefinicaoCampoCustomizadoMapper;
 import br.com.praxis.ergonshowcase.repository.DefinicaoCampoCustomizadoRepository;
+import br.com.praxis.ergonshowcase.rules.ErgonRuleEngineFacade;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
@@ -52,18 +53,46 @@ public class DefinicaoCampoCustomizadoService
         CreateDefinicaoCampoCustomizadoDTO,
         UpdateDefinicaoCampoCustomizadoDTO> {
 
-  @Autowired private ErgonInvariants invariants;
+  @Autowired(required = false)
+  private ErgonInvariants invariants;
+
   @PersistenceContext protected EntityManager entityManager;
   protected final DefinicaoCampoCustomizadoMapper mapper;
   private final TenantContext tenant;
+  private final ErgonRuleEngineFacade ruleEngineFacade;
 
   public DefinicaoCampoCustomizadoService(
       DefinicaoCampoCustomizadoRepository repository,
       DefinicaoCampoCustomizadoMapper mapper,
       TenantContext tenant) {
+    this(repository, mapper, tenant, new ErgonRuleEngineFacade());
+  }
+
+  @Autowired
+  public DefinicaoCampoCustomizadoService(
+      DefinicaoCampoCustomizadoRepository repository,
+      DefinicaoCampoCustomizadoMapper mapper,
+      TenantContext tenant,
+      ErgonRuleEngineFacade ruleEngineFacade) {
     super(repository, DefinicaoCampoCustomizado.class, "id");
     this.mapper = mapper;
-    this.tenant = tenant;
+    this.tenant = tenant != null ? tenant : new TenantContext();
+    this.ruleEngineFacade =
+        ruleEngineFacade != null ? ruleEngineFacade : new ErgonRuleEngineFacade();
+  }
+
+  public ErgonRuleEngineFacade getRuleEngineFacade() {
+    return ruleEngineFacade;
+  }
+
+  /**
+   * Valida sintática e estruturalmente {@code DefinicaoCampoCustomizado.validationRules} usando
+   * {@link org.praxisplatform.rules.jsonlogic.PraxisJsonLogicEngine#validate}.
+   */
+  public void validateCampoCustomizadoValidationRules(DefinicaoCampoCustomizado entity) {
+    if (entity != null) {
+      ruleEngineFacade.validateCustomFieldValidationRules(entity.getValidationRules());
+    }
   }
 
   @Override
@@ -138,7 +167,10 @@ public class DefinicaoCampoCustomizadoService
   protected void beforeCreate(
       CreateDefinicaoCampoCustomizadoDTO dto, DefinicaoCampoCustomizado entity) {
     checkOrg(entity.getEmpCodigo());
-    invariants.campoCustomizado(entity, true);
+    validateCampoCustomizadoValidationRules(entity);
+    if (invariants != null) {
+      invariants.campoCustomizado(entity, true);
+    }
   }
 
   @Override
@@ -160,7 +192,10 @@ public class DefinicaoCampoCustomizadoService
     precondition.requireMatch(entity.getVersion());
     beforeUpdate(id, entity, dto);
     mapper.applyUpdate(entity, dto);
-    invariants.campoCustomizado(entity, false);
+    validateCampoCustomizadoValidationRules(entity);
+    if (invariants != null) {
+      invariants.campoCustomizado(entity, false);
+    }
     var saved = getRepository().save(entity);
     afterUpdate(id, saved, dto);
     entityManager.flush();
@@ -179,7 +214,10 @@ public class DefinicaoCampoCustomizadoService
     precondition.requireMatch(entity.getVersion());
     checkOrg(entity.getEmpCodigo());
     action.accept(entity);
-    invariants.campoCustomizado(entity, false);
+    validateCampoCustomizadoValidationRules(entity);
+    if (invariants != null) {
+      invariants.campoCustomizado(entity, false);
+    }
     var saved = getRepository().save(entity);
     entityManager.flush();
     entityManager.refresh(saved);

@@ -1,11 +1,17 @@
 package br.com.praxis.ergonshowcase.rules;
 
 import br.com.praxis.ergonshowcase.domain.Afastamento;
+import br.com.praxis.ergonshowcase.domain.Cargo;
 import br.com.praxis.ergonshowcase.domain.CodigoFrequencia;
+import br.com.praxis.ergonshowcase.domain.DefinicaoCampoCustomizado;
+import br.com.praxis.ergonshowcase.domain.Dependente;
 import br.com.praxis.ergonshowcase.domain.DocumentoLegal;
 import br.com.praxis.ergonshowcase.domain.Frequencia;
+import br.com.praxis.ergonshowcase.domain.Orgao;
 import br.com.praxis.ergonshowcase.domain.RegraFrequenciaEstatutaria;
 import br.com.praxis.ergonshowcase.domain.ServidorPessoa;
+import br.com.praxis.ergonshowcase.domain.Setor;
+import br.com.praxis.ergonshowcase.domain.TipoDependente;
 import br.com.praxis.ergonshowcase.domain.TipoFrequencia;
 import br.com.praxis.ergonshowcase.domain.Vinculo;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -20,16 +26,25 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+import org.praxisplatform.rules.contract.DecisionSource;
+import org.praxisplatform.rules.contract.DecisionStage;
 import org.praxisplatform.rules.contract.RuleDecision;
 import org.praxisplatform.rules.contract.RuleEvaluationResult;
 import org.praxisplatform.rules.contract.RuleExecutorResult;
 import org.praxisplatform.rules.contract.RuleSetDefinition;
+import org.praxisplatform.rules.jsonlogic.PraxisJsonLogicEngine;
+import org.praxisplatform.rules.jsonlogic.PraxisJsonLogicException;
+import org.praxisplatform.rules.jsonlogic.model.JsonLogicEvaluationOptions;
+import org.praxisplatform.rules.jsonlogic.model.JsonLogicValidationOptions;
 import org.praxisplatform.rules.plan.PraxisRulePlanCompiler;
 import org.praxisplatform.rules.plan.RuleDecisionPlan;
 import org.praxisplatform.rules.runtime.PraxisRuleSetEngine;
@@ -43,11 +58,13 @@ import org.springframework.stereotype.Component;
  * de {@link RuleDecisionPlan} via {@link PraxisRulePlanCompiler} e avaliação em memória via
  * {@link PraxisRuleSetEngine}.
  *
- * <p>Suporta as 3 famílias governadas do domínio de Frequência e Afastamentos do Ergon RH Público:
+ * <p>Suporta as 5 famílias governadas do domínio do Ergon RH Público:
  * <ol>
  *   <li>{@link Rn013RegrasFrequenciaRuleSet} ({@code ergon.administracao-pessoal.regras-frequencia.rn013});
  *   <li>{@link FrequenciaLancamentoRuleSet} ({@code ergon.administracao-pessoal.frequencias.lancamento});
- *   <li>{@link AfastamentoConcessaoRuleSet} ({@code ergon.administracao-pessoal.afastamentos.concessao}).
+ *   <li>{@link AfastamentoConcessaoRuleSet} ({@code ergon.administracao-pessoal.afastamentos.concessao});
+ *   <li>{@link DependenteElegibilidadeRuleSet} ({@code ergon.administracao-pessoal.dependentes.elegibilidade});
+ *   <li>{@link VinculoProvimentoRuleSet} ({@code ergon.administracao-pessoal.vinculos.provimento}).
  * </ol>
  *
  * <p>Toda consulta JPA/SQL ocorre na camada de serviço antes de invocar o motor; os executores
@@ -58,8 +75,61 @@ import org.springframework.stereotype.Component;
 public class ErgonRuleEngineFacade {
 
   public static final String DEFAULT_TIME_ZONE = "America/Sao_Paulo";
+  public static final List<String> CUSTOM_FIELD_JSON_LOGIC_ROOTS =
+      List.of("value", "customFields", "draft", "entity");
   private static final LocalDate OPEN_ENDED_DATE = LocalDate.of(9999, 12, 31);
   private static final Set<String> INACTIVE_SITUACOES = Set.of("CANCELADO", "REJEITADO");
+  private static final Set<String> PROFESSOR_CATEGORIAS =
+      Set.of("MAGISTERIO", "DOCENTE", "PROFESSOR");
+  private static final Set<String> SAUDE_CATEGORIAS = Set.of("SAUDE", "PROFISSIONAL_SAUDE");
+  private static final Set<String> TECNICO_CIENTIFICO_CATEGORIAS =
+      Set.of("TECNICO", "TECNICO_CIENTIFICO", "CIENTIFICO");
+
+  /** Contexto pré-carregado para avaliação determinística de elegibilidade de {@link Dependente}. */
+  public record DependenteRuleContext(
+      Dependente draft,
+      Integer empCodigo,
+      ServidorPessoa pessoa,
+      TipoDependente tipoDependente,
+      DocumentoLegal documentoLegal,
+      List<Dependente> existingDependentes,
+      LocalDate referenceDate) {
+
+    public DependenteRuleContext(
+        Dependente draft,
+        ServidorPessoa pessoa,
+        TipoDependente tipoDependente,
+        DocumentoLegal documentoLegal,
+        List<Dependente> existingDependentes,
+        LocalDate referenceDate) {
+      this(draft, null, pessoa, tipoDependente, documentoLegal, existingDependentes, referenceDate);
+    }
+
+    public DependenteRuleContext(
+        Dependente draft,
+        ServidorPessoa pessoa,
+        TipoDependente tipoDependente,
+        DocumentoLegal documentoLegal,
+        List<Dependente> existingDependentes) {
+      this(draft, null, pessoa, tipoDependente, documentoLegal, existingDependentes, null);
+    }
+  }
+
+  /** Contexto pré-carregado para avaliação determinística de provimento/manutenção de {@link Vinculo}. */
+  public record VinculoRuleContext(
+      Vinculo draft,
+      Orgao orgao,
+      ServidorPessoa pessoa,
+      Cargo cargo,
+      long cargoOcupadas,
+      Cargo cargoComissao,
+      long cargoComissaoOcupadas,
+      Setor setor,
+      Setor setorExercicio,
+      DocumentoLegal documentoLegal,
+      List<Vinculo> existingVinculos,
+      long openAfastamentosCount,
+      boolean creating) {}
 
   /** Contexto pré-carregado para avaliação determinística de lançamento/manutenção de {@link Frequencia}. */
   public record FrequenciaRuleContext(
@@ -130,6 +200,7 @@ public class ErgonRuleEngineFacade {
   }
 
   private final ObjectMapper mapper;
+  private final PraxisJsonLogicEngine jsonLogicEngine;
   private final RuleBindingExecutorRegistry executorRegistry;
   private final PraxisRulePlanCompiler compiler;
   private final PraxisRuleSetEngine engine;
@@ -143,14 +214,23 @@ public class ErgonRuleEngineFacade {
   private final Map<Integer, RuleDecisionPlan> afastamentoPlansByOrgao = new ConcurrentHashMap<>();
   private final RuleDecisionPlan defaultProductAfastamentoPlan;
 
+  private final Map<Integer, RuleDecisionPlan> dependentePlansByOrgao = new ConcurrentHashMap<>();
+  private final RuleDecisionPlan defaultProductDependentePlan;
+
+  private final Map<Integer, RuleDecisionPlan> vinculoPlansByOrgao = new ConcurrentHashMap<>();
+  private final RuleDecisionPlan defaultProductVinculoPlan;
+
   public ErgonRuleEngineFacade() {
     this.mapper = new ObjectMapper();
+    this.jsonLogicEngine = new PraxisJsonLogicEngine();
     this.executorRegistry =
         new RuleBindingExecutorRegistry(
             List.of(
                 concomitanciaJavaExecutor(),
                 frequenciaSobreposicaoJavaExecutor(),
-                afastamentoSobreposicaoJavaExecutor()));
+                afastamentoSobreposicaoJavaExecutor(),
+                dependenteCpfUnicidadeJavaExecutor(),
+                vinculoAcumulacaoConstitucionalJavaExecutor()));
     this.compiler = new PraxisRulePlanCompiler(this.executorRegistry);
     this.engine = new PraxisRuleSetEngine(this.executorRegistry);
 
@@ -171,6 +251,22 @@ public class ErgonRuleEngineFacade {
     this.afastamentoPlansByOrgao.put(1, this.defaultProductAfastamentoPlan);
     this.afastamentoPlansByOrgao.put(
         2, this.compiler.compile(AfastamentoConcessaoRuleSet.orgao2CustomizedRuleSet()));
+
+    this.defaultProductDependentePlan =
+        this.compiler.compile(DependenteElegibilidadeRuleSet.productRuleSet());
+    this.dependentePlansByOrgao.put(1, this.defaultProductDependentePlan);
+    this.dependentePlansByOrgao.put(
+        2, this.compiler.compile(DependenteElegibilidadeRuleSet.orgao2CustomizedRuleSet()));
+
+    this.defaultProductVinculoPlan =
+        this.compiler.compile(VinculoProvimentoRuleSet.productRuleSet());
+    this.vinculoPlansByOrgao.put(1, this.defaultProductVinculoPlan);
+    this.vinculoPlansByOrgao.put(
+        2, this.compiler.compile(VinculoProvimentoRuleSet.orgao2CustomizedRuleSet()));
+  }
+
+  public PraxisJsonLogicEngine getJsonLogicEngine() {
+    return jsonLogicEngine;
   }
 
   /** Compila e valida estaticamente um {@link RuleSetDefinition} contra o registro de executores. */
@@ -226,6 +322,40 @@ public class ErgonRuleEngineFacade {
     Objects.requireNonNull(empCodigo, "empCodigo must not be null");
     RuleDecisionPlan compiled = compilePlan(definition);
     afastamentoPlansByOrgao.put(empCodigo, compiled);
+    return compiled;
+  }
+
+  /** Retorna o {@link RuleDecisionPlan} compilado de elegibilidade de dependente para o órgão informado. */
+  public RuleDecisionPlan resolveDependentePlan(Integer empCodigo) {
+    if (empCodigo == null) {
+      return defaultProductDependentePlan;
+    }
+    return dependentePlansByOrgao.getOrDefault(empCodigo, defaultProductDependentePlan);
+  }
+
+  /** Registra ou atualiza em memória um plano customizado de dependente para um órgão específico. */
+  public RuleDecisionPlan registerOrgaoDependentePlan(
+      Integer empCodigo, RuleSetDefinition definition) {
+    Objects.requireNonNull(empCodigo, "empCodigo must not be null");
+    RuleDecisionPlan compiled = compilePlan(definition);
+    dependentePlansByOrgao.put(empCodigo, compiled);
+    return compiled;
+  }
+
+  /** Retorna o {@link RuleDecisionPlan} compilado de provimento de vínculo para o órgão informado. */
+  public RuleDecisionPlan resolveVinculoPlan(Integer empCodigo) {
+    if (empCodigo == null) {
+      return defaultProductVinculoPlan;
+    }
+    return vinculoPlansByOrgao.getOrDefault(empCodigo, defaultProductVinculoPlan);
+  }
+
+  /** Registra ou atualiza em memória um plano customizado de vínculo para um órgão específico. */
+  public RuleDecisionPlan registerOrgaoVinculoPlan(
+      Integer empCodigo, RuleSetDefinition definition) {
+    Objects.requireNonNull(empCodigo, "empCodigo must not be null");
+    RuleDecisionPlan compiled = compilePlan(definition);
+    vinculoPlansByOrgao.put(empCodigo, compiled);
     return compiled;
   }
 
@@ -318,6 +448,234 @@ public class ErgonRuleEngineFacade {
     RuleDecisionPlan plan = resolveAfastamentoPlan(empCodigo);
     ObjectNode facts = buildAfastamentoFacts(ctx);
     return enforce(plan, facts);
+  }
+
+  /** Avalia deterministicamente a elegibilidade de {@link Dependente} contra o plano do órgão. */
+  public RuleEvaluationResult evaluateDependente(DependenteRuleContext ctx) {
+    Objects.requireNonNull(ctx, "ctx must not be null");
+    Integer empCodigo = resolveDependenteEmpCodigo(ctx);
+    RuleDecisionPlan plan = resolveDependentePlan(empCodigo);
+    ObjectNode facts = buildDependenteFacts(ctx);
+    return evaluate(plan, facts);
+  }
+
+  /**
+   * Avalia a elegibilidade de {@link Dependente} em modo <i>fail-closed</i>, lançando
+   * {@link ErgonRuleViolationException} (HTTP 422) se o resultado não for {@link RuleDecision#ALLOW}.
+   */
+  public RuleEvaluationResult enforceDependente(DependenteRuleContext ctx) {
+    Objects.requireNonNull(ctx, "ctx must not be null");
+    Integer empCodigo = resolveDependenteEmpCodigo(ctx);
+    RuleDecisionPlan plan = resolveDependentePlan(empCodigo);
+    ObjectNode facts = buildDependenteFacts(ctx);
+    return enforce(plan, facts);
+  }
+
+  private static Integer resolveDependenteEmpCodigo(DependenteRuleContext ctx) {
+    if (ctx.empCodigo() != null) {
+      return ctx.empCodigo();
+    }
+    if (ctx.draft() != null
+        && ctx.draft().getCustomFields() != null
+        && ctx.draft().getCustomFields().get("empCodigo") instanceof Number n) {
+      return n.intValue();
+    }
+    if (ctx.documentoLegal() != null && ctx.documentoLegal().getEmpCodigo() != null) {
+      return ctx.documentoLegal().getEmpCodigo();
+    }
+    return 1;
+  }
+
+  /** Avalia deterministicamente o provimento/manutenção de {@link Vinculo} contra o plano do órgão. */
+  public RuleEvaluationResult evaluateVinculo(VinculoRuleContext ctx) {
+    Objects.requireNonNull(ctx, "ctx must not be null");
+    Integer empCodigo =
+        ctx.draft() != null && ctx.draft().getEmpCodigo() != null ? ctx.draft().getEmpCodigo() : 1;
+    RuleDecisionPlan plan = resolveVinculoPlan(empCodigo);
+    ObjectNode facts = buildVinculoFacts(ctx);
+    return evaluate(plan, facts);
+  }
+
+  /**
+   * Avalia o provimento/manutenção de {@link Vinculo} em modo <i>fail-closed</i>, lançando
+   * {@link ErgonRuleViolationException} (HTTP 422) se o resultado não for {@link RuleDecision#ALLOW}.
+   */
+  public RuleEvaluationResult enforceVinculo(VinculoRuleContext ctx) {
+    Objects.requireNonNull(ctx, "ctx must not be null");
+    Integer empCodigo =
+        ctx.draft() != null && ctx.draft().getEmpCodigo() != null ? ctx.draft().getEmpCodigo() : 1;
+    RuleDecisionPlan plan = resolveVinculoPlan(empCodigo);
+    ObjectNode facts = buildVinculoFacts(ctx);
+    return enforce(plan, facts);
+  }
+
+  /**
+   * Valida sintática e estruturalmente {@code DefinicaoCampoCustomizado.validationRules}, incluindo
+   * limites escalares e qualquer árvore JSON Logic via {@link PraxisJsonLogicEngine#validate}.
+   * Rejeita expressões inválidas com HTTP 422 ({@link ErgonRuleViolationException} {@code ERG-21501}).
+   */
+  public void validateCustomFieldValidationRules(Map<String, Object> validationRules) {
+    if (validationRules == null || validationRules.isEmpty()) {
+      return;
+    }
+    if (validationRules.get("min") instanceof Number minN
+        && validationRules.get("max") instanceof Number maxN
+        && minN.doubleValue() > maxN.doubleValue()) {
+      throw new ErgonRuleViolationException(
+          ErgonRuleErrorCatalog.ERG_21501.code(),
+          ErgonRuleErrorCatalog.ERG_21501.slotKey(),
+          "product.ergon.customField.syntax",
+          DecisionSource.PRODUCT,
+          DecisionStage.PROTECTED_GUARD,
+          "validationRules",
+          "validationRules inválido: min não pode ser maior que max.");
+    }
+    if (validationRules.get("minLength") instanceof Number minL
+        && validationRules.get("maxLength") instanceof Number maxL
+        && minL.intValue() > maxL.intValue()) {
+      throw new ErgonRuleViolationException(
+          ErgonRuleErrorCatalog.ERG_21501.code(),
+          ErgonRuleErrorCatalog.ERG_21501.slotKey(),
+          "product.ergon.customField.syntax",
+          DecisionSource.PRODUCT,
+          DecisionStage.PROTECTED_GUARD,
+          "validationRules",
+          "validationRules inválido: minLength não pode ser maior que maxLength.");
+    }
+    Object patternObj = validationRules.get("pattern");
+    if (patternObj != null) {
+      try {
+        Pattern.compile(String.valueOf(patternObj));
+      } catch (PatternSyntaxException ex) {
+        throw new ErgonRuleViolationException(
+            ErgonRuleErrorCatalog.ERG_21501.code(),
+            ErgonRuleErrorCatalog.ERG_21501.slotKey(),
+            "product.ergon.customField.syntax",
+            DecisionSource.PRODUCT,
+            DecisionStage.PROTECTED_GUARD,
+            "validationRules",
+            "Expressão regular inválida em validationRules.pattern.");
+      }
+    }
+
+    JsonNode exprNode = extractJsonLogicExpression(validationRules);
+    if (exprNode != null) {
+      JsonLogicValidationOptions options =
+          new JsonLogicValidationOptions(
+              CUSTOM_FIELD_JSON_LOGIC_ROOTS,
+              "draft",
+              false,
+              Instant.now().toString(),
+              DEFAULT_TIME_ZONE,
+              true);
+      try {
+        jsonLogicEngine.validate(exprNode, options);
+      } catch (PraxisJsonLogicException ex) {
+        throw new ErgonRuleViolationException(
+            ErgonRuleErrorCatalog.ERG_21501.code(),
+            ErgonRuleErrorCatalog.ERG_21501.slotKey(),
+            "product.ergon.customField.syntax",
+            DecisionSource.PRODUCT,
+            DecisionStage.PROTECTED_GUARD,
+            "validationRules",
+            ErgonRuleErrorCatalog.ERG_21501.messagePtBr() + " Detalhe: " + ex.getMessage());
+      }
+    }
+  }
+
+  /**
+   * Avalia em runtime as expressões JSON Logic definidas nas {@link DefinicaoCampoCustomizado}
+   * ativas sobre o contexto determinístico {@code {"value": <valorDoCampo>, "customFields": <mapa>, "draft": <entidade>}},
+   * lançando {@link ErgonRuleViolationException} (HTTP 422 {@code ERG-21502}) quando uma regra retornar {@code false}.
+   */
+  public void evaluateCustomFieldsJsonLogic(
+      String resourceKey,
+      Integer empCodigo,
+      Map<String, Object> customFields,
+      Object draftEntity,
+      List<DefinicaoCampoCustomizado> activeDefinitions) {
+    if (activeDefinitions == null || activeDefinitions.isEmpty()) {
+      return;
+    }
+    Map<String, Object> safeCustomFields = customFields != null ? customFields : Map.of();
+    JsonNode customFieldsNode = toSafeJsonValue(safeCustomFields);
+    ObjectNode draftNode = toSafeEntityNode(draftEntity);
+    String nowUtc = Instant.now().toString();
+    JsonLogicEvaluationOptions evalOptions =
+        new JsonLogicEvaluationOptions(
+            CUSTOM_FIELD_JSON_LOGIC_ROOTS, "draft", false, nowUtc, DEFAULT_TIME_ZONE);
+
+    Map<String, DefinicaoCampoCustomizado> effectiveDefs = new LinkedHashMap<>();
+    for (DefinicaoCampoCustomizado candidate : activeDefinitions) {
+      if (candidate == null
+          || Boolean.FALSE.equals(candidate.getActive())
+          || candidate.getFieldKey() == null) {
+        continue;
+      }
+      if (candidate.getEmpCodigo() != null
+          && empCodigo != null
+          && !Objects.equals(candidate.getEmpCodigo(), empCodigo)) {
+        continue;
+      }
+      DefinicaoCampoCustomizado prev = effectiveDefs.get(candidate.getFieldKey());
+      if (prev == null || candidate.getEmpCodigo() != null) {
+        effectiveDefs.put(candidate.getFieldKey(), candidate);
+      }
+    }
+
+    for (DefinicaoCampoCustomizado def : effectiveDefs.values()) {
+      String fieldKey = def.getFieldKey();
+      if (def.getValidationRules() == null || def.getValidationRules().isEmpty()) {
+        continue;
+      }
+      JsonNode exprNode = extractJsonLogicExpression(def.getValidationRules());
+      if (exprNode == null) {
+        continue;
+      }
+      boolean fieldPresent = safeCustomFields.containsKey(fieldKey);
+      String exprText = exprNode.toString();
+      boolean referencesDraftOrMap =
+          exprText.contains("\"draft.")
+              || exprText.contains("\"entity.")
+              || exprText.contains("\"customFields.");
+      if (!fieldPresent && !Boolean.TRUE.equals(def.getRequired()) && !referencesDraftOrMap) {
+        continue;
+      }
+      Object fieldValue = safeCustomFields.get(fieldKey);
+      ObjectNode contextData = mapper.createObjectNode();
+      contextData.set("value", toSafeJsonValue(fieldValue));
+      contextData.set("customFields", customFieldsNode);
+      contextData.set("draft", draftNode);
+      contextData.set("entity", draftNode);
+
+      boolean allowed;
+      try {
+        Object result = jsonLogicEngine.evaluate(exprNode, contextData, evalOptions);
+        allowed = jsonLogicEngine.truthy(result);
+      } catch (PraxisJsonLogicException ex) {
+        allowed = false;
+      }
+      if (!allowed) {
+        Object customMsg = def.getValidationRules().get("customMessage");
+        String msg =
+            customMsg != null && !String.valueOf(customMsg).isBlank()
+                ? String.valueOf(customMsg)
+                : ErgonRuleErrorCatalog.ERG_21502.messagePtBr()
+                    + " (recurso: "
+                    + resourceKey
+                    + ", campo: "
+                    + fieldKey
+                    + ").";
+        throw new ErgonRuleViolationException(
+            ErgonRuleErrorCatalog.ERG_21502.code(),
+            ErgonRuleErrorCatalog.ERG_21502.slotKey(),
+            "product.ergon.customField." + fieldKey,
+            DecisionSource.PRODUCT,
+            DecisionStage.DOMAIN_DECISION,
+            "customFields." + fieldKey,
+            msg);
+      }
+    }
   }
 
   /**
@@ -1389,6 +1747,598 @@ public class ErgonRuleEngineFacade {
     return node;
   }
 
+  /**
+   * Constrói a árvore JSON imutável de fatos para {@link DependenteElegibilidadeRuleSet}.
+   */
+  public ObjectNode buildDependenteFacts(DependenteRuleContext ctx) {
+    Objects.requireNonNull(ctx, "ctx must not be null");
+    Dependente draft = ctx.draft();
+    Integer empCodigo = resolveDependenteEmpCodigo(ctx);
+    LocalDate refDate = ctx.referenceDate() != null ? ctx.referenceDate() : LocalDate.now();
+
+    ObjectNode root = mapper.createObjectNode();
+    ObjectNode draftNode = mapper.createObjectNode();
+    if (draft != null) {
+      Long numfunc = draft.getId() != null ? draft.getId().numfunc() : null;
+      Integer numdep = draft.getId() != null ? draft.getId().numdep() : null;
+      putIntOrNull(draftNode, "id", numdep);
+      putIntOrNull(draftNode, "empCodigo", empCodigo);
+      putLongOrNull(draftNode, "numfunc", numfunc);
+      putIntOrNull(draftNode, "numero", numdep);
+      putIntOrNull(draftNode, "numdep", numdep);
+      putTextOrNull(draftNode, "nome", draft.getNome());
+      putDateOrNull(draftNode, "dtnasc", draft.getDtnasc());
+      putTextOrNull(draftNode, "sexo", draft.getSexo());
+      String cleanCpf = blankToNull(draft.getCpf());
+      putTextOrNull(draftNode, "cpf", cleanCpf);
+      draftNode.put("cpfValidFormat", cleanCpf != null && cleanCpf.matches("\\d{11}"));
+      putTextOrNull(draftNode, "parentesco", blankToNull(draft.getParentesco()));
+      putTextOrNull(draftNode, "tipodepen", blankToNull(draft.getTipodepen()));
+      putDateOrNull(draftNode, "dtini", draft.getDtini());
+      putDateOrNull(draftNode, "dtfim", draft.getDtfim());
+      draftNode.put("depIr", Boolean.TRUE.equals(draft.getDepIr()));
+      draftNode.put("depSalarioFamilia", Boolean.TRUE.equals(draft.getDepSalarioFamilia()));
+      draftNode.put("depPlanoSaude", Boolean.TRUE.equals(draft.getDepPlanoSaude()));
+      draftNode.put("estudante", Boolean.TRUE.equals(draft.getEstudante()));
+      draftNode.put("universitario", Boolean.TRUE.equals(draft.getUniversitario()));
+      draftNode.put("invalido", Boolean.TRUE.equals(draft.getInvalido()));
+      draftNode.put("excepcional", Boolean.TRUE.equals(draft.getExcepcional()));
+      draftNode.put("representanteLegal", Boolean.TRUE.equals(draft.getRepresentanteLegal()));
+      putLongOrNull(draftNode, "documentoLegalId", draft.getDocumentoLegalId());
+      putTextOrNull(draftNode, "numrg", blankToNull(draft.getNumrg()));
+      putTextOrNull(draftNode, "tiporg", blankToNull(draft.getTiporg()));
+      putTextOrNull(draftNode, "orgaorg", blankToNull(draft.getOrgaorg()));
+      putTextOrNull(draftNode, "ufrg", blankToNull(draft.getUfrg()));
+      putDateOrNull(draftNode, "expedrg", draft.getExpedrg());
+      putTextOrNull(draftNode, "numCert", blankToNull(draft.getNumCert()));
+      putTextOrNull(draftNode, "livroCert", blankToNull(draft.getLivroACert()));
+      putTextOrNull(draftNode, "folhaCert", blankToNull(draft.getFolhaCert()));
+      putTextOrNull(draftNode, "cartorioCert", blankToNull(draft.getCartorioCert()));
+      putTextOrNull(draftNode, "tipodocCert", blankToNull(draft.getTipodocCert()));
+      draftNode.put("referenceDate", refDate.toString());
+      if (draft.getDtnasc() != null) {
+        int age =
+            draft.getDtnasc().isAfter(refDate)
+                ? -1
+                : Math.toIntExact(ChronoUnit.YEARS.between(draft.getDtnasc(), refDate));
+        draftNode.put("ageYears", age);
+      } else {
+        draftNode.putNull("ageYears");
+      }
+    }
+    root.set("draft", draftNode);
+
+    ObjectNode pessoaNode = mapper.createObjectNode();
+    if (ctx.pessoa() == null) {
+      pessoaNode.put("present", false);
+      pessoaNode.putNull("id");
+      pessoaNode.putNull("cpf");
+      pessoaNode.putNull("dtnasc");
+      pessoaNode.putNull("sexo");
+    } else {
+      pessoaNode.put("present", true);
+      putLongOrNull(pessoaNode, "id", ctx.pessoa().getNumero());
+      putTextOrNull(pessoaNode, "cpf", blankToNull(ctx.pessoa().getCpf()));
+      putDateOrNull(pessoaNode, "dtnasc", ctx.pessoa().getDtnasc());
+      putTextOrNull(pessoaNode, "sexo", ctx.pessoa().getSexo());
+    }
+    root.set("pessoa", pessoaNode);
+
+    ObjectNode tipoNode = mapper.createObjectNode();
+    if (ctx.tipoDependente() == null) {
+      tipoNode.put("present", false);
+      tipoNode.putNull("codigo");
+      tipoNode.put("geraIr", false);
+      tipoNode.put("geraSalarioFamilia", false);
+      tipoNode.putNull("effectiveMaxAge");
+    } else {
+      tipoNode.put("present", true);
+      putTextOrNull(tipoNode, "codigo", ctx.tipoDependente().getTipodepen());
+      tipoNode.put("geraIr", Boolean.TRUE.equals(ctx.tipoDependente().getGeraIr()));
+      tipoNode.put(
+          "geraSalarioFamilia", Boolean.TRUE.equals(ctx.tipoDependente().getGeraSalarioFamilia()));
+      Integer effectiveMaxAge =
+          draft != null
+                  && Boolean.TRUE.equals(draft.getUniversitario())
+                  && ctx.tipoDependente().getIdadeLimite() != null
+                  && ctx.tipoDependente().getIdadeLimite() < 24
+              ? Integer.valueOf(24)
+              : ctx.tipoDependente().getIdadeLimite();
+      putIntOrNull(tipoNode, "effectiveMaxAge", effectiveMaxAge);
+    }
+    root.set("tipoDependente", tipoNode);
+
+    root.set(
+        "documentoLegal",
+        toDocumentoLegalNode(
+            ctx.documentoLegal(),
+            draft != null ? draft.getDocumentoLegalId() : null,
+            empCodigo));
+
+    ArrayNode existingArray = mapper.createArrayNode();
+    if (ctx.existingDependentes() != null) {
+      for (Dependente existing : ctx.existingDependentes()) {
+        if (existing != null) {
+          ObjectNode item = mapper.createObjectNode();
+          Integer exNumdep = existing.getId() != null ? existing.getId().numdep() : null;
+          Long exNumfunc = existing.getId() != null ? existing.getId().numfunc() : null;
+          putIntOrNull(item, "id", exNumdep);
+          putLongOrNull(item, "numfunc", exNumfunc);
+          putIntOrNull(item, "numero", exNumdep);
+          putTextOrNull(item, "cpf", blankToNull(existing.getCpf()));
+          putDateOrNull(item, "dtini", existing.getDtini());
+          putDateOrNull(item, "dtfim", existing.getDtfim());
+          existingArray.add(item);
+        }
+      }
+    }
+    root.set("existingDependentes", existingArray);
+
+    ObjectNode tenantNode = mapper.createObjectNode();
+    tenantNode.put("empCodigo", empCodigo);
+    root.set("tenant", tenantNode);
+
+    ObjectNode contextNode = mapper.createObjectNode();
+    contextNode.put("resourceKey", DependenteElegibilidadeRuleSet.RESOURCE_KEY);
+    contextNode.put("ruleSetKey", DependenteElegibilidadeRuleSet.RULESET_KEY);
+    contextNode.put("referenceDate", refDate.toString());
+    root.set("context", contextNode);
+    return root;
+  }
+
+  /**
+   * Constrói a árvore JSON imutável de fatos para {@link VinculoProvimentoRuleSet}.
+   */
+  public ObjectNode buildVinculoFacts(VinculoRuleContext ctx) {
+    Objects.requireNonNull(ctx, "ctx must not be null");
+    Vinculo draft = ctx.draft();
+    Integer empCodigo = draft != null && draft.getEmpCodigo() != null ? draft.getEmpCodigo() : 1;
+
+    ObjectNode root = mapper.createObjectNode();
+    ObjectNode draftNode = mapper.createObjectNode();
+    if (draft != null) {
+      Long numfunc = draft.getId() != null ? draft.getId().numfunc() : null;
+      Integer numero = draft.getId() != null ? draft.getId().numero() : null;
+      putIntOrNull(draftNode, "id", numero);
+      putIntOrNull(draftNode, "empCodigo", draft.getEmpCodigo());
+      putLongOrNull(draftNode, "numfunc", numfunc);
+      putIntOrNull(draftNode, "numero", numero);
+      putTextOrNull(draftNode, "regimejur", blankToNull(draft.getRegimejur()));
+      putTextOrNull(draftNode, "tipovinc", blankToNull(draft.getTipovinc()));
+      putTextOrNull(draftNode, "categoria", blankToNull(draft.getCategoria()));
+      putTextOrNull(draftNode, "subcategoria", blankToNull(draft.getSubcategoria()));
+      putTextOrNull(draftNode, "situacao", blankToNull(draft.getSituacao()));
+      draftNode.put("creating", ctx.creating());
+      draftNode.put(
+          "occupyingPosition",
+          draft.getSituacao() != null
+              && Set.of("ATIVO", "AFASTADO", "CEDIDO").contains(draft.getSituacao()));
+
+      putDateOrNull(draftNode, "dtnom", draft.getDtnom());
+      putDateOrNull(draftNode, "dtposse", draft.getDtposse());
+      putDateOrNull(draftNode, "dtexerc", draft.getDtexerc());
+      putDateOrNull(draftNode, "dtvac", draft.getDtvac());
+      putTextOrNull(draftNode, "formavac", blankToNull(draft.getFormavac()));
+      putTextOrNull(draftNode, "motivovac", blankToNull(draft.getMotivovac()));
+      putDateOrNull(draftNode, "dtaposent", draft.getDtaposent());
+      putTextOrNull(draftNode, "tipoapos", blankToNull(draft.getTipoapos()));
+
+      putDateOrNull(draftNode, "dtinicontr", draft.getDtinicontr());
+      putDateOrNull(draftNode, "dtfimcontr", draft.getDtfimcontr());
+      putDateOrNull(draftNode, "dtprorrogcontr", draft.getDtprorrogcontr());
+      if (draft.getDtinicontr() != null && draft.getDtfimcontr() != null) {
+        draftNode.put(
+            "contractDurationDays",
+            Math.toIntExact(ChronoUnit.DAYS.between(draft.getDtinicontr(), draft.getDtfimcontr())));
+      } else {
+        draftNode.putNull("contractDurationDays");
+      }
+
+      putDateOrNull(draftNode, "dtHomologEstagio", draft.getDtHomologEstagio());
+      draftNode.putNull("dtinihomologestag");
+      draftNode.putNull("dtfimhomologestag");
+
+      putDateOrNull(draftNode, "dtiniCessao", draft.getDtiniCessao());
+      putDateOrNull(draftNode, "dtfimCessao", draft.getDtfimCessao());
+      putTextOrNull(draftNode, "tipoReq", blankToNull(draft.getTipoReq()));
+      putTextOrNull(draftNode, "orgaoReq", blankToNull(draft.getOrgaoReq()));
+
+      draftNode.putNull("dtinipagto");
+      draftNode.putNull("dtfimpagto");
+      putDateOrNull(draftNode, "dtPgtoAte", draft.getDtPgtoAte());
+
+      putIntOrNull(draftNode, "jornadaSemanal", draft.getJornadaSemanal());
+      if (draft.getDtposse() != null && draft.getDtexerc() != null) {
+        draftNode.put(
+            "daysPosseToExercicio",
+            Math.toIntExact(ChronoUnit.DAYS.between(draft.getDtposse(), draft.getDtexerc())));
+      } else {
+        draftNode.putNull("daysPosseToExercicio");
+      }
+
+      LocalDate entryDate = draft.getDtposse() != null ? draft.getDtposse() : draft.getDtexerc();
+      if (ctx.pessoa() != null && ctx.pessoa().getDtnasc() != null && entryDate != null) {
+        int age =
+            entryDate.isBefore(ctx.pessoa().getDtnasc())
+                ? -1
+                : Math.toIntExact(ChronoUnit.YEARS.between(ctx.pessoa().getDtnasc(), entryDate));
+        draftNode.put("ageAtIngressoYears", age);
+      } else {
+        draftNode.putNull("ageAtIngressoYears");
+      }
+
+      putIntOrNull(draftNode, "cargo", draft.getCargo());
+      putIntOrNull(draftNode, "cargoComissao", draft.getCargoComissao());
+      putTextOrNull(draftNode, "setor", blankToNull(draft.getSetor()));
+      putTextOrNull(draftNode, "setorExercicio", blankToNull(draft.getSetorExercicio()));
+      putLongOrNull(draftNode, "documentoLegalId", draft.getDocumentoLegalId());
+      draftNode.put("openAfastamentosCount", ctx.openAfastamentosCount());
+    }
+    root.set("draft", draftNode);
+
+    ObjectNode orgaoNode = mapper.createObjectNode();
+    if (ctx.orgao() == null) {
+      orgaoNode.put("present", false);
+      orgaoNode.put("ativa", false);
+    } else {
+      orgaoNode.put("present", true);
+      orgaoNode.put("ativa", Boolean.TRUE.equals(ctx.orgao().getAtiva()));
+    }
+    root.set("orgao", orgaoNode);
+
+    ObjectNode pessoaNode = mapper.createObjectNode();
+    if (ctx.pessoa() == null) {
+      pessoaNode.put("present", false);
+      pessoaNode.putNull("id");
+      pessoaNode.putNull("dtnasc");
+    } else {
+      pessoaNode.put("present", true);
+      putLongOrNull(pessoaNode, "id", ctx.pessoa().getNumero());
+      putDateOrNull(pessoaNode, "dtnasc", ctx.pessoa().getDtnasc());
+    }
+    root.set("pessoa", pessoaNode);
+
+    ObjectNode setorNode = mapper.createObjectNode();
+    setorNode.put("present", ctx.setor() != null);
+    setorNode.put(
+        "sameOrgao",
+        ctx.setor() != null && Objects.equals(ctx.setor().getEmpCodigo(), empCodigo));
+    root.set("setor", setorNode);
+
+    ObjectNode setorExNode = mapper.createObjectNode();
+    setorExNode.put("present", ctx.setorExercicio() != null);
+    setorExNode.put(
+        "sameOrgao",
+        ctx.setorExercicio() != null
+            && Objects.equals(ctx.setorExercicio().getEmpCodigo(), empCodigo));
+    root.set("setorExercicio", setorExNode);
+
+    root.set(
+        "cargo",
+        toCargoFactNode(
+            ctx.cargo(), ctx.cargoOcupadas(), draft, empCodigo, ctx.creating(), false));
+    root.set(
+        "cargoComissao",
+        toCargoFactNode(
+            ctx.cargoComissao(),
+            ctx.cargoComissaoOcupadas(),
+            draft,
+            empCodigo,
+            ctx.creating(),
+            true));
+
+    root.set(
+        "documentoLegal",
+        toDocumentoLegalNode(
+            ctx.documentoLegal(),
+            draft != null ? draft.getDocumentoLegalId() : null,
+            empCodigo));
+
+    ArrayNode existingArray = mapper.createArrayNode();
+    if (ctx.existingVinculos() != null) {
+      for (Vinculo existing : ctx.existingVinculos()) {
+        if (existing != null) {
+          ObjectNode item = mapper.createObjectNode();
+          Integer exNumero = existing.getId() != null ? existing.getId().numero() : null;
+          Long exNumfunc = existing.getId() != null ? existing.getId().numfunc() : null;
+          putIntOrNull(item, "id", exNumero);
+          putLongOrNull(item, "numfunc", exNumfunc);
+          putIntOrNull(item, "numero", exNumero);
+          putTextOrNull(item, "situacao", existing.getSituacao());
+          putTextOrNull(item, "categoria", existing.getCategoria());
+          putDateOrNull(item, "dtexerc", existing.getDtexerc());
+          putDateOrNull(item, "dtvac", existing.getDtvac());
+          existingArray.add(item);
+        }
+      }
+    }
+    root.set("existingVinculos", existingArray);
+
+    ObjectNode tenantNode = mapper.createObjectNode();
+    tenantNode.put("empCodigo", empCodigo);
+    root.set("tenant", tenantNode);
+
+    ObjectNode contextNode = mapper.createObjectNode();
+    contextNode.put("resourceKey", VinculoProvimentoRuleSet.RESOURCE_KEY);
+    contextNode.put("ruleSetKey", VinculoProvimentoRuleSet.RULESET_KEY);
+    contextNode.put("creating", ctx.creating());
+    root.set("context", contextNode);
+    return root;
+  }
+
+  private ObjectNode toCargoFactNode(
+      Cargo cargo,
+      long ocupadas,
+      Vinculo draft,
+      Integer empCodigo,
+      boolean creating,
+      boolean comissaoSlot) {
+    ObjectNode node = mapper.createObjectNode();
+    if (cargo == null) {
+      node.put("present", false);
+      node.put("sameOrgao", false);
+      node.put("extinct", false);
+      node.put("categoriaCompativel", false);
+      node.put("tipoComissaoValido", false);
+      node.put("hasVacancyBalance", false);
+      return node;
+    }
+    node.put("present", true);
+    node.put("sameOrgao", Objects.equals(cargo.getEmpCodigo(), empCodigo));
+    node.put("extinct", cargo.getDtExtincao() != null);
+    boolean categoriaCompativel = true;
+    if (draft != null && draft.getTipovinc() != null && cargo.getTipoCargo() != null) {
+      if ("EFETIVO".equals(draft.getTipovinc()) && "COMISSAO".equals(cargo.getTipoCargo())) {
+        categoriaCompativel = false;
+      } else if ("COMISSIONADO".equals(draft.getTipovinc())
+          && "EFETIVO".equals(cargo.getTipoCargo())) {
+        categoriaCompativel = false;
+      }
+    }
+    boolean tipoComissaoValido =
+        cargo.getTipoCargo() == null || !"EFETIVO".equals(cargo.getTipoCargo());
+    node.put("categoriaCompativel", categoriaCompativel);
+    node.put("tipoComissaoValido", tipoComissaoValido);
+
+    boolean hasVacancyBalance = true;
+    boolean occupying =
+        draft != null
+            && draft.getSituacao() != null
+            && Set.of("ATIVO", "AFASTADO", "CEDIDO").contains(draft.getSituacao());
+    if (Boolean.TRUE.equals(cargo.getControleVaga()) && occupying) {
+      if (cargo.getVagasAutorizadas() == null || ocupadas >= cargo.getVagasAutorizadas()) {
+        hasVacancyBalance = false;
+      }
+    }
+    node.put("hasVacancyBalance", hasVacancyBalance);
+    return node;
+  }
+
+  private JsonNode extractJsonLogicExpression(Map<String, Object> validationRules) {
+    if (validationRules == null || validationRules.isEmpty()) {
+      return null;
+    }
+    if (validationRules.containsKey("jsonLogic") || validationRules.containsKey("rule")) {
+      Object raw =
+          validationRules.containsKey("jsonLogic")
+              ? validationRules.get("jsonLogic")
+              : validationRules.get("rule");
+      return toSafeJsonValue(raw);
+    }
+    boolean allScalar = true;
+    for (Map.Entry<String, Object> entry : validationRules.entrySet()) {
+      if (!isScalarValidationEntry(entry.getKey(), entry.getValue())) {
+        allScalar = false;
+        break;
+      }
+    }
+    if (allScalar) {
+      return null;
+    }
+    Map<String, Object> exprMap = new LinkedHashMap<>();
+    for (Map.Entry<String, Object> entry : validationRules.entrySet()) {
+      String k = entry.getKey();
+      if ("customMessage".equals(k) && entry.getValue() instanceof String) {
+        continue;
+      }
+      if ("required".equals(k) && entry.getValue() instanceof Boolean) {
+        continue;
+      }
+      exprMap.put(k, entry.getValue());
+    }
+    return toSafeJsonValue(exprMap);
+  }
+
+  private static boolean isScalarValidationEntry(String key, Object value) {
+    if (key == null) {
+      return false;
+    }
+    return switch (key) {
+      case "min", "max", "minLength", "maxLength" -> value instanceof Number;
+      case "pattern", "customMessage" -> value instanceof String;
+      case "required" -> value instanceof Boolean;
+      default -> false;
+    };
+  }
+
+  private ObjectNode toSafeEntityNode(Object draftEntity) {
+    ObjectNode node = mapper.createObjectNode();
+    if (draftEntity == null) {
+      return node;
+    }
+    if (draftEntity instanceof Dependente d) {
+      Long numfunc = d.getId() != null ? d.getId().numfunc() : null;
+      Integer numdep = d.getId() != null ? d.getId().numdep() : null;
+      putIntOrNull(node, "id", numdep);
+      putLongOrNull(node, "numfunc", numfunc);
+      putIntOrNull(node, "numero", numdep);
+      putIntOrNull(node, "numdep", numdep);
+      putTextOrNull(node, "nome", d.getNome());
+      putDateOrNull(node, "dtnasc", d.getDtnasc());
+      putTextOrNull(node, "sexo", d.getSexo());
+      putTextOrNull(node, "cpf", d.getCpf());
+      putTextOrNull(node, "parentesco", d.getParentesco());
+      putTextOrNull(node, "tipodepen", d.getTipodepen());
+      putDateOrNull(node, "dtini", d.getDtini());
+      putDateOrNull(node, "dtfim", d.getDtfim());
+      putBooleanOrNull(node, "depIr", d.getDepIr());
+      putBooleanOrNull(node, "depSalarioFamilia", d.getDepSalarioFamilia());
+      putBooleanOrNull(node, "depPlanoSaude", d.getDepPlanoSaude());
+      putBooleanOrNull(node, "estudante", d.getEstudante());
+      putBooleanOrNull(node, "universitario", d.getUniversitario());
+      putBooleanOrNull(node, "invalido", d.getInvalido());
+      putBooleanOrNull(node, "excepcional", d.getExcepcional());
+      putBooleanOrNull(node, "representanteLegal", d.getRepresentanteLegal());
+      putLongOrNull(node, "documentoLegalId", d.getDocumentoLegalId());
+      return node;
+    }
+    if (draftEntity instanceof Vinculo v) {
+      Long numfunc = v.getId() != null ? v.getId().numfunc() : null;
+      Integer numero = v.getId() != null ? v.getId().numero() : null;
+      putIntOrNull(node, "id", numero);
+      putIntOrNull(node, "empCodigo", v.getEmpCodigo());
+      putLongOrNull(node, "numfunc", numfunc);
+      putIntOrNull(node, "numero", numero);
+      putTextOrNull(node, "regimejur", v.getRegimejur());
+      putTextOrNull(node, "tipovinc", v.getTipovinc());
+      putTextOrNull(node, "categoria", v.getCategoria());
+      putTextOrNull(node, "subcategoria", v.getSubcategoria());
+      putTextOrNull(node, "situacao", v.getSituacao());
+      putDateOrNull(node, "dtnom", v.getDtnom());
+      putDateOrNull(node, "dtposse", v.getDtposse());
+      putDateOrNull(node, "dtexerc", v.getDtexerc());
+      putDateOrNull(node, "dtvac", v.getDtvac());
+      putTextOrNull(node, "formavac", v.getFormavac());
+      putDateOrNull(node, "dtaposent", v.getDtaposent());
+      putIntOrNull(node, "jornadaSemanal", v.getJornadaSemanal());
+      putIntOrNull(node, "cargo", v.getCargo());
+      putIntOrNull(node, "cargoComissao", v.getCargoComissao());
+      putTextOrNull(node, "setor", v.getSetor());
+      putTextOrNull(node, "setorExercicio", v.getSetorExercicio());
+      putLongOrNull(node, "documentoLegalId", v.getDocumentoLegalId());
+      return node;
+    }
+    if (draftEntity instanceof Frequencia f) {
+      putLongOrNull(node, "id", f.getId());
+      putIntOrNull(node, "empCodigo", f.getEmpCodigo());
+      putLongOrNull(node, "numfunc", f.getNumfunc());
+      putIntOrNull(node, "numvinc", f.getNumvinc());
+      putTextOrNull(node, "tipofreq", f.getTipofreq());
+      putIntOrNull(node, "codfreq", f.getCodfreq());
+      putDateOrNull(node, "dtini", f.getDtini());
+      putDateOrNull(node, "dtfim", f.getDtfim());
+      if (f.getQuantidade() != null) {
+        node.put("quantidade", f.getQuantidade().stripTrailingZeros());
+      } else {
+        node.putNull("quantidade");
+      }
+      putTextOrNull(node, "situacao", f.getSituacao());
+      putLongOrNull(node, "documentoLegalId", f.getDocumentoLegalId());
+      return node;
+    }
+    if (draftEntity instanceof Afastamento a) {
+      putLongOrNull(node, "id", a.getId());
+      putIntOrNull(node, "empCodigo", a.getEmpCodigo());
+      putLongOrNull(node, "numfunc", a.getNumfunc());
+      putIntOrNull(node, "numvinc", a.getNumvinc());
+      putTextOrNull(node, "tipofreq", a.getTipofreq());
+      putIntOrNull(node, "codfreq", a.getCodfreq());
+      putDateOrNull(node, "dtini", a.getDtini());
+      putDateOrNull(node, "dtprevfim", a.getDtprevfim());
+      putDateOrNull(node, "dtfim", a.getDtfim());
+      putIntOrNull(node, "quantidadeDias", a.getQuantidadeDias());
+      putBooleanOrNull(node, "prorrogacao", a.getProrrogacao());
+      putTextOrNull(node, "situacao", a.getSituacao());
+      putLongOrNull(node, "documentoLegalId", a.getDocumentoLegalId());
+      return node;
+    }
+    if (draftEntity instanceof Cargo c) {
+      putIntOrNull(node, "id", c.getCargo());
+      putIntOrNull(node, "empCodigo", c.getEmpCodigo());
+      putIntOrNull(node, "cargo", c.getCargo());
+      putTextOrNull(node, "nome", c.getNome());
+      putTextOrNull(node, "categoria", c.getCategoria());
+      putTextOrNull(node, "tipoCargo", c.getTipoCargo());
+      putBooleanOrNull(node, "controleVaga", c.getControleVaga());
+      putIntOrNull(node, "vagasAutorizadas", c.getVagasAutorizadas());
+      putIntOrNull(node, "qtdVagasAutorizadas", c.getVagasAutorizadas());
+      putDateOrNull(node, "dtExtincao", c.getDtExtincao());
+      return node;
+    }
+    if (draftEntity instanceof ServidorPessoa p) {
+      putLongOrNull(node, "id", p.getNumero());
+      putLongOrNull(node, "numero", p.getNumero());
+      putTextOrNull(node, "nome", p.getNome());
+      putTextOrNull(node, "cpf", p.getCpf());
+      putDateOrNull(node, "dtnasc", p.getDtnasc());
+      putTextOrNull(node, "sexo", p.getSexo());
+      return node;
+    }
+    if (draftEntity instanceof Map<?, ?> map) {
+      for (Map.Entry<?, ?> entry : map.entrySet()) {
+        if (entry.getKey() != null) {
+          node.set(String.valueOf(entry.getKey()), toSafeJsonValue(entry.getValue()));
+        }
+      }
+      return node;
+    }
+    return node;
+  }
+
+  private JsonNode toSafeJsonValue(Object value) {
+    if (value == null) {
+      return mapper.nullNode();
+    }
+    if (value instanceof JsonNode jn) {
+      return jn;
+    }
+    if (value instanceof String s) {
+      return mapper.getNodeFactory().textNode(s);
+    }
+    if (value instanceof Boolean b) {
+      return mapper.getNodeFactory().booleanNode(b);
+    }
+    if (value instanceof Integer i) {
+      return mapper.getNodeFactory().numberNode(i);
+    }
+    if (value instanceof Long l) {
+      return mapper.getNodeFactory().numberNode(l);
+    }
+    if (value instanceof BigDecimal bd) {
+      return mapper.getNodeFactory().numberNode(bd.stripTrailingZeros());
+    }
+    if (value instanceof Number n) {
+      return mapper.getNodeFactory().numberNode(new BigDecimal(n.toString()).stripTrailingZeros());
+    }
+    if (value instanceof LocalDate
+        || value instanceof java.time.LocalTime
+        || value instanceof java.time.LocalDateTime
+        || value instanceof Instant) {
+      return mapper.getNodeFactory().textNode(value.toString());
+    }
+    if (value instanceof Map<?, ?> map) {
+      ObjectNode obj = mapper.createObjectNode();
+      for (Map.Entry<?, ?> entry : map.entrySet()) {
+        if (entry.getKey() != null) {
+          obj.set(String.valueOf(entry.getKey()), toSafeJsonValue(entry.getValue()));
+        }
+      }
+      return obj;
+    }
+    if (value instanceof Iterable<?> iterable) {
+      ArrayNode arr = mapper.createArrayNode();
+      for (Object item : iterable) {
+        arr.add(toSafeJsonValue(item));
+      }
+      return arr;
+    }
+    return mapper.getNodeFactory().textNode(String.valueOf(value));
+  }
+
+  private static String blankToNull(String value) {
+    return value == null || value.isBlank() ? null : value;
+  }
+
   private static int computeFrequenciaDurationDays(Frequencia f) {
     if (f == null || f.getDtini() == null) {
       return 1;
@@ -1507,6 +2457,44 @@ public class ErgonRuleEngineFacade {
       @Override
       public RuleExecutorResult evaluate(RuleExecutorContext context) {
         return evaluateAfastamentoSobreposicaoOverlap(context);
+      }
+    };
+  }
+
+  private static RuleBindingExecutor dependenteCpfUnicidadeJavaExecutor() {
+    return new RuleBindingExecutor() {
+      @Override
+      public String implementationKey() {
+        return DependenteElegibilidadeRuleSet.JAVA_EXECUTOR_CPF_UNICIDADE_KEY;
+      }
+
+      @Override
+      public String implementationVersion() {
+        return DependenteElegibilidadeRuleSet.JAVA_EXECUTOR_VERSION;
+      }
+
+      @Override
+      public RuleExecutorResult evaluate(RuleExecutorContext context) {
+        return evaluateDependenteCpfUnicidade(context);
+      }
+    };
+  }
+
+  private static RuleBindingExecutor vinculoAcumulacaoConstitucionalJavaExecutor() {
+    return new RuleBindingExecutor() {
+      @Override
+      public String implementationKey() {
+        return VinculoProvimentoRuleSet.JAVA_EXECUTOR_ACUMULACAO_KEY;
+      }
+
+      @Override
+      public String implementationVersion() {
+        return VinculoProvimentoRuleSet.JAVA_EXECUTOR_VERSION;
+      }
+
+      @Override
+      public RuleExecutorResult evaluate(RuleExecutorContext context) {
+        return evaluateVinculoAcumulacaoConstitucional(context);
       }
     };
   }
@@ -1659,6 +2647,169 @@ public class ErgonRuleEngineFacade {
       }
     }
     return RuleExecutorResult.allow();
+  }
+
+  /**
+   * Executor Java puro e determinístico para {@code ERG-03193}
+   * ({@code PCK_DEPENDENTES.PRC_VALID_CPF} — unicidade de CPF de dependente no servidor).
+   */
+  private static RuleExecutorResult evaluateDependenteCpfUnicidade(
+      RuleExecutorContext context) {
+    JsonNode facts = context.facts();
+    JsonNode draft = facts.path("draft");
+    JsonNode existingDependentes = facts.path("existingDependentes");
+    if (draft.isMissingNode() || draft.isNull() || !existingDependentes.isArray()) {
+      return RuleExecutorResult.allow();
+    }
+    String draftCpf = textOrNull(draft, "cpf");
+    if (draftCpf == null || draftCpf.isBlank()) {
+      return RuleExecutorResult.allow();
+    }
+    Long draftId = draft.path("id").isNumber() ? draft.path("id").longValue() : null;
+    Integer draftNumero =
+        draft.path("numero").isNumber() ? draft.path("numero").intValue() : null;
+    LocalDate draftStart = parseIsoDate(draft.path("dtini"));
+    LocalDate draftEnd = parseIsoDateOrMax(draft.path("dtfim"));
+    LocalDate refDate = parseIsoDate(facts.path("context").path("referenceDate"));
+
+    for (JsonNode candidate : existingDependentes) {
+      if (candidate == null || candidate.isNull() || !candidate.isObject()) {
+        continue;
+      }
+      Long candidateId = candidate.path("id").isNumber() ? candidate.path("id").longValue() : null;
+      if (draftId != null && Objects.equals(draftId, candidateId)) {
+        continue;
+      }
+      Integer candidateNumero =
+          candidate.path("numero").isNumber() ? candidate.path("numero").intValue() : null;
+      if (draftId == null && draftNumero != null && Objects.equals(draftNumero, candidateNumero)) {
+        continue;
+      }
+      LocalDate candEnd = parseIsoDate(candidate.path("dtfim"));
+      if (candEnd != null) {
+        LocalDate candStart = parseIsoDate(candidate.path("dtini"));
+        if ((draftStart != null && candEnd.isBefore(draftStart))
+            || (candStart != null && draftEnd.isBefore(candStart))
+            || (refDate != null && candEnd.isBefore(refDate))) {
+          continue;
+        }
+      }
+      String candCpf = textOrNull(candidate, "cpf");
+      if (Objects.equals(draftCpf, candCpf)) {
+        return RuleExecutorResult.of(RuleDecision.DENY, "ERG-03193");
+      }
+    }
+    return RuleExecutorResult.allow();
+  }
+
+  /**
+   * Executor Java puro e determinístico para {@code ERG-00300}
+   * ({@code PCK_VINCULOS.VALID_VINC_CONCOMIT} — Acumulação Constitucional CF/88 Art. 37, XVI).
+   */
+  private static RuleExecutorResult evaluateVinculoAcumulacaoConstitucional(
+      RuleExecutorContext context) {
+    JsonNode facts = context.facts();
+    JsonNode draft = facts.path("draft");
+    JsonNode existingVinculos = facts.path("existingVinculos");
+    if (draft.isMissingNode() || draft.isNull() || !existingVinculos.isArray()) {
+      return RuleExecutorResult.allow();
+    }
+    String draftSituacao = textOrNull(draft, "situacao");
+    if (!"ATIVO".equals(draftSituacao)) {
+      return RuleExecutorResult.allow();
+    }
+    if (existingVinculos.isEmpty()) {
+      return RuleExecutorResult.allow();
+    }
+    LocalDate draftStart = parseIsoDate(draft.path("dtexerc"));
+    if (draftStart == null) {
+      draftStart = parseIsoDate(draft.path("dtposse"));
+    }
+    if (draftStart == null) {
+      draftStart = parseIsoDate(draft.path("dtnom"));
+    }
+    if (draftStart == null) {
+      return RuleExecutorResult.of(RuleDecision.INCONCLUSIVE, "MISSING_REQUIRED_FACT");
+    }
+    LocalDate draftEnd = parseIsoDateOrMax(draft.path("dtvac"));
+    Long draftId = draft.path("id").isNumber() ? draft.path("id").longValue() : null;
+    Integer draftNumero =
+        draft.path("numero").isNumber() ? draft.path("numero").intValue() : null;
+    String draftCategoria = textOrNull(draft, "categoria");
+
+    List<JsonNode> overlappingActive = new ArrayList<>();
+    for (JsonNode candidate : existingVinculos) {
+      if (candidate == null || candidate.isNull() || !candidate.isObject()) {
+        continue;
+      }
+      Long candidateId = candidate.path("id").isNumber() ? candidate.path("id").longValue() : null;
+      if (draftId != null && Objects.equals(draftId, candidateId)) {
+        continue;
+      }
+      Integer candidateNumero =
+          candidate.path("numero").isNumber() ? candidate.path("numero").intValue() : null;
+      if (draftId == null && draftNumero != null && Objects.equals(draftNumero, candidateNumero)) {
+        continue;
+      }
+      if (!"ATIVO".equals(textOrNull(candidate, "situacao"))) {
+        continue;
+      }
+      LocalDate candStart = parseIsoDate(candidate.path("dtexerc"));
+      if (candStart == null) {
+        candStart = parseIsoDate(candidate.path("dtposse"));
+      }
+      if (candStart == null) {
+        candStart = parseIsoDate(candidate.path("dtnom"));
+      }
+      if (candStart == null) {
+        continue;
+      }
+      LocalDate candEnd = parseIsoDateOrMax(candidate.path("dtvac"));
+      if (!draftStart.isAfter(candEnd) && !candStart.isAfter(draftEnd)) {
+        overlappingActive.add(candidate);
+      }
+    }
+
+    if (overlappingActive.isEmpty()) {
+      return RuleExecutorResult.allow();
+    }
+    if (overlappingActive.size() >= 2) {
+      return RuleExecutorResult.of(RuleDecision.DENY, "ERG-00300");
+    }
+    JsonNode other = overlappingActive.get(0);
+    String otherCategoria = textOrNull(other, "categoria");
+    if (!isConstitutionalAccumulationPair(draftCategoria, otherCategoria)) {
+      return RuleExecutorResult.of(RuleDecision.DENY, "ERG-00300");
+    }
+    return RuleExecutorResult.allow();
+  }
+
+  /**
+   * Verifica se o par de categorias de vínculos concomitantes é constitucionalmente acumulável nos
+   * termos do art. 37, XVI da CF/88:
+   * <ul>
+   *   <li>(a) dois cargos de professor ({@code MAGISTERIO} + {@code MAGISTERIO});
+   *   <li>(b) um cargo de professor com outro técnico ou científico ({@code MAGISTERIO} + {@code TECNICO}/{@code TECNICO_CIENTIFICO}/{@code CIENTIFICO}/{@code SAUDE});
+   *   <li>(c) dois cargos ou empregos privativos de profissionais de saúde ({@code SAUDE} + {@code SAUDE}).
+   * </ul>
+   */
+  public static boolean isConstitutionalAccumulationPair(String catA, String catB) {
+    if (catA == null || catB == null) {
+      return false;
+    }
+    boolean aProf = PROFESSOR_CATEGORIAS.contains(catA);
+    boolean bProf = PROFESSOR_CATEGORIAS.contains(catB);
+    if (aProf && bProf) {
+      return true;
+    }
+    boolean aSaude = SAUDE_CATEGORIAS.contains(catA);
+    boolean bSaude = SAUDE_CATEGORIAS.contains(catB);
+    if (aSaude && bSaude) {
+      return true;
+    }
+    boolean aTec = TECNICO_CIENTIFICO_CATEGORIAS.contains(catA) || aSaude;
+    boolean bTec = TECNICO_CIENTIFICO_CATEGORIAS.contains(catB) || bSaude;
+    return (aProf && bTec) || (bProf && aTec);
   }
 
   private static boolean sameLogicalScope(JsonNode a, JsonNode b) {
