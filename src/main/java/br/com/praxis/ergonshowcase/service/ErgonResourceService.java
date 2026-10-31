@@ -163,7 +163,17 @@ public abstract class ErgonResourceService<E, R, I, F extends GenericFilterDTO, 
         (root, q, cb) ->
             cb.and(
                 java.util.stream.IntStream.range(0, identityPaths.size())
-                    .mapToObj(i -> cb.equal(path(root, identityPaths.get(i)), target.get(i)))
+                    .mapToObj(
+                        i -> {
+                          var p = path(root, identityPaths.get(i));
+                          Object val =
+                              p.getJavaType() == Long.class
+                                  ? Long.valueOf(target.get(i))
+                                  : p.getJavaType() == Integer.class
+                                      ? Integer.valueOf(target.get(i))
+                                      : target.get(i);
+                          return cb.equal(p, val);
+                        })
                     .toArray(Predicate[]::new));
     if (!getRepository().exists(filtered(filter).and(match))) return OptionalLong.empty();
     return OptionalLong.of(

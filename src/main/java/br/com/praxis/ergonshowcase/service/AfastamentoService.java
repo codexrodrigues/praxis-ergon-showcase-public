@@ -295,6 +295,10 @@ public class AfastamentoService
                 HttpStatus.CONFLICT,
                 "A prorrogação exige um afastamento homologado e ainda em aberto.");
           }
+          ErgonInvariants.chronology(
+              a.getDtini(),
+              dto.novaDataPrevisaoFim(),
+              "A nova data de término previsto não pode anteceder a data de início do afastamento.");
           if (a.getDtprevfim() != null && !dto.novaDataPrevisaoFim().isAfter(a.getDtprevfim())) {
             ErgonInvariants.fail(
                 "A nova data de término previsto deve ser posterior à previsão atual.");

@@ -34,7 +34,7 @@ public class AtualizarJustificativaFrequenciaDTO extends PartialUpdateInput {
       label = "Documento comprobatório",
       type = FieldDataType.NUMBER,
       controlType = FieldControlType.ENTITY_LOOKUP,
-      icon = "MenuBook",
+      icon = "menu_book",
       group = "Justificativa e Amparo Legal",
       order = 20,
       endpoint = ApiPaths.DOCUMENTO_OPTIONS,

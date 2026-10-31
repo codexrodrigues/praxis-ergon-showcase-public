@@ -260,10 +260,10 @@ public class FrequenciaService
         id,
         precondition,
         (Frequencia f) -> {
-          if (!"PENDENTE_HOMOLOGACAO".equals(f.getSituacao())) {
+          if (!Set.of("PENDENTE_HOMOLOGACAO", "HOMOLOGADO").contains(f.getSituacao())) {
             throw new ResponseStatusException(
                 HttpStatus.CONFLICT,
-                "Somente ocorrências pendentes de homologação podem receber abono formal.");
+                "Somente ocorrências pendentes ou homologadas podem receber abono formal.");
           }
           f.setDocumentoLegalId(dto.getDocumentoLegalId());
           f.setObs(

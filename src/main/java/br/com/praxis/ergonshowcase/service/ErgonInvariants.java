@@ -321,10 +321,12 @@ public class ErgonInvariants {
   }
 
   public void campoCustomizado(DefinicaoCampoCustomizado d, boolean creating) {
-    if (d.getEmpCodigo() == null || blank(d.getResourceKey()) || blank(d.getFieldKey()))
-      fail("Órgão, recurso alvo e chave técnica são obrigatórios para o campo customizado.");
-    Orgao orgao = em.find(Orgao.class, d.getEmpCodigo(), LockModeType.PESSIMISTIC_READ);
-    if (orgao == null) fail("Órgão inexistente para a definição de campo customizado.");
+    if (blank(d.getResourceKey()) || blank(d.getFieldKey()))
+      fail("Recurso alvo e chave técnica são obrigatórios para o campo customizado.");
+    if (d.getEmpCodigo() != null) {
+      Orgao orgao = em.find(Orgao.class, d.getEmpCodigo(), LockModeType.PESSIMISTIC_READ);
+      if (orgao == null) fail("Órgão inexistente para a definição de campo customizado.");
+    }
     if (blank(d.getFieldType())
         || !Set.of("STRING", "INTEGER", "NUMBER", "BOOLEAN", "DATE", "SELECT")
             .contains(d.getFieldType()))
@@ -341,19 +343,27 @@ public class ErgonInvariants {
       if (tab == null) fail("Tabela geral de opções (HADES.TABELA) inexistente: " + d.getOptionTabela());
     }
     var duplicados =
-        em.createQuery(
-                "select x from DefinicaoCampoCustomizado x where x.empCodigo=:e and x.resourceKey=:r and x.fieldKey=:k",
-                DefinicaoCampoCustomizado.class)
-            .setParameter("e", d.getEmpCodigo())
-            .setParameter("r", d.getResourceKey())
-            .setParameter("k", d.getFieldKey())
-            .setFlushMode(FlushModeType.COMMIT)
-            .getResultList();
+        d.getEmpCodigo() == null
+            ? em.createQuery(
+                    "select x from DefinicaoCampoCustomizado x where x.empCodigo is null and x.resourceKey=:r and x.fieldKey=:k",
+                    DefinicaoCampoCustomizado.class)
+                .setParameter("r", d.getResourceKey())
+                .setParameter("k", d.getFieldKey())
+                .setFlushMode(FlushModeType.COMMIT)
+                .getResultList()
+            : em.createQuery(
+                    "select x from DefinicaoCampoCustomizado x where x.empCodigo=:e and x.resourceKey=:r and x.fieldKey=:k",
+                    DefinicaoCampoCustomizado.class)
+                .setParameter("e", d.getEmpCodigo())
+                .setParameter("r", d.getResourceKey())
+                .setParameter("k", d.getFieldKey())
+                .setFlushMode(FlushModeType.COMMIT)
+                .getResultList();
     for (DefinicaoCampoCustomizado other : duplicados) {
       if (d.getId() != null && Objects.equals(d.getId(), other.getId())) continue;
       throw new ResponseStatusException(
           HttpStatus.CONFLICT,
-          "Já existe definição de campo customizado para o mesmo órgão, recurso e chave técnica.");
+          "Já existe definição de campo customizado para o mesmo escopo, recurso e chave técnica.");
     }
   }
 

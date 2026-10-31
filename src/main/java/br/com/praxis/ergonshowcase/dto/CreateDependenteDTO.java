@@ -48,7 +48,7 @@ public class CreateDependenteDTO extends DependenteDados {
       order = 2,
       type = FieldDataType.NUMBER,
       controlType = FieldControlType.INPUT,
-      icon = "Format_List_Numbered")
+      icon = "format_list_numbered")
   private Integer numdep;
 
   @NotNull

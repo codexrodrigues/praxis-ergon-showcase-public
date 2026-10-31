@@ -345,6 +345,23 @@ public class AfastamentoFilterDTO implements GenericFilterDTO {
 
   @Schema(
       description =
+          "Filtra licenças e afastamentos pela identidade composta do vínculo funcional (numfunc:numvinc).")
+  @UISchema(
+      label = "Vínculo funcional",
+      group = "Identificação",
+      order = 4,
+      type = FieldDataType.TEXT,
+      controlType = FieldControlType.ENTITY_LOOKUP,
+      icon = "work",
+      endpoint = ApiPaths.VINCULO_OPTIONS,
+      valueField = "id",
+      displayField = "label",
+      helpText = "Selecione o vínculo funcional titular para listar seus afastamentos.")
+  @Filterable(operation = FilterOperation.EQUAL, relation = "vinculo.id")
+  private br.com.praxis.ergonshowcase.domain.VinculoId vinculoId;
+
+  @Schema(
+      description =
           "Critérios adicionais sobre campos customizados do órgão definidos para licenças e afastamentos.")
   @UISchema(
       label = "Filtros complementares",

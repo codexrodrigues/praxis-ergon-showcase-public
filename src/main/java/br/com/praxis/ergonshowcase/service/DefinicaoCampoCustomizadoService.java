@@ -255,7 +255,7 @@ public class DefinicaoCampoCustomizadoService
   }
 
   private void checkOrg(Integer orgao) {
-    if (!Objects.equals(orgao, tenant.orgao())) {
+    if (orgao != null && !Objects.equals(orgao, tenant.orgao())) {
       throw new ResponseStatusException(
           HttpStatus.UNPROCESSABLE_ENTITY, "Órgão do campo customizado diverge de X-Tenant.");
     }

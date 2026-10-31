@@ -164,7 +164,7 @@ public class VinculoController
           "Histórico e licenças em aberto associadas ao vínculo funcional selecionado.",
       relatedChildResourceKey = "administracao-pessoal.afastamentos",
       relatedChildResourcePath = ApiPaths.AFASTAMENTOS,
-      relatedChildParentField = "numvinc",
+      relatedChildParentField = "vinculoId",
       relatedChildOperations = {
         org.praxisplatform.uischema.surface.RelatedResourceChildOperation.FILTER,
         org.praxisplatform.uischema.surface.RelatedResourceChildOperation.LIST
@@ -196,8 +196,7 @@ public class VinculoController
           org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
           "Paginação fora do limite permitido.");
     var filter = new AfastamentoFilterDTO();
-    filter.setNumfunc(id.numfunc());
-    filter.setNumvinc(id.numero());
+    filter.setVinculoId(id);
     var result =
         afastamentosService.filter(
             filter,
@@ -222,7 +221,7 @@ public class VinculoController
           "Histórico de ocorrências operacionais de frequência, faltas, abonos e horas extras do vínculo selecionado.",
       relatedChildResourceKey = "administracao-pessoal.frequencias",
       relatedChildResourcePath = ApiPaths.FREQUENCIAS,
-      relatedChildParentField = "numvinc",
+      relatedChildParentField = "vinculoId",
       relatedChildOperations = {
         org.praxisplatform.uischema.surface.RelatedResourceChildOperation.FILTER,
         org.praxisplatform.uischema.surface.RelatedResourceChildOperation.LIST
@@ -254,8 +253,7 @@ public class VinculoController
           org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
           "Paginação fora do limite permitido.");
     var filter = new FrequenciaFilterDTO();
-    filter.setNumfunc(id.numfunc());
-    filter.setNumvinc(id.numero());
+    filter.setVinculoId(id);
     var result =
         frequenciasService.filter(
             filter,

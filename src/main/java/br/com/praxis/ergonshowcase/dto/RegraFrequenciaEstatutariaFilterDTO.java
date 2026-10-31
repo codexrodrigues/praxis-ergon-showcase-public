@@ -240,7 +240,7 @@ public class RegraFrequenciaEstatutariaFilterDTO implements GenericFilterDTO {
       label = "Documento legal",
       type = FieldDataType.NUMBER,
       controlType = FieldControlType.ENTITY_LOOKUP,
-      icon = "MenuBook",
+      icon = "menu_book",
       group = "Limites e Governança",
       order = 150,
       endpoint = ApiPaths.DOCUMENTO_OPTIONS,
@@ -260,4 +260,21 @@ public class RegraFrequenciaEstatutariaFilterDTO implements GenericFilterDTO {
       order = 160,
       helpText = "Filtra pelo status de ativação da regra.")
   private Boolean ativa;
+
+  @Filterable(operation = FilterOperation.EQUAL, relation = "codigoFrequenciaEntidade.id")
+  @Schema(
+      description =
+          "Filtra regras pela identidade composta do código de frequência ou afastamento (tipofreq:codigo).")
+  @UISchema(
+      label = "Código de frequência (composto)",
+      type = FieldDataType.TEXT,
+      controlType = FieldControlType.ENTITY_LOOKUP,
+      icon = "event_note",
+      group = "Enquadramento e Código",
+      order = 75,
+      endpoint = ApiPaths.CODIGO_FREQUENCIA_OPTIONS,
+      valueField = "id",
+      displayField = "label",
+      helpText = "Selecione o código de frequência para consultar suas regras estatutárias.")
+  private br.com.praxis.ergonshowcase.domain.CodigoFrequenciaId codigoFrequenciaId;
 }

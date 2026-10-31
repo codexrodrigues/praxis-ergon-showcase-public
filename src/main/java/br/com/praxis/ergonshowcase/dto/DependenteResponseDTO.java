@@ -66,7 +66,7 @@ public class DependenteResponseDTO extends DependenteDados {
       order = 3,
       type = FieldDataType.NUMBER,
       controlType = FieldControlType.INPUT,
-      icon = "Format_List_Numbered",
+      icon = "format_list_numbered",
       readOnly = true,
       tableHidden = true)
   private Integer numdep;

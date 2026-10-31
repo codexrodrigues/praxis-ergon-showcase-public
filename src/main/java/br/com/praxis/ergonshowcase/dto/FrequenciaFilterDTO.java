@@ -205,7 +205,7 @@ public class FrequenciaFilterDTO implements GenericFilterDTO {
       label = "Documento comprobatório",
       type = FieldDataType.NUMBER,
       controlType = FieldControlType.ENTITY_LOOKUP,
-      icon = "MenuBook",
+      icon = "menu_book",
       group = "Quantidades e Auditoria",
       order = 110,
       endpoint = ApiPaths.DOCUMENTO_OPTIONS,
@@ -225,4 +225,33 @@ public class FrequenciaFilterDTO implements GenericFilterDTO {
       order = 120,
       helpText = "Quando marcado, lista ocorrências pendentes de documento anexo.")
   private Boolean semDocumentoLegal;
+
+  @Filterable(operation = FilterOperation.EQUAL, relation = "vinculo.id")
+  @Schema(
+      description =
+          "Filtra ocorrências de frequência pela identidade composta do vínculo funcional (numfunc:numvinc).")
+  @UISchema(
+      label = "Vínculo funcional",
+      type = FieldDataType.TEXT,
+      controlType = FieldControlType.ENTITY_LOOKUP,
+      icon = "work",
+      group = "Vínculo e Servidor",
+      order = 35,
+      endpoint = ApiPaths.VINCULO_OPTIONS,
+      valueField = "id",
+      displayField = "label",
+      helpText = "Selecione o vínculo funcional titular para listar suas frequências.")
+  private br.com.praxis.ergonshowcase.domain.VinculoId vinculoId;
+
+  @Schema(
+      description =
+          "Critérios adicionais sobre campos customizados do órgão definidos para ocorrências de frequência.")
+  @UISchema(
+      label = "Filtros complementares",
+      group = "Extensões do órgão",
+      order = 900,
+      tableHidden = true)
+  @org.praxisplatform.uischema.customfields.CustomFields(
+      resourceKey = "administracao-pessoal.frequencias")
+  private java.util.Map<String, Object> customFields = new java.util.LinkedHashMap<>();
 }

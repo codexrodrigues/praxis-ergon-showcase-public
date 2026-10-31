@@ -57,7 +57,7 @@ public class DependenteFilterDTO implements GenericFilterDTO {
       order = 3,
       type = FieldDataType.NUMBER,
       controlType = FieldControlType.INPUT,
-      icon = "Format_List_Numbered")
+      icon = "format_list_numbered")
   @Filterable(operation = FilterOperation.EQUAL, relation = "id.numdep")
   private Integer numdep;
 

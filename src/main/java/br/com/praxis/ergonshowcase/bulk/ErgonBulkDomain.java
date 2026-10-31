@@ -124,12 +124,15 @@ public class ErgonBulkDomain {
     return e;
   }
   public boolean scope(Resource r, Object e) {
+    if (r == Resource.CAMPOS_CUSTOMIZADOS) {
+      Integer emp = ((DefinicaoCampoCustomizado) e).getEmpCodigo();
+      return emp == null || Objects.equals(emp, tenant.orgao());
+    }
     return r == Resource.PESSOAS || r == Resource.DEPENDENTES
         || Objects.equals(
             r == Resource.CARGOS ? ((Cargo)e).getEmpCodigo()
                 : r == Resource.AFASTAMENTOS ? ((Afastamento)e).getEmpCodigo()
                 : r == Resource.FREQUENCIAS ? ((Frequencia)e).getEmpCodigo()
-                : r == Resource.CAMPOS_CUSTOMIZADOS ? ((DefinicaoCampoCustomizado)e).getEmpCodigo()
                 : ((Vinculo)e).getEmpCodigo(),
             tenant.orgao());
   }
@@ -214,7 +217,7 @@ public class ErgonBulkDomain {
           (root,q,cb)->cb.equal(root.get("empCodigo"),orgao),limit).stream()
           .map(id->(Object)id.toString()).toList();
       case CAMPOS_CUSTOMIZADOS -> campoCustomizadoService.selectBulkIdentities((DefinicaoCampoCustomizadoFilterDTO)filter,
-          (root,q,cb)->cb.equal(root.get("empCodigo"),orgao),limit).stream()
+          (root,q,cb)->cb.or(cb.isNull(root.get("empCodigo")), cb.equal(root.get("empCodigo"),orgao)),limit).stream()
           .map(id->(Object)id.toString()).toList();
     };
   }
@@ -255,7 +258,7 @@ public class ErgonBulkDomain {
       var dto=json.convertValue(parameters,EncerrarDependenciaLoteDTO.class); validate(dto);
       if (copy.getDtfim()!=null) throw new IllegalArgumentException("Dependência já encerrada.");
       ErgonInvariants.chronology(copy.getDtini(),dto.dtfim(),"Encerramento anterior ao início da dependência.");
-      if (em.find(DocumentoLegal.class,dto.documentoLegalId())==null) throw new IllegalArgumentException("Documento legal inexistente.");
+      document(dto.documentoLegalId(),tenant.orgao());
       copy.setDtfim(dto.dtfim()); copy.setDepIr(false); copy.setDepSalarioFamilia(false); copy.setDepPlanoSaude(false);
       copy.setDocumentoLegalId(dto.documentoLegalId());
       invariants.dependente(copy,false); return copy;

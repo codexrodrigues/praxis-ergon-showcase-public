@@ -142,7 +142,7 @@ public class OptionSourcesConfig {
       case "tipo" -> display(property, "Tipo de dado", "data_object");
       case "tab" -> display(property, "Tabela", "table_view");
       case "item" -> display(property, "Item", "vpn_key");
-      case "resourceKey" -> display(property, "Recurso alvo", "Extension");
+      case "resourceKey" -> display(property, "Recurso alvo", "extension");
       case "fieldKey" -> display(property, "Chave técnica", "vpn_key");
       default -> throw new IllegalArgumentException("Campo de diretório sem curadoria: " + property);
     }).toList();

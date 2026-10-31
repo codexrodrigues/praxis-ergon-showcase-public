@@ -216,8 +216,13 @@ class CampoCustomizadoContractTest {
     cc.setOptionTabela("ERG_TIPO_SANGUINEO");
     cc.setActive(true);
 
-    // Caso válido passa
+    // Caso válido de escopo do órgão passa
     invariants.campoCustomizado(cc, true);
+
+    // Caso válido de escopo global (empCodigo == null) também passa
+    cc.setEmpCodigo(null);
+    invariants.campoCustomizado(cc, true);
+    cc.setEmpCodigo(1);
 
     // 1. SELECT sem optionTabela -> 422
     cc.setOptionTabela(null);
@@ -282,5 +287,12 @@ class CampoCustomizadoContractTest {
     var inativoSnap =
         stateProvider.resolve("administracao-pessoal.campos-customizados", "900").orElseThrow();
     assertThat(inativoSnap.state()).isEqualTo("INATIVO");
+
+    // Escopo global (empCodigo == null) também resolve estado para qualquer órgão do tenant
+    cc.setEmpCodigo(null);
+    cc.setActive(true);
+    var globalSnap =
+        stateProvider.resolve("administracao-pessoal.campos-customizados", "900").orElseThrow();
+    assertThat(globalSnap.state()).isEqualTo("ATIVO");
   }
 }

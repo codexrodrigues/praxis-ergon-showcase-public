@@ -83,6 +83,10 @@ import org.springframework.web.bind.annotation.*;
           label = "Com tabela de opções",
           filter = "{\"comTabelaOpcoes\":true}"),
       @QuickFilter(
+          id = "globais",
+          label = "Escopo global",
+          filter = "{\"somenteGlobais\":true}"),
+      @QuickFilter(
           id = "inativos",
           label = "Inativos",
           filter = "{\"active\":false}")

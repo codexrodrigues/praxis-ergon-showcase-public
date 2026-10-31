@@ -45,7 +45,10 @@ public class VinculoStateProvider implements ResourceStateSnapshotProvider {
       Long campoId = id instanceof Long typed ? typed : Long.valueOf(id.toString());
       return camposCustomizados
           .findById(campoId)
-          .filter(c -> java.util.Objects.equals(c.getEmpCodigo(), tenant.orgao()))
+          .filter(
+              c ->
+                  c.getEmpCodigo() == null
+                      || java.util.Objects.equals(c.getEmpCodigo(), tenant.orgao()))
           .map(
               c ->
                   new ResourceStateSnapshot(

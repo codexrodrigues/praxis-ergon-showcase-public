@@ -51,6 +51,7 @@ public class CodigoFrequenciaController
     extends AbstractReadOnlyResourceController<
         CodigoFrequenciaResponseDTO, CodigoFrequenciaId, CodigoFrequenciaFilterDTO> {
   @Autowired private CodigoFrequenciaService service;
+  @Autowired private br.com.praxis.ergonshowcase.service.RegraFrequenciaEstatutariaService regrasService;
 
   @Override
   protected CodigoFrequenciaService getService() {
@@ -78,5 +79,54 @@ public class CodigoFrequenciaController
       requiredAuthorities = {"ERGON_READ"})
   public ResponseEntity<CodigoFrequenciaResponseDTO> ficha(@PathVariable CodigoFrequenciaId id) {
     return withResourceVersion(ResponseEntity.ok(), id, service.findById(id));
+  }
+
+  @GetMapping("/{id}/regras")
+  @PreAuthorize("hasAuthority('ERGON_READ')")
+  @UiSurface(
+      id = "regras-codigo-frequencia",
+      kind = SurfaceKind.READ_PROJECTION,
+      scope = SurfaceScope.ITEM,
+      title = "Regras estatutárias aplicáveis",
+      description = "Parâmetros e limites estatutários configurados para este código de frequência ou afastamento.",
+      relatedChildResourceKey = "administracao-pessoal.regras-frequencia-estatutaria",
+      relatedChildResourcePath = ApiPaths.REGRAS_FREQUENCIA_ESTATUTARIA,
+      relatedChildParentField = "codigoFrequenciaId",
+      relatedChildOperations = {
+        RelatedResourceChildOperation.FILTER,
+        RelatedResourceChildOperation.LIST
+      },
+      requiredAuthorities = {"ERGON_READ"})
+  @Operation(
+      summary = "Consultar regras estatutárias do código de frequência",
+      description =
+          "Lista as regras estatutárias de duração, interstício e limite configuradas para este código. Paginação limitada a 200 registros.")
+  public ResponseEntity<
+          org.praxisplatform.uischema.rest.response.RestApiResponse<
+              org.springframework.data.domain.Page<
+                  br.com.praxis.ergonshowcase.dto.RegraFrequenciaEstatutariaResponseDTO>>>
+      regras(
+          @PathVariable CodigoFrequenciaId id,
+          @RequestParam(defaultValue = "0") int page,
+          @RequestParam(defaultValue = "20") int size) {
+    service.findById(id);
+    if (page < 0 || size < 1 || size > 200)
+      throw new org.springframework.web.server.ResponseStatusException(
+          org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
+          "Paginação fora do limite permitido.");
+    var filter = new br.com.praxis.ergonshowcase.dto.RegraFrequenciaEstatutariaFilterDTO();
+    filter.setCodigoFrequenciaId(id);
+    var result =
+        regrasService.filter(
+            filter,
+            org.springframework.data.domain.PageRequest.of(
+                page, size, regrasService.getDefaultSort()),
+            null);
+    return ResponseEntity.ok(
+        org.praxisplatform.uischema.rest.response.RestApiResponse.success(
+            result,
+            org.springframework.hateoas.Links.of(
+                org.springframework.hateoas.Link.of(
+                    ApiPaths.REGRAS_FREQUENCIA_ESTATUTARIA, "collection"))));
   }
 }

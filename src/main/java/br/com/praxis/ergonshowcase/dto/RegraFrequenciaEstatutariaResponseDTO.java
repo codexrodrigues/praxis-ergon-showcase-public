@@ -599,7 +599,7 @@ public class RegraFrequenciaEstatutariaResponseDTO {
       label = "Documento legal",
       type = FieldDataType.NUMBER,
       controlType = FieldControlType.ENTITY_LOOKUP,
-      icon = "MenuBook",
+      icon = "menu_book",
       group = "Governança e Motor de Regras",
       order = 230,
       readOnly = true,

@@ -308,7 +308,7 @@ public class FrequenciaController
       description = "Registra documento comprobatório e homologa o abono da ocorrência.",
       scope = ActionScope.ITEM,
       requiredAuthorities = {"ERGON_WRITE"},
-      allowedStates = {"PENDENTE_HOMOLOGACAO"},
+      allowedStates = {"PENDENTE_HOMOLOGACAO", "HOMOLOGADO"},
       confirmationRequired = true,
       resourceVersion = ActionRequirement.REQUIRED,
       resourceVersionTransport = ActionResourceVersionTransport.IF_MATCH)

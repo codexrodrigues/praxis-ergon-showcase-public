@@ -24,7 +24,7 @@ public class AbonarFaltaFrequenciaDTO {
       label = "Documento comprobatório",
       type = FieldDataType.NUMBER,
       controlType = FieldControlType.ENTITY_LOOKUP,
-      icon = "MenuBook",
+      icon = "menu_book",
       group = "Abono de Falta",
       order = 10,
       required = true,

@@ -490,7 +490,7 @@ public class FrequenciaResponseDTO {
       label = "Documento comprobatório",
       type = FieldDataType.NUMBER,
       controlType = FieldControlType.ENTITY_LOOKUP,
-      icon = "MenuBook",
+      icon = "menu_book",
       group = "Justificativa e Amparo Legal",
       order = 130,
       readOnly = true,

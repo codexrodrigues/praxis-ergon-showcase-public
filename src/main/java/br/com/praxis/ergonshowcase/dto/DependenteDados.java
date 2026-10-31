@@ -381,7 +381,7 @@ public abstract class DependenteDados {
       controlType = FieldControlType.CHECKBOX,
       group = "Elegibilidade e benefícios",
       order = 190,
-      icon = "Accessible",
+      icon = "accessible",
       tableHidden = true)
   @BulkEditable(modes = {BulkMode.UNIFORM_UPDATE, BulkMode.PER_ITEM_UPDATE}, allowClear = false)
   private Boolean excepcional = false;
@@ -462,7 +462,7 @@ public abstract class DependenteDados {
       label = "Cartório de registro",
       group = "Registro civil",
       order = 250,
-      icon = "Assured_Workload",
+      icon = "assured_workload",
       tableHidden = true)
   @BulkEditable(modes = {BulkMode.UNIFORM_UPDATE, BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private String cartorioCert;

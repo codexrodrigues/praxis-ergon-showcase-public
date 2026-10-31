@@ -22,7 +22,7 @@ public class HomologarFrequenciaLoteDTO {
       label = "Documento de homologação",
       type = FieldDataType.NUMBER,
       controlType = FieldControlType.ENTITY_LOOKUP,
-      icon = "MenuBook",
+      icon = "menu_book",
       group = "Homologação em Lote",
       order = 10,
       endpoint = ApiPaths.DOCUMENTO_OPTIONS,
