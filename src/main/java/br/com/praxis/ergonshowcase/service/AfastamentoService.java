@@ -5,10 +5,14 @@ import br.com.praxis.ergonshowcase.domain.*;
 import br.com.praxis.ergonshowcase.dto.*;
 import br.com.praxis.ergonshowcase.mapper.AfastamentoMapper;
 import br.com.praxis.ergonshowcase.repository.AfastamentoRepository;
+import br.com.praxis.ergonshowcase.repository.RegraFrequenciaEstatutariaRepository;
+import br.com.praxis.ergonshowcase.rules.ErgonRuleEngineFacade;
+import br.com.praxis.ergonshowcase.rules.ErgonRuleViolationException;
 import jakarta.persistence.*;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Consumer;
+import org.praxisplatform.rules.contract.RuleEvaluationResult;
 import org.praxisplatform.uischema.concurrency.*;
 import org.praxisplatform.uischema.customfields.CustomFieldSupport;
 import org.praxisplatform.uischema.exporting.CollectionExportField;
@@ -38,16 +42,237 @@ public class AfastamentoService
         CreateAfastamentoDTO,
         UpdateAfastamentoDTO> {
 
-  @Autowired private ErgonInvariants invariants;
+  @Autowired(required = false)
+  private ErgonInvariants invariants;
+
   @PersistenceContext protected EntityManager entityManager;
   protected final AfastamentoMapper mapper;
   private final TenantContext tenant;
+  private final ErgonRuleEngineFacade ruleEngineFacade;
+  private final RegraFrequenciaEstatutariaRepository regraRepository;
 
   public AfastamentoService(
       AfastamentoRepository repository, AfastamentoMapper mapper, TenantContext tenant) {
+    this(repository, mapper, tenant, new ErgonRuleEngineFacade(), null);
+  }
+
+  @Autowired
+  public AfastamentoService(
+      AfastamentoRepository repository,
+      AfastamentoMapper mapper,
+      TenantContext tenant,
+      ErgonRuleEngineFacade ruleEngineFacade,
+      RegraFrequenciaEstatutariaRepository regraRepository) {
     super(repository, Afastamento.class, "id");
     this.mapper = mapper;
-    this.tenant = tenant;
+    this.tenant = tenant != null ? tenant : new TenantContext();
+    this.ruleEngineFacade =
+        ruleEngineFacade != null ? ruleEngineFacade : new ErgonRuleEngineFacade();
+    this.regraRepository = regraRepository;
+  }
+
+  public ErgonRuleEngineFacade getRuleEngineFacade() {
+    return ruleEngineFacade;
+  }
+
+  /**
+   * Avalia deterministicamente o rascunho de {@link Afastamento} contra o
+   * {@link br.com.praxis.ergonshowcase.rules.AfastamentoConcessaoRuleSet} do órgão, resolvendo a
+   * {@link RegraFrequenciaEstatutaria} vigente do servidor como provedora dinâmica de fatos
+   * ({@code effectiveStatutoryRule}).
+   */
+  public RuleEvaluationResult evaluateAfastamentoConcessao(Afastamento draft) {
+    return evaluateAfastamentoConcessao(draft, false);
+  }
+
+  /**
+   * Avalia deterministicamente o rascunho de {@link Afastamento} informando se se trata de
+   * prorrogação <i>in-place</i>.
+   */
+  public RuleEvaluationResult evaluateAfastamentoConcessao(
+      Afastamento draft, boolean inPlaceProrrogacao) {
+    ErgonRuleEngineFacade.AfastamentoRuleContext ctx =
+        buildAfastamentoRuleContext(draft, inPlaceProrrogacao);
+    return ruleEngineFacade.evaluateAfastamento(ctx);
+  }
+
+  /**
+   * Valida o rascunho de {@link Afastamento} em modo <i>fail-closed</i>, lançando
+   * {@link ErgonRuleViolationException} (HTTP 422) caso qualquer slot resulte em {@code DENY},
+   * {@code INCONCLUSIVE} ou {@code TECHNICAL_ERROR}.
+   */
+  public RuleEvaluationResult validateAfastamentoConcessao(Afastamento draft) {
+    return validateAfastamentoConcessao(draft, false);
+  }
+
+  /**
+   * Valida o rascunho de {@link Afastamento} em modo <i>fail-closed</i> informando se se trata de
+   * prorrogação <i>in-place</i>.
+   */
+  public RuleEvaluationResult validateAfastamentoConcessao(
+      Afastamento draft, boolean inPlaceProrrogacao) {
+    ErgonRuleEngineFacade.AfastamentoRuleContext ctx =
+        buildAfastamentoRuleContext(draft, inPlaceProrrogacao);
+    return ruleEngineFacade.enforceAfastamento(ctx);
+  }
+
+  /** Retorna o diagnóstico estruturado da avaliação determinística de concessão de afastamento. */
+  public Map<String, Object> evaluateAfastamentoDiagnostic(Afastamento draft) {
+    Integer empCodigo =
+        draft != null && draft.getEmpCodigo() != null ? draft.getEmpCodigo() : tenant.orgao();
+    RuleEvaluationResult result = evaluateAfastamentoConcessao(draft);
+    return ruleEngineFacade.toDiagnosticPayload(
+        ruleEngineFacade.resolveAfastamentoPlan(empCodigo), result);
+  }
+
+  /**
+   * Constrói o contexto completo de avaliação determinística de {@link Afastamento}, resolvendo o
+   * vínculo, a pessoa, a modalidade {@link CodigoFrequencia}, a {@link RegraFrequenciaEstatutaria}
+   * vigente ({@code effectiveStatutoryRule}), os afastamentos existentes, as frequências ativas, o
+   * afastamento de origem e o vínculo do substituto.
+   */
+  public ErgonRuleEngineFacade.AfastamentoRuleContext buildAfastamentoRuleContext(
+      Afastamento draft, boolean inPlaceProrrogacao) {
+    if (draft == null) {
+      return new ErgonRuleEngineFacade.AfastamentoRuleContext(
+          null, null, null, null, null, List.of(), List.of(), null, null, inPlaceProrrogacao);
+    }
+    Vinculo vinculo = draft.getVinculo();
+    if (vinculo == null
+        && entityManager != null
+        && draft.getNumfunc() != null
+        && draft.getNumvinc() != null) {
+      vinculo =
+          entityManager.find(
+              Vinculo.class, new VinculoId(draft.getNumfunc(), draft.getNumvinc()));
+    }
+
+    ServidorPessoa pessoa = draft.getPessoa();
+    if (pessoa == null && entityManager != null && draft.getNumfunc() != null) {
+      pessoa = entityManager.find(ServidorPessoa.class, draft.getNumfunc());
+    }
+
+    CodigoFrequencia codigo = draft.getCodigoFrequenciaEntidade();
+    if (codigo == null
+        && entityManager != null
+        && draft.getTipofreq() != null
+        && draft.getCodfreq() != null) {
+      codigo =
+          entityManager.find(
+              CodigoFrequencia.class,
+              new CodigoFrequenciaId(draft.getTipofreq(), draft.getCodfreq()));
+    }
+
+    if (entityManager != null && draft.getTipofreq() != null) {
+      if (draft.getTipoFrequenciaEntidade() == null
+          || !Objects.equals(draft.getTipoFrequenciaEntidade().getTipo(), draft.getTipofreq())) {
+        draft.setTipoFrequenciaEntidade(
+            entityManager.find(TipoFrequencia.class, draft.getTipofreq()));
+      }
+    }
+
+    if (entityManager != null && draft.getDocumentoLegalId() != null) {
+      if (draft.getDocumentoLegal() == null
+          || !Objects.equals(draft.getDocumentoLegal().getId(), draft.getDocumentoLegalId())) {
+        draft.setDocumentoLegal(
+            entityManager.find(DocumentoLegal.class, draft.getDocumentoLegalId()));
+      }
+    } else if (draft.getDocumentoLegalId() == null) {
+      draft.setDocumentoLegal(null);
+    }
+
+    List<RegraFrequenciaEstatutaria> ruleCandidates = loadStatutoryRuleCandidates(draft);
+    RegraFrequenciaEstatutaria effectiveRule =
+        ruleEngineFacade
+            .resolveEffectiveStatutoryRule(
+                ruleCandidates, vinculo, draft.getTipofreq(), draft.getCodfreq(), draft.getDtini())
+            .orElse(null);
+
+    List<Afastamento> existingAfastamentos = loadExistingAfastamentos(draft);
+    List<Frequencia> activeFrequencias = loadActiveFrequencias(draft);
+
+    Afastamento origem = draft.getAfastamentoOrigem();
+    if (origem == null && entityManager != null && draft.getAfastamentoOrigemId() != null) {
+      origem = entityManager.find(Afastamento.class, draft.getAfastamentoOrigemId());
+    }
+
+    Vinculo substitutoVinculo = null;
+    if (draft.getNumfuncSubstituto() != null && draft.getNumvincSubstituto() != null) {
+      if (entityManager != null) {
+        substitutoVinculo =
+            entityManager.find(
+                Vinculo.class,
+                new VinculoId(draft.getNumfuncSubstituto(), draft.getNumvincSubstituto()));
+      } else if (draft.getPessoaSubstituta() != null) {
+        substitutoVinculo = new Vinculo();
+        substitutoVinculo.setId(
+            new VinculoId(draft.getNumfuncSubstituto(), draft.getNumvincSubstituto()));
+        substitutoVinculo.setEmpCodigo(draft.getEmpCodigo());
+        substitutoVinculo.setSituacao("ATIVO");
+      }
+    }
+
+    return new ErgonRuleEngineFacade.AfastamentoRuleContext(
+        draft,
+        vinculo,
+        pessoa,
+        codigo,
+        effectiveRule,
+        existingAfastamentos,
+        activeFrequencias,
+        origem,
+        substitutoVinculo,
+        inPlaceProrrogacao);
+  }
+
+  private List<RegraFrequenciaEstatutaria> loadStatutoryRuleCandidates(Afastamento draft) {
+    if (draft == null || draft.getTipofreq() == null || draft.getCodfreq() == null) {
+      return List.of();
+    }
+    if (regraRepository != null) {
+      List<RegraFrequenciaEstatutaria> candidates =
+          regraRepository.findByTipofreqAndCodfreq(draft.getTipofreq(), draft.getCodfreq());
+      return candidates != null ? candidates : List.of();
+    }
+    if (entityManager != null) {
+      return entityManager
+          .createQuery(
+              "select r from RegraFrequenciaEstatutaria r where r.tipofreq=:t and r.codfreq=:c",
+              RegraFrequenciaEstatutaria.class)
+          .setParameter("t", draft.getTipofreq())
+          .setParameter("c", draft.getCodfreq())
+          .setFlushMode(FlushModeType.COMMIT)
+          .getResultList();
+    }
+    return List.of();
+  }
+
+  private List<Afastamento> loadExistingAfastamentos(Afastamento draft) {
+    if (entityManager == null || draft.getNumfunc() == null || draft.getNumvinc() == null) {
+      return List.of();
+    }
+    return entityManager
+        .createQuery(
+            "select x from Afastamento x where x.numfunc=:f and x.numvinc=:v and x.situacao not in ('CANCELADO','REJEITADO')",
+            Afastamento.class)
+        .setParameter("f", draft.getNumfunc())
+        .setParameter("v", draft.getNumvinc())
+        .setFlushMode(FlushModeType.COMMIT)
+        .getResultList();
+  }
+
+  private List<Frequencia> loadActiveFrequencias(Afastamento draft) {
+    if (entityManager == null || draft.getNumfunc() == null || draft.getNumvinc() == null) {
+      return List.of();
+    }
+    return entityManager
+        .createQuery(
+            "select f from Frequencia f where f.numfunc=:f and f.numvinc=:v and f.situacao not in ('CANCELADO','REJEITADO')",
+            Frequencia.class)
+        .setParameter("f", draft.getNumfunc())
+        .setParameter("v", draft.getNumvinc())
+        .setFlushMode(FlushModeType.COMMIT)
+        .getResultList();
   }
 
   @Override
@@ -132,7 +357,10 @@ public class AfastamentoService
   @Override
   protected void beforeCreate(CreateAfastamentoDTO dto, Afastamento entity) {
     checkOrg(entity.getEmpCodigo());
-    invariants.afastamento(entity, true);
+    validateAfastamentoConcessao(entity, false);
+    if (invariants != null) {
+      invariants.afastamento(entity, true);
+    }
   }
 
   @Override
@@ -153,7 +381,10 @@ public class AfastamentoService
     beforeUpdate(id, entity, dto);
     var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
     mapper.applyUpdate(entity, dto);
-    invariants.afastamento(entity, false);
+    validateAfastamentoConcessao(entity, false);
+    if (invariants != null) {
+      invariants.afastamento(entity, false);
+    }
     CustomFieldSupport.restoreReadOnlyValues(entity, readOnlyKeys, old);
     var saved = getRepository().save(entity);
     afterUpdate(id, saved, dto);
@@ -166,6 +397,14 @@ public class AfastamentoService
       Long id,
       ResourceVersionUpdatePrecondition<Long> precondition,
       Consumer<Afastamento> action) {
+    return command(id, precondition, false, action);
+  }
+
+  private ResourceRepresentationResult<AfastamentoResponseDTO> command(
+      Long id,
+      ResourceVersionUpdatePrecondition<Long> precondition,
+      boolean inPlaceProrrogacao,
+      Consumer<Afastamento> action) {
     if (precondition == null) throw ResourceVersionPreconditionException.required();
     Afastamento entity = findEntityById(id);
     entityManager.lock(entity, LockModeType.PESSIMISTIC_WRITE);
@@ -173,7 +412,12 @@ public class AfastamentoService
     precondition.requireMatch(entity.getVersion());
     checkOrg(entity.getEmpCodigo());
     action.accept(entity);
-    invariants.afastamento(entity, false);
+    if (!Set.of("CANCELADO", "REJEITADO").contains(entity.getSituacao())) {
+      validateAfastamentoConcessao(entity, inPlaceProrrogacao);
+      if (invariants != null && !inPlaceProrrogacao) {
+        invariants.afastamento(entity, false);
+      }
+    }
     var saved = getRepository().save(entity);
     entityManager.flush();
     entityManager.refresh(saved);
@@ -289,6 +533,7 @@ public class AfastamentoService
     return command(
         id,
         precondition,
+        true,
         (Afastamento a) -> {
           if (!"HOMOLOGADO".equals(a.getSituacao()) || a.getDtfim() != null) {
             throw new ResponseStatusException(

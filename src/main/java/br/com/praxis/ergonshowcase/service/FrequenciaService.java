@@ -1,7 +1,16 @@
 package br.com.praxis.ergonshowcase.service;
 
 import br.com.praxis.ergonshowcase.config.TenantContext;
+import br.com.praxis.ergonshowcase.domain.Afastamento;
+import br.com.praxis.ergonshowcase.domain.CodigoFrequencia;
+import br.com.praxis.ergonshowcase.domain.CodigoFrequenciaId;
+import br.com.praxis.ergonshowcase.domain.DocumentoLegal;
 import br.com.praxis.ergonshowcase.domain.Frequencia;
+import br.com.praxis.ergonshowcase.domain.RegraFrequenciaEstatutaria;
+import br.com.praxis.ergonshowcase.domain.ServidorPessoa;
+import br.com.praxis.ergonshowcase.domain.TipoFrequencia;
+import br.com.praxis.ergonshowcase.domain.Vinculo;
+import br.com.praxis.ergonshowcase.domain.VinculoId;
 import br.com.praxis.ergonshowcase.dto.AbonarFaltaFrequenciaDTO;
 import br.com.praxis.ergonshowcase.dto.AtualizarHorarioFrequenciaDTO;
 import br.com.praxis.ergonshowcase.dto.AtualizarJustificativaFrequenciaDTO;
@@ -14,15 +23,22 @@ import br.com.praxis.ergonshowcase.dto.RejeitarFrequenciaDTO;
 import br.com.praxis.ergonshowcase.dto.UpdateFrequenciaDTO;
 import br.com.praxis.ergonshowcase.mapper.FrequenciaMapper;
 import br.com.praxis.ergonshowcase.repository.FrequenciaRepository;
+import br.com.praxis.ergonshowcase.repository.RegraFrequenciaEstatutariaRepository;
+import br.com.praxis.ergonshowcase.rules.ErgonRuleEngineFacade;
+import br.com.praxis.ergonshowcase.rules.ErgonRuleViolationException;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.Consumer;
+import org.praxisplatform.rules.contract.RuleEvaluationResult;
 import org.praxisplatform.uischema.concurrency.ResourceRepresentationResult;
 import org.praxisplatform.uischema.concurrency.ResourceVersionPreconditionException;
 import org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition;
@@ -56,16 +72,214 @@ public class FrequenciaService
         CreateFrequenciaDTO,
         UpdateFrequenciaDTO> {
 
-  @Autowired private ErgonInvariants invariants;
+  @Autowired(required = false)
+  private ErgonInvariants invariants;
+
   @PersistenceContext protected EntityManager entityManager;
   protected final FrequenciaMapper mapper;
   private final TenantContext tenant;
+  private final ErgonRuleEngineFacade ruleEngineFacade;
+  private final RegraFrequenciaEstatutariaRepository regraRepository;
 
   public FrequenciaService(
       FrequenciaRepository repository, FrequenciaMapper mapper, TenantContext tenant) {
+    this(repository, mapper, tenant, new ErgonRuleEngineFacade(), null);
+  }
+
+  @Autowired
+  public FrequenciaService(
+      FrequenciaRepository repository,
+      FrequenciaMapper mapper,
+      TenantContext tenant,
+      ErgonRuleEngineFacade ruleEngineFacade,
+      RegraFrequenciaEstatutariaRepository regraRepository) {
     super(repository, Frequencia.class, "id");
     this.mapper = mapper;
-    this.tenant = tenant;
+    this.tenant = tenant != null ? tenant : new TenantContext();
+    this.ruleEngineFacade =
+        ruleEngineFacade != null ? ruleEngineFacade : new ErgonRuleEngineFacade();
+    this.regraRepository = regraRepository;
+  }
+
+  public ErgonRuleEngineFacade getRuleEngineFacade() {
+    return ruleEngineFacade;
+  }
+
+  /**
+   * Avalia deterministicamente o rascunho de {@link Frequencia} contra o
+   * {@link br.com.praxis.ergonshowcase.rules.FrequenciaLancamentoRuleSet} do órgão, resolvendo a
+   * {@link RegraFrequenciaEstatutaria} vigente do servidor como provedora dinâmica de fatos
+   * ({@code effectiveStatutoryRule}).
+   */
+  public RuleEvaluationResult evaluateFrequenciaLancamento(Frequencia draft) {
+    return evaluateFrequenciaLancamento(draft, null);
+  }
+
+  /**
+   * Avalia deterministicamente o rascunho de {@link Frequencia} com data de referência explícita
+   * para aferição de retroatividade ({@code ERG-00446}).
+   */
+  public RuleEvaluationResult evaluateFrequenciaLancamento(
+      Frequencia draft, LocalDate referenceDate) {
+    ErgonRuleEngineFacade.FrequenciaRuleContext ctx =
+        buildFrequenciaRuleContext(draft, referenceDate);
+    return ruleEngineFacade.evaluateFrequencia(ctx);
+  }
+
+  /**
+   * Valida o rascunho de {@link Frequencia} em modo <i>fail-closed</i>, lançando
+   * {@link ErgonRuleViolationException} (HTTP 422) caso qualquer slot resulte em {@code DENY},
+   * {@code INCONCLUSIVE} ou {@code TECHNICAL_ERROR}.
+   */
+  public RuleEvaluationResult validateFrequenciaLancamento(Frequencia draft) {
+    return validateFrequenciaLancamento(draft, null);
+  }
+
+  /**
+   * Valida o rascunho de {@link Frequencia} com data de referência explícita em modo
+   * <i>fail-closed</i>.
+   */
+  public RuleEvaluationResult validateFrequenciaLancamento(
+      Frequencia draft, LocalDate referenceDate) {
+    ErgonRuleEngineFacade.FrequenciaRuleContext ctx =
+        buildFrequenciaRuleContext(draft, referenceDate);
+    return ruleEngineFacade.enforceFrequencia(ctx);
+  }
+
+  /** Retorna o diagnóstico estruturado da avaliação determinística de lançamento de frequência. */
+  public Map<String, Object> evaluateFrequenciaDiagnostic(
+      Frequencia draft, LocalDate referenceDate) {
+    Integer empCodigo =
+        draft != null && draft.getEmpCodigo() != null ? draft.getEmpCodigo() : tenant.orgao();
+    RuleEvaluationResult result = evaluateFrequenciaLancamento(draft, referenceDate);
+    return ruleEngineFacade.toDiagnosticPayload(
+        ruleEngineFacade.resolveFrequenciaPlan(empCodigo), result);
+  }
+
+  /**
+   * Constrói o contexto completo de avaliação determinística de {@link Frequencia}, resolvendo o
+   * vínculo, a pessoa, a modalidade {@link CodigoFrequencia}, a {@link RegraFrequenciaEstatutaria}
+   * vigente ({@code effectiveStatutoryRule}), as ocorrências existentes e os afastamentos ativos.
+   */
+  public ErgonRuleEngineFacade.FrequenciaRuleContext buildFrequenciaRuleContext(
+      Frequencia draft, LocalDate referenceDate) {
+    if (draft == null) {
+      return new ErgonRuleEngineFacade.FrequenciaRuleContext(
+          null, null, null, null, null, List.of(), List.of(), referenceDate);
+    }
+    Vinculo vinculo = draft.getVinculo();
+    if (vinculo == null
+        && entityManager != null
+        && draft.getNumfunc() != null
+        && draft.getNumvinc() != null) {
+      vinculo =
+          entityManager.find(
+              Vinculo.class, new VinculoId(draft.getNumfunc(), draft.getNumvinc()));
+    }
+
+    ServidorPessoa pessoa = draft.getPessoa();
+    if (pessoa == null && entityManager != null && draft.getNumfunc() != null) {
+      pessoa = entityManager.find(ServidorPessoa.class, draft.getNumfunc());
+    }
+
+    CodigoFrequencia codigo = draft.getCodigoFrequenciaEntidade();
+    if (codigo == null
+        && entityManager != null
+        && draft.getTipofreq() != null
+        && draft.getCodfreq() != null) {
+      codigo =
+          entityManager.find(
+              CodigoFrequencia.class,
+              new CodigoFrequenciaId(draft.getTipofreq(), draft.getCodfreq()));
+    }
+
+    if (entityManager != null && draft.getTipofreq() != null) {
+      if (draft.getTipoFrequenciaEntidade() == null
+          || !Objects.equals(draft.getTipoFrequenciaEntidade().getTipo(), draft.getTipofreq())) {
+        draft.setTipoFrequenciaEntidade(
+            entityManager.find(TipoFrequencia.class, draft.getTipofreq()));
+      }
+    }
+
+    if (entityManager != null && draft.getDocumentoLegalId() != null) {
+      if (draft.getDocumentoLegal() == null
+          || !Objects.equals(draft.getDocumentoLegal().getId(), draft.getDocumentoLegalId())) {
+        draft.setDocumentoLegal(
+            entityManager.find(DocumentoLegal.class, draft.getDocumentoLegalId()));
+      }
+    } else if (draft.getDocumentoLegalId() == null) {
+      draft.setDocumentoLegal(null);
+    }
+
+    List<RegraFrequenciaEstatutaria> ruleCandidates = loadStatutoryRuleCandidates(draft);
+    RegraFrequenciaEstatutaria effectiveRule =
+        ruleEngineFacade
+            .resolveEffectiveStatutoryRule(
+                ruleCandidates, vinculo, draft.getTipofreq(), draft.getCodfreq(), draft.getDtini())
+            .orElse(null);
+
+    List<Frequencia> existingFrequencias = loadExistingFrequencias(draft);
+    List<Afastamento> activeAfastamentos = loadActiveAfastamentos(draft);
+
+    return new ErgonRuleEngineFacade.FrequenciaRuleContext(
+        draft,
+        vinculo,
+        pessoa,
+        codigo,
+        effectiveRule,
+        existingFrequencias,
+        activeAfastamentos,
+        referenceDate);
+  }
+
+  private List<RegraFrequenciaEstatutaria> loadStatutoryRuleCandidates(Frequencia draft) {
+    if (draft == null || draft.getTipofreq() == null || draft.getCodfreq() == null) {
+      return List.of();
+    }
+    if (regraRepository != null) {
+      List<RegraFrequenciaEstatutaria> candidates =
+          regraRepository.findByTipofreqAndCodfreq(draft.getTipofreq(), draft.getCodfreq());
+      return candidates != null ? candidates : List.of();
+    }
+    if (entityManager != null) {
+      return entityManager
+          .createQuery(
+              "select r from RegraFrequenciaEstatutaria r where r.tipofreq=:t and r.codfreq=:c",
+              RegraFrequenciaEstatutaria.class)
+          .setParameter("t", draft.getTipofreq())
+          .setParameter("c", draft.getCodfreq())
+          .setFlushMode(FlushModeType.COMMIT)
+          .getResultList();
+    }
+    return List.of();
+  }
+
+  private List<Frequencia> loadExistingFrequencias(Frequencia draft) {
+    if (entityManager == null || draft.getNumfunc() == null || draft.getNumvinc() == null) {
+      return List.of();
+    }
+    return entityManager
+        .createQuery(
+            "select x from Frequencia x where x.numfunc=:p and x.numvinc=:v and x.situacao<>'CANCELADO'",
+            Frequencia.class)
+        .setParameter("p", draft.getNumfunc())
+        .setParameter("v", draft.getNumvinc())
+        .setFlushMode(FlushModeType.COMMIT)
+        .getResultList();
+  }
+
+  private List<Afastamento> loadActiveAfastamentos(Frequencia draft) {
+    if (entityManager == null || draft.getNumfunc() == null || draft.getNumvinc() == null) {
+      return List.of();
+    }
+    return entityManager
+        .createQuery(
+            "select a from Afastamento a where a.numfunc=:p and a.numvinc=:v and a.situacao not in ('CANCELADO','REJEITADO')",
+            Afastamento.class)
+        .setParameter("p", draft.getNumfunc())
+        .setParameter("v", draft.getNumvinc())
+        .setFlushMode(FlushModeType.COMMIT)
+        .getResultList();
   }
 
   @Override
@@ -146,7 +360,10 @@ public class FrequenciaService
   @Override
   protected void beforeCreate(CreateFrequenciaDTO dto, Frequencia entity) {
     checkOrg(entity.getEmpCodigo());
-    invariants.frequencia(entity, true);
+    validateFrequenciaLancamento(entity);
+    if (invariants != null) {
+      invariants.frequencia(entity, true);
+    }
   }
 
   @Override
@@ -167,7 +384,10 @@ public class FrequenciaService
     beforeUpdate(id, entity, dto);
     var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
     mapper.applyUpdate(entity, dto);
-    invariants.frequencia(entity, false);
+    validateFrequenciaLancamento(entity);
+    if (invariants != null) {
+      invariants.frequencia(entity, false);
+    }
     CustomFieldSupport.restoreReadOnlyValues(entity, readOnlyKeys, old);
     var saved = getRepository().save(entity);
     afterUpdate(id, saved, dto);
@@ -187,7 +407,12 @@ public class FrequenciaService
     precondition.requireMatch(entity.getVersion());
     checkOrg(entity.getEmpCodigo());
     action.accept(entity);
-    invariants.frequencia(entity, false);
+    if (!Set.of("CANCELADO", "REJEITADO").contains(entity.getSituacao())) {
+      validateFrequenciaLancamento(entity);
+      if (invariants != null) {
+        invariants.frequencia(entity, false);
+      }
+    }
     var saved = getRepository().save(entity);
     entityManager.flush();
     entityManager.refresh(saved);

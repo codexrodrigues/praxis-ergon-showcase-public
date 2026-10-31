@@ -185,8 +185,14 @@ public class ErgonBulkDomain {
       case PESSOAS -> invariants.pessoa((ServidorPessoa)e);
       case VINCULOS -> invariants.vinculo((Vinculo)e,false);
       case DEPENDENTES -> invariants.dependente((Dependente)e,false);
-      case AFASTAMENTOS -> invariants.afastamento((Afastamento)e,false);
-      case FREQUENCIAS -> invariants.frequencia((Frequencia)e,false);
+      case AFASTAMENTOS -> {
+        afastamentoService.validateAfastamentoConcessao((Afastamento) e, false);
+        invariants.afastamento((Afastamento) e, false);
+      }
+      case FREQUENCIAS -> {
+        frequenciaService.validateFrequenciaLancamento((Frequencia) e);
+        invariants.frequencia((Frequencia) e, false);
+      }
       case CAMPOS_CUSTOMIZADOS -> invariants.campoCustomizado((DefinicaoCampoCustomizado)e,false);
     }
   }
@@ -239,6 +245,7 @@ public class ErgonBulkDomain {
       copy.setSituacao("HOMOLOGADO");
       if (dto.getDocumentoLegalId()!=null) copy.setDocumentoLegalId(dto.getDocumentoLegalId());
       copy.setObs((copy.getObs()==null ? "" : copy.getObs()+" | ") + "Homologação em lote: " + dto.getObservacoes());
+      frequenciaService.validateFrequenciaLancamento(copy);
       invariants.frequencia(copy,false); return copy;
     }
     if (current instanceof Afastamento afast) {
@@ -251,6 +258,7 @@ public class ErgonBulkDomain {
       copy.setSituacao("HOMOLOGADO");
       copy.setDocumentoLegalId(dto.documentoLegalId());
       if (dto.atoPublicacaoId()!=null) copy.setAtoPublicacaoId(dto.atoPublicacaoId());
+      afastamentoService.validateAfastamentoConcessao(copy, false);
       invariants.afastamento(copy,false); return copy;
     }
     if (current instanceof Dependente dep) {
