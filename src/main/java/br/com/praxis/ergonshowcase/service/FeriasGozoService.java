@@ -151,8 +151,27 @@ public class FeriasGozoService
   public StatsFieldRegistry getStatsFieldRegistry() {
     return StatsFieldRegistry.builder()
         .labeledGroupByBucket(
-            "id", "id", "situacao", Set.of(StatsMetric.COUNT, StatsMetric.SUM))
-        .categoricalGroupByBucket("situacao", "situacao")
+            "id",
+            "id",
+            "situacao",
+            Set.of(
+                StatsMetric.COUNT,
+                StatsMetric.SUM,
+                StatsMetric.AVG,
+                StatsMetric.MIN,
+                StatsMetric.MAX,
+                StatsMetric.MEDIAN,
+                StatsMetric.PERCENTILE_90,
+                StatsMetric.PERCENTILE_95))
+        .groupByBucket(
+            "situacao",
+            "situacao",
+            Set.of(
+                StatsMetric.COUNT,
+                StatsMetric.SUM,
+                StatsMetric.AVG,
+                StatsMetric.MEDIAN,
+                StatsMetric.PERCENTILE_90))
         .categoricalGroupByBucket("ordemParcela", "ordemParcela")
         .categoricalGroupByBucket("abonoPecuniario", "abonoPecuniario")
         .temporalTimeSeriesField("dtini", "dtini")

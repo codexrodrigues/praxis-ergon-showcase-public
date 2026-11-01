@@ -23,7 +23,12 @@ import org.springframework.web.bind.annotation.*;
     icon = "gavel",
     tone = "neutral",
     valuePresentation = "badge",
-    sourceKind = "field")
+    sourceKind = "field",
+    thresholds = {
+      @Threshold(min = 0, max = 2015, tone = "neutral", label = "Acervo histórico"),
+      @Threshold(min = 2015, max = 2023, tone = "info", label = "Legislação consolidada"),
+      @Threshold(min = 2023, tone = "success", label = "Edição recente")
+    })
 @ApiResource(
     value = ApiPaths.DOCUMENTOS_LEGAIS,
     resourceKey = "administracao-pessoal.documentos-legais",

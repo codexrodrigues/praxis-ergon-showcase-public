@@ -329,8 +329,28 @@ public class FrequenciaService
   @Override
   public StatsFieldRegistry getStatsFieldRegistry() {
     return StatsFieldRegistry.builder()
-        .labeledGroupByBucket("id", "id", "obs", Set.of(StatsMetric.COUNT, StatsMetric.SUM))
-        .categoricalGroupByBucket("situacao", "situacao")
+        .labeledGroupByBucket(
+            "id",
+            "id",
+            "obs",
+            Set.of(
+                StatsMetric.COUNT,
+                StatsMetric.SUM,
+                StatsMetric.AVG,
+                StatsMetric.MIN,
+                StatsMetric.MAX,
+                StatsMetric.MEDIAN,
+                StatsMetric.PERCENTILE_90,
+                StatsMetric.PERCENTILE_95))
+        .groupByBucket(
+            "situacao",
+            "situacao",
+            Set.of(
+                StatsMetric.COUNT,
+                StatsMetric.SUM,
+                StatsMetric.AVG,
+                StatsMetric.MEDIAN,
+                StatsMetric.PERCENTILE_90))
         .categoricalGroupByBucket("tipofreq", "tipofreq")
         .temporalTimeSeriesField("dtini", "dtini")
         .numericHistogramMeasureField("quantidade", "quantidade")

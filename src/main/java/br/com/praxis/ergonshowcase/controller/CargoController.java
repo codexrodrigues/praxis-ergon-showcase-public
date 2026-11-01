@@ -107,7 +107,22 @@ public class CargoController
           primaryMetrics = @AnalyticsMetricBinding(field = "vagasAutorizadas", aggregation = "sum", label = "Vagas autorizadas"),
           defaultLimit = 20,
           recordOpen = @AnalyticsRecordOpen(sourceIdentityField = "key",
-              target = @AnalyticsSurfaceTarget(resourceKey = "administracao-pessoal.cargos", surfaceId = "ficha-cargo")))
+              target = @AnalyticsSurfaceTarget(resourceKey = "administracao-pessoal.cargos", surfaceId = "ficha-cargo"))),
+      @AnalyticsProjection(id = "evolucao-criacao-cargos", intent = AnalyticsIntent.TREND,
+          sourceOperation = AnalyticsOperation.TIMESERIES,
+          primaryDimension = @AnalyticsDimensionBinding(field = "dtCriacao"),
+          defaultGranularity = AnalyticsGranularity.MONTH,
+          defaultTimezone = "America/Sao_Paulo",
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Cargos criados")),
+      @AnalyticsProjection(id = "distribuicao-vagas-autorizadas", intent = AnalyticsIntent.DISTRIBUTION,
+          sourceOperation = AnalyticsOperation.DISTRIBUTION,
+          primaryDimension = @AnalyticsDimensionBinding(field = "vagasAutorizadas"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "vagasAutorizadas", aggregation = "histogram", label = "Distribuição de vagas")),
+      @AnalyticsProjection(id = "comparativo-cargos-por-categoria", intent = AnalyticsIntent.COMPARISON,
+          sourceOperation = AnalyticsOperation.COMPARISON,
+          primaryDimension = @AnalyticsDimensionBinding(field = "categoria"),
+          comparisonPeriod = @AnalyticsComparisonPeriodBinding(field = "dtCriacao", timezone = "America/Sao_Paulo"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Variação por categoria"))
   })
   public org.springframework.http.ResponseEntity<RestApiResponse<org.praxisplatform.uischema.stats.dto.GroupByStatsResponse>> groupByStats(
       @RequestBody org.praxisplatform.uischema.stats.dto.GroupByStatsRequest<CargoFilterDTO> request) {

@@ -294,9 +294,9 @@ public final class FeriasGozoRuleSet {
         new DecisionSlot(
             SLOT_ABONO_PECUNIARIO_ELEGIBILIDADE_E_LIMITES,
             DecisionStage.DOMAIN_DECISION,
-            SlotCardinality.SINGLE,
+            SlotCardinality.MULTIPLE,
             OverridePolicy.REPLACEABLE,
-            DecisionAggregationPolicy.SINGLE_RESULT,
+            DecisionAggregationPolicy.DENY_OVERRIDES,
             null),
         new DecisionSlot(
             SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
@@ -660,20 +660,136 @@ public final class FeriasGozoRuleSet {
             ERG00519_TEMPLATE_EXPRESSION,
             "ERG-00519",
             baseFacts),
-        // 10. ERG-00522 / ERG-03311..ERG-03315: elegibilidade e limites de abono pecuniário (Executor Java)
-        new DecisionBinding(
+        // 10a. ERG-00522: elegibilidade geral ao abono pecuniário e proibição de dias vendidos quando abonoPecuniario != true
+        productJsonLogicBinding(
             "product.ferias-gozo.erg-00522",
             SLOT_ABONO_PECUNIARIO_ELEGIBILIDADE_E_LIMITES,
-            DecisionSource.PRODUCT,
-            null,
-            RuleExecutorRef.java(JAVA_EXECUTOR_ABONO_PECUNIARIO_KEY, JAVA_EXECUTOR_VERSION),
-            List.of(),
             100,
-            true,
-            null,
-            null,
-            List.of("draft.dtini", "draft.dtprevfim", "draft.diasGozo"),
-            null),
+            """
+            {
+              "or": [
+                {
+                  "and": [
+                    {"!=": [{"var": "draft.abonoPecuniario"}, true]},
+                    {"or": [{"==": [{"var": "draft.diasAbonoVendidos"}, null]}, {"==": [{"var": "draft.diasAbonoVendidos"}, 0]}]}
+                  ]
+                },
+                {
+                  "and": [
+                    {"==": [{"var": "draft.abonoPecuniario"}, true]},
+                    {"==": [{"var": "effectiveParametroConta.permiteAbonoPecuniario"}, true]},
+                    {"!=": [{"var": "draft.diasAbonoVendidos"}, null]},
+                    {">": [{"var": "draft.diasAbonoVendidos"}, 0]},
+                    {
+                      "or": [
+                        {"==": [{"var": "effectiveParametroConta.maxDiasVendFer"}, null]},
+                        {"==": [{"var": "derived.maxDiasAbonoPelaFracao"}, null]},
+                        {"<=": [{"var": "draft.diasAbonoVendidos"}, {"var": "effectiveParametroConta.maxDiasVendFer"}]},
+                        {"<=": [{"var": "draft.diasAbonoVendidos"}, {"var": "derived.maxDiasAbonoPelaFracao"}]}
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            """,
+            "ERG-00522",
+            baseFacts),
+        // 10b. ERG-03311: posição do abono pecuniário deve ser 'I' ou 'F' quando abonoPecuniario == true
+        productJsonLogicBinding(
+            "product.ferias-gozo.erg-03311",
+            SLOT_ABONO_PECUNIARIO_ELEGIBILIDADE_E_LIMITES,
+            101,
+            """
+            {
+              "or": [
+                {"!=": [{"var": "draft.abonoPecuniario"}, true]},
+                {"in": [{"var": "draft.iniFimAbono"}, ["I", "F"]]}
+              ]
+            }
+            """,
+            "ERG-03311",
+            baseFacts),
+        // 10c. ERG-03312: mínimo de dias vendidos em abono pecuniário (minDiasPvendFer)
+        productJsonLogicBinding(
+            "product.ferias-gozo.erg-03312",
+            SLOT_ABONO_PECUNIARIO_ELEGIBILIDADE_E_LIMITES,
+            102,
+            """
+            {
+              "or": [
+                {"!=": [{"var": "draft.abonoPecuniario"}, true]},
+                {"==": [{"var": "effectiveParametroConta.minDiasPvendFer"}, null]},
+                {">=": [{"var": "draft.diasAbonoVendidos"}, {"var": "effectiveParametroConta.minDiasPvendFer"}]}
+              ]
+            }
+            """,
+            "ERG-03312",
+            baseFacts),
+        // 10d. ERG-03313: máximo absoluto de dias vendidos em abono pecuniário (maxDiasVendFer)
+        productJsonLogicBinding(
+            "product.ferias-gozo.erg-03313",
+            SLOT_ABONO_PECUNIARIO_ELEGIBILIDADE_E_LIMITES,
+            103,
+            """
+            {
+              "or": [
+                {"!=": [{"var": "draft.abonoPecuniario"}, true]},
+                {"==": [{"var": "effectiveParametroConta.maxDiasVendFer"}, null]},
+                {"<=": [{"var": "draft.diasAbonoVendidos"}, {"var": "effectiveParametroConta.maxDiasVendFer"}]}
+              ]
+            }
+            """,
+            "ERG-03313",
+            baseFacts),
+        // 10e. ERG-03314: teto proporcional de dias vendidos pela fração (derived.maxDiasAbonoPelaFracao)
+        productJsonLogicBinding(
+            "product.ferias-gozo.erg-03314",
+            SLOT_ABONO_PECUNIARIO_ELEGIBILIDADE_E_LIMITES,
+            104,
+            """
+            {
+              "or": [
+                {"!=": [{"var": "draft.abonoPecuniario"}, true]},
+                {"==": [{"var": "derived.maxDiasAbonoPelaFracao"}, null]},
+                {"<=": [{"var": "draft.diasAbonoVendidos"}, {"var": "derived.maxDiasAbonoPelaFracao"}]}
+              ]
+            }
+            """,
+            "ERG-03314",
+            baseFacts),
+        // 10f. ERG-03315: cronologia de venda e pagamento do abono pecuniário (dtVendaAbono <= dtini e dtPagtoAbono >= dtVendaAbono)
+        productJsonLogicBinding(
+            "product.ferias-gozo.erg-03315",
+            SLOT_ABONO_PECUNIARIO_ELEGIBILIDADE_E_LIMITES,
+            105,
+            """
+            {
+              "or": [
+                {"!=": [{"var": "draft.abonoPecuniario"}, true]},
+                {
+                  "and": [
+                    {
+                      "or": [
+                        {"==": [{"var": "draft.dtVendaAbono"}, null]},
+                        {"==": [{"var": "draft.dtini"}, null]},
+                        {"<=": [{"date": [{"var": "draft.dtVendaAbono"}]}, {"date": [{"var": "draft.dtini"}]}]}
+                      ]
+                    },
+                    {
+                      "or": [
+                        {"==": [{"var": "draft.dtPagtoAbono"}, null]},
+                        {"==": [{"var": "draft.dtVendaAbono"}, null]},
+                        {">=": [{"date": [{"var": "draft.dtPagtoAbono"}]}, {"date": [{"var": "draft.dtVendaAbono"}]}]}
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            """,
+            "ERG-03315",
+            baseFacts),
         // 11. ERG-00514, ERG-00518, ERG-00520, ERG-00523, ERG-00525, ERG-00531, ERG-00532, ERG-00526 (Executor Java)
         new DecisionBinding(
             "product.ferias-gozo.concomitancia-e-saldo",

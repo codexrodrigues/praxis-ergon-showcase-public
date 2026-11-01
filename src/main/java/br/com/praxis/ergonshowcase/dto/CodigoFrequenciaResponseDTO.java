@@ -248,12 +248,18 @@ public class CodigoFrequenciaResponseDTO {
   @Schema(
       description =
           "Restrição de aplicabilidade por sexo do servidor: [A]mbos, [F]eminino (ex.: licença-maternidade) ou [M]asculino (ex.: licença-paternidade).",
+      allowableValues = {"A", "F", "M"},
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Aplicabilidade por sexo",
       helpText = "Restrição de elegibilidade por sexo ([A]mbos, [F]eminino ou [M]asculino).",
       group = "Parâmetros de quantidade",
       order = 110,
+      type = FieldDataType.TEXT,
+      controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"A\",\"label\":\"Ambos (A)\"},{\"value\":\"F\",\"label\":\"Feminino (F)\"},{\"value\":\"M\",\"label\":\"Masculino (M)\"}]",
+      icon = "wc",
       readOnly = true,
       tableHidden = true)
   private String sexo;

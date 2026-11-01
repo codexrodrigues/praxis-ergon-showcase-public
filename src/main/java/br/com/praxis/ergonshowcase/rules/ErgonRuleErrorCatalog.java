@@ -1034,6 +1034,78 @@ public final class ErgonRuleErrorCatalog {
     register(
         map,
         new RuleErrorDescriptor(
+            "ERG-01821",
+            ParametroContagemFeriasRuleSet.SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            "minDiasPvendLicEsp",
+            "O mínimo de dias para venda de licença especial não pode ser negativo nem superior ao máximo de dias para venda (maxDiasVendLicEsp).",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.vend_lic_esp = 'S' AND v_row_new.min_dias_pvend_lic_esp > v_row_new.max_dias_vend_lic_esp THEN pack_hades.trata_erro(1821); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01822",
+            ParametroContagemFeriasRuleSet.SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            "numDiasAbonoLicEsp",
+            "Fração de venda de licença especial inválida: numerador e denominador devem obedecer 0 <= numDiasAbonoLicEsp <= denDiasAbonoLicEsp com denominador positivo.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.vend_lic_esp = 'S' AND (v_row_new.den_dias_abono_lic_esp <= 0 OR v_row_new.num_dias_abono_lic_esp > v_row_new.den_dias_abono_lic_esp) THEN pack_hades.trata_erro(1822); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01823",
+            ParametroContagemFeriasRuleSet.SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            "minDiasPcontDobLicEsp",
+            "Os limites mínimo e máximo de dias para contagem em dobro de licença especial não podem ser negativos.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.cont_dobro_lic_esp = 'S' AND (v_row_new.min_dias_pcont_dob_lic_esp < 0 OR v_row_new.max_dias_cont_dob_lic_esp < 0) THEN pack_hades.trata_erro(1823); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01824",
+            ParametroContagemFeriasRuleSet.SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            "maxDiasContDobLicEsp",
+            "Quando a contagem em dobro de licença especial está desabilitada, os limites de dias para contagem em dobro devem permanecer nulos ou zerados.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.cont_dobro_lic_esp = 'N' AND (v_row_new.min_dias_pcont_dob_lic_esp > 0 OR v_row_new.max_dias_cont_dob_lic_esp > 0) THEN pack_hades.trata_erro(1824); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01825",
+            PeriodoAquisitivoFeriasRuleSet.SLOT_OVERRIDES_CONTAGEM_DOBRO,
+            "minDiasPeraqfer",
+            "Quando o override de contagem em dobro do período aquisitivo está desabilitado ('N'), os limites mínimo e máximo de dias não podem ser informados.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE / PCK_PERAQFER.MAIN_PRE",
+            "IF v_row_new.cont_dobro_ferias = 'N' AND (v_row_new.min_dias_peraqfer > 0 OR v_row_new.max_dias_peraqfer > 0) THEN pack_hades.trata_erro(1825); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01826",
+            PeriodoAquisitivoFeriasRuleSet.SLOT_OVERRIDES_CONTAGEM_DOBRO,
+            "diasConvertidosDobro",
+            "Quantidade de dias convertidos em dobro exige contagem em dobro habilitada e deve respeitar os limites mínimo e máximo efetivos do período aquisitivo.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE / PCK_PERAQFER.MAIN_PRE",
+            "IF v_row_new.dias_convertidos_dobro > 0 AND (NOT v_eff_cont_dobro OR v_row_new.dias_convertidos_dobro NOT BETWEEN v_min_dobro AND v_max_dobro) THEN pack_hades.trata_erro(1826); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01827",
+            PeriodoAquisitivoFeriasRuleSet.SLOT_OVERRIDES_PARCELAMENTO_E_ABONO,
+            "permiteGozoPosPrescricao",
+            "Indicadores tri-state de override do período aquisitivo devem assumir 'I' (herdar), 'S' (sim) ou 'N' (não), e abonoDirGozo deve assumir 'I', 'D', 'G' ou 'N'.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE / PCK_PERAQFER.MAIN_PRE",
+            "IF v_row_new.abono_const_fer NOT IN ('I','S','N') OR v_row_new.abono_dir_gozo NOT IN ('I','D','G','N') THEN pack_hades.trata_erro(1827); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01828",
+            PeriodoAquisitivoFeriasRuleSet.SLOT_OVERRIDES_PARCELAMENTO_E_ABONO,
+            "maxPerFer",
+            "Overrides de quantidade mínima e máxima de parcelas do período aquisitivo devem respeitar o intervalo de 1 a 6 parcelas e minPerFer <= maxPerFer.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE / PCK_PERAQFER.MAIN_PRE",
+            "IF v_eff.min_per_fer > v_eff.max_per_fer OR v_row_new.max_per_fer > 6 THEN pack_hades.trata_erro(1828); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
             "ERG-01850",
             ParametroContagemFeriasRuleSet.SLOT_CONCOMITANCIA_VIGENCIA_ESCOPO,
             "dtini",

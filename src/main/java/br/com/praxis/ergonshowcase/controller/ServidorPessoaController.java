@@ -102,7 +102,22 @@ public class ServidorPessoaController
           primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Cadastros civis"),
           defaultLimit = 20,
           recordOpen = @AnalyticsRecordOpen(sourceIdentityField = "key",
-              target = @AnalyticsSurfaceTarget(resourceKey = "administracao-pessoal.funcionarios", surfaceId = "ficha-cadastral")))
+              target = @AnalyticsSurfaceTarget(resourceKey = "administracao-pessoal.funcionarios", surfaceId = "ficha-cadastral"))),
+      @AnalyticsProjection(id = "evolucao-nascimento-pessoas", intent = AnalyticsIntent.TREND,
+          sourceOperation = AnalyticsOperation.TIMESERIES,
+          primaryDimension = @AnalyticsDimensionBinding(field = "dtnasc"),
+          defaultGranularity = AnalyticsGranularity.MONTH,
+          defaultTimezone = "America/Sao_Paulo",
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Servidores por mês de nascimento")),
+      @AnalyticsProjection(id = "distribuicao-numero-funcional", intent = AnalyticsIntent.DISTRIBUTION,
+          sourceOperation = AnalyticsOperation.DISTRIBUTION,
+          primaryDimension = @AnalyticsDimensionBinding(field = "id"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "id", aggregation = "histogram", label = "Distribuição de número funcional")),
+      @AnalyticsProjection(id = "comparativo-pessoas-por-escolaridade", intent = AnalyticsIntent.COMPARISON,
+          sourceOperation = AnalyticsOperation.COMPARISON,
+          primaryDimension = @AnalyticsDimensionBinding(field = "escolaridade"),
+          comparisonPeriod = @AnalyticsComparisonPeriodBinding(field = "dtnasc", timezone = "America/Sao_Paulo"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Variação por escolaridade"))
   })
   public org.springframework.http.ResponseEntity<RestApiResponse<org.praxisplatform.uischema.stats.dto.GroupByStatsResponse>> groupByStats(
       @RequestBody org.praxisplatform.uischema.stats.dto.GroupByStatsRequest<ServidorPessoaFilterDTO> request) {

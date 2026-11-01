@@ -1590,7 +1590,106 @@ class FeriasRuleEngineAndDeterminationsContractTest {
           return new ParametroContagemFeriasRuleContext(p, List.of());
         });
 
-    // 2. PeriodoAquisitivoFeriasRuleSet granular codes ERG-00605, ERG-00606, ERG-01810, ERG-01802
+    parametroContagemFeriasProductViolationsAreDeniedWithOfficialErgonCodes(
+        "ERG-01821",
+        ParametroContagemFeriasRuleSet.SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+        () -> {
+          var p = validParametro();
+          p.setTemLicEsp(true);
+          p.setAnosLicEsp(5);
+          p.setMesesLicEspPer(3);
+          p.setVendLicEsp(true);
+          p.setAbonoDirGozoLicEsp("D");
+          p.setMinDiasPvendLicEsp(20);
+          p.setMaxDiasVendLicEsp(10);
+          return new ParametroContagemFeriasRuleContext(p, List.of());
+        });
+
+    parametroContagemFeriasProductViolationsAreDeniedWithOfficialErgonCodes(
+        "ERG-01822",
+        ParametroContagemFeriasRuleSet.SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+        () -> {
+          var p = validParametro();
+          p.setTemLicEsp(true);
+          p.setAnosLicEsp(5);
+          p.setMesesLicEspPer(3);
+          p.setVendLicEsp(true);
+          p.setAbonoDirGozoLicEsp("D");
+          p.setNumDiasAbonoLicEsp(4);
+          p.setDenDiasAbonoLicEsp(2);
+          return new ParametroContagemFeriasRuleContext(p, List.of());
+        });
+
+    parametroContagemFeriasProductViolationsAreDeniedWithOfficialErgonCodes(
+        "ERG-01823",
+        ParametroContagemFeriasRuleSet.SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+        () -> {
+          var p = validParametro();
+          p.setTemLicEsp(true);
+          p.setAnosLicEsp(5);
+          p.setMesesLicEspPer(3);
+          p.setContDobroLicEsp(true);
+          p.setMinDiasPcontDobLicEsp(-5);
+          p.setMaxDiasContDobLicEsp(15);
+          return new ParametroContagemFeriasRuleContext(p, List.of());
+        });
+
+    parametroContagemFeriasProductViolationsAreDeniedWithOfficialErgonCodes(
+        "ERG-01824",
+        ParametroContagemFeriasRuleSet.SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+        () -> {
+          var p = validParametro();
+          p.setTemLicEsp(true);
+          p.setAnosLicEsp(5);
+          p.setMesesLicEspPer(3);
+          p.setContDobroLicEsp(false);
+          p.setMaxDiasContDobLicEsp(15);
+          return new ParametroContagemFeriasRuleContext(p, List.of());
+        });
+
+    // 2. PeriodoAquisitivoFeriasRuleSet granular codes ERG-00605, ERG-00606, ERG-01825..01828, ERG-01810, ERG-01802
+    periodoAquisitivoFeriasProductViolationsAreDeniedWithOfficialErgonCodes(
+        "ERG-01825",
+        PeriodoAquisitivoFeriasRuleSet.SLOT_OVERRIDES_CONTAGEM_DOBRO,
+        () -> {
+          var pa = validPa();
+          pa.setContDobroFerias("N");
+          pa.setMinDiasPeraqfer(10);
+          return new PeriodoAquisitivoFeriasRuleContext(
+              pa, vinculo, List.of(param), List.of(), List.of());
+        });
+
+    periodoAquisitivoFeriasProductViolationsAreDeniedWithOfficialErgonCodes(
+        "ERG-01826",
+        PeriodoAquisitivoFeriasRuleSet.SLOT_OVERRIDES_CONTAGEM_DOBRO,
+        () -> {
+          var pa = validPa();
+          pa.setContDobroFerias("N");
+          pa.setDiasConvertidosDobro(10);
+          pa.setSaldoDiasDisponivel(20);
+          return new PeriodoAquisitivoFeriasRuleContext(
+              pa, vinculo, List.of(param), List.of(), List.of());
+        });
+
+    periodoAquisitivoFeriasProductViolationsAreDeniedWithOfficialErgonCodes(
+        "ERG-01827",
+        PeriodoAquisitivoFeriasRuleSet.SLOT_OVERRIDES_PARCELAMENTO_E_ABONO,
+        () -> {
+          var pa = validPa();
+          pa.setAbonoConstFer("X");
+          return new PeriodoAquisitivoFeriasRuleContext(
+              pa, vinculo, List.of(param), List.of(), List.of());
+        });
+
+    periodoAquisitivoFeriasProductViolationsAreDeniedWithOfficialErgonCodes(
+        "ERG-01828",
+        PeriodoAquisitivoFeriasRuleSet.SLOT_OVERRIDES_PARCELAMENTO_E_ABONO,
+        () -> {
+          var pa = validPa();
+          pa.setMaxPerFer(9);
+          return new PeriodoAquisitivoFeriasRuleContext(
+              pa, vinculo, List.of(param), List.of(), List.of());
+        });
     periodoAquisitivoFeriasProductViolationsAreDeniedWithOfficialErgonCodes(
         "ERG-00605",
         PeriodoAquisitivoFeriasRuleSet.SLOT_OVERRIDES_CONTAGEM_DOBRO,

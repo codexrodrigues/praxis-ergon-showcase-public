@@ -208,14 +208,34 @@ public class ParametroContagemFeriasService
   public StatsFieldRegistry getStatsFieldRegistry() {
     return StatsFieldRegistry.builder()
         .labeledGroupByBucket(
-            "id", "id", "regimeJuridico", Set.of(StatsMetric.COUNT, StatsMetric.SUM))
-        .categoricalGroupByBucket("regimeJuridico", "regimeJuridico")
+            "id",
+            "id",
+            "regimeJuridico",
+            Set.of(
+                StatsMetric.COUNT,
+                StatsMetric.SUM,
+                StatsMetric.AVG,
+                StatsMetric.MIN,
+                StatsMetric.MAX,
+                StatsMetric.MEDIAN,
+                StatsMetric.PERCENTILE_90,
+                StatsMetric.PERCENTILE_95))
+        .groupByBucket(
+            "regimeJuridico",
+            "regimeJuridico",
+            Set.of(
+                StatsMetric.COUNT,
+                StatsMetric.SUM,
+                StatsMetric.AVG,
+                StatsMetric.MEDIAN,
+                StatsMetric.PERCENTILE_90))
         .categoricalGroupByBucket("tipoVinculo", "tipoVinculo")
         .categoricalGroupByBucket("categoria", "categoria")
         .categoricalGroupByBucket("active", "active")
         .temporalTimeSeriesField("dtini", "dtini")
         .numericHistogramMeasureField("totDiasFer", "totDiasFer")
         .numericHistogramMeasureField("maxDiasVendFer", "maxDiasVendFer")
+        .numericHistogramMeasureField("maxPerFer", "maxPerFer")
         .build();
   }
 

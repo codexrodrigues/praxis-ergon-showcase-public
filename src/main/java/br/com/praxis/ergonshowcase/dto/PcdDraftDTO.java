@@ -11,6 +11,7 @@ public record PcdDraftDTO(
             kind = DomainGovernanceKind.PRIVACY,
             classification = DomainClassification.RESTRICTED,
             dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+            complianceTags = {"LGPD", "HEALTH_DATA", "NON_EXPORTABLE"},
             reason = "Indicador de deficiência em formulário não persistido.",
             aiUsage =
                 @AiUsagePolicy(
@@ -22,12 +23,16 @@ public record PcdDraftDTO(
             group = "Acessibilidade",
             type = org.praxisplatform.uischema.FieldDataType.BOOLEAN,
             controlType = org.praxisplatform.uischema.FieldControlType.CHECKBOX,
-            icon = "accessible")
+            icon = "accessible",
+            visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_HEALTH_READ"},
+            editableForAuthorities = {"ERGON_WRITE"},
+            fieldAccessReason = "Indicador sensível de deficiência física (LGPD Art. 11).")
         Boolean deffisica,
     @DomainGovernance(
             kind = DomainGovernanceKind.PRIVACY,
             classification = DomainClassification.RESTRICTED,
             dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+            complianceTags = {"LGPD", "HEALTH_DATA", "NON_EXPORTABLE"},
             reason = "Indicador de deficiência em formulário não persistido.",
             aiUsage =
                 @AiUsagePolicy(
@@ -39,12 +44,16 @@ public record PcdDraftDTO(
             group = "Acessibilidade",
             type = org.praxisplatform.uischema.FieldDataType.BOOLEAN,
             controlType = org.praxisplatform.uischema.FieldControlType.CHECKBOX,
-            icon = "accessible")
+            icon = "accessible",
+            visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_HEALTH_READ"},
+            editableForAuthorities = {"ERGON_WRITE"},
+            fieldAccessReason = "Indicador sensível de deficiência visual (LGPD Art. 11).")
         Boolean defvisual,
     @DomainGovernance(
             kind = DomainGovernanceKind.PRIVACY,
             classification = DomainClassification.RESTRICTED,
             dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+            complianceTags = {"LGPD", "HEALTH_DATA", "NON_EXPORTABLE"},
             reason = "Indicador de deficiência em formulário não persistido.",
             aiUsage =
                 @AiUsagePolicy(
@@ -56,12 +65,16 @@ public record PcdDraftDTO(
             group = "Acessibilidade",
             type = org.praxisplatform.uischema.FieldDataType.BOOLEAN,
             controlType = org.praxisplatform.uischema.FieldControlType.CHECKBOX,
-            icon = "accessible")
+            icon = "accessible",
+            visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_HEALTH_READ"},
+            editableForAuthorities = {"ERGON_WRITE"},
+            fieldAccessReason = "Indicador sensível de deficiência auditiva (LGPD Art. 11).")
         Boolean defauditiva,
     @DomainGovernance(
             kind = DomainGovernanceKind.PRIVACY,
             classification = DomainClassification.RESTRICTED,
             dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+            complianceTags = {"LGPD", "HEALTH_DATA", "NON_EXPORTABLE"},
             reason = "Indicador de deficiência em formulário não persistido.",
             aiUsage =
                 @AiUsagePolicy(
@@ -73,12 +86,16 @@ public record PcdDraftDTO(
             group = "Acessibilidade",
             type = org.praxisplatform.uischema.FieldDataType.BOOLEAN,
             controlType = org.praxisplatform.uischema.FieldControlType.CHECKBOX,
-            icon = "accessible")
+            icon = "accessible",
+            visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_HEALTH_READ"},
+            editableForAuthorities = {"ERGON_WRITE"},
+            fieldAccessReason = "Indicador sensível de deficiência mental (LGPD Art. 11).")
         Boolean defmental,
     @DomainGovernance(
             kind = DomainGovernanceKind.PRIVACY,
             classification = DomainClassification.RESTRICTED,
             dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+            complianceTags = {"LGPD", "HEALTH_DATA", "NON_EXPORTABLE"},
             reason = "Indicador de deficiência em formulário não persistido.",
             aiUsage =
                 @AiUsagePolicy(
@@ -90,5 +107,8 @@ public record PcdDraftDTO(
             group = "Acessibilidade",
             type = org.praxisplatform.uischema.FieldDataType.BOOLEAN,
             controlType = org.praxisplatform.uischema.FieldControlType.CHECKBOX,
-            icon = "accessible")
+            icon = "accessible",
+            visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_HEALTH_READ"},
+            editableForAuthorities = {"ERGON_WRITE"},
+            fieldAccessReason = "Indicador sensível de deficiência intelectual (LGPD Art. 11).")
         Boolean defintelectual) {}

@@ -176,10 +176,23 @@ public class ErgonInvariants {
             Vinculo.class,
             new VinculoId(a.getNumfunc(), a.getNumvinc()),
             LockModeType.PESSIMISTIC_READ);
+    if (titular == null) {
+      titular =
+          em.find(
+              Vinculo.class,
+              new VinculoId(a.getNumfunc(), a.getNumvinc()),
+              LockModeType.PESSIMISTIC_WRITE);
+    }
+    if (titular == null) {
+      titular = em.find(Vinculo.class, new VinculoId(a.getNumfunc(), a.getNumvinc()));
+    }
     if (titular == null || !Objects.equals(titular.getEmpCodigo(), a.getEmpCodigo()))
       fail("Vínculo funcional inexistente ou pertence a outro órgão.");
     ServidorPessoa pessoa =
         em.find(ServidorPessoa.class, a.getNumfunc(), LockModeType.PESSIMISTIC_READ);
+    if (pessoa == null) {
+      pessoa = em.find(ServidorPessoa.class, a.getNumfunc());
+    }
     if (pessoa == null) fail("Servidor titular inexistente para o afastamento.");
     chronology(
         titular.getDtexerc(),

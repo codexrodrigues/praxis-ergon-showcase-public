@@ -36,7 +36,12 @@ import org.springframework.web.bind.annotation.*;
     icon = "sort",
     tone = "neutral",
     valuePresentation = "integer",
-    sourceKind = "field")
+    sourceKind = "field",
+    thresholds = {
+      @Threshold(min = 0, max = 10, tone = "info", label = "Prioritário"),
+      @Threshold(min = 10, max = 50, tone = "neutral", label = "Intermediário"),
+      @Threshold(min = 50, tone = "warning", label = "Complementar")
+    })
 @ApiResource(
     value = ApiPaths.ITENS_TABELA,
     resourceKey = "administracao-pessoal.itens-tabela",

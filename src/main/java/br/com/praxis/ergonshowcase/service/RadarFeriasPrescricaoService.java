@@ -485,8 +485,24 @@ public class RadarFeriasPrescricaoService
             "id",
             "id",
             "faixaUrgenciaPrescricao",
-            Set.of(StatsMetric.COUNT, StatsMetric.SUM))
-        .categoricalGroupByBucket("faixaUrgenciaPrescricao", "faixaUrgenciaPrescricao")
+            Set.of(
+                StatsMetric.COUNT,
+                StatsMetric.SUM,
+                StatsMetric.AVG,
+                StatsMetric.MIN,
+                StatsMetric.MAX,
+                StatsMetric.MEDIAN,
+                StatsMetric.PERCENTILE_90,
+                StatsMetric.PERCENTILE_95))
+        .groupByBucket(
+            "faixaUrgenciaPrescricao",
+            "faixaUrgenciaPrescricao",
+            Set.of(
+                StatsMetric.COUNT,
+                StatsMetric.SUM,
+                StatsMetric.AVG,
+                StatsMetric.MEDIAN,
+                StatsMetric.PERCENTILE_90))
         .categoricalGroupByBucket("setorNome", "setorNome")
         .categoricalGroupByBucket("situacao", "situacao")
         .categoricalGroupByBucket("regimeJuridico", "regimeJuridico")

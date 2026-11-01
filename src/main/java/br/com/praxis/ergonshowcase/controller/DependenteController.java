@@ -172,7 +172,43 @@ public class DependenteController
                     target =
                         @AnalyticsSurfaceTarget(
                             resourceKey = "administracao-pessoal.dependentes",
-                            surfaceId = "ficha-dependente")))
+                            surfaceId = "ficha-dependente"))),
+        @AnalyticsProjection(
+            id = "evolucao-inclusao-dependentes",
+            intent = AnalyticsIntent.TREND,
+            sourceOperation = AnalyticsOperation.TIMESERIES,
+            primaryDimension = @AnalyticsDimensionBinding(field = "dtini"),
+            defaultGranularity = AnalyticsGranularity.MONTH,
+            defaultTimezone = "America/Sao_Paulo",
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "count",
+                    aggregation = "count",
+                    label = "Dependentes incluídos no mês")),
+        @AnalyticsProjection(
+            id = "distribuicao-sequencial-dependentes",
+            intent = AnalyticsIntent.DISTRIBUTION,
+            sourceOperation = AnalyticsOperation.DISTRIBUTION,
+            primaryDimension = @AnalyticsDimensionBinding(field = "numdep"),
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "numdep",
+                    aggregation = "histogram",
+                    label = "Distribuição por sequencial de dependente")),
+        @AnalyticsProjection(
+            id = "comparativo-dependentes-por-parentesco",
+            intent = AnalyticsIntent.COMPARISON,
+            sourceOperation = AnalyticsOperation.COMPARISON,
+            primaryDimension = @AnalyticsDimensionBinding(field = "parentesco"),
+            comparisonPeriod =
+                @AnalyticsComparisonPeriodBinding(
+                    field = "dtini",
+                    timezone = "America/Sao_Paulo"),
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "count",
+                    aggregation = "count",
+                    label = "Variação por parentesco"))
       })
   public ResponseEntity<RestApiResponse<GroupByStatsResponse>> groupByStats(
       @RequestBody GroupByStatsRequest<DependenteFilterDTO> request) {

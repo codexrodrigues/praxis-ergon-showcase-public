@@ -56,6 +56,22 @@ import org.springframework.web.bind.annotation.*;
     tone = "success",
     valuePresentation = "badge",
     sourceKind = "computed")
+@ResourceFact(
+    key = "quantidade",
+    resourceKey = "administracao-pessoal.frequencias",
+    label = "Quantidade apurada",
+    description = "Quantidade de dias, horas ou minutos apurada na ocorrência de frequência.",
+    dataType = "number",
+    unit = "u",
+    icon = "calculate",
+    tone = "info",
+    valuePresentation = "metric",
+    sourceKind = "field",
+    thresholds = {
+      @Threshold(min = 0, max = 2, tone = "success", label = "Curta duração"),
+      @Threshold(min = 2, max = 8, tone = "warning", label = "Turno regular"),
+      @Threshold(min = 8, tone = "danger", label = "Acima da jornada")
+    })
 @BulkResourceOperations(
     proposalOperationId = "ergon.frequencias.bulk.proposal",
     proposalResultsOperationId = "ergon.frequencias.bulk.proposal-results",
@@ -160,7 +176,43 @@ public class FrequenciaController
                     target =
                         @AnalyticsSurfaceTarget(
                             resourceKey = "administracao-pessoal.frequencias",
-                            surfaceId = "ficha-frequencia")))
+                            surfaceId = "ficha-frequencia"))),
+        @AnalyticsProjection(
+            id = "evolucao-mensal-frequencias",
+            intent = AnalyticsIntent.TREND,
+            sourceOperation = AnalyticsOperation.TIMESERIES,
+            primaryDimension = @AnalyticsDimensionBinding(field = "dtini"),
+            defaultGranularity = AnalyticsGranularity.MONTH,
+            defaultTimezone = "America/Sao_Paulo",
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "count",
+                    aggregation = "count",
+                    label = "Ocorrências no mês")),
+        @AnalyticsProjection(
+            id = "distribuicao-quantidade-frequencia",
+            intent = AnalyticsIntent.DISTRIBUTION,
+            sourceOperation = AnalyticsOperation.DISTRIBUTION,
+            primaryDimension = @AnalyticsDimensionBinding(field = "quantidade"),
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "quantidade",
+                    aggregation = "histogram",
+                    label = "Distribuição de quantidade apurada")),
+        @AnalyticsProjection(
+            id = "comparativo-frequencias-por-situacao",
+            intent = AnalyticsIntent.COMPARISON,
+            sourceOperation = AnalyticsOperation.COMPARISON,
+            primaryDimension = @AnalyticsDimensionBinding(field = "situacao"),
+            comparisonPeriod =
+                @AnalyticsComparisonPeriodBinding(
+                    field = "dtini",
+                    timezone = "America/Sao_Paulo"),
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "count",
+                    aggregation = "count",
+                    label = "Variação por situação"))
       })
   public ResponseEntity<RestApiResponse<GroupByStatsResponse>> groupByStats(
       @RequestBody GroupByStatsRequest<FrequenciaFilterDTO> request) {

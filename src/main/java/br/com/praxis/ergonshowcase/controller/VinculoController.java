@@ -130,7 +130,22 @@ public class VinculoController
           primaryMetrics = @AnalyticsMetricBinding(field = "jornadaSemanal", aggregation = "sum", label = "Horas semanais"),
           defaultLimit = 20,
           recordOpen = @AnalyticsRecordOpen(sourceIdentityField = "key",
-              target = @AnalyticsSurfaceTarget(resourceKey = "administracao-pessoal.vinculos", surfaceId = "resumo-funcional")))
+              target = @AnalyticsSurfaceTarget(resourceKey = "administracao-pessoal.vinculos", surfaceId = "resumo-funcional"))),
+      @AnalyticsProjection(id = "evolucao-exercicio-vinculos", intent = AnalyticsIntent.TREND,
+          sourceOperation = AnalyticsOperation.TIMESERIES,
+          primaryDimension = @AnalyticsDimensionBinding(field = "dtexerc"),
+          defaultGranularity = AnalyticsGranularity.MONTH,
+          defaultTimezone = "America/Sao_Paulo",
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Vínculos iniciados no mês")),
+      @AnalyticsProjection(id = "distribuicao-jornada-semanal", intent = AnalyticsIntent.DISTRIBUTION,
+          sourceOperation = AnalyticsOperation.DISTRIBUTION,
+          primaryDimension = @AnalyticsDimensionBinding(field = "jornadaSemanal"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "jornadaSemanal", aggregation = "histogram", label = "Distribuição de jornada semanal")),
+      @AnalyticsProjection(id = "comparativo-vinculos-por-situacao", intent = AnalyticsIntent.COMPARISON,
+          sourceOperation = AnalyticsOperation.COMPARISON,
+          primaryDimension = @AnalyticsDimensionBinding(field = "situacao"),
+          comparisonPeriod = @AnalyticsComparisonPeriodBinding(field = "dtexerc", timezone = "America/Sao_Paulo"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Variação por situação"))
   })
   public org.springframework.http.ResponseEntity<RestApiResponse<org.praxisplatform.uischema.stats.dto.GroupByStatsResponse>> groupByStats(
       @RequestBody org.praxisplatform.uischema.stats.dto.GroupByStatsRequest<VinculoFilterDTO> request) {

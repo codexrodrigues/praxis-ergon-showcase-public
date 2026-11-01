@@ -66,7 +66,21 @@ public class OrgaoService
   @Override
   public StatsFieldRegistry getStatsFieldRegistry() {
     return StatsFieldRegistry.builder()
-        .categoricalGroupByBucket("ativa", "ativa")
+        .labeledGroupByBucket(
+            "id",
+            "empresa",
+            "nome",
+            Set.of(
+                StatsMetric.COUNT,
+                StatsMetric.MEDIAN,
+                StatsMetric.PERCENTILE_90))
+        .groupByBucket(
+            "ativa",
+            "ativa",
+            Set.of(
+                StatsMetric.COUNT,
+                StatsMetric.MEDIAN,
+                StatsMetric.PERCENTILE_90))
         .categoricalGroupByBucket("ufSigla", "ufSigla")
         .build();
   }

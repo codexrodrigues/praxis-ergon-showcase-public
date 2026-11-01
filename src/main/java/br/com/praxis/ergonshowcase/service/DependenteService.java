@@ -221,11 +221,30 @@ public class DependenteService
   @Override
   public StatsFieldRegistry getStatsFieldRegistry() {
     return StatsFieldRegistry.builder()
-        .labeledGroupByBucket("id", "id", "nome", Set.of(StatsMetric.COUNT))
-        .categoricalGroupByBucket("parentesco", "parentesco")
+        .labeledGroupByBucket(
+            "id",
+            "id",
+            "nome",
+            Set.of(
+                StatsMetric.COUNT,
+                StatsMetric.SUM,
+                StatsMetric.AVG,
+                StatsMetric.MIN,
+                StatsMetric.MAX,
+                StatsMetric.MEDIAN,
+                StatsMetric.PERCENTILE_90,
+                StatsMetric.PERCENTILE_95))
+        .groupByBucket(
+            "parentesco",
+            "parentesco",
+            Set.of(
+                StatsMetric.COUNT,
+                StatsMetric.MEDIAN,
+                StatsMetric.PERCENTILE_90))
         .categoricalGroupByBucket("tipodepen", "tipodepen")
         .temporalTimeSeriesField("dtini", "dtini")
         .temporalTimeSeriesField("dtnasc", "dtnasc")
+        .numericHistogramMeasureField("numdep", "id.numdep")
         .build();
   }
 

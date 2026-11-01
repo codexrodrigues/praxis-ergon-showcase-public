@@ -47,7 +47,12 @@ import org.springframework.web.bind.annotation.*;
     icon = "timelapse",
     tone = "info",
     valuePresentation = "integer",
-    sourceKind = "field")
+    sourceKind = "field",
+    thresholds = {
+      @Threshold(min = 0, max = 15, tone = "success", label = "Curta duração"),
+      @Threshold(min = 15, max = 90, tone = "warning", label = "Média duração"),
+      @Threshold(min = 90, tone = "danger", label = "Longa duração")
+    })
 @ApiResource(
     value = ApiPaths.REGRAS_FREQUENCIA_ESTATUTARIA,
     resourceKey = "administracao-pessoal.regras-frequencia-estatutaria",

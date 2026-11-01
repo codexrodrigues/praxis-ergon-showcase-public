@@ -29,6 +29,7 @@ public class ErgonCommands {
   @Autowired private CargoMapper cargos;
   @Autowired private ServidorPessoaMapper pessoas;
   @Autowired private ErgonInvariants rules;
+  @Autowired(required = false) private ErgonInvariants invariants;
   @Autowired private TenantContext tenant;
   @Autowired private OrgaoMapper orgaos;
   @Autowired private ErgonReadFacts readFacts;
@@ -139,6 +140,10 @@ public class ErgonCommands {
     a.setMotivo(dto.motivo());
     a.setDocumentoLegalId(dto.documentoLegalId());
     a.setSituacao("HOMOLOGADO");
+    ErgonInvariants inv = this.invariants != null ? this.invariants : this.rules;
+    if (inv != null) {
+      inv.afastamento(a, true);
+    }
     if (afastamentoService != null) {
       afastamentoService.validateAfastamentoConcessao(a, true);
     }

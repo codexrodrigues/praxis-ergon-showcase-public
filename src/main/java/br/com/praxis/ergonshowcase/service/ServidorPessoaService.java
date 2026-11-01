@@ -80,9 +80,29 @@ public class ServidorPessoaService
   @Override
   public StatsFieldRegistry getStatsFieldRegistry() {
     return StatsFieldRegistry.builder()
-        .labeledGroupByBucket("id", "numero", "nome", Set.of(StatsMetric.COUNT))
-        .categoricalGroupByBucket("escolaridade", "escolaridade")
-        .temporalTimeSeriesField("dtnasc", "dtnasc").build();
+        .labeledGroupByBucket(
+            "id",
+            "numero",
+            "nome",
+            Set.of(
+                StatsMetric.COUNT,
+                StatsMetric.SUM,
+                StatsMetric.AVG,
+                StatsMetric.MIN,
+                StatsMetric.MAX,
+                StatsMetric.MEDIAN,
+                StatsMetric.PERCENTILE_90,
+                StatsMetric.PERCENTILE_95))
+        .groupByBucket(
+            "escolaridade",
+            "escolaridade",
+            Set.of(
+                StatsMetric.COUNT,
+                StatsMetric.MEDIAN,
+                StatsMetric.PERCENTILE_90))
+        .temporalTimeSeriesField("dtnasc", "dtnasc")
+        .numericHistogramMeasureField("id", "numero")
+        .build();
   }
 
   @Override

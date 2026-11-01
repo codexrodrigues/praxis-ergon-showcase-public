@@ -3412,8 +3412,7 @@ public class ErgonRuleEngineFacade {
     ObjectNode scopeNode = root.putObject("scope");
     scopeNode.put("overlappingActiveCount", overlappingActiveCount);
 
-    ObjectNode derivedNode = root.putObject("derived");
-    derivedNode.put("licencaProgressaoTempoServCoerente", isLicencaProgressaoCoerente(d));
+    root.putObject("derived");
 
     ObjectNode tenantNode = root.putObject("tenant");
     tenantNode.put("empCodigo", empCodigo);
@@ -3431,90 +3430,6 @@ public class ErgonRuleEngineFacade {
         && Objects.equals(a.getTipoVinculo(), b.getTipoVinculo())
         && Objects.equals(a.getCategoria(), b.getCategoria())
         && Objects.equals(a.getSubcategoria(), b.getSubcategoria());
-  }
-
-  private static boolean isLicencaProgressaoCoerente(ParametroContagemFerias d) {
-    if (d == null) {
-      return true;
-    }
-    if (Boolean.TRUE.equals(d.getTemLicEsp())) {
-      if (d.getAnosLicEsp() == null
-          || d.getAnosLicEsp() <= 0
-          || d.getMesesLicEspPer() == null
-          || d.getMesesLicEspPer() <= 0) {
-        return false;
-      }
-      if (Boolean.TRUE.equals(d.getVendLicEsp())) {
-        if (d.getAbonoDirGozoLicEsp() == null
-            || !Set.of("D", "G", "N").contains(d.getAbonoDirGozoLicEsp())) {
-          return false;
-        }
-        if (d.getMinDiasPvendLicEsp() != null
-            && d.getMaxDiasVendLicEsp() != null
-            && d.getMinDiasPvendLicEsp() > d.getMaxDiasVendLicEsp()) {
-          return false;
-        }
-        if (d.getNumDiasAbonoLicEsp() != null
-            && d.getDenDiasAbonoLicEsp() != null
-            && (d.getDenDiasAbonoLicEsp() <= 0
-                || d.getNumDiasAbonoLicEsp() < 0
-                || d.getNumDiasAbonoLicEsp() > d.getDenDiasAbonoLicEsp())) {
-          return false;
-        }
-      } else {
-        if ((d.getMinDiasPvendLicEsp() != null && d.getMinDiasPvendLicEsp() > 0)
-            || (d.getMaxDiasVendLicEsp() != null && d.getMaxDiasVendLicEsp() > 0)) {
-          return false;
-        }
-      }
-      if (Boolean.TRUE.equals(d.getContDobroLicEsp())) {
-        if (d.getMinDiasPcontDobLicEsp() == null || d.getMaxDiasContDobLicEsp() == null) {
-          return false;
-        }
-        if (d.getMinDiasPcontDobLicEsp() < 0
-            || d.getMaxDiasContDobLicEsp() < 0
-            || d.getMinDiasPcontDobLicEsp() > d.getMaxDiasContDobLicEsp()) {
-          return false;
-        }
-      } else {
-        if ((d.getMinDiasPcontDobLicEsp() != null && d.getMinDiasPcontDobLicEsp() > 0)
-            || (d.getMaxDiasContDobLicEsp() != null && d.getMaxDiasContDobLicEsp() > 0)) {
-          return false;
-        }
-      }
-    } else {
-      if ((d.getAnosLicEsp() != null && d.getAnosLicEsp() > 0)
-          || (d.getMesesLicEspPer() != null && d.getMesesLicEspPer() > 0)
-          || Boolean.TRUE.equals(d.getVendLicEsp())
-          || Boolean.TRUE.equals(d.getContDobroLicEsp())) {
-        return false;
-      }
-    }
-
-    if (Boolean.TRUE.equals(d.getTemProgressao())) {
-      if (d.getAnosProgressao() == null || d.getAnosProgressao() <= 0) {
-        return false;
-      }
-    } else if (d.getAnosProgressao() != null && d.getAnosProgressao() > 0) {
-      return false;
-    }
-
-    if (Boolean.TRUE.equals(d.getTemTempoServ())) {
-      if (d.getAnos1TempoServ() == null || d.getAnos1TempoServ() <= 0) {
-        return false;
-      }
-    } else if (d.getAnos1TempoServ() != null && d.getAnos1TempoServ() > 0) {
-      return false;
-    }
-
-    if (Boolean.TRUE.equals(d.getTemSextaParte())) {
-      if (d.getAnosSextaParte() == null || d.getAnosSextaParte() <= 0) {
-        return false;
-      }
-    } else if (d.getAnosSextaParte() != null && d.getAnosSextaParte() > 0) {
-      return false;
-    }
-    return true;
   }
 
   /**
@@ -3744,10 +3659,6 @@ public class ErgonRuleEngineFacade {
     derivedNode.put("openAccumulatedPeriodsCount", openAccumulatedPeriodsCount);
     derivedNode.put("overlappingPeriodsCount", overlappingPeriodsCount);
     derivedNode.put("parcelasViolandoPrescricaoCount", parcelasViolandoPrescricaoCount);
-    derivedNode.put(
-        "contagemDobroOverrideCoerente", isContagemDobroOverrideCoerente(d, effective));
-    derivedNode.put(
-        "overridesParcelamentoAbonoCoerentes", isOverridesParcelamentoAbonoCoerentes(d, effective));
 
     ObjectNode tenantNode = root.putObject("tenant");
     tenantNode.put("empCodigo", empCodigo);
@@ -3764,130 +3675,6 @@ public class ErgonRuleEngineFacade {
     }
     return Set.of("EM_AQUISICAO", "DISPONIVEL", "ADQUIRIDO", "PARCIALMENTE_GOZADO")
         .contains(situacao.toUpperCase());
-  }
-
-  private static boolean isContagemDobroOverrideCoerente(
-      PeriodoAquisitivoFerias d,
-      EffectiveVacationParameterResolver.EffectiveParametroFeriasFacts effective) {
-    if (d == null) {
-      return true;
-    }
-    if (d.getContDobroFerias() != null
-        && !Set.of("I", "S", "N").contains(d.getContDobroFerias().toUpperCase())) {
-      return false;
-    }
-    boolean dobroAtivoNoPa = "S".equalsIgnoreCase(d.getContDobroFerias());
-    boolean dobroDesabilitadoNoPa =
-        "N".equalsIgnoreCase(d.getContDobroFerias()) || !effective.contDobroFerias();
-    if (dobroAtivoNoPa) {
-      if (d.getMinDiasPeraqfer() == null || d.getMaxDiasPeraqfer() == null) {
-        return false;
-      }
-      if (d.getMinDiasPeraqfer() < 0
-          || d.getMaxDiasPeraqfer() < 0
-          || d.getMinDiasPeraqfer() > d.getMaxDiasPeraqfer()) {
-        return false;
-      }
-    } else if ("N".equalsIgnoreCase(d.getContDobroFerias())) {
-      if ((d.getMinDiasPeraqfer() != null && d.getMinDiasPeraqfer() > 0)
-          || (d.getMaxDiasPeraqfer() != null && d.getMaxDiasPeraqfer() > 0)) {
-        return false;
-      }
-    }
-    int convertidos = d.getDiasConvertidosDobro() != null ? d.getDiasConvertidosDobro() : 0;
-    if (convertidos > 0) {
-      if (dobroDesabilitadoNoPa) {
-        return false;
-      }
-      if (effective.minDiasPeraqfer() != null && convertidos < effective.minDiasPeraqfer()) {
-        return false;
-      }
-      if (effective.maxDiasPeraqfer() != null && convertidos > effective.maxDiasPeraqfer()) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  private static boolean isOverridesParcelamentoAbonoCoerentes(
-      PeriodoAquisitivoFerias d,
-      EffectiveVacationParameterResolver.EffectiveParametroFeriasFacts effective) {
-    if (d == null) {
-      return true;
-    }
-    if (!isValidTriState(d.getPermiteGozoPosPrescricao())
-        || !isValidTriState(d.getAbonoConstFer())
-        || !isValidTriState(d.getAdiant13Fer())
-        || !isValidTriState(d.getAdiantSalFer())
-        || !isValidTriState(d.getEmprestFer())
-        || !isValidTriState(d.getPermiteFerEstePer())) {
-      return false;
-    }
-    if (d.getAbonoDirGozo() != null
-        && !Set.of("I", "D", "G", "N").contains(d.getAbonoDirGozo().toUpperCase())) {
-      return false;
-    }
-    if (d.getMinPerFer() != null && d.getMinPerFer() <= 0) {
-      return false;
-    }
-    if (d.getMaxPerFer() != null && (d.getMaxPerFer() <= 0 || d.getMaxPerFer() > 6)) {
-      return false;
-    }
-    if (effective.minPerFer() != null
-        && effective.maxPerFer() != null
-        && effective.minPerFer() > effective.maxPerFer()) {
-      return false;
-    }
-    if (d.getMinDiasPerFer() != null && d.getMinDiasPerFer() <= 0) {
-      return false;
-    }
-    if (d.getMaxDiasPerFer() != null && d.getMaxDiasPerFer() <= 0) {
-      return false;
-    }
-    if (effective.minDiasPerFer() != null
-        && effective.maxDiasPerFer() != null
-        && effective.minDiasPerFer() > effective.maxDiasPerFer()) {
-      return false;
-    }
-    if (effective.minDiasPerPrincFer() != null) {
-      if (effective.minDiasPerFer() != null
-          && effective.minDiasPerPrincFer() < effective.minDiasPerFer()) {
-        return false;
-      }
-      if (effective.maxDiasPerFer() != null
-          && effective.minDiasPerPrincFer() > effective.maxDiasPerFer()) {
-        return false;
-      }
-    }
-    if ("N".equalsIgnoreCase(d.getAbonoDirGozo())) {
-      if ((d.getMinDiasPvendFer() != null && d.getMinDiasPvendFer() > 0)
-          || (d.getMaxDiasVendFer() != null && d.getMaxDiasVendFer() > 0)
-          || (d.getNumDiasAbonoFer() != null && d.getNumDiasAbonoFer() > 0)
-          || (d.getDenDiasAbonoFer() != null && d.getDenDiasAbonoFer() > 0)) {
-        return false;
-      }
-    } else {
-      if ((d.getNumDiasAbonoFer() != null) != (d.getDenDiasAbonoFer() != null)) {
-        return false;
-      }
-      if (d.getNumDiasAbonoFer() != null && d.getDenDiasAbonoFer() != null) {
-        if (d.getNumDiasAbonoFer() < 0
-            || d.getDenDiasAbonoFer() <= 0
-            || d.getNumDiasAbonoFer() > d.getDenDiasAbonoFer()) {
-          return false;
-        }
-      }
-      if (effective.minDiasPvendFer() != null
-          && effective.maxDiasVendFer() != null
-          && effective.minDiasPvendFer() > effective.maxDiasVendFer()) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  private static boolean isValidTriState(String value) {
-    return value == null || Set.of("I", "S", "N").contains(value.toUpperCase());
   }
 
   private static int countUnjustifiedAbsencesInPa(
@@ -4264,9 +4051,6 @@ public class ErgonRuleEngineFacade {
     derivedNode.put(
         "otherParcelasWithAbonoPecuniarioInPaCount", otherParcelasWithAbonoPecuniarioInPaCount);
     derivedNode.put("violatesDtPrescricao", violatesDtPrescricao);
-    derivedNode.put(
-        "abonoPecuniarioLimitesValidos",
-        isAbonoPecuniarioLimitesValidos(d, totDiasDireitoPa, effective));
     derivedNode.put("totalParcelasNoPa", totalParcelasNoPa);
     derivedNode.put("totalDiasGozadosPa", totalDiasGozadosPa);
     derivedNode.put("totalDiasAbonoPa", totalDiasAbonoPa);
@@ -4363,58 +4147,6 @@ public class ErgonRuleEngineFacade {
       return Math.max(rank, pa.getChave() != null && pa.getChave() > 0 ? pa.getChave() : 1);
     }
     return pa.getChave() != null && pa.getChave() > 0 ? pa.getChave() : 1;
-  }
-
-  private static boolean isAbonoPecuniarioLimitesValidos(
-      FeriasGozo d,
-      int totDiasDireitoPa,
-      EffectiveVacationParameterResolver.EffectiveParametroFeriasFacts effective) {
-    if (d == null) {
-      return true;
-    }
-    int vendidos = d.getDiasAbonoVendidos() != null ? d.getDiasAbonoVendidos() : 0;
-    if (!Boolean.TRUE.equals(d.getAbonoPecuniario())) {
-      return vendidos == 0;
-    }
-    if (!effective.permiteAbonoPecuniario()) {
-      return false;
-    }
-    if (vendidos <= 0) {
-      return false;
-    }
-    if (d.getIniFimAbono() == null
-        || !Set.of("I", "F").contains(d.getIniFimAbono().toUpperCase())) {
-      return false;
-    }
-    if (effective.minDiasPvendFer() != null && vendidos < effective.minDiasPvendFer()) {
-      return false;
-    }
-    if (effective.maxDiasVendFer() != null && vendidos > effective.maxDiasVendFer()) {
-      return false;
-    }
-    if (effective.numDiasAbonoFer() != null
-        && effective.denDiasAbonoFer() != null
-        && effective.denDiasAbonoFer() > 0) {
-      int baseCalculo =
-          "G".equalsIgnoreCase(effective.abonoDirGozo())
-              ? (d.getDiasGozo() != null ? d.getDiasGozo() : 0)
-              : totDiasDireitoPa;
-      int maxFracao = (baseCalculo * effective.numDiasAbonoFer()) / effective.denDiasAbonoFer();
-      if (vendidos > maxFracao) {
-        return false;
-      }
-    }
-    if (d.getDtVendaAbono() != null
-        && d.getDtini() != null
-        && d.getDtVendaAbono().isAfter(d.getDtini())) {
-      return false;
-    }
-    if (d.getDtPagtoAbono() != null
-        && d.getDtVendaAbono() != null
-        && d.getDtPagtoAbono().isBefore(d.getDtVendaAbono())) {
-      return false;
-    }
-    return true;
   }
 
   private static int countOverlappingNormalFrequencias(

@@ -102,8 +102,29 @@ public class CargoService
   @Override
   public StatsFieldRegistry getStatsFieldRegistry() {
     return StatsFieldRegistry.builder()
-        .labeledGroupByBucket("id", "cargo", "nome", Set.of(StatsMetric.COUNT, StatsMetric.SUM))
-        .categoricalGroupByBucket("categoria", "categoria")
+        .labeledGroupByBucket(
+            "id",
+            "cargo",
+            "nome",
+            Set.of(
+                StatsMetric.COUNT,
+                StatsMetric.SUM,
+                StatsMetric.AVG,
+                StatsMetric.MIN,
+                StatsMetric.MAX,
+                StatsMetric.MEDIAN,
+                StatsMetric.PERCENTILE_90,
+                StatsMetric.PERCENTILE_95))
+        .groupByBucket(
+            "categoria",
+            "categoria",
+            Set.of(
+                StatsMetric.COUNT,
+                StatsMetric.SUM,
+                StatsMetric.AVG,
+                StatsMetric.MEDIAN,
+                StatsMetric.PERCENTILE_90))
+        .temporalTimeSeriesField("dtCriacao", "dtCriacao")
         .numericHistogramMeasureField("vagasAutorizadas", "vagasAutorizadas")
         .build();
   }

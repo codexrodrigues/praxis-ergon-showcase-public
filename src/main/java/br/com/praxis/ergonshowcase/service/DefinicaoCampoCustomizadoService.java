@@ -139,17 +139,43 @@ public class DefinicaoCampoCustomizadoService
   @Override
   public StatsFieldRegistry getStatsFieldRegistry() {
     return StatsFieldRegistry.builder()
-        .labeledGroupByBucket("id", "id", "label", Set.of(StatsMetric.COUNT, StatsMetric.SUM))
-        .categoricalGroupByBucket("resourceKey", "resourceKey")
+        .labeledGroupByBucket(
+            "id",
+            "id",
+            "label",
+            Set.of(
+                StatsMetric.COUNT,
+                StatsMetric.SUM,
+                StatsMetric.AVG,
+                StatsMetric.MIN,
+                StatsMetric.MAX,
+                StatsMetric.MEDIAN,
+                StatsMetric.PERCENTILE_90,
+                StatsMetric.PERCENTILE_95))
+        .groupByBucket(
+            "resourceKey",
+            "resourceKey",
+            Set.of(
+                StatsMetric.COUNT,
+                StatsMetric.SUM,
+                StatsMetric.AVG,
+                StatsMetric.MEDIAN,
+                StatsMetric.PERCENTILE_90))
         .categoricalGroupByBucket("fieldType", "fieldType")
         .categoricalGroupByBucket("controlType", "controlType")
         .categoricalGroupByBucket("active", "active")
+        .temporalTimeSeriesField("updatedAt", "updatedAt")
         .numericHistogramMeasureField("fieldOrder", "fieldOrder")
         .build();
   }
 
   @Override
   public StatsSupportMode getGroupByStatsSupportMode() {
+    return StatsSupportMode.AUTO;
+  }
+
+  @Override
+  public StatsSupportMode getTimeSeriesStatsSupportMode() {
     return StatsSupportMode.AUTO;
   }
 

@@ -177,6 +177,7 @@ public abstract class ServidorPessoaDados {
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
       dataCategory = DomainDataCategory.PERSONAL,
+      complianceTags = {"LGPD", "NON_EXPORTABLE"},
       reason = "Identificador trabalhista e previdenciário individual.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
@@ -186,7 +187,10 @@ public abstract class ServidorPessoaDados {
       tableHidden = true,
       group = "Documentação",
       order = 80,
-      icon = "assignment_ind")
+      icon = "assignment_ind",
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_PII_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Inscrição previdenciária individual (LGPD) governada para inspeção autorizada.")
   @jakarta.validation.constraints.Size(max = 11)
   private String pispasep;
 
@@ -209,10 +213,18 @@ public abstract class ServidorPessoaDados {
   @jakarta.validation.constraints.Size(max = 20)
   private String tratamento;
 
-  @Schema(description = "Sexo registral informado no cadastro civil.")
+  @Schema(
+      description = "Sexo registral informado no cadastro civil ([F]eminino ou [M]asculino).",
+      allowableValues = {"F", "M"},
+      nullable = true)
   @UISchema(
       label = "Sexo registral",
       group = "Identificação civil",
+      type = FieldDataType.TEXT,
+      controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"F\",\"label\":\"Feminino (F)\"},{\"value\":\"M\",\"label\":\"Masculino (M)\"}]",
+      icon = "wc",
       tableHidden = true,
       order = 201)
   @DomainGovernance(
@@ -434,11 +446,15 @@ public abstract class ServidorPessoaDados {
       label = "Número do RG",
       group = "Documentação civil e trabalhista",
       tableHidden = true,
-      order = 216)
+      order = 216,
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_PII_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Documento civil de identificação (LGPD) restrito a perfis autorizados.")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
       dataCategory = DomainDataCategory.PERSONAL,
+      complianceTags = {"LGPD", "NON_EXPORTABLE"},
       reason = "Número do documento de identidade civil, preservando zeros e letras.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
@@ -940,11 +956,19 @@ public abstract class ServidorPessoaDados {
   private String ramal;
 
   @Schema(nullable = true, description = "Código da instituição bancária padrão para pagamento ao servidor.")
-  @UISchema(label = "Banco", group = "Dados bancários padrão", tableHidden = true, order = 248)
+  @UISchema(
+      label = "Banco",
+      group = "Dados bancários padrão",
+      tableHidden = true,
+      order = 248,
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_FINANCIAL_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Dado bancário individual protegido contra exposição não autorizada.")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
       dataCategory = DomainDataCategory.FINANCIAL,
+      complianceTags = {"LGPD", "FINANCIAL_DATA", "NON_EXPORTABLE"},
       reason = "Código da instituição bancária padrão para pagamento ao servidor.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
@@ -952,11 +976,19 @@ public abstract class ServidorPessoaDados {
   private Integer banco;
 
   @Schema(nullable = true, description = "Agência bancária padrão, incluindo eventual dígito verificador.")
-  @UISchema(label = "Agência", group = "Dados bancários padrão", tableHidden = true, order = 249)
+  @UISchema(
+      label = "Agência",
+      group = "Dados bancários padrão",
+      tableHidden = true,
+      order = 249,
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_FINANCIAL_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Agência bancária individual protegida contra exposição não autorizada.")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
       dataCategory = DomainDataCategory.FINANCIAL,
+      complianceTags = {"LGPD", "FINANCIAL_DATA", "NON_EXPORTABLE"},
       reason = "Agência bancária padrão, incluindo eventual dígito verificador.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
@@ -965,11 +997,19 @@ public abstract class ServidorPessoaDados {
   private String agencia;
 
   @Schema(description = "Conta bancária padrão, preservando zeros e dígito verificador.")
-  @UISchema(label = "Conta", group = "Dados bancários padrão", tableHidden = true, order = 250)
+  @UISchema(
+      label = "Conta",
+      group = "Dados bancários padrão",
+      tableHidden = true,
+      order = 250,
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_FINANCIAL_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Conta bancária individual protegida contra exposição e exportação em massa.")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
       dataCategory = DomainDataCategory.FINANCIAL,
+      complianceTags = {"LGPD", "FINANCIAL_DATA", "NON_EXPORTABLE"},
       reason = "Conta bancária padrão, preservando zeros e dígito verificador.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
@@ -998,11 +1038,15 @@ public abstract class ServidorPessoaDados {
       label = "Deficiência física",
       group = "Acessibilidade e PcD",
       tableHidden = true,
-      order = 252)
+      order = 252,
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_HEALTH_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Dado pessoal sensível de saúde/PcD (LGPD Art. 11).")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.RESTRICTED,
       dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+      complianceTags = {"LGPD", "HEALTH_DATA", "NON_EXPORTABLE"},
       reason = "Indica deficiência física registrada no cadastro da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
@@ -1013,11 +1057,15 @@ public abstract class ServidorPessoaDados {
       label = "Deficiência visual",
       group = "Acessibilidade e PcD",
       tableHidden = true,
-      order = 253)
+      order = 253,
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_HEALTH_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Dado pessoal sensível de saúde/PcD (LGPD Art. 11).")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.RESTRICTED,
       dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+      complianceTags = {"LGPD", "HEALTH_DATA", "NON_EXPORTABLE"},
       reason = "Indica deficiência visual registrada no cadastro da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
@@ -1028,11 +1076,15 @@ public abstract class ServidorPessoaDados {
       label = "Deficiência auditiva",
       group = "Acessibilidade e PcD",
       tableHidden = true,
-      order = 254)
+      order = 254,
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_HEALTH_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Dado pessoal sensível de saúde/PcD (LGPD Art. 11).")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.RESTRICTED,
       dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+      complianceTags = {"LGPD", "HEALTH_DATA", "NON_EXPORTABLE"},
       reason = "Indica deficiência auditiva registrada no cadastro da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
@@ -1043,11 +1095,15 @@ public abstract class ServidorPessoaDados {
       label = "Deficiência mental",
       group = "Acessibilidade e PcD",
       tableHidden = true,
-      order = 255)
+      order = 255,
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_HEALTH_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Dado pessoal sensível de saúde/PcD (LGPD Art. 11).")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.RESTRICTED,
       dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+      complianceTags = {"LGPD", "HEALTH_DATA", "NON_EXPORTABLE"},
       reason = "Indica deficiência mental registrada no cadastro da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
@@ -1058,11 +1114,15 @@ public abstract class ServidorPessoaDados {
       label = "Deficiência intelectual",
       group = "Acessibilidade e PcD",
       tableHidden = true,
-      order = 256)
+      order = 256,
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_HEALTH_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Dado pessoal sensível de saúde/PcD (LGPD Art. 11).")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.RESTRICTED,
       dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+      complianceTags = {"LGPD", "HEALTH_DATA", "NON_EXPORTABLE"},
       reason = "Indica deficiência intelectual registrada no cadastro da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
@@ -1073,11 +1133,15 @@ public abstract class ServidorPessoaDados {
       label = "Observações de acessibilidade",
       group = "Acessibilidade e PcD",
       tableHidden = true,
-      order = 257)
+      order = 257,
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_HEALTH_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Laudo e observações clínicas de PcD protegidos por sigilo (LGPD Art. 11).")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.RESTRICTED,
       dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+      complianceTags = {"LGPD", "HEALTH_DATA", "NON_EXPORTABLE"},
       reason = "Informações complementares sobre acessibilidade e deficiência da pessoa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))

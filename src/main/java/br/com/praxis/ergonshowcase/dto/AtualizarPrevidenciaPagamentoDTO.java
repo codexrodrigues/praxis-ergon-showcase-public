@@ -55,22 +55,34 @@ public class AtualizarPrevidenciaPagamentoDTO extends org.praxisplatform.uischem
   private Boolean correio;
 
   @Schema(nullable = true, description = "Banco destinatário do pagamento deste vínculo.")
-  @UISchema(label = "Banco", group = "Previdência e pagamento")
+  @UISchema(
+      label = "Banco",
+      group = "Previdência e pagamento",
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_FINANCIAL_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Dado bancário de pagamento do vínculo governado para perfis autorizados.")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
       dataCategory = DomainDataCategory.FINANCIAL,
+      complianceTags = {"LGPD", "FINANCIAL_DATA", "NON_EXPORTABLE"},
       reason = "Banco destinatário do pagamento deste vínculo.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   private Integer banco;
 
   @Schema(nullable = true, description = "Agência bancária para pagamento deste vínculo.")
-  @UISchema(label = "Agência", group = "Previdência e pagamento")
+  @UISchema(
+      label = "Agência",
+      group = "Previdência e pagamento",
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_FINANCIAL_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Agência bancária de pagamento do vínculo governada para perfis autorizados.")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
       dataCategory = DomainDataCategory.FINANCIAL,
+      complianceTags = {"LGPD", "FINANCIAL_DATA", "NON_EXPORTABLE"},
       reason = "Agência bancária para pagamento deste vínculo.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
@@ -78,11 +90,17 @@ public class AtualizarPrevidenciaPagamentoDTO extends org.praxisplatform.uischem
   private String agencia;
 
   @Schema(nullable = true, description = "Conta bancária para pagamento deste vínculo.")
-  @UISchema(label = "Conta", group = "Previdência e pagamento")
+  @UISchema(
+      label = "Conta",
+      group = "Previdência e pagamento",
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_FINANCIAL_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Conta bancária de pagamento do vínculo protegida contra exportação em massa.")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
       dataCategory = DomainDataCategory.FINANCIAL,
+      complianceTags = {"LGPD", "FINANCIAL_DATA", "NON_EXPORTABLE"},
       reason = "Conta bancária para pagamento deste vínculo.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))

@@ -50,7 +50,12 @@ import org.springframework.web.server.ResponseStatusException;
     icon = "straighten",
     tone = "neutral",
     valuePresentation = "integer",
-    sourceKind = "field")
+    sourceKind = "field",
+    thresholds = {
+      @Threshold(min = 0, max = 5, tone = "success", label = "Código curto"),
+      @Threshold(min = 5, max = 15, tone = "info", label = "Código médio"),
+      @Threshold(min = 15, tone = "warning", label = "Código extenso")
+    })
 @ApiResource(
     value = ApiPaths.TABELAS,
     resourceKey = "administracao-pessoal.tabelas",

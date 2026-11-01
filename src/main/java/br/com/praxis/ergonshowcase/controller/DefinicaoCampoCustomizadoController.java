@@ -56,6 +56,21 @@ import org.springframework.web.bind.annotation.*;
     tone = "success",
     valuePresentation = "badge",
     sourceKind = "computed")
+@ResourceFact(
+    key = "fieldOrder",
+    resourceKey = "administracao-pessoal.campos-customizados",
+    label = "Ordem no grupo",
+    description = "Posição numérica do campo customizado dentro da seção do formulário dinâmico.",
+    dataType = "integer",
+    icon = "format_list_numbered",
+    tone = "neutral",
+    valuePresentation = "metric",
+    sourceKind = "field",
+    thresholds = {
+      @Threshold(min = 0, max = 30, tone = "info", label = "Topo"),
+      @Threshold(min = 30, max = 70, tone = "neutral", label = "Intermediário"),
+      @Threshold(min = 70, tone = "warning", label = "Final")
+    })
 @BulkResourceOperations(
     proposalOperationId = "ergon.campos-customizados.bulk.proposal",
     proposalResultsOperationId = "ergon.campos-customizados.bulk.proposal-results",
@@ -171,7 +186,43 @@ public class DefinicaoCampoCustomizadoController
                     target =
                         @AnalyticsSurfaceTarget(
                             resourceKey = "administracao-pessoal.campos-customizados",
-                            surfaceId = "ficha-campo-customizado")))
+                            surfaceId = "ficha-campo-customizado"))),
+        @AnalyticsProjection(
+            id = "evolucao-atualizacao-campos-customizados",
+            intent = AnalyticsIntent.TREND,
+            sourceOperation = AnalyticsOperation.TIMESERIES,
+            primaryDimension = @AnalyticsDimensionBinding(field = "updatedAt"),
+            defaultGranularity = AnalyticsGranularity.MONTH,
+            defaultTimezone = "America/Sao_Paulo",
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "count",
+                    aggregation = "count",
+                    label = "Definições atualizadas no mês")),
+        @AnalyticsProjection(
+            id = "distribuicao-ordem-campos-customizados",
+            intent = AnalyticsIntent.DISTRIBUTION,
+            sourceOperation = AnalyticsOperation.DISTRIBUTION,
+            primaryDimension = @AnalyticsDimensionBinding(field = "fieldOrder"),
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "fieldOrder",
+                    aggregation = "histogram",
+                    label = "Distribuição de ordem no grupo")),
+        @AnalyticsProjection(
+            id = "comparativo-campos-por-recurso",
+            intent = AnalyticsIntent.COMPARISON,
+            sourceOperation = AnalyticsOperation.COMPARISON,
+            primaryDimension = @AnalyticsDimensionBinding(field = "resourceKey"),
+            comparisonPeriod =
+                @AnalyticsComparisonPeriodBinding(
+                    field = "updatedAt",
+                    timezone = "America/Sao_Paulo"),
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "count",
+                    aggregation = "count",
+                    label = "Variação por recurso alvo"))
       })
   public ResponseEntity<RestApiResponse<GroupByStatsResponse>> groupByStats(
       @RequestBody GroupByStatsRequest<DefinicaoCampoCustomizadoFilterDTO> request) {

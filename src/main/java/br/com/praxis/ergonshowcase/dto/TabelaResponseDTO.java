@@ -105,12 +105,18 @@ public class TabelaResponseDTO {
   @Schema(
       description =
           "Tipo de dado predominante do código do item dentro desta tabela geral ([A]lfanumérico ou [N]umérico).",
+      allowableValues = {"A", "N"},
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Natureza do código",
       helpText = "Classificação do código dos itens: Alfanumérico (A) ou Numérico (N).",
       group = "Estrutura do item",
       order = 50,
+      type = FieldDataType.TEXT,
+      controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"A\",\"label\":\"Alfanumérico (A)\"},{\"value\":\"N\",\"label\":\"Numérico (N)\"}]",
+      icon = "data_object",
       readOnly = true,
       tableHidden = false,
       quickViewVisible = true,

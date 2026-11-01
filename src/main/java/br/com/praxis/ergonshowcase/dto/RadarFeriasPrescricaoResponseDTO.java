@@ -332,6 +332,8 @@ public class RadarFeriasPrescricaoResponseDTO {
       order = 60,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"ESTATUTARIO\",\"label\":\"Estatutário\"},{\"value\":\"CLT\",\"label\":\"CLT\"},{\"value\":\"ESPECIAL\",\"label\":\"Especial\"},{\"value\":\"COMISSIONADO\",\"label\":\"Comissionado\"}]",
       icon = "gavel",
       readOnly = true,
       tableHidden = true)
@@ -349,6 +351,8 @@ public class RadarFeriasPrescricaoResponseDTO {
       order = 65,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"EFETIVO\",\"label\":\"Efetivo\"},{\"value\":\"COMISSAO\",\"label\":\"Comissão\"},{\"value\":\"COMISSIONADO\",\"label\":\"Comissionado\"},{\"value\":\"TEMPORARIO\",\"label\":\"Temporário\"},{\"value\":\"CONTRATADO\",\"label\":\"Contratado\"}]",
       icon = "work_history",
       readOnly = true,
       tableHidden = true)
@@ -366,6 +370,8 @@ public class RadarFeriasPrescricaoResponseDTO {
       order = 70,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"ADMINISTRATIVO\",\"label\":\"Administrativo\"},{\"value\":\"GERAL\",\"label\":\"Geral\"},{\"value\":\"MAGISTERIO\",\"label\":\"Magistério\"},{\"value\":\"SAUDE\",\"label\":\"Saúde\"},{\"value\":\"POLICIAL\",\"label\":\"Policial\"},{\"value\":\"GUARDA_MUNICIPAL\",\"label\":\"Guarda Municipal\"}]",
       icon = "category",
       readOnly = true,
       tableHidden = true)
@@ -459,6 +465,8 @@ public class RadarFeriasPrescricaoResponseDTO {
       order = 100,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"EM_AQUISICAO\",\"label\":\"Em aquisição\"},{\"value\":\"DISPONIVEL\",\"label\":\"Disponível\"},{\"value\":\"PARCIALMENTE_GOZADO\",\"label\":\"Parcialmente gozado\"},{\"value\":\"QUITADO\",\"label\":\"Quitado\"},{\"value\":\"PRESCRITO\",\"label\":\"Prescrito\"},{\"value\":\"CONVERTIDO_DOBRO\",\"label\":\"Convertido em dobro\"},{\"value\":\"SUSPENSO\",\"label\":\"Suspenso\"},{\"value\":\"CANCELADO\",\"label\":\"Cancelado\"}]",
       icon = "flag",
       readOnly = true,
       tableHidden = true)
@@ -681,6 +689,8 @@ public class RadarFeriasPrescricaoResponseDTO {
       order = 160,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"VENCIDO_PRESCRITO\",\"label\":\"Vencido / prescrito\"},{\"value\":\"CRITICO_30D\",\"label\":\"Crítico (30d)\"},{\"value\":\"ALERTA_60D\",\"label\":\"Alerta (60d)\"},{\"value\":\"ATENCAO_90D\",\"label\":\"Atenção (90d)\"},{\"value\":\"REGULAR\",\"label\":\"Regular\"}]",
       icon = "notification_important",
       readOnly = true,
       tableHidden = false,
@@ -755,6 +765,8 @@ public class RadarFeriasPrescricaoResponseDTO {
       order = 180,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"PROGRAMADA\",\"label\":\"Programada\"},{\"value\":\"HOMOLOGADA\",\"label\":\"Homologada\"},{\"value\":\"EM_GOZO\",\"label\":\"Em gozo\"},{\"value\":\"GOZADA\",\"label\":\"Gozada\"},{\"value\":\"INTERROMPIDA\",\"label\":\"Interrompida\"},{\"value\":\"CANCELADA\",\"label\":\"Cancelada\"}]",
       icon = "flag_circle",
       readOnly = true,
       tableHidden = true)

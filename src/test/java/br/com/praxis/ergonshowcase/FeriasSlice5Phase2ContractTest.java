@@ -1530,4 +1530,163 @@ class FeriasSlice5Phase2ContractTest {
             CollectionExportScope.ALL);
     assertThat(setorService.getStatsFieldRegistry()).isNotNull();
   }
+
+  @Test
+  void setePontosDeInspecaoLinhaALinhaEstaoCompletosEVerificados() throws Exception {
+    // Ponto 3: CreateFeriasGozoDTO com apenas periodoAquisitivoId passa no Bean Validation sem @NotNull bloqueando
+    // e hidrata empCodigo, numfunc, numvinc, chavePeraqfer e totDiasDireitoPa a partir do PA pai
+    var validator = jakarta.validation.Validation.buildDefaultValidatorFactory().getValidator();
+    var createGozo = new CreateFeriasGozoDTO();
+    createGozo.setPeriodoAquisitivoId(202L);
+    createGozo.setOrdemParcela(1);
+    createGozo.setDtini(LocalDate.of(2025, 2, 1));
+    createGozo.setDtprevfim(LocalDate.of(2025, 2, 15));
+    createGozo.setDiasGozo(15);
+    createGozo.setTotDiasDireitoPa(null);
+    assertThat(createGozo.getEmpCodigo()).isNull();
+    assertThat(createGozo.getNumfunc()).isNull();
+    assertThat(createGozo.getNumvinc()).isNull();
+    assertThat(createGozo.getChavePeraqfer()).isNull();
+    assertThat(createGozo.getTotDiasDireitoPa()).isNull();
+    assertThat(validator.validate(createGozo)).isEmpty();
+
+    var em = mock(EntityManager.class);
+    var pa = new PeriodoAquisitivoFerias();
+    pa.setId(202L);
+    pa.setEmpCodigo(1);
+    pa.setNumfunc(100L);
+    pa.setNumvinc(2);
+    pa.setChave(3);
+    pa.setTotDiasDireito(30);
+    when(em.find(PeriodoAquisitivoFerias.class, 202L)).thenReturn(pa);
+
+    var gozoService =
+        new FeriasGozoService(
+            mock(FeriasGozoRepository.class), new FeriasGozoMapper(new TenantContext()), new TenantContext());
+    ReflectionTestUtils.setField(gozoService, "entityManager", em);
+    var entity = new FeriasGozo();
+    entity.setPeriodoAquisitivoId(202L);
+    gozoService.hydrateParentPeriodoAquisitivo(entity);
+    assertThat(entity.getEmpCodigo()).isEqualTo(1);
+    assertThat(entity.getNumfunc()).isEqualTo(100L);
+    assertThat(entity.getNumvinc()).isEqualTo(2);
+    assertThat(entity.getChavePeraqfer()).isEqualTo(3);
+    assertThat(entity.getTotDiasDireitoPa()).isEqualTo(30);
+
+    // Ponto 4: allowableValues e options em CargoDados.cargoFuncao, ServidorPessoaDados.sexo, DependenteDados.sexo,
+    // CodigoFrequenciaResponseDTO.sexo, TabelaResponseDTO.tipo e nos 6 campos SELECT de RadarFeriasPrescricaoResponseDTO
+    assertThat(
+            br.com.praxis.ergonshowcase.dto.CargoDados.class
+                .getDeclaredField("cargoFuncao")
+                .getAnnotation(io.swagger.v3.oas.annotations.media.Schema.class)
+                .allowableValues())
+        .containsExactly("C", "F");
+    assertThat(
+            br.com.praxis.ergonshowcase.dto.ServidorPessoaDados.class
+                .getDeclaredField("sexo")
+                .getAnnotation(io.swagger.v3.oas.annotations.media.Schema.class)
+                .allowableValues())
+        .containsExactly("F", "M");
+    assertThat(
+            br.com.praxis.ergonshowcase.dto.DependenteDados.class
+                .getDeclaredField("sexo")
+                .getAnnotation(io.swagger.v3.oas.annotations.media.Schema.class)
+                .allowableValues())
+        .containsExactly("F", "M");
+    assertThat(
+            br.com.praxis.ergonshowcase.dto.CodigoFrequenciaResponseDTO.class
+                .getDeclaredField("sexo")
+                .getAnnotation(io.swagger.v3.oas.annotations.media.Schema.class)
+                .allowableValues())
+        .containsExactly("A", "F", "M");
+    assertThat(
+            br.com.praxis.ergonshowcase.dto.TabelaResponseDTO.class
+                .getDeclaredField("tipo")
+                .getAnnotation(io.swagger.v3.oas.annotations.media.Schema.class)
+                .allowableValues())
+        .containsExactly("A", "N");
+    for (String radarSelectField :
+        List.of(
+            "regimeJuridico",
+            "tipoVinculo",
+            "categoria",
+            "situacao",
+            "faixaUrgenciaPrescricao",
+            "proximaParcelaSituacao")) {
+      var field =
+          br.com.praxis.ergonshowcase.dto.RadarFeriasPrescricaoResponseDTO.class.getDeclaredField(
+              radarSelectField);
+      assertThat(
+              field
+                  .getAnnotation(io.swagger.v3.oas.annotations.media.Schema.class)
+                  .allowableValues())
+          .as("allowableValues em RadarFeriasPrescricaoResponseDTO.%s", radarSelectField)
+          .isNotEmpty();
+      assertThat(
+              field
+                  .getAnnotation(org.praxisplatform.uischema.extension.annotation.UISchema.class)
+                  .options())
+          .as("options em RadarFeriasPrescricaoResponseDTO.%s", radarSelectField)
+          .isNotBlank();
+    }
+
+    // Ponto 5: @ResourceFact rico (icon, tone, valuePresentation) nos 20 controllers
+    List<Class<?>> allControllers =
+        List.of(
+            br.com.praxis.ergonshowcase.controller.OrgaoController.class,
+            br.com.praxis.ergonshowcase.controller.CargoController.class,
+            br.com.praxis.ergonshowcase.controller.ServidorPessoaController.class,
+            br.com.praxis.ergonshowcase.controller.VinculoController.class,
+            br.com.praxis.ergonshowcase.controller.DependenteController.class,
+            br.com.praxis.ergonshowcase.controller.AfastamentoController.class,
+            br.com.praxis.ergonshowcase.controller.FrequenciaController.class,
+            br.com.praxis.ergonshowcase.controller.DefinicaoCampoCustomizadoController.class,
+            br.com.praxis.ergonshowcase.controller.SetorController.class,
+            br.com.praxis.ergonshowcase.controller.DocumentoLegalController.class,
+            br.com.praxis.ergonshowcase.controller.TipoDependenteController.class,
+            br.com.praxis.ergonshowcase.controller.TipoFrequenciaController.class,
+            br.com.praxis.ergonshowcase.controller.CodigoFrequenciaController.class,
+            br.com.praxis.ergonshowcase.controller.RegraFrequenciaEstatutariaController.class,
+            br.com.praxis.ergonshowcase.controller.TabelaController.class,
+            br.com.praxis.ergonshowcase.controller.ItemTabelaController.class,
+            ParametroContagemFeriasController.class,
+            PeriodoAquisitivoFeriasController.class,
+            FeriasGozoController.class,
+            RadarFeriasPrescricaoController.class);
+    for (Class<?> controllerClass : allControllers) {
+      var facts =
+          controllerClass.getAnnotationsByType(
+              org.praxisplatform.uischema.fact.ResourceFact.class);
+      assertThat(facts).as("@ResourceFact em %s", controllerClass.getSimpleName()).isNotEmpty();
+      for (var fact : facts) {
+        assertThat(fact.icon()).isNotBlank();
+        assertThat(fact.tone()).isNotBlank();
+        assertThat(fact.valuePresentation()).isNotBlank();
+      }
+    }
+
+    // Ponto 6: StatsFieldRegistry com MEDIAN/PERCENTILE_90 e @UiAnalytics multi-família nos controllers analíticos
+    assertThat(
+            gozoService
+                .getStatsFieldRegistry()
+                .resolve("id")
+                .orElseThrow()
+                .metrics())
+        .contains(
+            org.praxisplatform.uischema.stats.StatsMetric.MEDIAN,
+            org.praxisplatform.uischema.stats.StatsMetric.PERCENTILE_90);
+
+    // Ponto 7: fieldAccess declarativo e complianceTags NON_EXPORTABLE em campos sensíveis PII/CID/PcD
+    var cpfField = br.com.praxis.ergonshowcase.dto.ServidorPessoaDados.class.getDeclaredField("cpf");
+    assertThat(
+            cpfField
+                .getAnnotation(org.praxisplatform.uischema.extension.annotation.UISchema.class)
+                .visibleForAuthorities())
+        .contains("ERGON_PII_READ");
+    assertThat(
+            cpfField
+                .getAnnotation(org.praxisplatform.uischema.annotation.DomainGovernance.class)
+                .complianceTags())
+        .contains("NON_EXPORTABLE");
+  }
 }

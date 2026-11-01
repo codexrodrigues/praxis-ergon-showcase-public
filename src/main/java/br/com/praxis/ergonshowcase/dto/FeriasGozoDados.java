@@ -18,8 +18,10 @@ import org.praxisplatform.uischema.extension.annotation.UISchema;
 @Setter
 public abstract class FeriasGozoDados {
 
-  @NotNull
-  @Schema(description = "Código do órgão público de lotação do vínculo funcional.")
+  @Schema(
+      description =
+          "Código do órgão público de lotação do vínculo funcional (hidratado automaticamente pelo período aquisitivo quando omitido).",
+      nullable = true)
   @UISchema(
       label = "Órgão",
       helpText = "Órgão público titular do vínculo funcional.",
@@ -33,8 +35,10 @@ public abstract class FeriasGozoDados {
       displayField = "label")
   private Integer empCodigo;
 
-  @NotNull
-  @Schema(description = "Número funcional do servidor titular da programação de férias.")
+  @Schema(
+      description =
+          "Número funcional do servidor titular da programação de férias (hidratado automaticamente pelo período aquisitivo quando omitido).",
+      nullable = true)
   @UISchema(
       label = "Servidor",
       helpText = "Pessoa servidora titular da parcela de férias.",
@@ -48,8 +52,10 @@ public abstract class FeriasGozoDados {
       displayField = "label")
   private Long numfunc;
 
-  @NotNull
-  @Schema(description = "Número sequencial do vínculo funcional do servidor.")
+  @Schema(
+      description =
+          "Número sequencial do vínculo funcional do servidor (hidratado automaticamente pelo período aquisitivo quando omitido).",
+      nullable = true)
   @UISchema(
       label = "Vínculo funcional",
       helpText = "Sequencial do vínculo funcional do servidor.",
@@ -80,11 +86,11 @@ public abstract class FeriasGozoDados {
       displayField = "label")
   private Long periodoAquisitivoId;
 
-  @NotNull
   @Min(1)
   @Schema(
       description =
-          "Chave sequencial de negócio do período aquisitivo no vínculo (CHAVEPERAQFER).")
+          "Chave sequencial de negócio do período aquisitivo no vínculo (CHAVEPERAQFER, hidratada pelo período aquisitivo quando omitida).",
+      nullable = true)
   @UISchema(
       label = "Chave do PA",
       helpText = "Sequencial de negócio do período aquisitivo no vínculo.",
@@ -166,12 +172,12 @@ public abstract class FeriasGozoDados {
       icon = "beach_access")
   private Integer diasGozo;
 
-  @NotNull
   @Min(0)
   @Max(90)
   @Schema(
       description =
-          "Espelho do total de dias de direito do período aquisitivo no momento da concessão (TOTDIAS).")
+          "Espelho do total de dias de direito do período aquisitivo no momento da concessão (TOTDIAS, hidratado automaticamente pelo período aquisitivo quando omitido).",
+      nullable = true)
   @UISchema(
       label = "Dias de direito no PA",
       helpText = "Total de dias de direito do período aquisitivo vinculado.",

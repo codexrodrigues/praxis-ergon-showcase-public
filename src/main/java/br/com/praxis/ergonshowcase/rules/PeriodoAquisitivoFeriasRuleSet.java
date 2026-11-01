@@ -339,7 +339,7 @@ public final class PeriodoAquisitivoFeriasRuleSet {
             ERG00612_TEMPLATE_EXPRESSION,
             "ERG-00612",
             baseFacts),
-        // 7a. ERG-00604: obrigatoriedade/vedação de overrides de contagem em dobro e limite de diasConvertidosDobro
+        // 7a. ERG-00604: obrigatoriedade de minDiasPeraqfer e maxDiasPeraqfer quando contDobroFerias == 'S'
         productJsonLogicBinding(
             "product.peraqfer.erg-00604",
             SLOT_OVERRIDES_CONTAGEM_DOBRO,
@@ -358,37 +358,55 @@ public final class PeriodoAquisitivoFeriasRuleSet {
                       ]
                     }
                   ]
-                },
+                }
+              ]
+            }
+            """,
+            "ERG-00604",
+            baseFacts),
+        // 7b. ERG-01825: vedação de minDiasPeraqfer e maxDiasPeraqfer positivos quando contDobroFerias == 'N'
+        productJsonLogicBinding(
+            "product.peraqfer.erg-01825",
+            SLOT_OVERRIDES_CONTAGEM_DOBRO,
+            71,
+            """
+            {
+              "or": [
+                {"!=": [{"var": "draft.contDobroFerias"}, "N"]},
                 {
-                  "or": [
-                    {"!=": [{"var": "draft.contDobroFerias"}, "N"]},
-                    {
-                      "and": [
-                        {"or": [{"==": [{"var": "draft.minDiasPeraqfer"}, null]}, {"<=": [{"var": "draft.minDiasPeraqfer"}, 0]}]},
-                        {"or": [{"==": [{"var": "draft.maxDiasPeraqfer"}, null]}, {"<=": [{"var": "draft.maxDiasPeraqfer"}, 0]}]}
-                      ]
-                    }
+                  "and": [
+                    {"or": [{"==": [{"var": "draft.minDiasPeraqfer"}, null]}, {"<=": [{"var": "draft.minDiasPeraqfer"}, 0]}]},
+                    {"or": [{"==": [{"var": "draft.maxDiasPeraqfer"}, null]}, {"<=": [{"var": "draft.maxDiasPeraqfer"}, 0]}]}
                   ]
-                },
+                }
+              ]
+            }
+            """,
+            "ERG-01825",
+            baseFacts),
+        // 7c. ERG-01826: diasConvertidosDobro > 0 exige contagem em dobro habilitada e respeito aos limites efetivos
+        productJsonLogicBinding(
+            "product.peraqfer.erg-01826",
+            SLOT_OVERRIDES_CONTAGEM_DOBRO,
+            72,
+            """
+            {
+              "or": [
+                {"<=": [{"var": "draft.diasConvertidosDobro"}, 0]},
                 {
-                  "or": [
-                    {"<=": [{"var": "draft.diasConvertidosDobro"}, 0]},
+                  "and": [
+                    {"!=": [{"var": "draft.contDobroFerias"}, "N"]},
+                    {"==": [{"var": "effectiveParametroConta.contDobroFerias"}, true]},
                     {
-                      "and": [
-                        {"!=": [{"var": "draft.contDobroFerias"}, "N"]},
-                        {"==": [{"var": "effectiveParametroConta.contDobroFerias"}, true]},
-                        {
-                          "or": [
-                            {"==": [{"var": "effectiveParametroConta.minDiasPeraqfer"}, null]},
-                            {">=": [{"var": "draft.diasConvertidosDobro"}, {"var": "effectiveParametroConta.minDiasPeraqfer"}]}
-                          ]
-                        },
-                        {
-                          "or": [
-                            {"==": [{"var": "effectiveParametroConta.maxDiasPeraqfer"}, null]},
-                            {"<=": [{"var": "draft.diasConvertidosDobro"}, {"var": "effectiveParametroConta.maxDiasPeraqfer"}]}
-                          ]
-                        }
+                      "or": [
+                        {"==": [{"var": "effectiveParametroConta.minDiasPeraqfer"}, null]},
+                        {">=": [{"var": "draft.diasConvertidosDobro"}, {"var": "effectiveParametroConta.minDiasPeraqfer"}]}
+                      ]
+                    },
+                    {
+                      "or": [
+                        {"==": [{"var": "effectiveParametroConta.maxDiasPeraqfer"}, null]},
+                        {"<=": [{"var": "draft.diasConvertidosDobro"}, {"var": "effectiveParametroConta.maxDiasPeraqfer"}]}
                       ]
                     }
                   ]
@@ -396,13 +414,13 @@ public final class PeriodoAquisitivoFeriasRuleSet {
               ]
             }
             """,
-            "ERG-00604",
+            "ERG-01826",
             baseFacts),
-        // 7b. ERG-00605: limites de contagem em dobro não negativos
+        // 7d. ERG-00605: limites de contagem em dobro não negativos
         productJsonLogicBinding(
             "product.peraqfer.erg-00605",
             SLOT_OVERRIDES_CONTAGEM_DOBRO,
-            71,
+            73,
             """
             {
               "and": [
@@ -413,11 +431,11 @@ public final class PeriodoAquisitivoFeriasRuleSet {
             """,
             "ERG-00605",
             baseFacts),
-        // 7c. ERG-00606: minDiasPeraqfer <= maxDiasPeraqfer
+        // 7e. ERG-00606: minDiasPeraqfer <= maxDiasPeraqfer
         productJsonLogicBinding(
             "product.peraqfer.erg-00606",
             SLOT_OVERRIDES_CONTAGEM_DOBRO,
-            72,
+            74,
             """
             {
               "or": [
@@ -429,9 +447,9 @@ public final class PeriodoAquisitivoFeriasRuleSet {
             """,
             "ERG-00606",
             baseFacts),
-        // 8a. ERG-01809: overrides de quantidade de parcelas (minPerFer <= maxPerFer) e vedação de abono quando 'N'
+        // 8a. ERG-01827: domínio válido dos flags tri-state ('I', 'S', 'N') e de abonoDirGozo ('I', 'D', 'G', 'N')
         productJsonLogicBinding(
-            "product.peraqfer.erg-01809",
+            "product.peraqfer.erg-01827",
             SLOT_OVERRIDES_PARCELAMENTO_E_ABONO,
             80,
             """
@@ -443,7 +461,20 @@ public final class PeriodoAquisitivoFeriasRuleSet {
                 {"in": [{"var": "draft.adiantSalFer"}, [null, "I", "S", "N"]]},
                 {"in": [{"var": "draft.emprestFer"}, [null, "I", "S", "N"]]},
                 {"in": [{"var": "draft.permiteFerEstePer"}, [null, "I", "S", "N"]]},
-                {"in": [{"var": "draft.abonoDirGozo"}, [null, "I", "D", "G", "N"]]},
+                {"in": [{"var": "draft.abonoDirGozo"}, [null, "I", "D", "G", "N"]]}
+              ]
+            }
+            """,
+            "ERG-01827",
+            baseFacts),
+        // 8b. ERG-01828: overrides de quantidade de parcelas (1 <= minPerFer <= maxPerFer <= 6)
+        productJsonLogicBinding(
+            "product.peraqfer.erg-01828",
+            SLOT_OVERRIDES_PARCELAMENTO_E_ABONO,
+            81,
+            """
+            {
+              "and": [
                 {"or": [{"==": [{"var": "draft.minPerFer"}, null]}, {">": [{"var": "draft.minPerFer"}, 0]}]},
                 {
                   "or": [
@@ -457,18 +488,27 @@ public final class PeriodoAquisitivoFeriasRuleSet {
                     {"==": [{"var": "effectiveParametroConta.maxPerFer"}, null]},
                     {"<=": [{"var": "effectiveParametroConta.minPerFer"}, {"var": "effectiveParametroConta.maxPerFer"}]}
                   ]
-                },
+                }
+              ]
+            }
+            """,
+            "ERG-01828",
+            baseFacts),
+        // 8c. ERG-01809: vedação de limites de abono no PA quando abonoDirGozo == 'N'
+        productJsonLogicBinding(
+            "product.peraqfer.erg-01809",
+            SLOT_OVERRIDES_PARCELAMENTO_E_ABONO,
+            82,
+            """
+            {
+              "or": [
+                {"!=": [{"var": "draft.abonoDirGozo"}, "N"]},
                 {
-                  "or": [
-                    {"!=": [{"var": "draft.abonoDirGozo"}, "N"]},
-                    {
-                      "and": [
-                        {"or": [{"==": [{"var": "draft.minDiasPvendFer"}, null]}, {"<=": [{"var": "draft.minDiasPvendFer"}, 0]}]},
-                        {"or": [{"==": [{"var": "draft.maxDiasVendFer"}, null]}, {"<=": [{"var": "draft.maxDiasVendFer"}, 0]}]},
-                        {"or": [{"==": [{"var": "draft.numDiasAbonoFer"}, null]}, {"<=": [{"var": "draft.numDiasAbonoFer"}, 0]}]},
-                        {"or": [{"==": [{"var": "draft.denDiasAbonoFer"}, null]}, {"<=": [{"var": "draft.denDiasAbonoFer"}, 0]}]}
-                      ]
-                    }
+                  "and": [
+                    {"or": [{"==": [{"var": "draft.minDiasPvendFer"}, null]}, {"<=": [{"var": "draft.minDiasPvendFer"}, 0]}]},
+                    {"or": [{"==": [{"var": "draft.maxDiasVendFer"}, null]}, {"<=": [{"var": "draft.maxDiasVendFer"}, 0]}]},
+                    {"or": [{"==": [{"var": "draft.numDiasAbonoFer"}, null]}, {"<=": [{"var": "draft.numDiasAbonoFer"}, 0]}]},
+                    {"or": [{"==": [{"var": "draft.denDiasAbonoFer"}, null]}, {"<=": [{"var": "draft.denDiasAbonoFer"}, 0]}]}
                   ]
                 }
               ]
@@ -476,11 +516,11 @@ public final class PeriodoAquisitivoFeriasRuleSet {
             """,
             "ERG-01809",
             baseFacts),
-        // 8b. ERG-01810: overrides de dias por parcela (minDiasPerFer <= minDiasPerPrincFer <= maxDiasPerFer)
+        // 8d. ERG-01810: overrides de dias por parcela (minDiasPerFer <= minDiasPerPrincFer <= maxDiasPerFer)
         productJsonLogicBinding(
             "product.peraqfer.erg-01810",
             SLOT_OVERRIDES_PARCELAMENTO_E_ABONO,
-            81,
+            83,
             """
             {
               "and": [
@@ -519,11 +559,11 @@ public final class PeriodoAquisitivoFeriasRuleSet {
             """,
             "ERG-01810",
             baseFacts),
-        // 8c. ERG-01802: fração e limites de venda de abono no PA quando abonoDirGozo != 'N'
+        // 8e. ERG-01802: fração e limites de venda de abono no PA quando abonoDirGozo != 'N'
         productJsonLogicBinding(
             "product.peraqfer.erg-01802",
             SLOT_OVERRIDES_PARCELAMENTO_E_ABONO,
-            82,
+            84,
             """
             {
               "or": [

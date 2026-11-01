@@ -164,7 +164,43 @@ public class AfastamentoController
                     target =
                         @AnalyticsSurfaceTarget(
                             resourceKey = "administracao-pessoal.afastamentos",
-                            surfaceId = "ficha-afastamento")))
+                            surfaceId = "ficha-afastamento"))),
+        @AnalyticsProjection(
+            id = "evolucao-mensal-afastamentos",
+            intent = AnalyticsIntent.TREND,
+            sourceOperation = AnalyticsOperation.TIMESERIES,
+            primaryDimension = @AnalyticsDimensionBinding(field = "dtini"),
+            defaultGranularity = AnalyticsGranularity.MONTH,
+            defaultTimezone = "America/Sao_Paulo",
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "count",
+                    aggregation = "count",
+                    label = "Afastamentos iniciados no mês")),
+        @AnalyticsProjection(
+            id = "distribuicao-duracao-afastamentos",
+            intent = AnalyticsIntent.DISTRIBUTION,
+            sourceOperation = AnalyticsOperation.DISTRIBUTION,
+            primaryDimension = @AnalyticsDimensionBinding(field = "quantidadeDias"),
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "quantidadeDias",
+                    aggregation = "histogram",
+                    label = "Distribuição de duração (dias)")),
+        @AnalyticsProjection(
+            id = "comparativo-afastamentos-por-situacao",
+            intent = AnalyticsIntent.COMPARISON,
+            sourceOperation = AnalyticsOperation.COMPARISON,
+            primaryDimension = @AnalyticsDimensionBinding(field = "situacao"),
+            comparisonPeriod =
+                @AnalyticsComparisonPeriodBinding(
+                    field = "dtini",
+                    timezone = "America/Sao_Paulo"),
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "count",
+                    aggregation = "count",
+                    label = "Variação por situação"))
       })
   public ResponseEntity<RestApiResponse<GroupByStatsResponse>> groupByStats(
       @RequestBody GroupByStatsRequest<AfastamentoFilterDTO> request) {

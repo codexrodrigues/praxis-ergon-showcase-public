@@ -433,11 +433,19 @@ public abstract class VinculoDados {
   private Boolean infoCota = false;
 
   @Schema(nullable = true, description = "Banco destinatário do pagamento deste vínculo.")
-  @UISchema(label = "Banco", group = "Previdência, folha e FGTS", tableHidden = true, order = 223)
+  @UISchema(
+      label = "Banco",
+      group = "Previdência, folha e FGTS",
+      tableHidden = true,
+      order = 223,
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_FINANCIAL_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Dado bancário de pagamento do vínculo governado para perfis autorizados.")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
       dataCategory = DomainDataCategory.FINANCIAL,
+      complianceTags = {"LGPD", "FINANCIAL_DATA", "NON_EXPORTABLE"},
       reason = "Banco destinatário do pagamento deste vínculo.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
@@ -445,11 +453,19 @@ public abstract class VinculoDados {
   private Integer banco;
 
   @Schema(nullable = true, description = "Agência bancária para pagamento deste vínculo.")
-  @UISchema(label = "Agência", group = "Previdência, folha e FGTS", tableHidden = true, order = 224)
+  @UISchema(
+      label = "Agência",
+      group = "Previdência, folha e FGTS",
+      tableHidden = true,
+      order = 224,
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_FINANCIAL_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Agência bancária de pagamento do vínculo governada para perfis autorizados.")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
       dataCategory = DomainDataCategory.FINANCIAL,
+      complianceTags = {"LGPD", "FINANCIAL_DATA", "NON_EXPORTABLE"},
       reason = "Agência bancária para pagamento deste vínculo.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
@@ -458,11 +474,19 @@ public abstract class VinculoDados {
   private String agencia;
 
   @Schema(description = "Conta bancária para pagamento deste vínculo.")
-  @UISchema(label = "Conta", group = "Previdência, folha e FGTS", tableHidden = true, order = 225)
+  @UISchema(
+      label = "Conta",
+      group = "Previdência, folha e FGTS",
+      tableHidden = true,
+      order = 225,
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_FINANCIAL_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Conta bancária de pagamento do vínculo protegida contra exportação em massa.")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
       dataCategory = DomainDataCategory.FINANCIAL,
+      complianceTags = {"LGPD", "FINANCIAL_DATA", "NON_EXPORTABLE"},
       reason = "Conta bancária para pagamento deste vínculo.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))

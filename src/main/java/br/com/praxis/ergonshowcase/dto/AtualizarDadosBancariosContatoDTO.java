@@ -143,22 +143,34 @@ public class AtualizarDadosBancariosContatoDTO extends org.praxisplatform.uische
   private String cepender;
 
   @Schema(nullable = true, description = "Código da instituição bancária padrão para pagamento ao servidor.")
-  @UISchema(label = "Banco", group = "Endereço, contato e dados bancários")
+  @UISchema(
+      label = "Banco",
+      group = "Endereço, contato e dados bancários",
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_FINANCIAL_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Dado bancário padrão protegido para perfis autorizados.")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
       dataCategory = DomainDataCategory.FINANCIAL,
+      complianceTags = {"LGPD", "FINANCIAL_DATA", "NON_EXPORTABLE"},
       reason = "Código da instituição bancária padrão para pagamento ao servidor.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   private Integer banco;
 
   @Schema(nullable = true, description = "Agência bancária padrão, incluindo eventual dígito verificador.")
-  @UISchema(label = "Agência", group = "Endereço, contato e dados bancários")
+  @UISchema(
+      label = "Agência",
+      group = "Endereço, contato e dados bancários",
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_FINANCIAL_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Agência bancária padrão protegida para perfis autorizados.")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
       dataCategory = DomainDataCategory.FINANCIAL,
+      complianceTags = {"LGPD", "FINANCIAL_DATA", "NON_EXPORTABLE"},
       reason = "Agência bancária padrão, incluindo eventual dígito verificador.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
@@ -166,11 +178,17 @@ public class AtualizarDadosBancariosContatoDTO extends org.praxisplatform.uische
   private String agencia;
 
   @Schema(nullable = true, description = "Conta bancária padrão, preservando zeros e dígito verificador.")
-  @UISchema(label = "Conta", group = "Endereço, contato e dados bancários")
+  @UISchema(
+      label = "Conta",
+      group = "Endereço, contato e dados bancários",
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_FINANCIAL_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Conta bancária padrão protegida contra exportação em massa.")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
       dataCategory = DomainDataCategory.FINANCIAL,
+      complianceTags = {"LGPD", "FINANCIAL_DATA", "NON_EXPORTABLE"},
       reason = "Conta bancária padrão, preservando zeros e dígito verificador.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))

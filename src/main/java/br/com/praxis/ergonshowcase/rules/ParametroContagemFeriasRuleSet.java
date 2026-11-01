@@ -620,7 +620,7 @@ public final class ParametroContagemFeriasRuleSet {
             """,
             "ERG-01817",
             baseFacts),
-        // 10c. ERG-01814: vendLicEsp == true exige abonoDirGozoLicEsp válido e fração/limites coerentes
+        // 10c. ERG-01814: vendLicEsp == true exige abonoDirGozoLicEsp válido ('D', 'G' ou 'N')
         productJsonLogicBinding(
             "product.parametros-conta.erg-01814",
             SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
@@ -630,41 +630,59 @@ public final class ParametroContagemFeriasRuleSet {
               "or": [
                 {"!=": [{"var": "draft.temLicEsp"}, true]},
                 {"!=": [{"var": "draft.vendLicEsp"}, true]},
-                {
-                  "and": [
-                    {"in": [{"var": "draft.abonoDirGozoLicEsp"}, ["D", "G", "N"]]},
-                    {
-                      "or": [
-                        {"==": [{"var": "draft.minDiasPvendLicEsp"}, null]},
-                        {"==": [{"var": "draft.maxDiasVendLicEsp"}, null]},
-                        {"<=": [{"var": "draft.minDiasPvendLicEsp"}, {"var": "draft.maxDiasVendLicEsp"}]}
-                      ]
-                    },
-                    {
-                      "or": [
-                        {"==": [{"var": "draft.numDiasAbonoLicEsp"}, null]},
-                        {"==": [{"var": "draft.denDiasAbonoLicEsp"}, null]},
-                        {
-                          "and": [
-                            {">": [{"var": "draft.denDiasAbonoLicEsp"}, 0]},
-                            {">=": [{"var": "draft.numDiasAbonoLicEsp"}, 0]},
-                            {"<=": [{"var": "draft.numDiasAbonoLicEsp"}, {"var": "draft.denDiasAbonoLicEsp"}]}
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
+                {"in": [{"var": "draft.abonoDirGozoLicEsp"}, ["D", "G", "N"]]}
               ]
             }
             """,
             "ERG-01814",
             baseFacts),
-        // 10d. ERG-01815: vendLicEsp != true veda minDiasPvendLicEsp e maxDiasVendLicEsp positivos
+        // 10d. ERG-01821: vendLicEsp == true exige minDiasPvendLicEsp <= maxDiasVendLicEsp
+        productJsonLogicBinding(
+            "product.parametros-conta.erg-01821",
+            SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            103,
+            """
+            {
+              "or": [
+                {"!=": [{"var": "draft.temLicEsp"}, true]},
+                {"!=": [{"var": "draft.vendLicEsp"}, true]},
+                {"==": [{"var": "draft.minDiasPvendLicEsp"}, null]},
+                {"==": [{"var": "draft.maxDiasVendLicEsp"}, null]},
+                {"<=": [{"var": "draft.minDiasPvendLicEsp"}, {"var": "draft.maxDiasVendLicEsp"}]}
+              ]
+            }
+            """,
+            "ERG-01821",
+            baseFacts),
+        // 10e. ERG-01822: vendLicEsp == true exige fração coerente 0 <= numDiasAbonoLicEsp <= denDiasAbonoLicEsp
+        productJsonLogicBinding(
+            "product.parametros-conta.erg-01822",
+            SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            104,
+            """
+            {
+              "or": [
+                {"!=": [{"var": "draft.temLicEsp"}, true]},
+                {"!=": [{"var": "draft.vendLicEsp"}, true]},
+                {"==": [{"var": "draft.numDiasAbonoLicEsp"}, null]},
+                {"==": [{"var": "draft.denDiasAbonoLicEsp"}, null]},
+                {
+                  "and": [
+                    {">": [{"var": "draft.denDiasAbonoLicEsp"}, 0]},
+                    {">=": [{"var": "draft.numDiasAbonoLicEsp"}, 0]},
+                    {"<=": [{"var": "draft.numDiasAbonoLicEsp"}, {"var": "draft.denDiasAbonoLicEsp"}]}
+                  ]
+                }
+              ]
+            }
+            """,
+            "ERG-01822",
+            baseFacts),
+        // 10f. ERG-01815: vendLicEsp != true veda minDiasPvendLicEsp e maxDiasVendLicEsp positivos
         productJsonLogicBinding(
             "product.parametros-conta.erg-01815",
             SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
-            103,
+            105,
             """
             {
               "or": [
@@ -681,29 +699,20 @@ public final class ParametroContagemFeriasRuleSet {
             """,
             "ERG-01815",
             baseFacts),
-        // 10e. ERG-01816: coerência de contagem em dobro de licença especial
+        // 10g. ERG-01816: contDobroLicEsp == true exige minDiasPcontDobLicEsp <= maxDiasContDobLicEsp informados
         productJsonLogicBinding(
             "product.parametros-conta.erg-01816",
             SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
-            104,
+            106,
             """
             {
               "or": [
                 {"!=": [{"var": "draft.temLicEsp"}, true]},
+                {"!=": [{"var": "draft.contDobroLicEsp"}, true]},
                 {
                   "and": [
-                    {"!=": [{"var": "draft.contDobroLicEsp"}, true]},
-                    {"or": [{"==": [{"var": "draft.minDiasPcontDobLicEsp"}, null]}, {"<=": [{"var": "draft.minDiasPcontDobLicEsp"}, 0]}]},
-                    {"or": [{"==": [{"var": "draft.maxDiasContDobLicEsp"}, null]}, {"<=": [{"var": "draft.maxDiasContDobLicEsp"}, 0]}]}
-                  ]
-                },
-                {
-                  "and": [
-                    {"==": [{"var": "draft.contDobroLicEsp"}, true]},
                     {"!=": [{"var": "draft.minDiasPcontDobLicEsp"}, null]},
                     {"!=": [{"var": "draft.maxDiasContDobLicEsp"}, null]},
-                    {">=": [{"var": "draft.minDiasPcontDobLicEsp"}, 0]},
-                    {">=": [{"var": "draft.maxDiasContDobLicEsp"}, 0]},
                     {"<=": [{"var": "draft.minDiasPcontDobLicEsp"}, {"var": "draft.maxDiasContDobLicEsp"}]}
                   ]
                 }
@@ -712,11 +721,53 @@ public final class ParametroContagemFeriasRuleSet {
             """,
             "ERG-01816",
             baseFacts),
-        // 10f. ERG-01818: coerência entre temProgressao e anosProgressao
+        // 10h. ERG-01823: contDobroLicEsp == true exige limites não negativos
+        productJsonLogicBinding(
+            "product.parametros-conta.erg-01823",
+            SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            107,
+            """
+            {
+              "or": [
+                {"!=": [{"var": "draft.temLicEsp"}, true]},
+                {"!=": [{"var": "draft.contDobroLicEsp"}, true]},
+                {
+                  "and": [
+                    {"or": [{"==": [{"var": "draft.minDiasPcontDobLicEsp"}, null]}, {">=": [{"var": "draft.minDiasPcontDobLicEsp"}, 0]}]},
+                    {"or": [{"==": [{"var": "draft.maxDiasContDobLicEsp"}, null]}, {">=": [{"var": "draft.maxDiasContDobLicEsp"}, 0]}]}
+                  ]
+                }
+              ]
+            }
+            """,
+            "ERG-01823",
+            baseFacts),
+        // 10i. ERG-01824: contDobroLicEsp != true veda limites de contagem em dobro de licença especial positivos
+        productJsonLogicBinding(
+            "product.parametros-conta.erg-01824",
+            SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            108,
+            """
+            {
+              "or": [
+                {"!=": [{"var": "draft.temLicEsp"}, true]},
+                {"==": [{"var": "draft.contDobroLicEsp"}, true]},
+                {
+                  "and": [
+                    {"or": [{"==": [{"var": "draft.minDiasPcontDobLicEsp"}, null]}, {"<=": [{"var": "draft.minDiasPcontDobLicEsp"}, 0]}]},
+                    {"or": [{"==": [{"var": "draft.maxDiasContDobLicEsp"}, null]}, {"<=": [{"var": "draft.maxDiasContDobLicEsp"}, 0]}]}
+                  ]
+                }
+              ]
+            }
+            """,
+            "ERG-01824",
+            baseFacts),
+        // 10j. ERG-01818: coerência entre temProgressao e anosProgressao
         productJsonLogicBinding(
             "product.parametros-conta.erg-01818",
             SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
-            105,
+            109,
             """
             {
               "or": [
@@ -738,11 +789,11 @@ public final class ParametroContagemFeriasRuleSet {
             """,
             "ERG-01818",
             baseFacts),
-        // 10g. ERG-01819: coerência entre temTempoServ e anos1TempoServ
+        // 10k. ERG-01819: coerência entre temTempoServ e anos1TempoServ
         productJsonLogicBinding(
             "product.parametros-conta.erg-01819",
             SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
-            106,
+            110,
             """
             {
               "or": [
@@ -764,11 +815,11 @@ public final class ParametroContagemFeriasRuleSet {
             """,
             "ERG-01819",
             baseFacts),
-        // 10h. ERG-01820: coerência entre temSextaParte e anosSextaParte
+        // 10l. ERG-01820: coerência entre temSextaParte e anosSextaParte
         productJsonLogicBinding(
             "product.parametros-conta.erg-01820",
             SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
-            107,
+            111,
             """
             {
               "or": [

@@ -69,7 +69,8 @@ public abstract class DependenteDados {
   @Size(max = 1)
   @Schema(
       nullable = true,
-      description = "Sexo registral do dependente no cadastro civil ([F]eminino ou [M]asculino).")
+      description = "Sexo registral do dependente no cadastro civil ([F]eminino ou [M]asculino).",
+      allowableValues = {"F", "M"})
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -193,6 +194,7 @@ public abstract class DependenteDados {
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
       dataCategory = DomainDataCategory.PERSONAL,
+      complianceTags = {"LGPD", "NON_EXPORTABLE"},
       reason = "Documento civil de identificação do dependente.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
@@ -201,7 +203,10 @@ public abstract class DependenteDados {
       group = "Documentação civil",
       order = 80,
       icon = "credit_card",
-      tableHidden = true)
+      tableHidden = true,
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_PII_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Documento civil de identificação do dependente (LGPD).")
   @BulkEditable(modes = {BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private String numrg;
 
@@ -329,6 +334,7 @@ public abstract class DependenteDados {
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.RESTRICTED,
       dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+      complianceTags = {"LGPD", "HEALTH_DATA", "NON_EXPORTABLE"},
       reason = "Condição de saúde e invalidez atestada por junta médica.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
@@ -339,7 +345,10 @@ public abstract class DependenteDados {
       group = "Elegibilidade e benefícios",
       order = 160,
       icon = "medical_information",
-      tableHidden = true)
+      tableHidden = true,
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_HEALTH_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Condição clínica e laudo de invalidez protegidos por sigilo (LGPD Art. 11).")
   private Boolean invalido = false;
 
   @NotNull
@@ -380,6 +389,7 @@ public abstract class DependenteDados {
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.RESTRICTED,
       dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+      complianceTags = {"LGPD", "HEALTH_DATA", "NON_EXPORTABLE"},
       reason = "Condição clínica excepcional para benefício assistencial.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
@@ -390,7 +400,10 @@ public abstract class DependenteDados {
       group = "Elegibilidade e benefícios",
       order = 190,
       icon = "accessible",
-      tableHidden = true)
+      tableHidden = true,
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_HEALTH_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Condição clínica excepcional protegida por sigilo (LGPD Art. 11).")
   @BulkEditable(modes = {BulkMode.UNIFORM_UPDATE, BulkMode.PER_ITEM_UPDATE}, allowClear = false)
   private Boolean excepcional = false;
 

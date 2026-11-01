@@ -47,7 +47,12 @@ import org.springframework.web.bind.annotation.*;
     icon = "cake",
     tone = "neutral",
     valuePresentation = "integer",
-    sourceKind = "field")
+    sourceKind = "field",
+    thresholds = {
+      @Threshold(min = 0, max = 18, tone = "info", label = "Menoridade civil"),
+      @Threshold(min = 18, max = 24, tone = "warning", label = "Universitário / estendido"),
+      @Threshold(min = 24, tone = "success", label = "Vitalício / especial")
+    })
 @ApiResource(
     value = ApiPaths.TIPOS_DEPENDENTE,
     resourceKey = "administracao-pessoal.tipos-dependente",
