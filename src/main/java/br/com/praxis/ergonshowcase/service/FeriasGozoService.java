@@ -191,11 +191,11 @@ public class FeriasGozoService
     }
   }
 
-  private void hydrateParentPeriodoAquisitivo(FeriasGozo entity) {
+  public void hydrateParentPeriodoAquisitivo(FeriasGozo entity) {
     hydrateParentPeriodoAquisitivo(entity, false);
   }
 
-  private void hydrateParentPeriodoAquisitivo(FeriasGozo entity, boolean reparented) {
+  public void hydrateParentPeriodoAquisitivo(FeriasGozo entity, boolean reparented) {
     if (entity == null || entityManager == null || entity.getPeriodoAquisitivoId() == null) {
       return;
     }
@@ -204,13 +204,16 @@ public class FeriasGozoService
     if (pa == null) {
       return;
     }
+    if (reparented || entity.getEmpCodigo() == null) {
+      entity.setEmpCodigo(pa.getEmpCodigo());
+    }
     if (reparented || entity.getNumfunc() == null) {
       entity.setNumfunc(pa.getNumfunc());
     }
     if (reparented || entity.getNumvinc() == null) {
       entity.setNumvinc(pa.getNumvinc());
     }
-    if (reparented || entity.getChavePeraqfer() == null) {
+    if (pa.getChave() != null) {
       entity.setChavePeraqfer(pa.getChave());
     }
     if (pa.getTotDiasDireito() != null) {

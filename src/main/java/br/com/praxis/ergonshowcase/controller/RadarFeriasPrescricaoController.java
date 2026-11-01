@@ -9,7 +9,9 @@ import br.com.praxis.ergonshowcase.service.FeriasGozoService;
 import br.com.praxis.ergonshowcase.service.RadarFeriasPrescricaoService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import org.praxisplatform.uischema.annotation.AnalyticsComparisonPeriodBinding;
 import org.praxisplatform.uischema.annotation.AnalyticsDimensionBinding;
+import org.praxisplatform.uischema.annotation.AnalyticsGranularity;
 import org.praxisplatform.uischema.annotation.AnalyticsIntent;
 import org.praxisplatform.uischema.annotation.AnalyticsMetricBinding;
 import org.praxisplatform.uischema.annotation.AnalyticsOperation;
@@ -211,7 +213,43 @@ public class RadarFeriasPrescricaoController
                     target =
                         @AnalyticsSurfaceTarget(
                             resourceKey = "administracao-pessoal.radar-ferias-prescricao",
-                            surfaceId = "detail")))
+                            surfaceId = "detail"))),
+        @AnalyticsProjection(
+            id = "curva-prescricao-mensal-radar",
+            intent = AnalyticsIntent.TREND,
+            sourceOperation = AnalyticsOperation.TIMESERIES,
+            primaryDimension = @AnalyticsDimensionBinding(field = "dtPrescricao"),
+            defaultGranularity = AnalyticsGranularity.MONTH,
+            defaultTimezone = "America/Sao_Paulo",
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "count",
+                    aggregation = "count",
+                    label = "Períodos com prescrição no mês")),
+        @AnalyticsProjection(
+            id = "distribuicao-dias-ate-prescricao",
+            intent = AnalyticsIntent.DISTRIBUTION,
+            sourceOperation = AnalyticsOperation.DISTRIBUTION,
+            primaryDimension = @AnalyticsDimensionBinding(field = "diasAtePrescricao"),
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "diasAtePrescricao",
+                    aggregation = "histogram",
+                    label = "Distribuição de dias até prescrição")),
+        @AnalyticsProjection(
+            id = "comparativo-radar-por-urgencia",
+            intent = AnalyticsIntent.COMPARISON,
+            sourceOperation = AnalyticsOperation.COMPARISON,
+            primaryDimension = @AnalyticsDimensionBinding(field = "faixaUrgenciaPrescricao"),
+            comparisonPeriod =
+                @AnalyticsComparisonPeriodBinding(
+                    field = "dtPrescricao",
+                    timezone = "America/Sao_Paulo"),
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "count",
+                    aggregation = "count",
+                    label = "Variação por faixa de urgência"))
       })
   public ResponseEntity<RestApiResponse<GroupByStatsResponse>> groupByStats(
       @Valid @RequestBody GroupByStatsRequest<RadarFeriasPrescricaoFilterDTO> request) {

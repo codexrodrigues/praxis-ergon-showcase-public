@@ -10,8 +10,14 @@ import br.com.praxis.ergonshowcase.rules.ErgonRuleEngineFacade;
 import br.com.praxis.ergonshowcase.rules.ErgonRuleViolationException;
 import java.util.List;
 import java.util.OptionalLong;
+import java.util.Set;
 import org.praxisplatform.rules.contract.RuleEvaluationResult;
-import org.praxisplatform.uischema.service.base.AbstractReadOnlyResourceService;
+import org.praxisplatform.uischema.exporting.CollectionExportField;
+import org.praxisplatform.uischema.exporting.CollectionExportFieldPresentation;
+import org.praxisplatform.uischema.service.base.ResourceFilterAccessScope;
+import org.praxisplatform.uischema.stats.StatsFieldRegistry;
+import org.praxisplatform.uischema.stats.StatsMetric;
+import org.praxisplatform.uischema.stats.StatsSupportMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +27,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class RegraFrequenciaEstatutariaService
-    extends AbstractReadOnlyResourceService<
+    extends ErgonReadOnlyResourceService<
         RegraFrequenciaEstatutaria,
         RegraFrequenciaEstatutariaResponseDTO,
         Long,
@@ -49,7 +55,7 @@ public class RegraFrequenciaEstatutariaService
       RegraFrequenciaEstatutariaMapper mapper,
       ErgonRuleEngineFacade ruleEngineFacade,
       TenantContext tenantContext) {
-    super(repository, RegraFrequenciaEstatutaria.class);
+    super(repository, RegraFrequenciaEstatutaria.class, "id");
     this.regraRepository = repository;
     this.mapper = mapper;
     this.ruleEngineFacade = ruleEngineFacade;
@@ -62,8 +68,64 @@ public class RegraFrequenciaEstatutariaService
   }
 
   @Override
+  protected RegraFrequenciaEstatutariaFilterDTO emptyFilter() {
+    return new RegraFrequenciaEstatutariaFilterDTO();
+  }
+
+  @Override
   protected OptionalLong getEntityResourceVersion(RegraFrequenciaEstatutaria entity) {
     return OptionalLong.of(entity.getVersion());
+  }
+
+  @Override
+  protected ResourceFilterAccessScope<RegraFrequenciaEstatutaria> resolveResourceFilterAccessScope() {
+    var explicit = tenantContext.explicitOrgao();
+    if (explicit.isEmpty()) {
+      return ResourceFilterAccessScope.unrestricted();
+    }
+    int orgao = explicit.getAsInt();
+    return ResourceFilterAccessScope.restricted(
+        (root, query, cb) ->
+            cb.or(cb.isNull(root.get("empCodigo")), cb.equal(root.get("empCodigo"), orgao)));
+  }
+
+  @Override
+  protected List<CollectionExportField> exportFields() {
+    var boolPresentation =
+        new CollectionExportFieldPresentation(
+            "boolean", null, null, "pt-BR", null, "Sim", "Não", "Não informado");
+    return List.of(
+        field("id", "ID", "integer"),
+        field("empCodigo", "Órgão", "integer"),
+        field("regimeJuridico", "Regime jurídico", "string"),
+        field("tipoVinculo", "Tipo de vínculo", "string"),
+        field("categoria", "Categoria", "string"),
+        field("tipofreq", "Tipo de frequência", "string"),
+        field("codfreq", "Código de frequência", "integer"),
+        presentedField("exigeHomologacao", "Exige homologação", "boolean", boolPresentation),
+        field("duracaoMaxDias", "Duração máxima (dias)", "integer"));
+  }
+
+  @Override
+  public StatsFieldRegistry getStatsFieldRegistry() {
+    return StatsFieldRegistry.builder()
+        .labeledGroupByBucket("id", "id", "regimeJuridico", Set.of(StatsMetric.COUNT))
+        .categoricalGroupByBucket("regimeJuridico", "regimeJuridico")
+        .categoricalGroupByBucket("tipoVinculo", "tipoVinculo")
+        .categoricalGroupByBucket("categoria", "categoria")
+        .categoricalGroupByBucket("tipofreq", "tipofreq")
+        .numericHistogramMeasureField("duracaoMaxDias", "duracaoMaxDias")
+        .build();
+  }
+
+  @Override
+  public StatsSupportMode getGroupByStatsSupportMode() {
+    return StatsSupportMode.AUTO;
+  }
+
+  @Override
+  public StatsSupportMode getDistributionStatsSupportMode() {
+    return StatsSupportMode.AUTO;
   }
 
   public ErgonRuleEngineFacade getRuleEngineFacade() {

@@ -33,6 +33,9 @@ import org.springframework.web.bind.annotation.*;
     label = "Dependência vigente",
     description = "Verdadeiro quando a vigência da dependência está ativa na data atual.",
     dataType = "boolean",
+    icon = "verified",
+    tone = "success",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @ResourceFact(
     key = "idadeAnos",
@@ -41,6 +44,14 @@ import org.springframework.web.bind.annotation.*;
     description = "Idade completa em anos calculada a partir da data de nascimento.",
     dataType = "integer",
     unit = "years",
+    icon = "cake",
+    tone = "info",
+    valuePresentation = "metric",
+    thresholds = {
+      @Threshold(min = 0, max = 21, tone = "success", label = "Faixa etária padrão (até 21)"),
+      @Threshold(min = 22, max = 24, tone = "warning", label = "Faixa universitária (22 a 24)"),
+      @Threshold(min = 25, max = 130, tone = "neutral", label = "Acima do limite etário padrão")
+    },
     sourceKind = "computed")
 @ResourceFact(
     key = "elegivelIrrf",
@@ -49,6 +60,9 @@ import org.springframework.web.bind.annotation.*;
     description =
         "Verdadeiro quando vigente, habilitado em depIr e dentro do limite etário ou invalidez.",
     dataType = "boolean",
+    icon = "receipt_long",
+    tone = "info",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @BulkResourceOperations(
     proposalOperationId = "ergon.dependentes.bulk.proposal",

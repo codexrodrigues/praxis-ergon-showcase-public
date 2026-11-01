@@ -32,6 +32,9 @@ import org.springframework.web.bind.annotation.*;
     label = "Com tabela de opções",
     description = "Verdadeiro quando o campo customizado é alimentado por uma tabela geral HADES.TABELA.",
     dataType = "boolean",
+    icon = "table_View",
+    tone = "info",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @ResourceFact(
     key = "possuiRegrasValidacao",
@@ -39,6 +42,9 @@ import org.springframework.web.bind.annotation.*;
     label = "Com regras de validação",
     description = "Verdadeiro quando o campo customizado possui regras estruturadas de validação declaradas.",
     dataType = "boolean",
+    icon = "rule",
+    tone = "info",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @ResourceFact(
     key = "obrigatorioAtivo",
@@ -46,6 +52,9 @@ import org.springframework.web.bind.annotation.*;
     label = "Obrigatório e ativo",
     description = "Verdadeiro quando o campo customizado é simultaneamente obrigatório e ativo no órgão.",
     dataType = "boolean",
+    icon = "verified",
+    tone = "success",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @BulkResourceOperations(
     proposalOperationId = "ergon.campos-customizados.bulk.proposal",
@@ -54,7 +63,14 @@ import org.springframework.web.bind.annotation.*;
     executionResultsOperationId = "ergon.campos-customizados.bulk.results",
     cancelOperationId = "ergon.campos-customizados.bulk.cancel",
     updateSourceOperationId = "updateErgonCampoCustomizado",
-    protectedUpdateFields = {"resourceKey", "fieldKey", "fieldType", "validationRules", "governancePolicy"})
+    protectedUpdateFields = {
+      "empCodigo",
+      "resourceKey",
+      "fieldKey",
+      "fieldType",
+      "validationRules",
+      "governancePolicy"
+    })
 @ApiResource(
     value = ApiPaths.CAMPOS_CUSTOMIZADOS,
     resourceKey = "administracao-pessoal.campos-customizados",

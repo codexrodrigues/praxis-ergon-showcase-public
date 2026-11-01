@@ -32,6 +32,9 @@ import org.springframework.web.bind.annotation.*;
     label = "Pendente de homologação",
     description = "Verdadeiro quando a ocorrência aguarda deliberação da chefia imediata ou RH.",
     dataType = "boolean",
+    icon = "pending_actions",
+    tone = "warning",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @ResourceFact(
     key = "ocorrenciaHoraria",
@@ -39,6 +42,9 @@ import org.springframework.web.bind.annotation.*;
     label = "Ocorrência horária",
     description = "Verdadeiro quando há horários de entrada e saída apurados na ocorrência.",
     dataType = "boolean",
+    icon = "schedule",
+    tone = "info",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @ResourceFact(
     key = "comDocumentoComprobatorio",
@@ -46,6 +52,9 @@ import org.springframework.web.bind.annotation.*;
     label = "Com documento anexo",
     description = "Verdadeiro quando há documento comprobatório ou portaria vinculada.",
     dataType = "boolean",
+    icon = "gavel",
+    tone = "success",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @BulkResourceOperations(
     proposalOperationId = "ergon.frequencias.bulk.proposal",

@@ -69,6 +69,7 @@ import org.springframework.web.bind.annotation.*;
       "numvinc",
       "periodoAquisitivoId",
       "chavePeraqfer",
+      "totDiasDireitoPa",
       "ordemParcela",
       "dtini",
       "situacao"
@@ -179,7 +180,43 @@ public class FeriasGozoController
                     target =
                         @AnalyticsSurfaceTarget(
                             resourceKey = "administracao-pessoal.ferias-gozo",
-                            surfaceId = "ficha-ferias-gozo")))
+                            surfaceId = "ficha-ferias-gozo"))),
+        @AnalyticsProjection(
+            id = "evolucao-mensal-gozos-ferias",
+            intent = AnalyticsIntent.TREND,
+            sourceOperation = AnalyticsOperation.TIMESERIES,
+            primaryDimension = @AnalyticsDimensionBinding(field = "dtini"),
+            defaultGranularity = AnalyticsGranularity.MONTH,
+            defaultTimezone = "America/Sao_Paulo",
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "count",
+                    aggregation = "count",
+                    label = "Parcelas iniciadas no mês")),
+        @AnalyticsProjection(
+            id = "distribuicao-duracao-parcelas-gozo",
+            intent = AnalyticsIntent.DISTRIBUTION,
+            sourceOperation = AnalyticsOperation.DISTRIBUTION,
+            primaryDimension = @AnalyticsDimensionBinding(field = "diasGozo"),
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "diasGozo",
+                    aggregation = "histogram",
+                    label = "Distribuição de dias de gozo")),
+        @AnalyticsProjection(
+            id = "comparativo-parcelas-por-situacao",
+            intent = AnalyticsIntent.COMPARISON,
+            sourceOperation = AnalyticsOperation.COMPARISON,
+            primaryDimension = @AnalyticsDimensionBinding(field = "situacao"),
+            comparisonPeriod =
+                @AnalyticsComparisonPeriodBinding(
+                    field = "dtini",
+                    timezone = "America/Sao_Paulo"),
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "count",
+                    aggregation = "count",
+                    label = "Variação de parcelas de férias"))
       })
   public ResponseEntity<RestApiResponse<GroupByStatsResponse>> groupByStats(
       @RequestBody GroupByStatsRequest<FeriasGozoFilterDTO> request) {

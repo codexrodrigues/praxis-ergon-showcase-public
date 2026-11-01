@@ -164,7 +164,43 @@ public class ParametroContagemFeriasController
                     target =
                         @AnalyticsSurfaceTarget(
                             resourceKey = "administracao-pessoal.parametros-contagem-ferias",
-                            surfaceId = "ficha-parametro-contagem-ferias")))
+                            surfaceId = "ficha-parametro-contagem-ferias"))),
+        @AnalyticsProjection(
+            id = "evolucao-vigencia-parametros-ferias",
+            intent = AnalyticsIntent.TREND,
+            sourceOperation = AnalyticsOperation.TIMESERIES,
+            primaryDimension = @AnalyticsDimensionBinding(field = "dtini"),
+            defaultGranularity = AnalyticsGranularity.MONTH,
+            defaultTimezone = "America/Sao_Paulo",
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "count",
+                    aggregation = "count",
+                    label = "Parâmetros iniciados")),
+        @AnalyticsProjection(
+            id = "distribuicao-dias-direito-ferias",
+            intent = AnalyticsIntent.DISTRIBUTION,
+            sourceOperation = AnalyticsOperation.DISTRIBUTION,
+            primaryDimension = @AnalyticsDimensionBinding(field = "totDiasFer"),
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "totDiasFer",
+                    aggregation = "histogram",
+                    label = "Distribuição de dias de direito")),
+        @AnalyticsProjection(
+            id = "comparativo-parametros-por-regime",
+            intent = AnalyticsIntent.COMPARISON,
+            sourceOperation = AnalyticsOperation.COMPARISON,
+            primaryDimension = @AnalyticsDimensionBinding(field = "regimeJuridico"),
+            comparisonPeriod =
+                @AnalyticsComparisonPeriodBinding(
+                    field = "dtini",
+                    timezone = "America/Sao_Paulo"),
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "count",
+                    aggregation = "count",
+                    label = "Variação de parâmetros por regime"))
       })
   public ResponseEntity<RestApiResponse<GroupByStatsResponse>> groupByStats(
       @RequestBody GroupByStatsRequest<ParametroContagemFeriasFilterDTO> request) {

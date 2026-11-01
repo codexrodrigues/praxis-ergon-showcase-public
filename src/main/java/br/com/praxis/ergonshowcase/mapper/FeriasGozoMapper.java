@@ -103,7 +103,15 @@ public class FeriasGozoMapper
 
   @Override
   public void applyUpdate(FeriasGozo entity, UpdateFeriasGozoDTO dto) {
+    Integer chaveAtual = entity.getChavePeraqfer();
+    Integer direitoAtual = entity.getTotDiasDireitoPa();
     apply(dto, entity);
+    if (dto.getChavePeraqfer() == null && chaveAtual != null) {
+      entity.setChavePeraqfer(chaveAtual);
+    }
+    if (dto.getTotDiasDireitoPa() == null && direitoAtual != null) {
+      entity.setTotDiasDireitoPa(direitoAtual);
+    }
   }
 
   @Override

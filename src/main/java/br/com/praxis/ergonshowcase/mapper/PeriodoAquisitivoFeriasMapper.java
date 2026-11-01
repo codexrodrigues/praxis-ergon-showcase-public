@@ -137,7 +137,7 @@ public class PeriodoAquisitivoFeriasMapper
         entity.setSituacao("QUITADO");
       } else if (gozados + vendidos + dobro > 0) {
         entity.setSituacao("PARCIALMENTE_GOZADO");
-      } else {
+      } else if (!"EM_AQUISICAO".equals(sit)) {
         entity.setSituacao("DISPONIVEL");
       }
     }

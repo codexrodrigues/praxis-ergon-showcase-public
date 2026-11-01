@@ -91,8 +91,12 @@ import org.springframework.web.server.ResponseStatusException;
       "numvinc",
       "chave",
       "dtini",
+      "diasGozados",
+      "diasVendidosAbono",
+      "diasConvertidosDobro",
       "saldoDiasDisponivel",
-      "situacao"
+      "situacao",
+      "geradoPorAverbacao"
     })
 @ApiResource(
     value = ApiPaths.PERIODOS_AQUISITIVOS_FERIAS,
@@ -200,7 +204,43 @@ public class PeriodoAquisitivoFeriasController
                     target =
                         @AnalyticsSurfaceTarget(
                             resourceKey = "administracao-pessoal.periodos-aquisitivos-ferias",
-                            surfaceId = "ficha-periodo-aquisitivo")))
+                            surfaceId = "ficha-periodo-aquisitivo"))),
+        @AnalyticsProjection(
+            id = "evolucao-abertura-periodos-aquisitivos",
+            intent = AnalyticsIntent.TREND,
+            sourceOperation = AnalyticsOperation.TIMESERIES,
+            primaryDimension = @AnalyticsDimensionBinding(field = "dtini"),
+            defaultGranularity = AnalyticsGranularity.MONTH,
+            defaultTimezone = "America/Sao_Paulo",
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "count",
+                    aggregation = "count",
+                    label = "Períodos iniciados no mês")),
+        @AnalyticsProjection(
+            id = "distribuicao-saldo-dias-disponivel",
+            intent = AnalyticsIntent.DISTRIBUTION,
+            sourceOperation = AnalyticsOperation.DISTRIBUTION,
+            primaryDimension = @AnalyticsDimensionBinding(field = "saldoDiasDisponivel"),
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "saldoDiasDisponivel",
+                    aggregation = "histogram",
+                    label = "Distribuição de saldo disponível (dias)")),
+        @AnalyticsProjection(
+            id = "comparativo-periodos-por-situacao",
+            intent = AnalyticsIntent.COMPARISON,
+            sourceOperation = AnalyticsOperation.COMPARISON,
+            primaryDimension = @AnalyticsDimensionBinding(field = "situacao"),
+            comparisonPeriod =
+                @AnalyticsComparisonPeriodBinding(
+                    field = "dtini",
+                    timezone = "America/Sao_Paulo"),
+            primaryMetrics =
+                @AnalyticsMetricBinding(
+                    field = "count",
+                    aggregation = "count",
+                    label = "Variação de períodos aquisitivos"))
       })
   public ResponseEntity<RestApiResponse<GroupByStatsResponse>> groupByStats(
       @RequestBody GroupByStatsRequest<PeriodoAquisitivoFeriasFilterDTO> request) {

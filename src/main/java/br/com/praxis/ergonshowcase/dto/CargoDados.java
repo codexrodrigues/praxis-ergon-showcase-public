@@ -70,8 +70,17 @@ public abstract class CargoDados {
   @Pattern(regexp = "[CF]")
   @Schema(
       description =
-          "Distingue cargo público (C) de função de confiança (F) no quadro institucional.")
-  @UISchema(label = "Cargo ou função", group = "Enquadramento", order = 50, icon = "badge")
+          "Distingue cargo público (C) de função de confiança (F) no quadro institucional.",
+      allowableValues = {"C", "F"})
+  @UISchema(
+      label = "Cargo ou função",
+      group = "Enquadramento",
+      order = 50,
+      type = FieldDataType.TEXT,
+      controlType = org.praxisplatform.uischema.FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"C\",\"label\":\"Cargo público (C)\"},{\"value\":\"F\",\"label\":\"Função de confiança (F)\"}]",
+      icon = "badge")
   private String cargoFuncao = "C";
 
   @Size(max = 20)

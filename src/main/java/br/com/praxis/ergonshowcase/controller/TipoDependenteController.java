@@ -7,12 +7,47 @@ import br.com.praxis.ergonshowcase.service.TipoDependenteService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.praxisplatform.uischema.annotation.*;
 import org.praxisplatform.uischema.controller.base.AbstractReadOnlyResourceController;
+import org.praxisplatform.uischema.fact.ResourceFact;
 import org.praxisplatform.uischema.surface.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+@ResourceFact(
+    key = "geraIr",
+    resourceKey = "administracao-pessoal.tipos-dependente",
+    label = "Elegível à dedução IRRF",
+    description =
+        "Indica se a modalidade de dependência habilita dedução na base de cálculo do Imposto de Renda.",
+    dataType = "boolean",
+    icon = "receipt_long",
+    tone = "info",
+    valuePresentation = "badge",
+    sourceKind = "field")
+@ResourceFact(
+    key = "geraSalarioFamilia",
+    resourceKey = "administracao-pessoal.tipos-dependente",
+    label = "Elegível a salário-família",
+    description =
+        "Indica se a modalidade de dependência habilita percepção de cota de salário-família.",
+    dataType = "boolean",
+    icon = "family_restroom",
+    tone = "success",
+    valuePresentation = "badge",
+    sourceKind = "field")
+@ResourceFact(
+    key = "idadeLimite",
+    resourceKey = "administracao-pessoal.tipos-dependente",
+    label = "Teto etário legal",
+    description =
+        "Idade máxima em anos para manutenção ordinária do vínculo de dependência nesta modalidade.",
+    dataType = "integer",
+    unit = "anos",
+    icon = "cake",
+    tone = "neutral",
+    valuePresentation = "integer",
+    sourceKind = "field")
 @ApiResource(
     value = ApiPaths.TIPOS_DEPENDENTE,
     resourceKey = "administracao-pessoal.tipos-dependente",

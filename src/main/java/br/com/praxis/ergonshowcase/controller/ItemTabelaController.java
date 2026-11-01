@@ -8,12 +8,35 @@ import br.com.praxis.ergonshowcase.service.ItemTabelaService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.praxisplatform.uischema.annotation.*;
 import org.praxisplatform.uischema.controller.base.AbstractReadOnlyResourceController;
+import org.praxisplatform.uischema.fact.ResourceFact;
 import org.praxisplatform.uischema.surface.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+@ResourceFact(
+    key = "ativo",
+    resourceKey = "administracao-pessoal.itens-tabela",
+    label = "Item de domínio ativo",
+    description =
+        "Indica se o item da tabela geral encontra-se disponível para seleção em novos cadastros.",
+    dataType = "boolean",
+    icon = "check_circle",
+    tone = "success",
+    valuePresentation = "badge",
+    sourceKind = "field")
+@ResourceFact(
+    key = "ordem",
+    resourceKey = "administracao-pessoal.itens-tabela",
+    label = "Ordem de apresentação",
+    description =
+        "Posição ordinal configurada para exibição do item em listas de seleção.",
+    dataType = "integer",
+    icon = "sort",
+    tone = "neutral",
+    valuePresentation = "integer",
+    sourceKind = "field")
 @ApiResource(
     value = ApiPaths.ITENS_TABELA,
     resourceKey = "administracao-pessoal.itens-tabela",

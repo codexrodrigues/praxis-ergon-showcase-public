@@ -105,6 +105,7 @@ public abstract class AfastamentoDados {
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.RESTRICTED,
       dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+      complianceTags = {"LGPD", "HEALTH_DATA", "NON_EXPORTABLE"},
       reason = "Fundamentação de licença pode conter diagnóstico clínico ou laudo pericial.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
@@ -114,7 +115,10 @@ public abstract class AfastamentoDados {
       group = "Enquadramento e fundamentação",
       order = 50,
       icon = "notes",
-      tableHidden = false)
+      tableHidden = false,
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_HEALTH_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Fundamentação sujeita a sigilo pericial e clínico (LGPD Art. 11).")
   @ResourceReference(
       resourceKey = "administracao-pessoal.afastamentos",
       valueField = "id",

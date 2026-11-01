@@ -260,6 +260,8 @@ public abstract class ParametroContagemFeriasDados {
       order = 150,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"D\",\"label\":\"Dias de direito (D)\"},{\"value\":\"G\",\"label\":\"Dias de gozo (G)\"},{\"value\":\"N\",\"label\":\"Sem abono pecuniário (N)\"}]",
       icon = "sell")
   private String abonoDirGozo = "D";
 
@@ -480,6 +482,8 @@ public abstract class ParametroContagemFeriasDados {
       order = 290,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Pelo início do gozo (I)\"},{\"value\":\"F\",\"label\":\"Pelo término do gozo (F)\"}]",
       icon = "warning")
   private String criterioPrescricao = "F";
 
@@ -670,6 +674,8 @@ public abstract class ParametroContagemFeriasDados {
       order = 410,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"D\",\"label\":\"Dias de direito (D)\"},{\"value\":\"G\",\"label\":\"Dias de gozo (G)\"},{\"value\":\"N\",\"label\":\"Sem conversão (N)\"}]",
       icon = "sell")
   private String abonoDirGozoLicEsp;
 

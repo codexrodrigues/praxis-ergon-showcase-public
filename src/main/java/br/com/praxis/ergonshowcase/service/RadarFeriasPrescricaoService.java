@@ -354,6 +354,7 @@ public class RadarFeriasPrescricaoService
         effectiveScope == CollectionExportScope.ALL || request.filters() == null
             ? new RadarFeriasPrescricaoFilterDTO()
             : request.filters();
+    Sort exportSort = resolveExportSort(request.sort());
     List<RadarFeriasPrescricaoResponseDTO> slice;
     boolean truncated;
     if (effectiveScope == CollectionExportScope.CURRENT_PAGE && request.pagination() != null) {
@@ -367,33 +368,41 @@ public class RadarFeriasPrescricaoService
           request.pagination().pageSize() != null && request.pagination().pageSize() > 0
               ? Math.min(request.pagination().pageSize(), limit)
               : limit;
-      var pageResult = filter(filter, PageRequest.of(pageNum, pageSize, getDefaultSort()), null);
+      var pageResult = filter(filter, PageRequest.of(pageNum, pageSize, exportSort), null);
       slice = pageResult.getContent();
       truncated = pageResult.hasNext() && slice.size() >= limit;
+    } else if (effectiveScope == CollectionExportScope.SELECTED && hasSelection) {
+      var entities =
+          getRepository()
+              .findAll(
+                  filtered(filter).and(selectionSpecification(request.selection())),
+                  PageRequest.of(0, limit + 1, exportSort))
+              .getContent();
+      var rows = entities.stream().map(mapper::toResponse).toList();
+      Set<String> selectedIds =
+          request.selection().selectedKeys().stream()
+              .map(String::valueOf)
+              .collect(Collectors.toSet());
+      String keyProp =
+          request.selection().keyField() != null && !request.selection().keyField().isBlank()
+              ? request.selection().keyField().trim()
+              : "id";
+      List<RadarFeriasPrescricaoResponseDTO> matched =
+          rows.stream()
+              .filter(
+                  row -> {
+                    var bw = new BeanWrapperImpl(row);
+                    Object keyVal =
+                        bw.isReadableProperty(keyProp)
+                            ? bw.getPropertyValue(keyProp)
+                            : (bw.isReadableProperty("id") ? bw.getPropertyValue("id") : null);
+                    return keyVal != null && selectedIds.contains(String.valueOf(keyVal));
+                  })
+              .toList();
+      truncated = matched.size() > limit;
+      slice = matched.subList(0, Math.min(matched.size(), limit));
     } else {
-      var rows = filter(filter, PageRequest.of(0, limit + 1, getDefaultSort()), null).getContent();
-      if (effectiveScope == CollectionExportScope.SELECTED && hasSelection) {
-        Set<String> selectedIds =
-            request.selection().selectedKeys().stream()
-                .map(String::valueOf)
-                .collect(Collectors.toSet());
-        String keyProp =
-            request.selection().keyField() != null && !request.selection().keyField().isBlank()
-                ? request.selection().keyField().trim()
-                : "id";
-        rows =
-            rows.stream()
-                .filter(
-                    row -> {
-                      var bw = new BeanWrapperImpl(row);
-                      Object keyVal =
-                          bw.isReadableProperty(keyProp)
-                              ? bw.getPropertyValue(keyProp)
-                              : (bw.isReadableProperty("id") ? bw.getPropertyValue("id") : null);
-                      return keyVal != null && selectedIds.contains(String.valueOf(keyVal));
-                    })
-                .toList();
-      }
+      var rows = filter(filter, PageRequest.of(0, limit + 1, exportSort), null).getContent();
       truncated = rows.size() > limit;
       slice = rows.subList(0, Math.min(rows.size(), limit));
     }
@@ -404,6 +413,69 @@ public class RadarFeriasPrescricaoService
         exportFields(),
         CollectionExportValueResolver.reflective(),
         Map.of("effectiveMaxRows", limit, "truncated", truncated, "scope", scopeName));
+  }
+
+  private Sort resolveExportSort(Object rawSort) {
+    if (rawSort instanceof Sort s && s.isSorted()) {
+      return s;
+    }
+    if (rawSort instanceof String str && !str.isBlank()) {
+      String[] parts = str.trim().split(",");
+      String prop = parts[0].trim();
+      Sort.Direction dir =
+          parts.length > 1 && "desc".equalsIgnoreCase(parts[1].trim())
+              ? Sort.Direction.DESC
+              : Sort.Direction.ASC;
+      return Sort.by(dir, prop);
+    }
+    if (rawSort instanceof Map<?, ?> map) {
+      Object propObj =
+          map.containsKey("property")
+              ? map.get("property")
+              : (map.containsKey("field") ? map.get("field") : map.get("column"));
+      if (propObj instanceof String prop && !prop.isBlank()) {
+        Object dirObj = map.containsKey("direction") ? map.get("direction") : map.get("order");
+        Sort.Direction dir =
+            dirObj != null && "desc".equalsIgnoreCase(dirObj.toString().trim())
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
+        return Sort.by(dir, prop.trim());
+      }
+    }
+    if (rawSort instanceof java.util.Collection<?> coll && !coll.isEmpty()) {
+      Sort combined = Sort.unsorted();
+      for (Object item : coll) {
+        Sort next = resolveExportSort(item);
+        if (next != null && next.isSorted()) {
+          combined = combined.and(next);
+        }
+      }
+      if (combined.isSorted()) {
+        return combined;
+      }
+    }
+    return getDefaultSort();
+  }
+
+  private Specification<RadarFeriasPrescricao> selectionSpecification(
+      org.praxisplatform.uischema.exporting.CollectionExportSelection selection) {
+    if (selection == null
+        || selection.selectedKeys() == null
+        || selection.selectedKeys().isEmpty()) {
+      return (root, q, cb) -> cb.conjunction();
+    }
+    List<Long> ids = new ArrayList<>();
+    for (Object raw : selection.selectedKeys()) {
+      if (raw == null) continue;
+      try {
+        ids.add(Long.valueOf(String.valueOf(raw).trim()));
+      } catch (NumberFormatException ignored) {
+      }
+    }
+    if (ids.isEmpty()) {
+      return (root, q, cb) -> cb.conjunction();
+    }
+    return (root, q, cb) -> root.get("id").in(ids);
   }
 
   @Override

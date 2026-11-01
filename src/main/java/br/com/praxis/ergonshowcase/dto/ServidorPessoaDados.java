@@ -71,7 +71,8 @@ public abstract class ServidorPessoaDados {
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
       dataCategory = DomainDataCategory.PERSONAL,
-      reason = "Identificação fiscal individual.",
+      complianceTags = {"LGPD", "NON_EXPORTABLE"},
+      reason = "Identificação fiscal individual protegida contra exportação em massa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   @UISchema(
@@ -81,7 +82,10 @@ public abstract class ServidorPessoaDados {
       tableHidden = true,
       group = "Identificação civil",
       order = 30,
-      icon = "badge")
+      icon = "badge",
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_PII_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Dado fiscal pessoal (LGPD) governado para inspeção individual.")
   @jakarta.validation.constraints.Size(max = 11)
   private String cpf;
 

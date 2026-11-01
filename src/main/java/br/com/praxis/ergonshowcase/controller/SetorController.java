@@ -6,12 +6,24 @@ import br.com.praxis.ergonshowcase.service.*;
 import io.swagger.v3.oas.annotations.*;
 import org.praxisplatform.uischema.annotation.*;
 import org.praxisplatform.uischema.controller.base.AbstractReadOnlyResourceController;
+import org.praxisplatform.uischema.fact.ResourceFact;
 import org.praxisplatform.uischema.surface.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /** Consulta auxiliar que sustenta opções e referências 360° dos pilotos. */
+@ResourceFact(
+    key = "tipoSetor",
+    resourceKey = "administracao-pessoal.setores",
+    label = "Classificação da unidade",
+    description =
+        "Natureza organizacional ou administrativa da unidade de lotação no organograma do órgão.",
+    dataType = "string",
+    icon = "account_tree",
+    tone = "info",
+    valuePresentation = "badge",
+    sourceKind = "field")
 @ApiResource(
     value = ApiPaths.SETORES,
     resourceKey = "administracao-pessoal.setores",

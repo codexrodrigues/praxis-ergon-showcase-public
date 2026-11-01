@@ -7,12 +7,35 @@ import br.com.praxis.ergonshowcase.service.TipoFrequenciaService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.praxisplatform.uischema.annotation.*;
 import org.praxisplatform.uischema.controller.base.AbstractReadOnlyResourceController;
+import org.praxisplatform.uischema.fact.ResourceFact;
 import org.praxisplatform.uischema.surface.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+@ResourceFact(
+    key = "influiConta",
+    resourceKey = "administracao-pessoal.tipos-frequencia",
+    label = "Impacta contagem de tempo",
+    description =
+        "Indica se as ocorrências desta natureza repercutem na apuração de tempo de serviço e férias.",
+    dataType = "boolean",
+    icon = "calculate",
+    tone = "warning",
+    valuePresentation = "badge",
+    sourceKind = "field")
+@ResourceFact(
+    key = "horaExtra",
+    resourceKey = "administracao-pessoal.tipos-frequencia",
+    label = "Natureza de sobrejornada",
+    description =
+        "Indica se o tipo de frequência classifica eventos de serviço extraordinário ou banco de horas.",
+    dataType = "boolean",
+    icon = "more_time",
+    tone = "info",
+    valuePresentation = "badge",
+    sourceKind = "field")
 @ApiResource(
     value = ApiPaths.TIPOS_FREQUENCIA,
     resourceKey = "administracao-pessoal.tipos-frequencia",

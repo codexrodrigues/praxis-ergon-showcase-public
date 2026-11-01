@@ -144,6 +144,13 @@ public class ErgonBulkDomain {
     if (em.unwrap(org.hibernate.Session.class).isDirty()) throw new IllegalStateException("Contexto de persistência deve estar limpo antes do lote.");
     Object e = lock ? em.find(r.entity, identity(r,wire), LockModeType.PESSIMISTIC_WRITE, Map.of("jakarta.persistence.lock.timeout",1000)) : em.find(r.entity,identity(r,wire));
     if (e != null && !scope(r,e)) throw new SecurityException("Registro fora do órgão selecionado.");
+    if (lock && e instanceof FeriasGozo fg && fg.getPeriodoAquisitivoId() != null) {
+      em.find(
+          PeriodoAquisitivoFerias.class,
+          fg.getPeriodoAquisitivoId(),
+          LockModeType.PESSIMISTIC_WRITE,
+          Map.of("jakarta.persistence.lock.timeout", 1000));
+    }
     return e;
   }
   public boolean scope(Resource r, Object e) {
@@ -208,10 +215,17 @@ public class ErgonBulkDomain {
     Object dto=json.convertValue(value,r.update); validate(dto);
     try {
       Object copy=r.entity.getDeclaredConstructor().newInstance(); BeanUtils.copyProperties(e,copy);
-      mapper(r).applyUpdate(copy,dto); validateEntity(r,copy); return dto;
+      mapper(r).applyUpdate(copy,dto);
+      if (copy instanceof FeriasGozo fg && feriasGozoService != null) {
+        feriasGozoService.hydrateParentPeriodoAquisitivo(fg, false);
+      }
+      validateEntity(r,copy,e); return dto;
     } catch (ReflectiveOperationException failure) { throw new IllegalStateException("Tipo de entidade não construível."); }
   }
   public void validateEntity(Resource r, Object e) {
+    validateEntity(r, e, null);
+  }
+  public void validateEntity(Resource r, Object e, Object previousSnapshot) {
     switch(r) {
       case CARGOS -> invariants.cargo((Cargo)e);
       case PESSOAS -> invariants.pessoa((ServidorPessoa)e);
@@ -248,22 +262,41 @@ public class ErgonBulkDomain {
       }
       case PERIODOS_AQUISITIVOS_FERIAS -> {
         if (periodoAquisitivoFeriasService != null) {
-          periodoAquisitivoFeriasService.validatePeriodoAquisitivoFerias((PeriodoAquisitivoFerias) e);
+          periodoAquisitivoFeriasService.validatePeriodoAquisitivoFerias(
+              (PeriodoAquisitivoFerias) e,
+              previousSnapshot instanceof PeriodoAquisitivoFerias paf ? paf : null);
         }
         invariants.periodoAquisitivoFerias((PeriodoAquisitivoFerias) e, false);
       }
       case FERIAS_GOZO -> {
         if (feriasGozoService != null) {
-          feriasGozoService.validateFeriasGozo((FeriasGozo) e);
+          feriasGozoService.validateFeriasGozo(
+              (FeriasGozo) e, previousSnapshot instanceof FeriasGozo fg ? fg : null);
         }
         invariants.feriasGozo((FeriasGozo) e, false);
       }
     }
   }
   public boolean apply(Resource r, Object e, Object dto) {
+    Object previousSnapshot = null;
+    try {
+      previousSnapshot = r.entity.getDeclaredConstructor().newInstance();
+      BeanUtils.copyProperties(e, previousSnapshot);
+    } catch (ReflectiveOperationException ignored) {
+    }
     ObjectNode before=prior(r,e); mapper(r).applyUpdate(e,dto);
+    if (e instanceof PeriodoAquisitivoFerias paf && previousSnapshot instanceof PeriodoAquisitivoFerias prevPa) {
+      if (prevPa.getDiasGozados() != null) paf.setDiasGozados(prevPa.getDiasGozados());
+      if (prevPa.getDiasVendidosAbono() != null) paf.setDiasVendidosAbono(prevPa.getDiasVendidosAbono());
+      if (prevPa.getDiasConvertidosDobro() != null) paf.setDiasConvertidosDobro(prevPa.getDiasConvertidosDobro());
+      if (prevPa.getGeradoPorAverbacao() != null) paf.setGeradoPorAverbacao(prevPa.getGeradoPorAverbacao());
+      PeriodoAquisitivoFeriasMapper.recomputeSaldoAndSituacao(paf);
+    }
+    if (e instanceof FeriasGozo fg && feriasGozoService != null) {
+      feriasGozoService.hydrateParentPeriodoAquisitivo(fg, false);
+    }
     boolean changed=!before.equals(prior(r,e));
-    validateEntity(r,e);
+    validateEntity(r,e,previousSnapshot);
     if (e instanceof FeriasGozo fg && feriasGozoService != null) {
       feriasGozoService.sincronizarContabilidadePeriodoAquisitivo(fg.getPeriodoAquisitivoId());
     }
@@ -324,7 +357,8 @@ public class ErgonBulkDomain {
       if (!Set.of("EM_AQUISICAO", "SUSPENSO").contains(copy.getSituacao()))
         throw new IllegalArgumentException("Período aquisitivo não está em aquisição ou suspenso para homologação.");
       if (dto.getDocumentoLegalId() != null) document(dto.getDocumentoLegalId(), copy.getEmpCodigo());
-      copy.setSituacao(copy.getDiasGozados() != null && copy.getDiasGozados() > 0 ? "PARCIALMENTE_GOZADO" : "DISPONIVEL");
+      copy.setSituacao("DISPONIVEL");
+      PeriodoAquisitivoFeriasMapper.recomputeSaldoAndSituacao(copy);
       if (dto.getDocumentoLegalId() != null) copy.setDocumentoLegalId(dto.getDocumentoLegalId());
       copy.setObservacoes((copy.getObservacoes() == null ? "" : copy.getObservacoes() + " | ") + "Homologação em lote: " + dto.getObservacoes());
       if (periodoAquisitivoFeriasService != null) {
@@ -433,9 +467,11 @@ public class ErgonBulkDomain {
     }
     if (entity instanceof PeriodoAquisitivoFerias current && candidate instanceof PeriodoAquisitivoFerias next) {
       boolean changed = !Objects.equals(current.getSituacao(), next.getSituacao())
+          || !Objects.equals(current.getSaldoDiasDisponivel(), next.getSaldoDiasDisponivel())
           || !Objects.equals(current.getDocumentoLegalId(), next.getDocumentoLegalId())
           || !Objects.equals(current.getObservacoes(), next.getObservacoes());
       current.setSituacao(next.getSituacao());
+      current.setSaldoDiasDisponivel(next.getSaldoDiasDisponivel());
       current.setDocumentoLegalId(next.getDocumentoLegalId());
       current.setObservacoes(next.getObservacoes());
       em.flush(); return changed;

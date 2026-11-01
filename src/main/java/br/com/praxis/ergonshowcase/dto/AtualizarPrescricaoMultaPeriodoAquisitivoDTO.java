@@ -81,6 +81,8 @@ public class AtualizarPrescricaoMultaPeriodoAquisitivoDTO {
       order = 50,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Pelo início do gozo (I)\"},{\"value\":\"F\",\"label\":\"Pelo término do gozo (F)\"}]",
       icon = "warning")
   private String criterioPrescricao;
 
@@ -95,6 +97,8 @@ public class AtualizarPrescricaoMultaPeriodoAquisitivoDTO {
       order = 60,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herdar da regra (I)\"},{\"value\":\"S\",\"label\":\"Permitir gozo (S)\"},{\"value\":\"N\",\"label\":\"Bloquear gozo (N)\"}]",
       icon = "warning")
   private String permiteGozoPosPrescricao;
 
@@ -120,6 +124,8 @@ public class AtualizarPrescricaoMultaPeriodoAquisitivoDTO {
       order = 80,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herdar da regra (I)\"},{\"value\":\"S\",\"label\":\"Dispensar multa (S)\"},{\"value\":\"N\",\"label\":\"Aplicar multa (N)\"}]",
       icon = "gavel")
   private String semPgtoMulta;
 

@@ -39,6 +39,8 @@ public class AtualizarAbonoFinanceiroFeriasGozoDTO {
       order = 20,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Início das férias (I)\"},{\"value\":\"F\",\"label\":\"Final das férias (F)\"}]",
       icon = "swap_horiz")
   private String iniFimAbono;
 

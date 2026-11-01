@@ -91,6 +91,8 @@ public class AtualizarOverridesPeriodoAquisitivoDTO {
       order = 60,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herdar da regra (I)\"},{\"value\":\"D\",\"label\":\"Dias de direito (D)\"},{\"value\":\"G\",\"label\":\"Dias de gozo (G)\"},{\"value\":\"N\",\"label\":\"Sem abono (N)\"}]",
       icon = "tune")
   private String abonoDirGozo;
 
@@ -105,6 +107,8 @@ public class AtualizarOverridesPeriodoAquisitivoDTO {
       order = 70,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herdar da regra (I)\"},{\"value\":\"S\",\"label\":\"Conceder 1/3 (S)\"},{\"value\":\"N\",\"label\":\"Vedar 1/3 (N)\"}]",
       icon = "tune")
   private String abonoConstFer;
 
@@ -119,6 +123,8 @@ public class AtualizarOverridesPeriodoAquisitivoDTO {
       order = 80,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herdar da regra (I)\"},{\"value\":\"S\",\"label\":\"Permitir (S)\"},{\"value\":\"N\",\"label\":\"Bloquear (N)\"}]",
       icon = "tune")
   private String adiant13Fer;
 
@@ -133,6 +139,8 @@ public class AtualizarOverridesPeriodoAquisitivoDTO {
       order = 90,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herdar da regra (I)\"},{\"value\":\"S\",\"label\":\"Permitir (S)\"},{\"value\":\"N\",\"label\":\"Bloquear (N)\"}]",
       icon = "tune")
   private String adiantSalFer;
 
@@ -147,6 +155,8 @@ public class AtualizarOverridesPeriodoAquisitivoDTO {
       order = 100,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herdar da regra (I)\"},{\"value\":\"S\",\"label\":\"Permitir (S)\"},{\"value\":\"N\",\"label\":\"Bloquear (N)\"}]",
       icon = "tune")
   private String emprestFer;
 
@@ -161,6 +171,8 @@ public class AtualizarOverridesPeriodoAquisitivoDTO {
       order = 110,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herdar da regra (I)\"},{\"value\":\"S\",\"label\":\"Permitir (S)\"},{\"value\":\"N\",\"label\":\"Bloquear (N)\"}]",
       icon = "tune")
   private String permiteFerEstePer;
 
@@ -227,6 +239,8 @@ public class AtualizarOverridesPeriodoAquisitivoDTO {
       order = 160,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herdar da regra (I)\"},{\"value\":\"S\",\"label\":\"Permitir dobro (S)\"},{\"value\":\"N\",\"label\":\"Bloquear dobro (N)\"}]",
       icon = "tune")
   private String contDobroFerias;
 

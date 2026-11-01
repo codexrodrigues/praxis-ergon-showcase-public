@@ -28,6 +28,13 @@ import org.praxisplatform.uischema.fact.ResourceFact;
         "Dias corridos entre o início de exercício e a vacância ou a data atual; não equivale a tempo previdenciário certificado.",
     dataType = "integer",
     unit = "days",
+    icon = "calendar_month",
+    tone = "info",
+    valuePresentation = "metric",
+    thresholds = {
+      @Threshold(min = 0, max = 1094, tone = "warning", label = "Período inicial (< 3 anos)"),
+      @Threshold(min = 1095, max = 36500, tone = "success", label = "Carreira consolidada")
+    },
     sourceKind = "computed")
 @org.praxisplatform.uischema.fact.ResourceFact(
     key = "emEstagioProbatorio",
@@ -37,6 +44,9 @@ import org.praxisplatform.uischema.fact.ResourceFact;
     description =
         "Indica vínculo ativo em exercício cujo estágio ainda não foi homologado; não certifica elegibilidade jurídica.",
     dataType = "boolean",
+    icon = "hourglass_top",
+    tone = "warning",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @org.praxisplatform.uischema.fact.ResourceFact(
     key = "possuiCargoComissao",
@@ -44,6 +54,9 @@ import org.praxisplatform.uischema.fact.ResourceFact;
     label = "Cargo em comissão",
     description = "Indica cargo em comissão associado ao vínculo.",
     dataType = "boolean",
+    icon = "workspace_premium",
+    tone = "info",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @org.praxisplatform.uischema.fact.ResourceFact(
     key = "emCessaoAtiva",
@@ -51,6 +64,9 @@ import org.praxisplatform.uischema.fact.ResourceFact;
     label = "Cessão ativa",
     description = "Indica estado funcional CEDIDO persistido.",
     dataType = "boolean",
+    icon = "swap_horiz",
+    tone = "warning",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @BulkResourceOperations(
     proposalOperationId="ergon.vinculos.bulk.proposal",

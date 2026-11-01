@@ -1079,7 +1079,7 @@ class FeriasSlice5Phase2ContractTest {
                 .getMethod("groupByStats", org.praxisplatform.uischema.stats.dto.GroupByStatsRequest.class)
                 .getAnnotation(UiAnalytics.class)
                 .projections())
-        .hasSize(2);
+        .hasSizeGreaterThanOrEqualTo(5);
     assertThat(
             VinculoController.class
                 .getMethod("periodosAquisitivosFerias", VinculoId.class, int.class, int.class)
@@ -1500,5 +1500,34 @@ class FeriasSlice5Phase2ContractTest {
         radarService.filterByCursor(
             new RadarFeriasPrescricaoFilterDTO(), radarService.getDefaultSort(), null, null, 10);
     assertThat(cursorPage.content()).hasSize(1);
+
+    // 3. Preservação de EM_AQUISICAO em PeriodoAquisitivoFeriasMapper.recomputeSaldoAndSituacao
+    var paEmAquisicao = new PeriodoAquisitivoFerias();
+    paEmAquisicao.setTotDiasDireito(30);
+    paEmAquisicao.setFaltasApuradas(0);
+    paEmAquisicao.setDiasGozados(0);
+    paEmAquisicao.setDiasVendidosAbono(0);
+    paEmAquisicao.setDiasConvertidosDobro(0);
+    paEmAquisicao.setSituacao("EM_AQUISICAO");
+    PeriodoAquisitivoFeriasMapper.recomputeSaldoAndSituacao(paEmAquisicao);
+    assertThat(paEmAquisicao.getSituacao()).isEqualTo("EM_AQUISICAO");
+    assertThat(paEmAquisicao.getSaldoDiasDisponivel()).isEqualTo(30);
+
+    // 4. ErgonReadOnlyResourceService habilita cursor pagination, exportação 5 escopos e stats nos catálogos read-only
+    var setorService =
+        new br.com.praxis.ergonshowcase.service.SetorService(
+            mock(br.com.praxis.ergonshowcase.repository.SetorRepository.class),
+            mock(br.com.praxis.ergonshowcase.mapper.SetorMapper.class),
+            tenant);
+    assertThat(setorService.supportsCursorPagination()).isTrue();
+    assertThat(setorService.supportsCollectionExport()).isTrue();
+    assertThat(setorService.getCollectionExportCapability().orElseThrow().scopes())
+        .containsExactlyInAnyOrder(
+            CollectionExportScope.AUTO,
+            CollectionExportScope.SELECTED,
+            CollectionExportScope.FILTERED,
+            CollectionExportScope.CURRENT_PAGE,
+            CollectionExportScope.ALL);
+    assertThat(setorService.getStatsFieldRegistry()).isNotNull();
   }
 }

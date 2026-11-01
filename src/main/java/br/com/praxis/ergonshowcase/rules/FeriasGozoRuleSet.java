@@ -68,9 +68,13 @@ public final class FeriasGozoRuleSet {
 
   public static final String JAVA_EXECUTOR_CONCOMITANCIA_KEY =
       "ergon.ferias:concomitancia-e-saldo-fracionamento";
+  public static final String JAVA_EXECUTOR_ABONO_PECUNIARIO_KEY =
+      "ergon.ferias:abono-pecuniario-elegibilidade-e-limites";
   public static final String JAVA_EXECUTOR_VERSION = "1.0";
   public static final String EXECUTOR_CONCOMITANCIA_E_SALDO_FRACIONAMENTO =
       JAVA_EXECUTOR_CONCOMITANCIA_KEY + "@" + JAVA_EXECUTOR_VERSION;
+  public static final String EXECUTOR_ABONO_PECUNIARIO_ELEGIBILIDADE_E_LIMITES =
+      JAVA_EXECUTOR_ABONO_PECUNIARIO_KEY + "@" + JAVA_EXECUTOR_VERSION;
 
   public static final String SLOT_CRONOLOGIA_E_INTERRUPCAO_VALIDA =
       "ferias-gozo.guard.cronologia-e-interrupcao-valida";
@@ -656,66 +660,20 @@ public final class FeriasGozoRuleSet {
             ERG00519_TEMPLATE_EXPRESSION,
             "ERG-00519",
             baseFacts),
-        // 10. ERG-00522 / ERG-03311..ERG-03315: elegibilidade e limites de abono pecuniário
-        productJsonLogicBinding(
+        // 10. ERG-00522 / ERG-03311..ERG-03315: elegibilidade e limites de abono pecuniário (Executor Java)
+        new DecisionBinding(
             "product.ferias-gozo.erg-00522",
             SLOT_ABONO_PECUNIARIO_ELEGIBILIDADE_E_LIMITES,
+            DecisionSource.PRODUCT,
+            null,
+            RuleExecutorRef.java(JAVA_EXECUTOR_ABONO_PECUNIARIO_KEY, JAVA_EXECUTOR_VERSION),
+            List.of(),
             100,
-            """
-            {
-              "or": [
-                {
-                  "and": [
-                    {"!=": [{"var": "draft.abonoPecuniario"}, true]},
-                    {"or": [{"==": [{"var": "draft.diasAbonoVendidos"}, null]}, {"==": [{"var": "draft.diasAbonoVendidos"}, 0]}]}
-                  ]
-                },
-                {
-                  "and": [
-                    {"==": [{"var": "draft.abonoPecuniario"}, true]},
-                    {"==": [{"var": "effectiveParametroConta.permiteAbonoPecuniario"}, true]},
-                    {"!=": [{"var": "draft.diasAbonoVendidos"}, null]},
-                    {">": [{"var": "draft.diasAbonoVendidos"}, 0]},
-                    {"in": [{"var": "draft.iniFimAbono"}, ["I", "F"]]},
-                    {
-                      "or": [
-                        {"==": [{"var": "effectiveParametroConta.minDiasPvendFer"}, null]},
-                        {">=": [{"var": "draft.diasAbonoVendidos"}, {"var": "effectiveParametroConta.minDiasPvendFer"}]}
-                      ]
-                    },
-                    {
-                      "or": [
-                        {"==": [{"var": "effectiveParametroConta.maxDiasVendFer"}, null]},
-                        {"<=": [{"var": "draft.diasAbonoVendidos"}, {"var": "effectiveParametroConta.maxDiasVendFer"}]}
-                      ]
-                    },
-                    {
-                      "or": [
-                        {"==": [{"var": "derived.maxDiasAbonoPelaFracao"}, null]},
-                        {"<=": [{"var": "draft.diasAbonoVendidos"}, {"var": "derived.maxDiasAbonoPelaFracao"}]}
-                      ]
-                    },
-                    {
-                      "or": [
-                        {"==": [{"var": "draft.dtVendaAbono"}, null]},
-                        {"==": [{"var": "draft.dtini"}, null]},
-                        {"<=": [{"date": [{"var": "draft.dtVendaAbono"}]}, {"date": [{"var": "draft.dtini"}]}]}
-                      ]
-                    },
-                    {
-                      "or": [
-                        {"==": [{"var": "draft.dtPagtoAbono"}, null]},
-                        {"==": [{"var": "draft.dtVendaAbono"}, null]},
-                        {">=": [{"date": [{"var": "draft.dtPagtoAbono"}]}, {"date": [{"var": "draft.dtVendaAbono"}]}]}
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-            """,
-            "ERG-00522",
-            baseFacts),
+            true,
+            null,
+            null,
+            List.of("draft.dtini", "draft.dtprevfim", "draft.diasGozo"),
+            null),
         // 11. ERG-00514, ERG-00518, ERG-00520, ERG-00523, ERG-00525, ERG-00531, ERG-00532, ERG-00526 (Executor Java)
         new DecisionBinding(
             "product.ferias-gozo.concomitancia-e-saldo",

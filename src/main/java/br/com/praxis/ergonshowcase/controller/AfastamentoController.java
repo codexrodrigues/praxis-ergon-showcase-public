@@ -32,6 +32,9 @@ import org.springframework.web.bind.annotation.*;
     label = "Afastamento em curso",
     description = "Verdadeiro quando o afastamento está homologado e sem data de término efetivo.",
     dataType = "boolean",
+    icon = "event_busy",
+    tone = "warning",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @ResourceFact(
     key = "comSubstitutoDesignado",
@@ -39,6 +42,9 @@ import org.springframework.web.bind.annotation.*;
     label = "Com substituto designado",
     description = "Verdadeiro quando há servidor substituto formalmente vinculado ao período.",
     dataType = "boolean",
+    icon = "swap_horiz",
+    tone = "info",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @ResourceFact(
     key = "pendenteHomologacao",
@@ -46,6 +52,9 @@ import org.springframework.web.bind.annotation.*;
     label = "Pendente de homologação",
     description = "Verdadeiro quando o registro aguarda deliberação da chefia ou junta médica.",
     dataType = "boolean",
+    icon = "pending_actions",
+    tone = "warning",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @BulkResourceOperations(
     proposalOperationId = "ergon.afastamentos.bulk.proposal",

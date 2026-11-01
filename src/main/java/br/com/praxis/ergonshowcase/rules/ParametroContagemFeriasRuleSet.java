@@ -576,141 +576,81 @@ public final class ParametroContagemFeriasRuleSet {
             """,
             "ERG-00606",
             baseFacts),
-        // 10. ERG-01813..ERG-01828: licença especial, progressão, tempo de serviço e sexta-parte
+        // 10a. ERG-01813: temLicEsp == true exige anosLicEsp > 0 e mesesLicEspPer > 0
         productJsonLogicBinding(
             "product.parametros-conta.erg-01813",
             SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
             100,
             """
             {
-              "and": [
+              "or": [
+                {"!=": [{"var": "draft.temLicEsp"}, true]},
                 {
-                  "or": [
+                  "and": [
+                    {"!=": [{"var": "draft.anosLicEsp"}, null]},
+                    {">": [{"var": "draft.anosLicEsp"}, 0]},
+                    {"!=": [{"var": "draft.mesesLicEspPer"}, null]},
+                    {">": [{"var": "draft.mesesLicEspPer"}, 0]}
+                  ]
+                }
+              ]
+            }
+            """,
+            "ERG-01813",
+            baseFacts),
+        // 10b. ERG-01817: temLicEsp != true veda anosLicEsp, mesesLicEspPer, vendLicEsp e contDobroLicEsp
+        productJsonLogicBinding(
+            "product.parametros-conta.erg-01817",
+            SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            101,
+            """
+            {
+              "or": [
+                {"==": [{"var": "draft.temLicEsp"}, true]},
+                {
+                  "and": [
+                    {"or": [{"==": [{"var": "draft.anosLicEsp"}, null]}, {"<=": [{"var": "draft.anosLicEsp"}, 0]}]},
+                    {"or": [{"==": [{"var": "draft.mesesLicEspPer"}, null]}, {"<=": [{"var": "draft.mesesLicEspPer"}, 0]}]},
+                    {"!=": [{"var": "draft.vendLicEsp"}, true]},
+                    {"!=": [{"var": "draft.contDobroLicEsp"}, true]}
+                  ]
+                }
+              ]
+            }
+            """,
+            "ERG-01817",
+            baseFacts),
+        // 10c. ERG-01814: vendLicEsp == true exige abonoDirGozoLicEsp válido e fração/limites coerentes
+        productJsonLogicBinding(
+            "product.parametros-conta.erg-01814",
+            SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            102,
+            """
+            {
+              "or": [
+                {"!=": [{"var": "draft.temLicEsp"}, true]},
+                {"!=": [{"var": "draft.vendLicEsp"}, true]},
+                {
+                  "and": [
+                    {"in": [{"var": "draft.abonoDirGozoLicEsp"}, ["D", "G", "N"]]},
                     {
-                      "and": [
-                        {"!=": [{"var": "draft.temLicEsp"}, true]},
-                        {"or": [{"==": [{"var": "draft.anosLicEsp"}, null]}, {"<=": [{"var": "draft.anosLicEsp"}, 0]}]},
-                        {"or": [{"==": [{"var": "draft.mesesLicEspPer"}, null]}, {"<=": [{"var": "draft.mesesLicEspPer"}, 0]}]},
-                        {"!=": [{"var": "draft.vendLicEsp"}, true]},
-                        {"!=": [{"var": "draft.contDobroLicEsp"}, true]}
+                      "or": [
+                        {"==": [{"var": "draft.minDiasPvendLicEsp"}, null]},
+                        {"==": [{"var": "draft.maxDiasVendLicEsp"}, null]},
+                        {"<=": [{"var": "draft.minDiasPvendLicEsp"}, {"var": "draft.maxDiasVendLicEsp"}]}
                       ]
                     },
                     {
-                      "and": [
-                        {"==": [{"var": "draft.temLicEsp"}, true]},
-                        {"!=": [{"var": "draft.anosLicEsp"}, null]},
-                        {">": [{"var": "draft.anosLicEsp"}, 0]},
-                        {"!=": [{"var": "draft.mesesLicEspPer"}, null]},
-                        {">": [{"var": "draft.mesesLicEspPer"}, 0]},
+                      "or": [
+                        {"==": [{"var": "draft.numDiasAbonoLicEsp"}, null]},
+                        {"==": [{"var": "draft.denDiasAbonoLicEsp"}, null]},
                         {
-                          "or": [
-                            {
-                              "and": [
-                                {"!=": [{"var": "draft.vendLicEsp"}, true]},
-                                {"or": [{"==": [{"var": "draft.minDiasPvendLicEsp"}, null]}, {"<=": [{"var": "draft.minDiasPvendLicEsp"}, 0]}]},
-                                {"or": [{"==": [{"var": "draft.maxDiasVendLicEsp"}, null]}, {"<=": [{"var": "draft.maxDiasVendLicEsp"}, 0]}]}
-                              ]
-                            },
-                            {
-                              "and": [
-                                {"==": [{"var": "draft.vendLicEsp"}, true]},
-                                {"in": [{"var": "draft.abonoDirGozoLicEsp"}, ["D", "G", "N"]]},
-                                {
-                                  "or": [
-                                    {"==": [{"var": "draft.minDiasPvendLicEsp"}, null]},
-                                    {"==": [{"var": "draft.maxDiasVendLicEsp"}, null]},
-                                    {"<=": [{"var": "draft.minDiasPvendLicEsp"}, {"var": "draft.maxDiasVendLicEsp"}]}
-                                  ]
-                                },
-                                {
-                                  "or": [
-                                    {"==": [{"var": "draft.numDiasAbonoLicEsp"}, null]},
-                                    {"==": [{"var": "draft.denDiasAbonoLicEsp"}, null]},
-                                    {
-                                      "and": [
-                                        {">": [{"var": "draft.denDiasAbonoLicEsp"}, 0]},
-                                        {">=": [{"var": "draft.numDiasAbonoLicEsp"}, 0]},
-                                        {"<=": [{"var": "draft.numDiasAbonoLicEsp"}, {"var": "draft.denDiasAbonoLicEsp"}]}
-                                      ]
-                                    }
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "or": [
-                            {
-                              "and": [
-                                {"!=": [{"var": "draft.contDobroLicEsp"}, true]},
-                                {"or": [{"==": [{"var": "draft.minDiasPcontDobLicEsp"}, null]}, {"<=": [{"var": "draft.minDiasPcontDobLicEsp"}, 0]}]},
-                                {"or": [{"==": [{"var": "draft.maxDiasContDobLicEsp"}, null]}, {"<=": [{"var": "draft.maxDiasContDobLicEsp"}, 0]}]}
-                              ]
-                            },
-                            {
-                              "and": [
-                                {"==": [{"var": "draft.contDobroLicEsp"}, true]},
-                                {"!=": [{"var": "draft.minDiasPcontDobLicEsp"}, null]},
-                                {"!=": [{"var": "draft.maxDiasContDobLicEsp"}, null]},
-                                {">=": [{"var": "draft.minDiasPcontDobLicEsp"}, 0]},
-                                {">=": [{"var": "draft.maxDiasContDobLicEsp"}, 0]},
-                                {"<=": [{"var": "draft.minDiasPcontDobLicEsp"}, {"var": "draft.maxDiasContDobLicEsp"}]}
-                              ]
-                            }
+                          "and": [
+                            {">": [{"var": "draft.denDiasAbonoLicEsp"}, 0]},
+                            {">=": [{"var": "draft.numDiasAbonoLicEsp"}, 0]},
+                            {"<=": [{"var": "draft.numDiasAbonoLicEsp"}, {"var": "draft.denDiasAbonoLicEsp"}]}
                           ]
                         }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "or": [
-                    {
-                      "and": [
-                        {"==": [{"var": "draft.temProgressao"}, true]},
-                        {"!=": [{"var": "draft.anosProgressao"}, null]},
-                        {">": [{"var": "draft.anosProgressao"}, 0]}
-                      ]
-                    },
-                    {
-                      "and": [
-                        {"!=": [{"var": "draft.temProgressao"}, true]},
-                        {"or": [{"==": [{"var": "draft.anosProgressao"}, null]}, {"<=": [{"var": "draft.anosProgressao"}, 0]}]}
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "or": [
-                    {
-                      "and": [
-                        {"==": [{"var": "draft.temTempoServ"}, true]},
-                        {"!=": [{"var": "draft.anos1TempoServ"}, null]},
-                        {">": [{"var": "draft.anos1TempoServ"}, 0]}
-                      ]
-                    },
-                    {
-                      "and": [
-                        {"!=": [{"var": "draft.temTempoServ"}, true]},
-                        {"or": [{"==": [{"var": "draft.anos1TempoServ"}, null]}, {"<=": [{"var": "draft.anos1TempoServ"}, 0]}]}
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "or": [
-                    {
-                      "and": [
-                        {"==": [{"var": "draft.temSextaParte"}, true]},
-                        {"!=": [{"var": "draft.anosSextaParte"}, null]},
-                        {">": [{"var": "draft.anosSextaParte"}, 0]}
-                      ]
-                    },
-                    {
-                      "and": [
-                        {"!=": [{"var": "draft.temSextaParte"}, true]},
-                        {"or": [{"==": [{"var": "draft.anosSextaParte"}, null]}, {"<=": [{"var": "draft.anosSextaParte"}, 0]}]}
                       ]
                     }
                   ]
@@ -718,7 +658,137 @@ public final class ParametroContagemFeriasRuleSet {
               ]
             }
             """,
-            "ERG-01813",
+            "ERG-01814",
+            baseFacts),
+        // 10d. ERG-01815: vendLicEsp != true veda minDiasPvendLicEsp e maxDiasVendLicEsp positivos
+        productJsonLogicBinding(
+            "product.parametros-conta.erg-01815",
+            SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            103,
+            """
+            {
+              "or": [
+                {"!=": [{"var": "draft.temLicEsp"}, true]},
+                {"==": [{"var": "draft.vendLicEsp"}, true]},
+                {
+                  "and": [
+                    {"or": [{"==": [{"var": "draft.minDiasPvendLicEsp"}, null]}, {"<=": [{"var": "draft.minDiasPvendLicEsp"}, 0]}]},
+                    {"or": [{"==": [{"var": "draft.maxDiasVendLicEsp"}, null]}, {"<=": [{"var": "draft.maxDiasVendLicEsp"}, 0]}]}
+                  ]
+                }
+              ]
+            }
+            """,
+            "ERG-01815",
+            baseFacts),
+        // 10e. ERG-01816: coerência de contagem em dobro de licença especial
+        productJsonLogicBinding(
+            "product.parametros-conta.erg-01816",
+            SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            104,
+            """
+            {
+              "or": [
+                {"!=": [{"var": "draft.temLicEsp"}, true]},
+                {
+                  "and": [
+                    {"!=": [{"var": "draft.contDobroLicEsp"}, true]},
+                    {"or": [{"==": [{"var": "draft.minDiasPcontDobLicEsp"}, null]}, {"<=": [{"var": "draft.minDiasPcontDobLicEsp"}, 0]}]},
+                    {"or": [{"==": [{"var": "draft.maxDiasContDobLicEsp"}, null]}, {"<=": [{"var": "draft.maxDiasContDobLicEsp"}, 0]}]}
+                  ]
+                },
+                {
+                  "and": [
+                    {"==": [{"var": "draft.contDobroLicEsp"}, true]},
+                    {"!=": [{"var": "draft.minDiasPcontDobLicEsp"}, null]},
+                    {"!=": [{"var": "draft.maxDiasContDobLicEsp"}, null]},
+                    {">=": [{"var": "draft.minDiasPcontDobLicEsp"}, 0]},
+                    {">=": [{"var": "draft.maxDiasContDobLicEsp"}, 0]},
+                    {"<=": [{"var": "draft.minDiasPcontDobLicEsp"}, {"var": "draft.maxDiasContDobLicEsp"}]}
+                  ]
+                }
+              ]
+            }
+            """,
+            "ERG-01816",
+            baseFacts),
+        // 10f. ERG-01818: coerência entre temProgressao e anosProgressao
+        productJsonLogicBinding(
+            "product.parametros-conta.erg-01818",
+            SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            105,
+            """
+            {
+              "or": [
+                {
+                  "and": [
+                    {"==": [{"var": "draft.temProgressao"}, true]},
+                    {"!=": [{"var": "draft.anosProgressao"}, null]},
+                    {">": [{"var": "draft.anosProgressao"}, 0]}
+                  ]
+                },
+                {
+                  "and": [
+                    {"!=": [{"var": "draft.temProgressao"}, true]},
+                    {"or": [{"==": [{"var": "draft.anosProgressao"}, null]}, {"<=": [{"var": "draft.anosProgressao"}, 0]}]}
+                  ]
+                }
+              ]
+            }
+            """,
+            "ERG-01818",
+            baseFacts),
+        // 10g. ERG-01819: coerência entre temTempoServ e anos1TempoServ
+        productJsonLogicBinding(
+            "product.parametros-conta.erg-01819",
+            SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            106,
+            """
+            {
+              "or": [
+                {
+                  "and": [
+                    {"==": [{"var": "draft.temTempoServ"}, true]},
+                    {"!=": [{"var": "draft.anos1TempoServ"}, null]},
+                    {">": [{"var": "draft.anos1TempoServ"}, 0]}
+                  ]
+                },
+                {
+                  "and": [
+                    {"!=": [{"var": "draft.temTempoServ"}, true]},
+                    {"or": [{"==": [{"var": "draft.anos1TempoServ"}, null]}, {"<=": [{"var": "draft.anos1TempoServ"}, 0]}]}
+                  ]
+                }
+              ]
+            }
+            """,
+            "ERG-01819",
+            baseFacts),
+        // 10h. ERG-01820: coerência entre temSextaParte e anosSextaParte
+        productJsonLogicBinding(
+            "product.parametros-conta.erg-01820",
+            SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            107,
+            """
+            {
+              "or": [
+                {
+                  "and": [
+                    {"==": [{"var": "draft.temSextaParte"}, true]},
+                    {"!=": [{"var": "draft.anosSextaParte"}, null]},
+                    {">": [{"var": "draft.anosSextaParte"}, 0]}
+                  ]
+                },
+                {
+                  "and": [
+                    {"!=": [{"var": "draft.temSextaParte"}, true]},
+                    {"or": [{"==": [{"var": "draft.anosSextaParte"}, null]}, {"<=": [{"var": "draft.anosSextaParte"}, 0]}]}
+                  ]
+                }
+              ]
+            }
+            """,
+            "ERG-01820",
             baseFacts),
         // 11. ERG-01850 / ERG-01874: concomitância de vigência no mesmo escopo lógico (Executor Java)
         new DecisionBinding(

@@ -7,12 +7,47 @@ import br.com.praxis.ergonshowcase.service.RegraFrequenciaEstatutariaService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.praxisplatform.uischema.annotation.*;
 import org.praxisplatform.uischema.controller.base.AbstractReadOnlyResourceController;
+import org.praxisplatform.uischema.fact.ResourceFact;
 import org.praxisplatform.uischema.surface.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+@ResourceFact(
+    key = "ativa",
+    resourceKey = "administracao-pessoal.regras-frequencia-estatutaria",
+    label = "Regra estatutária ativa",
+    description =
+        "Indica se a parametrização estatutária encontra-se vigente para validação de ocorrências.",
+    dataType = "boolean",
+    icon = "verified",
+    tone = "success",
+    valuePresentation = "badge",
+    sourceKind = "field")
+@ResourceFact(
+    key = "exigeHomologacao",
+    resourceKey = "administracao-pessoal.regras-frequencia-estatutaria",
+    label = "Exige homologação formal",
+    description =
+        "Indica se o afastamento ou ocorrência requer homologação administrativa ou pericial.",
+    dataType = "boolean",
+    icon = "fact_check",
+    tone = "warning",
+    valuePresentation = "badge",
+    sourceKind = "field")
+@ResourceFact(
+    key = "duracaoMaxDias",
+    resourceKey = "administracao-pessoal.regras-frequencia-estatutaria",
+    label = "Duração máxima por evento",
+    description =
+        "Quantidade máxima de dias permitida para um único evento sob esta regra estatutária.",
+    dataType = "integer",
+    unit = "dias",
+    icon = "timelapse",
+    tone = "info",
+    valuePresentation = "integer",
+    sourceKind = "field")
 @ApiResource(
     value = ApiPaths.REGRAS_FREQUENCIA_ESTATUTARIA,
     resourceKey = "administracao-pessoal.regras-frequencia-estatutaria",

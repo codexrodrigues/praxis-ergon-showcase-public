@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.praxisplatform.uischema.annotation.*;
 import org.praxisplatform.uischema.controller.base.AbstractReadOnlyResourceController;
+import org.praxisplatform.uischema.fact.ResourceFact;
 import org.praxisplatform.uischema.rest.response.RestApiResponse;
 import org.praxisplatform.uischema.surface.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,29 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+@ResourceFact(
+    key = "multiEmp",
+    resourceKey = "administracao-pessoal.tabelas",
+    label = "Particionada por órgão",
+    description =
+        "Indica se os itens da tabela geral admitem escopo segregado por empresa/órgão (MULTI_EMP).",
+    dataType = "boolean",
+    icon = "domain",
+    tone = "info",
+    valuePresentation = "badge",
+    sourceKind = "field")
+@ResourceFact(
+    key = "taminfo",
+    resourceKey = "administracao-pessoal.tabelas",
+    label = "Tamanho máximo do código",
+    description =
+        "Quantidade máxima de caracteres aceita para o código de item nesta tabela geral.",
+    dataType = "integer",
+    unit = "caracteres",
+    icon = "straighten",
+    tone = "neutral",
+    valuePresentation = "integer",
+    sourceKind = "field")
 @ApiResource(
     value = ApiPaths.TABELAS,
     resourceKey = "administracao-pessoal.tabelas",

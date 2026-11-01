@@ -6,8 +6,20 @@ import br.com.praxis.ergonshowcase.dto.*;
 import br.com.praxis.ergonshowcase.service.*;
 import org.praxisplatform.uischema.annotation.*;
 import org.praxisplatform.uischema.controller.base.AbstractResourceController;
+import org.praxisplatform.uischema.fact.ResourceFact;
 
 /** Publica o contrato de órgãos através da hierarquia canônica Praxis. */
+@ResourceFact(
+    key = "ativa",
+    resourceKey = "administracao-pessoal.empresas",
+    label = "Órgão ativo",
+    description =
+        "Indica se o órgão público está habilitado para novas admissões e operações cadastrais.",
+    dataType = "boolean",
+    icon = "verified_user",
+    tone = "success",
+    valuePresentation = "badge",
+    sourceKind = "field")
 @ApiResource(
     quickFilters = {
       @QuickFilter(id = "ativos", label = "Órgãos ativos", filter = "{\"ativa\":true}"),

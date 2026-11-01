@@ -244,6 +244,8 @@ public abstract class PeriodoAquisitivoFeriasDados {
       order = 160,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Pelo início do gozo (I)\"},{\"value\":\"F\",\"label\":\"Pelo término do gozo (F)\"}]",
       icon = "warning")
   private String criterioPrescricao = "I";
 
@@ -261,6 +263,8 @@ public abstract class PeriodoAquisitivoFeriasDados {
       order = 170,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herdar da regra (I)\"},{\"value\":\"S\",\"label\":\"Permitir gozo (S)\"},{\"value\":\"N\",\"label\":\"Bloquear gozo (N)\"}]",
       icon = "warning")
   private String permiteGozoPosPrescricao = "I";
 
@@ -293,6 +297,8 @@ public abstract class PeriodoAquisitivoFeriasDados {
       order = 190,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herdar da regra (I)\"},{\"value\":\"S\",\"label\":\"Dispensar multa (S)\"},{\"value\":\"N\",\"label\":\"Aplicar multa (N)\"}]",
       icon = "gavel")
   private String semPgtoMulta = "N";
 
@@ -395,6 +401,8 @@ public abstract class PeriodoAquisitivoFeriasDados {
       order = 250,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herdar da regra (I)\"},{\"value\":\"D\",\"label\":\"Dias de direito (D)\"},{\"value\":\"G\",\"label\":\"Dias de gozo (G)\"},{\"value\":\"N\",\"label\":\"Sem abono (N)\"}]",
       icon = "tune")
   private String abonoDirGozo = "I";
 
@@ -412,6 +420,8 @@ public abstract class PeriodoAquisitivoFeriasDados {
       order = 260,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herdar da regra (I)\"},{\"value\":\"S\",\"label\":\"Conceder 1/3 (S)\"},{\"value\":\"N\",\"label\":\"Vedar 1/3 (N)\"}]",
       icon = "tune")
   private String abonoConstFer = "I";
 
@@ -429,6 +439,8 @@ public abstract class PeriodoAquisitivoFeriasDados {
       order = 270,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herdar da regra (I)\"},{\"value\":\"S\",\"label\":\"Permitir (S)\"},{\"value\":\"N\",\"label\":\"Bloquear (N)\"}]",
       icon = "tune")
   private String adiant13Fer = "I";
 
@@ -446,6 +458,8 @@ public abstract class PeriodoAquisitivoFeriasDados {
       order = 280,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herdar da regra (I)\"},{\"value\":\"S\",\"label\":\"Permitir (S)\"},{\"value\":\"N\",\"label\":\"Bloquear (N)\"}]",
       icon = "tune")
   private String adiantSalFer = "I";
 
@@ -463,6 +477,8 @@ public abstract class PeriodoAquisitivoFeriasDados {
       order = 290,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herdar da regra (I)\"},{\"value\":\"S\",\"label\":\"Permitir (S)\"},{\"value\":\"N\",\"label\":\"Bloquear (N)\"}]",
       icon = "tune")
   private String emprestFer = "I";
 
@@ -480,6 +496,8 @@ public abstract class PeriodoAquisitivoFeriasDados {
       order = 300,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herdar da regra (I)\"},{\"value\":\"S\",\"label\":\"Permitir (S)\"},{\"value\":\"N\",\"label\":\"Bloquear (N)\"}]",
       icon = "tune")
   private String permiteFerEstePer = "I";
 
@@ -565,6 +583,8 @@ public abstract class PeriodoAquisitivoFeriasDados {
       order = 350,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herdar da regra (I)\"},{\"value\":\"S\",\"label\":\"Permitir dobro (S)\"},{\"value\":\"N\",\"label\":\"Bloquear dobro (N)\"}]",
       icon = "tune")
   private String contDobroFerias = "I";
 

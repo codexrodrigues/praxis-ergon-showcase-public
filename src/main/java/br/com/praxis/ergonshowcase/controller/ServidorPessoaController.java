@@ -26,6 +26,14 @@ import org.praxisplatform.uischema.controller.base.AbstractResourceController;
     label = "Idade em anos",
     description = "Idade civil em anos completos na data atual.",
     dataType = "integer",
+    icon = "cake",
+    tone = "info",
+    valuePresentation = "metric",
+    thresholds = {
+      @Threshold(min = 0, max = 64, tone = "info", label = "Faixa regular"),
+      @Threshold(min = 65, max = 74, tone = "warning", label = "Elegibilidade etária"),
+      @Threshold(min = 75, max = 130, tone = "danger", label = "Compulsória (75+ anos)")
+    },
     sourceKind = "computed")
 @org.praxisplatform.uischema.fact.ResourceFact(
     key = "possuiDeficienciaPcD",
@@ -33,6 +41,9 @@ import org.praxisplatform.uischema.controller.base.AbstractResourceController;
     label = "Pessoa com deficiência",
     description = "Indica ao menos uma das cinco deficiências específicas registrada na pessoa.",
     dataType = "boolean",
+    icon = "accessible",
+    tone = "info",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @BulkResourceOperations(
     proposalOperationId="ergon.funcionarios.bulk.proposal",

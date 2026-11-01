@@ -25,6 +25,9 @@ import org.praxisplatform.uischema.controller.base.AbstractDuplicateDraftResourc
     label = "Cargo extinto",
     description = "Indica existência de extinção registrada para o cargo.",
     dataType = "boolean",
+    icon = "block",
+    tone = "danger",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @org.praxisplatform.uischema.fact.ResourceFact(
     key = "saldoVagasDisponiveis",
@@ -35,6 +38,14 @@ import org.praxisplatform.uischema.controller.base.AbstractDuplicateDraftResourc
     description =
         "Vagas autorizadas menos vínculos ativos, afastados ou cedidos; nulo quando não há quantitativo autorizado.",
     dataType = "integer",
+    icon = "groups",
+    tone = "info",
+    valuePresentation = "metric",
+    thresholds = {
+      @Threshold(max = 0, tone = "danger", label = "Quadro lotado ou excedente"),
+      @Threshold(min = 1, max = 5, tone = "warning", label = "Saldo reduzido"),
+      @Threshold(min = 6, max = 99999, tone = "success", label = "Vagas disponíveis")
+    },
     sourceKind = "computed")
 @BulkResourceOperations(
     proposalOperationId="ergon.cargos.bulk.proposal",

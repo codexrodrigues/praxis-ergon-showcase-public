@@ -6,12 +6,24 @@ import br.com.praxis.ergonshowcase.service.*;
 import io.swagger.v3.oas.annotations.*;
 import org.praxisplatform.uischema.annotation.*;
 import org.praxisplatform.uischema.controller.base.AbstractReadOnlyResourceController;
+import org.praxisplatform.uischema.fact.ResourceFact;
 import org.praxisplatform.uischema.surface.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /** Consulta auxiliar que sustenta opções e referências 360° dos pilotos. */
+@ResourceFact(
+    key = "anoDocumento",
+    resourceKey = "administracao-pessoal.documentos-legais",
+    label = "Ano de edição do ato",
+    description =
+        "Exercício oficial de edição ou numeração do ato administrativo ou diploma legal.",
+    dataType = "integer",
+    icon = "gavel",
+    tone = "neutral",
+    valuePresentation = "badge",
+    sourceKind = "field")
 @ApiResource(
     value = ApiPaths.DOCUMENTOS_LEGAIS,
     resourceKey = "administracao-pessoal.documentos-legais",

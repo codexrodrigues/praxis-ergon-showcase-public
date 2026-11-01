@@ -8,12 +8,46 @@ import br.com.praxis.ergonshowcase.service.CodigoFrequenciaService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.praxisplatform.uischema.annotation.*;
 import org.praxisplatform.uischema.controller.base.AbstractReadOnlyResourceController;
+import org.praxisplatform.uischema.fact.ResourceFact;
 import org.praxisplatform.uischema.surface.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+@ResourceFact(
+    key = "afastamento",
+    resourceKey = "administracao-pessoal.codigos-frequencia",
+    label = "Modalidade de afastamento",
+    description =
+        "Indica se o código caracteriza licença ou afastamento formal do exercício funcional.",
+    dataType = "boolean",
+    icon = "event_busy",
+    tone = "warning",
+    valuePresentation = "badge",
+    sourceKind = "field")
+@ResourceFact(
+    key = "onus",
+    resourceKey = "administracao-pessoal.codigos-frequencia",
+    label = "Mantém remuneração (ônus)",
+    description =
+        "Indica se a ocorrência preserva o ônus remuneratório pelo órgão de origem.",
+    dataType = "boolean",
+    icon = "payments",
+    tone = "success",
+    valuePresentation = "badge",
+    sourceKind = "field")
+@ResourceFact(
+    key = "viaFrequencia",
+    resourceKey = "administracao-pessoal.codigos-frequencia",
+    label = "Lançável via folha de ponto",
+    description =
+        "Indica se o código pode ser registrado diretamente na apuração mensal de frequência.",
+    dataType = "boolean",
+    icon = "edit_calendar",
+    tone = "info",
+    valuePresentation = "badge",
+    sourceKind = "field")
 @ApiResource(
     value = ApiPaths.CODIGOS_FREQUENCIA,
     resourceKey = "administracao-pessoal.codigos-frequencia",

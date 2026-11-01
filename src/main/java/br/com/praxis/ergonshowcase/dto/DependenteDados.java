@@ -81,6 +81,10 @@ public abstract class DependenteDados {
       label = "Sexo",
       group = "Identificação civil",
       order = 30,
+      type = FieldDataType.TEXT,
+      controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"F\",\"label\":\"Feminino (F)\"},{\"value\":\"M\",\"label\":\"Masculino (M)\"}]",
       icon = "wc",
       tableHidden = true)
   @BulkEditable(modes = {BulkMode.UNIFORM_UPDATE, BulkMode.PER_ITEM_UPDATE}, allowClear = true)
@@ -163,7 +167,8 @@ public abstract class DependenteDados {
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
       dataCategory = DomainDataCategory.PERSONAL,
-      reason = "Identificação fiscal individual do dependente.",
+      complianceTags = {"LGPD", "NON_EXPORTABLE"},
+      reason = "Identificação fiscal individual do dependente protegida contra exportação em massa.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   @UISchema(
@@ -173,7 +178,10 @@ public abstract class DependenteDados {
       group = "Documentação civil",
       order = 70,
       icon = "badge",
-      tableHidden = true)
+      tableHidden = true,
+      visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_PII_READ"},
+      editableForAuthorities = {"ERGON_WRITE"},
+      fieldAccessReason = "Dado fiscal pessoal de dependente (LGPD) governado para inspeção individual.")
   @BulkEditable(modes = {BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private String cpf;
 

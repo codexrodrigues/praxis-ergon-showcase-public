@@ -241,6 +241,7 @@ public abstract class ErgonResourceService<E, R, I, F extends GenericFilterDTO, 
         effectiveScope == CollectionExportScope.ALL || request.filters() == null
             ? emptyFilter()
             : request.filters();
+    Sort exportSort = resolveExportSort(request.sort());
     List<R> slice;
     boolean truncated;
     if (effectiveScope == CollectionExportScope.CURRENT_PAGE && request.pagination() != null) {
@@ -255,35 +256,46 @@ public abstract class ErgonResourceService<E, R, I, F extends GenericFilterDTO, 
               ? Math.min(request.pagination().pageSize(), limit)
               : limit;
       var pageResult =
-          filter(effectiveFilter, PageRequest.of(pageNum, pageSize, getDefaultSort()), null);
+          filter(effectiveFilter, PageRequest.of(pageNum, pageSize, exportSort), null);
       slice = pageResult.getContent();
       truncated = pageResult.hasNext() && slice.size() >= limit;
+    } else if (effectiveScope == CollectionExportScope.SELECTED && hasSelection) {
+      var entities =
+          getRepository()
+              .findAll(
+                  filtered(effectiveFilter).and(selectionSpecification(request.selection())),
+                  PageRequest.of(0, limit + 1, exportSort))
+              .getContent();
+      var rows = new ArrayList<>(entities.stream().map(getResourceMapper()::toResponse).toList());
+      if (readFacts != null) {
+        readFacts.enrich(rows);
+      }
+      Set<String> selectedIds =
+          request.selection().selectedKeys().stream()
+              .map(String::valueOf)
+              .collect(java.util.stream.Collectors.toSet());
+      String keyProp =
+          request.selection().keyField() != null && !request.selection().keyField().isBlank()
+              ? request.selection().keyField().trim()
+              : "id";
+      List<R> matched =
+          rows.stream()
+              .filter(
+                  row -> {
+                    var bw = new BeanWrapperImpl(row);
+                    Object keyVal =
+                        bw.isReadableProperty(keyProp)
+                            ? bw.getPropertyValue(keyProp)
+                            : (bw.isReadableProperty("id") ? bw.getPropertyValue("id") : null);
+                    return keyVal != null && selectedIds.contains(String.valueOf(keyVal));
+                  })
+              .toList();
+      truncated = matched.size() > limit;
+      slice = matched.subList(0, Math.min(matched.size(), limit));
     } else {
       var rows =
-          filter(effectiveFilter, PageRequest.of(0, limit + 1, getDefaultSort()), null)
+          filter(effectiveFilter, PageRequest.of(0, limit + 1, exportSort), null)
               .getContent();
-      if (effectiveScope == CollectionExportScope.SELECTED && hasSelection) {
-        Set<String> selectedIds =
-            request.selection().selectedKeys().stream()
-                .map(String::valueOf)
-                .collect(java.util.stream.Collectors.toSet());
-        String keyProp =
-            request.selection().keyField() != null && !request.selection().keyField().isBlank()
-                ? request.selection().keyField().trim()
-                : "id";
-        rows =
-            rows.stream()
-                .filter(
-                    row -> {
-                      var bw = new BeanWrapperImpl(row);
-                      Object keyVal =
-                          bw.isReadableProperty(keyProp)
-                              ? bw.getPropertyValue(keyProp)
-                              : (bw.isReadableProperty("id") ? bw.getPropertyValue("id") : null);
-                      return keyVal != null && selectedIds.contains(String.valueOf(keyVal));
-                    })
-                .toList();
-      }
       truncated = rows.size() > limit;
       slice = rows.subList(0, Math.min(rows.size(), limit));
     }
@@ -294,6 +306,106 @@ public abstract class ErgonResourceService<E, R, I, F extends GenericFilterDTO, 
         exportFields(),
         CollectionExportValueResolver.reflective(),
         Map.of("effectiveMaxRows", limit, "truncated", truncated, "scope", scopeName));
+  }
+
+  protected Sort resolveExportSort(Object rawSort) {
+    if (rawSort instanceof Sort s && s.isSorted()) {
+      return s;
+    }
+    if (rawSort instanceof String str && !str.isBlank()) {
+      String[] parts = str.trim().split(",");
+      String prop = parts[0].trim();
+      Sort.Direction dir =
+          parts.length > 1 && "desc".equalsIgnoreCase(parts[1].trim())
+              ? Sort.Direction.DESC
+              : Sort.Direction.ASC;
+      if ("id".equals(prop)) {
+        return Sort.by(dir, identityPaths.toArray(String[]::new));
+      }
+      return Sort.by(dir, prop);
+    }
+    if (rawSort instanceof Map<?, ?> map) {
+      Object propObj =
+          map.containsKey("property")
+              ? map.get("property")
+              : (map.containsKey("field") ? map.get("field") : map.get("column"));
+      if (propObj instanceof String prop && !prop.isBlank()) {
+        Object dirObj = map.containsKey("direction") ? map.get("direction") : map.get("order");
+        Sort.Direction dir =
+            dirObj != null && "desc".equalsIgnoreCase(dirObj.toString().trim())
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
+        if ("id".equals(prop.trim())) {
+          return Sort.by(dir, identityPaths.toArray(String[]::new));
+        }
+        return Sort.by(dir, prop.trim());
+      }
+    }
+    if (rawSort instanceof Collection<?> coll && !coll.isEmpty()) {
+      Sort combined = Sort.unsorted();
+      for (Object item : coll) {
+        Sort next = resolveExportSort(item);
+        if (next != null && next.isSorted()) {
+          combined = combined.and(next);
+        }
+      }
+      if (combined.isSorted()) {
+        return combined;
+      }
+    }
+    return getDefaultSort();
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  protected Specification<E> selectionSpecification(CollectionExportSelection selection) {
+    if (selection == null
+        || selection.selectedKeys() == null
+        || selection.selectedKeys().isEmpty()) {
+      return (root, q, cb) -> cb.conjunction();
+    }
+    List<String> rawKeys =
+        selection.selectedKeys().stream()
+            .filter(Objects::nonNull)
+            .map(String::valueOf)
+            .filter(s -> !s.isBlank())
+            .toList();
+    if (rawKeys.isEmpty()) {
+      return (root, q, cb) -> cb.conjunction();
+    }
+    return (root, q, cb) -> {
+      try {
+        if (identityPaths.size() == 1) {
+          Path p = path(root, identityPaths.getFirst());
+          CriteriaBuilder.In<Object> in = cb.in(p);
+          for (String raw : rawKeys) {
+            Object val =
+                p.getJavaType() == Long.class
+                    ? Long.valueOf(raw)
+                    : p.getJavaType() == Integer.class ? Integer.valueOf(raw) : raw;
+            in.value(val);
+          }
+          return in;
+        }
+        List<Predicate> ors = new ArrayList<>();
+        for (String raw : rawKeys) {
+          String[] parts = raw.split(":");
+          if (parts.length != identityPaths.size()) continue;
+          List<Predicate> ands = new ArrayList<>();
+          for (int i = 0; i < identityPaths.size(); i++) {
+            Path p = path(root, identityPaths.get(i));
+            Object val =
+                p.getJavaType() == Long.class
+                    ? Long.valueOf(parts[i])
+                    : p.getJavaType() == Integer.class ? Integer.valueOf(parts[i]) : parts[i];
+            ands.add(cb.equal(p, val));
+          }
+          ors.add(cb.and(ands.toArray(Predicate[]::new)));
+        }
+        return ors.isEmpty() ? cb.conjunction() : cb.or(ors.toArray(Predicate[]::new));
+      } catch (RuntimeException ex) {
+        return cb.conjunction();
+      }
+    };
   }
 
   @Autowired protected ErgonReadFacts readFacts;
