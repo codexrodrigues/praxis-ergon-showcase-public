@@ -5,11 +5,15 @@ import br.com.praxis.ergonshowcase.domain.ParametroContagemFerias;
 import br.com.praxis.ergonshowcase.dto.*;
 import br.com.praxis.ergonshowcase.mapper.ParametroContagemFeriasMapper;
 import br.com.praxis.ergonshowcase.repository.ParametroContagemFeriasRepository;
+import br.com.praxis.ergonshowcase.rules.ErgonRuleEngineFacade;
+import br.com.praxis.ergonshowcase.rules.ErgonRuleViolationException;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
 import java.util.*;
 import java.util.function.Consumer;
+import org.praxisplatform.rules.contract.RuleEvaluationResult;
 import org.praxisplatform.uischema.concurrency.ResourceRepresentationResult;
 import org.praxisplatform.uischema.concurrency.ResourceVersionPreconditionException;
 import org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition;
@@ -52,14 +56,90 @@ public class ParametroContagemFeriasService
   @PersistenceContext protected EntityManager entityManager;
   protected final ParametroContagemFeriasMapper mapper;
   private final TenantContext tenant;
+  private final ErgonRuleEngineFacade ruleEngineFacade;
 
   public ParametroContagemFeriasService(
       ParametroContagemFeriasRepository repository,
       ParametroContagemFeriasMapper mapper,
       TenantContext tenant) {
+    this(repository, mapper, tenant, new ErgonRuleEngineFacade());
+  }
+
+  @Autowired
+  public ParametroContagemFeriasService(
+      ParametroContagemFeriasRepository repository,
+      ParametroContagemFeriasMapper mapper,
+      TenantContext tenant,
+      ErgonRuleEngineFacade ruleEngineFacade) {
     super(repository, ParametroContagemFerias.class, "id");
     this.mapper = mapper;
     this.tenant = tenant != null ? tenant : new TenantContext();
+    this.ruleEngineFacade =
+        ruleEngineFacade != null ? ruleEngineFacade : new ErgonRuleEngineFacade();
+  }
+
+  public ErgonRuleEngineFacade getRuleEngineFacade() {
+    return ruleEngineFacade;
+  }
+
+  /**
+   * Avalia deterministicamente o rascunho de {@link ParametroContagemFerias} contra o plano
+   * compilado do órgão ({@code PCK_PARAMETROS_CONTA.MAIN_PRE}/{@code MAIN_POS}) sem lançar exceção.
+   */
+  public RuleEvaluationResult evaluateParametroContagemFerias(ParametroContagemFerias draft) {
+    return ruleEngineFacade.evaluateParametroContagemFerias(
+        buildParametroContagemFeriasRuleContext(draft));
+  }
+
+  /**
+   * Valida o rascunho de {@link ParametroContagemFerias} em modo <i>fail-closed</i>, lançando
+   * {@link ErgonRuleViolationException} (HTTP 422) caso qualquer slot resulte em {@code DENY},
+   * {@code INCONCLUSIVE} ou {@code TECHNICAL_ERROR}.
+   */
+  public RuleEvaluationResult validateParametroContagemFerias(ParametroContagemFerias draft) {
+    return ruleEngineFacade.enforceParametroContagemFerias(
+        buildParametroContagemFeriasRuleContext(draft));
+  }
+
+  /** Retorna o diagnóstico estruturado da avaliação determinística de {@link ParametroContagemFerias}. */
+  public Map<String, Object> evaluateParametroContagemFeriasDiagnostic(
+      ParametroContagemFerias draft) {
+    Integer empCodigo =
+        draft != null && draft.getEmpCodigo() != null ? draft.getEmpCodigo() : tenant.orgao();
+    RuleEvaluationResult result = evaluateParametroContagemFerias(draft);
+    return ruleEngineFacade.toDiagnosticPayload(
+        ruleEngineFacade.resolveParametroContagemFeriasPlan(empCodigo), result);
+  }
+
+  public ErgonRuleEngineFacade.ParametroContagemFeriasRuleContext
+      buildParametroContagemFeriasRuleContext(ParametroContagemFerias draft) {
+    if (draft == null) {
+      return new ErgonRuleEngineFacade.ParametroContagemFeriasRuleContext(null, List.of());
+    }
+    return new ErgonRuleEngineFacade.ParametroContagemFeriasRuleContext(
+        draft, loadExistingParametroRules(draft));
+  }
+
+  private List<ParametroContagemFerias> loadExistingParametroRules(ParametroContagemFerias draft) {
+    if (entityManager == null || draft == null || draft.getRegimeJuridico() == null) {
+      return List.of();
+    }
+    var q =
+        entityManager.createQuery(
+            "select x from ParametroContagemFerias x where x.active=true and x.regimeJuridico=:rj and x.tipoVinculo=:tv and x.categoria=:cat",
+            ParametroContagemFerias.class);
+    if (q == null) {
+      return List.of();
+    }
+    var r1 = q.setParameter("rj", draft.getRegimeJuridico());
+    var r2 = r1 != null ? r1.setParameter("tv", draft.getTipoVinculo()) : null;
+    var r3 = r2 != null ? r2.setParameter("cat", draft.getCategoria()) : null;
+    var flushed = r3 != null ? r3.setFlushMode(FlushModeType.COMMIT) : null;
+    var list =
+        (flushed != null ? flushed : r3) != null
+            ? (flushed != null ? flushed : r3).getResultList()
+            : List.<ParametroContagemFerias>of();
+    return list != null ? list : List.of();
   }
 
   @Override
@@ -159,6 +239,7 @@ public class ParametroContagemFeriasService
   protected void beforeCreate(
       CreateParametroContagemFeriasDTO dto, ParametroContagemFerias entity) {
     checkOrg(entity.getEmpCodigo());
+    validateParametroContagemFerias(entity);
     if (invariants != null) {
       invariants.parametroContagemFerias(entity, true);
     }
@@ -185,6 +266,7 @@ public class ParametroContagemFeriasService
     beforeUpdate(id, entity, dto);
     var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
     mapper.applyUpdate(entity, dto);
+    validateParametroContagemFerias(entity);
     if (invariants != null) {
       invariants.parametroContagemFerias(entity, false);
     }
@@ -209,6 +291,7 @@ public class ParametroContagemFeriasService
     precondition.requireMatch(entity.getVersion());
     checkOrg(entity.getEmpCodigo());
     action.accept(entity);
+    validateParametroContagemFerias(entity);
     if (invariants != null) {
       invariants.parametroContagemFerias(entity, false);
     }

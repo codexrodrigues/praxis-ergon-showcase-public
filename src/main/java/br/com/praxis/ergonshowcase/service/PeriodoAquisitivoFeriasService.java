@@ -2,12 +2,20 @@ package br.com.praxis.ergonshowcase.service;
 
 import br.com.praxis.ergonshowcase.config.TenantContext;
 import br.com.praxis.ergonshowcase.domain.Afastamento;
+import br.com.praxis.ergonshowcase.domain.FeriasGozo;
 import br.com.praxis.ergonshowcase.domain.Frequencia;
+import br.com.praxis.ergonshowcase.domain.ParametroContagemFerias;
 import br.com.praxis.ergonshowcase.domain.PeriodoAquisitivoFerias;
+import br.com.praxis.ergonshowcase.domain.Vinculo;
+import br.com.praxis.ergonshowcase.domain.VinculoId;
 import br.com.praxis.ergonshowcase.dto.*;
 import br.com.praxis.ergonshowcase.mapper.PeriodoAquisitivoFeriasMapper;
 import br.com.praxis.ergonshowcase.repository.PeriodoAquisitivoFeriasRepository;
+import br.com.praxis.ergonshowcase.rules.EffectiveVacationParameterResolver;
+import br.com.praxis.ergonshowcase.rules.ErgonRuleEngineFacade;
+import br.com.praxis.ergonshowcase.rules.ErgonRuleViolationException;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
 import java.math.BigDecimal;
@@ -15,6 +23,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Consumer;
+import org.praxisplatform.rules.contract.RuleEvaluationResult;
 import org.praxisplatform.uischema.concurrency.ResourceRepresentationResult;
 import org.praxisplatform.uischema.concurrency.ResourceVersionPreconditionException;
 import org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition;
@@ -58,14 +67,217 @@ public class PeriodoAquisitivoFeriasService
   @PersistenceContext protected EntityManager entityManager;
   protected final PeriodoAquisitivoFeriasMapper mapper;
   private final TenantContext tenant;
+  private final ErgonRuleEngineFacade ruleEngineFacade;
 
   public PeriodoAquisitivoFeriasService(
       PeriodoAquisitivoFeriasRepository repository,
       PeriodoAquisitivoFeriasMapper mapper,
       TenantContext tenant) {
+    this(repository, mapper, tenant, new ErgonRuleEngineFacade());
+  }
+
+  @Autowired
+  public PeriodoAquisitivoFeriasService(
+      PeriodoAquisitivoFeriasRepository repository,
+      PeriodoAquisitivoFeriasMapper mapper,
+      TenantContext tenant,
+      ErgonRuleEngineFacade ruleEngineFacade) {
     super(repository, PeriodoAquisitivoFerias.class, "id");
     this.mapper = mapper;
     this.tenant = tenant != null ? tenant : new TenantContext();
+    this.ruleEngineFacade =
+        ruleEngineFacade != null ? ruleEngineFacade : new ErgonRuleEngineFacade();
+  }
+
+  public ErgonRuleEngineFacade getRuleEngineFacade() {
+    return ruleEngineFacade;
+  }
+
+  /**
+   * Avalia deterministicamente o rascunho de {@link PeriodoAquisitivoFerias} contra o plano
+   * compilado do órgão ({@code PCK_PERAQFER.MAIN_PRE}/{@code MAIN_POS}) sem lançar exceção.
+   */
+  public RuleEvaluationResult evaluatePeriodoAquisitivoFerias(PeriodoAquisitivoFerias draft) {
+    return ruleEngineFacade.evaluatePeriodoAquisitivoFerias(
+        buildPeriodoAquisitivoFeriasRuleContext(draft, null, false));
+  }
+
+  /**
+   * Valida o rascunho de {@link PeriodoAquisitivoFerias} em modo <i>fail-closed</i>, lançando
+   * {@link ErgonRuleViolationException} (HTTP 422) caso qualquer slot resulte em {@code DENY},
+   * {@code INCONCLUSIVE} ou {@code TECHNICAL_ERROR}.
+   */
+  public RuleEvaluationResult validatePeriodoAquisitivoFerias(PeriodoAquisitivoFerias draft) {
+    return validatePeriodoAquisitivoFerias(draft, null);
+  }
+
+  public RuleEvaluationResult validatePeriodoAquisitivoFerias(
+      PeriodoAquisitivoFerias draft, PeriodoAquisitivoFerias previousSnapshot) {
+    return ruleEngineFacade.enforcePeriodoAquisitivoFerias(
+        buildPeriodoAquisitivoFeriasRuleContext(draft, previousSnapshot, false));
+  }
+
+  private static PeriodoAquisitivoFerias snapshotBeforeMutation(PeriodoAquisitivoFerias src) {
+    if (src == null) {
+      return null;
+    }
+    PeriodoAquisitivoFerias copy = new PeriodoAquisitivoFerias();
+    copy.setId(src.getId());
+    copy.setEmpCodigo(src.getEmpCodigo());
+    copy.setNumfunc(src.getNumfunc());
+    copy.setNumvinc(src.getNumvinc());
+    copy.setChave(src.getChave());
+    copy.setExercicio(src.getExercicio());
+    copy.setDtini(src.getDtini());
+    copy.setDtfim(src.getDtfim());
+    copy.setGeradoPorAverbacao(src.getGeradoPorAverbacao());
+    copy.setSituacao(src.getSituacao());
+    return copy;
+  }
+
+  /** Retorna o diagnóstico estruturado da avaliação determinística de {@link PeriodoAquisitivoFerias}. */
+  public Map<String, Object> evaluatePeriodoAquisitivoFeriasDiagnostic(
+      PeriodoAquisitivoFerias draft) {
+    Integer empCodigo =
+        draft != null && draft.getEmpCodigo() != null ? draft.getEmpCodigo() : tenant.orgao();
+    RuleEvaluationResult result = evaluatePeriodoAquisitivoFerias(draft);
+    return ruleEngineFacade.toDiagnosticPayload(
+        ruleEngineFacade.resolvePeriodoAquisitivoFeriasPlan(empCodigo), result);
+  }
+
+  public ErgonRuleEngineFacade.PeriodoAquisitivoFeriasRuleContext
+      buildPeriodoAquisitivoFeriasRuleContext(
+          PeriodoAquisitivoFerias draft,
+          PeriodoAquisitivoFerias previousSnapshot,
+          boolean lockedAverbacaoMutation) {
+    if (draft == null) {
+      return new ErgonRuleEngineFacade.PeriodoAquisitivoFeriasRuleContext(
+          null, null, null, null, List.of(), List.of(), List.of(), List.of(), List.of(), false);
+    }
+    Vinculo vinculo = draft.getVinculo();
+    if (vinculo == null
+        && entityManager != null
+        && draft.getNumfunc() != null
+        && draft.getNumvinc() != null) {
+      vinculo =
+          entityManager.find(
+              Vinculo.class, new VinculoId(draft.getNumfunc(), draft.getNumvinc()));
+    }
+    List<ParametroContagemFerias> paramCandidates = loadParametroCandidates(draft, vinculo);
+    List<PeriodoAquisitivoFerias> existingPeriodos = loadExistingPeriodos(draft);
+    List<FeriasGozo> parcelasDoPeriodo = loadParcelasDoPeriodo(draft);
+    List<Frequencia> activeFrequencias = loadActiveFrequencias(draft);
+    List<Afastamento> activeAfastamentos = loadActiveAfastamentos(draft);
+    return new ErgonRuleEngineFacade.PeriodoAquisitivoFeriasRuleContext(
+        draft,
+        previousSnapshot,
+        vinculo,
+        null,
+        paramCandidates,
+        existingPeriodos,
+        parcelasDoPeriodo,
+        activeFrequencias,
+        activeAfastamentos,
+        lockedAverbacaoMutation);
+  }
+
+  private List<ParametroContagemFerias> loadParametroCandidates(
+      PeriodoAquisitivoFerias draft, Vinculo vinculo) {
+    if (entityManager == null) {
+      return List.of();
+    }
+    if (vinculo != null && vinculo.getRegimejur() != null && vinculo.getTipovinc() != null) {
+      var q =
+          entityManager.createQuery(
+              "select x from ParametroContagemFerias x where x.active=true and x.regimeJuridico=:rj and x.tipoVinculo=:tv",
+              ParametroContagemFerias.class);
+      if (q != null) {
+        var r1 = q.setParameter("rj", vinculo.getRegimejur());
+        var r2 = r1 != null ? r1.setParameter("tv", vinculo.getTipovinc()) : null;
+        var flushed = r2 != null ? r2.setFlushMode(FlushModeType.COMMIT) : null;
+        var list =
+            (flushed != null ? flushed : r2) != null
+                ? (flushed != null ? flushed : r2).getResultList()
+                : List.<ParametroContagemFerias>of();
+        return list != null ? list : List.of();
+      }
+    }
+    return List.of();
+  }
+
+  private List<PeriodoAquisitivoFerias> loadExistingPeriodos(PeriodoAquisitivoFerias draft) {
+    if (entityManager == null || draft.getNumfunc() == null || draft.getNumvinc() == null) {
+      return List.of();
+    }
+    var q =
+        entityManager.createQuery(
+            "select x from PeriodoAquisitivoFerias x where x.numfunc=:f and x.numvinc=:v and x.situacao<>'CANCELADO'",
+            PeriodoAquisitivoFerias.class);
+    if (q == null) {
+      return List.of();
+    }
+    var r1 = q.setParameter("f", draft.getNumfunc());
+    var r2 = r1 != null ? r1.setParameter("v", draft.getNumvinc()) : null;
+    var flushed = r2 != null ? r2.setFlushMode(FlushModeType.COMMIT) : null;
+    var list =
+        (flushed != null ? flushed : r2) != null
+            ? (flushed != null ? flushed : r2).getResultList()
+            : List.<PeriodoAquisitivoFerias>of();
+    return list != null ? list : List.of();
+  }
+
+  private List<FeriasGozo> loadParcelasDoPeriodo(PeriodoAquisitivoFerias draft) {
+    if (entityManager == null || draft.getId() == null) {
+      return List.of();
+    }
+    var q =
+        entityManager.createQuery(
+            "select x from FeriasGozo x where x.periodoAquisitivoId=:paId and x.situacao<>'CANCELADA'",
+            FeriasGozo.class);
+    if (q == null) {
+      return List.of();
+    }
+    var r1 = q.setParameter("paId", draft.getId());
+    var flushed = r1 != null ? r1.setFlushMode(FlushModeType.COMMIT) : null;
+    var list =
+        (flushed != null ? flushed : r1) != null
+            ? (flushed != null ? flushed : r1).getResultList()
+            : List.<FeriasGozo>of();
+    return list != null ? list : List.of();
+  }
+
+  private List<Frequencia> loadActiveFrequencias(PeriodoAquisitivoFerias draft) {
+    if (entityManager == null || draft.getNumfunc() == null || draft.getNumvinc() == null) {
+      return List.of();
+    }
+    var q =
+        entityManager.createQuery(
+            "select f from Frequencia f where f.numfunc=:f and f.numvinc=:v and f.situacao='HOMOLOGADO'",
+            Frequencia.class);
+    if (q == null) {
+      return List.of();
+    }
+    var p1 = q.setParameter("f", draft.getNumfunc());
+    var p2 = p1 != null ? p1.setParameter("v", draft.getNumvinc()) : null;
+    var list = p2 != null ? p2.getResultList() : List.<Frequencia>of();
+    return list != null ? list : List.of();
+  }
+
+  private List<Afastamento> loadActiveAfastamentos(PeriodoAquisitivoFerias draft) {
+    if (entityManager == null || draft.getNumfunc() == null || draft.getNumvinc() == null) {
+      return List.of();
+    }
+    var q =
+        entityManager.createQuery(
+            "select a from Afastamento a where a.numfunc=:f and a.numvinc=:v and a.situacao='HOMOLOGADO'",
+            Afastamento.class);
+    if (q == null) {
+      return List.of();
+    }
+    var p1 = q.setParameter("f", draft.getNumfunc());
+    var p2 = p1 != null ? p1.setParameter("v", draft.getNumvinc()) : null;
+    var list = p2 != null ? p2.getResultList() : List.<Afastamento>of();
+    return list != null ? list : List.of();
   }
 
   @Override
@@ -167,6 +379,7 @@ public class PeriodoAquisitivoFeriasService
   protected void beforeCreate(
       CreatePeriodoAquisitivoFeriasDTO dto, PeriodoAquisitivoFerias entity) {
     checkOrg(entity.getEmpCodigo());
+    validatePeriodoAquisitivoFerias(entity);
     if (invariants != null) {
       invariants.periodoAquisitivoFerias(entity, true);
     }
@@ -192,7 +405,9 @@ public class PeriodoAquisitivoFeriasService
     precondition.requireMatch(entity.getVersion());
     beforeUpdate(id, entity, dto);
     var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
+    PeriodoAquisitivoFerias previousSnapshot = snapshotBeforeMutation(entity);
     mapper.applyUpdate(entity, dto);
+    validatePeriodoAquisitivoFerias(entity, previousSnapshot);
     if (invariants != null) {
       invariants.periodoAquisitivoFerias(entity, false);
     }
@@ -216,9 +431,13 @@ public class PeriodoAquisitivoFeriasService
     entityManager.refresh(entity);
     precondition.requireMatch(entity.getVersion());
     checkOrg(entity.getEmpCodigo());
+    PeriodoAquisitivoFerias previousSnapshot = snapshotBeforeMutation(entity);
     action.accept(entity);
-    if (invariants != null && !"CANCELADO".equals(entity.getSituacao())) {
-      invariants.periodoAquisitivoFerias(entity, false);
+    if (!"CANCELADO".equals(entity.getSituacao())) {
+      validatePeriodoAquisitivoFerias(entity, previousSnapshot);
+      if (invariants != null) {
+        invariants.periodoAquisitivoFerias(entity, false);
+      }
     }
     var saved = getRepository().save(entity);
     entityManager.flush();
@@ -525,7 +744,19 @@ public class PeriodoAquisitivoFeriasService
           }
           pa.setFaltasApuradas(faltas);
           pa.setDiasAfastamentoSuspensivo(diasSuspensivos);
-          int diasDireito = calcularDiasDireitoPorFaltas(faltas);
+          Vinculo vinculo =
+              entityManager != null && pa.getNumfunc() != null && pa.getNumvinc() != null
+                  ? entityManager.find(
+                      Vinculo.class, new VinculoId(pa.getNumfunc(), pa.getNumvinc()))
+                  : null;
+          var effective =
+              ruleEngineFacade
+                  .getVacationParameterResolver()
+                  .resolveEffectiveFacts(
+                      loadParametroCandidates(pa, vinculo), null, pa, vinculo, pa.getDtini());
+          int baseTotDias = effective.totDiasFer() != null ? effective.totDiasFer() : 30;
+          int diasDireito =
+              EffectiveVacationParameterResolver.calcularDiasDireitoPorFaltas(baseTotDias, faltas);
           pa.setTotDiasDireito(diasDireito);
           if (dto != null) {
             if (dto.getDocumentoLegalId() != null) pa.setDocumentoLegalId(dto.getDocumentoLegalId());
@@ -536,11 +767,7 @@ public class PeriodoAquisitivoFeriasService
   }
 
   public static int calcularDiasDireitoPorFaltas(int faltasInjustificadas) {
-    if (faltasInjustificadas <= 5) return 30;
-    if (faltasInjustificadas <= 14) return 24;
-    if (faltasInjustificadas <= 23) return 18;
-    if (faltasInjustificadas <= 32) return 12;
-    return 0;
+    return EffectiveVacationParameterResolver.calcularDiasDireitoPorFaltas(30, faltasInjustificadas);
   }
 
   private void checkOrg(Integer orgao) {

@@ -793,43 +793,7 @@ public class ErgonInvariants {
 
   private ParametroContagemFerias resolveEffectiveParametroFerias(
       Vinculo vinculo, LocalDate refDate) {
-    if (vinculo == null || blank(vinculo.getRegimejur()) || blank(vinculo.getTipovinc())) {
-      return null;
-    }
-    var q =
-        em.createQuery(
-            "select x from ParametroContagemFerias x where x.active=true and x.regimeJuridico=:rj and x.tipoVinculo=:tv",
-            ParametroContagemFerias.class);
-    if (q == null) return null;
-    var r1 = q.setParameter("rj", vinculo.getRegimejur());
-    var r2 = r1 != null ? r1.setParameter("tv", vinculo.getTipovinc()) : null;
-    var flushed = r2 != null ? r2.setFlushMode(FlushModeType.COMMIT) : null;
-    var lista =
-        (flushed != null ? flushed : r2) != null
-            ? (flushed != null ? flushed : r2).getResultList()
-            : List.<ParametroContagemFerias>of();
-    if (lista == null || lista.isEmpty()) return null;
-    return lista.stream()
-        .filter(
-            p ->
-                p.getEmpCodigo() == null
-                    || Objects.equals(p.getEmpCodigo(), vinculo.getEmpCodigo()))
-        .filter(
-            p ->
-                vinculo.getCategoria() == null
-                    || Objects.equals(p.getCategoria(), vinculo.getCategoria()))
-        .filter(
-            p ->
-                refDate == null
-                    || ((p.getDtini() == null || !refDate.isBefore(p.getDtini()))
-                        && (p.getDtfim() == null || !refDate.isAfter(p.getDtfim()))))
-        .sorted(
-            Comparator.comparing((ParametroContagemFerias p) -> p.getEmpCodigo() != null ? 0 : 1)
-                .thenComparing(
-                    p -> p.getDtini() != null ? p.getDtini() : LocalDate.MIN,
-                    Comparator.reverseOrder()))
-        .findFirst()
-        .orElse(null);
+    return ruleEngine().getVacationParameterResolver().resolveActiveParameter(em, vinculo, refDate);
   }
 
   public void vinculo(Vinculo v, boolean creating) {

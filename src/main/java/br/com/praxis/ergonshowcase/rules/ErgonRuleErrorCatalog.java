@@ -7,11 +7,14 @@ import java.util.Optional;
 
 /**
  * Catálogo oficial de códigos de razão e mensagens de domínio para as famílias de regras
- * estatutárias e operacionais de frequência e afastamentos do Ergon RH Público:
+ * estatutárias e operacionais do Ergon RH Público:
  * <ul>
  *   <li>{@code RN-013} ({@code PCK_REGRAS_FREQ.MAIN_PRE} e {@code PCK_REGRAS_FREQ.MAIN_POS});
  *   <li>{@code PCK_FREQUENCIAS} ({@link FrequenciaLancamentoRuleSet});
  *   <li>{@code PCK_LIC_AFAST} / {@code ERG_PM_GERALICAFAST} ({@link AfastamentoConcessaoRuleSet});
+ *   <li>{@code PCK_VINCULOS} e {@code PCK_DEPENDENTES} ({@link VinculoProvimentoRuleSet}, {@link DependenteElegibilidadeRuleSet});
+ *   <li>{@code PCK_PARAMETROS_CONTA}, {@code PCK_PERAQFER}, {@code PCK_FERIAS} e {@code PCK_ERG_ABONOS_FERIAS}
+ *       ({@link ParametroContagemFeriasRuleSet}, {@link PeriodoAquisitivoFeriasRuleSet}, {@link FeriasGozoRuleSet});
  *   <li>Códigos governados de customização de órgão ({@code CERG-*}).
  * </ul>
  *
@@ -793,7 +796,717 @@ public final class ErgonRuleErrorCatalog {
     register(map, ERG_21501);
     register(map, ERG_21502);
 
+    // =========================================================================
+    // 8. Família Parâmetros de Contagem de Férias (PCK_PARAMETROS_CONTA)
+    // =========================================================================
+    registerFeriasDescriptors(map);
+
     CATALOG = Collections.unmodifiableMap(map);
+  }
+
+  private static void registerFeriasDescriptors(Map<String, RuleErrorDescriptor> map) {
+    // PCK_PARAMETROS_CONTA
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01873",
+            ParametroContagemFeriasRuleSet.SLOT_VIGENCIA_ORDEM_VALIDA,
+            "dtfim",
+            "Data de início da vigência do parâmetro de contagem não pode ser posterior à data de término.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.dtfim < v_row_new.dtini THEN pack_hades.trata_erro(1873); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01870",
+            ParametroContagemFeriasRuleSet.SLOT_PRESCRICAO_E_FLAGS_GOZO,
+            "criterioPrescricao",
+            "Critério de prescrição deve ser 'I' (início do gozo) ou 'F' (fim do gozo) e indicadores de prescrição/concomitância devem ser válidos.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.criterio_prescr NOT IN ('I','F') THEN pack_hades.trata_erro(1870); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01871",
+            ParametroContagemFeriasRuleSet.SLOT_PRESCRICAO_E_FLAGS_GOZO,
+            "permiteGozoAntesPaFer",
+            "Indicador de permissão de gozo antes do fim do período aquisitivo inválido.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.permite_gozo_antes_pa_fer NOT IN ('S','N') THEN pack_hades.trata_erro(1871); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01872",
+            ParametroContagemFeriasRuleSet.SLOT_PRESCRICAO_E_FLAGS_GOZO,
+            "permiteGozoAposPrescricao",
+            "Indicador de permissão de gozo após a prescrição inválido.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.permite_gozo_pos_prescr NOT IN ('S','N') THEN pack_hades.trata_erro(1872); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01800",
+            ParametroContagemFeriasRuleSet.SLOT_FERIAS_HABILITADAS_OBRIGATORIOS,
+            "totDiasFer",
+            "Quando o regime possui direito a férias (temFerias = true), totDiasFer, maxPerFer, minPerFer, maxDiasPerFer e minDiasPerFer são obrigatórios e positivos.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.tem_ferias = 'S' AND (v_row_new.tot_dias_fer IS NULL OR v_row_new.tot_dias_fer <= 0) THEN pack_hades.trata_erro(1800); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01801",
+            ParametroContagemFeriasRuleSet.SLOT_ABONO_PECUNIARIO_FRACAO_LIMITES,
+            "abonoDirGozo",
+            "Modalidade de abono pecuniário deve ser 'D' (sobre direito), 'G' (sobre gozo) ou 'N' (sem abono).",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.abono_dir_gozo NOT IN ('D','G','N') THEN pack_hades.trata_erro(1801); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01802",
+            ParametroContagemFeriasRuleSet.SLOT_ABONO_PECUNIARIO_FRACAO_LIMITES,
+            "numDiasAbonoFer",
+            "Fração e limites de abono pecuniário inválidos: numerador/denominador obrigatórios quando há abono (0 <= num <= den, den > 0) e minDiasPvendFer <= maxDiasVendFer <= totDiasFer.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.abono_dir_gozo IN ('D','G') AND (v_row_new.num_dias_abono_fer IS NULL OR v_row_new.den_dias_abono_fer IS NULL) THEN pack_hades.trata_erro(1802); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01803",
+            ParametroContagemFeriasRuleSet.SLOT_ABONO_PECUNIARIO_FRACAO_LIMITES,
+            "denDiasAbonoFer",
+            "Denominador da fração de abono pecuniário deve ser maior que zero.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.den_dias_abono_fer <= 0 THEN pack_hades.trata_erro(1803); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01804",
+            ParametroContagemFeriasRuleSet.SLOT_ABONO_PECUNIARIO_FRACAO_LIMITES,
+            "numDiasAbonoFer",
+            "Numerador da fração de abono pecuniário não pode ser negativo.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.num_dias_abono_fer < 0 THEN pack_hades.trata_erro(1804); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01805",
+            ParametroContagemFeriasRuleSet.SLOT_ABONO_PECUNIARIO_FRACAO_LIMITES,
+            "numDiasAbonoFer",
+            "Numerador da fração de abono pecuniário não pode superar o denominador.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.num_dias_abono_fer > v_row_new.den_dias_abono_fer THEN pack_hades.trata_erro(1805); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01806",
+            ParametroContagemFeriasRuleSet.SLOT_FERIAS_LIMITES_DIAS_TEMPLATE,
+            "totDiasFer",
+            "Limites de dias de férias e teto de parcelas fora dos parâmetros permitidos pelo órgão.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.tot_dias_fer > 60 OR v_row_new.max_per_fer > 6 THEN pack_hades.trata_erro(1806); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01807",
+            ParametroContagemFeriasRuleSet.SLOT_ABONO_PECUNIARIO_FRACAO_LIMITES,
+            "minDiasPvendFer",
+            "Mínimo de dias para venda de abono não pode superar o máximo de dias vendáveis.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.min_dias_pvend_fer > v_row_new.max_dias_vend_fer THEN pack_hades.trata_erro(1807); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01808",
+            ParametroContagemFeriasRuleSet.SLOT_ABONO_PECUNIARIO_FRACAO_LIMITES,
+            "maxDiasVendFer",
+            "Máximo de dias vendáveis em abono não pode superar o total de dias de férias.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.max_dias_vend_fer > v_row_new.tot_dias_fer THEN pack_hades.trata_erro(1808); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01809",
+            ParametroContagemFeriasRuleSet.SLOT_PARCELAMENTO_COERENCIA,
+            "minPerFer",
+            "Mínimo de parcelas de férias não pode ser superior ao máximo de parcelas permitido.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.min_per_fer > v_row_new.max_per_fer THEN pack_hades.trata_erro(1809); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01810",
+            ParametroContagemFeriasRuleSet.SLOT_PARCELAMENTO_COERENCIA,
+            "minDiasPerFer",
+            "Mínimo de dias por parcela não pode ser superior ao máximo de dias por parcela (e parcela principal deve estar dentro da faixa).",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.min_dias_per_fer > v_row_new.max_dias_per_fer THEN pack_hades.trata_erro(1810); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01811",
+            ParametroContagemFeriasRuleSet.SLOT_FERIAS_DESABILITADAS_SEM_LIMITES,
+            "temFerias",
+            "Quando o regime não possui direito a férias (temFerias = false), os limites numéricos de férias e abono devem permanecer nulos ou zerados.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.tem_ferias = 'N' AND v_row_new.tot_dias_fer IS NOT NULL THEN pack_hades.trata_erro(1811); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01812",
+            ParametroContagemFeriasRuleSet.SLOT_FERIAS_DESABILITADAS_SEM_LIMITES,
+            "maxDiasVendFer",
+            "Quando o regime não possui direito a férias, os limites de venda de abono pecuniário não podem ser informados.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.tem_ferias = 'N' AND (v_row_new.max_dias_vend_fer IS NOT NULL OR v_row_new.min_dias_pvend_fer IS NOT NULL) THEN pack_hades.trata_erro(1812); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01813",
+            ParametroContagemFeriasRuleSet.SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            "anosLicEsp",
+            "Inconsistência nos parâmetros de Licença Especial, Progressão Funcional, Tempo de Serviço ou Sexta-Parte.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.tem_lic_esp = 'S' AND (v_row_new.anos_lic_esp IS NULL OR v_row_new.meses_lic_esp_per IS NULL) THEN pack_hades.trata_erro(1813); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01850",
+            ParametroContagemFeriasRuleSet.SLOT_CONCOMITANCIA_VIGENCIA_ESCOPO,
+            "dtini",
+            "Conflito de vigência ativa na mesma chave de parâmetros de contagem ou data inicial do período aquisitivo incompatível com exercício/vacância do vínculo.",
+            "PCK_PARAMETROS_CONTA.MAIN_POS / PCK_PERAQFER.MAIN_PRE",
+            "IF v_concomitantes > 0 OR p_peraqfer.dtini < v_vinculo.dtexerc THEN pack_hades.trata_erro(1850); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01851",
+            ParametroContagemFeriasRuleSet.SLOT_PARCELAMENTO_COERENCIA,
+            "dtfim",
+            "Máximo de parcelas não pode superar o total de dias de férias ou cronologia de datas do período aquisitivo inválida (dtini <= dtfim <= dtPrescricao).",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE / PCK_PERAQFER.MAIN_PRE",
+            "IF v_row_new.max_per_fer > v_row_new.tot_dias_fer OR p_peraqfer.dtfim < p_peraqfer.dtini THEN pack_hades.trata_erro(1851); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01852",
+            ParametroContagemFeriasRuleSet.SLOT_PARCELAMENTO_COERENCIA,
+            "maxDiasPerFer",
+            "Máximo de dias por parcela não pode superar o total de dias de férias.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.max_dias_per_fer > v_row_new.tot_dias_fer THEN pack_hades.trata_erro(1852); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01853",
+            ParametroContagemFeriasRuleSet.SLOT_CONTAGEM_DOBRO_FERIAS_COERENCIA,
+            "minDiasPeraqfer",
+            "Quando a contagem em dobro de férias está habilitada, o mínimo de dias (minDiasPeraqfer) é obrigatório.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.cont_dobro_ferias = 'S' AND v_row_new.min_dias_peraqfer IS NULL THEN pack_hades.trata_erro(1853); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01854",
+            ParametroContagemFeriasRuleSet.SLOT_CONTAGEM_DOBRO_FERIAS_COERENCIA,
+            "maxDiasPeraqfer",
+            "Quando a contagem em dobro de férias está habilitada, o máximo de dias (maxDiasPeraqfer) é obrigatório.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.cont_dobro_ferias = 'S' AND v_row_new.max_dias_peraqfer IS NULL THEN pack_hades.trata_erro(1854); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01855",
+            ParametroContagemFeriasRuleSet.SLOT_CONTAGEM_DOBRO_FERIAS_COERENCIA,
+            "minDiasPeraqfer",
+            "Quando a contagem em dobro de férias está desabilitada, o mínimo de dias para contagem em dobro não deve ser informado.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.cont_dobro_ferias = 'N' AND v_row_new.min_dias_peraqfer IS NOT NULL THEN pack_hades.trata_erro(1855); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01856",
+            ParametroContagemFeriasRuleSet.SLOT_CONTAGEM_DOBRO_FERIAS_COERENCIA,
+            "maxDiasPeraqfer",
+            "Quando a contagem em dobro de férias está desabilitada, o máximo de dias para contagem em dobro não deve ser informado.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.cont_dobro_ferias = 'N' AND v_row_new.max_dias_peraqfer IS NOT NULL THEN pack_hades.trata_erro(1856); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00604",
+            PeriodoAquisitivoFeriasRuleSet.SLOT_OVERRIDES_CONTAGEM_DOBRO,
+            "contDobroFerias",
+            "Configuração de contagem em dobro de férias inconsistente com os limites mínimo e máximo de dias do período aquisitivo.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE / PCK_PERAQFER.MAIN_PRE",
+            "IF v_row_new.cont_dobro_ferias = 'S' AND (v_row_new.min_dias_peraqfer IS NULL OR v_row_new.max_dias_peraqfer IS NULL) THEN pack_hades.trata_erro(604); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00605",
+            PeriodoAquisitivoFeriasRuleSet.SLOT_OVERRIDES_CONTAGEM_DOBRO,
+            "minDiasPeraqfer",
+            "Limites de dias para contagem em dobro de férias não podem ser negativos.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE / PCK_PERAQFER.MAIN_PRE",
+            "IF v_row_new.min_dias_peraqfer < 0 OR v_row_new.max_dias_peraqfer < 0 THEN pack_hades.trata_erro(605); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00606",
+            ParametroContagemFeriasRuleSet.SLOT_CONTAGEM_DOBRO_FERIAS_COERENCIA,
+            "minDiasPeraqfer",
+            "O mínimo de dias para contagem em dobro não pode ser superior ao máximo de dias para contagem em dobro.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE / PCK_PERAQFER.MAIN_PRE",
+            "IF v_row_new.min_dias_peraqfer > v_row_new.max_dias_peraqfer THEN pack_hades.trata_erro(606); END IF;"));
+
+    // PCK_PERAQFER
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00099",
+            PeriodoAquisitivoFeriasRuleSet.SLOT_BLOQUEIO_AVERBACAO_E_CRITERIO_PRESCRICAO,
+            "geradoPorAverbacao",
+            "Período aquisitivo gerado por averbação bloqueado para alteração manual ou critério de prescrição/multa fora do domínio permitido.",
+            "PCK_PERAQFER.MAIN_PRE",
+            "IF v_row_old.gerado_por_averbacao = 'S' THEN pack_hades.trata_erro(99); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00600",
+            PeriodoAquisitivoFeriasRuleSet.SLOT_DIREITO_TETO_E_REDUCAO_FALTAS,
+            "totDiasDireito",
+            "Total de dias de direito do período aquisitivo excede o limite do parâmetro/escala de redução por faltas ou é inferior aos dias já consumidos.",
+            "PCK_PERAQFER.VALID_PERAQFER",
+            "IF v_row_new.tot_dias_direito > v_max_direito OR v_row_new.tot_dias_direito < v_dias_consumidos THEN pack_hades.trata_erro(600); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00601",
+            PeriodoAquisitivoFeriasRuleSet.SLOT_SOBREPOSICAO_E_ACUMULO_PERIODOS,
+            "dtini",
+            "Sobreposição de datas ou duplicidade de chave entre períodos aquisitivos ativos do mesmo vínculo funcional.",
+            "PCK_PERAQFER.MAIN_POS",
+            "IF v_sobreposicao_pa > 0 THEN pack_hades.trata_erro(601); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00603",
+            PeriodoAquisitivoFeriasRuleSet.SLOT_BLOQUEIO_AVERBACAO_E_CRITERIO_PRESCRICAO,
+            "geradoPorAverbacao",
+            "Período aquisitivo gerado por averbação não pode sofrer manutenção manual direta nos campos nucleares.",
+            "PCK_PERAQFER.MAIN_PRE",
+            "IF v_row_new.gerado_por_averbacao = 'S' THEN pack_hades.trata_erro(603); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00612",
+            PeriodoAquisitivoFeriasRuleSet.SLOT_ACUMULO_E_FALTAS_LIMITES_TEMPLATE,
+            "faltasApuradas",
+            "Quantidade de períodos aquisitivos acumulados em aberto ou faltas apuradas excede o teto permitido pelo órgão.",
+            "PCK_PERAQFER.VALID_PERAQFER",
+            "IF v_periodos_abertos > v_max_acumulo THEN pack_hades.trata_erro(612); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00615",
+            PeriodoAquisitivoFeriasRuleSet.SLOT_PRESCRICAO_PARCELAS_ATIVAS,
+            "dtPrescricao",
+            "Existem parcelas de gozo de férias programadas ou usufruídas após a data de prescrição do período aquisitivo.",
+            "PCK_PERAQFER.VERIFICA_DT_PRESCR",
+            "IF v_parcelas_apos_prescr > 0 THEN pack_hades.trata_erro(615); END IF;"));
+
+    // PCK_FERIAS & PCK_ERG_ABONOS_FERIAS
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "VALID_FERIAS",
+            FeriasGozoRuleSet.SLOT_CRONOLOGIA_E_INTERRUPCAO_VALIDA,
+            "dtini",
+            "Cronologia da parcela de férias inválida, fora da vigência de exercício/vacância do vínculo ou em conflito com frequência normal/afastamento.",
+            "PCK_FERIAS.VALID_FERIAS",
+            "IF p_ferias.dtprevfim < p_ferias.dtini OR v_conflito_freq_afast > 0 THEN pack_hades.trata_erro('VALID_FERIAS'); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00502",
+            FeriasGozoRuleSet.SLOT_SUBSTITUTO_FUNCIONAL_VALIDO,
+            "numfuncSubstituto",
+            "O servidor titular da parcela de férias não pode ser designado como seu próprio substituto.",
+            "PCK_FERIAS.MAIN_PRE",
+            "IF v_row_new.numfunc_subst = v_row_new.numfunc AND v_row_new.numvinc_subst = v_row_new.numvinc THEN pack_hades.trata_erro(502); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00503",
+            FeriasGozoRuleSet.SLOT_SUBSTITUTO_FUNCIONAL_VALIDO,
+            "numfuncSubstituto",
+            "Substituto funcional inválido: número funcional e vínculo do substituto devem ser informados em conjunto e pertencer a vínculo ativo no órgão.",
+            "PCK_FERIAS.MAIN_PRE",
+            "IF (v_row_new.numfunc_subst IS NULL) <> (v_row_new.numvinc_subst IS NULL) OR NOT vinculo_subst_valido THEN pack_hades.trata_erro(503); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00504",
+            FeriasGozoRuleSet.SLOT_SUBSTITUTO_FUNCIONAL_VALIDO,
+            "numfuncSubstituto",
+            "Existe substituição ativa vinculada ao período que impede o encolhimento ou exclusão da parcela de férias.",
+            "PCK_FERIAS.MAIN_PRE",
+            "IF v_substituicao_ativa_conflito > 0 THEN pack_hades.trata_erro(504); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00506",
+            FeriasGozoRuleSet.SLOT_DIREITO_FERIAS_HABILITADO,
+            "periodoAquisitivoId",
+            "A categoria/regime parametrizado não possui direito a férias habilitado ou o período aquisitivo encontra-se cancelado/prescrito.",
+            "PCK_FERIAS.MAIN_PRE",
+            "IF v_param.tem_ferias = 'N' OR v_pa.tot_dias_direito <= 0 THEN pack_hades.trata_erro(506); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00507",
+            FeriasGozoRuleSet.SLOT_BENEFICIOS_FINANCEIROS_ELEGIBILIDADE,
+            "adiantamento13",
+            "Adiantamento de 13º salário nas férias não permitido pelos parâmetros efetivos do período aquisitivo.",
+            "PCK_FERIAS.MAIN_PRE",
+            "IF v_row_new.adiant_13 = 'S' AND v_eff.adiant_13_fer = 'N' THEN pack_hades.trata_erro(507); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00508",
+            FeriasGozoRuleSet.SLOT_BENEFICIOS_FINANCEIROS_ELEGIBILIDADE,
+            "adiantamentoSalario",
+            "Adiantamento salarial nas férias não permitido pelos parâmetros efetivos do período aquisitivo.",
+            "PCK_FERIAS.MAIN_PRE",
+            "IF v_row_new.adiant_sal = 'S' AND v_eff.adiant_sal_fer = 'N' THEN pack_hades.trata_erro(508); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00509",
+            FeriasGozoRuleSet.SLOT_BENEFICIOS_FINANCEIROS_ELEGIBILIDADE,
+            "emprestimoFerias",
+            "Empréstimo de férias não permitido pelos parâmetros efetivos do período aquisitivo.",
+            "PCK_FERIAS.MAIN_PRE",
+            "IF v_row_new.emprest_fer = 'S' AND v_eff.emprest_fer = 'N' THEN pack_hades.trata_erro(509); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00510",
+            FeriasGozoRuleSet.SLOT_BENEFICIOS_FINANCEIROS_ELEGIBILIDADE,
+            "abonoConstitucional",
+            "Pagamento do terço constitucional de férias não permitido pelos parâmetros efetivos do período aquisitivo.",
+            "PCK_FERIAS.MAIN_PRE",
+            "IF v_row_new.abono_const = 'S' AND v_eff.abono_const_fer = 'N' THEN pack_hades.trata_erro(510); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00512",
+            FeriasGozoRuleSet.SLOT_BENEFICIOS_FINANCEIROS_ELEGIBILIDADE,
+            "abonoConstitucional",
+            "O terço constitucional de férias já foi concedido em outra parcela deste mesmo período aquisitivo.",
+            "PCK_FERIAS.MAIN_PRE",
+            "IF v_row_new.abono_const = 'S' AND v_outras_parcelas_abono_const > 0 THEN pack_hades.trata_erro(512); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00513",
+            FeriasGozoRuleSet.SLOT_BENEFICIOS_FINANCEIROS_ELEGIBILIDADE,
+            "adiantamento13",
+            "O adiantamento de 13º salário já foi concedido em outra parcela de férias no mesmo ano civil.",
+            "PCK_FERIAS.MAIN_PRE",
+            "IF v_row_new.adiant_13 = 'S' AND v_outras_parcelas_adiant13_ano > 0 THEN pack_hades.trata_erro(513); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00514",
+            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            "dtini",
+            "Conflito de datas ou ordem de parcela duplicada com outra parcela de férias ativa do vínculo.",
+            "PCK_FERIAS.MAIN_POS",
+            "IF v_concomitancia_ferias > 0 OR v_ordem_duplicada > 0 THEN pack_hades.trata_erro(514); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00516",
+            FeriasGozoRuleSet.SLOT_GOZO_ANTES_TERMINO_PA_POR_ORDEM,
+            "dtini",
+            "A data de início do gozo de férias não pode anteceder o início do período aquisitivo quando o gozo antecipado está vedado.",
+            "PCK_FERIAS.MAIN_PRE",
+            "IF v_row_new.dtini < v_pa.dtini AND v_eff.permite_gozo_antes_pa_fer = 'N' THEN pack_hades.trata_erro(516); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00517",
+            FeriasGozoRuleSet.SLOT_GOZO_ANTES_TERMINO_PA_POR_ORDEM,
+            "dtini",
+            "Não é permitido gozar férias antes do término de período aquisitivo incompleto (> 3º período do vínculo).",
+            "PCK_FERIAS.MAIN_PRE",
+            "IF v_ordem_pa > 3 AND v_row_new.dtini <= v_pa.dtfim AND v_eff.permite_fer_per_inc = 'N' THEN pack_hades.trata_erro(517); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00518",
+            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            "diasGozo",
+            "A duração da parcela de férias supera o máximo de dias por parcela permitido pelos parâmetros efetivos.",
+            "PCK_FERIAS.MAIN_PRE",
+            "IF v_row_new.dias_gozo > v_eff.max_dias_per_fer THEN pack_hades.trata_erro(518); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00519",
+            FeriasGozoRuleSet.SLOT_FRACIONAMENTO_LIMITES_TEMPLATE,
+            "diasGozo",
+            "A duração da parcela de férias é inferior ao mínimo de dias por parcela exigido pelos parâmetros efetivos.",
+            "PCK_FERIAS.MAIN_PRE",
+            "IF v_row_new.dias_gozo < v_eff.min_dias_per_fer THEN pack_hades.trata_erro(519); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00520",
+            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            "ordemParcela",
+            "A quantidade de parcelas de férias supera o máximo de parcelas permitido para o período aquisitivo.",
+            "PCK_FERIAS.MAIN_PRE",
+            "IF v_total_parcelas_pa > v_eff.max_per_fer THEN pack_hades.trata_erro(520); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00521",
+            FeriasGozoRuleSet.SLOT_BENEFICIOS_FINANCEIROS_ELEGIBILIDADE,
+            "abonoPecuniario",
+            "Não é permitido lançar abono pecuniário em mais de uma parcela do mesmo período aquisitivo quando permiteLancConcPa está desabilitado.",
+            "PCK_FERIAS.MAIN_PRE",
+            "IF v_row_new.abono_pecuniario = 'S' AND v_eff.permite_lanc_conc_pa = 'N' AND v_outros_abonos_pa > 0 THEN pack_hades.trata_erro(521); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00522",
+            FeriasGozoRuleSet.SLOT_ABONO_PECUNIARIO_ELEGIBILIDADE_E_LIMITES,
+            "diasAbonoVendidos",
+            "Venda de abono pecuniário vedada para o período aquisitivo ou quantidade/posição de dias vendidos fora dos limites parametrizados.",
+            "PCK_FERIAS.MAIN_PRE / PCK_ERG_ABONOS_FERIAS.MAIN_PRE",
+            "IF NOT abono_pecuniario_limites_validos THEN pack_hades.trata_erro(522); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00523",
+            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            "diasGozo",
+            "A soma dos dias de gozo, abono pecuniário e contagem em dobro excede o total de dias de direito do período aquisitivo.",
+            "PCK_FERIAS.MAIN_POS",
+            "IF v_total_dias_consumidos_pa > v_pa.tot_dias_direito THEN pack_hades.trata_erro(523); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00525",
+            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            "diasGozo",
+            "O saldo remanescente do período aquisitivo não poderá ser esgotado nas parcelas restantes respeitando o teto máximo de dias por parcela.",
+            "PCK_FERIAS.MAIN_POS",
+            "IF v_saldo_remanescente > v_parcelas_restantes * v_eff.max_dias_per_fer THEN pack_hades.trata_erro(525); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00526",
+            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            "diasGozo",
+            "O saldo residual do período aquisitivo é inferior ao mínimo de dias permitido para uma futura parcela ou inviabiliza a parcela principal mínima.",
+            "PCK_FERIAS.MAIN_POS",
+            "IF v_saldo_remanescente < v_eff.min_dias_per_fer OR (NOT has_principal AND v_saldo_remanescente < v_eff.min_dias_per_princ_fer) THEN pack_hades.trata_erro(526); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00527",
+            FeriasGozoRuleSet.SLOT_GOZO_ANTES_TERMINO_PA_POR_ORDEM,
+            "dtini",
+            "Não é permitido gozar férias antes do término do 1º período aquisitivo do vínculo funcional.",
+            "PCK_FERIAS.MAIN_PRE",
+            "IF v_ordem_pa = 1 AND v_row_new.dtini <= v_pa.dtfim AND v_eff.permite_fer_prim_per = 'N' THEN pack_hades.trata_erro(527); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00528",
+            FeriasGozoRuleSet.SLOT_GOZO_ANTES_TERMINO_PA_POR_ORDEM,
+            "dtini",
+            "Não é permitido gozar férias antes do término do 2º período aquisitivo do vínculo funcional.",
+            "PCK_FERIAS.MAIN_PRE",
+            "IF v_ordem_pa = 2 AND v_row_new.dtini <= v_pa.dtfim AND v_eff.permite_fer_segun_per = 'N' THEN pack_hades.trata_erro(528); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00530",
+            FeriasGozoRuleSet.SLOT_GOZO_ANTES_TERMINO_PA_POR_ORDEM,
+            "dtini",
+            "Não é permitido gozar férias antes do término do 3º período aquisitivo do vínculo funcional.",
+            "PCK_FERIAS.MAIN_PRE",
+            "IF v_ordem_pa = 3 AND v_row_new.dtini <= v_pa.dtfim AND v_eff.permite_fer_terc_per = 'N' THEN pack_hades.trata_erro(530); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00531",
+            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            "ordemParcela",
+            "O período aquisitivo não pode ser integralmente quitado em quantidade de parcelas inferior ao mínimo exigido (minPerFer).",
+            "PCK_FERIAS.MAIN_POS",
+            "IF v_saldo_remanescente = 0 AND v_total_parcelas_pa < v_eff.min_per_fer THEN pack_hades.trata_erro(531); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00532",
+            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            "diasGozo",
+            "Ao atingir o número máximo de parcelas permitido (maxPerFer), não pode restar saldo positivo de dias no período aquisitivo.",
+            "PCK_FERIAS.MAIN_POS",
+            "IF v_total_parcelas_pa >= v_eff.max_per_fer AND v_saldo_remanescente > 0 THEN pack_hades.trata_erro(532); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01880",
+            FeriasGozoRuleSet.SLOT_GOZO_APOS_PRESCRICAO_PA,
+            "dtini",
+            "Gozo de férias após a data de prescrição do período aquisitivo não é permitido pelos parâmetros efetivos.",
+            "PCK_FERIAS.MAIN_PRE",
+            "IF v_viola_dt_prescr AND v_eff.permite_gozo_pos_prescr = 'N' THEN pack_hades.trata_erro(1880); END IF;"));
+
+    // Códigos de customização de Órgão 2 (CERG-*)
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "CERG-PARAM-PRE-001",
+            ParametroContagemFeriasRuleSet.SLOT_HOOK_PRE_VALIDACAO,
+            "documentoLegalId",
+            "Violação de regra customizada pré-validação em parâmetros de contagem.",
+            "EPB__PARAMETROS_CONTA",
+            "EPB__PARAMETROS_CONTA(v_row_new, v_mens);"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "CERG-PARAM-201",
+            ParametroContagemFeriasRuleSet.SLOT_FERIAS_LIMITES_DIAS_TEMPLATE,
+            "totDiasFer",
+            "Órgão 2 exige direito de férias entre 20 e 30 dias e no máximo 2 parcelas.",
+            "PARAMETROS_CONTA.TEMPLATE",
+            "Template ergon.parametros-conta:ferias-bounds@1.0 parametrizado para Órgão 2."));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "CERG-PARAM-301",
+            ParametroContagemFeriasRuleSet.SLOT_HOOK_PRE_VALIDACAO,
+            "documentoLegalId",
+            "Órgão 2 exige portaria/documento legal vinculado ao parâmetro de contagem de férias.",
+            "EPB__PARAMETROS_CONTA",
+            "IF v_row_new.tem_ferias = 'S' AND v_row_new.documento_legal_id IS NULL THEN pack_hades.trata_erro('CERG-PARAM-301'); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "CERG-PARAM-401",
+            ParametroContagemFeriasRuleSet.SLOT_ABONO_PECUNIARIO_FRACAO_LIMITES,
+            "abonoDirGozo",
+            "Órgão 2 veda parametrização de abono pecuniário (exige abonoDirGozo = 'N').",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.abono_dir_gozo <> 'N' THEN pack_hades.trata_erro('CERG-PARAM-401'); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "CERG-PARAM-POST-001",
+            ParametroContagemFeriasRuleSet.SLOT_HOOK_POS_VALIDACAO,
+            "dtini",
+            "Violação de regra customizada pós-validação em parâmetros de contagem.",
+            "EPA__PARAMETROS_CONTA",
+            "EPA__PARAMETROS_CONTA(v_row_new, v_mens);"));
+
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "CERG-PA-PRE-001",
+            PeriodoAquisitivoFeriasRuleSet.SLOT_HOOK_PRE_VALIDACAO,
+            "documentoLegalId",
+            "Violação de regra customizada pré-validação no período aquisitivo.",
+            "EPB__PERAQFER",
+            "EPB__PERAQFER(v_row_new, v_mens);"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "CERG-PA-201",
+            PeriodoAquisitivoFeriasRuleSet.SLOT_ACUMULO_E_FALTAS_LIMITES_TEMPLATE,
+            "faltasApuradas",
+            "Órgão 2 permite no máximo 1 período aquisitivo acumulado em aberto e até 20 faltas.",
+            "PERAQFER.TEMPLATE",
+            "Template ergon.peraqfer:accumulation-and-reduction-bounds@1.0 parametrizado para Órgão 2."));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "CERG-PA-301",
+            PeriodoAquisitivoFeriasRuleSet.SLOT_HOOK_PRE_VALIDACAO,
+            "documentoLegalId",
+            "Órgão 2 exige documento legal formal para conversão em dobro no período aquisitivo.",
+            "EPB__PERAQFER",
+            "IF v_row_new.dias_convertidos_dobro > 0 AND v_row_new.documento_legal_id IS NULL THEN pack_hades.trata_erro('CERG-PA-301'); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "CERG-PA-401",
+            PeriodoAquisitivoFeriasRuleSet.SLOT_PRESCRICAO_PARCELAS_ATIVAS,
+            "dtPrescricao",
+            "Órgão 2 exige documento legal expresso para autorizar parcelas após a data de prescrição.",
+            "EP__VERIFICA_DT_PRESCR",
+            "IF v_parcelas_apos_prescr > 0 AND v_row_new.documento_legal_id IS NULL THEN pack_hades.trata_erro('CERG-PA-401'); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "CERG-PA-POST-001",
+            PeriodoAquisitivoFeriasRuleSet.SLOT_HOOK_POS_VALIDACAO,
+            "dtini",
+            "Violação de regra customizada pós-validação no período aquisitivo.",
+            "EPA__PERAQFER",
+            "EPA__PERAQFER(v_row_new, v_mens);"));
+
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "CERG-FER-PRE-001",
+            FeriasGozoRuleSet.SLOT_HOOK_PRE_VALIDACAO,
+            "documentoLegalId",
+            "Violação de regra customizada pré-validação na concessão de férias.",
+            "EPB__FERIAS",
+            "EPB__FERIAS(v_row_new, v_mens);"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "CERG-FER-201",
+            FeriasGozoRuleSet.SLOT_FRACIONAMENTO_LIMITES_TEMPLATE,
+            "diasGozo",
+            "Órgão 2 exige máximo de 2 parcelas, mínimo de 10 dias por parcela, 15 dias na parcela principal e antecedência mínima de 15 dias.",
+            "FERIAS.TEMPLATE",
+            "Template ergon.ferias:fracionamento-and-abono-bounds@1.0 parametrizado para Órgão 2."));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "CERG-FER-301",
+            FeriasGozoRuleSet.SLOT_HOOK_PRE_VALIDACAO,
+            "documentoLegalId",
+            "Órgão 2 exige documento legal formal para concessão de férias com abono pecuniário ou adiantamento de 13º salário.",
+            "EPB__FERIAS",
+            "IF (v_row_new.abono_pecuniario = 'S' OR v_row_new.adiant_13 = 'S') AND v_row_new.documento_legal_id IS NULL THEN pack_hades.trata_erro('CERG-FER-301'); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "CERG-FER-401",
+            FeriasGozoRuleSet.SLOT_ABONO_PECUNIARIO_ELEGIBILIDADE_E_LIMITES,
+            "iniFimAbono",
+            "Órgão 2 permite abono pecuniário exclusivamente na 1ª parcela e ao final do gozo (iniFimAbono = 'F').",
+            "EP__TRATA_ABONO",
+            "IF v_row_new.abono_pecuniario = 'S' AND (v_row_new.ordem_parcela <> 1 OR v_row_new.ini_fim_abono <> 'F') THEN pack_hades.trata_erro('CERG-FER-401'); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "CERG-FER-POST-001",
+            FeriasGozoRuleSet.SLOT_HOOK_POS_VALIDACAO,
+            "dtini",
+            "Violação de regra customizada pós-validação na concessão de férias.",
+            "EPA__FERIAS",
+            "EPA__FERIAS(v_row_new, v_mens);"));
   }
 
   private ErgonRuleErrorCatalog() {}
@@ -822,6 +1535,6 @@ public final class ErgonRuleErrorCatalog {
     }
     return find(reasonCode)
         .map(RuleErrorDescriptor::messagePtBr)
-        .orElse("Violação determinística da política de regras estatutárias de frequência (" + reasonCode + ").");
+        .orElse("Violação determinística da política de regras de negócio Ergon (" + reasonCode + ").");
   }
 }

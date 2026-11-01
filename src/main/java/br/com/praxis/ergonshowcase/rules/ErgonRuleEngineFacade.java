@@ -6,14 +6,18 @@ import br.com.praxis.ergonshowcase.domain.CodigoFrequencia;
 import br.com.praxis.ergonshowcase.domain.DefinicaoCampoCustomizado;
 import br.com.praxis.ergonshowcase.domain.Dependente;
 import br.com.praxis.ergonshowcase.domain.DocumentoLegal;
+import br.com.praxis.ergonshowcase.domain.FeriasGozo;
 import br.com.praxis.ergonshowcase.domain.Frequencia;
 import br.com.praxis.ergonshowcase.domain.Orgao;
+import br.com.praxis.ergonshowcase.domain.ParametroContagemFerias;
+import br.com.praxis.ergonshowcase.domain.PeriodoAquisitivoFerias;
 import br.com.praxis.ergonshowcase.domain.RegraFrequenciaEstatutaria;
 import br.com.praxis.ergonshowcase.domain.ServidorPessoa;
 import br.com.praxis.ergonshowcase.domain.Setor;
 import br.com.praxis.ergonshowcase.domain.TipoDependente;
 import br.com.praxis.ergonshowcase.domain.TipoFrequencia;
 import br.com.praxis.ergonshowcase.domain.Vinculo;
+import br.com.praxis.ergonshowcase.rules.EffectiveVacationParameterResolver.EffectiveParametroFeriasFacts;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -58,13 +62,17 @@ import org.springframework.stereotype.Component;
  * de {@link RuleDecisionPlan} via {@link PraxisRulePlanCompiler} e avaliação em memória via
  * {@link PraxisRuleSetEngine}.
  *
- * <p>Suporta as 5 famílias governadas do domínio do Ergon RH Público:
+ * <p>Suporta as 8 famílias governadas de {@code RuleSetDefinition} (além da 9ª família de validação
+ * JSON Logic de campos customizados) do domínio do Ergon RH Público:
  * <ol>
  *   <li>{@link Rn013RegrasFrequenciaRuleSet} ({@code ergon.administracao-pessoal.regras-frequencia.rn013});
  *   <li>{@link FrequenciaLancamentoRuleSet} ({@code ergon.administracao-pessoal.frequencias.lancamento});
  *   <li>{@link AfastamentoConcessaoRuleSet} ({@code ergon.administracao-pessoal.afastamentos.concessao});
  *   <li>{@link DependenteElegibilidadeRuleSet} ({@code ergon.administracao-pessoal.dependentes.elegibilidade});
- *   <li>{@link VinculoProvimentoRuleSet} ({@code ergon.administracao-pessoal.vinculos.provimento}).
+ *   <li>{@link VinculoProvimentoRuleSet} ({@code ergon.administracao-pessoal.vinculos.provimento});
+ *   <li>{@link ParametroContagemFeriasRuleSet} ({@code ergon.administracao-pessoal.parametros-contagem-ferias.matriz});
+ *   <li>{@link PeriodoAquisitivoFeriasRuleSet} ({@code ergon.administracao-pessoal.periodos-aquisitivos-ferias.aquisicao});
+ *   <li>{@link FeriasGozoRuleSet} ({@code ergon.administracao-pessoal.ferias-gozo.concessao}).
  * </ol>
  *
  * <p>Toda consulta JPA/SQL ocorre na camada de serviço antes de invocar o motor; os executores
@@ -199,11 +207,150 @@ public class ErgonRuleEngineFacade {
     }
   }
 
+  /** Contexto pré-carregado para avaliação determinística de {@link ParametroContagemFerias}. */
+  public record ParametroContagemFeriasRuleContext(
+      ParametroContagemFerias draft, List<ParametroContagemFerias> existingRules) {}
+
+  /** Contexto pré-carregado para avaliação determinística de {@link PeriodoAquisitivoFerias}. */
+  public record PeriodoAquisitivoFeriasRuleContext(
+      PeriodoAquisitivoFerias draft,
+      PeriodoAquisitivoFerias previousSnapshot,
+      Vinculo vinculo,
+      ParametroContagemFerias resolvedParametroBase,
+      List<ParametroContagemFerias> parametroCandidates,
+      List<PeriodoAquisitivoFerias> existingPeriodos,
+      List<FeriasGozo> parcelasDoPeriodo,
+      List<Frequencia> activeFrequencias,
+      List<Afastamento> activeAfastamentos,
+      boolean lockedAverbacaoMutation) {
+
+    public PeriodoAquisitivoFeriasRuleContext(
+        PeriodoAquisitivoFerias draft,
+        Vinculo vinculo,
+        List<ParametroContagemFerias> parametroCandidates,
+        List<PeriodoAquisitivoFerias> existingPeriodos,
+        List<FeriasGozo> parcelasDoPeriodo) {
+      this(
+          draft,
+          null,
+          vinculo,
+          null,
+          parametroCandidates,
+          existingPeriodos,
+          parcelasDoPeriodo,
+          List.of(),
+          List.of(),
+          false);
+    }
+
+    public PeriodoAquisitivoFeriasRuleContext(
+        PeriodoAquisitivoFerias draft,
+        Vinculo vinculo,
+        ParametroContagemFerias resolvedParametroBase,
+        List<ParametroContagemFerias> parametroCandidates,
+        List<PeriodoAquisitivoFerias> existingPeriodos,
+        List<FeriasGozo> parcelasDoPeriodo,
+        boolean lockedAverbacaoMutation) {
+      this(
+          draft,
+          null,
+          vinculo,
+          resolvedParametroBase,
+          parametroCandidates,
+          existingPeriodos,
+          parcelasDoPeriodo,
+          List.of(),
+          List.of(),
+          lockedAverbacaoMutation);
+    }
+  }
+
+  /** Contexto pré-carregado para avaliação determinística de {@link FeriasGozo}. */
+  public record FeriasGozoRuleContext(
+      FeriasGozo draft,
+      PeriodoAquisitivoFerias periodoAquisitivo,
+      Vinculo vinculo,
+      Vinculo substitutoVinculo,
+      Boolean substitutoVinculoValidoOverride,
+      ParametroContagemFerias resolvedParametroBase,
+      List<ParametroContagemFerias> parametroCandidates,
+      List<PeriodoAquisitivoFerias> existingPeriodosDoVinculo,
+      Integer ordemPaNoVinculoOverride,
+      List<FeriasGozo> existingParcelasDoVinculo,
+      List<Frequencia> activeFrequencias,
+      List<Afastamento> activeAfastamentos,
+      LocalDate referenceDate,
+      boolean activeSubstitutionConflict,
+      boolean enforceStrictResidualBalance) {
+
+    public FeriasGozoRuleContext(
+        FeriasGozo draft,
+        PeriodoAquisitivoFerias periodoAquisitivo,
+        Vinculo vinculo,
+        Vinculo substitutoVinculo,
+        List<ParametroContagemFerias> parametroCandidates,
+        List<PeriodoAquisitivoFerias> existingPeriodosDoVinculo,
+        List<FeriasGozo> existingParcelasDoVinculo,
+        List<Frequencia> activeFrequencias,
+        List<Afastamento> activeAfastamentos) {
+      this(
+          draft,
+          periodoAquisitivo,
+          vinculo,
+          substitutoVinculo,
+          null,
+          null,
+          parametroCandidates,
+          existingPeriodosDoVinculo,
+          null,
+          existingParcelasDoVinculo,
+          activeFrequencias,
+          activeAfastamentos,
+          null,
+          false,
+          true);
+    }
+
+    public FeriasGozoRuleContext(
+        FeriasGozo draft,
+        PeriodoAquisitivoFerias periodoAquisitivo,
+        Vinculo vinculo,
+        Vinculo substitutoVinculo,
+        ParametroContagemFerias resolvedParametroBase,
+        List<ParametroContagemFerias> parametroCandidates,
+        List<PeriodoAquisitivoFerias> existingPeriodosDoVinculo,
+        List<FeriasGozo> existingParcelasDoVinculo,
+        List<Frequencia> activeFrequencias,
+        List<Afastamento> activeAfastamentos,
+        LocalDate referenceDate,
+        boolean activeSubstitutionConflict,
+        boolean enforceStrictResidualBalance) {
+      this(
+          draft,
+          periodoAquisitivo,
+          vinculo,
+          substitutoVinculo,
+          null,
+          resolvedParametroBase,
+          parametroCandidates,
+          existingPeriodosDoVinculo,
+          null,
+          existingParcelasDoVinculo,
+          activeFrequencias,
+          activeAfastamentos,
+          referenceDate,
+          activeSubstitutionConflict,
+          enforceStrictResidualBalance);
+    }
+  }
+
   private final ObjectMapper mapper;
   private final PraxisJsonLogicEngine jsonLogicEngine;
   private final RuleBindingExecutorRegistry executorRegistry;
   private final PraxisRulePlanCompiler compiler;
   private final PraxisRuleSetEngine engine;
+  private final EffectiveVacationParameterResolver vacationParameterResolver =
+      new EffectiveVacationParameterResolver();
 
   private final Map<Integer, RuleDecisionPlan> rn013PlansByOrgao = new ConcurrentHashMap<>();
   private final RuleDecisionPlan defaultProductRn013Plan;
@@ -220,6 +367,17 @@ public class ErgonRuleEngineFacade {
   private final Map<Integer, RuleDecisionPlan> vinculoPlansByOrgao = new ConcurrentHashMap<>();
   private final RuleDecisionPlan defaultProductVinculoPlan;
 
+  private final Map<Integer, RuleDecisionPlan> parametroContagemFeriasPlansByOrgao =
+      new ConcurrentHashMap<>();
+  private final RuleDecisionPlan defaultProductParametroContagemFeriasPlan;
+
+  private final Map<Integer, RuleDecisionPlan> periodoAquisitivoFeriasPlansByOrgao =
+      new ConcurrentHashMap<>();
+  private final RuleDecisionPlan defaultProductPeriodoAquisitivoFeriasPlan;
+
+  private final Map<Integer, RuleDecisionPlan> feriasGozoPlansByOrgao = new ConcurrentHashMap<>();
+  private final RuleDecisionPlan defaultProductFeriasGozoPlan;
+
   public ErgonRuleEngineFacade() {
     this.mapper = new ObjectMapper();
     this.jsonLogicEngine = new PraxisJsonLogicEngine();
@@ -230,7 +388,10 @@ public class ErgonRuleEngineFacade {
                 frequenciaSobreposicaoJavaExecutor(),
                 afastamentoSobreposicaoJavaExecutor(),
                 dependenteCpfUnicidadeJavaExecutor(),
-                vinculoAcumulacaoConstitucionalJavaExecutor()));
+                vinculoAcumulacaoConstitucionalJavaExecutor(),
+                parametroContagemConcomitanciaJavaExecutor(),
+                periodoAquisitivoSobreposicaoJavaExecutor(),
+                feriasGozoConcomitanciaSaldoJavaExecutor()));
     this.compiler = new PraxisRulePlanCompiler(this.executorRegistry);
     this.engine = new PraxisRuleSetEngine(this.executorRegistry);
 
@@ -263,6 +424,28 @@ public class ErgonRuleEngineFacade {
     this.vinculoPlansByOrgao.put(1, this.defaultProductVinculoPlan);
     this.vinculoPlansByOrgao.put(
         2, this.compiler.compile(VinculoProvimentoRuleSet.orgao2CustomizedRuleSet()));
+
+    this.defaultProductParametroContagemFeriasPlan =
+        this.compiler.compile(ParametroContagemFeriasRuleSet.productRuleSet());
+    this.parametroContagemFeriasPlansByOrgao.put(1, this.defaultProductParametroContagemFeriasPlan);
+    this.parametroContagemFeriasPlansByOrgao.put(
+        2, this.compiler.compile(ParametroContagemFeriasRuleSet.orgao2CustomizedRuleSet()));
+
+    this.defaultProductPeriodoAquisitivoFeriasPlan =
+        this.compiler.compile(PeriodoAquisitivoFeriasRuleSet.productRuleSet());
+    this.periodoAquisitivoFeriasPlansByOrgao.put(1, this.defaultProductPeriodoAquisitivoFeriasPlan);
+    this.periodoAquisitivoFeriasPlansByOrgao.put(
+        2, this.compiler.compile(PeriodoAquisitivoFeriasRuleSet.orgao2CustomizedRuleSet()));
+
+    this.defaultProductFeriasGozoPlan =
+        this.compiler.compile(FeriasGozoRuleSet.productRuleSet());
+    this.feriasGozoPlansByOrgao.put(1, this.defaultProductFeriasGozoPlan);
+    this.feriasGozoPlansByOrgao.put(
+        2, this.compiler.compile(FeriasGozoRuleSet.orgao2CustomizedRuleSet()));
+  }
+
+  public EffectiveVacationParameterResolver getVacationParameterResolver() {
+    return vacationParameterResolver;
   }
 
   public PraxisJsonLogicEngine getJsonLogicEngine() {
@@ -2886,5 +3069,1491 @@ public class ErgonRuleEngineFacade {
     } else {
       node.putNull(field);
     }
+  }
+
+  // ============================================================================================
+  // Slice 5 (Férias e Períodos Aquisitivos): Planos, Fatos e Executores Java Determinísticos
+  // ============================================================================================
+
+  /**
+   * Retorna o {@link RuleDecisionPlan} compilado de parâmetros de contagem de férias para o órgão
+   * informado.
+   */
+  public RuleDecisionPlan resolveParametroContagemFeriasPlan(Integer empCodigo) {
+    if (empCodigo == null) {
+      return defaultProductParametroContagemFeriasPlan;
+    }
+    return parametroContagemFeriasPlansByOrgao.getOrDefault(
+        empCodigo, defaultProductParametroContagemFeriasPlan);
+  }
+
+  /**
+   * Registra ou atualiza em memória um plano customizado de parâmetros de contagem de férias para
+   * um órgão específico.
+   */
+  public RuleDecisionPlan registerOrgaoParametroContagemFeriasPlan(
+      Integer empCodigo, RuleSetDefinition definition) {
+    Objects.requireNonNull(empCodigo, "empCodigo must not be null");
+    RuleDecisionPlan compiled = compilePlan(definition);
+    parametroContagemFeriasPlansByOrgao.put(empCodigo, compiled);
+    return compiled;
+  }
+
+  /**
+   * Retorna o {@link RuleDecisionPlan} compilado de períodos aquisitivos de férias para o órgão
+   * informado.
+   */
+  public RuleDecisionPlan resolvePeriodoAquisitivoFeriasPlan(Integer empCodigo) {
+    if (empCodigo == null) {
+      return defaultProductPeriodoAquisitivoFeriasPlan;
+    }
+    return periodoAquisitivoFeriasPlansByOrgao.getOrDefault(
+        empCodigo, defaultProductPeriodoAquisitivoFeriasPlan);
+  }
+
+  /**
+   * Registra ou atualiza em memória um plano customizado de períodos aquisitivos de férias para um
+   * órgão específico.
+   */
+  public RuleDecisionPlan registerOrgaoPeriodoAquisitivoFeriasPlan(
+      Integer empCodigo, RuleSetDefinition definition) {
+    Objects.requireNonNull(empCodigo, "empCodigo must not be null");
+    RuleDecisionPlan compiled = compilePlan(definition);
+    periodoAquisitivoFeriasPlansByOrgao.put(empCodigo, compiled);
+    return compiled;
+  }
+
+  /**
+   * Retorna o {@link RuleDecisionPlan} compilado de programação e gozo de férias para o órgão
+   * informado.
+   */
+  public RuleDecisionPlan resolveFeriasGozoPlan(Integer empCodigo) {
+    if (empCodigo == null) {
+      return defaultProductFeriasGozoPlan;
+    }
+    return feriasGozoPlansByOrgao.getOrDefault(empCodigo, defaultProductFeriasGozoPlan);
+  }
+
+  /**
+   * Registra ou atualiza em memória um plano customizado de programação e gozo de férias para um
+   * órgão específico.
+   */
+  public RuleDecisionPlan registerOrgaoFeriasGozoPlan(
+      Integer empCodigo, RuleSetDefinition definition) {
+    Objects.requireNonNull(empCodigo, "empCodigo must not be null");
+    RuleDecisionPlan compiled = compilePlan(definition);
+    feriasGozoPlansByOrgao.put(empCodigo, compiled);
+    return compiled;
+  }
+
+  /**
+   * Avalia deterministicamente o cadastro/manutenção de {@link ParametroContagemFerias} contra o
+   * plano do órgão.
+   */
+  public RuleEvaluationResult evaluateParametroContagemFerias(
+      ParametroContagemFeriasRuleContext ctx) {
+    Objects.requireNonNull(ctx, "ctx must not be null");
+    Integer empCodigo =
+        ctx.draft() != null && ctx.draft().getEmpCodigo() != null ? ctx.draft().getEmpCodigo() : 1;
+    RuleDecisionPlan plan = resolveParametroContagemFeriasPlan(empCodigo);
+    ObjectNode facts = buildParametroContagemFeriasFacts(ctx);
+    return evaluate(plan, facts);
+  }
+
+  /**
+   * Avalia o cadastro/manutenção de {@link ParametroContagemFerias} em modo <i>fail-closed</i>,
+   * lançando {@link ErgonRuleViolationException} (HTTP 422) se o resultado não for
+   * {@link RuleDecision#ALLOW}.
+   */
+  public RuleEvaluationResult enforceParametroContagemFerias(
+      ParametroContagemFeriasRuleContext ctx) {
+    Objects.requireNonNull(ctx, "ctx must not be null");
+    Integer empCodigo =
+        ctx.draft() != null && ctx.draft().getEmpCodigo() != null ? ctx.draft().getEmpCodigo() : 1;
+    RuleDecisionPlan plan = resolveParametroContagemFeriasPlan(empCodigo);
+    ObjectNode facts = buildParametroContagemFeriasFacts(ctx);
+    return enforce(plan, facts);
+  }
+
+  /**
+   * Avalia deterministicamente a abertura/manutenção de {@link PeriodoAquisitivoFerias} contra o
+   * plano do órgão.
+   */
+  public RuleEvaluationResult evaluatePeriodoAquisitivoFerias(
+      PeriodoAquisitivoFeriasRuleContext ctx) {
+    Objects.requireNonNull(ctx, "ctx must not be null");
+    Integer empCodigo =
+        ctx.draft() != null && ctx.draft().getEmpCodigo() != null ? ctx.draft().getEmpCodigo() : 1;
+    RuleDecisionPlan plan = resolvePeriodoAquisitivoFeriasPlan(empCodigo);
+    ObjectNode facts = buildPeriodoAquisitivoFeriasFacts(ctx);
+    return evaluate(plan, facts);
+  }
+
+  /**
+   * Avalia a abertura/manutenção de {@link PeriodoAquisitivoFerias} em modo <i>fail-closed</i>,
+   * lançando {@link ErgonRuleViolationException} (HTTP 422) se o resultado não for
+   * {@link RuleDecision#ALLOW}.
+   */
+  public RuleEvaluationResult enforcePeriodoAquisitivoFerias(
+      PeriodoAquisitivoFeriasRuleContext ctx) {
+    Objects.requireNonNull(ctx, "ctx must not be null");
+    Integer empCodigo =
+        ctx.draft() != null && ctx.draft().getEmpCodigo() != null ? ctx.draft().getEmpCodigo() : 1;
+    RuleDecisionPlan plan = resolvePeriodoAquisitivoFeriasPlan(empCodigo);
+    ObjectNode facts = buildPeriodoAquisitivoFeriasFacts(ctx);
+    return enforce(plan, facts);
+  }
+
+  /**
+   * Avalia deterministicamente a programação/concessão de {@link FeriasGozo} contra o plano do
+   * órgão.
+   */
+  public RuleEvaluationResult evaluateFeriasGozo(FeriasGozoRuleContext ctx) {
+    Objects.requireNonNull(ctx, "ctx must not be null");
+    Integer empCodigo =
+        ctx.draft() != null && ctx.draft().getEmpCodigo() != null ? ctx.draft().getEmpCodigo() : 1;
+    RuleDecisionPlan plan = resolveFeriasGozoPlan(empCodigo);
+    ObjectNode facts = buildFeriasGozoFacts(ctx);
+    return evaluate(plan, facts);
+  }
+
+  /**
+   * Avalia a programação/concessão de {@link FeriasGozo} em modo <i>fail-closed</i>, lançando
+   * {@link ErgonRuleViolationException} (HTTP 422) se o resultado não for {@link RuleDecision#ALLOW}.
+   */
+  public RuleEvaluationResult enforceFeriasGozo(FeriasGozoRuleContext ctx) {
+    Objects.requireNonNull(ctx, "ctx must not be null");
+    Integer empCodigo =
+        ctx.draft() != null && ctx.draft().getEmpCodigo() != null ? ctx.draft().getEmpCodigo() : 1;
+    RuleDecisionPlan plan = resolveFeriasGozoPlan(empCodigo);
+    ObjectNode facts = buildFeriasGozoFacts(ctx);
+    return enforce(plan, facts);
+  }
+
+  /**
+   * Constrói o envelope canônico de fatos de {@link ParametroContagemFerias}
+   * ({@code draft}, {@code scope}, {@code existingRules}, {@code derived}, {@code tenant},
+   * {@code context}).
+   */
+  public ObjectNode buildParametroContagemFeriasFacts(ParametroContagemFeriasRuleContext ctx) {
+    ParametroContagemFerias d = ctx.draft();
+    Integer empCodigo = d != null && d.getEmpCodigo() != null ? d.getEmpCodigo() : 1;
+
+    ObjectNode root = mapper.createObjectNode();
+    ObjectNode draftNode = root.putObject("draft");
+    if (d != null) {
+      putLongOrNull(draftNode, "id", d.getId());
+      putIntOrNull(draftNode, "empCodigo", d.getEmpCodigo());
+      putTextOrNull(draftNode, "regimeJuridico", d.getRegimeJuridico());
+      putTextOrNull(draftNode, "tipoVinculo", d.getTipoVinculo());
+      putTextOrNull(draftNode, "categoria", d.getCategoria());
+      putTextOrNull(draftNode, "subcategoria", d.getSubcategoria());
+      putDateOrNull(draftNode, "dtini", d.getDtini());
+      putDateOrNull(draftNode, "dtfim", d.getDtfim());
+      putBooleanOrNull(draftNode, "temFerias", d.getTemFerias());
+      putIntOrNull(draftNode, "totDiasFer", d.getTotDiasFer());
+      putIntOrNull(draftNode, "minPerFer", d.getMinPerFer());
+      putIntOrNull(draftNode, "maxPerFer", d.getMaxPerFer());
+      putIntOrNull(draftNode, "minDiasPerFer", d.getMinDiasPerFer());
+      putIntOrNull(draftNode, "maxDiasPerFer", d.getMaxDiasPerFer());
+      putIntOrNull(draftNode, "minDiasPerPrincFer", d.getMinDiasPerPrincFer());
+      putTextOrNull(draftNode, "abonoDirGozo", d.getAbonoDirGozo());
+      putIntOrNull(draftNode, "numDiasAbonoFer", d.getNumDiasAbonoFer());
+      putIntOrNull(draftNode, "denDiasAbonoFer", d.getDenDiasAbonoFer());
+      putIntOrNull(draftNode, "minDiasPvendFer", d.getMinDiasPvendFer());
+      putIntOrNull(draftNode, "maxDiasVendFer", d.getMaxDiasVendFer());
+      putBooleanOrNull(draftNode, "abonoConstFer", d.getAbonoConstFer());
+      putBooleanOrNull(draftNode, "adiant13Fer", d.getAdiant13Fer());
+      putBooleanOrNull(draftNode, "adiantSalFer", d.getAdiantSalFer());
+      putBooleanOrNull(draftNode, "emprestFer", d.getEmprestFer());
+      putBooleanOrNull(draftNode, "permiteGozoAntesPaFer", d.getPermiteGozoAntesPaFer());
+      putBooleanOrNull(draftNode, "permiteFerPrimPer", d.getPermiteFerPrimPer());
+      putBooleanOrNull(draftNode, "permiteFerSegunPer", d.getPermiteFerSegunPer());
+      putBooleanOrNull(draftNode, "permiteFerTercPer", d.getPermiteFerTercPer());
+      putBooleanOrNull(draftNode, "permiteFerPerInc", d.getPermiteFerPerInc());
+      putTextOrNull(draftNode, "criterioPrescricao", d.getCriterioPrescricao());
+      putBooleanOrNull(draftNode, "permiteGozoAposPrescricao", d.getPermiteGozoAposPrescricao());
+      putBooleanOrNull(draftNode, "permiteLancConcPa", d.getPermiteLancConcPa());
+      putBooleanOrNull(draftNode, "exigeExercicio", d.getExigeExercicio());
+      putBooleanOrNull(draftNode, "semPgtoMulta", d.getSemPgtoMulta());
+      putBooleanOrNull(draftNode, "contDobroFerias", d.getContDobroFerias());
+      putIntOrNull(draftNode, "minDiasPeraqfer", d.getMinDiasPeraqfer());
+      putIntOrNull(draftNode, "maxDiasPeraqfer", d.getMaxDiasPeraqfer());
+      putBooleanOrNull(draftNode, "temLicEsp", d.getTemLicEsp());
+      putIntOrNull(draftNode, "anosLicEsp", d.getAnosLicEsp());
+      putIntOrNull(draftNode, "mesesLicEspPer", d.getMesesLicEspPer());
+      putBooleanOrNull(draftNode, "vendLicEsp", d.getVendLicEsp());
+      putTextOrNull(draftNode, "abonoDirGozoLicEsp", d.getAbonoDirGozoLicEsp());
+      putIntOrNull(draftNode, "minDiasPvendLicEsp", d.getMinDiasPvendLicEsp());
+      putIntOrNull(draftNode, "maxDiasVendLicEsp", d.getMaxDiasVendLicEsp());
+      putIntOrNull(draftNode, "numDiasAbonoLicEsp", d.getNumDiasAbonoLicEsp());
+      putIntOrNull(draftNode, "denDiasAbonoLicEsp", d.getDenDiasAbonoLicEsp());
+      putBooleanOrNull(draftNode, "contDobroLicEsp", d.getContDobroLicEsp());
+      putIntOrNull(draftNode, "minDiasPcontDobLicEsp", d.getMinDiasPcontDobLicEsp());
+      putIntOrNull(draftNode, "maxDiasContDobLicEsp", d.getMaxDiasContDobLicEsp());
+      putBooleanOrNull(draftNode, "temProgressao", d.getTemProgressao());
+      putIntOrNull(draftNode, "anosProgressao", d.getAnosProgressao());
+      putBooleanOrNull(draftNode, "temTempoServ", d.getTemTempoServ());
+      putIntOrNull(draftNode, "anos1TempoServ", d.getAnos1TempoServ());
+      putBooleanOrNull(draftNode, "temSextaParte", d.getTemSextaParte());
+      putIntOrNull(draftNode, "anosSextaParte", d.getAnosSextaParte());
+      putLongOrNull(draftNode, "documentoLegalFeriasId", d.getDocumentoLegalFeriasId());
+      putLongOrNull(draftNode, "documentoLegalProgressaoId", d.getDocumentoLegalProgressaoId());
+      putTextOrNull(draftNode, "observacoes", d.getObservacoes());
+      putBooleanOrNull(
+          draftNode, "active", d.getActive() != null ? d.getActive() : Boolean.TRUE);
+    }
+
+    ArrayNode existingNode = root.putArray("existingRules");
+    int overlappingActiveCount = 0;
+    LocalDate draftStart = d != null ? d.getDtini() : null;
+    LocalDate draftEnd = d != null && d.getDtfim() != null ? d.getDtfim() : OPEN_ENDED_DATE;
+    boolean draftActive = d == null || d.getActive() == null || d.getActive();
+
+    if (ctx.existingRules() != null) {
+      for (ParametroContagemFerias cand : ctx.existingRules()) {
+        if (cand == null) {
+          continue;
+        }
+        ObjectNode item = existingNode.addObject();
+        putLongOrNull(item, "id", cand.getId());
+        putIntOrNull(item, "empCodigo", cand.getEmpCodigo());
+        putTextOrNull(item, "regimeJuridico", cand.getRegimeJuridico());
+        putTextOrNull(item, "tipoVinculo", cand.getTipoVinculo());
+        putTextOrNull(item, "categoria", cand.getCategoria());
+        putTextOrNull(item, "subcategoria", cand.getSubcategoria());
+        putDateOrNull(item, "dtini", cand.getDtini());
+        putDateOrNull(item, "dtfim", cand.getDtfim());
+        putBooleanOrNull(
+            item, "active", cand.getActive() != null ? cand.getActive() : Boolean.TRUE);
+
+        if (d != null
+            && draftActive
+            && draftStart != null
+            && (cand.getActive() == null || cand.getActive())
+            && (d.getId() == null || !Objects.equals(d.getId(), cand.getId()))
+            && sameParametroContagemScope(d, cand)
+            && cand.getDtini() != null) {
+          LocalDate candEnd = cand.getDtfim() != null ? cand.getDtfim() : OPEN_ENDED_DATE;
+          if (!draftStart.isAfter(candEnd) && !cand.getDtini().isAfter(draftEnd)) {
+            overlappingActiveCount++;
+          }
+        }
+      }
+    }
+
+    ObjectNode scopeNode = root.putObject("scope");
+    scopeNode.put("overlappingActiveCount", overlappingActiveCount);
+
+    ObjectNode derivedNode = root.putObject("derived");
+    derivedNode.put("licencaProgressaoTempoServCoerente", isLicencaProgressaoCoerente(d));
+
+    ObjectNode tenantNode = root.putObject("tenant");
+    tenantNode.put("empCodigo", empCodigo);
+
+    ObjectNode contextNode = root.putObject("context");
+    contextNode.put("operation", ParametroContagemFeriasRuleSet.OPERATION);
+
+    return root;
+  }
+
+  private static boolean sameParametroContagemScope(
+      ParametroContagemFerias a, ParametroContagemFerias b) {
+    return Objects.equals(a.getEmpCodigo(), b.getEmpCodigo())
+        && Objects.equals(a.getRegimeJuridico(), b.getRegimeJuridico())
+        && Objects.equals(a.getTipoVinculo(), b.getTipoVinculo())
+        && Objects.equals(a.getCategoria(), b.getCategoria())
+        && Objects.equals(a.getSubcategoria(), b.getSubcategoria());
+  }
+
+  private static boolean isLicencaProgressaoCoerente(ParametroContagemFerias d) {
+    if (d == null) {
+      return true;
+    }
+    if (Boolean.TRUE.equals(d.getTemLicEsp())) {
+      if (d.getAnosLicEsp() == null
+          || d.getAnosLicEsp() <= 0
+          || d.getMesesLicEspPer() == null
+          || d.getMesesLicEspPer() <= 0) {
+        return false;
+      }
+      if (Boolean.TRUE.equals(d.getVendLicEsp())) {
+        if (d.getAbonoDirGozoLicEsp() == null
+            || !Set.of("D", "G", "N").contains(d.getAbonoDirGozoLicEsp())) {
+          return false;
+        }
+        if (d.getMinDiasPvendLicEsp() != null
+            && d.getMaxDiasVendLicEsp() != null
+            && d.getMinDiasPvendLicEsp() > d.getMaxDiasVendLicEsp()) {
+          return false;
+        }
+        if (d.getNumDiasAbonoLicEsp() != null
+            && d.getDenDiasAbonoLicEsp() != null
+            && (d.getDenDiasAbonoLicEsp() <= 0
+                || d.getNumDiasAbonoLicEsp() < 0
+                || d.getNumDiasAbonoLicEsp() > d.getDenDiasAbonoLicEsp())) {
+          return false;
+        }
+      } else {
+        if ((d.getMinDiasPvendLicEsp() != null && d.getMinDiasPvendLicEsp() > 0)
+            || (d.getMaxDiasVendLicEsp() != null && d.getMaxDiasVendLicEsp() > 0)) {
+          return false;
+        }
+      }
+      if (Boolean.TRUE.equals(d.getContDobroLicEsp())) {
+        if (d.getMinDiasPcontDobLicEsp() == null || d.getMaxDiasContDobLicEsp() == null) {
+          return false;
+        }
+        if (d.getMinDiasPcontDobLicEsp() < 0
+            || d.getMaxDiasContDobLicEsp() < 0
+            || d.getMinDiasPcontDobLicEsp() > d.getMaxDiasContDobLicEsp()) {
+          return false;
+        }
+      } else {
+        if ((d.getMinDiasPcontDobLicEsp() != null && d.getMinDiasPcontDobLicEsp() > 0)
+            || (d.getMaxDiasContDobLicEsp() != null && d.getMaxDiasContDobLicEsp() > 0)) {
+          return false;
+        }
+      }
+    } else {
+      if ((d.getAnosLicEsp() != null && d.getAnosLicEsp() > 0)
+          || (d.getMesesLicEspPer() != null && d.getMesesLicEspPer() > 0)
+          || Boolean.TRUE.equals(d.getVendLicEsp())
+          || Boolean.TRUE.equals(d.getContDobroLicEsp())) {
+        return false;
+      }
+    }
+
+    if (Boolean.TRUE.equals(d.getTemProgressao())) {
+      if (d.getAnosProgressao() == null || d.getAnosProgressao() <= 0) {
+        return false;
+      }
+    } else if (d.getAnosProgressao() != null && d.getAnosProgressao() > 0) {
+      return false;
+    }
+
+    if (Boolean.TRUE.equals(d.getTemTempoServ())) {
+      if (d.getAnos1TempoServ() == null || d.getAnos1TempoServ() <= 0) {
+        return false;
+      }
+    } else if (d.getAnos1TempoServ() != null && d.getAnos1TempoServ() > 0) {
+      return false;
+    }
+
+    if (Boolean.TRUE.equals(d.getTemSextaParte())) {
+      if (d.getAnosSextaParte() == null || d.getAnosSextaParte() <= 0) {
+        return false;
+      }
+    } else if (d.getAnosSextaParte() != null && d.getAnosSextaParte() > 0) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Constrói o envelope canônico de fatos de {@link PeriodoAquisitivoFerias}
+   * ({@code draft}, {@code vinculo}, {@code effectiveParametroConta}, {@code derived},
+   * {@code existingPeriodos}, {@code tenant}, {@code context}).
+   */
+  public ObjectNode buildPeriodoAquisitivoFeriasFacts(PeriodoAquisitivoFeriasRuleContext ctx) {
+    PeriodoAquisitivoFerias d = ctx.draft();
+    Vinculo v = ctx.vinculo();
+    Integer empCodigo = d != null && d.getEmpCodigo() != null ? d.getEmpCodigo() : 1;
+
+    EffectiveVacationParameterResolver.EffectiveParametroFeriasFacts effective =
+        vacationParameterResolver.resolveEffectiveFacts(
+            ctx.parametroCandidates(),
+            ctx.resolvedParametroBase(),
+            d,
+            v,
+            d != null ? d.getDtini() : null);
+
+    ObjectNode root = mapper.createObjectNode();
+    ObjectNode draftNode = root.putObject("draft");
+    boolean lockedAverbacaoMutation = ctx.lockedAverbacaoMutation();
+    if (d != null) {
+      if (ctx.previousSnapshot() != null
+          && Boolean.TRUE.equals(ctx.previousSnapshot().getGeradoPorAverbacao())) {
+        PeriodoAquisitivoFerias prev = ctx.previousSnapshot();
+        if (!Objects.equals(prev.getDtini(), d.getDtini())
+            || !Objects.equals(prev.getDtfim(), d.getDtfim())
+            || !Objects.equals(prev.getChave(), d.getChave())) {
+          lockedAverbacaoMutation = true;
+        }
+      }
+      putLongOrNull(draftNode, "id", d.getId());
+      putIntOrNull(draftNode, "empCodigo", d.getEmpCodigo());
+      putLongOrNull(draftNode, "numfunc", d.getNumfunc());
+      putIntOrNull(draftNode, "numvinc", d.getNumvinc());
+      putIntOrNull(draftNode, "chave", d.getChave());
+      putIntOrNull(draftNode, "exercicio", d.getExercicio());
+      putDateOrNull(draftNode, "dtini", d.getDtini());
+      putDateOrNull(draftNode, "dtfim", d.getDtfim());
+      putIntOrNull(
+          draftNode, "totDiasDireito", d.getTotDiasDireito() != null ? d.getTotDiasDireito() : 0);
+      putIntOrNull(
+          draftNode, "faltasApuradas", d.getFaltasApuradas() != null ? d.getFaltasApuradas() : 0);
+      putIntOrNull(
+          draftNode,
+          "diasAfastamentoSuspensivo",
+          d.getDiasAfastamentoSuspensivo() != null ? d.getDiasAfastamentoSuspensivo() : 0);
+      putIntOrNull(
+          draftNode, "diasGozados", d.getDiasGozados() != null ? d.getDiasGozados() : 0);
+      putIntOrNull(
+          draftNode,
+          "diasVendidosAbono",
+          d.getDiasVendidosAbono() != null ? d.getDiasVendidosAbono() : 0);
+      putIntOrNull(
+          draftNode,
+          "diasConvertidosDobro",
+          d.getDiasConvertidosDobro() != null ? d.getDiasConvertidosDobro() : 0);
+      putIntOrNull(
+          draftNode,
+          "saldoDiasDisponivel",
+          d.getSaldoDiasDisponivel() != null ? d.getSaldoDiasDisponivel() : 0);
+      putTextOrNull(draftNode, "situacao", d.getSituacao());
+      putDateOrNull(draftNode, "dtPrescricao", d.getDtPrescricao());
+      putTextOrNull(draftNode, "criterioPrescricao", d.getCriterioPrescricao());
+      putTextOrNull(draftNode, "permiteGozoPosPrescricao", d.getPermiteGozoPosPrescricao());
+      putDateOrNull(draftNode, "dtPgtoComMulta", d.getDtPgtoComMulta());
+      putTextOrNull(draftNode, "semPgtoMulta", d.getSemPgtoMulta());
+      putIntOrNull(draftNode, "maxPerFer", d.getMaxPerFer());
+      putIntOrNull(draftNode, "minPerFer", d.getMinPerFer());
+      putIntOrNull(draftNode, "maxDiasPerFer", d.getMaxDiasPerFer());
+      putIntOrNull(draftNode, "minDiasPerFer", d.getMinDiasPerFer());
+      putIntOrNull(draftNode, "minDiasPerPrincFer", d.getMinDiasPerPrincFer());
+      putTextOrNull(draftNode, "abonoDirGozo", d.getAbonoDirGozo());
+      putTextOrNull(draftNode, "abonoConstFer", d.getAbonoConstFer());
+      putTextOrNull(draftNode, "adiant13Fer", d.getAdiant13Fer());
+      putTextOrNull(draftNode, "adiantSalFer", d.getAdiantSalFer());
+      putTextOrNull(draftNode, "emprestFer", d.getEmprestFer());
+      putTextOrNull(draftNode, "permiteFerEstePer", d.getPermiteFerEstePer());
+      putIntOrNull(draftNode, "maxDiasVendFer", d.getMaxDiasVendFer());
+      putIntOrNull(draftNode, "minDiasPvendFer", d.getMinDiasPvendFer());
+      putIntOrNull(draftNode, "numDiasAbonoFer", d.getNumDiasAbonoFer());
+      putIntOrNull(draftNode, "denDiasAbonoFer", d.getDenDiasAbonoFer());
+      putTextOrNull(draftNode, "contDobroFerias", d.getContDobroFerias());
+      putIntOrNull(draftNode, "minDiasPeraqfer", d.getMinDiasPeraqfer());
+      putIntOrNull(draftNode, "maxDiasPeraqfer", d.getMaxDiasPeraqfer());
+      putBooleanOrNull(
+          draftNode,
+          "geradoPorAverbacao",
+          d.getGeradoPorAverbacao() != null ? d.getGeradoPorAverbacao() : Boolean.FALSE);
+      putLongOrNull(draftNode, "documentoLegalId", d.getDocumentoLegalId());
+      putLongOrNull(draftNode, "atoPublicacaoId", d.getAtoPublicacaoId());
+      putTextOrNull(draftNode, "observacoes", d.getObservacoes());
+      draftNode.put("lockedAverbacaoMutation", lockedAverbacaoMutation);
+    }
+
+    ObjectNode vinculoNode = root.putObject("vinculo");
+    if (v != null) {
+      putDateOrNull(vinculoNode, "dtexerc", v.getDtexerc());
+      putDateOrNull(vinculoNode, "dtvac", v.getDtvac());
+      putDateOrNull(vinculoNode, "dtaposent", v.getDtaposent());
+      putTextOrNull(vinculoNode, "situacao", v.getSituacao());
+      putTextOrNull(vinculoNode, "regimeJuridico", v.getRegimejur());
+      putTextOrNull(vinculoNode, "tipoVinculo", v.getTipovinc());
+      putTextOrNull(vinculoNode, "categoria", v.getCategoria());
+      putTextOrNull(vinculoNode, "subcategoria", v.getSubcategoria());
+    } else {
+      vinculoNode.putNull("dtexerc");
+      vinculoNode.putNull("dtvac");
+      vinculoNode.putNull("dtaposent");
+      vinculoNode.putNull("situacao");
+    }
+
+    ObjectNode effNode = root.putObject("effectiveParametroConta");
+    populateEffectiveParametroNode(effNode, effective);
+
+    int faltasFromFrequencias = countUnjustifiedAbsencesInPa(d, ctx.activeFrequencias());
+    int faltasApuradas =
+        d != null && d.getFaltasApuradas() != null
+            ? Math.max(d.getFaltasApuradas(), faltasFromFrequencias)
+            : faltasFromFrequencias;
+    draftNode.put("faltasApuradas", faltasApuradas);
+
+    int diasAfastFromEntity =
+        d != null && d.getDiasAfastamentoSuspensivo() != null
+            ? d.getDiasAfastamentoSuspensivo()
+            : 0;
+    int diasAfastFromList = countSuspensiveLeaveDaysInPa(d, ctx.activeAfastamentos());
+    int diasAfastEfetivos = Math.max(diasAfastFromEntity, diasAfastFromList);
+    draftNode.put("diasAfastamentoSuspensivo", diasAfastEfetivos);
+
+    int maxDiasDireitoPelaEscalaFaltas =
+        EffectiveVacationParameterResolver.calcularDiasDireitoPorFaltas(
+            effective.totDiasFer() != null ? effective.totDiasFer() : 30, faltasApuradas);
+    if (diasAfastEfetivos > 180) {
+      maxDiasDireitoPelaEscalaFaltas = 0;
+    }
+
+    int gozados = d != null && d.getDiasGozados() != null ? d.getDiasGozados() : 0;
+    int vendidos = d != null && d.getDiasVendidosAbono() != null ? d.getDiasVendidosAbono() : 0;
+    int dobro = d != null && d.getDiasConvertidosDobro() != null ? d.getDiasConvertidosDobro() : 0;
+    int totalDiasConsumidos = gozados + vendidos + dobro;
+
+    ArrayNode existingNode = root.putArray("existingPeriodos");
+    int overlappingPeriodsCount = 0;
+    int otherOpenPeriodsCount = 0;
+    LocalDate draftStart = d != null ? d.getDtini() : null;
+    LocalDate draftEnd = d != null ? d.getDtfim() : null;
+
+    if (ctx.existingPeriodos() != null) {
+      for (PeriodoAquisitivoFerias cand : ctx.existingPeriodos()) {
+        if (cand == null) {
+          continue;
+        }
+        ObjectNode item = existingNode.addObject();
+        putLongOrNull(item, "id", cand.getId());
+        putIntOrNull(item, "chave", cand.getChave());
+        putDateOrNull(item, "dtini", cand.getDtini());
+        putDateOrNull(item, "dtfim", cand.getDtfim());
+        putTextOrNull(item, "situacao", cand.getSituacao());
+        putIntOrNull(item, "saldoDiasDisponivel", cand.getSaldoDiasDisponivel());
+
+        boolean sameRecord =
+            (d != null && d.getId() != null && Objects.equals(d.getId(), cand.getId()))
+                || (d != null
+                    && d.getId() == null
+                    && d.getChave() != null
+                    && Objects.equals(d.getChave(), cand.getChave())
+                    && Objects.equals(d.getDtini(), cand.getDtini())
+                    && Objects.equals(d.getDtfim(), cand.getDtfim()));
+        if (sameRecord) {
+          continue;
+        }
+        if ("CANCELADO".equalsIgnoreCase(cand.getSituacao())) {
+          continue;
+        }
+        if (d != null
+            && d.getChave() != null
+            && Objects.equals(d.getChave(), cand.getChave())
+            && (d.getId() == null || !Objects.equals(d.getId(), cand.getId()))) {
+          overlappingPeriodsCount++;
+        } else if (draftStart != null
+            && draftEnd != null
+            && cand.getDtini() != null
+            && cand.getDtfim() != null
+            && !draftStart.isAfter(cand.getDtfim())
+            && !cand.getDtini().isAfter(draftEnd)) {
+          overlappingPeriodsCount++;
+        }
+
+        if (isOpenPeriodoSituacao(cand.getSituacao())
+            && (cand.getSaldoDiasDisponivel() == null || cand.getSaldoDiasDisponivel() > 0)) {
+          otherOpenPeriodsCount++;
+        }
+      }
+    }
+
+    boolean currentOpen =
+        d != null
+            && isOpenPeriodoSituacao(d.getSituacao())
+            && (d.getTotDiasDireito() == null || d.getTotDiasDireito() - totalDiasConsumidos > 0);
+    int openAccumulatedPeriodsCount = otherOpenPeriodsCount + (currentOpen ? 1 : 0);
+
+    int parcelasViolandoPrescricaoCount = 0;
+    if (d != null && d.getDtPrescricao() != null && ctx.parcelasDoPeriodo() != null) {
+      for (FeriasGozo fg : ctx.parcelasDoPeriodo()) {
+        if (fg == null || "CANCELADA".equalsIgnoreCase(fg.getSituacao())) {
+          continue;
+        }
+        LocalDate endRef = resolveFeriasEffectiveEndDate(fg);
+        boolean violates =
+            "I".equalsIgnoreCase(effective.criterioPrescricao())
+                ? (fg.getDtini() != null && fg.getDtini().isAfter(d.getDtPrescricao()))
+                : (endRef != null && endRef.isAfter(d.getDtPrescricao()));
+        if (violates) {
+          parcelasViolandoPrescricaoCount++;
+        }
+      }
+    }
+
+    ObjectNode derivedNode = root.putObject("derived");
+    derivedNode.put("faltasNoPeriodoCount", faltasApuradas);
+    derivedNode.put("diasAfastamentoNoPeriodoCount", diasAfastEfetivos);
+    derivedNode.put("maxDiasDireitoPelaEscalaFaltas", maxDiasDireitoPelaEscalaFaltas);
+    derivedNode.put("totalDiasConsumidos", totalDiasConsumidos);
+    derivedNode.put("openAccumulatedPeriodsCount", openAccumulatedPeriodsCount);
+    derivedNode.put("overlappingPeriodsCount", overlappingPeriodsCount);
+    derivedNode.put("parcelasViolandoPrescricaoCount", parcelasViolandoPrescricaoCount);
+    derivedNode.put(
+        "contagemDobroOverrideCoerente", isContagemDobroOverrideCoerente(d, effective));
+    derivedNode.put(
+        "overridesParcelamentoAbonoCoerentes", isOverridesParcelamentoAbonoCoerentes(d, effective));
+
+    ObjectNode tenantNode = root.putObject("tenant");
+    tenantNode.put("empCodigo", empCodigo);
+
+    ObjectNode contextNode = root.putObject("context");
+    contextNode.put("operation", PeriodoAquisitivoFeriasRuleSet.OPERATION);
+
+    return root;
+  }
+
+  private static boolean isOpenPeriodoSituacao(String situacao) {
+    if (situacao == null) {
+      return true;
+    }
+    return Set.of("EM_AQUISICAO", "DISPONIVEL", "ADQUIRIDO", "PARCIALMENTE_GOZADO")
+        .contains(situacao.toUpperCase());
+  }
+
+  private static boolean isContagemDobroOverrideCoerente(
+      PeriodoAquisitivoFerias d,
+      EffectiveVacationParameterResolver.EffectiveParametroFeriasFacts effective) {
+    if (d == null) {
+      return true;
+    }
+    if (d.getContDobroFerias() != null
+        && !Set.of("I", "S", "N").contains(d.getContDobroFerias().toUpperCase())) {
+      return false;
+    }
+    boolean dobroAtivoNoPa = "S".equalsIgnoreCase(d.getContDobroFerias());
+    boolean dobroDesabilitadoNoPa =
+        "N".equalsIgnoreCase(d.getContDobroFerias()) || !effective.contDobroFerias();
+    if (dobroAtivoNoPa) {
+      if (d.getMinDiasPeraqfer() == null || d.getMaxDiasPeraqfer() == null) {
+        return false;
+      }
+      if (d.getMinDiasPeraqfer() < 0
+          || d.getMaxDiasPeraqfer() < 0
+          || d.getMinDiasPeraqfer() > d.getMaxDiasPeraqfer()) {
+        return false;
+      }
+    } else if ("N".equalsIgnoreCase(d.getContDobroFerias())) {
+      if ((d.getMinDiasPeraqfer() != null && d.getMinDiasPeraqfer() > 0)
+          || (d.getMaxDiasPeraqfer() != null && d.getMaxDiasPeraqfer() > 0)) {
+        return false;
+      }
+    }
+    int convertidos = d.getDiasConvertidosDobro() != null ? d.getDiasConvertidosDobro() : 0;
+    if (convertidos > 0) {
+      if (dobroDesabilitadoNoPa) {
+        return false;
+      }
+      if (effective.minDiasPeraqfer() != null && convertidos < effective.minDiasPeraqfer()) {
+        return false;
+      }
+      if (effective.maxDiasPeraqfer() != null && convertidos > effective.maxDiasPeraqfer()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private static boolean isOverridesParcelamentoAbonoCoerentes(
+      PeriodoAquisitivoFerias d,
+      EffectiveVacationParameterResolver.EffectiveParametroFeriasFacts effective) {
+    if (d == null) {
+      return true;
+    }
+    if (!isValidTriState(d.getPermiteGozoPosPrescricao())
+        || !isValidTriState(d.getAbonoConstFer())
+        || !isValidTriState(d.getAdiant13Fer())
+        || !isValidTriState(d.getAdiantSalFer())
+        || !isValidTriState(d.getEmprestFer())
+        || !isValidTriState(d.getPermiteFerEstePer())) {
+      return false;
+    }
+    if (d.getAbonoDirGozo() != null
+        && !Set.of("I", "D", "G", "N").contains(d.getAbonoDirGozo().toUpperCase())) {
+      return false;
+    }
+    if (d.getMinPerFer() != null && d.getMinPerFer() <= 0) {
+      return false;
+    }
+    if (d.getMaxPerFer() != null && (d.getMaxPerFer() <= 0 || d.getMaxPerFer() > 6)) {
+      return false;
+    }
+    if (effective.minPerFer() != null
+        && effective.maxPerFer() != null
+        && effective.minPerFer() > effective.maxPerFer()) {
+      return false;
+    }
+    if (d.getMinDiasPerFer() != null && d.getMinDiasPerFer() <= 0) {
+      return false;
+    }
+    if (d.getMaxDiasPerFer() != null && d.getMaxDiasPerFer() <= 0) {
+      return false;
+    }
+    if (effective.minDiasPerFer() != null
+        && effective.maxDiasPerFer() != null
+        && effective.minDiasPerFer() > effective.maxDiasPerFer()) {
+      return false;
+    }
+    if (effective.minDiasPerPrincFer() != null) {
+      if (effective.minDiasPerFer() != null
+          && effective.minDiasPerPrincFer() < effective.minDiasPerFer()) {
+        return false;
+      }
+      if (effective.maxDiasPerFer() != null
+          && effective.minDiasPerPrincFer() > effective.maxDiasPerFer()) {
+        return false;
+      }
+    }
+    if ("N".equalsIgnoreCase(d.getAbonoDirGozo())) {
+      if ((d.getMinDiasPvendFer() != null && d.getMinDiasPvendFer() > 0)
+          || (d.getMaxDiasVendFer() != null && d.getMaxDiasVendFer() > 0)
+          || (d.getNumDiasAbonoFer() != null && d.getNumDiasAbonoFer() > 0)
+          || (d.getDenDiasAbonoFer() != null && d.getDenDiasAbonoFer() > 0)) {
+        return false;
+      }
+    } else {
+      if ((d.getNumDiasAbonoFer() != null) != (d.getDenDiasAbonoFer() != null)) {
+        return false;
+      }
+      if (d.getNumDiasAbonoFer() != null && d.getDenDiasAbonoFer() != null) {
+        if (d.getNumDiasAbonoFer() < 0
+            || d.getDenDiasAbonoFer() <= 0
+            || d.getNumDiasAbonoFer() > d.getDenDiasAbonoFer()) {
+          return false;
+        }
+      }
+      if (effective.minDiasPvendFer() != null
+          && effective.maxDiasVendFer() != null
+          && effective.minDiasPvendFer() > effective.maxDiasVendFer()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private static boolean isValidTriState(String value) {
+    return value == null || Set.of("I", "S", "N").contains(value.toUpperCase());
+  }
+
+  private static int countUnjustifiedAbsencesInPa(
+      PeriodoAquisitivoFerias pa, List<Frequencia> frequencias) {
+    if (pa == null
+        || pa.getDtini() == null
+        || pa.getDtfim() == null
+        || frequencias == null
+        || frequencias.isEmpty()) {
+      return 0;
+    }
+    int total = 0;
+    for (Frequencia f : frequencias) {
+      if (f == null
+          || "CANCELADO".equalsIgnoreCase(f.getSituacao())
+          || "ESTORNADO".equalsIgnoreCase(f.getSituacao())) {
+        continue;
+      }
+      boolean isFalta =
+          "FALTA".equalsIgnoreCase(f.getTipofreq())
+              || (f.getCodigoFrequenciaEntidade() != null
+                  && f.getCodigoFrequenciaEntidade().getQtdFaltas() != null
+                  && f.getCodigoFrequenciaEntidade().getQtdFaltas().signum() > 0);
+      if (!isFalta || f.getDtini() == null) {
+        continue;
+      }
+      LocalDate fEnd = f.getDtfim() != null ? f.getDtfim() : f.getDtini();
+      LocalDate start = f.getDtini().isBefore(pa.getDtini()) ? pa.getDtini() : f.getDtini();
+      LocalDate end = fEnd.isAfter(pa.getDtfim()) ? pa.getDtfim() : fEnd;
+      if (!start.isAfter(end)) {
+        int qtd =
+            f.getQuantidade() != null && f.getQuantidade().intValue() > 0
+                ? f.getQuantidade().intValue()
+                : (int) (ChronoUnit.DAYS.between(start, end) + 1);
+        total += qtd;
+      }
+    }
+    return total;
+  }
+
+  private static int countSuspensiveLeaveDaysInPa(
+      PeriodoAquisitivoFerias pa, List<Afastamento> afastamentos) {
+    if (pa == null
+        || pa.getDtini() == null
+        || pa.getDtfim() == null
+        || afastamentos == null
+        || afastamentos.isEmpty()) {
+      return 0;
+    }
+    int total = 0;
+    for (Afastamento a : afastamentos) {
+      if (a == null
+          || "CANCELADO".equalsIgnoreCase(a.getSituacao())
+          || "INTERROMPIDO".equalsIgnoreCase(a.getSituacao())
+          || a.getDtini() == null) {
+        continue;
+      }
+      LocalDate aEnd =
+          a.getDtfim() != null
+              ? a.getDtfim()
+              : (a.getDtprevfim() != null ? a.getDtprevfim() : pa.getDtfim());
+      LocalDate start = a.getDtini().isBefore(pa.getDtini()) ? pa.getDtini() : a.getDtini();
+      LocalDate end = aEnd.isAfter(pa.getDtfim()) ? pa.getDtfim() : aEnd;
+      if (!start.isAfter(end)) {
+        total += (int) (ChronoUnit.DAYS.between(start, end) + 1);
+      }
+    }
+    return total;
+  }
+
+  /**
+   * Constrói o envelope canônico de fatos de {@link FeriasGozo}
+   * ({@code draft}, {@code vinculo}, {@code substituto}, {@code pa},
+   * {@code effectiveParametroConta}, {@code derived}, {@code existingParcelas}, {@code tenant},
+   * {@code context}).
+   */
+  public ObjectNode buildFeriasGozoFacts(FeriasGozoRuleContext ctx) {
+    FeriasGozo d = ctx.draft();
+    PeriodoAquisitivoFerias pa = ctx.periodoAquisitivo();
+    Vinculo v = ctx.vinculo();
+    Integer empCodigo = d != null && d.getEmpCodigo() != null ? d.getEmpCodigo() : 1;
+
+    EffectiveVacationParameterResolver.EffectiveParametroFeriasFacts effective =
+        vacationParameterResolver.resolveEffectiveFacts(
+            ctx.parametroCandidates(),
+            ctx.resolvedParametroBase(),
+            pa,
+            v,
+            d != null ? d.getDtini() : null);
+
+    ObjectNode root = mapper.createObjectNode();
+    ObjectNode draftNode = root.putObject("draft");
+    LocalDate dtfimEfetivo = resolveFeriasEffectiveEndDate(d);
+    if (d != null) {
+      putLongOrNull(draftNode, "id", d.getId());
+      putIntOrNull(draftNode, "empCodigo", d.getEmpCodigo());
+      putLongOrNull(draftNode, "numfunc", d.getNumfunc());
+      putIntOrNull(draftNode, "numvinc", d.getNumvinc());
+      putLongOrNull(draftNode, "periodoAquisitivoId", d.getPeriodoAquisitivoId());
+      putIntOrNull(draftNode, "chavePeraqfer", d.getChavePeraqfer());
+      putIntOrNull(draftNode, "ordemParcela", d.getOrdemParcela() != null ? d.getOrdemParcela() : 1);
+      putDateOrNull(draftNode, "dtini", d.getDtini());
+      putDateOrNull(draftNode, "dtprevfim", d.getDtprevfim());
+      putDateOrNull(draftNode, "dtfim", d.getDtfim());
+      putDateOrNull(draftNode, "dtfimEfetivo", dtfimEfetivo);
+      putIntOrNull(draftNode, "diasGozo", d.getDiasGozo());
+      putIntOrNull(
+          draftNode,
+          "totDiasDireitoPa",
+          pa != null && pa.getTotDiasDireito() != null
+              ? pa.getTotDiasDireito()
+              : d.getTotDiasDireitoPa());
+      putBooleanOrNull(draftNode, "abonoPecuniario", d.getAbonoPecuniario());
+      putTextOrNull(draftNode, "iniFimAbono", d.getIniFimAbono());
+      putIntOrNull(
+          draftNode,
+          "diasAbonoVendidos",
+          d.getDiasAbonoVendidos() != null ? d.getDiasAbonoVendidos() : 0);
+      putDateOrNull(draftNode, "dtVendaAbono", d.getDtVendaAbono());
+      putDateOrNull(draftNode, "dtPagtoAbono", d.getDtPagtoAbono());
+      putBooleanOrNull(draftNode, "abonoConstitucional", d.getAbonoConstitucional());
+      putBooleanOrNull(draftNode, "adiantamento13", d.getAdiantamento13());
+      putBooleanOrNull(draftNode, "adiantamentoSalario", d.getAdiantamentoSalario());
+      putBooleanOrNull(draftNode, "emprestimoFerias", d.getEmprestimoFerias());
+      putDateOrNull(draftNode, "mesAnoFolha", d.getMesAnoFolha());
+      putIntOrNull(draftNode, "numFolha", d.getNumFolha());
+      putTextOrNull(draftNode, "situacao", d.getSituacao());
+      putDateOrNull(draftNode, "dtInterrupcao", d.getDtInterrupcao());
+      putTextOrNull(draftNode, "motivoInterrupcao", d.getMotivoInterrupcao());
+      putLongOrNull(draftNode, "numfuncSubstituto", d.getNumfuncSubstituto());
+      putIntOrNull(draftNode, "numvincSubstituto", d.getNumvincSubstituto());
+      putLongOrNull(draftNode, "documentoLegalId", d.getDocumentoLegalId());
+      putLongOrNull(draftNode, "atoPublicacaoId", d.getAtoPublicacaoId());
+      putTextOrNull(draftNode, "observacoes", d.getObservacoes());
+    }
+
+    ObjectNode vinculoNode = root.putObject("vinculo");
+    if (v != null) {
+      putDateOrNull(vinculoNode, "dtexerc", v.getDtexerc());
+      putDateOrNull(vinculoNode, "dtvac", v.getDtvac());
+      putDateOrNull(vinculoNode, "dtaposent", v.getDtaposent());
+      putTextOrNull(vinculoNode, "situacao", v.getSituacao());
+    } else {
+      vinculoNode.putNull("dtexerc");
+      vinculoNode.putNull("dtvac");
+      vinculoNode.putNull("dtaposent");
+      vinculoNode.putNull("situacao");
+    }
+
+    ObjectNode substNode = root.putObject("substituto");
+    Long subFunc = d != null ? d.getNumfuncSubstituto() : null;
+    Integer subVinc = d != null ? d.getNumvincSubstituto() : null;
+    boolean pairComplete =
+        (subFunc == null && subVinc == null)
+            || (subFunc != null && subVinc != null && subFunc > 0 && subVinc > 0);
+    boolean selfSubstitution =
+        subFunc != null
+            && subVinc != null
+            && d != null
+            && Objects.equals(subFunc, d.getNumfunc())
+            && Objects.equals(subVinc, d.getNumvinc());
+    boolean vinculoValidoNoOrgao;
+    if (subFunc == null && subVinc == null) {
+      vinculoValidoNoOrgao = true;
+    } else if (ctx.substitutoVinculoValidoOverride() != null) {
+      vinculoValidoNoOrgao = ctx.substitutoVinculoValidoOverride();
+    } else if (ctx.substitutoVinculo() != null) {
+      vinculoValidoNoOrgao =
+          Objects.equals(ctx.substitutoVinculo().getEmpCodigo(), empCodigo)
+              && !"VACANTE".equalsIgnoreCase(ctx.substitutoVinculo().getSituacao());
+    } else {
+      vinculoValidoNoOrgao = true;
+    }
+    substNode.put("pairComplete", pairComplete);
+    substNode.put("selfSubstitution", selfSubstitution);
+    substNode.put("vinculoValidoNoOrgao", vinculoValidoNoOrgao);
+    substNode.put("activeSubstitutionConflict", ctx.activeSubstitutionConflict());
+
+    int ordemNoVinculo = resolveOrdemPaNoVinculo(pa, ctx);
+    ObjectNode paNode = root.putObject("pa");
+    if (pa != null) {
+      putLongOrNull(paNode, "id", pa.getId());
+      putIntOrNull(paNode, "chave", pa.getChave());
+      paNode.put("ordemNoVinculo", ordemNoVinculo);
+      putDateOrNull(paNode, "dtini", pa.getDtini());
+      putDateOrNull(paNode, "dtfim", pa.getDtfim());
+      putDateOrNull(paNode, "dtPrescricao", pa.getDtPrescricao());
+      putIntOrNull(
+          paNode, "totDiasDireito", pa.getTotDiasDireito() != null ? pa.getTotDiasDireito() : 30);
+      putIntOrNull(
+          paNode,
+          "diasConvertidosDobro",
+          pa.getDiasConvertidosDobro() != null ? pa.getDiasConvertidosDobro() : 0);
+      putTextOrNull(paNode, "situacao", pa.getSituacao());
+      boolean apto =
+          pa.getTotDiasDireito() != null
+              && pa.getTotDiasDireito() > 0
+              && (pa.getSituacao() == null
+                  || !Set.of("PRESCRITO", "CANCELADO", "CONVERTIDO_DOBRO", "SUSPENSO")
+                      .contains(pa.getSituacao().toUpperCase()));
+      paNode.put("aptoConcessao", apto);
+    } else {
+      paNode.putNull("id");
+      paNode.putNull("chave");
+      paNode.put("ordemNoVinculo", ordemNoVinculo);
+      paNode.putNull("dtini");
+      paNode.putNull("dtfim");
+      paNode.putNull("dtPrescricao");
+      paNode.put("totDiasDireito", d != null && d.getTotDiasDireitoPa() != null ? d.getTotDiasDireitoPa() : 30);
+      paNode.put("diasConvertidosDobro", 0);
+      paNode.putNull("situacao");
+      paNode.put("aptoConcessao", false);
+    }
+
+    ObjectNode effNode = root.putObject("effectiveParametroConta");
+    populateEffectiveParametroNode(effNode, effective);
+
+    int overlappingNormalFrequenciasCount =
+        countOverlappingNormalFrequencias(d, dtfimEfetivo, ctx.activeFrequencias());
+    int overlappingAfastamentosCount =
+        countOverlappingAfastamentos(d, dtfimEfetivo, ctx.activeAfastamentos());
+
+    ArrayNode existingNode = root.putArray("existingParcelas");
+    int overlappingFeriasGozoCount = 0;
+    int duplicateOrdemParcelaCount = 0;
+    int otherParcelasWithAbonoConstCount = 0;
+    int otherParcelasWithAdiant13InYearCount = 0;
+    int otherParcelasWithAbonoPecuniarioInPaCount = 0;
+    int otherParcelasNoPaCount = 0;
+    int otherDiasGozadosPa = 0;
+    int otherDiasAbonoPa = 0;
+    int maxOtherParcelaDiasNoPa = 0;
+
+    if (ctx.existingParcelasDoVinculo() != null) {
+      for (FeriasGozo cand : ctx.existingParcelasDoVinculo()) {
+        if (cand == null) {
+          continue;
+        }
+        ObjectNode item = existingNode.addObject();
+        putLongOrNull(item, "id", cand.getId());
+        putLongOrNull(item, "periodoAquisitivoId", cand.getPeriodoAquisitivoId());
+        putIntOrNull(item, "chavePeraqfer", cand.getChavePeraqfer());
+        putIntOrNull(item, "ordemParcela", cand.getOrdemParcela());
+        putDateOrNull(item, "dtini", cand.getDtini());
+        putDateOrNull(item, "dtprevfim", cand.getDtprevfim());
+        putDateOrNull(item, "dtfim", cand.getDtfim());
+        putIntOrNull(item, "diasGozo", cand.getDiasGozo());
+        putBooleanOrNull(item, "abonoPecuniario", cand.getAbonoPecuniario());
+        putIntOrNull(item, "diasAbonoVendidos", cand.getDiasAbonoVendidos());
+        putTextOrNull(item, "situacao", cand.getSituacao());
+
+        if (d != null && d.getId() != null && Objects.equals(d.getId(), cand.getId())) {
+          continue;
+        }
+        if ("CANCELADA".equalsIgnoreCase(cand.getSituacao())) {
+          continue;
+        }
+        LocalDate candEnd = resolveFeriasEffectiveEndDate(cand);
+        if (d != null
+            && d.getDtini() != null
+            && dtfimEfetivo != null
+            && cand.getDtini() != null
+            && candEnd != null
+            && !d.getDtini().isAfter(candEnd)
+            && !cand.getDtini().isAfter(dtfimEfetivo)) {
+          overlappingFeriasGozoCount++;
+        }
+
+        if (d != null
+            && d.getDtini() != null
+            && cand.getDtini() != null
+            && d.getDtini().getYear() == cand.getDtini().getYear()
+            && Boolean.TRUE.equals(cand.getAdiantamento13())) {
+          otherParcelasWithAdiant13InYearCount++;
+        }
+
+        boolean samePa =
+            (d != null
+                    && d.getPeriodoAquisitivoId() != null
+                    && Objects.equals(d.getPeriodoAquisitivoId(), cand.getPeriodoAquisitivoId()))
+                || (d != null
+                    && d.getChavePeraqfer() != null
+                    && Objects.equals(d.getChavePeraqfer(), cand.getChavePeraqfer()));
+        if (samePa) {
+          otherParcelasNoPaCount++;
+          int candGozo = cand.getDiasGozo() != null ? cand.getDiasGozo() : 0;
+          int candAbono =
+              Boolean.TRUE.equals(cand.getAbonoPecuniario()) && cand.getDiasAbonoVendidos() != null
+                  ? cand.getDiasAbonoVendidos()
+                  : 0;
+          otherDiasGozadosPa += candGozo;
+          otherDiasAbonoPa += candAbono;
+          if (candGozo > maxOtherParcelaDiasNoPa) {
+            maxOtherParcelaDiasNoPa = candGozo;
+          }
+          if (d != null
+              && d.getOrdemParcela() != null
+              && Objects.equals(d.getOrdemParcela(), cand.getOrdemParcela())) {
+            duplicateOrdemParcelaCount++;
+          }
+          if (Boolean.TRUE.equals(cand.getAbonoConstitucional())) {
+            otherParcelasWithAbonoConstCount++;
+          }
+          if (Boolean.TRUE.equals(cand.getAbonoPecuniario()) || candAbono > 0) {
+            otherParcelasWithAbonoPecuniarioInPaCount++;
+          }
+        }
+      }
+    }
+
+    boolean currentActive = d != null && !"CANCELADA".equalsIgnoreCase(d.getSituacao());
+    int currentGozo = currentActive && d.getDiasGozo() != null ? d.getDiasGozo() : 0;
+    int currentAbono =
+        currentActive
+                && Boolean.TRUE.equals(d.getAbonoPecuniario())
+                && d.getDiasAbonoVendidos() != null
+            ? d.getDiasAbonoVendidos()
+            : 0;
+    int totalParcelasNoPa = otherParcelasNoPaCount + (currentActive ? 1 : 0);
+    int totalDiasGozadosPa = otherDiasGozadosPa + currentGozo;
+    int totalDiasAbonoPa = otherDiasAbonoPa + currentAbono;
+    int diasDobroPa =
+        pa != null && pa.getDiasConvertidosDobro() != null ? pa.getDiasConvertidosDobro() : 0;
+    int totalDiasConsumidosPa = totalDiasGozadosPa + totalDiasAbonoPa + diasDobroPa;
+    int totDiasDireitoPa =
+        pa != null && pa.getTotDiasDireito() != null
+            ? pa.getTotDiasDireito()
+            : (d != null && d.getTotDiasDireitoPa() != null ? d.getTotDiasDireitoPa() : 30);
+    int saldoRemanescentePa = totDiasDireitoPa - totalDiasConsumidosPa;
+    int maxParcelaDiasNoPa = Math.max(maxOtherParcelaDiasNoPa, currentGozo);
+
+    boolean violatesDtPrescricao = false;
+    if (pa != null && pa.getDtPrescricao() != null && d != null && d.getDtini() != null) {
+      violatesDtPrescricao =
+          "I".equalsIgnoreCase(effective.criterioPrescricao())
+              ? d.getDtini().isAfter(pa.getDtPrescricao())
+              : (dtfimEfetivo != null && dtfimEfetivo.isAfter(pa.getDtPrescricao()));
+    }
+
+    Long antecedenciaDias = null;
+    if (d != null && d.getDtVendaAbono() != null && d.getDtini() != null) {
+      antecedenciaDias = ChronoUnit.DAYS.between(d.getDtVendaAbono(), d.getDtini());
+    }
+
+    ObjectNode derivedNode = root.putObject("derived");
+    if (antecedenciaDias != null) {
+      derivedNode.put("antecedenciaDias", antecedenciaDias);
+    } else {
+      derivedNode.putNull("antecedenciaDias");
+    }
+    derivedNode.put("overlappingNormalFrequenciasCount", overlappingNormalFrequenciasCount);
+    derivedNode.put("overlappingAfastamentosCount", overlappingAfastamentosCount);
+    derivedNode.put("overlappingFeriasGozoCount", overlappingFeriasGozoCount);
+    derivedNode.put("duplicateOrdemParcelaCount", duplicateOrdemParcelaCount);
+    derivedNode.put("otherParcelasWithAbonoConstCount", otherParcelasWithAbonoConstCount);
+    derivedNode.put("otherParcelasWithAdiant13InYearCount", otherParcelasWithAdiant13InYearCount);
+    derivedNode.put(
+        "otherParcelasWithAbonoPecuniarioInPaCount", otherParcelasWithAbonoPecuniarioInPaCount);
+    derivedNode.put("violatesDtPrescricao", violatesDtPrescricao);
+    derivedNode.put(
+        "abonoPecuniarioLimitesValidos",
+        isAbonoPecuniarioLimitesValidos(d, totDiasDireitoPa, effective));
+    derivedNode.put("totalParcelasNoPa", totalParcelasNoPa);
+    derivedNode.put("totalDiasGozadosPa", totalDiasGozadosPa);
+    derivedNode.put("totalDiasAbonoPa", totalDiasAbonoPa);
+    derivedNode.put("totalDiasConsumidosPa", totalDiasConsumidosPa);
+    derivedNode.put("saldoRemanescentePa", saldoRemanescentePa);
+    derivedNode.put("maxParcelaDiasNoPa", maxParcelaDiasNoPa);
+    derivedNode.put("enforceStrictResidualBalance", ctx.enforceStrictResidualBalance());
+
+    ObjectNode tenantNode = root.putObject("tenant");
+    tenantNode.put("empCodigo", empCodigo);
+
+    ObjectNode contextNode = root.putObject("context");
+    contextNode.put("operation", FeriasGozoRuleSet.OPERATION);
+
+    return root;
+  }
+
+  private static void populateEffectiveParametroNode(
+      ObjectNode effNode, EffectiveVacationParameterResolver.EffectiveParametroFeriasFacts eff) {
+    effNode.put("parametroEncontrado", eff.parametroEncontrado());
+    putLongOrNull(effNode, "parametroId", eff.parametroContagemId());
+    effNode.put("escopoGlobal", eff.empCodigo() == null);
+    effNode.put("temFerias", eff.temFerias());
+    putIntOrNull(effNode, "totDiasFer", eff.totDiasFer());
+    putIntOrNull(effNode, "maxPerFer", eff.maxPerFer());
+    putIntOrNull(effNode, "minPerFer", eff.minPerFer());
+    putIntOrNull(effNode, "maxDiasPerFer", eff.maxDiasPerFer());
+    putIntOrNull(effNode, "minDiasPerFer", eff.minDiasPerFer());
+    putIntOrNull(effNode, "minDiasPerPrincFer", eff.minDiasPerPrincFer());
+    putTextOrNull(effNode, "abonoDirGozo", eff.abonoDirGozo());
+    effNode.put("permiteAbonoPecuniario", eff.permiteAbonoPecuniario());
+    putIntOrNull(effNode, "numDiasAbonoFer", eff.numDiasAbonoFer());
+    putIntOrNull(effNode, "denDiasAbonoFer", eff.denDiasAbonoFer());
+    putIntOrNull(effNode, "maxDiasVendFer", eff.maxDiasVendFer());
+    putIntOrNull(effNode, "minDiasPvendFer", eff.minDiasPvendFer());
+    effNode.put("abonoConstFer", eff.abonoConstFer());
+    effNode.put("adiant13Fer", eff.adiant13Fer());
+    effNode.put("adiantSalFer", eff.adiantSalFer());
+    effNode.put("emprestFer", eff.emprestFer());
+    effNode.put("contDobroFerias", eff.contDobroFerias());
+    putIntOrNull(effNode, "minDiasPeraqfer", eff.minDiasPeraqfer());
+    putIntOrNull(effNode, "maxDiasPeraqfer", eff.maxDiasPeraqfer());
+    putTextOrNull(effNode, "criterioPrescricao", eff.criterioPrescricao());
+    effNode.put("permiteGozoAposPrescricao", eff.permiteGozoAposPrescricao());
+    effNode.put("semPgtoMulta", eff.semPgtoMulta());
+    effNode.put("permiteGozoAntesPaFer", eff.permiteGozoAntesPaFer());
+    effNode.put("permiteFerPrimPer", eff.permiteFerPrimPer());
+    effNode.put("permiteFerSegunPer", eff.permiteFerSegunPer());
+    effNode.put("permiteFerTercPer", eff.permiteFerTercPer());
+    effNode.put("permiteFerPerInc", eff.permiteFerPerInc());
+    effNode.put("permiteLancConcPa", eff.permiteLancConcPa());
+  }
+
+  private static LocalDate resolveFeriasEffectiveEndDate(FeriasGozo fg) {
+    if (fg == null) {
+      return null;
+    }
+    if ("INTERROMPIDA".equalsIgnoreCase(fg.getSituacao()) && fg.getDtInterrupcao() != null) {
+      return fg.getDtInterrupcao();
+    }
+    return fg.getDtfim() != null ? fg.getDtfim() : fg.getDtprevfim();
+  }
+
+  private static int resolveOrdemPaNoVinculo(
+      PeriodoAquisitivoFerias pa, FeriasGozoRuleContext ctx) {
+    if (ctx.ordemPaNoVinculoOverride() != null && ctx.ordemPaNoVinculoOverride() > 0) {
+      return ctx.ordemPaNoVinculoOverride();
+    }
+    if (pa == null) {
+      return 1;
+    }
+    if (ctx.existingPeriodosDoVinculo() != null && !ctx.existingPeriodosDoVinculo().isEmpty()) {
+      int rank = 1;
+      for (PeriodoAquisitivoFerias other : ctx.existingPeriodosDoVinculo()) {
+        if (other == null || "CANCELADO".equalsIgnoreCase(other.getSituacao())) {
+          continue;
+        }
+        if (pa.getId() != null && Objects.equals(pa.getId(), other.getId())) {
+          continue;
+        }
+        if (other.getDtini() != null
+            && pa.getDtini() != null
+            && other.getDtini().isBefore(pa.getDtini())) {
+          rank++;
+        } else if (other.getDtini() != null
+            && pa.getDtini() != null
+            && other.getDtini().isEqual(pa.getDtini())
+            && other.getChave() != null
+            && pa.getChave() != null
+            && other.getChave() < pa.getChave()) {
+          rank++;
+        }
+      }
+      return Math.max(rank, pa.getChave() != null && pa.getChave() > 0 ? pa.getChave() : 1);
+    }
+    return pa.getChave() != null && pa.getChave() > 0 ? pa.getChave() : 1;
+  }
+
+  private static boolean isAbonoPecuniarioLimitesValidos(
+      FeriasGozo d,
+      int totDiasDireitoPa,
+      EffectiveVacationParameterResolver.EffectiveParametroFeriasFacts effective) {
+    if (d == null) {
+      return true;
+    }
+    int vendidos = d.getDiasAbonoVendidos() != null ? d.getDiasAbonoVendidos() : 0;
+    if (!Boolean.TRUE.equals(d.getAbonoPecuniario())) {
+      return vendidos == 0;
+    }
+    if (!effective.permiteAbonoPecuniario()) {
+      return false;
+    }
+    if (vendidos <= 0) {
+      return false;
+    }
+    if (d.getIniFimAbono() == null
+        || !Set.of("I", "F").contains(d.getIniFimAbono().toUpperCase())) {
+      return false;
+    }
+    if (effective.minDiasPvendFer() != null && vendidos < effective.minDiasPvendFer()) {
+      return false;
+    }
+    if (effective.maxDiasVendFer() != null && vendidos > effective.maxDiasVendFer()) {
+      return false;
+    }
+    if (effective.numDiasAbonoFer() != null
+        && effective.denDiasAbonoFer() != null
+        && effective.denDiasAbonoFer() > 0) {
+      int baseCalculo =
+          "G".equalsIgnoreCase(effective.abonoDirGozo())
+              ? (d.getDiasGozo() != null ? d.getDiasGozo() : 0)
+              : totDiasDireitoPa;
+      int maxFracao = (baseCalculo * effective.numDiasAbonoFer()) / effective.denDiasAbonoFer();
+      if (vendidos > maxFracao) {
+        return false;
+      }
+    }
+    if (d.getDtVendaAbono() != null
+        && d.getDtini() != null
+        && d.getDtVendaAbono().isAfter(d.getDtini())) {
+      return false;
+    }
+    if (d.getDtPagtoAbono() != null
+        && d.getDtVendaAbono() != null
+        && d.getDtPagtoAbono().isBefore(d.getDtVendaAbono())) {
+      return false;
+    }
+    return true;
+  }
+
+  private static int countOverlappingNormalFrequencias(
+      FeriasGozo d, LocalDate dtfimEfetivo, List<Frequencia> frequencias) {
+    if (d == null
+        || d.getDtini() == null
+        || dtfimEfetivo == null
+        || frequencias == null
+        || frequencias.isEmpty()) {
+      return 0;
+    }
+    int count = 0;
+    for (Frequencia f : frequencias) {
+      if (f == null
+          || "CANCELADO".equalsIgnoreCase(f.getSituacao())
+          || "ESTORNADO".equalsIgnoreCase(f.getSituacao())
+          || f.getDtini() == null) {
+        continue;
+      }
+      if (!"NORMAL".equalsIgnoreCase(f.getTipofreq())) {
+        continue;
+      }
+      LocalDate fEnd = f.getDtfim() != null ? f.getDtfim() : f.getDtini();
+      if (!d.getDtini().isAfter(fEnd) && !f.getDtini().isAfter(dtfimEfetivo)) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  private static int countOverlappingAfastamentos(
+      FeriasGozo d, LocalDate dtfimEfetivo, List<Afastamento> afastamentos) {
+    if (d == null
+        || d.getDtini() == null
+        || dtfimEfetivo == null
+        || afastamentos == null
+        || afastamentos.isEmpty()) {
+      return 0;
+    }
+    int count = 0;
+    for (Afastamento a : afastamentos) {
+      if (a == null
+          || "CANCELADO".equalsIgnoreCase(a.getSituacao())
+          || a.getDtini() == null) {
+        continue;
+      }
+      LocalDate aEnd =
+          a.getDtfim() != null
+              ? a.getDtfim()
+              : (a.getDtprevfim() != null ? a.getDtprevfim() : OPEN_ENDED_DATE);
+      if (!d.getDtini().isAfter(aEnd) && !a.getDtini().isAfter(dtfimEfetivo)) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  private static RuleBindingExecutor parametroContagemConcomitanciaJavaExecutor() {
+    return new RuleBindingExecutor() {
+      @Override
+      public String implementationKey() {
+        return ParametroContagemFeriasRuleSet.JAVA_EXECUTOR_CONCOMITANCIA_KEY;
+      }
+
+      @Override
+      public String implementationVersion() {
+        return ParametroContagemFeriasRuleSet.JAVA_EXECUTOR_VERSION;
+      }
+
+      @Override
+      public RuleExecutorResult evaluate(RuleExecutorContext context) {
+        JsonNode facts = context.facts();
+        int overlaps = facts.path("scope").path("overlappingActiveCount").asInt(0);
+        if (overlaps > 0) {
+          return RuleExecutorResult.of(RuleDecision.DENY, "ERG-01850");
+        }
+        return RuleExecutorResult.allow();
+      }
+    };
+  }
+
+  private static RuleBindingExecutor periodoAquisitivoSobreposicaoJavaExecutor() {
+    return new RuleBindingExecutor() {
+      @Override
+      public String implementationKey() {
+        return PeriodoAquisitivoFeriasRuleSet.JAVA_EXECUTOR_SOBREPOSICAO_KEY;
+      }
+
+      @Override
+      public String implementationVersion() {
+        return PeriodoAquisitivoFeriasRuleSet.JAVA_EXECUTOR_VERSION;
+      }
+
+      @Override
+      public RuleExecutorResult evaluate(RuleExecutorContext context) {
+        JsonNode facts = context.facts();
+        int overlaps = facts.path("derived").path("overlappingPeriodsCount").asInt(0);
+        if (overlaps > 0) {
+          return RuleExecutorResult.of(RuleDecision.DENY, "ERG-00601");
+        }
+        return RuleExecutorResult.allow();
+      }
+    };
+  }
+
+  private static RuleBindingExecutor feriasGozoConcomitanciaSaldoJavaExecutor() {
+    return new RuleBindingExecutor() {
+      @Override
+      public String implementationKey() {
+        return FeriasGozoRuleSet.JAVA_EXECUTOR_CONCOMITANCIA_KEY;
+      }
+
+      @Override
+      public String implementationVersion() {
+        return FeriasGozoRuleSet.JAVA_EXECUTOR_VERSION;
+      }
+
+      @Override
+      public RuleExecutorResult evaluate(RuleExecutorContext context) {
+        return evaluateFeriasGozoConcomitanciaAndBalance(context);
+      }
+    };
+  }
+
+  /**
+   * Executor Java puro e determinístico para {@code ERG-00514}, {@code ERG-00518},
+   * {@code ERG-00520}, {@code ERG-00523}, {@code ERG-00525}, {@code ERG-00531},
+   * {@code ERG-00532} e {@code ERG-00526} ({@code PCK_FERIAS.MAIN_POS}).
+   */
+  private static RuleExecutorResult evaluateFeriasGozoConcomitanciaAndBalance(
+      RuleExecutorContext context) {
+    JsonNode facts = context.facts();
+    JsonNode draft = facts.path("draft");
+    JsonNode pa = facts.path("pa");
+    JsonNode eff = facts.path("effectiveParametroConta");
+    JsonNode derived = facts.path("derived");
+
+    String situacao = textOrNull(draft, "situacao");
+    if ("CANCELADA".equalsIgnoreCase(situacao)) {
+      return RuleExecutorResult.allow();
+    }
+
+    // 1. ERG-00514: concomitância entre parcelas de férias ou duplicidade de ordemParcela
+    int overlappingFerias = derived.path("overlappingFeriasGozoCount").asInt(0);
+    int duplicateOrdem = derived.path("duplicateOrdemParcelaCount").asInt(0);
+    if (overlappingFerias > 0 || duplicateOrdem > 0) {
+      return RuleExecutorResult.of(RuleDecision.DENY, "ERG-00514");
+    }
+
+    int diasGozo = draft.path("diasGozo").asInt(0);
+    int ordemParcela = draft.path("ordemParcela").asInt(1);
+    int totDiasDireito = pa.path("totDiasDireito").asInt(30);
+    int totalParcelasNoPa = derived.path("totalParcelasNoPa").asInt(1);
+    int totalDiasConsumidosPa = derived.path("totalDiasConsumidosPa").asInt(diasGozo);
+    int saldoRemanescentePa = derived.path("saldoRemanescentePa").asInt(0);
+    int maxParcelaDiasNoPa = derived.path("maxParcelaDiasNoPa").asInt(diasGozo);
+    boolean enforceStrictResidual =
+        derived.path("enforceStrictResidualBalance").asBoolean(true);
+    boolean interrompida = "INTERROMPIDA".equalsIgnoreCase(situacao);
+
+    Integer maxDiasPerFer =
+        eff.path("maxDiasPerFer").isNumber() ? eff.path("maxDiasPerFer").intValue() : null;
+    Integer minDiasPerFer =
+        eff.path("minDiasPerFer").isNumber() ? eff.path("minDiasPerFer").intValue() : null;
+    Integer minDiasPerPrincFer =
+        eff.path("minDiasPerPrincFer").isNumber()
+            ? eff.path("minDiasPerPrincFer").intValue()
+            : null;
+    Integer maxPerFer =
+        eff.path("maxPerFer").isNumber() ? eff.path("maxPerFer").intValue() : null;
+    Integer minPerFer =
+        eff.path("minPerFer").isNumber() ? eff.path("minPerFer").intValue() : null;
+
+    // 2. ERG-00518: diasGozo excede maxDiasPerFer
+    if (maxDiasPerFer != null && diasGozo > maxDiasPerFer) {
+      return RuleExecutorResult.of(RuleDecision.DENY, "ERG-00518");
+    }
+
+    // 3. ERG-00520: quantidade de parcelas ou ordemParcela excede maxPerFer
+    if (maxPerFer != null && (totalParcelasNoPa > maxPerFer || ordemParcela > maxPerFer)) {
+      return RuleExecutorResult.of(RuleDecision.DENY, "ERG-00520");
+    }
+
+    // 4. ERG-00523: soma das parcelas + abono + dobro excede totDiasDireito do PA
+    if (totalDiasConsumidosPa > totDiasDireito || saldoRemanescentePa < 0) {
+      return RuleExecutorResult.of(RuleDecision.DENY, "ERG-00523");
+    }
+
+    if (interrompida || !enforceStrictResidual) {
+      return RuleExecutorResult.allow();
+    }
+
+    // 5. ERG-00531: PA quitado antes de atingir o número mínimo de parcelas (minPerFer)
+    if (saldoRemanescentePa == 0 && minPerFer != null && totalParcelasNoPa < minPerFer) {
+      return RuleExecutorResult.of(RuleDecision.DENY, "ERG-00531");
+    }
+
+    // 6. ERG-00532: última parcela permitida (maxPerFer) sem esgotar o saldo do PA
+    if (saldoRemanescentePa > 0
+        && maxPerFer != null
+        && (totalParcelasNoPa >= maxPerFer || ordemParcela >= maxPerFer)) {
+      return RuleExecutorResult.of(RuleDecision.DENY, "ERG-00532");
+    }
+
+    // 7. ERG-00525: impossibilidade de esgotar o PA nas parcelas restantes respeitando maxDiasPerFer
+    if (saldoRemanescentePa > 0 && maxPerFer != null && maxDiasPerFer != null) {
+      int parcelasRestantes = Math.max(0, maxPerFer - totalParcelasNoPa);
+      if (saldoRemanescentePa > parcelasRestantes * maxDiasPerFer) {
+        return RuleExecutorResult.of(RuleDecision.DENY, "ERG-00525");
+      }
+    }
+
+    // 8. ERG-00526: saldo residual menor que minDiasPerFer ou ausência de parcela principal >= minDiasPerPrincFer (Tarefa 98160)
+    if (saldoRemanescentePa > 0 && minDiasPerFer != null && saldoRemanescentePa < minDiasPerFer) {
+      return RuleExecutorResult.of(RuleDecision.DENY, "ERG-00526");
+    }
+    if (minDiasPerPrincFer != null && minDiasPerPrincFer > 1) {
+      boolean hasPrincipal = maxParcelaDiasNoPa >= minDiasPerPrincFer;
+      if (!hasPrincipal && saldoRemanescentePa < minDiasPerPrincFer) {
+        return RuleExecutorResult.of(RuleDecision.DENY, "ERG-00526");
+      }
+    }
+
+    return RuleExecutorResult.allow();
   }
 }

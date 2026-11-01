@@ -116,35 +116,68 @@ public class ErgonDeterminationConfig {
                 "PeriodoAquisitivoFerias",
                 "determineErgonPeriodoAquisitivoPrevia",
                 List.of(
+                    "empCodigo",
+                    "numfunc",
+                    "numvinc",
                     "dtini",
                     "dtfim",
                     "totDiasDireito",
+                    "faltasApuradas",
+                    "diasAfastamentoSuspensivo",
                     "diasGozados",
                     "diasVendidosAbono",
                     "diasConvertidosDobro"),
                 List.of(
+                    "empCodigo",
+                    "numfunc",
+                    "numvinc",
                     "dtini",
                     "dtfim",
                     "totDiasDireito",
+                    "faltasApuradas",
+                    "diasAfastamentoSuspensivo",
                     "diasGozados",
                     "diasVendidosAbono",
                     "diasConvertidosDobro"),
                 List.of(
+                    new ReactiveDeterminationOutputBinding("/dtfim", "/dtfim"),
+                    new ReactiveDeterminationOutputBinding("/totDiasDireito", "/totDiasDireito"),
                     new ReactiveDeterminationOutputBinding(
                         "/saldoDiasDisponivel", "/saldoDiasDisponivel"),
-                    new ReactiveDeterminationOutputBinding("/dtPrescricao", "/dtPrescricao"))),
+                    new ReactiveDeterminationOutputBinding("/dtPrescricao", "/dtPrescricao"),
+                    new ReactiveDeterminationOutputBinding("/faltasApuradas", "/faltasApuradas"),
+                    new ReactiveDeterminationOutputBinding(
+                        "/diasAfastamentoSuspensivo", "/diasAfastamentoSuspensivo"))),
             definition(
                 "ergon.feriasGozo.previa",
                 "FeriasGozo",
                 "determineErgonFeriasGozoPrevia",
-                List.of("periodoAquisitivoId", "dtini", "dtprevfim", "diasGozo"),
-                List.of("periodoAquisitivoId", "dtini", "dtprevfim", "diasGozo"),
+                List.of(
+                    "periodoAquisitivoId",
+                    "dtini",
+                    "dtprevfim",
+                    "diasGozo",
+                    "abonoPecuniario",
+                    "diasAbonoVendidos"),
+                List.of(
+                    "periodoAquisitivoId",
+                    "dtini",
+                    "dtprevfim",
+                    "diasGozo",
+                    "abonoPecuniario",
+                    "diasAbonoVendidos"),
                 List.of(
                     new ReactiveDeterminationOutputBinding("/chavePeraqfer", "/chavePeraqfer"),
                     new ReactiveDeterminationOutputBinding(
                         "/totDiasDireitoPa", "/totDiasDireitoPa"),
                     new ReactiveDeterminationOutputBinding("/diasGozo", "/diasGozo"),
-                    new ReactiveDeterminationOutputBinding("/dtprevfim", "/dtprevfim"))));
+                    new ReactiveDeterminationOutputBinding("/dtprevfim", "/dtprevfim"),
+                    new ReactiveDeterminationOutputBinding("/ordemParcela", "/ordemParcela"),
+                    new ReactiveDeterminationOutputBinding(
+                        "/diasAbonoVendidos", "/diasAbonoVendidos"),
+                    new ReactiveDeterminationOutputBinding("/dtPagtoAbono", "/dtPagtoAbono"),
+                    new ReactiveDeterminationOutputBinding(
+                        "/saldoPaAposParcela", "/saldoPaAposParcela"))));
   }
 
   private ReactiveDeterminationDefinition definition(

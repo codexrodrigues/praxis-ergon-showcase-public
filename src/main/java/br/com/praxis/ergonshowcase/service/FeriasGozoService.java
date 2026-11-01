@@ -1,18 +1,28 @@
 package br.com.praxis.ergonshowcase.service;
 
 import br.com.praxis.ergonshowcase.config.TenantContext;
+import br.com.praxis.ergonshowcase.domain.Afastamento;
 import br.com.praxis.ergonshowcase.domain.FeriasGozo;
+import br.com.praxis.ergonshowcase.domain.Frequencia;
+import br.com.praxis.ergonshowcase.domain.ParametroContagemFerias;
 import br.com.praxis.ergonshowcase.domain.PeriodoAquisitivoFerias;
+import br.com.praxis.ergonshowcase.domain.Vinculo;
+import br.com.praxis.ergonshowcase.domain.VinculoId;
 import br.com.praxis.ergonshowcase.dto.*;
 import br.com.praxis.ergonshowcase.mapper.FeriasGozoMapper;
 import br.com.praxis.ergonshowcase.mapper.PeriodoAquisitivoFeriasMapper;
 import br.com.praxis.ergonshowcase.repository.FeriasGozoRepository;
+import br.com.praxis.ergonshowcase.rules.ErgonRuleEngineFacade;
+import br.com.praxis.ergonshowcase.rules.ErgonRuleViolationException;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.FlushModeType;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Consumer;
+import org.praxisplatform.rules.contract.RuleEvaluationResult;
 import org.praxisplatform.uischema.concurrency.ResourceRepresentationResult;
 import org.praxisplatform.uischema.concurrency.ResourceVersionPreconditionException;
 import org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition;
@@ -55,12 +65,24 @@ public class FeriasGozoService
   @PersistenceContext protected EntityManager entityManager;
   protected final FeriasGozoMapper mapper;
   private final TenantContext tenant;
+  private final ErgonRuleEngineFacade ruleEngineFacade;
 
   public FeriasGozoService(
       FeriasGozoRepository repository, FeriasGozoMapper mapper, TenantContext tenant) {
+    this(repository, mapper, tenant, new ErgonRuleEngineFacade());
+  }
+
+  @Autowired
+  public FeriasGozoService(
+      FeriasGozoRepository repository,
+      FeriasGozoMapper mapper,
+      TenantContext tenant,
+      ErgonRuleEngineFacade ruleEngineFacade) {
     super(repository, FeriasGozo.class, "id");
     this.mapper = mapper;
     this.tenant = tenant != null ? tenant : new TenantContext();
+    this.ruleEngineFacade =
+        ruleEngineFacade != null ? ruleEngineFacade : new ErgonRuleEngineFacade();
   }
 
   @Override
@@ -158,6 +180,7 @@ public class FeriasGozoService
   @Override
   protected void beforeCreate(CreateFeriasGozoDTO dto, FeriasGozo entity) {
     checkOrg(entity.getEmpCodigo());
+    validateFeriasGozo(entity);
     if (invariants != null) {
       invariants.feriasGozo(entity, true);
     }
@@ -190,7 +213,9 @@ public class FeriasGozoService
     precondition.requireMatch(entity.getVersion());
     beforeUpdate(id, entity, dto);
     var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
+    FeriasGozo previousSnapshot = snapshotBeforeMutation(entity);
     mapper.applyUpdate(entity, dto);
+    validateFeriasGozo(entity, previousSnapshot);
     if (invariants != null) {
       invariants.feriasGozo(entity, false);
     }
@@ -212,7 +237,11 @@ public class FeriasGozoService
     entityManager.refresh(entity);
     precondition.requireMatch(entity.getVersion());
     checkOrg(entity.getEmpCodigo());
+    FeriasGozo previousSnapshot = snapshotBeforeMutation(entity);
     action.accept(entity);
+    if (!"CANCELADA".equals(entity.getSituacao())) {
+      validateFeriasGozo(entity, previousSnapshot);
+    }
     if (invariants != null && !"CANCELADA".equals(entity.getSituacao())) {
       invariants.feriasGozo(entity, false);
     }
@@ -439,6 +468,185 @@ public class FeriasGozoService
       }
     }
     PeriodoAquisitivoFeriasMapper.recomputeSaldoAndSituacao(pa);
+  }
+
+  public RuleEvaluationResult evaluateFeriasGozo(FeriasGozo entity) {
+    return ruleEngineFacade.evaluateFeriasGozo(buildFeriasGozoRuleContext(entity, null));
+  }
+
+  public void validateFeriasGozo(FeriasGozo entity) {
+    validateFeriasGozo(entity, null);
+  }
+
+  public void validateFeriasGozo(FeriasGozo entity, FeriasGozo previousSnapshot) {
+    ruleEngineFacade.enforceFeriasGozo(buildFeriasGozoRuleContext(entity, previousSnapshot));
+  }
+
+  private static FeriasGozo snapshotBeforeMutation(FeriasGozo src) {
+    if (src == null) {
+      return null;
+    }
+    FeriasGozo copy = new FeriasGozo();
+    copy.setId(src.getId());
+    copy.setDtini(src.getDtini());
+    copy.setDtprevfim(src.getDtprevfim());
+    copy.setDtfim(src.getDtfim());
+    copy.setSituacao(src.getSituacao());
+    copy.setNumfuncSubstituto(src.getNumfuncSubstituto());
+    copy.setNumvincSubstituto(src.getNumvincSubstituto());
+    return copy;
+  }
+
+  private static boolean detectActiveSubstitutionConflict(
+      FeriasGozo entity, FeriasGozo previousSnapshot) {
+    if (entity == null || previousSnapshot == null) {
+      return false;
+    }
+    if (previousSnapshot.getNumfuncSubstituto() == null
+        || previousSnapshot.getNumvincSubstituto() == null) {
+      return false;
+    }
+    if (!"EM_GOZO".equalsIgnoreCase(previousSnapshot.getSituacao())) {
+      return false;
+    }
+    if ("INTERROMPIDA".equalsIgnoreCase(entity.getSituacao())
+        || "GOZADA".equalsIgnoreCase(entity.getSituacao())) {
+      return false;
+    }
+    if (previousSnapshot.getDtini() != null
+        && entity.getDtini() != null
+        && entity.getDtini().isAfter(previousSnapshot.getDtini())) {
+      return true;
+    }
+    LocalDate prevEnd =
+        previousSnapshot.getDtfim() != null
+            ? previousSnapshot.getDtfim()
+            : previousSnapshot.getDtprevfim();
+    LocalDate currEnd = entity.getDtfim() != null ? entity.getDtfim() : entity.getDtprevfim();
+    return prevEnd != null && currEnd != null && currEnd.isBefore(prevEnd);
+  }
+
+  private ErgonRuleEngineFacade.FeriasGozoRuleContext buildFeriasGozoRuleContext(
+      FeriasGozo entity, FeriasGozo previousSnapshot) {
+    boolean activeSubstConflict = detectActiveSubstitutionConflict(entity, previousSnapshot);
+    if (entityManager == null) {
+      return new ErgonRuleEngineFacade.FeriasGozoRuleContext(
+          entity,
+          null,
+          null,
+          null,
+          null,
+          List.of(),
+          List.of(),
+          List.of(),
+          List.of(),
+          List.of(),
+          null,
+          activeSubstConflict,
+          true);
+    }
+    Vinculo vinculo = null;
+    if (entity.getNumfunc() != null && entity.getNumvinc() != null) {
+      vinculo =
+          entityManager.find(
+              Vinculo.class,
+              new VinculoId(entity.getNumfunc(), entity.getNumvinc()),
+              LockModeType.PESSIMISTIC_READ);
+      if (vinculo == null) {
+        vinculo =
+            entityManager.find(
+                Vinculo.class, new VinculoId(entity.getNumfunc(), entity.getNumvinc()));
+      }
+    }
+    Vinculo substituto = null;
+    if (entity.getNumfuncSubstituto() != null && entity.getNumvincSubstituto() != null) {
+      substituto =
+          entityManager.find(
+              Vinculo.class,
+              new VinculoId(entity.getNumfuncSubstituto(), entity.getNumvincSubstituto()),
+              LockModeType.PESSIMISTIC_READ);
+      if (substituto == null) {
+        substituto =
+            entityManager.find(
+                Vinculo.class,
+                new VinculoId(entity.getNumfuncSubstituto(), entity.getNumvincSubstituto()));
+      }
+    }
+    PeriodoAquisitivoFerias pa = null;
+    if (entity.getPeriodoAquisitivoId() != null) {
+      pa =
+          entityManager.find(
+              PeriodoAquisitivoFerias.class,
+              entity.getPeriodoAquisitivoId(),
+              LockModeType.PESSIMISTIC_READ);
+      if (pa == null) {
+        pa = entityManager.find(PeriodoAquisitivoFerias.class, entity.getPeriodoAquisitivoId());
+      }
+    }
+    List<ParametroContagemFerias> paramCandidates =
+        ruleEngineFacade.getVacationParameterResolver().loadCandidates(entityManager, vinculo);
+    List<FeriasGozo> parcelasVinculo = List.of();
+    List<PeriodoAquisitivoFerias> todosPas = List.of();
+    List<Afastamento> afastamentos = List.of();
+    List<Frequencia> frequencias = List.of();
+    if (entity.getNumfunc() != null && entity.getNumvinc() != null) {
+      var qFg =
+          entityManager.createQuery(
+              "select x from FeriasGozo x where x.numfunc=:f and x.numvinc=:v and x.situacao<>'CANCELADA'",
+              FeriasGozo.class);
+      if (qFg != null) {
+        var r1 = qFg.setParameter("f", entity.getNumfunc());
+        var r2 = r1 != null ? r1.setParameter("v", entity.getNumvinc()) : null;
+        var flushed = r2 != null ? r2.setFlushMode(FlushModeType.COMMIT) : null;
+        var list = (flushed != null ? flushed : r2) != null ? (flushed != null ? flushed : r2).getResultList() : null;
+        if (list != null) parcelasVinculo = list;
+      }
+      var qPa =
+          entityManager.createQuery(
+              "select x from PeriodoAquisitivoFerias x where x.numfunc=:f and x.numvinc=:v and x.situacao<>'CANCELADO'",
+              PeriodoAquisitivoFerias.class);
+      if (qPa != null) {
+        var r1 = qPa.setParameter("f", entity.getNumfunc());
+        var r2 = r1 != null ? r1.setParameter("v", entity.getNumvinc()) : null;
+        var flushed = r2 != null ? r2.setFlushMode(FlushModeType.COMMIT) : null;
+        var list = (flushed != null ? flushed : r2) != null ? (flushed != null ? flushed : r2).getResultList() : null;
+        if (list != null) todosPas = list;
+      }
+      var qAf =
+          entityManager.createQuery(
+              "select x from Afastamento x where x.numfunc=:f and x.numvinc=:v", Afastamento.class);
+      if (qAf != null) {
+        var r1 = qAf.setParameter("f", entity.getNumfunc());
+        var r2 = r1 != null ? r1.setParameter("v", entity.getNumvinc()) : null;
+        var flushed = r2 != null ? r2.setFlushMode(FlushModeType.COMMIT) : null;
+        var list = (flushed != null ? flushed : r2) != null ? (flushed != null ? flushed : r2).getResultList() : null;
+        if (list != null) afastamentos = list;
+      }
+      var qFr =
+          entityManager.createQuery(
+              "select x from Frequencia x where x.numfunc=:f and x.numvinc=:v", Frequencia.class);
+      if (qFr != null) {
+        var r1 = qFr.setParameter("f", entity.getNumfunc());
+        var r2 = r1 != null ? r1.setParameter("v", entity.getNumvinc()) : null;
+        var flushed = r2 != null ? r2.setFlushMode(FlushModeType.COMMIT) : null;
+        var list = (flushed != null ? flushed : r2) != null ? (flushed != null ? flushed : r2).getResultList() : null;
+        if (list != null) frequencias = list;
+      }
+    }
+    return new ErgonRuleEngineFacade.FeriasGozoRuleContext(
+        entity,
+        pa,
+        vinculo,
+        substituto,
+        null,
+        paramCandidates,
+        todosPas,
+        parcelasVinculo,
+        frequencias,
+        afastamentos,
+        null,
+        activeSubstConflict,
+        true);
   }
 
   private void checkOrg(Integer orgao) {

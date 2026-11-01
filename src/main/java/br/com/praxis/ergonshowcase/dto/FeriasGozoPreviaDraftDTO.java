@@ -60,4 +60,26 @@ public class FeriasGozoPreviaDraftDTO {
       controlType = FieldControlType.NUMERIC_TEXT_BOX,
       icon = "beach_access")
   private Integer diasGozo;
+
+  @Schema(
+      description =
+          "Indica se há opção por conversão parcial em abono pecuniário nesta parcela.")
+  @UISchema(
+      label = "Com abono pecuniário",
+      helpText = "Indica venda de dias em abono pecuniário nesta parcela.",
+      type = FieldDataType.BOOLEAN,
+      controlType = FieldControlType.CHECKBOX,
+      icon = "sell")
+  private Boolean abonoPecuniario;
+
+  @Schema(
+      description =
+          "Quantidade de dias vendidos em abono pecuniário informada na parcela.")
+  @UISchema(
+      label = "Dias de abono vendidos",
+      helpText = "Quantidade de dias convertidos em pecúnia nesta parcela.",
+      type = FieldDataType.NUMBER,
+      controlType = FieldControlType.NUMERIC_TEXT_BOX,
+      icon = "payments")
+  private Integer diasAbonoVendidos;
 }
