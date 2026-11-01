@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.*;
     valuePresentation = "badge",
     sourceKind = "field")
 @ResourceFact(
-    key = "duracaoMaxDias",
+    key = "qtdMaxDias",
     resourceKey = "administracao-pessoal.regras-frequencia-estatutaria",
     label = "Duração máxima por evento",
     description =

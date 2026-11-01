@@ -435,6 +435,7 @@ public class PeriodoAquisitivoFeriasService
     var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
     PeriodoAquisitivoFerias previousSnapshot = snapshotBeforeMutation(entity);
     mapper.applyUpdate(entity, dto);
+    checkOrg(entity.getEmpCodigo());
     if (previousSnapshot != null) {
       if (previousSnapshot.getDiasGozados() != null) {
         entity.setDiasGozados(previousSnapshot.getDiasGozados());

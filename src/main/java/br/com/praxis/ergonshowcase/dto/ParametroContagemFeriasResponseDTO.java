@@ -338,6 +338,8 @@ public class ParametroContagemFeriasResponseDTO {
       order = 150,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"D\",\"label\":\"Sobre dias de direito\"},{\"value\":\"G\",\"label\":\"Sobre dias de gozo\"},{\"value\":\"N\",\"label\":\"Não permite abono\"}]",
       icon = "sell",
       readOnly = true,
       tableHidden = true)
@@ -565,6 +567,8 @@ public class ParametroContagemFeriasResponseDTO {
       order = 290,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Data inicial do gozo\"},{\"value\":\"F\",\"label\":\"Data final do gozo\"}]",
       icon = "warning",
       readOnly = true,
       tableHidden = true)
@@ -758,6 +762,8 @@ public class ParametroContagemFeriasResponseDTO {
       order = 410,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"D\",\"label\":\"Sobre dias de direito\"},{\"value\":\"G\",\"label\":\"Sobre dias de gozo\"},{\"value\":\"N\",\"label\":\"Não permite abono\"}]",
       icon = "sell",
       readOnly = true,
       tableHidden = true)

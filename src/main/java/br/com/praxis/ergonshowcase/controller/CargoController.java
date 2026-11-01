@@ -110,10 +110,10 @@ public class CargoController
               target = @AnalyticsSurfaceTarget(resourceKey = "administracao-pessoal.cargos", surfaceId = "ficha-cargo"))),
       @AnalyticsProjection(id = "evolucao-criacao-cargos", intent = AnalyticsIntent.TREND,
           sourceOperation = AnalyticsOperation.TIMESERIES,
-          primaryDimension = @AnalyticsDimensionBinding(field = "dtCriacao"),
+          primaryDimension = @AnalyticsDimensionBinding(field = "dtInicioContrVaga"),
           defaultGranularity = AnalyticsGranularity.MONTH,
           defaultTimezone = "America/Sao_Paulo",
-          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Cargos criados")),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Cargos por início de controle de vagas")),
       @AnalyticsProjection(id = "distribuicao-vagas-autorizadas", intent = AnalyticsIntent.DISTRIBUTION,
           sourceOperation = AnalyticsOperation.DISTRIBUTION,
           primaryDimension = @AnalyticsDimensionBinding(field = "vagasAutorizadas"),
@@ -121,7 +121,7 @@ public class CargoController
       @AnalyticsProjection(id = "comparativo-cargos-por-categoria", intent = AnalyticsIntent.COMPARISON,
           sourceOperation = AnalyticsOperation.COMPARISON,
           primaryDimension = @AnalyticsDimensionBinding(field = "categoria"),
-          comparisonPeriod = @AnalyticsComparisonPeriodBinding(field = "dtCriacao", timezone = "America/Sao_Paulo"),
+          comparisonPeriod = @AnalyticsComparisonPeriodBinding(field = "dtInicioContrVaga", timezone = "America/Sao_Paulo"),
           primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Variação por categoria"))
   })
   public org.springframework.http.ResponseEntity<RestApiResponse<org.praxisplatform.uischema.stats.dto.GroupByStatsResponse>> groupByStats(

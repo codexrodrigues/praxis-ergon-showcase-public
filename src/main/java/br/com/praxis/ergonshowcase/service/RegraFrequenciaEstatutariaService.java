@@ -103,7 +103,7 @@ public class RegraFrequenciaEstatutariaService
         field("tipofreq", "Tipo de frequência", "string"),
         field("codfreq", "Código de frequência", "integer"),
         presentedField("exigeHomologacao", "Exige homologação", "boolean", boolPresentation),
-        field("duracaoMaxDias", "Duração máxima (dias)", "integer"));
+        field("qtdMaxDias", "Duração máxima (dias)", "integer"));
   }
 
   @Override
@@ -114,7 +114,7 @@ public class RegraFrequenciaEstatutariaService
         .categoricalGroupByBucket("tipoVinculo", "tipoVinculo")
         .categoricalGroupByBucket("categoria", "categoria")
         .categoricalGroupByBucket("tipofreq", "tipofreq")
-        .numericHistogramMeasureField("duracaoMaxDias", "duracaoMaxDias")
+        .numericHistogramMeasureField("qtdMaxDias", "qtdMaxDias")
         .build();
   }
 

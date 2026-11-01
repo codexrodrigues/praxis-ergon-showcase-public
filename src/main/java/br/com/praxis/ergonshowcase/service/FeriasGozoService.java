@@ -215,28 +215,35 @@ public class FeriasGozoService
   }
 
   public void hydrateParentPeriodoAquisitivo(FeriasGozo entity, boolean reparented) {
-    if (entity == null || entityManager == null || entity.getPeriodoAquisitivoId() == null) {
+    if (entity == null) {
       return;
     }
-    PeriodoAquisitivoFerias pa =
-        entityManager.find(PeriodoAquisitivoFerias.class, entity.getPeriodoAquisitivoId());
-    if (pa == null) {
-      return;
+    if (entityManager != null && entity.getPeriodoAquisitivoId() != null) {
+      PeriodoAquisitivoFerias pa =
+          entityManager.find(PeriodoAquisitivoFerias.class, entity.getPeriodoAquisitivoId());
+      if (pa != null) {
+        if (reparented || entity.getEmpCodigo() == null) {
+          entity.setEmpCodigo(pa.getEmpCodigo());
+        }
+        if (reparented || entity.getNumfunc() == null) {
+          entity.setNumfunc(pa.getNumfunc());
+        }
+        if (reparented || entity.getNumvinc() == null) {
+          entity.setNumvinc(pa.getNumvinc());
+        }
+        if (pa.getChave() != null) {
+          entity.setChavePeraqfer(pa.getChave());
+        }
+        if (pa.getTotDiasDireito() != null) {
+          entity.setTotDiasDireitoPa(pa.getTotDiasDireito());
+        }
+      }
     }
-    if (reparented || entity.getEmpCodigo() == null) {
-      entity.setEmpCodigo(pa.getEmpCodigo());
+    if (entity.getEmpCodigo() == null && tenant != null) {
+      entity.setEmpCodigo(tenant.orgao());
     }
-    if (reparented || entity.getNumfunc() == null) {
-      entity.setNumfunc(pa.getNumfunc());
-    }
-    if (reparented || entity.getNumvinc() == null) {
-      entity.setNumvinc(pa.getNumvinc());
-    }
-    if (pa.getChave() != null) {
-      entity.setChavePeraqfer(pa.getChave());
-    }
-    if (pa.getTotDiasDireito() != null) {
-      entity.setTotDiasDireitoPa(pa.getTotDiasDireito());
+    if (entity.getTotDiasDireitoPa() == null) {
+      entity.setTotDiasDireitoPa(30);
     }
   }
 
@@ -281,6 +288,7 @@ public class FeriasGozoService
     }
     mapper.applyUpdate(entity, dto);
     hydrateParentPeriodoAquisitivo(entity, reparented);
+    checkOrg(entity.getEmpCodigo());
     validateFeriasGozo(entity, previousSnapshot);
     if (invariants != null) {
       invariants.feriasGozo(entity, false);

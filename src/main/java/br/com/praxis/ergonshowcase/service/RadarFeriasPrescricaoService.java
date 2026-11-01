@@ -473,7 +473,7 @@ public class RadarFeriasPrescricaoService
       }
     }
     if (ids.isEmpty()) {
-      return (root, q, cb) -> cb.conjunction();
+      return (root, q, cb) -> cb.disjunction();
     }
     return (root, q, cb) -> root.get("id").in(ids);
   }

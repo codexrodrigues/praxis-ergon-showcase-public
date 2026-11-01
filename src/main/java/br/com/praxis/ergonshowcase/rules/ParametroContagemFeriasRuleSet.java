@@ -178,9 +178,9 @@ public final class ParametroContagemFeriasRuleSet {
         new DecisionSlot(
             SLOT_PRESCRICAO_E_FLAGS_GOZO,
             DecisionStage.DOMAIN_DECISION,
-            SlotCardinality.SINGLE,
+            SlotCardinality.MULTIPLE,
             OverridePolicy.FORBIDDEN,
-            DecisionAggregationPolicy.SINGLE_RESULT,
+            DecisionAggregationPolicy.DENY_OVERRIDES,
             null),
         new DecisionSlot(
             SLOT_FERIAS_HABILITADAS_OBRIGATORIOS,
@@ -213,9 +213,9 @@ public final class ParametroContagemFeriasRuleSet {
         new DecisionSlot(
             SLOT_FERIAS_DESABILITADAS_SEM_LIMITES,
             DecisionStage.DOMAIN_DECISION,
-            SlotCardinality.SINGLE,
+            SlotCardinality.MULTIPLE,
             OverridePolicy.FORBIDDEN,
-            DecisionAggregationPolicy.SINGLE_RESULT,
+            DecisionAggregationPolicy.DENY_OVERRIDES,
             null),
         new DecisionSlot(
             SLOT_CONTAGEM_DOBRO_FERIAS_COERENCIA,
@@ -273,22 +273,44 @@ public final class ParametroContagemFeriasRuleSet {
             "{\"==\": [1, 1]}",
             "CERG-PARAM-PRE-001",
             baseFacts),
-        // 3. ERG-01870..ERG-01872
+        // 3a. ERG-01870: criterioPrescricao em ['I', 'F']
         productJsonLogicBinding(
             "product.parametros-conta.erg-01870",
             SLOT_PRESCRICAO_E_FLAGS_GOZO,
             30,
             """
             {
-              "and": [
-                {"in": [{"var": "draft.criterioPrescricao"}, ["I", "F"]]},
-                {"!=": [{"var": "draft.permiteGozoAntesPaFer"}, null]},
-                {"!=": [{"var": "draft.permiteGozoAposPrescricao"}, null]},
-                {"!=": [{"var": "draft.permiteLancConcPa"}, null]}
-              ]
+              "in": [{"var": "draft.criterioPrescricao"}, ["I", "F"]]
             }
             """,
             "ERG-01870",
+            baseFacts),
+        // 3b. ERG-01871: flags de gozo antes do término do PA e após prescrição obrigatórias
+        productJsonLogicBinding(
+            "product.parametros-conta.erg-01871",
+            SLOT_PRESCRICAO_E_FLAGS_GOZO,
+            31,
+            """
+            {
+              "and": [
+                {"!=": [{"var": "draft.permiteGozoAntesPaFer"}, null]},
+                {"!=": [{"var": "draft.permiteGozoAposPrescricao"}, null]}
+              ]
+            }
+            """,
+            "ERG-01871",
+            baseFacts),
+        // 3c. ERG-01872: flag permiteLancConcPa obrigatória
+        productJsonLogicBinding(
+            "product.parametros-conta.erg-01872",
+            SLOT_PRESCRICAO_E_FLAGS_GOZO,
+            32,
+            """
+            {
+              "!=": [{"var": "draft.permiteLancConcPa"}, null]
+            }
+            """,
+            "ERG-01872",
             baseFacts),
         // 4. ERG-01800: campos obrigatórios quando temFerias == true
         productJsonLogicBinding(
@@ -468,7 +490,7 @@ public final class ParametroContagemFeriasRuleSet {
             """,
             "ERG-01802",
             baseFacts),
-        // 8. ERG-01811 / ERG-01812: quando temFerias == false, veda parâmetros de férias/abono
+        // 8a. ERG-01811: quando temFerias == false, veda parâmetros de férias
         productJsonLogicBinding(
             "product.parametros-conta.erg-01811",
             SLOT_FERIAS_DESABILITADAS_SEM_LIMITES,
@@ -484,14 +506,35 @@ public final class ParametroContagemFeriasRuleSet {
                     {"in": [{"var": "draft.minPerFer"}, [null, 0]]},
                     {"in": [{"var": "draft.maxDiasPerFer"}, [null, 0]]},
                     {"in": [{"var": "draft.minDiasPerFer"}, [null, 0]]},
-                    {"in": [{"var": "draft.minDiasPvendFer"}, [null, 0]]},
-                    {"in": [{"var": "draft.maxDiasVendFer"}, [null, 0]]}
+                    {"in": [{"var": "draft.minDiasPerPrincFer"}, [null, 0]]}
                   ]
                 }
               ]
             }
             """,
             "ERG-01811",
+            baseFacts),
+        // 8b. ERG-01812: quando temFerias == false, veda parâmetros de abono pecuniário
+        productJsonLogicBinding(
+            "product.parametros-conta.erg-01812",
+            SLOT_FERIAS_DESABILITADAS_SEM_LIMITES,
+            81,
+            """
+            {
+              "or": [
+                {"==": [{"var": "draft.temFerias"}, true]},
+                {
+                  "and": [
+                    {"in": [{"var": "draft.minDiasPvendFer"}, [null, 0]]},
+                    {"in": [{"var": "draft.maxDiasVendFer"}, [null, 0]]},
+                    {"in": [{"var": "draft.numDiasAbonoFer"}, [null, 0]]},
+                    {"in": [{"var": "draft.denDiasAbonoFer"}, [null, 0]]}
+                  ]
+                }
+              ]
+            }
+            """,
+            "ERG-01812",
             baseFacts),
         // 9a. ERG-01853: contDobroFerias == true exige minDiasPeraqfer != null
         productJsonLogicBinding(
@@ -636,7 +679,7 @@ public final class ParametroContagemFeriasRuleSet {
             """,
             "ERG-01814",
             baseFacts),
-        // 10d. ERG-01821: vendLicEsp == true exige minDiasPvendLicEsp <= maxDiasVendLicEsp
+        // 10d. ERG-01821: vendLicEsp == true exige minDiasPvendLicEsp >= 0, maxDiasVendLicEsp >= 0 e minDiasPvendLicEsp <= maxDiasVendLicEsp
         productJsonLogicBinding(
             "product.parametros-conta.erg-01821",
             SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
@@ -646,15 +689,25 @@ public final class ParametroContagemFeriasRuleSet {
               "or": [
                 {"!=": [{"var": "draft.temLicEsp"}, true]},
                 {"!=": [{"var": "draft.vendLicEsp"}, true]},
-                {"==": [{"var": "draft.minDiasPvendLicEsp"}, null]},
-                {"==": [{"var": "draft.maxDiasVendLicEsp"}, null]},
-                {"<=": [{"var": "draft.minDiasPvendLicEsp"}, {"var": "draft.maxDiasVendLicEsp"}]}
+                {
+                  "and": [
+                    {"or": [{"==": [{"var": "draft.minDiasPvendLicEsp"}, null]}, {">=": [{"var": "draft.minDiasPvendLicEsp"}, 0]}]},
+                    {"or": [{"==": [{"var": "draft.maxDiasVendLicEsp"}, null]}, {">=": [{"var": "draft.maxDiasVendLicEsp"}, 0]}]},
+                    {
+                      "or": [
+                        {"==": [{"var": "draft.minDiasPvendLicEsp"}, null]},
+                        {"==": [{"var": "draft.maxDiasVendLicEsp"}, null]},
+                        {"<=": [{"var": "draft.minDiasPvendLicEsp"}, {"var": "draft.maxDiasVendLicEsp"}]}
+                      ]
+                    }
+                  ]
+                }
               ]
             }
             """,
             "ERG-01821",
             baseFacts),
-        // 10e. ERG-01822: vendLicEsp == true exige fração coerente 0 <= numDiasAbonoLicEsp <= denDiasAbonoLicEsp
+        // 10e. ERG-01822: vendLicEsp == true exige fração coerente 0 <= numDiasAbonoLicEsp <= denDiasAbonoLicEsp (obrigatória quando 'D' ou 'G')
         productJsonLogicBinding(
             "product.parametros-conta.erg-01822",
             SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
@@ -664,10 +717,18 @@ public final class ParametroContagemFeriasRuleSet {
               "or": [
                 {"!=": [{"var": "draft.temLicEsp"}, true]},
                 {"!=": [{"var": "draft.vendLicEsp"}, true]},
-                {"==": [{"var": "draft.numDiasAbonoLicEsp"}, null]},
-                {"==": [{"var": "draft.denDiasAbonoLicEsp"}, null]},
                 {
                   "and": [
+                    {"!=": [{"var": "draft.abonoDirGozoLicEsp"}, "D"]},
+                    {"!=": [{"var": "draft.abonoDirGozoLicEsp"}, "G"]},
+                    {"==": [{"var": "draft.numDiasAbonoLicEsp"}, null]},
+                    {"==": [{"var": "draft.denDiasAbonoLicEsp"}, null]}
+                  ]
+                },
+                {
+                  "and": [
+                    {"!=": [{"var": "draft.numDiasAbonoLicEsp"}, null]},
+                    {"!=": [{"var": "draft.denDiasAbonoLicEsp"}, null]},
                     {">": [{"var": "draft.denDiasAbonoLicEsp"}, 0]},
                     {">=": [{"var": "draft.numDiasAbonoLicEsp"}, 0]},
                     {"<=": [{"var": "draft.numDiasAbonoLicEsp"}, {"var": "draft.denDiasAbonoLicEsp"}]}

@@ -27,6 +27,8 @@ public class AtualizarLicencaProgressaoParametroFeriasDTO {
       order = 10,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Data inicial do gozo\"},{\"value\":\"F\",\"label\":\"Data final do gozo\"}]",
       icon = "warning")
   private String criterioPrescricao;
 

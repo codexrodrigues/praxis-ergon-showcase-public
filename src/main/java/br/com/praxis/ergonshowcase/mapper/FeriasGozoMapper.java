@@ -121,7 +121,7 @@ public class FeriasGozoMapper
 
   private void apply(FeriasGozoDados dto, FeriasGozo entity) {
     entity.setEmpCodigo(dto.getEmpCodigo());
-    if (entity.getEmpCodigo() == null) {
+    if (entity.getEmpCodigo() == null && dto.getPeriodoAquisitivoId() == null) {
       entity.setEmpCodigo(tenant.orgao());
     }
     entity.setNumfunc(dto.getNumfunc());
@@ -144,7 +144,7 @@ public class FeriasGozoMapper
           Math.toIntExact(ChronoUnit.DAYS.between(dto.getDtini(), dto.getDtprevfim()) + 1));
     }
     entity.setTotDiasDireitoPa(dto.getTotDiasDireitoPa());
-    if (entity.getTotDiasDireitoPa() == null) {
+    if (entity.getTotDiasDireitoPa() == null && dto.getPeriodoAquisitivoId() == null) {
       entity.setTotDiasDireitoPa(30);
     }
     entity.setAbonoPecuniario(dto.getAbonoPecuniario());

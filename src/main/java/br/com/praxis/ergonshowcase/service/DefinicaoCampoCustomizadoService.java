@@ -18,6 +18,7 @@ import jakarta.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -26,6 +27,7 @@ import org.praxisplatform.uischema.concurrency.ResourceVersionPreconditionExcept
 import org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition;
 import org.praxisplatform.uischema.exporting.CollectionExportField;
 import org.praxisplatform.uischema.exporting.CollectionExportFieldPresentation;
+import org.praxisplatform.uischema.service.base.ResourceFilterAccessScope;
 import org.praxisplatform.uischema.service.base.VersionedCreateUpdateResourceService;
 import org.praxisplatform.uischema.stats.StatsFieldRegistry;
 import org.praxisplatform.uischema.stats.StatsMetric;
@@ -164,7 +166,7 @@ public class DefinicaoCampoCustomizadoService
         .categoricalGroupByBucket("fieldType", "fieldType")
         .categoricalGroupByBucket("controlType", "controlType")
         .categoricalGroupByBucket("active", "active")
-        .temporalTimeSeriesField("updatedAt", "updatedAt")
+        .temporalTimeSeriesField("updatedAt", "auditoria.updatedAt")
         .numericHistogramMeasureField("fieldOrder", "fieldOrder")
         .build();
   }
@@ -206,6 +208,18 @@ public class DefinicaoCampoCustomizadoService
   }
 
   @Override
+  protected ResourceFilterAccessScope<DefinicaoCampoCustomizado> resolveResourceFilterAccessScope() {
+    var explicit = tenant != null ? tenant.explicitOrgao() : OptionalInt.empty();
+    if (explicit.isEmpty()) {
+      return ResourceFilterAccessScope.unrestricted();
+    }
+    int orgao = explicit.getAsInt();
+    return ResourceFilterAccessScope.restricted(
+        (root, query, cb) ->
+            cb.or(cb.isNull(root.get("empCodigo")), cb.equal(root.get("empCodigo"), orgao)));
+  }
+
+  @Override
   @Transactional
   public ResourceRepresentationResult<DefinicaoCampoCustomizadoResponseDTO> update(
       Long id,
@@ -218,6 +232,7 @@ public class DefinicaoCampoCustomizadoService
     precondition.requireMatch(entity.getVersion());
     beforeUpdate(id, entity, dto);
     mapper.applyUpdate(entity, dto);
+    checkOrg(entity.getEmpCodigo());
     validateCampoCustomizadoValidationRules(entity);
     if (invariants != null) {
       invariants.campoCustomizado(entity, false);

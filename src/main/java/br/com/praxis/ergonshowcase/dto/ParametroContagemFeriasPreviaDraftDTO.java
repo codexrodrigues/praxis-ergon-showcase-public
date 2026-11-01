@@ -39,6 +39,8 @@ public class ParametroContagemFeriasPreviaDraftDTO {
       helpText = "Indica D, G ou N para cálculo do abono pecuniário.",
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"D\",\"label\":\"Sobre dias de direito\"},{\"value\":\"G\",\"label\":\"Sobre dias de gozo\"},{\"value\":\"N\",\"label\":\"Não permite abono\"}]",
       icon = "sell")
   private String abonoDirGozo;
 

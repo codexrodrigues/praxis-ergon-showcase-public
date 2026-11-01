@@ -448,6 +448,8 @@ public class FeriasGozoResponseDTO {
       order = 130,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Início das férias\"},{\"value\":\"F\",\"label\":\"Final das férias\"}]",
       icon = "swap_horiz",
       readOnly = true,
       tableHidden = true)
@@ -614,6 +616,8 @@ public class FeriasGozoResponseDTO {
       order = 230,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"PROGRAMADA\",\"label\":\"Programada\"},{\"value\":\"HOMOLOGADA\",\"label\":\"Homologada\"},{\"value\":\"EM_GOZO\",\"label\":\"Em gozo\"},{\"value\":\"GOZADA\",\"label\":\"Gozada\"},{\"value\":\"INTERROMPIDA\",\"label\":\"Interrompida\"},{\"value\":\"CANCELADA\",\"label\":\"Cancelada\"}]",
       icon = "flag",
       readOnly = true,
       tableHidden = false)

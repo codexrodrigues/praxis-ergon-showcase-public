@@ -101,6 +101,7 @@ public class AtualizarElegibilidadeDependenteDTO extends PartialUpdateInput {
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.RESTRICTED,
       dataCategory = DomainDataCategory.SENSITIVE_PERSONAL,
+      complianceTags = {"LGPD", "HEALTH_DATA", "NON_EXPORTABLE"},
       reason = "Condição clínica excepcional do dependente.",
       aiUsage =
           @AiUsagePolicy(
@@ -112,7 +113,11 @@ public class AtualizarElegibilidadeDependenteDTO extends PartialUpdateInput {
       order = 7,
       type = FieldDataType.BOOLEAN,
       controlType = FieldControlType.CHECKBOX,
-      icon = "accessible")
+      icon = "accessible",
+      visibleForAuthorities = {"ROLE_RH", "ROLE_ADMIN", "ROLE_PERICIA"},
+      editableForAuthorities = {"ROLE_RH", "ROLE_ADMIN", "ROLE_PERICIA"},
+      fieldAccessReason =
+          "Indicador de condição clínica excepcional do dependente (Art. 11 da LGPD).")
   private Boolean excepcional;
 
   @Schema(description = "Indica se o registro envolve tutela, curatela ou representante legal.")

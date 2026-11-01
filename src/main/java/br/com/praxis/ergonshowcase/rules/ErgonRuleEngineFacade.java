@@ -391,7 +391,6 @@ public class ErgonRuleEngineFacade {
                 vinculoAcumulacaoConstitucionalJavaExecutor(),
                 parametroContagemConcomitanciaJavaExecutor(),
                 periodoAquisitivoSobreposicaoJavaExecutor(),
-                feriasGozoAbonoPecuniarioJavaExecutor(),
                 feriasGozoConcomitanciaSaldoJavaExecutor()));
     this.compiler = new PraxisRulePlanCompiler(this.executorRegistry);
     this.engine = new PraxisRuleSetEngine(this.executorRegistry);
@@ -4250,105 +4249,6 @@ public class ErgonRuleEngineFacade {
         return RuleExecutorResult.allow();
       }
     };
-  }
-
-  private static RuleBindingExecutor feriasGozoAbonoPecuniarioJavaExecutor() {
-    return new RuleBindingExecutor() {
-      @Override
-      public String implementationKey() {
-        return FeriasGozoRuleSet.JAVA_EXECUTOR_ABONO_PECUNIARIO_KEY;
-      }
-
-      @Override
-      public String implementationVersion() {
-        return FeriasGozoRuleSet.JAVA_EXECUTOR_VERSION;
-      }
-
-      @Override
-      public RuleExecutorResult evaluate(RuleExecutorContext context) {
-        return evaluateFeriasGozoAbonoPecuniario(context);
-      }
-    };
-  }
-
-  /**
-   * Executor Java puro e determinístico para {@code ERG-00522} e {@code ERG-03311..ERG-03315}
-   * ({@code PCK_FERIAS.MAIN_PRE} e {@code PCK_ERG_ABONOS_FERIAS.MAIN_PRE}).
-   */
-  private static RuleExecutorResult evaluateFeriasGozoAbonoPecuniario(RuleExecutorContext context) {
-    JsonNode facts = context.facts();
-    JsonNode draft = facts.path("draft");
-    JsonNode eff = facts.path("effectiveParametroConta");
-    JsonNode derived = facts.path("derived");
-
-    boolean abonoPecuniario = draft.path("abonoPecuniario").asBoolean(false);
-    int diasAbonoVendidos =
-        draft.path("diasAbonoVendidos").isNumber() ? draft.path("diasAbonoVendidos").intValue() : 0;
-
-    if (!abonoPecuniario) {
-      if (diasAbonoVendidos != 0) {
-        return RuleExecutorResult.of(RuleDecision.DENY, "ERG-00522");
-      }
-      return RuleExecutorResult.allow();
-    }
-
-    if (!eff.path("permiteAbonoPecuniario").asBoolean(false) || diasAbonoVendidos <= 0) {
-      return RuleExecutorResult.of(RuleDecision.DENY, "ERG-00522");
-    }
-
-    String iniFim = textOrNull(draft, "iniFimAbono");
-    if (iniFim == null || !Set.of("I", "F").contains(iniFim.toUpperCase())) {
-      return RuleExecutorResult.of(RuleDecision.DENY, "ERG-03311");
-    }
-
-    Integer minDiasPvendFer =
-        eff.path("minDiasPvendFer").isNumber() ? eff.path("minDiasPvendFer").intValue() : null;
-    if (minDiasPvendFer != null && diasAbonoVendidos < minDiasPvendFer) {
-      return RuleExecutorResult.of(RuleDecision.DENY, "ERG-03312");
-    }
-
-    Integer maxDiasVendFer =
-        eff.path("maxDiasVendFer").isNumber() ? eff.path("maxDiasVendFer").intValue() : null;
-    Integer maxDiasAbonoPelaFracao =
-        derived.path("maxDiasAbonoPelaFracao").isNumber()
-            ? derived.path("maxDiasAbonoPelaFracao").intValue()
-            : null;
-
-    if (maxDiasVendFer != null
-        && diasAbonoVendidos > maxDiasVendFer
-        && (maxDiasAbonoPelaFracao == null || diasAbonoVendidos <= maxDiasAbonoPelaFracao)) {
-      return RuleExecutorResult.of(RuleDecision.DENY, "ERG-03313");
-    }
-    if (maxDiasAbonoPelaFracao != null
-        && diasAbonoVendidos > maxDiasAbonoPelaFracao
-        && (maxDiasVendFer == null || diasAbonoVendidos <= maxDiasVendFer)) {
-      return RuleExecutorResult.of(RuleDecision.DENY, "ERG-03314");
-    }
-    if ((maxDiasVendFer != null && diasAbonoVendidos > maxDiasVendFer)
-        || (maxDiasAbonoPelaFracao != null && diasAbonoVendidos > maxDiasAbonoPelaFracao)) {
-      return RuleExecutorResult.of(RuleDecision.DENY, "ERG-00522");
-    }
-
-    LocalDate dtini = parseDateOrNull(textOrNull(draft, "dtini"));
-    LocalDate dtVenda = parseDateOrNull(textOrNull(draft, "dtVendaAbono"));
-    LocalDate dtPagto = parseDateOrNull(textOrNull(draft, "dtPagtoAbono"));
-    if ((dtVenda != null && dtini != null && dtVenda.isAfter(dtini))
-        || (dtPagto != null && dtVenda != null && dtPagto.isBefore(dtVenda))) {
-      return RuleExecutorResult.of(RuleDecision.DENY, "ERG-03315");
-    }
-
-    return RuleExecutorResult.allow();
-  }
-
-  private static LocalDate parseDateOrNull(String iso) {
-    if (iso == null || iso.isBlank()) {
-      return null;
-    }
-    try {
-      return LocalDate.parse(iso.trim());
-    } catch (RuntimeException ignored) {
-      return null;
-    }
   }
 
   private static RuleBindingExecutor feriasGozoConcomitanciaSaldoJavaExecutor() {

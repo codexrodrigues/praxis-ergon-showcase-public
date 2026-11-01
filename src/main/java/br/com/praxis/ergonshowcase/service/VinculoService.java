@@ -302,6 +302,17 @@ public class VinculoService
   }
 
   @Override
+  protected ResourceFilterAccessScope<Vinculo> resolveResourceFilterAccessScope() {
+    var explicit = tenant != null ? tenant.explicitOrgao() : OptionalInt.empty();
+    if (explicit.isEmpty()) {
+      return ResourceFilterAccessScope.unrestricted();
+    }
+    int orgao = explicit.getAsInt();
+    return ResourceFilterAccessScope.restricted(
+        (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
+  }
+
+  @Override
   @Transactional
   public ResourceRepresentationResult<VinculoResponseDTO> update(
       VinculoId id,
@@ -316,6 +327,7 @@ public class VinculoService
     beforeUpdate(id, entity, dto);
     var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
     mapper.applyUpdate(entity, dto);
+    checkOrg(entity.getEmpCodigo());
     if (invariants != null) {
       invariants.vinculo(entity, false, false);
     }

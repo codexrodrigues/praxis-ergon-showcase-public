@@ -68,13 +68,9 @@ public final class FeriasGozoRuleSet {
 
   public static final String JAVA_EXECUTOR_CONCOMITANCIA_KEY =
       "ergon.ferias:concomitancia-e-saldo-fracionamento";
-  public static final String JAVA_EXECUTOR_ABONO_PECUNIARIO_KEY =
-      "ergon.ferias:abono-pecuniario-elegibilidade-e-limites";
   public static final String JAVA_EXECUTOR_VERSION = "1.0";
   public static final String EXECUTOR_CONCOMITANCIA_E_SALDO_FRACIONAMENTO =
       JAVA_EXECUTOR_CONCOMITANCIA_KEY + "@" + JAVA_EXECUTOR_VERSION;
-  public static final String EXECUTOR_ABONO_PECUNIARIO_ELEGIBILIDADE_E_LIMITES =
-      JAVA_EXECUTOR_ABONO_PECUNIARIO_KEY + "@" + JAVA_EXECUTOR_VERSION;
 
   public static final String SLOT_CRONOLOGIA_E_INTERRUPCAO_VALIDA =
       "ferias-gozo.guard.cronologia-e-interrupcao-valida";
@@ -368,12 +364,14 @@ public final class FeriasGozoRuleSet {
                 {
                   "or": [
                     {"==": [{"var": "vinculo.dtvac"}, null]},
+                    {"==": [{"var": "draft.dtfimEfetivo"}, null]},
                     {"<": [{"date": [{"var": "draft.dtfimEfetivo"}]}, {"date": [{"var": "vinculo.dtvac"}]}]}
                   ]
                 },
                 {
                   "or": [
                     {"==": [{"var": "vinculo.dtaposent"}, null]},
+                    {"==": [{"var": "draft.dtfimEfetivo"}, null]},
                     {"<": [{"date": [{"var": "draft.dtfimEfetivo"}]}, {"date": [{"var": "vinculo.dtaposent"}]}]}
                   ]
                 },
@@ -719,6 +717,9 @@ public final class FeriasGozoRuleSet {
             {
               "or": [
                 {"!=": [{"var": "draft.abonoPecuniario"}, true]},
+                {"!=": [{"var": "effectiveParametroConta.permiteAbonoPecuniario"}, true]},
+                {"==": [{"var": "draft.diasAbonoVendidos"}, null]},
+                {"<=": [{"var": "draft.diasAbonoVendidos"}, 0]},
                 {"==": [{"var": "effectiveParametroConta.minDiasPvendFer"}, null]},
                 {">=": [{"var": "draft.diasAbonoVendidos"}, {"var": "effectiveParametroConta.minDiasPvendFer"}]}
               ]
@@ -735,6 +736,9 @@ public final class FeriasGozoRuleSet {
             {
               "or": [
                 {"!=": [{"var": "draft.abonoPecuniario"}, true]},
+                {"!=": [{"var": "effectiveParametroConta.permiteAbonoPecuniario"}, true]},
+                {"==": [{"var": "draft.diasAbonoVendidos"}, null]},
+                {"<=": [{"var": "draft.diasAbonoVendidos"}, 0]},
                 {"==": [{"var": "effectiveParametroConta.maxDiasVendFer"}, null]},
                 {"<=": [{"var": "draft.diasAbonoVendidos"}, {"var": "effectiveParametroConta.maxDiasVendFer"}]}
               ]
@@ -751,6 +755,9 @@ public final class FeriasGozoRuleSet {
             {
               "or": [
                 {"!=": [{"var": "draft.abonoPecuniario"}, true]},
+                {"!=": [{"var": "effectiveParametroConta.permiteAbonoPecuniario"}, true]},
+                {"==": [{"var": "draft.diasAbonoVendidos"}, null]},
+                {"<=": [{"var": "draft.diasAbonoVendidos"}, 0]},
                 {"==": [{"var": "derived.maxDiasAbonoPelaFracao"}, null]},
                 {"<=": [{"var": "draft.diasAbonoVendidos"}, {"var": "derived.maxDiasAbonoPelaFracao"}]}
               ]

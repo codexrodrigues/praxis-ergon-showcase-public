@@ -160,15 +160,32 @@ public class ErgonInvariants {
       fail("Dependência encerrada não pode manter benefícios ativos de IRRF, salário-família ou saúde.");
     Integer emp = tenant != null ? tenant.orgao() : 1;
     if (runRuleEngine) {
+      List<Dependente> existentes = List.of();
+      if (em != null && d.getId() != null && d.getId().numfunc() != null) {
+        var q =
+            em.createQuery(
+                "select x from Dependente x where x.id.numfunc=:f", Dependente.class);
+        if (q != null) {
+          q.setParameter("f", d.getId().numfunc());
+          var list = q.getResultList();
+          if (list != null) {
+            existentes = list;
+          }
+        }
+      }
       ruleEngine()
           .enforceDependente(
               new ErgonRuleEngineFacade.DependenteRuleContext(
-                  d, emp, titular, tipo, doc, List.of(), null));
+                  d, emp, titular, tipo, doc, existentes, null));
     }
     customFields("administracao-pessoal.dependentes", emp, d.getCustomFields(), d);
   }
 
   public void afastamento(Afastamento a, boolean creating) {
+    afastamento(a, creating, false);
+  }
+
+  public void afastamento(Afastamento a, boolean creating, boolean inPlaceProrrogacao) {
     if (a.getNumfunc() == null || a.getNumvinc() == null || a.getEmpCodigo() == null)
       fail("Órgão, servidor e vínculo são obrigatórios para o registro de afastamento.");
     Vinculo titular =
@@ -233,7 +250,9 @@ public class ErgonInvariants {
     if (Boolean.TRUE.equals(a.getProrrogacao())) {
       if (a.getAfastamentoOrigemId() == null)
         fail("Afastamento marcado como prorrogação exige informar o afastamento de origem.");
-      if (a.getId() != null && Objects.equals(a.getId(), a.getAfastamentoOrigemId()))
+      if (!inPlaceProrrogacao
+          && a.getId() != null
+          && Objects.equals(a.getId(), a.getAfastamentoOrigemId()))
         fail("Um afastamento não pode prorrogar a si próprio.");
       Afastamento origem = em.find(Afastamento.class, a.getAfastamentoOrigemId());
       if (origem == null

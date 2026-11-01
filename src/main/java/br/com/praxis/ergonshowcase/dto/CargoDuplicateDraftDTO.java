@@ -58,8 +58,15 @@ public class CargoDuplicateDraftDTO {
   private String tipoCargo;
 
   @Schema(nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+      allowableValues = {"C", "F"},
       description = "Distinção da origem entre cargo (C) e função (F), preservada sem converter funções em cargos.")
-  @UISchema(label = "Cargo ou função", group = "Enquadramento", icon = "badge")
+  @UISchema(
+      label = "Cargo ou função",
+      group = "Enquadramento",
+      type = FieldDataType.TEXT,
+      controlType = FieldControlType.SELECT,
+      options = "[{\"value\":\"C\",\"label\":\"Cargo\"},{\"value\":\"F\",\"label\":\"Função\"}]",
+      icon = "badge")
   private String cargoFuncao;
 
   @Schema(nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED,

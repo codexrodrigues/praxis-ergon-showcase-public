@@ -290,6 +290,7 @@ public class ParametroContagemFeriasService
     beforeUpdate(id, entity, dto);
     var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
     mapper.applyUpdate(entity, dto);
+    checkOrg(entity.getEmpCodigo());
     validateParametroContagemFerias(entity);
     if (invariants != null) {
       invariants.parametroContagemFerias(entity, false);

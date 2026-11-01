@@ -335,9 +335,49 @@ public abstract class ErgonReadOnlyResourceService<E, R, I, F extends GenericFil
     return exports.export(
         request,
         slice,
-        exportFields(),
+        governedExportFields(),
         CollectionExportValueResolver.reflective(),
         Map.of("effectiveMaxRows", limit, "truncated", truncated, "scope", scopeName));
+  }
+
+  protected List<CollectionExportField> governedExportFields() {
+    Class<?> responseType =
+        org.springframework.core.ResolvableType.forClass(getClass())
+            .as(ErgonReadOnlyResourceService.class)
+            .getGeneric(1)
+            .resolve();
+    if (responseType == null) {
+      return exportFields();
+    }
+    return exportFields().stream()
+        .filter(
+            f ->
+                !Boolean.FALSE.equals(f.exportable())
+                    && !isNonExportableField(responseType, f.key())
+                    && !isNonExportableField(responseType, f.valuePath()))
+        .toList();
+  }
+
+  private static boolean isNonExportableField(Class<?> type, String fieldName) {
+    if (type == null || fieldName == null || fieldName.isBlank()) {
+      return false;
+    }
+    for (Class<?> curr = type; curr != null && curr != Object.class; curr = curr.getSuperclass()) {
+      try {
+        var field = curr.getDeclaredField(fieldName);
+        var gov =
+            field.getAnnotation(org.praxisplatform.uischema.annotation.DomainGovernance.class);
+        if (gov != null && gov.complianceTags() != null) {
+          for (String tag : gov.complianceTags()) {
+            if ("NON_EXPORTABLE".equalsIgnoreCase(tag)) {
+              return true;
+            }
+          }
+        }
+      } catch (NoSuchFieldException ignored) {
+      }
+    }
+    return false;
   }
 
   protected Sort resolveExportSort(Object rawSort) {
@@ -402,7 +442,7 @@ public abstract class ErgonReadOnlyResourceService<E, R, I, F extends GenericFil
             .filter(s -> !s.isBlank())
             .toList();
     if (rawKeys.isEmpty()) {
-      return (root, q, cb) -> cb.conjunction();
+      return (root, q, cb) -> cb.disjunction();
     }
     return (root, q, cb) -> {
       try {
@@ -433,9 +473,9 @@ public abstract class ErgonReadOnlyResourceService<E, R, I, F extends GenericFil
           }
           ors.add(cb.and(ands.toArray(Predicate[]::new)));
         }
-        return ors.isEmpty() ? cb.conjunction() : cb.or(ors.toArray(Predicate[]::new));
+        return ors.isEmpty() ? cb.disjunction() : cb.or(ors.toArray(Predicate[]::new));
       } catch (RuntimeException ex) {
-        return cb.conjunction();
+        return cb.disjunction();
       }
     };
   }

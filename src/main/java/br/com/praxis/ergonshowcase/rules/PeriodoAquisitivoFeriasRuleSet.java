@@ -298,21 +298,32 @@ public final class PeriodoAquisitivoFeriasRuleSet {
             "{\"==\": [1, 1]}",
             "CERG-PA-PRE-001",
             baseFacts),
-        // 4. ERG-00099 / ERG-00603: proteção de averbação e critério de prescrição
+        // 4. ERG-00099: proteção de averbação
         productJsonLogicBinding(
             "product.peraqfer.erg-00099",
             SLOT_BLOQUEIO_AVERBACAO_E_CRITERIO_PRESCRICAO,
             40,
             """
             {
+              "!=": [{"var": "draft.lockedAverbacaoMutation"}, true]
+            }
+            """,
+            "ERG-00099",
+            baseFacts),
+        // 4b. ERG-00603: critério de prescrição ('I' ou 'F') e semPgtoMulta ('I', 'S', 'N')
+        productJsonLogicBinding(
+            "product.peraqfer.erg-00603",
+            SLOT_DIREITO_TETO_E_REDUCAO_FALTAS,
+            45,
+            """
+            {
               "and": [
-                {"!=": [{"var": "draft.lockedAverbacaoMutation"}, true]},
                 {"in": [{"var": "draft.criterioPrescricao"}, [null, "I", "F"]]},
                 {"in": [{"var": "draft.semPgtoMulta"}, [null, "I", "S", "N"]]}
               ]
             }
             """,
-            "ERG-00099",
+            "ERG-00603",
             baseFacts),
         // 5. ERG-00600: totDiasDireito <= totDiasFer, escala de faltas e >= totalDiasConsumidos
         productJsonLogicBinding(
@@ -526,6 +537,7 @@ public final class PeriodoAquisitivoFeriasRuleSet {
               "and": [
                 {"or": [{"==": [{"var": "draft.minDiasPerFer"}, null]}, {">": [{"var": "draft.minDiasPerFer"}, 0]}]},
                 {"or": [{"==": [{"var": "draft.maxDiasPerFer"}, null]}, {">": [{"var": "draft.maxDiasPerFer"}, 0]}]},
+                {"or": [{"==": [{"var": "draft.minDiasPerPrincFer"}, null]}, {">": [{"var": "draft.minDiasPerPrincFer"}, 0]}]},
                 {
                   "or": [
                     {"==": [{"var": "effectiveParametroConta.minDiasPerFer"}, null]},
@@ -559,36 +571,106 @@ public final class PeriodoAquisitivoFeriasRuleSet {
             """,
             "ERG-01810",
             baseFacts),
-        // 8e. ERG-01802: fração e limites de venda de abono no PA quando abonoDirGozo != 'N'
+        // 8e. ERG-01801: abonoDirGozo válido no PA
+        productJsonLogicBinding(
+            "product.peraqfer.erg-01801",
+            SLOT_OVERRIDES_PARCELAMENTO_E_ABONO,
+            84,
+            """
+            {
+              "in": [{"var": "draft.abonoDirGozo"}, [null, "I", "D", "G", "N"]]
+            }
+            """,
+            "ERG-01801",
+            baseFacts),
+        // 8f. ERG-01802: paridade de preenchimento entre numerador e denominador da fração de abono no PA
         productJsonLogicBinding(
             "product.peraqfer.erg-01802",
             SLOT_OVERRIDES_PARCELAMENTO_E_ABONO,
-            84,
+            85,
             """
             {
               "or": [
                 {"==": [{"var": "draft.abonoDirGozo"}, "N"]},
                 {
                   "and": [
-                    {
-                      "or": [
-                        {
-                          "and": [
-                            {"==": [{"var": "draft.numDiasAbonoFer"}, null]},
-                            {"==": [{"var": "draft.denDiasAbonoFer"}, null]}
-                          ]
-                        },
-                        {
-                          "and": [
-                            {"!=": [{"var": "draft.numDiasAbonoFer"}, null]},
-                            {"!=": [{"var": "draft.denDiasAbonoFer"}, null]},
-                            {">=": [{"var": "draft.numDiasAbonoFer"}, 0]},
-                            {">": [{"var": "draft.denDiasAbonoFer"}, 0]},
-                            {"<=": [{"var": "draft.numDiasAbonoFer"}, {"var": "draft.denDiasAbonoFer"}]}
-                          ]
-                        }
-                      ]
-                    },
+                    {"==": [{"var": "draft.numDiasAbonoFer"}, null]},
+                    {"==": [{"var": "draft.denDiasAbonoFer"}, null]}
+                  ]
+                },
+                {
+                  "and": [
+                    {"!=": [{"var": "draft.numDiasAbonoFer"}, null]},
+                    {"!=": [{"var": "draft.denDiasAbonoFer"}, null]}
+                  ]
+                }
+              ]
+            }
+            """,
+            "ERG-01802",
+            baseFacts),
+        // 8g. ERG-01803: numerador da fração de abono não negativo no PA
+        productJsonLogicBinding(
+            "product.peraqfer.erg-01803",
+            SLOT_OVERRIDES_PARCELAMENTO_E_ABONO,
+            86,
+            """
+            {
+              "or": [
+                {"==": [{"var": "draft.abonoDirGozo"}, "N"]},
+                {"==": [{"var": "draft.numDiasAbonoFer"}, null]},
+                {">=": [{"var": "draft.numDiasAbonoFer"}, 0]}
+              ]
+            }
+            """,
+            "ERG-01803",
+            baseFacts),
+        // 8h. ERG-01804: denominador da fração de abono positivo no PA
+        productJsonLogicBinding(
+            "product.peraqfer.erg-01804",
+            SLOT_OVERRIDES_PARCELAMENTO_E_ABONO,
+            87,
+            """
+            {
+              "or": [
+                {"==": [{"var": "draft.abonoDirGozo"}, "N"]},
+                {"==": [{"var": "draft.denDiasAbonoFer"}, null]},
+                {">": [{"var": "draft.denDiasAbonoFer"}, 0]}
+              ]
+            }
+            """,
+            "ERG-01804",
+            baseFacts),
+        // 8i. ERG-01805: numDiasAbonoFer <= denDiasAbonoFer no PA
+        productJsonLogicBinding(
+            "product.peraqfer.erg-01805",
+            SLOT_OVERRIDES_PARCELAMENTO_E_ABONO,
+            88,
+            """
+            {
+              "or": [
+                {"==": [{"var": "draft.abonoDirGozo"}, "N"]},
+                {"==": [{"var": "draft.numDiasAbonoFer"}, null]},
+                {"==": [{"var": "draft.denDiasAbonoFer"}, null]},
+                {"<=": [{"var": "draft.numDiasAbonoFer"}, {"var": "draft.denDiasAbonoFer"}]}
+              ]
+            }
+            """,
+            "ERG-01805",
+            baseFacts),
+        // 8j. ERG-01807: limites de venda de abono não negativos e minDiasPvendFer <= maxDiasVendFer no PA
+        productJsonLogicBinding(
+            "product.peraqfer.erg-01807",
+            SLOT_OVERRIDES_PARCELAMENTO_E_ABONO,
+            89,
+            """
+            {
+              "or": [
+                {"==": [{"var": "draft.abonoDirGozo"}, "N"]},
+                {
+                  "and": [
+                    {"or": [{"==": [{"var": "draft.minDiasPvendFer"}, null]}, {">=": [{"var": "draft.minDiasPvendFer"}, 0]}]},
+                    {"or": [{"==": [{"var": "draft.maxDiasVendFer"}, null]}, {">=": [{"var": "draft.maxDiasVendFer"}, 0]}]},
                     {
                       "or": [
                         {"==": [{"var": "effectiveParametroConta.minDiasPvendFer"}, null]},
@@ -601,13 +683,30 @@ public final class PeriodoAquisitivoFeriasRuleSet {
               ]
             }
             """,
-            "ERG-01802",
+            "ERG-01807",
+            baseFacts),
+        // 8k. ERG-01808: maxDiasVendFer <= totDiasDireito no PA
+        productJsonLogicBinding(
+            "product.peraqfer.erg-01808",
+            SLOT_OVERRIDES_PARCELAMENTO_E_ABONO,
+            90,
+            """
+            {
+              "or": [
+                {"==": [{"var": "draft.abonoDirGozo"}, "N"]},
+                {"==": [{"var": "effectiveParametroConta.maxDiasVendFer"}, null]},
+                {"==": [{"var": "draft.totDiasDireito"}, null]},
+                {"<=": [{"var": "effectiveParametroConta.maxDiasVendFer"}, {"var": "draft.totDiasDireito"}]}
+              ]
+            }
+            """,
+            "ERG-01808",
             baseFacts),
         // 9. ERG-00615: VERIFICA_DT_PRESCR
         productJsonLogicBinding(
             "product.peraqfer.erg-00615",
             SLOT_PRESCRICAO_PARCELAS_ATIVAS,
-            90,
+            95,
             """
             {
               "or": [

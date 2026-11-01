@@ -329,7 +329,7 @@ public class AfastamentoService
         .labeledGroupByBucket(
             "id",
             "id",
-            "motivo",
+            "tipofreq",
             Set.of(
                 StatsMetric.COUNT,
                 StatsMetric.SUM,
@@ -389,6 +389,17 @@ public class AfastamentoService
   }
 
   @Override
+  protected ResourceFilterAccessScope<Afastamento> resolveResourceFilterAccessScope() {
+    var explicit = tenant != null ? tenant.explicitOrgao() : OptionalInt.empty();
+    if (explicit.isEmpty()) {
+      return ResourceFilterAccessScope.unrestricted();
+    }
+    int orgao = explicit.getAsInt();
+    return ResourceFilterAccessScope.restricted(
+        (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
+  }
+
+  @Override
   @Transactional
   public ResourceRepresentationResult<AfastamentoResponseDTO> update(
       Long id, UpdateAfastamentoDTO dto, ResourceVersionUpdatePrecondition<Long> precondition) {
@@ -401,6 +412,7 @@ public class AfastamentoService
     beforeUpdate(id, entity, dto);
     var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
     mapper.applyUpdate(entity, dto);
+    checkOrg(entity.getEmpCodigo());
     validateAfastamentoConcessao(entity, false);
     if (invariants != null) {
       invariants.afastamento(entity, false);
@@ -434,8 +446,8 @@ public class AfastamentoService
     action.accept(entity);
     if (!Set.of("CANCELADO", "REJEITADO").contains(entity.getSituacao())) {
       validateAfastamentoConcessao(entity, inPlaceProrrogacao);
-      if (invariants != null && !inPlaceProrrogacao) {
-        invariants.afastamento(entity, false);
+      if (invariants != null) {
+        invariants.afastamento(entity, false, inPlaceProrrogacao);
       }
     }
     var saved = getRepository().save(entity);

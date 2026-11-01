@@ -179,6 +179,13 @@ public class ErgonCommands {
         a.getDtini(), dto.dtfim(), "Encerramento anterior ao início do afastamento.");
     a.setDtfim(dto.dtfim());
     a.setQuantidadeDias(Math.toIntExact(ChronoUnit.DAYS.between(a.getDtini(), dto.dtfim()) + 1));
+    ErgonInvariants inv = this.invariants != null ? this.invariants : this.rules;
+    if (inv != null) {
+      inv.afastamento(a, false);
+    }
+    if (afastamentoService != null) {
+      afastamentoService.validateAfastamentoConcessao(a, false);
+    }
     e.setSituacao("ATIVO");
     e.setDocumentoLegalId(dto.documentoLegalId());
     return finish(e);

@@ -433,6 +433,8 @@ public class PeriodoAquisitivoFeriasResponseDTO {
       order = 145,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"EM_AQUISICAO\",\"label\":\"Em aquisição\"},{\"value\":\"DISPONIVEL\",\"label\":\"Disponível\"},{\"value\":\"PARCIALMENTE_GOZADO\",\"label\":\"Parcialmente gozado\"},{\"value\":\"QUITADO\",\"label\":\"Quitado\"},{\"value\":\"PRESCRITO\",\"label\":\"Prescrito\"},{\"value\":\"SUSPENSO\",\"label\":\"Suspenso\"},{\"value\":\"CANCELADO\",\"label\":\"Cancelado\"}]",
       icon = "flag",
       readOnly = true,
       tableHidden = false)
@@ -467,6 +469,8 @@ public class PeriodoAquisitivoFeriasResponseDTO {
       order = 160,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Data inicial do gozo\"},{\"value\":\"F\",\"label\":\"Data final do gozo\"}]",
       icon = "warning",
       readOnly = true,
       tableHidden = true)
@@ -484,6 +488,8 @@ public class PeriodoAquisitivoFeriasResponseDTO {
       order = 170,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herda do parâmetro\"},{\"value\":\"S\",\"label\":\"Permite\"},{\"value\":\"N\",\"label\":\"Bloqueia\"}]",
       icon = "warning",
       readOnly = true,
       tableHidden = true)
@@ -517,6 +523,8 @@ public class PeriodoAquisitivoFeriasResponseDTO {
       order = 190,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herda do parâmetro\"},{\"value\":\"S\",\"label\":\"Isenta multa\"},{\"value\":\"N\",\"label\":\"Cobra multa\"}]",
       icon = "gavel",
       readOnly = true,
       tableHidden = true)
@@ -614,6 +622,8 @@ public class PeriodoAquisitivoFeriasResponseDTO {
       order = 250,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herda do parâmetro\"},{\"value\":\"D\",\"label\":\"Sobre dias de direito\"},{\"value\":\"G\",\"label\":\"Sobre dias de gozo\"},{\"value\":\"N\",\"label\":\"Sem abono\"}]",
       icon = "tune",
       readOnly = true,
       tableHidden = true)
@@ -631,6 +641,8 @@ public class PeriodoAquisitivoFeriasResponseDTO {
       order = 260,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herda do parâmetro\"},{\"value\":\"S\",\"label\":\"Concede\"},{\"value\":\"N\",\"label\":\"Veda\"}]",
       icon = "tune",
       readOnly = true,
       tableHidden = true)
@@ -648,6 +660,8 @@ public class PeriodoAquisitivoFeriasResponseDTO {
       order = 270,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herda do parâmetro\"},{\"value\":\"S\",\"label\":\"Permite\"},{\"value\":\"N\",\"label\":\"Bloqueia\"}]",
       icon = "tune",
       readOnly = true,
       tableHidden = true)
@@ -665,6 +679,8 @@ public class PeriodoAquisitivoFeriasResponseDTO {
       order = 280,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herda do parâmetro\"},{\"value\":\"S\",\"label\":\"Permite\"},{\"value\":\"N\",\"label\":\"Bloqueia\"}]",
       icon = "tune",
       readOnly = true,
       tableHidden = true)
@@ -682,6 +698,8 @@ public class PeriodoAquisitivoFeriasResponseDTO {
       order = 290,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herda do parâmetro\"},{\"value\":\"S\",\"label\":\"Permite\"},{\"value\":\"N\",\"label\":\"Bloqueia\"}]",
       icon = "tune",
       readOnly = true,
       tableHidden = true)
@@ -699,6 +717,8 @@ public class PeriodoAquisitivoFeriasResponseDTO {
       order = 300,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herda do parâmetro\"},{\"value\":\"S\",\"label\":\"Permite\"},{\"value\":\"N\",\"label\":\"Bloqueia\"}]",
       icon = "tune",
       readOnly = true,
       tableHidden = true)
@@ -780,6 +800,8 @@ public class PeriodoAquisitivoFeriasResponseDTO {
       order = 350,
       type = FieldDataType.TEXT,
       controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"I\",\"label\":\"Herda do parâmetro\"},{\"value\":\"S\",\"label\":\"Permite\"},{\"value\":\"N\",\"label\":\"Bloqueia\"}]",
       icon = "tune",
       readOnly = true,
       tableHidden = true)

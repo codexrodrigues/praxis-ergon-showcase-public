@@ -124,7 +124,7 @@ public class CargoService
                 StatsMetric.AVG,
                 StatsMetric.MEDIAN,
                 StatsMetric.PERCENTILE_90))
-        .temporalTimeSeriesField("dtCriacao", "dtCriacao")
+        .temporalTimeSeriesField("dtInicioContrVaga", "dtInicioContrVaga")
         .numericHistogramMeasureField("vagasAutorizadas", "vagasAutorizadas")
         .build();
   }
@@ -150,6 +150,17 @@ public class CargoService
   }
 
   @Override
+  protected ResourceFilterAccessScope<Cargo> resolveResourceFilterAccessScope() {
+    var explicit = tenant != null ? tenant.explicitOrgao() : OptionalInt.empty();
+    if (explicit.isEmpty()) {
+      return ResourceFilterAccessScope.unrestricted();
+    }
+    int orgao = explicit.getAsInt();
+    return ResourceFilterAccessScope.restricted(
+        (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
+  }
+
+  @Override
   @Transactional
   public ResourceRepresentationResult<CargoResponseDTO> update(
       Integer id, UpdateCargoDTO dto, ResourceVersionUpdatePrecondition<Integer> precondition) {
@@ -162,6 +173,7 @@ public class CargoService
     beforeUpdate(id, entity, dto);
     var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
     mapper.applyUpdate(entity, dto);
+    checkOrg(entity.getEmpCodigo());
     invariants.cargo(entity);
     CustomFieldSupport.restoreReadOnlyValues(entity, readOnlyKeys, old);
     var saved = getRepository().save(entity);

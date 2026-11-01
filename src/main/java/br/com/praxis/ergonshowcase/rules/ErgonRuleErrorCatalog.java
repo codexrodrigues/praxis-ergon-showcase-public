@@ -1227,10 +1227,10 @@ public final class ErgonRuleErrorCatalog {
         new RuleErrorDescriptor(
             "ERG-00603",
             PeriodoAquisitivoFeriasRuleSet.SLOT_BLOQUEIO_AVERBACAO_E_CRITERIO_PRESCRICAO,
-            "geradoPorAverbacao",
-            "Período aquisitivo gerado por averbação não pode sofrer manutenção manual direta nos campos nucleares.",
+            "criterioPrescricao",
+            "Critério de prescrição ('I' ou 'F') ou indicador de dispensa de multa ('I', 'S' ou 'N') inválido no período aquisitivo.",
             "PCK_PERAQFER.MAIN_PRE",
-            "IF v_row_new.gerado_por_averbacao = 'S' THEN pack_hades.trata_erro(603); END IF;"));
+            "IF v_row_new.criterio_prescricao NOT IN ('I', 'F') OR v_row_new.sem_pgto_multa NOT IN ('I', 'S', 'N') THEN pack_hades.trata_erro(603); END IF;"));
     register(
         map,
         new RuleErrorDescriptor(
@@ -1682,6 +1682,24 @@ public final class ErgonRuleErrorCatalog {
         map,
         new RuleErrorDescriptor(
             "CERG-FER-POST-001",
+            FeriasGozoRuleSet.SLOT_HOOK_POS_VALIDACAO,
+            "dtini",
+            "Violação de regra customizada pós-validação na concessão de férias.",
+            "EPA__FERIAS",
+            "EPA__FERIAS(v_row_new, v_mens);"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "CERG-FERIAS-PRE-001",
+            FeriasGozoRuleSet.SLOT_HOOK_PRE_VALIDACAO,
+            "documentoLegalId",
+            "Violação de regra customizada pré-validação na concessão de férias.",
+            "EPB__FERIAS",
+            "EPB__FERIAS(v_row_new, v_mens);"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "CERG-FERIAS-POST-001",
             FeriasGozoRuleSet.SLOT_HOOK_POS_VALIDACAO,
             "dtini",
             "Violação de regra customizada pós-validação na concessão de férias.",
