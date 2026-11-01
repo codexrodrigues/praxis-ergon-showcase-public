@@ -34,6 +34,9 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
       reason = "Critério de pesquisa sobre dado sensível de saúde ou identificação étnica.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @Filterable(
+      operation = FilterOperation.IS_TRUE,
+      relations = {"deffisica", "defvisual", "defauditiva", "defmental", "defintelectual"})
   private Boolean somentePcD;
 
   @Schema(description = "Trecho do nome civil para localizar a pessoa no cadastro único.")

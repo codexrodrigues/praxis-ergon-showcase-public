@@ -416,6 +416,15 @@ public class PeriodoAquisitivoFeriasResponseDTO {
   @Schema(
       description =
           "Situação operacional do período aquisitivo (EM_AQUISICAO, DISPONIVEL, PARCIALMENTE_GOZADO, QUITADO, PRESCRITO, SUSPENSO, CANCELADO).",
+      allowableValues = {
+        "EM_AQUISICAO",
+        "DISPONIVEL",
+        "PARCIALMENTE_GOZADO",
+        "QUITADO",
+        "PRESCRITO",
+        "SUSPENSO",
+        "CANCELADO"
+      },
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Situação do PA",
@@ -449,6 +458,7 @@ public class PeriodoAquisitivoFeriasResponseDTO {
   @Schema(
       description =
           "Critério de avaliação da prescrição no período aquisitivo: I (data inicial do gozo) ou F (data final do gozo).",
+      allowableValues = {"I", "F"},
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Critério de prescrição",
@@ -465,6 +475,7 @@ public class PeriodoAquisitivoFeriasResponseDTO {
   @Schema(
       description =
           "Override individual de permissão de gozo após a data de prescrição: I (herda do parâmetro), S (permite) ou N (bloqueia).",
+      allowableValues = {"I", "S", "N"},
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Gozo após prescrição (PA)",
@@ -497,6 +508,7 @@ public class PeriodoAquisitivoFeriasResponseDTO {
   @Schema(
       description =
           "Indicador de dispensa do pagamento de multa concessiva para este período: I (herda), S (isenta multa) ou N (cobra multa).",
+      allowableValues = {"I", "S", "N"},
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Dispensa de multa (PA)",
@@ -593,6 +605,7 @@ public class PeriodoAquisitivoFeriasResponseDTO {
   @Schema(
       description =
           "Override individual da base de abono pecuniário: I (herda), D (sobre direito), G (sobre gozo) ou N (sem abono).",
+      allowableValues = {"I", "D", "G", "N"},
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Override base de abono",
@@ -609,6 +622,7 @@ public class PeriodoAquisitivoFeriasResponseDTO {
   @Schema(
       description =
           "Override individual do terço constitucional neste PA: I (herda), S (concede) ou N (veda).",
+      allowableValues = {"I", "S", "N"},
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Override terço constitucional",
@@ -625,6 +639,7 @@ public class PeriodoAquisitivoFeriasResponseDTO {
   @Schema(
       description =
           "Override individual de adiantamento de 13º salário neste PA: I (herda), S (permite) ou N (bloqueia).",
+      allowableValues = {"I", "S", "N"},
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Override adiantamento 13º",
@@ -641,6 +656,7 @@ public class PeriodoAquisitivoFeriasResponseDTO {
   @Schema(
       description =
           "Override individual de adiantamento salarial neste PA: I (herda), S (permite) ou N (bloqueia).",
+      allowableValues = {"I", "S", "N"},
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Override adiant. salarial",
@@ -657,6 +673,7 @@ public class PeriodoAquisitivoFeriasResponseDTO {
   @Schema(
       description =
           "Override individual de empréstimo de férias neste PA: I (herda), S (permite) ou N (bloqueia).",
+      allowableValues = {"I", "S", "N"},
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Override empréstimo",
@@ -673,6 +690,7 @@ public class PeriodoAquisitivoFeriasResponseDTO {
   @Schema(
       description =
           "Override individual de permissão de gozo antes do fim deste PA: I (herda), S (permite) ou N (bloqueia).",
+      allowableValues = {"I", "S", "N"},
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Override gozo antecipado",
@@ -753,6 +771,7 @@ public class PeriodoAquisitivoFeriasResponseDTO {
   @Schema(
       description =
           "Override individual de contagem em dobro de férias neste PA: I (herda), S (permite) ou N (bloqueia).",
+      allowableValues = {"I", "S", "N"},
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Override contagem em dobro",

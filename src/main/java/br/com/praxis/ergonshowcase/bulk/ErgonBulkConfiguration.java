@@ -63,7 +63,13 @@ public class ErgonBulkConfiguration {
       public String confirmationOperationId() { return "ergon." + resource + "." + suffix; }
       public String providerId() { return "ergon-bulk-" + resource + "-" + suffix; }
       public String providerRevision() { return ErgonBulkOperations.REVISION; }
-      public BulkIdentityCodec<?, ?> identityCodec() { return resource.equals("cargos") ? BulkIdentityCodecs.integers() : resource.equals("funcionarios") ? BulkIdentityCodecs.longs() : BulkIdentityCodecs.strings(); }
+      public BulkIdentityCodec<?, ?> identityCodec() {
+        return resource.equals("cargos")
+            ? BulkIdentityCodecs.integers()
+            : (resource.equals("vinculos") || resource.equals("dependentes"))
+                ? BulkIdentityCodecs.strings()
+                : BulkIdentityCodecs.longs();
+      }
       public String identitySchemaPointer() { return mode == BulkMode.PER_ITEM_UPDATE ? "/properties/items/items/properties/id" : "/properties/selection/properties/targets/items/properties/id"; }
       public BulkOperationalProfile profile() {
         return new BulkOperationalProfile(Set.of(mode), Set.of(BulkExecutionMode.SYNC),
@@ -79,6 +85,27 @@ public class ErgonBulkConfiguration {
   @Bean BulkOperationDescriptorProvider pessoaItems(BulkExecutionInfrastructure i) { return provider("funcionarios", "bulk.items", BulkMode.PER_ITEM_UPDATE, i); }
   @Bean BulkOperationDescriptorProvider cargoUniform(BulkExecutionInfrastructure i) { return provider("cargos", "bulk.uniform", BulkMode.UNIFORM_UPDATE, i); }
   @Bean BulkOperationDescriptorProvider cargoItems(BulkExecutionInfrastructure i) { return provider("cargos", "bulk.items", BulkMode.PER_ITEM_UPDATE, i); }
+  @Bean BulkOperationDescriptorProvider dependenteUniform(BulkExecutionInfrastructure i) { return provider("dependentes", "bulk.uniform", BulkMode.UNIFORM_UPDATE, i); }
+  @Bean BulkOperationDescriptorProvider dependenteItems(BulkExecutionInfrastructure i) { return provider("dependentes", "bulk.items", BulkMode.PER_ITEM_UPDATE, i); }
+  @Bean BulkOperationDescriptorProvider afastamentoUniform(BulkExecutionInfrastructure i) { return provider("afastamentos", "bulk.uniform", BulkMode.UNIFORM_UPDATE, i); }
+  @Bean BulkOperationDescriptorProvider afastamentoItems(BulkExecutionInfrastructure i) { return provider("afastamentos", "bulk.items", BulkMode.PER_ITEM_UPDATE, i); }
+  @Bean BulkOperationDescriptorProvider frequenciaUniform(BulkExecutionInfrastructure i) { return provider("frequencias", "bulk.uniform", BulkMode.UNIFORM_UPDATE, i); }
+  @Bean BulkOperationDescriptorProvider frequenciaItems(BulkExecutionInfrastructure i) { return provider("frequencias", "bulk.items", BulkMode.PER_ITEM_UPDATE, i); }
+  @Bean BulkOperationDescriptorProvider campoCustomizadoUniform(BulkExecutionInfrastructure i) { return provider("campos-customizados", "bulk.uniform", BulkMode.UNIFORM_UPDATE, i); }
+  @Bean BulkOperationDescriptorProvider campoCustomizadoItems(BulkExecutionInfrastructure i) { return provider("campos-customizados", "bulk.items", BulkMode.PER_ITEM_UPDATE, i); }
+  @Bean BulkOperationDescriptorProvider parametroContagemFeriasUniform(BulkExecutionInfrastructure i) { return provider("parametros-contagem-ferias", "bulk.uniform", BulkMode.UNIFORM_UPDATE, i); }
+  @Bean BulkOperationDescriptorProvider parametroContagemFeriasItems(BulkExecutionInfrastructure i) { return provider("parametros-contagem-ferias", "bulk.items", BulkMode.PER_ITEM_UPDATE, i); }
+  @Bean BulkOperationDescriptorProvider periodoAquisitivoFeriasUniform(BulkExecutionInfrastructure i) { return provider("periodos-aquisitivos-ferias", "bulk.uniform", BulkMode.UNIFORM_UPDATE, i); }
+  @Bean BulkOperationDescriptorProvider periodoAquisitivoFeriasItems(BulkExecutionInfrastructure i) { return provider("periodos-aquisitivos-ferias", "bulk.items", BulkMode.PER_ITEM_UPDATE, i); }
+  @Bean BulkOperationDescriptorProvider feriasGozoUniform(BulkExecutionInfrastructure i) { return provider("ferias-gozo", "bulk.uniform", BulkMode.UNIFORM_UPDATE, i); }
+  @Bean BulkOperationDescriptorProvider feriasGozoItems(BulkExecutionInfrastructure i) { return provider("ferias-gozo", "bulk.items", BulkMode.PER_ITEM_UPDATE, i); }
   @Bean BulkOperationDescriptorProvider realocarSetor(BulkExecutionInfrastructure i) { return provider("vinculos", "realocar-setor-lote", BulkMode.DOMAIN_COMMAND, i); }
   @Bean BulkOperationDescriptorProvider homologarEstagio(BulkExecutionInfrastructure i) { return provider("vinculos", "homologar-estagio-lote", BulkMode.DOMAIN_COMMAND, i); }
+  @Bean BulkOperationDescriptorProvider encerrarDependenciaLote(BulkExecutionInfrastructure i) { return provider("dependentes", "encerrar-dependencia-lote", BulkMode.DOMAIN_COMMAND, i); }
+  @Bean BulkOperationDescriptorProvider homologarAfastamentoLote(BulkExecutionInfrastructure i) { return provider("afastamentos", "homologar-afastamento-lote", BulkMode.DOMAIN_COMMAND, i); }
+  @Bean BulkOperationDescriptorProvider homologarFrequenciaLote(BulkExecutionInfrastructure i) { return provider("frequencias", "homologar-frequencia-lote", BulkMode.DOMAIN_COMMAND, i); }
+  @Bean BulkOperationDescriptorProvider ativarCampoCustomizadoLote(BulkExecutionInfrastructure i) { return provider("campos-customizados", "ativar-campo-customizado-lote", BulkMode.DOMAIN_COMMAND, i); }
+  @Bean BulkOperationDescriptorProvider ativarParametroFeriasLote(BulkExecutionInfrastructure i) { return provider("parametros-contagem-ferias", "ativar-parametro-ferias-lote", BulkMode.DOMAIN_COMMAND, i); }
+  @Bean BulkOperationDescriptorProvider homologarPeriodoAquisitivoLote(BulkExecutionInfrastructure i) { return provider("periodos-aquisitivos-ferias", "homologar-periodo-aquisitivo-lote", BulkMode.DOMAIN_COMMAND, i); }
+  @Bean BulkOperationDescriptorProvider homologarFeriasGozoLote(BulkExecutionInfrastructure i) { return provider("ferias-gozo", "homologar-ferias-gozo-lote", BulkMode.DOMAIN_COMMAND, i); }
 }

@@ -174,7 +174,6 @@ public abstract class PeriodoAquisitivoFeriasDados {
   @Min(0)
   @Max(90)
   @Schema(description = "Total acumulado de dias efetivamente usufruídos em parcelas de gozo.")
-  @BulkEditable
   @UISchema(
       label = "Dias gozados",
       helpText = "Soma dos dias já programados ou usufruídos em parcelas.",
@@ -191,7 +190,6 @@ public abstract class PeriodoAquisitivoFeriasDados {
   @Schema(
       description =
           "Total de dias do período aquisitivo convertidos em abono pecuniário indenizatório.")
-  @BulkEditable
   @UISchema(
       label = "Dias vendidos em abono",
       helpText = "Dias do período aquisitivo convertidos em pecúnia.",
@@ -208,7 +206,6 @@ public abstract class PeriodoAquisitivoFeriasDados {
   @Schema(
       description =
           "Total de dias do período aquisitivo averbados para contagem em dobro de tempo de serviço.")
-  @BulkEditable
   @UISchema(
       label = "Dias em contagem em dobro",
       helpText = "Dias não gozados convertidos em contagem em dobro.",
@@ -237,6 +234,7 @@ public abstract class PeriodoAquisitivoFeriasDados {
   @Schema(
       description =
           "Critério de avaliação da prescrição no período aquisitivo: I (data inicial do gozo) ou F (data final do gozo).",
+      allowableValues = {"I", "F"},
       nullable = true)
   @BulkEditable
   @UISchema(
@@ -253,6 +251,7 @@ public abstract class PeriodoAquisitivoFeriasDados {
   @Schema(
       description =
           "Override individual de permissão de gozo após a data de prescrição: I (herda do parâmetro), S (permite) ou N (bloqueia).",
+      allowableValues = {"I", "S", "N"},
       nullable = true)
   @BulkEditable
   @UISchema(
@@ -284,6 +283,7 @@ public abstract class PeriodoAquisitivoFeriasDados {
   @Schema(
       description =
           "Indicador de dispensa do pagamento de multa concessiva para este período: I (herda), S (isenta multa) ou N (cobra multa).",
+      allowableValues = {"I", "S", "N"},
       nullable = true)
   @BulkEditable
   @UISchema(
@@ -385,6 +385,7 @@ public abstract class PeriodoAquisitivoFeriasDados {
   @Schema(
       description =
           "Override individual da base de abono pecuniário: I (herda), D (sobre direito), G (sobre gozo) ou N (sem abono).",
+      allowableValues = {"I", "D", "G", "N"},
       nullable = true)
   @BulkEditable
   @UISchema(
@@ -401,6 +402,7 @@ public abstract class PeriodoAquisitivoFeriasDados {
   @Schema(
       description =
           "Override individual do terço constitucional neste PA: I (herda), S (concede) ou N (veda).",
+      allowableValues = {"I", "S", "N"},
       nullable = true)
   @BulkEditable
   @UISchema(
@@ -417,6 +419,7 @@ public abstract class PeriodoAquisitivoFeriasDados {
   @Schema(
       description =
           "Override individual de adiantamento de 13º salário neste PA: I (herda), S (permite) ou N (bloqueia).",
+      allowableValues = {"I", "S", "N"},
       nullable = true)
   @BulkEditable
   @UISchema(
@@ -433,6 +436,7 @@ public abstract class PeriodoAquisitivoFeriasDados {
   @Schema(
       description =
           "Override individual de adiantamento salarial neste PA: I (herda), S (permite) ou N (bloqueia).",
+      allowableValues = {"I", "S", "N"},
       nullable = true)
   @BulkEditable
   @UISchema(
@@ -449,6 +453,7 @@ public abstract class PeriodoAquisitivoFeriasDados {
   @Schema(
       description =
           "Override individual de empréstimo de férias neste PA: I (herda), S (permite) ou N (bloqueia).",
+      allowableValues = {"I", "S", "N"},
       nullable = true)
   @BulkEditable
   @UISchema(
@@ -465,6 +470,7 @@ public abstract class PeriodoAquisitivoFeriasDados {
   @Schema(
       description =
           "Override individual de permissão de gozo antes do fim deste PA: I (herda), S (permite) ou N (bloqueia).",
+      allowableValues = {"I", "S", "N"},
       nullable = true)
   @BulkEditable
   @UISchema(
@@ -549,6 +555,7 @@ public abstract class PeriodoAquisitivoFeriasDados {
   @Schema(
       description =
           "Override individual de contagem em dobro de férias neste PA: I (herda), S (permite) ou N (bloqueia).",
+      allowableValues = {"I", "S", "N"},
       nullable = true)
   @BulkEditable
   @UISchema(
@@ -599,7 +606,6 @@ public abstract class PeriodoAquisitivoFeriasDados {
   @Schema(
       description =
           "Indica se o período aquisitivo foi gerado automaticamente por averbação de tempo externo (bloqueio ERG-00099).")
-  @BulkEditable
   @UISchema(
       label = "Gerado por averbação",
       helpText = "Indica período originado por averbação com restrição de edição direta.",

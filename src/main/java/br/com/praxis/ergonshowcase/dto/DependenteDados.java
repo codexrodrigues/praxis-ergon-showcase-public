@@ -543,6 +543,7 @@ public abstract class DependenteDados {
   private Map<String, Object> customFields = new LinkedHashMap<>();
 
   @Null
+  @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
   @Schema(
       description =
           "Descrição oficial da modalidade de dependência projetada em rascunho; não pode ser enviada pelo cliente.",
@@ -556,6 +557,7 @@ public abstract class DependenteDados {
   private String tipoDependenteDescricaoPrevista;
 
   @Null
+  @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
   @Schema(
       description =
           "Idade atual do dependente em anos completos projetada em rascunho; não pode ser enviada pelo cliente.",
@@ -572,6 +574,7 @@ public abstract class DependenteDados {
   private Integer idadeCalculadaAnos;
 
   @Null
+  @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
   @Schema(
       description =
           "Prévia determinística de elegibilidade tributária a IRRF conforme tipo de dependência, idade, escolaridade e invalidez.",

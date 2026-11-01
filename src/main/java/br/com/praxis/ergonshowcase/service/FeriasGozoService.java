@@ -138,7 +138,11 @@ public class FeriasGozoService
   @Override
   protected org.praxisplatform.uischema.service.base.ResourceFilterAccessScope<FeriasGozo>
       resolveResourceFilterAccessScope() {
-    int orgao = tenant.orgao();
+    var explicitOrgao = tenant.explicitOrgao();
+    if (explicitOrgao.isEmpty()) {
+      return org.praxisplatform.uischema.service.base.ResourceFilterAccessScope.unrestricted();
+    }
+    int orgao = explicitOrgao.getAsInt();
     return org.praxisplatform.uischema.service.base.ResourceFilterAccessScope.restricted(
         (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
   }
@@ -179,10 +183,38 @@ public class FeriasGozoService
 
   @Override
   protected void beforeCreate(CreateFeriasGozoDTO dto, FeriasGozo entity) {
+    hydrateParentPeriodoAquisitivo(entity);
     checkOrg(entity.getEmpCodigo());
     validateFeriasGozo(entity);
     if (invariants != null) {
       invariants.feriasGozo(entity, true);
+    }
+  }
+
+  private void hydrateParentPeriodoAquisitivo(FeriasGozo entity) {
+    hydrateParentPeriodoAquisitivo(entity, false);
+  }
+
+  private void hydrateParentPeriodoAquisitivo(FeriasGozo entity, boolean reparented) {
+    if (entity == null || entityManager == null || entity.getPeriodoAquisitivoId() == null) {
+      return;
+    }
+    PeriodoAquisitivoFerias pa =
+        entityManager.find(PeriodoAquisitivoFerias.class, entity.getPeriodoAquisitivoId());
+    if (pa == null) {
+      return;
+    }
+    if (reparented || entity.getNumfunc() == null) {
+      entity.setNumfunc(pa.getNumfunc());
+    }
+    if (reparented || entity.getNumvinc() == null) {
+      entity.setNumvinc(pa.getNumvinc());
+    }
+    if (reparented || entity.getChavePeraqfer() == null) {
+      entity.setChavePeraqfer(pa.getChave());
+    }
+    if (pa.getTotDiasDireito() != null) {
+      entity.setTotDiasDireitoPa(pa.getTotDiasDireito());
     }
   }
 
@@ -214,13 +246,31 @@ public class FeriasGozoService
     beforeUpdate(id, entity, dto);
     var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
     FeriasGozo previousSnapshot = snapshotBeforeMutation(entity);
+    boolean reparented =
+        previousSnapshot != null
+            && previousSnapshot.getPeriodoAquisitivoId() != null
+            && dto.getPeriodoAquisitivoId() != null
+            && !Objects.equals(
+                previousSnapshot.getPeriodoAquisitivoId(), dto.getPeriodoAquisitivoId());
+    if (reparented && !"PROGRAMADA".equals(previousSnapshot.getSituacao())) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "Somente parcelas programadas podem ser realocadas para outro período aquisitivo.");
+    }
     mapper.applyUpdate(entity, dto);
+    hydrateParentPeriodoAquisitivo(entity, reparented);
     validateFeriasGozo(entity, previousSnapshot);
     if (invariants != null) {
       invariants.feriasGozo(entity, false);
     }
     CustomFieldSupport.restoreReadOnlyValues(entity, readOnlyKeys, old);
     var saved = getRepository().save(entity);
+    if (previousSnapshot != null
+        && previousSnapshot.getPeriodoAquisitivoId() != null
+        && !Objects.equals(
+            previousSnapshot.getPeriodoAquisitivoId(), saved.getPeriodoAquisitivoId())) {
+      sincronizarContabilidadePeriodoAquisitivo(previousSnapshot.getPeriodoAquisitivoId());
+    }
     afterUpdate(id, saved, dto);
     entityManager.flush();
     entityManager.refresh(saved);
@@ -488,6 +538,7 @@ public class FeriasGozoService
     }
     FeriasGozo copy = new FeriasGozo();
     copy.setId(src.getId());
+    copy.setPeriodoAquisitivoId(src.getPeriodoAquisitivoId());
     copy.setDtini(src.getDtini());
     copy.setDtprevfim(src.getDtprevfim());
     copy.setDtfim(src.getDtfim());

@@ -196,6 +196,7 @@ public class FrequenciaDados {
       helpText = "Ato legal, atestado ou processo administrativo que fundamenta o registro.")
   private Long documentoLegalId;
 
+  @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
   @Schema(
       description =
           "Denominação prevista da modalidade de frequência calculada reativamente em tempo de formulário.",
@@ -212,6 +213,7 @@ public class FrequenciaDados {
       helpText = "Nome oficial da modalidade resolvido automaticamente ao selecionar o código.")
   private String codigoFrequenciaNomePrevisto;
 
+  @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
   @Schema(
       description =
           "Unidade de medida prevista do código selecionado calculada reativamente no formulário.",
@@ -228,6 +230,7 @@ public class FrequenciaDados {
       helpText = "Unidade de medida do código, como DIAS, HORAS ou MINUTOS.")
   private String formatoQuantidadePrevisto;
 
+  @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
   @Schema(
       description =
           "Indica reativamente se o código selecionado exige preenchimento de hora de entrada e saída.",

@@ -172,7 +172,6 @@ public abstract class FeriasGozoDados {
   @Schema(
       description =
           "Espelho do total de dias de direito do período aquisitivo no momento da concessão (TOTDIAS).")
-  @BulkEditable
   @UISchema(
       label = "Dias de direito no PA",
       helpText = "Total de dias de direito do período aquisitivo vinculado.",
@@ -202,6 +201,7 @@ public abstract class FeriasGozoDados {
   @Schema(
       description =
           "Posição cronológica do abono pecuniário em relação ao gozo: I (no início das férias) ou F (ao final das férias).",
+      allowableValues = {"I", "F"},
       nullable = true)
   @BulkEditable(allowClear = true)
   @UISchema(

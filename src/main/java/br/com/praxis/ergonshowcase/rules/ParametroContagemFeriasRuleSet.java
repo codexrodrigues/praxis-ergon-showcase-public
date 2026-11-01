@@ -582,7 +582,141 @@ public final class ParametroContagemFeriasRuleSet {
             SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
             100,
             """
-            {"==": [{"var": "derived.licencaProgressaoTempoServCoerente"}, true]}
+            {
+              "and": [
+                {
+                  "or": [
+                    {
+                      "and": [
+                        {"!=": [{"var": "draft.temLicEsp"}, true]},
+                        {"or": [{"==": [{"var": "draft.anosLicEsp"}, null]}, {"<=": [{"var": "draft.anosLicEsp"}, 0]}]},
+                        {"or": [{"==": [{"var": "draft.mesesLicEspPer"}, null]}, {"<=": [{"var": "draft.mesesLicEspPer"}, 0]}]},
+                        {"!=": [{"var": "draft.vendLicEsp"}, true]},
+                        {"!=": [{"var": "draft.contDobroLicEsp"}, true]}
+                      ]
+                    },
+                    {
+                      "and": [
+                        {"==": [{"var": "draft.temLicEsp"}, true]},
+                        {"!=": [{"var": "draft.anosLicEsp"}, null]},
+                        {">": [{"var": "draft.anosLicEsp"}, 0]},
+                        {"!=": [{"var": "draft.mesesLicEspPer"}, null]},
+                        {">": [{"var": "draft.mesesLicEspPer"}, 0]},
+                        {
+                          "or": [
+                            {
+                              "and": [
+                                {"!=": [{"var": "draft.vendLicEsp"}, true]},
+                                {"or": [{"==": [{"var": "draft.minDiasPvendLicEsp"}, null]}, {"<=": [{"var": "draft.minDiasPvendLicEsp"}, 0]}]},
+                                {"or": [{"==": [{"var": "draft.maxDiasVendLicEsp"}, null]}, {"<=": [{"var": "draft.maxDiasVendLicEsp"}, 0]}]}
+                              ]
+                            },
+                            {
+                              "and": [
+                                {"==": [{"var": "draft.vendLicEsp"}, true]},
+                                {"in": [{"var": "draft.abonoDirGozoLicEsp"}, ["D", "G", "N"]]},
+                                {
+                                  "or": [
+                                    {"==": [{"var": "draft.minDiasPvendLicEsp"}, null]},
+                                    {"==": [{"var": "draft.maxDiasVendLicEsp"}, null]},
+                                    {"<=": [{"var": "draft.minDiasPvendLicEsp"}, {"var": "draft.maxDiasVendLicEsp"}]}
+                                  ]
+                                },
+                                {
+                                  "or": [
+                                    {"==": [{"var": "draft.numDiasAbonoLicEsp"}, null]},
+                                    {"==": [{"var": "draft.denDiasAbonoLicEsp"}, null]},
+                                    {
+                                      "and": [
+                                        {">": [{"var": "draft.denDiasAbonoLicEsp"}, 0]},
+                                        {">=": [{"var": "draft.numDiasAbonoLicEsp"}, 0]},
+                                        {"<=": [{"var": "draft.numDiasAbonoLicEsp"}, {"var": "draft.denDiasAbonoLicEsp"}]}
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "or": [
+                            {
+                              "and": [
+                                {"!=": [{"var": "draft.contDobroLicEsp"}, true]},
+                                {"or": [{"==": [{"var": "draft.minDiasPcontDobLicEsp"}, null]}, {"<=": [{"var": "draft.minDiasPcontDobLicEsp"}, 0]}]},
+                                {"or": [{"==": [{"var": "draft.maxDiasContDobLicEsp"}, null]}, {"<=": [{"var": "draft.maxDiasContDobLicEsp"}, 0]}]}
+                              ]
+                            },
+                            {
+                              "and": [
+                                {"==": [{"var": "draft.contDobroLicEsp"}, true]},
+                                {"!=": [{"var": "draft.minDiasPcontDobLicEsp"}, null]},
+                                {"!=": [{"var": "draft.maxDiasContDobLicEsp"}, null]},
+                                {">=": [{"var": "draft.minDiasPcontDobLicEsp"}, 0]},
+                                {">=": [{"var": "draft.maxDiasContDobLicEsp"}, 0]},
+                                {"<=": [{"var": "draft.minDiasPcontDobLicEsp"}, {"var": "draft.maxDiasContDobLicEsp"}]}
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "or": [
+                    {
+                      "and": [
+                        {"==": [{"var": "draft.temProgressao"}, true]},
+                        {"!=": [{"var": "draft.anosProgressao"}, null]},
+                        {">": [{"var": "draft.anosProgressao"}, 0]}
+                      ]
+                    },
+                    {
+                      "and": [
+                        {"!=": [{"var": "draft.temProgressao"}, true]},
+                        {"or": [{"==": [{"var": "draft.anosProgressao"}, null]}, {"<=": [{"var": "draft.anosProgressao"}, 0]}]}
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "or": [
+                    {
+                      "and": [
+                        {"==": [{"var": "draft.temTempoServ"}, true]},
+                        {"!=": [{"var": "draft.anos1TempoServ"}, null]},
+                        {">": [{"var": "draft.anos1TempoServ"}, 0]}
+                      ]
+                    },
+                    {
+                      "and": [
+                        {"!=": [{"var": "draft.temTempoServ"}, true]},
+                        {"or": [{"==": [{"var": "draft.anos1TempoServ"}, null]}, {"<=": [{"var": "draft.anos1TempoServ"}, 0]}]}
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "or": [
+                    {
+                      "and": [
+                        {"==": [{"var": "draft.temSextaParte"}, true]},
+                        {"!=": [{"var": "draft.anosSextaParte"}, null]},
+                        {">": [{"var": "draft.anosSextaParte"}, 0]}
+                      ]
+                    },
+                    {
+                      "and": [
+                        {"!=": [{"var": "draft.temSextaParte"}, true]},
+                        {"or": [{"==": [{"var": "draft.anosSextaParte"}, null]}, {"<=": [{"var": "draft.anosSextaParte"}, 0]}]}
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
             """,
             "ERG-01813",
             baseFacts),

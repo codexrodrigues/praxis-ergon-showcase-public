@@ -345,7 +345,59 @@ public final class PeriodoAquisitivoFeriasRuleSet {
             SLOT_OVERRIDES_CONTAGEM_DOBRO,
             70,
             """
-            {"==": [{"var": "derived.contagemDobroOverrideCoerente"}, true]}
+            {
+              "and": [
+                {"in": [{"var": "draft.contDobroFerias"}, [null, "I", "S", "N"]]},
+                {
+                  "or": [
+                    {"!=": [{"var": "draft.contDobroFerias"}, "S"]},
+                    {
+                      "and": [
+                        {"!=": [{"var": "draft.minDiasPeraqfer"}, null]},
+                        {"!=": [{"var": "draft.maxDiasPeraqfer"}, null]},
+                        {">=": [{"var": "draft.minDiasPeraqfer"}, 0]},
+                        {">=": [{"var": "draft.maxDiasPeraqfer"}, 0]},
+                        {"<=": [{"var": "draft.minDiasPeraqfer"}, {"var": "draft.maxDiasPeraqfer"}]}
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "or": [
+                    {"!=": [{"var": "draft.contDobroFerias"}, "N"]},
+                    {
+                      "and": [
+                        {"or": [{"==": [{"var": "draft.minDiasPeraqfer"}, null]}, {"<=": [{"var": "draft.minDiasPeraqfer"}, 0]}]},
+                        {"or": [{"==": [{"var": "draft.maxDiasPeraqfer"}, null]}, {"<=": [{"var": "draft.maxDiasPeraqfer"}, 0]}]}
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "or": [
+                    {"<=": [{"var": "draft.diasConvertidosDobro"}, 0]},
+                    {
+                      "and": [
+                        {"!=": [{"var": "draft.contDobroFerias"}, "N"]},
+                        {"==": [{"var": "effectiveParametroConta.contDobroFerias"}, true]},
+                        {
+                          "or": [
+                            {"==": [{"var": "effectiveParametroConta.minDiasPeraqfer"}, null]},
+                            {">=": [{"var": "draft.diasConvertidosDobro"}, {"var": "effectiveParametroConta.minDiasPeraqfer"}]}
+                          ]
+                        },
+                        {
+                          "or": [
+                            {"==": [{"var": "effectiveParametroConta.maxDiasPeraqfer"}, null]},
+                            {"<=": [{"var": "draft.diasConvertidosDobro"}, {"var": "effectiveParametroConta.maxDiasPeraqfer"}]}
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
             """,
             "ERG-00604",
             baseFacts),
@@ -355,7 +407,105 @@ public final class PeriodoAquisitivoFeriasRuleSet {
             SLOT_OVERRIDES_PARCELAMENTO_E_ABONO,
             80,
             """
-            {"==": [{"var": "derived.overridesParcelamentoAbonoCoerentes"}, true]}
+            {
+              "and": [
+                {"in": [{"var": "draft.permiteGozoPosPrescricao"}, [null, "I", "S", "N"]]},
+                {"in": [{"var": "draft.abonoConstFer"}, [null, "I", "S", "N"]]},
+                {"in": [{"var": "draft.adiant13Fer"}, [null, "I", "S", "N"]]},
+                {"in": [{"var": "draft.adiantSalFer"}, [null, "I", "S", "N"]]},
+                {"in": [{"var": "draft.emprestFer"}, [null, "I", "S", "N"]]},
+                {"in": [{"var": "draft.permiteFerEstePer"}, [null, "I", "S", "N"]]},
+                {"in": [{"var": "draft.abonoDirGozo"}, [null, "I", "D", "G", "N"]]},
+                {"or": [{"==": [{"var": "draft.minPerFer"}, null]}, {">": [{"var": "draft.minPerFer"}, 0]}]},
+                {
+                  "or": [
+                    {"==": [{"var": "draft.maxPerFer"}, null]},
+                    {"and": [{">": [{"var": "draft.maxPerFer"}, 0]}, {"<=": [{"var": "draft.maxPerFer"}, 6]}]}
+                  ]
+                },
+                {
+                  "or": [
+                    {"==": [{"var": "effectiveParametroConta.minPerFer"}, null]},
+                    {"==": [{"var": "effectiveParametroConta.maxPerFer"}, null]},
+                    {"<=": [{"var": "effectiveParametroConta.minPerFer"}, {"var": "effectiveParametroConta.maxPerFer"}]}
+                  ]
+                },
+                {"or": [{"==": [{"var": "draft.minDiasPerFer"}, null]}, {">": [{"var": "draft.minDiasPerFer"}, 0]}]},
+                {"or": [{"==": [{"var": "draft.maxDiasPerFer"}, null]}, {">": [{"var": "draft.maxDiasPerFer"}, 0]}]},
+                {
+                  "or": [
+                    {"==": [{"var": "effectiveParametroConta.minDiasPerFer"}, null]},
+                    {"==": [{"var": "effectiveParametroConta.maxDiasPerFer"}, null]},
+                    {"<=": [{"var": "effectiveParametroConta.minDiasPerFer"}, {"var": "effectiveParametroConta.maxDiasPerFer"}]}
+                  ]
+                },
+                {
+                  "or": [
+                    {"==": [{"var": "effectiveParametroConta.minDiasPerPrincFer"}, null]},
+                    {
+                      "and": [
+                        {
+                          "or": [
+                            {"==": [{"var": "effectiveParametroConta.minDiasPerFer"}, null]},
+                            {">=": [{"var": "effectiveParametroConta.minDiasPerPrincFer"}, {"var": "effectiveParametroConta.minDiasPerFer"}]}
+                          ]
+                        },
+                        {
+                          "or": [
+                            {"==": [{"var": "effectiveParametroConta.maxDiasPerFer"}, null]},
+                            {"<=": [{"var": "effectiveParametroConta.minDiasPerPrincFer"}, {"var": "effectiveParametroConta.maxDiasPerFer"}]}
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "or": [
+                    {
+                      "and": [
+                        {"==": [{"var": "draft.abonoDirGozo"}, "N"]},
+                        {"or": [{"==": [{"var": "draft.minDiasPvendFer"}, null]}, {"<=": [{"var": "draft.minDiasPvendFer"}, 0]}]},
+                        {"or": [{"==": [{"var": "draft.maxDiasVendFer"}, null]}, {"<=": [{"var": "draft.maxDiasVendFer"}, 0]}]},
+                        {"or": [{"==": [{"var": "draft.numDiasAbonoFer"}, null]}, {"<=": [{"var": "draft.numDiasAbonoFer"}, 0]}]},
+                        {"or": [{"==": [{"var": "draft.denDiasAbonoFer"}, null]}, {"<=": [{"var": "draft.denDiasAbonoFer"}, 0]}]}
+                      ]
+                    },
+                    {
+                      "and": [
+                        {"!=": [{"var": "draft.abonoDirGozo"}, "N"]},
+                        {
+                          "or": [
+                            {
+                              "and": [
+                                {"==": [{"var": "draft.numDiasAbonoFer"}, null]},
+                                {"==": [{"var": "draft.denDiasAbonoFer"}, null]}
+                              ]
+                            },
+                            {
+                              "and": [
+                                {"!=": [{"var": "draft.numDiasAbonoFer"}, null]},
+                                {"!=": [{"var": "draft.denDiasAbonoFer"}, null]},
+                                {">=": [{"var": "draft.numDiasAbonoFer"}, 0]},
+                                {">": [{"var": "draft.denDiasAbonoFer"}, 0]},
+                                {"<=": [{"var": "draft.numDiasAbonoFer"}, {"var": "draft.denDiasAbonoFer"}]}
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "or": [
+                            {"==": [{"var": "effectiveParametroConta.minDiasPvendFer"}, null]},
+                            {"==": [{"var": "effectiveParametroConta.maxDiasVendFer"}, null]},
+                            {"<=": [{"var": "effectiveParametroConta.minDiasPvendFer"}, {"var": "effectiveParametroConta.maxDiasVendFer"}]}
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
             """,
             "ERG-01809",
             baseFacts),

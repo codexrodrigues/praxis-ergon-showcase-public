@@ -1115,4 +1115,390 @@ class FeriasSlice5Phase2ContractTest {
                 .id())
         .isEqualTo("concluir-ferias-gozo");
   }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  void bulkDomainEnforcesPraxisRulesEngineAndPreservesErgCodesAcrossAllThreeModes() {
+    EntityManager em = mock(EntityManager.class);
+    var tenant = new TenantContext();
+    var invariants = createMockedInvariants(em, tenant);
+    var json = new ObjectMapper().findAndRegisterModules();
+    var validator = Validation.buildDefaultValidatorFactory().getValidator();
+    var ruleEngine = new br.com.praxis.ergonshowcase.rules.ErgonRuleEngineFacade();
+    ReflectionTestUtils.setField(invariants, "ruleEngineFacade", ruleEngine);
+
+    var param = new ParametroContagemFerias();
+    param.setId(501L);
+    param.setEmpCodigo(1);
+    param.setRegimeJuridico("ESTATUTARIO");
+    param.setTipoVinculo("EFETIVO");
+    param.setCategoria("GERAL");
+    param.setDtini(LocalDate.of(2024, 1, 1));
+    param.setTemFerias(true);
+    param.setTotDiasFer(30);
+    param.setMinPerFer(1);
+    param.setMaxPerFer(3);
+    param.setMinDiasPerFer(10);
+    param.setMaxDiasPerFer(30);
+    param.setActive(true);
+    param.setDocumentoLegalFeriasId(10L);
+    param.setAbonoDirGozo("N");
+
+    TypedQuery<ParametroContagemFerias> paramQuery = mock(TypedQuery.class);
+    when(paramQuery.setParameter(anyString(), any())).thenReturn(paramQuery);
+    when(paramQuery.setFlushMode(any(FlushModeType.class))).thenReturn(paramQuery);
+    when(paramQuery.getResultList()).thenReturn(List.of(param));
+    when(em.createQuery(anyString(), eq(ParametroContagemFerias.class))).thenReturn(paramQuery);
+
+    var pa = new PeriodoAquisitivoFerias();
+    pa.setId(77L);
+    pa.setEmpCodigo(1);
+    pa.setNumfunc(100L);
+    pa.setNumvinc(1);
+    pa.setChave(1);
+    pa.setExercicio(2025);
+    pa.setDtini(LocalDate.of(2024, 1, 1));
+    pa.setDtfim(LocalDate.of(2024, 12, 31));
+    pa.setTotDiasDireito(30);
+    pa.setSaldoDiasDisponivel(30);
+    pa.setSituacao("DISPONIVEL");
+    pa.setVersion(1L);
+    when(em.find(eq(PeriodoAquisitivoFerias.class), eq(77L), any(LockModeType.class)))
+        .thenReturn(pa);
+    when(em.find(eq(PeriodoAquisitivoFerias.class), eq(77L))).thenReturn(pa);
+
+    var fg = new FeriasGozo();
+    fg.setId(88L);
+    fg.setEmpCodigo(1);
+    fg.setNumfunc(100L);
+    fg.setNumvinc(1);
+    fg.setPeriodoAquisitivoId(77L);
+    fg.setChavePeraqfer(1);
+    fg.setOrdemParcela(1);
+    fg.setDtini(LocalDate.of(2025, 10, 1));
+    fg.setDtprevfim(LocalDate.of(2025, 10, 15));
+    fg.setDiasGozo(15);
+    fg.setAbonoPecuniario(false);
+    fg.setDiasAbonoVendidos(0);
+    fg.setSituacao("PROGRAMADA");
+    fg.setDocumentoLegalId(10L);
+    fg.setVersion(1L);
+
+    TypedQuery<Afastamento> afQuery = mock(TypedQuery.class);
+    when(afQuery.setParameter(anyString(), any())).thenReturn(afQuery);
+    when(afQuery.setFlushMode(any(FlushModeType.class))).thenReturn(afQuery);
+    when(afQuery.getResultList()).thenReturn(List.of());
+    when(em.createQuery(anyString(), eq(Afastamento.class))).thenReturn(afQuery);
+
+    var fgRepo = mock(FeriasGozoRepository.class);
+    var fgService = new FeriasGozoService(fgRepo, new FeriasGozoMapper(tenant), tenant);
+    ReflectionTestUtils.setField(fgService, "entityManager", em);
+    ReflectionTestUtils.setField(fgService, "invariants", invariants);
+    ReflectionTestUtils.setField(fgService, "ruleEngineFacade", ruleEngine);
+
+    var bulkDomain = new ErgonBulkDomain();
+    ReflectionTestUtils.setField(bulkDomain, "em", em);
+    ReflectionTestUtils.setField(bulkDomain, "json", json);
+    ReflectionTestUtils.setField(bulkDomain, "validator", validator);
+    ReflectionTestUtils.setField(bulkDomain, "tenant", tenant);
+    ReflectionTestUtils.setField(bulkDomain, "invariants", invariants);
+    ReflectionTestUtils.setField(
+        bulkDomain, "parametrosContagemFerias", new ParametroContagemFeriasMapper(tenant));
+    ReflectionTestUtils.setField(
+        bulkDomain, "periodosAquisitivosFerias", new PeriodoAquisitivoFeriasMapper(tenant));
+    ReflectionTestUtils.setField(bulkDomain, "feriasGozo", new FeriasGozoMapper(tenant));
+    ReflectionTestUtils.setField(bulkDomain, "feriasGozoService", fgService);
+
+    var fgFields = mock(BulkEditableFields.class);
+    when(fgFields.writableFields(BulkMode.PER_ITEM_UPDATE))
+        .thenReturn(Set.of("diasGozo", "dtprevfim"));
+    when(fgFields.clearableFields(any())).thenReturn(Set.of());
+
+    // Violação ERG-00519 em PER_ITEM_UPDATE (diasGozo = 5 < minDiasPerFer = 10)
+    var invalidItemChanges =
+        List.of(
+            new BulkFieldChange("diasGozo", BulkChangeOperator.SET, json.valueToTree(5)),
+            new BulkFieldChange(
+                "dtprevfim", BulkChangeOperator.SET, json.valueToTree("2025-10-05")));
+    assertThatThrownBy(
+            () ->
+                bulkDomain.candidate(
+                    Resource.FERIAS_GOZO,
+                    fg,
+                    invalidItemChanges,
+                    fgFields,
+                    BulkMode.PER_ITEM_UPDATE))
+        .isInstanceOf(br.com.praxis.ergonshowcase.rules.ErgonRuleViolationException.class)
+        .satisfies(
+            ex -> {
+              var ruleEx = (br.com.praxis.ergonshowcase.rules.ErgonRuleViolationException) ex;
+              assertThat(ruleEx.getReasonCodes()).contains("ERG-00519");
+            });
+
+    // Violação ERG-00519 em DOMAIN_COMMAND (homologar-ferias-gozo-lote quando parcela tem diasGozo = 5)
+    fg.setDiasGozo(5);
+    fg.setDtprevfim(LocalDate.of(2025, 10, 5));
+    var cmdFgDto = new TransicaoFeriasGozoDTO();
+    cmdFgDto.setDocumentoLegalId(10L);
+    cmdFgDto.setObservacoes("Homologação coletiva");
+    assertThatThrownBy(
+            () ->
+                bulkDomain.commandCandidate(
+                    fg, "homologar-ferias-gozo-lote", json.valueToTree(cmdFgDto)))
+        .isInstanceOf(br.com.praxis.ergonshowcase.rules.ErgonRuleViolationException.class)
+        .satisfies(
+            ex -> {
+              var ruleEx = (br.com.praxis.ergonshowcase.rules.ErgonRuleViolationException) ex;
+              assertThat(ruleEx.getReasonCodes()).contains("ERG-00519");
+            });
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  void feriasGozoHydratesParentPaBlocksActiveReparentingAndReconcilesBothPas() {
+    EntityManager em = mock(EntityManager.class);
+    var tenant = new TenantContext();
+    var invariants = createMockedInvariants(em, tenant);
+    var readFacts = mock(ErgonReadFacts.class);
+
+    var paOld = new PeriodoAquisitivoFerias();
+    paOld.setId(201L);
+    paOld.setEmpCodigo(1);
+    paOld.setNumfunc(100L);
+    paOld.setNumvinc(1);
+    paOld.setChave(1);
+    paOld.setExercicio(2024);
+    paOld.setDtini(LocalDate.of(2023, 1, 1));
+    paOld.setDtfim(LocalDate.of(2023, 12, 31));
+    paOld.setTotDiasDireito(30);
+    paOld.setDiasGozados(15);
+    paOld.setSaldoDiasDisponivel(15);
+    paOld.setSituacao("PARCIALMENTE_GOZADO");
+
+    var paNew = new PeriodoAquisitivoFerias();
+    paNew.setId(202L);
+    paNew.setEmpCodigo(1);
+    paNew.setNumfunc(100L);
+    paNew.setNumvinc(1);
+    paNew.setChave(2);
+    paNew.setExercicio(2025);
+    paNew.setDtini(LocalDate.of(2024, 1, 1));
+    paNew.setDtfim(LocalDate.of(2024, 12, 31));
+    paNew.setTotDiasDireito(30);
+    paNew.setDiasGozados(0);
+    paNew.setSaldoDiasDisponivel(30);
+    paNew.setSituacao("DISPONIVEL");
+
+    when(em.find(eq(PeriodoAquisitivoFerias.class), eq(201L), any(LockModeType.class)))
+        .thenReturn(paOld);
+    when(em.find(eq(PeriodoAquisitivoFerias.class), eq(201L))).thenReturn(paOld);
+    when(em.find(eq(PeriodoAquisitivoFerias.class), eq(202L), any(LockModeType.class)))
+        .thenReturn(paNew);
+    when(em.find(eq(PeriodoAquisitivoFerias.class), eq(202L))).thenReturn(paNew);
+
+    var fg = new FeriasGozo();
+    fg.setId(301L);
+    fg.setEmpCodigo(1);
+    fg.setNumfunc(100L);
+    fg.setNumvinc(1);
+    fg.setPeriodoAquisitivoId(201L);
+    fg.setChavePeraqfer(1);
+    fg.setOrdemParcela(1);
+    fg.setDtini(LocalDate.of(2025, 7, 1));
+    fg.setDtprevfim(LocalDate.of(2025, 7, 15));
+    fg.setDiasGozo(15);
+    fg.setSituacao("HOMOLOGADA");
+    fg.setVersion(1L);
+
+    var fgRepo = mock(FeriasGozoRepository.class);
+    when(fgRepo.findById(301L)).thenReturn(Optional.of(fg));
+    when(fgRepo.save(any(FeriasGozo.class))).thenAnswer(inv -> inv.getArgument(0));
+    when(em.find(eq(FeriasGozo.class), eq(301L), any(LockModeType.class))).thenReturn(fg);
+
+    var fgService = new FeriasGozoService(fgRepo, new FeriasGozoMapper(tenant), tenant);
+    ReflectionTestUtils.setField(fgService, "entityManager", em);
+    ReflectionTestUtils.setField(fgService, "invariants", invariants);
+    ReflectionTestUtils.setField(fgService, "readFacts", readFacts);
+
+    // 1. Bloqueio 409 ao tentar trocar periodoAquisitivoId quando situacao != PROGRAMADA
+    var updateDto = new br.com.praxis.ergonshowcase.dto.UpdateFeriasGozoDTO();
+    updateDto.setPeriodoAquisitivoId(202L);
+    updateDto.setNumfunc(999L); // tentativa de falsificar numfunc
+    updateDto.setNumvinc(9);
+    updateDto.setChavePeraqfer(99);
+    updateDto.setOrdemParcela(1);
+    updateDto.setDtini(LocalDate.of(2025, 7, 1));
+    updateDto.setDtprevfim(LocalDate.of(2025, 7, 15));
+    updateDto.setDiasGozo(15);
+
+    var etags = new ResourceVersionEtagService("slice5-secret");
+    assertThatThrownBy(
+            () ->
+                fgService.update(
+                    301L,
+                    updateDto,
+                    precondition(etags, "administracao-pessoal.ferias-gozo", 301L, 1L)))
+        .isInstanceOf(ResponseStatusException.class)
+        .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
+        .isEqualTo(HttpStatus.CONFLICT);
+
+    // 2. Quando situacao == PROGRAMADA, permite trocar periodoAquisitivoId, hidrata chaves do novo PA e reconcilia ambos os PAs
+    fg.setSituacao("PROGRAMADA");
+    TypedQuery<FeriasGozo> queryOld = mock(TypedQuery.class);
+    TypedQuery<FeriasGozo> queryNew = mock(TypedQuery.class);
+    when(em.createQuery(anyString(), eq(FeriasGozo.class)))
+        .thenAnswer(
+            inv -> {
+              String jpql = inv.getArgument(0);
+              if (jpql.contains(":paId")) {
+                TypedQuery<FeriasGozo> q = mock(TypedQuery.class);
+                when(q.setFlushMode(any(FlushModeType.class))).thenReturn(q);
+                when(q.setParameter(eq("paId"), eq(201L))).thenReturn(queryOld);
+                when(q.setParameter(eq("paId"), eq(202L))).thenReturn(queryNew);
+                return q;
+              }
+              TypedQuery<FeriasGozo> emptyQ = mock(TypedQuery.class);
+              when(emptyQ.setParameter(anyString(), any())).thenReturn(emptyQ);
+              when(emptyQ.setFlushMode(any(FlushModeType.class))).thenReturn(emptyQ);
+              when(emptyQ.getResultList()).thenReturn(List.of());
+              return emptyQ;
+            });
+    when(queryOld.setFlushMode(any(FlushModeType.class))).thenReturn(queryOld);
+    when(queryOld.getResultList()).thenReturn(List.of());
+    when(queryNew.setFlushMode(any(FlushModeType.class))).thenReturn(queryNew);
+    when(queryNew.getResultList()).thenReturn(List.of(fg));
+
+    var updated =
+        fgService.update(
+            301L, updateDto, precondition(etags, "administracao-pessoal.ferias-gozo", 301L, 1L));
+    assertThat(updated.body().getPeriodoAquisitivoId()).isEqualTo(202L);
+    // Hidratado a partir de paNew (ignorando 999L / 9 / 99 enviados pelo cliente):
+    assertThat(updated.body().getNumfunc()).isEqualTo(100L);
+    assertThat(updated.body().getNumvinc()).isEqualTo(1);
+    assertThat(updated.body().getChavePeraqfer()).isEqualTo(2);
+    assertThat(updated.body().getTotDiasDireitoPa()).isEqualTo(30);
+    // Reconciliação de paOld (voltou para 30 dias disponíveis) e paNew (passou a ter 15 dias comprometidos):
+    assertThat(paOld.getDiasGozados()).isZero();
+    assertThat(paOld.getSaldoDiasDisponivel()).isEqualTo(30);
+    assertThat(paOld.getSituacao()).isEqualTo("DISPONIVEL");
+    assertThat(paNew.getDiasGozados()).isEqualTo(15);
+    assertThat(paNew.getSaldoDiasDisponivel()).isEqualTo(15);
+    assertThat(paNew.getSituacao()).isEqualTo("PARCIALMENTE_GOZADO");
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  void paidLeavesWithOnusTrueAreExcludedFromSuspensiveDaysAndCursorExportCapabilitiesWork() {
+    EntityManager em = mock(EntityManager.class);
+    var tenant = new TenantContext();
+    var invariants = createMockedInvariants(em, tenant);
+    var readFacts = mock(ErgonReadFacts.class);
+
+    // 1. Afastamento remunerado (onus = true) vs não-remunerado (onus = false)
+    var afRemunerado = new Afastamento();
+    afRemunerado.setId(1L);
+    afRemunerado.setNumfunc(100L);
+    afRemunerado.setNumvinc(1);
+    afRemunerado.setTipofreq("LICENCA");
+    afRemunerado.setCodfreq(201);
+    afRemunerado.setDtini(LocalDate.of(2024, 3, 1));
+    afRemunerado.setDtfim(LocalDate.of(2024, 3, 20));
+    afRemunerado.setQuantidadeDias(20);
+    afRemunerado.setSituacao("HOMOLOGADO");
+
+    var afSuspensivo = new Afastamento();
+    afSuspensivo.setId(2L);
+    afSuspensivo.setNumfunc(100L);
+    afSuspensivo.setNumvinc(1);
+    afSuspensivo.setTipofreq("LICENCA");
+    afSuspensivo.setCodfreq(202);
+    afSuspensivo.setDtini(LocalDate.of(2024, 5, 1));
+    afSuspensivo.setDtfim(LocalDate.of(2024, 5, 10));
+    afSuspensivo.setQuantidadeDias(10);
+    afSuspensivo.setSituacao("HOMOLOGADO");
+
+    var cfRemunerado = new br.com.praxis.ergonshowcase.domain.CodigoFrequencia();
+    cfRemunerado.setId(new br.com.praxis.ergonshowcase.domain.CodigoFrequenciaId("LICENCA", 201));
+    cfRemunerado.setOnus(true);
+    var cfSuspensivo = new br.com.praxis.ergonshowcase.domain.CodigoFrequencia();
+    cfSuspensivo.setId(new br.com.praxis.ergonshowcase.domain.CodigoFrequenciaId("LICENCA", 202));
+    cfSuspensivo.setOnus(false);
+    when(em.find(
+            eq(br.com.praxis.ergonshowcase.domain.CodigoFrequencia.class),
+            eq(new br.com.praxis.ergonshowcase.domain.CodigoFrequenciaId("LICENCA", 201))))
+        .thenReturn(cfRemunerado);
+    when(em.find(
+            eq(br.com.praxis.ergonshowcase.domain.CodigoFrequencia.class),
+            eq(new br.com.praxis.ergonshowcase.domain.CodigoFrequenciaId("LICENCA", 202))))
+        .thenReturn(cfSuspensivo);
+
+    TypedQuery<Frequencia> freqQuery = mock(TypedQuery.class);
+    when(freqQuery.setParameter(anyString(), any())).thenReturn(freqQuery);
+    when(freqQuery.getResultList()).thenReturn(List.of());
+    when(em.createQuery(anyString(), eq(Frequencia.class))).thenReturn(freqQuery);
+
+    TypedQuery<Afastamento> afQuery = mock(TypedQuery.class);
+    when(afQuery.setParameter(anyString(), any())).thenReturn(afQuery);
+    when(afQuery.getResultList()).thenReturn(List.of(afRemunerado, afSuspensivo));
+    when(em.createQuery(anyString(), eq(Afastamento.class))).thenReturn(afQuery);
+
+    var pa = new PeriodoAquisitivoFerias();
+    pa.setId(401L);
+    pa.setEmpCodigo(1);
+    pa.setNumfunc(100L);
+    pa.setNumvinc(1);
+    pa.setChave(1);
+    pa.setExercicio(2025);
+    pa.setDtini(LocalDate.of(2024, 1, 1));
+    pa.setDtfim(LocalDate.of(2024, 12, 31));
+    pa.setTotDiasDireito(30);
+    pa.setSaldoDiasDisponivel(30);
+    pa.setSituacao("DISPONIVEL");
+    pa.setVersion(1L);
+
+    var paRepo = mock(PeriodoAquisitivoFeriasRepository.class);
+    when(paRepo.findById(401L)).thenReturn(Optional.of(pa));
+    when(paRepo.save(any(PeriodoAquisitivoFerias.class))).thenAnswer(inv -> inv.getArgument(0));
+    when(em.find(eq(PeriodoAquisitivoFerias.class), eq(401L), any(LockModeType.class)))
+        .thenReturn(pa);
+    when(em.find(eq(PeriodoAquisitivoFerias.class), eq(401L))).thenReturn(pa);
+
+    var paService = new PeriodoAquisitivoFeriasService(paRepo, new PeriodoAquisitivoFeriasMapper(tenant), tenant);
+    ReflectionTestUtils.setField(paService, "entityManager", em);
+    ReflectionTestUtils.setField(paService, "invariants", invariants);
+    ReflectionTestUtils.setField(paService, "readFacts", readFacts);
+
+    var etags = new ResourceVersionEtagService("slice5-secret");
+    var resRecalc =
+        paService.recalcularFaltasDireitoPeriodo(
+            401L,
+            new TransicaoPeriodoAquisitivoFeriasDTO(),
+            precondition(etags, "administracao-pessoal.periodos-aquisitivos-ferias", 401L, 1L));
+    // Somente os 10 dias de afSuspensivo (onus = false) entram em diasAfastamentoSuspensivo!
+    assertThat(resRecalc.body().getDiasAfastamentoSuspensivo()).isEqualTo(10);
+
+    // 2. SupportsCursorPagination e 5 escopos de exportação em ErgonResourceService e RadarFeriasPrescricaoService
+    assertThat(paService.supportsCursorPagination()).isTrue();
+    assertThat(paService.getCollectionExportCapability().orElseThrow().scopes())
+        .containsExactlyInAnyOrder(
+            CollectionExportScope.AUTO,
+            CollectionExportScope.SELECTED,
+            CollectionExportScope.FILTERED,
+            CollectionExportScope.CURRENT_PAGE,
+            CollectionExportScope.ALL);
+
+    var radarRepo = mock(RadarFeriasPrescricaoRepository.class);
+    var radarEntity = new RadarFeriasPrescricao();
+    radarEntity.setId(800L);
+    radarEntity.setEmpCodigo(1);
+    when(radarRepo.findAll(any(Specification.class), any(Pageable.class)))
+        .thenReturn(new PageImpl<>(List.of(radarEntity)));
+    var radarService =
+        new RadarFeriasPrescricaoService(radarRepo, new RadarFeriasPrescricaoMapper(), tenant);
+    assertThat(radarService.supportsCursorPagination()).isTrue();
+    var cursorPage =
+        radarService.filterByCursor(
+            new RadarFeriasPrescricaoFilterDTO(), radarService.getDefaultSort(), null, null, 10);
+    assertThat(cursorPage.content()).hasSize(1);
+  }
 }

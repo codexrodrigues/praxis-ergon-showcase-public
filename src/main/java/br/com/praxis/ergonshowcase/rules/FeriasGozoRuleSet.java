@@ -664,11 +664,51 @@ public final class FeriasGozoRuleSet {
             """
             {
               "or": [
-                {"!=": [{"var": "draft.abonoPecuniario"}, true]},
                 {
                   "and": [
+                    {"!=": [{"var": "draft.abonoPecuniario"}, true]},
+                    {"or": [{"==": [{"var": "draft.diasAbonoVendidos"}, null]}, {"==": [{"var": "draft.diasAbonoVendidos"}, 0]}]}
+                  ]
+                },
+                {
+                  "and": [
+                    {"==": [{"var": "draft.abonoPecuniario"}, true]},
                     {"==": [{"var": "effectiveParametroConta.permiteAbonoPecuniario"}, true]},
-                    {"==": [{"var": "derived.abonoPecuniarioLimitesValidos"}, true]}
+                    {"!=": [{"var": "draft.diasAbonoVendidos"}, null]},
+                    {">": [{"var": "draft.diasAbonoVendidos"}, 0]},
+                    {"in": [{"var": "draft.iniFimAbono"}, ["I", "F"]]},
+                    {
+                      "or": [
+                        {"==": [{"var": "effectiveParametroConta.minDiasPvendFer"}, null]},
+                        {">=": [{"var": "draft.diasAbonoVendidos"}, {"var": "effectiveParametroConta.minDiasPvendFer"}]}
+                      ]
+                    },
+                    {
+                      "or": [
+                        {"==": [{"var": "effectiveParametroConta.maxDiasVendFer"}, null]},
+                        {"<=": [{"var": "draft.diasAbonoVendidos"}, {"var": "effectiveParametroConta.maxDiasVendFer"}]}
+                      ]
+                    },
+                    {
+                      "or": [
+                        {"==": [{"var": "derived.maxDiasAbonoPelaFracao"}, null]},
+                        {"<=": [{"var": "draft.diasAbonoVendidos"}, {"var": "derived.maxDiasAbonoPelaFracao"}]}
+                      ]
+                    },
+                    {
+                      "or": [
+                        {"==": [{"var": "draft.dtVendaAbono"}, null]},
+                        {"==": [{"var": "draft.dtini"}, null]},
+                        {"<=": [{"date": [{"var": "draft.dtVendaAbono"}]}, {"date": [{"var": "draft.dtini"}]}]}
+                      ]
+                    },
+                    {
+                      "or": [
+                        {"==": [{"var": "draft.dtPagtoAbono"}, null]},
+                        {"==": [{"var": "draft.dtVendaAbono"}, null]},
+                        {">=": [{"date": [{"var": "draft.dtPagtoAbono"}]}, {"date": [{"var": "draft.dtVendaAbono"}]}]}
+                      ]
+                    }
                   ]
                 }
               ]
@@ -887,13 +927,38 @@ public final class FeriasGozoRuleSet {
                 """
                 {
                   "or": [
-                    {"!=": [{"var": "draft.abonoPecuniario"}, true]},
                     {
                       "and": [
+                        {"!=": [{"var": "draft.abonoPecuniario"}, true]},
+                        {"or": [{"==": [{"var": "draft.diasAbonoVendidos"}, null]}, {"==": [{"var": "draft.diasAbonoVendidos"}, 0]}]}
+                      ]
+                    },
+                    {
+                      "and": [
+                        {"==": [{"var": "draft.abonoPecuniario"}, true]},
                         {"==": [{"var": "effectiveParametroConta.permiteAbonoPecuniario"}, true]},
-                        {"==": [{"var": "derived.abonoPecuniarioLimitesValidos"}, true]},
+                        {"!=": [{"var": "draft.diasAbonoVendidos"}, null]},
+                        {">": [{"var": "draft.diasAbonoVendidos"}, 0]},
                         {"==": [{"var": "draft.ordemParcela"}, 1]},
-                        {"==": [{"var": "draft.iniFimAbono"}, "F"]}
+                        {"==": [{"var": "draft.iniFimAbono"}, "F"]},
+                        {
+                          "or": [
+                            {"==": [{"var": "effectiveParametroConta.minDiasPvendFer"}, null]},
+                            {">=": [{"var": "draft.diasAbonoVendidos"}, {"var": "effectiveParametroConta.minDiasPvendFer"}]}
+                          ]
+                        },
+                        {
+                          "or": [
+                            {"==": [{"var": "effectiveParametroConta.maxDiasVendFer"}, null]},
+                            {"<=": [{"var": "draft.diasAbonoVendidos"}, {"var": "effectiveParametroConta.maxDiasVendFer"}]}
+                          ]
+                        },
+                        {
+                          "or": [
+                            {"==": [{"var": "derived.maxDiasAbonoPelaFracao"}, null]},
+                            {"<=": [{"var": "draft.diasAbonoVendidos"}, {"var": "derived.maxDiasAbonoPelaFracao"}]}
+                          ]
+                        }
                       ]
                     }
                   ]

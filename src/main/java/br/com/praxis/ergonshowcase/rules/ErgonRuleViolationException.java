@@ -40,9 +40,9 @@ public class ErgonRuleViolationException extends ResponseStatusException {
    * @param source origem governada da decisão ({@link DecisionSource#PRODUCT} ou {@link DecisionSource#CUSTOMER})
    * @param stage estágio do pipeline ({@link DecisionStage#PROTECTED_GUARD}, {@code DOMAIN_DECISION}, {@code POST_DECISION})
    * @param decision estado determinístico retornado pelo binding ({@code DENY}, {@code INCONCLUSIVE}, {@code TECHNICAL_ERROR})
-   * @param targetField atributo principal do contrato {@code RegraFrequenciaEstatutaria} afetado
+   * @param targetField atributo principal do contrato afetado
    * @param messagePtBr mensagem oficial de negócio em português do Brasil
-   * @param plsqlOrigin rotina legada de origem ({@code PCK_REGRAS_FREQ} ou {@code EPB__REGRAS_FREQ})
+   * @param plsqlOrigin rotina legada de origem ({@code PCK_*} ou {@code EPB__*})
    */
   public record SlotViolationDetail(
       String code,
@@ -171,9 +171,13 @@ public class ErgonRuleViolationException extends ResponseStatusException {
 
   private void populateProblemDetailProperties() {
     ProblemDetail body = getBody();
-    body.setTitle("Violação determinística de regra estatutária (RN-013)");
+    String ruleSetKey =
+        evaluationResult.ruleSetRef() != null
+            ? evaluationResult.ruleSetRef().ruleSetKey()
+            : null;
+    body.setTitle(resolveProblemTitle(ruleSetKey));
     if (evaluationResult.ruleSetRef() != null) {
-      body.setProperty("ruleSetKey", evaluationResult.ruleSetRef().ruleSetKey());
+      body.setProperty("ruleSetKey", ruleSetKey);
       body.setProperty("resourceKey", evaluationResult.ruleSetRef().boundedContextKey());
     }
     body.setProperty("planDigest", evaluationResult.planDigest());
@@ -188,6 +192,10 @@ public class ErgonRuleViolationException extends ResponseStatusException {
 
   public static List<SlotViolationDetail> buildViolations(
       RuleDecisionPlan plan, RuleEvaluationResult result) {
+    String ruleSetKey =
+        result.ruleSetRef() != null
+            ? result.ruleSetRef().ruleSetKey()
+            : null;
     Map<String, DecisionSource> sourceByBindingKey = new LinkedHashMap<>();
     if (plan != null && plan.orderedBindings() != null) {
       for (DecisionBinding binding : plan.orderedBindings()) {
@@ -224,10 +232,7 @@ public class ErgonRuleViolationException extends ResponseStatusException {
                   desc.map(ErgonRuleErrorCatalog.RuleErrorDescriptor::targetField).orElse("dtini"),
                   ErgonRuleErrorCatalog.resolveMessagePtBr(code),
                   desc.map(ErgonRuleErrorCatalog.RuleErrorDescriptor::plsqlOrigin)
-                      .orElse(
-                          source == DecisionSource.CUSTOMER
-                              ? "EPB__REGRAS_FREQ"
-                              : "PCK_REGRAS_FREQ")));
+                      .orElseGet(() -> resolveDefaultPlsqlOrigin(ruleSetKey, source))));
         }
       }
     }
@@ -239,7 +244,8 @@ public class ErgonRuleViolationException extends ResponseStatusException {
         list.add(
             new SlotViolationDetail(
                 code,
-                desc.map(ErgonRuleErrorCatalog.RuleErrorDescriptor::slotKey).orElse("rn013.unknown"),
+                desc.map(ErgonRuleErrorCatalog.RuleErrorDescriptor::slotKey)
+                    .orElseGet(() -> resolveDefaultSlotKey(ruleSetKey)),
                 "unknown",
                 source,
                 DecisionStage.DOMAIN_DECISION,
@@ -247,10 +253,95 @@ public class ErgonRuleViolationException extends ResponseStatusException {
                 desc.map(ErgonRuleErrorCatalog.RuleErrorDescriptor::targetField).orElse("dtini"),
                 ErgonRuleErrorCatalog.resolveMessagePtBr(code),
                 desc.map(ErgonRuleErrorCatalog.RuleErrorDescriptor::plsqlOrigin)
-                    .orElse("PCK_REGRAS_FREQ")));
+                    .orElseGet(() -> resolveDefaultPlsqlOrigin(ruleSetKey, source))));
       }
     }
     return List.copyOf(list);
+  }
+
+  private static String resolveProblemTitle(String ruleSetKey) {
+    if (ruleSetKey == null) {
+      return "Violação determinística de regra estatutária (RN-013)";
+    }
+    if (ruleSetKey.contains("parametros-contagem-ferias")) {
+      return "Violação determinística de regra de parâmetros de contagem de férias (PCK_PARAMETROS_CONTA)";
+    }
+    if (ruleSetKey.contains("periodos-aquisitivos-ferias")) {
+      return "Violação determinística de regra de período aquisitivo de férias (PCK_PERAQFER)";
+    }
+    if (ruleSetKey.contains("ferias-gozo")) {
+      return "Violação determinística de regra de concessão e gozo de férias (PCK_FERIAS)";
+    }
+    if (ruleSetKey.contains("frequencias") && !ruleSetKey.contains("regras-frequencia")) {
+      return "Violação determinística de regra de lançamento de frequência (PCK_FREQUENCIAS)";
+    }
+    if (ruleSetKey.contains("afastamentos")) {
+      return "Violação determinística de regra de concessão de afastamento (PCK_LIC_AFAST)";
+    }
+    if (ruleSetKey.contains("dependentes")) {
+      return "Violação determinística de regra de elegibilidade de dependente (PCK_DEPENDENTES)";
+    }
+    if (ruleSetKey.contains("vinculos")) {
+      return "Violação determinística de regra de provimento e movimentação funcional (PCK_VINCULOS)";
+    }
+    return "Violação determinística de regra estatutária (RN-013)";
+  }
+
+  private static String resolveDefaultPlsqlOrigin(String ruleSetKey, DecisionSource source) {
+    boolean customer = source == DecisionSource.CUSTOMER;
+    if (ruleSetKey == null) {
+      return customer ? "EPB__REGRAS_FREQ" : "PCK_REGRAS_FREQ";
+    }
+    if (ruleSetKey.contains("parametros-contagem-ferias")) {
+      return customer ? "EPB__PARAMETROS_CONTA" : "PCK_PARAMETROS_CONTA";
+    }
+    if (ruleSetKey.contains("periodos-aquisitivos-ferias")) {
+      return customer ? "EPB__PERAQFER" : "PCK_PERAQFER";
+    }
+    if (ruleSetKey.contains("ferias-gozo")) {
+      return customer ? "EPB__FERIAS" : "PCK_FERIAS";
+    }
+    if (ruleSetKey.contains("frequencias") && !ruleSetKey.contains("regras-frequencia")) {
+      return customer ? "EPB__FREQUENCIAS" : "PCK_FREQUENCIAS";
+    }
+    if (ruleSetKey.contains("afastamentos")) {
+      return customer ? "EPB__LIC_AFAST" : "PCK_LIC_AFAST";
+    }
+    if (ruleSetKey.contains("dependentes")) {
+      return customer ? "EPB__DEPENDENTES" : "PCK_DEPENDENTES";
+    }
+    if (ruleSetKey.contains("vinculos")) {
+      return customer ? "EPB__VINCULOS" : "PCK_VINCULOS";
+    }
+    return customer ? "EPB__REGRAS_FREQ" : "PCK_REGRAS_FREQ";
+  }
+
+  private static String resolveDefaultSlotKey(String ruleSetKey) {
+    if (ruleSetKey == null) {
+      return "rn013.unknown";
+    }
+    if (ruleSetKey.contains("parametros-contagem-ferias")) {
+      return "parametros-conta.unknown";
+    }
+    if (ruleSetKey.contains("periodos-aquisitivos-ferias")) {
+      return "peraqfer.unknown";
+    }
+    if (ruleSetKey.contains("ferias-gozo")) {
+      return "ferias-gozo.unknown";
+    }
+    if (ruleSetKey.contains("frequencias") && !ruleSetKey.contains("regras-frequencia")) {
+      return "frequencias.unknown";
+    }
+    if (ruleSetKey.contains("afastamentos")) {
+      return "afastamentos.unknown";
+    }
+    if (ruleSetKey.contains("dependentes")) {
+      return "dependentes.unknown";
+    }
+    if (ruleSetKey.contains("vinculos")) {
+      return "vinculos.unknown";
+    }
+    return "rn013.unknown";
   }
 
   private static DecisionSource inferSource(String bindingKey, List<String> codes) {

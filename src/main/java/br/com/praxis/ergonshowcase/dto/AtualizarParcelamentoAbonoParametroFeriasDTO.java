@@ -106,7 +106,9 @@ public class AtualizarParcelamentoAbonoParametroFeriasDTO {
   private Integer minDiasPerPrincFer;
 
   @Pattern(regexp = "D|G|N")
-  @Schema(description = "Base de cálculo do abono pecuniário: D (direito), G (gozo) ou N (vedado).")
+  @Schema(
+      description = "Base de cálculo do abono pecuniário: D (direito), G (gozo) ou N (vedado).",
+      allowableValues = {"D", "G", "N"})
   @UISchema(
       label = "Base do abono pecuniário",
       helpText = "Informe D (direito), G (gozo) ou N (sem abono pecuniário).",

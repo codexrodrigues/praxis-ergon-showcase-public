@@ -598,6 +598,7 @@ public abstract class VinculoDados {
       readOnly = true,
       tableHidden = true,
       icon = "info")
+  @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
   private String cargoNomePrevisto;
 
   @jakarta.validation.constraints.Null(
@@ -613,5 +614,6 @@ public abstract class VinculoDados {
       icon = "info",
       type = FieldDataType.NUMBER,
       controlType = FieldControlType.NUMERIC_TEXT_BOX)
+  @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
   private Long saldoVagasPrevisto;
 }

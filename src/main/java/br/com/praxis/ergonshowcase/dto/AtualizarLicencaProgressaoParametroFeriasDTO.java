@@ -17,7 +17,9 @@ import org.praxisplatform.uischema.extension.annotation.UISchema;
 public class AtualizarLicencaProgressaoParametroFeriasDTO {
 
   @Pattern(regexp = "I|F")
-  @Schema(description = "Critério de prescrição: I (data inicial do gozo) ou F (data final do gozo).")
+  @Schema(
+      description = "Critério de prescrição: I (data inicial do gozo) ou F (data final do gozo).",
+      allowableValues = {"I", "F"})
   @UISchema(
       label = "Critério de prescrição",
       helpText = "Use I para validar pelo início do gozo ou F pelo término.",

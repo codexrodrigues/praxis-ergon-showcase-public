@@ -25,6 +25,9 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
     metadataFields = {"orgaoNome", "cargoNome", "situacao"})
 public class VinculoResponseDTO extends VinculoDados {
   @Override
+  @Schema(
+      description =
+          "Carga horária semanal contratual ou estatutária cumprida pelo servidor neste vínculo funcional.")
   @MicroVisualization(kind = MicroVisualizationKind.BULLET, valueExpr = "jornadaSemanal",
       min = 0, max = 168, total = 168, valueSuffix = " h", compactValue = true,
       thresholds = @Threshold(min = 1, max = 168, tone = "info", label = "Horas semanais registradas"),

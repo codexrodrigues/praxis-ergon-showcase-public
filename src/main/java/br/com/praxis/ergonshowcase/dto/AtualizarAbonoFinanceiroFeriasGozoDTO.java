@@ -29,7 +29,9 @@ public class AtualizarAbonoFinanceiroFeriasGozoDTO {
   private Boolean abonoPecuniario = false;
 
   @Pattern(regexp = "I|F")
-  @Schema(description = "Posição cronológica do abono pecuniário: I (início) ou F (final).")
+  @Schema(
+      description = "Posição cronológica do abono pecuniário: I (início) ou F (final).",
+      allowableValues = {"I", "F"})
   @UISchema(
       label = "Posição do abono (I/F)",
       helpText = "Informe I (início das férias) ou F (final das férias).",

@@ -1120,5 +1120,6 @@ public abstract class ServidorPessoaDados {
       reason = "Prévia de indicador de deficiência no formulário.",
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
   private Boolean possuiDeficienciaPcDPrevisto;
 }

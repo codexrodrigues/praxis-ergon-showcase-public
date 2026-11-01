@@ -71,7 +71,9 @@ public class AtualizarPrescricaoMultaPeriodoAquisitivoDTO {
   private LocalDate dtPrescricao;
 
   @Pattern(regexp = "I|F")
-  @Schema(description = "Critério de avaliação da prescrição (I ou F).")
+  @Schema(
+      description = "Critério de avaliação da prescrição (I ou F).",
+      allowableValues = {"I", "F"})
   @UISchema(
       label = "Critério de prescrição",
       helpText = "Informe I (início do gozo) ou F (término do gozo).",
@@ -83,7 +85,9 @@ public class AtualizarPrescricaoMultaPeriodoAquisitivoDTO {
   private String criterioPrescricao;
 
   @Pattern(regexp = "I|S|N")
-  @Schema(description = "Permissão de gozo após a data de prescrição (I, S ou N).")
+  @Schema(
+      description = "Permissão de gozo após a data de prescrição (I, S ou N).",
+      allowableValues = {"I", "S", "N"})
   @UISchema(
       label = "Gozo após prescrição (PA)",
       helpText = "Informe I (herda), S (permite) ou N (bloqueia).",
@@ -106,7 +110,9 @@ public class AtualizarPrescricaoMultaPeriodoAquisitivoDTO {
   private LocalDate dtPgtoComMulta;
 
   @Pattern(regexp = "I|S|N")
-  @Schema(description = "Dispensa de pagamento de multa concessiva (I, S ou N).")
+  @Schema(
+      description = "Dispensa de pagamento de multa concessiva (I, S ou N).",
+      allowableValues = {"I", "S", "N"})
   @UISchema(
       label = "Dispensa de multa (PA)",
       helpText = "Informe I (herda), S (dispensa) ou N (aplica multa).",

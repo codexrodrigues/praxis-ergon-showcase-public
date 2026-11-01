@@ -2,6 +2,8 @@ package br.com.praxis.ergonshowcase.service;
 
 import br.com.praxis.ergonshowcase.config.TenantContext;
 import br.com.praxis.ergonshowcase.domain.Afastamento;
+import br.com.praxis.ergonshowcase.domain.CodigoFrequencia;
+import br.com.praxis.ergonshowcase.domain.CodigoFrequenciaId;
 import br.com.praxis.ergonshowcase.domain.FeriasGozo;
 import br.com.praxis.ergonshowcase.domain.Frequencia;
 import br.com.praxis.ergonshowcase.domain.ParametroContagemFerias;
@@ -130,6 +132,9 @@ public class PeriodoAquisitivoFeriasService
     copy.setExercicio(src.getExercicio());
     copy.setDtini(src.getDtini());
     copy.setDtfim(src.getDtfim());
+    copy.setDiasGozados(src.getDiasGozados());
+    copy.setDiasVendidosAbono(src.getDiasVendidosAbono());
+    copy.setDiasConvertidosDobro(src.getDiasConvertidosDobro());
     copy.setGeradoPorAverbacao(src.getGeradoPorAverbacao());
     copy.setSituacao(src.getSituacao());
     return copy;
@@ -334,7 +339,11 @@ public class PeriodoAquisitivoFeriasService
 
   @Override
   protected ResourceFilterAccessScope<PeriodoAquisitivoFerias> resolveResourceFilterAccessScope() {
-    int orgao = tenant.orgao();
+    var explicitOrgao = tenant.explicitOrgao();
+    if (explicitOrgao.isEmpty()) {
+      return ResourceFilterAccessScope.unrestricted();
+    }
+    int orgao = explicitOrgao.getAsInt();
     return ResourceFilterAccessScope.restricted(
         (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
   }
@@ -407,6 +416,18 @@ public class PeriodoAquisitivoFeriasService
     var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
     PeriodoAquisitivoFerias previousSnapshot = snapshotBeforeMutation(entity);
     mapper.applyUpdate(entity, dto);
+    if (previousSnapshot != null) {
+      if (previousSnapshot.getDiasGozados() != null) {
+        entity.setDiasGozados(previousSnapshot.getDiasGozados());
+      }
+      if (previousSnapshot.getDiasVendidosAbono() != null) {
+        entity.setDiasVendidosAbono(previousSnapshot.getDiasVendidosAbono());
+      }
+      if (previousSnapshot.getDiasConvertidosDobro() != null) {
+        entity.setDiasConvertidosDobro(previousSnapshot.getDiasConvertidosDobro());
+      }
+      PeriodoAquisitivoFeriasMapper.recomputeSaldoAndSituacao(entity);
+    }
     validatePeriodoAquisitivoFerias(entity, previousSnapshot);
     if (invariants != null) {
       invariants.periodoAquisitivoFerias(entity, false);
@@ -728,6 +749,19 @@ public class PeriodoAquisitivoFeriasService
               if (afasts != null) {
                 for (Afastamento a : afasts) {
                   if (a.getDtini() == null) continue;
+                  CodigoFrequencia cf = a.getCodigoFrequenciaEntidade();
+                  if (cf == null
+                      && a.getTipofreq() != null
+                      && !a.getTipofreq().isBlank()
+                      && a.getCodfreq() != null) {
+                    cf =
+                        entityManager.find(
+                            CodigoFrequencia.class,
+                            new CodigoFrequenciaId(a.getTipofreq().trim(), a.getCodfreq()));
+                  }
+                  if (cf != null && Boolean.TRUE.equals(cf.getOnus())) {
+                    continue;
+                  }
                   LocalDate aEnd =
                       a.getDtfim() != null
                           ? a.getDtfim()

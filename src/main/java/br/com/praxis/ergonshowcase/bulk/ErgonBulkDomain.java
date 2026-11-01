@@ -42,10 +42,10 @@ public class ErgonBulkDomain {
         case CARGOS -> Set.of();
         case DEPENDENTES -> Set.of("nome", "dtnasc", "invalido");
         case AFASTAMENTOS, FREQUENCIAS -> Set.of("tipofreq", "codfreq", "dtini");
-        case CAMPOS_CUSTOMIZADOS -> Set.of("resourceKey", "fieldKey", "fieldType", "validationRules", "governancePolicy");
+        case CAMPOS_CUSTOMIZADOS -> Set.of("empCodigo", "resourceKey", "fieldKey", "fieldType", "validationRules", "governancePolicy");
         case PARAMETROS_CONTAGEM_FERIAS -> Set.of("dtini", "active");
-        case PERIODOS_AQUISITIVOS_FERIAS -> Set.of("empCodigo", "numfunc", "numvinc", "chave", "dtini", "saldoDiasDisponivel", "situacao");
-        case FERIAS_GOZO -> Set.of("empCodigo", "numfunc", "numvinc", "periodoAquisitivoId", "chavePeraqfer", "ordemParcela", "dtini", "situacao");
+        case PERIODOS_AQUISITIVOS_FERIAS -> Set.of("empCodigo", "numfunc", "numvinc", "chave", "dtini", "diasGozados", "diasVendidosAbono", "diasConvertidosDobro", "saldoDiasDisponivel", "geradoPorAverbacao", "situacao");
+        case FERIAS_GOZO -> Set.of("empCodigo", "numfunc", "numvinc", "periodoAquisitivoId", "chavePeraqfer", "ordemParcela", "dtini", "totDiasDireitoPa", "situacao");
       };
     }
   }
@@ -216,25 +216,48 @@ public class ErgonBulkDomain {
       case CARGOS -> invariants.cargo((Cargo)e);
       case PESSOAS -> invariants.pessoa((ServidorPessoa)e);
       case VINCULOS -> {
-        invariants.vinculo((Vinculo) e, false);
-        vinculoService.validateVinculoProvimento((Vinculo) e, false);
+        invariants.vinculo((Vinculo) e, false, false);
+        if (vinculoService != null) {
+          vinculoService.validateVinculoProvimento((Vinculo) e, false);
+        }
       }
       case DEPENDENTES -> {
-        invariants.dependente((Dependente) e, false);
-        dependenteService.validateDependenteElegibilidade((Dependente) e);
+        invariants.dependente((Dependente) e, false, false);
+        if (dependenteService != null) {
+          dependenteService.validateDependenteElegibilidade((Dependente) e);
+        }
       }
       case AFASTAMENTOS -> {
-        afastamentoService.validateAfastamentoConcessao((Afastamento) e, false);
+        if (afastamentoService != null) {
+          afastamentoService.validateAfastamentoConcessao((Afastamento) e, false);
+        }
         invariants.afastamento((Afastamento) e, false);
       }
       case FREQUENCIAS -> {
-        frequenciaService.validateFrequenciaLancamento((Frequencia) e);
+        if (frequenciaService != null) {
+          frequenciaService.validateFrequenciaLancamento((Frequencia) e);
+        }
         invariants.frequencia((Frequencia) e, false);
       }
       case CAMPOS_CUSTOMIZADOS -> invariants.campoCustomizado((DefinicaoCampoCustomizado)e,false);
-      case PARAMETROS_CONTAGEM_FERIAS -> invariants.parametroContagemFerias((ParametroContagemFerias) e, false);
-      case PERIODOS_AQUISITIVOS_FERIAS -> invariants.periodoAquisitivoFerias((PeriodoAquisitivoFerias) e, false);
-      case FERIAS_GOZO -> invariants.feriasGozo((FeriasGozo) e, false);
+      case PARAMETROS_CONTAGEM_FERIAS -> {
+        if (parametroContagemFeriasService != null) {
+          parametroContagemFeriasService.validateParametroContagemFerias((ParametroContagemFerias) e);
+        }
+        invariants.parametroContagemFerias((ParametroContagemFerias) e, false);
+      }
+      case PERIODOS_AQUISITIVOS_FERIAS -> {
+        if (periodoAquisitivoFeriasService != null) {
+          periodoAquisitivoFeriasService.validatePeriodoAquisitivoFerias((PeriodoAquisitivoFerias) e);
+        }
+        invariants.periodoAquisitivoFerias((PeriodoAquisitivoFerias) e, false);
+      }
+      case FERIAS_GOZO -> {
+        if (feriasGozoService != null) {
+          feriasGozoService.validateFeriasGozo((FeriasGozo) e);
+        }
+        invariants.feriasGozo((FeriasGozo) e, false);
+      }
     }
   }
   public boolean apply(Resource r, Object e, Object dto) {
@@ -289,6 +312,9 @@ public class ErgonBulkDomain {
         throw new IllegalArgumentException("Parâmetro de contagem de férias já se encontra ativo.");
       copy.setActive(true);
       if (dto.getDtfim() != null) copy.setDtfim(dto.getDtfim());
+      if (parametroContagemFeriasService != null) {
+        parametroContagemFeriasService.validateParametroContagemFerias(copy);
+      }
       invariants.parametroContagemFerias(copy, false);
       return copy;
     }
@@ -301,6 +327,9 @@ public class ErgonBulkDomain {
       copy.setSituacao(copy.getDiasGozados() != null && copy.getDiasGozados() > 0 ? "PARCIALMENTE_GOZADO" : "DISPONIVEL");
       if (dto.getDocumentoLegalId() != null) copy.setDocumentoLegalId(dto.getDocumentoLegalId());
       copy.setObservacoes((copy.getObservacoes() == null ? "" : copy.getObservacoes() + " | ") + "Homologação em lote: " + dto.getObservacoes());
+      if (periodoAquisitivoFeriasService != null) {
+        periodoAquisitivoFeriasService.validatePeriodoAquisitivoFerias(copy, paf);
+      }
       invariants.periodoAquisitivoFerias(copy, false);
       return copy;
     }
@@ -315,6 +344,9 @@ public class ErgonBulkDomain {
       if (dto.getDocumentoLegalId() != null) copy.setDocumentoLegalId(dto.getDocumentoLegalId());
       if (dto.getAtoPublicacaoId() != null) copy.setAtoPublicacaoId(dto.getAtoPublicacaoId());
       copy.setObservacoes((copy.getObservacoes() == null ? "" : copy.getObservacoes() + " | ") + "Homologação em lote: " + dto.getObservacoes());
+      if (feriasGozoService != null) {
+        feriasGozoService.validateFeriasGozo(copy, fg);
+      }
       invariants.feriasGozo(copy, false);
       return copy;
     }
@@ -335,7 +367,9 @@ public class ErgonBulkDomain {
       copy.setSituacao("HOMOLOGADO");
       if (dto.getDocumentoLegalId()!=null) copy.setDocumentoLegalId(dto.getDocumentoLegalId());
       copy.setObs((copy.getObs()==null ? "" : copy.getObs()+" | ") + "Homologação em lote: " + dto.getObservacoes());
-      frequenciaService.validateFrequenciaLancamento(copy);
+      if (frequenciaService != null) {
+        frequenciaService.validateFrequenciaLancamento(copy);
+      }
       invariants.frequencia(copy,false); return copy;
     }
     if (current instanceof Afastamento afast) {
@@ -348,7 +382,9 @@ public class ErgonBulkDomain {
       copy.setSituacao("HOMOLOGADO");
       copy.setDocumentoLegalId(dto.documentoLegalId());
       if (dto.atoPublicacaoId()!=null) copy.setAtoPublicacaoId(dto.atoPublicacaoId());
-      afastamentoService.validateAfastamentoConcessao(copy, false);
+      if (afastamentoService != null) {
+        afastamentoService.validateAfastamentoConcessao(copy, false);
+      }
       invariants.afastamento(copy,false); return copy;
     }
     if (current instanceof Dependente dep) {
@@ -359,8 +395,10 @@ public class ErgonBulkDomain {
       document(dto.documentoLegalId(),tenant.orgao());
       copy.setDtfim(dto.dtfim()); copy.setDepIr(false); copy.setDepSalarioFamilia(false); copy.setDepPlanoSaude(false);
       copy.setDocumentoLegalId(dto.documentoLegalId());
-      invariants.dependente(copy,false);
-      dependenteService.validateDependenteElegibilidade(copy);
+      invariants.dependente(copy, false, false);
+      if (dependenteService != null) {
+        dependenteService.validateDependenteElegibilidade(copy);
+      }
       return copy;
     }
     Vinculo copy=new Vinculo(); BeanUtils.copyProperties(current,copy);
@@ -375,8 +413,10 @@ public class ErgonBulkDomain {
       ErgonInvariants.chronology(copy.getDtexerc(),dto.dtHomologEstagio(),"Homologação anterior ao exercício.");
       document(dto.documentoLegalId(),copy.getEmpCodigo()); copy.setDtHomologEstagio(dto.dtHomologEstagio()); copy.setDocumentoLegalId(dto.documentoLegalId());
     }
-    invariants.vinculo(copy,false);
-    vinculoService.validateVinculoProvimento(copy, false);
+    invariants.vinculo(copy, false, false);
+    if (vinculoService != null) {
+      vinculoService.validateVinculoProvimento(copy, false);
+    }
     return copy;
   }
   private void document(Long id, Integer owner) {

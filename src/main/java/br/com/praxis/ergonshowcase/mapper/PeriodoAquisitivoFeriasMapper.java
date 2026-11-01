@@ -166,16 +166,19 @@ public class PeriodoAquisitivoFeriasMapper
     if (entity.getDiasAfastamentoSuspensivo() == null) {
       entity.setDiasAfastamentoSuspensivo(0);
     }
-    entity.setDiasGozados(dto.getDiasGozados());
-    if (entity.getDiasGozados() == null) {
+    if (dto.getDiasGozados() != null) {
+      entity.setDiasGozados(dto.getDiasGozados());
+    } else if (entity.getDiasGozados() == null) {
       entity.setDiasGozados(0);
     }
-    entity.setDiasVendidosAbono(dto.getDiasVendidosAbono());
-    if (entity.getDiasVendidosAbono() == null) {
+    if (dto.getDiasVendidosAbono() != null) {
+      entity.setDiasVendidosAbono(dto.getDiasVendidosAbono());
+    } else if (entity.getDiasVendidosAbono() == null) {
       entity.setDiasVendidosAbono(0);
     }
-    entity.setDiasConvertidosDobro(dto.getDiasConvertidosDobro());
-    if (entity.getDiasConvertidosDobro() == null) {
+    if (dto.getDiasConvertidosDobro() != null) {
+      entity.setDiasConvertidosDobro(dto.getDiasConvertidosDobro());
+    } else if (entity.getDiasConvertidosDobro() == null) {
       entity.setDiasConvertidosDobro(0);
     }
     entity.setDtPrescricao(dto.getDtPrescricao());

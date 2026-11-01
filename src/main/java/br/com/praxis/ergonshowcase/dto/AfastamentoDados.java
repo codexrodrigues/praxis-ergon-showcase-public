@@ -281,6 +281,7 @@ public abstract class AfastamentoDados {
   private Map<String, Object> customFields = new LinkedHashMap<>();
 
   @Null
+  @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
   @Schema(
       description =
           "Descrição oficial da modalidade de licença projetada em rascunho a partir do código de frequência; não pode ser enviada pelo cliente.",
@@ -295,6 +296,7 @@ public abstract class AfastamentoDados {
   private String codigoFrequenciaNomePrevisto;
 
   @Null
+  @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
   @Schema(
       description =
           "Quantidade prevista de dias corridos entre o início e o término estimado em rascunho; não pode ser enviada pelo cliente.",
@@ -312,6 +314,7 @@ public abstract class AfastamentoDados {
   private Integer quantidadeDiasPrevista;
 
   @Null
+  @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
   @Schema(
       description =
           "Indicador preliminar se a modalidade selecionada implica ônus financeiro ou desconto remuneratório; não pode ser enviado pelo cliente.",

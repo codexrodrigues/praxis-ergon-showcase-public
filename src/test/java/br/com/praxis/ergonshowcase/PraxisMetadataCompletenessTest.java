@@ -67,6 +67,27 @@ class PraxisMetadataCompletenessTest {
   }
 
   @Test
+  void allControllerResourceFactsPassSemanticReview() throws Exception {
+    var scanner = new ClassPathScanningCandidateComponentProvider(false) {
+      @Override protected boolean isCandidateComponent(org.springframework.beans.factory.annotation.AnnotatedBeanDefinition bean) {
+        return bean.getMetadata().isIndependent() && !bean.getMetadata().isInterface();
+      }
+    };
+    scanner.addIncludeFilter(new RegexPatternTypeFilter(java.util.regex.Pattern.compile(".*Controller")));
+    var reviewer = new SemanticMetadataReviewer();
+    var errors = new ArrayList<SemanticMetadataReviewIssue>();
+    var controllers = new ArrayList<Class<?>>();
+    for (var bean : scanner.findCandidateComponents("br.com.praxis.ergonshowcase.controller")) {
+      var controller = Class.forName(bean.getBeanClassName());
+      controllers.add(controller);
+      errors.addAll(reviewer.reviewResourceFacts(controller).issues().stream()
+          .filter(i -> i.severity() == SemanticMetadataIssueSeverity.ERROR).toList());
+    }
+    assertThat(controllers).hasSizeGreaterThanOrEqualTo(20);
+    assertThat(errors).isEmpty();
+  }
+
+  @Test
   void actualResolvedMicrovisualizationsHaveValidExpressions() {
     var converters = new ModelConverters();
     converters.addConverter(new CustomOpenApiResolver(new ObjectMapper().findAndRegisterModules()));

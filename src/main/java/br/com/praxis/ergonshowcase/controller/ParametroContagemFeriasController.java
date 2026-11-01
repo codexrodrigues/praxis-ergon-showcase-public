@@ -32,6 +32,9 @@ import org.springframework.web.bind.annotation.*;
     label = "Regra de escopo global",
     description = "Verdadeiro quando a regra vale para todos os órgãos por não restringir empCodigo.",
     dataType = "boolean",
+    icon = "public",
+    tone = "info",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @ResourceFact(
     key = "permiteParcelamento",
@@ -39,6 +42,9 @@ import org.springframework.web.bind.annotation.*;
     label = "Permite parcelamento",
     description = "Verdadeiro quando maxParcelasFerias autoriza mais de uma etapa de gozo por período aquisitivo.",
     dataType = "boolean",
+    icon = "splitscreen",
+    tone = "success",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @ResourceFact(
     key = "permiteAbonoPecuniario",
@@ -46,6 +52,9 @@ import org.springframework.web.bind.annotation.*;
     label = "Permite abono pecuniário",
     description = "Verdadeiro quando a regra habilita venda de dias em abono pecuniário.",
     dataType = "boolean",
+    icon = "payments",
+    tone = "info",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @BulkResourceOperations(
     proposalOperationId = "ergon.parametros-contagem-ferias.bulk.proposal",

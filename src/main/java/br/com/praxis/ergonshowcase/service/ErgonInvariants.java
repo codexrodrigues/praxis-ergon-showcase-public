@@ -93,6 +93,10 @@ public class ErgonInvariants {
   }
 
   public void dependente(Dependente d, boolean creating) {
+    dependente(d, creating, true);
+  }
+
+  public void dependente(Dependente d, boolean creating, boolean runRuleEngine) {
     if (d.getId() == null || d.getId().numfunc() == null || d.getId().numdep() == null)
       fail("Identidade composta (numfunc, numdep) é obrigatória para o dependente.");
     ServidorPessoa titular =
@@ -155,10 +159,12 @@ public class ErgonInvariants {
             || Boolean.TRUE.equals(d.getDepPlanoSaude())))
       fail("Dependência encerrada não pode manter benefícios ativos de IRRF, salário-família ou saúde.");
     Integer emp = tenant != null ? tenant.orgao() : 1;
-    ruleEngine()
-        .enforceDependente(
-            new ErgonRuleEngineFacade.DependenteRuleContext(
-                d, emp, titular, tipo, doc, List.of(), null));
+    if (runRuleEngine) {
+      ruleEngine()
+          .enforceDependente(
+              new ErgonRuleEngineFacade.DependenteRuleContext(
+                  d, emp, titular, tipo, doc, List.of(), null));
+    }
     customFields("administracao-pessoal.dependentes", emp, d.getCustomFields(), d);
   }
 
@@ -797,6 +803,10 @@ public class ErgonInvariants {
   }
 
   public void vinculo(Vinculo v, boolean creating) {
+    vinculo(v, creating, true);
+  }
+
+  public void vinculo(Vinculo v, boolean creating, boolean runRuleEngine) {
     Orgao orgao = null;
     if (creating) {
       orgao = em.find(Orgao.class, v.getEmpCodigo(), LockModeType.PESSIMISTIC_READ);
@@ -877,22 +887,24 @@ public class ErgonInvariants {
         v.getDocumentoLegalId() != null
             ? em.find(DocumentoLegal.class, v.getDocumentoLegalId())
             : null;
-    ruleEngine()
-        .enforceVinculo(
-            new ErgonRuleEngineFacade.VinculoRuleContext(
-                v,
-                orgao,
-                pessoa,
-                cargo,
-                cargoOcupadas,
-                cargoComissao,
-                comissaoOcupadas,
-                lotacao,
-                exercicio,
-                doc,
-                others,
-                openAfastamentosCount,
-                creating));
+    if (runRuleEngine) {
+      ruleEngine()
+          .enforceVinculo(
+              new ErgonRuleEngineFacade.VinculoRuleContext(
+                  v,
+                  orgao,
+                  pessoa,
+                  cargo,
+                  cargoOcupadas,
+                  cargoComissao,
+                  comissaoOcupadas,
+                  lotacao,
+                  exercicio,
+                  doc,
+                  others,
+                  openAfastamentosCount,
+                  creating));
+    }
     customFields("administracao-pessoal.vinculos", v.getEmpCodigo(), v.getCustomFields(), v);
   }
 

@@ -297,7 +297,7 @@ public class VinculoService
     var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
     mapper.applyUpdate(entity, dto);
     if (invariants != null) {
-      invariants.vinculo(entity, false);
+      invariants.vinculo(entity, false, false);
     }
     validateVinculoProvimento(entity, false);
     CustomFieldSupport.restoreReadOnlyValues(entity, readOnlyKeys, old);
@@ -332,7 +332,7 @@ public class VinculoService
     e.setSituacao("VACANTE");
     validateVinculoProvimento(e, false);
     if (invariants != null) {
-      invariants.vinculo(e, false);
+      invariants.vinculo(e, false, false);
     }
     entityManager.flush();
     return toResourceRepresentation(e);
@@ -341,7 +341,7 @@ public class VinculoService
   @Override
   protected void beforeCreate(CreateVinculoDTO dto, Vinculo e) {
     if (invariants != null) {
-      invariants.vinculo(e, true);
+      invariants.vinculo(e, true, false);
     }
     validateVinculoProvimento(e, true);
     checkOrg(e.getEmpCodigo());

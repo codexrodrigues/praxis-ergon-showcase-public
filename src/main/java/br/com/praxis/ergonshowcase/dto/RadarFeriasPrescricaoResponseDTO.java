@@ -323,6 +323,7 @@ public class RadarFeriasPrescricaoResponseDTO {
   @Schema(
       description =
           "Regime jurídico do vínculo funcional (ex.: ESTATUTARIO, CLT, ESPECIAL, COMISSIONADO).",
+      allowableValues = {"ESTATUTARIO", "CLT", "ESPECIAL", "COMISSIONADO"},
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Regime jurídico",
@@ -339,6 +340,7 @@ public class RadarFeriasPrescricaoResponseDTO {
   @Schema(
       description =
           "Tipo de vínculo funcional com a administração pública (ex.: EFETIVO, COMISSAO, TEMPORARIO).",
+      allowableValues = {"EFETIVO", "COMISSAO", "COMISSIONADO", "TEMPORARIO", "CONTRATADO"},
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Tipo de vínculo",
@@ -355,6 +357,7 @@ public class RadarFeriasPrescricaoResponseDTO {
   @Schema(
       description =
           "Categoria funcional de enquadramento do vínculo (ex.: GERAL, MAGISTERIO, SAUDE, GUARDA_MUNICIPAL).",
+      allowableValues = {"ADMINISTRATIVO", "GERAL", "MAGISTERIO", "SAUDE", "POLICIAL", "GUARDA_MUNICIPAL"},
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Categoria funcional",
@@ -438,6 +441,16 @@ public class RadarFeriasPrescricaoResponseDTO {
   @Schema(
       description =
           "Situação operacional do período aquisitivo (EM_AQUISICAO, DISPONIVEL, PARCIALMENTE_GOZADO, QUITADO, PRESCRITO, CONVERTIDO_DOBRO, SUSPENSO, CANCELADO).",
+      allowableValues = {
+        "EM_AQUISICAO",
+        "DISPONIVEL",
+        "PARCIALMENTE_GOZADO",
+        "QUITADO",
+        "PRESCRITO",
+        "CONVERTIDO_DOBRO",
+        "SUSPENSO",
+        "CANCELADO"
+      },
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Situação do PA",
@@ -653,6 +666,13 @@ public class RadarFeriasPrescricaoResponseDTO {
   @Schema(
       description =
           "Faixa executiva de urgência prescricional (VENCIDO_PRESCRITO, CRITICO_30D, ALERTA_60D, ATENCAO_90D, REGULAR).",
+      allowableValues = {
+        "VENCIDO_PRESCRITO",
+        "CRITICO_30D",
+        "ALERTA_60D",
+        "ATENCAO_90D",
+        "REGULAR"
+      },
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Faixa de urgência",
@@ -719,6 +739,14 @@ public class RadarFeriasPrescricaoResponseDTO {
   @Schema(
       description =
           "Situação operacional da próxima parcela de gozo associada ao período aquisitivo.",
+      allowableValues = {
+        "PROGRAMADA",
+        "HOMOLOGADA",
+        "EM_GOZO",
+        "GOZADA",
+        "INTERROMPIDA",
+        "CANCELADA"
+      },
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Situação próxima parcela",

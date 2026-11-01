@@ -31,7 +31,9 @@ public class ParametroContagemFeriasPreviaDraftDTO {
       icon = "calendar_month")
   private Integer totDiasFer;
 
-  @Schema(description = "Base de cálculo do abono pecuniário (D, G ou N).")
+  @Schema(
+      description = "Base de cálculo do abono pecuniário (D, G ou N).",
+      allowableValues = {"D", "G", "N"})
   @UISchema(
       label = "Base do abono pecuniário",
       helpText = "Indica D, G ou N para cálculo do abono pecuniário.",

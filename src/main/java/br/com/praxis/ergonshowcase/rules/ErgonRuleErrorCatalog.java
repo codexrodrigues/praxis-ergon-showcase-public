@@ -971,6 +971,69 @@ public final class ErgonRuleErrorCatalog {
     register(
         map,
         new RuleErrorDescriptor(
+            "ERG-01814",
+            ParametroContagemFeriasRuleSet.SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            "abonoDirGozoLicEsp",
+            "Venda de licença especial habilitada exige modalidade de abono válida ('D', 'G' ou 'N') e fração/limites coerentes.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.vend_lic_esp = 'S' AND v_row_new.abono_dir_gozo_lic_esp NOT IN ('D','G','N') THEN pack_hades.trata_erro(1814); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01815",
+            ParametroContagemFeriasRuleSet.SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            "minDiasPvendLicEsp",
+            "Quando a venda de licença especial está desabilitada, os limites mínimo e máximo de venda devem permanecer nulos ou zerados.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.vend_lic_esp = 'N' AND (v_row_new.min_dias_pvend_lic_esp > 0 OR v_row_new.max_dias_vend_lic_esp > 0) THEN pack_hades.trata_erro(1815); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01816",
+            ParametroContagemFeriasRuleSet.SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            "minDiasPcontDobLicEsp",
+            "Contagem em dobro de licença especial exige limites mínimo e máximo de dias coerentes (0 <= min <= max).",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.cont_dobro_lic_esp = 'S' AND (v_row_new.min_dias_pcont_dob_lic_esp IS NULL OR v_row_new.max_dias_cont_dob_lic_esp IS NULL) THEN pack_hades.trata_erro(1816); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01817",
+            ParametroContagemFeriasRuleSet.SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            "temLicEsp",
+            "Quando o regime não possui direito a licença especial, os parâmetros de anos, meses, venda e contagem em dobro devem permanecer desabilitados.",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF v_row_new.tem_lic_esp = 'N' AND (v_row_new.anos_lic_esp > 0 OR v_row_new.meses_lic_esp_per > 0) THEN pack_hades.trata_erro(1817); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01818",
+            ParametroContagemFeriasRuleSet.SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            "anosProgressao",
+            "Coerência entre o indicador de direito a progressão funcional (temProgressao) e o interstício em anos (anosProgressao).",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF (v_row_new.tem_progressao = 'S') <> (v_row_new.anos_progressao > 0) THEN pack_hades.trata_erro(1818); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01819",
+            ParametroContagemFeriasRuleSet.SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            "anos1TempoServ",
+            "Coerência entre o indicador de adicional por tempo de serviço (temTempoServ) e o interstício em anos (anos1TempoServ).",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF (v_row_new.tem_tempo_serv = 'S') <> (v_row_new.anos_1_tempo_serv > 0) THEN pack_hades.trata_erro(1819); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-01820",
+            ParametroContagemFeriasRuleSet.SLOT_LICENCA_ESPECIAL_PROGRESSAO_COERENCIA,
+            "anosSextaParte",
+            "Coerência entre o indicador de sexta-parte (temSextaParte) e o interstício em anos (anosSextaParte).",
+            "PCK_PARAMETROS_CONTA.MAIN_PRE",
+            "IF (v_row_new.tem_sexta_parte = 'S') <> (v_row_new.anos_sexta_parte > 0) THEN pack_hades.trata_erro(1820); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
             "ERG-01850",
             ParametroContagemFeriasRuleSet.SLOT_CONCOMITANCIA_VIGENCIA_ESCOPO,
             "dtini",
@@ -1287,6 +1350,51 @@ public final class ErgonRuleErrorCatalog {
             "Venda de abono pecuniário vedada para o período aquisitivo ou quantidade/posição de dias vendidos fora dos limites parametrizados.",
             "PCK_FERIAS.MAIN_PRE / PCK_ERG_ABONOS_FERIAS.MAIN_PRE",
             "IF NOT abono_pecuniario_limites_validos THEN pack_hades.trata_erro(522); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-03311",
+            FeriasGozoRuleSet.SLOT_ABONO_PECUNIARIO_ELEGIBILIDADE_E_LIMITES,
+            "iniFimAbono",
+            "Posição do abono pecuniário deve ser 'I' (início das férias) ou 'F' (final das férias) quando abonoPecuniario = true.",
+            "PCK_ERG_ABONOS_FERIAS.MAIN_PRE",
+            "IF v_row_new.abono_pecuniario = 'S' AND v_row_new.ini_fim_abono NOT IN ('I','F') THEN pack_hades.trata_erro(3311); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-03312",
+            FeriasGozoRuleSet.SLOT_ABONO_PECUNIARIO_ELEGIBILIDADE_E_LIMITES,
+            "diasAbonoVendidos",
+            "Quantidade de dias vendidos em abono pecuniário inferior ao mínimo permitido pelos parâmetros efetivos (minDiasPvendFer).",
+            "PCK_ERG_ABONOS_FERIAS.MAIN_PRE",
+            "IF v_row_new.dias_abono_vendidos < v_eff.min_dias_pvend_fer THEN pack_hades.trata_erro(3312); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-03313",
+            FeriasGozoRuleSet.SLOT_ABONO_PECUNIARIO_ELEGIBILIDADE_E_LIMITES,
+            "diasAbonoVendidos",
+            "Quantidade de dias vendidos em abono pecuniário superior ao máximo permitido pelos parâmetros efetivos (maxDiasVendFer).",
+            "PCK_ERG_ABONOS_FERIAS.MAIN_PRE",
+            "IF v_row_new.dias_abono_vendidos > v_eff.max_dias_vend_fer THEN pack_hades.trata_erro(3313); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-03314",
+            FeriasGozoRuleSet.SLOT_ABONO_PECUNIARIO_ELEGIBILIDADE_E_LIMITES,
+            "diasAbonoVendidos",
+            "Quantidade de dias vendidos em abono pecuniário supera o teto da fração legal incidente sobre direito ou gozo (numDiasAbonoFer/denDiasAbonoFer).",
+            "PCK_ERG_ABONOS_FERIAS.MAIN_PRE",
+            "IF v_row_new.dias_abono_vendidos > v_max_fracao_abono THEN pack_hades.trata_erro(3314); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-03315",
+            FeriasGozoRuleSet.SLOT_ABONO_PECUNIARIO_ELEGIBILIDADE_E_LIMITES,
+            "dtVendaAbono",
+            "Data de venda do abono pecuniário posterior ao início do gozo ou data de pagamento anterior à data de venda.",
+            "PCK_ERG_ABONOS_FERIAS.MAIN_PRE",
+            "IF v_row_new.dt_venda_abono > v_row_new.dtini OR v_row_new.dt_pagto_abono < v_row_new.dt_venda_abono THEN pack_hades.trata_erro(3315); END IF;"));
     register(
         map,
         new RuleErrorDescriptor(

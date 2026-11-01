@@ -14,7 +14,6 @@ import org.praxisplatform.uischema.extension.annotation.UISchema;
 @Setter
 public abstract class DefinicaoCampoCustomizadoDados {
   @Positive
-  @BulkEditable(modes = {BulkMode.UNIFORM_UPDATE, BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   @Schema(
       nullable = true,
       description =

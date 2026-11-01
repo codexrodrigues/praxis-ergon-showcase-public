@@ -265,7 +265,7 @@ public class DependenteService
     var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
     mapper.applyUpdate(entity, dto);
     if (invariants != null) {
-      invariants.dependente(entity, false);
+      invariants.dependente(entity, false, false);
     }
     validateDependenteElegibilidade(entity);
     CustomFieldSupport.restoreReadOnlyValues(entity, readOnlyKeys, old);
@@ -279,7 +279,7 @@ public class DependenteService
   @Override
   protected void beforeCreate(CreateDependenteDTO dto, Dependente entity) {
     if (invariants != null) {
-      invariants.dependente(entity, true);
+      invariants.dependente(entity, true, false);
     }
     validateDependenteElegibilidade(entity);
     if (getRepository().existsById(entity.getId())) {
@@ -299,7 +299,7 @@ public class DependenteService
     precondition.requireMatch(entity.getVersion());
     action.accept(entity);
     if (invariants != null) {
-      invariants.dependente(entity, false);
+      invariants.dependente(entity, false, false);
     }
     validateDependenteElegibilidade(entity);
     var saved = getRepository().save(entity);

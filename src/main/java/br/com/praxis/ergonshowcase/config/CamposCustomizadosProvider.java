@@ -27,6 +27,24 @@ public class CamposCustomizadosProvider implements CustomFieldDefinitionProvider
             .setParameter("r", resourceKey)
             .setParameter("o", orgao)
             .getResultList();
+    var optionTabs =
+        rows.stream()
+            .map(DefinicaoCampoCustomizado::getOptionTabela)
+            .filter(Objects::nonNull)
+            .distinct()
+            .toList();
+    Map<String, List<ItemTabela>> itemsByTab = new HashMap<>();
+    if (!optionTabs.isEmpty()) {
+      for (var item :
+          em.createQuery(
+                  "select i from ItemTabela i where i.id.tab in :tabs and i.ativo=true and (i.empCodigo is null or i.empCodigo=:o) order by i.ordem,i.descr",
+                  ItemTabela.class)
+              .setParameter("tabs", optionTabs)
+              .setParameter("o", orgao)
+              .getResultList()) {
+        itemsByTab.computeIfAbsent(item.getId().tab(), k -> new ArrayList<>()).add(item);
+      }
+    }
     Map<String, CustomFieldDescriptor> result = new LinkedHashMap<>();
     for (var d : rows) {
       var v = d.getValidationRules();
@@ -34,13 +52,7 @@ public class CamposCustomizadosProvider implements CustomFieldDefinitionProvider
       List<String> enums = new ArrayList<>();
       List<Map<String, Object>> options = new ArrayList<>();
       if (d.getOptionTabela() != null)
-        for (var item :
-            em.createQuery(
-                    "select i from ItemTabela i where i.id.tab=:t and i.ativo=true and (i.empCodigo is null or i.empCodigo=:o) order by i.ordem,i.descr",
-                    ItemTabela.class)
-                .setParameter("t", d.getOptionTabela())
-                .setParameter("o", orgao)
-                .getResultList()) {
+        for (var item : itemsByTab.getOrDefault(d.getOptionTabela(), List.of())) {
           enums.add(item.getId().item());
           options.add(Map.of("value", item.getId().item(), "label", item.getDescr()));
         }

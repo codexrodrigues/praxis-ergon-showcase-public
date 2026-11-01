@@ -32,6 +32,9 @@ import org.springframework.web.bind.annotation.*;
     label = "Com abono pecuniário",
     description = "Verdadeiro quando a parcela de férias inclui venda de dias em abono pecuniário.",
     dataType = "boolean",
+    icon = "payments",
+    tone = "info",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @ResourceFact(
     key = "comSubstitutoDesignado",
@@ -39,6 +42,9 @@ import org.springframework.web.bind.annotation.*;
     label = "Com substituto designado",
     description = "Verdadeiro quando há servidor substituto formalmente vinculado à parcela de férias.",
     dataType = "boolean",
+    icon = "supervisor_account",
+    tone = "success",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @ResourceFact(
     key = "parcelaInterrompida",
@@ -46,6 +52,9 @@ import org.springframework.web.bind.annotation.*;
     label = "Parcela interrompida",
     description = "Verdadeiro quando o gozo da parcela sofreu interrupção administrativa formal.",
     dataType = "boolean",
+    icon = "pause_circle",
+    tone = "danger",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @BulkResourceOperations(
     proposalOperationId = "ergon.ferias-gozo.bulk.proposal",

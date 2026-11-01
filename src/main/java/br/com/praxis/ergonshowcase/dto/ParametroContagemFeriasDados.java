@@ -250,6 +250,7 @@ public abstract class ParametroContagemFeriasDados {
   @Schema(
       description =
           "Base de cálculo do abono pecuniário de férias: D (sobre dias de direito do PA), G (sobre dias de gozo da parcela) ou N (não permite abono).",
+      allowableValues = {"D", "G", "N"},
       nullable = true)
   @BulkEditable
   @UISchema(
@@ -469,6 +470,7 @@ public abstract class ParametroContagemFeriasDados {
   @Schema(
       description =
           "Critério de comparação da prescrição do período aquisitivo: I (data inicial do gozo até a prescrição) ou F (data final do gozo até a prescrição).",
+      allowableValues = {"I", "F"},
       nullable = true)
   @BulkEditable
   @UISchema(
@@ -658,6 +660,7 @@ public abstract class ParametroContagemFeriasDados {
   @Schema(
       description =
           "Base de cálculo para conversão de licença especial em pecúnia: D (dias de direito), G (dias de gozo) ou N (vedado).",
+      allowableValues = {"D", "G", "N"},
       nullable = true)
   @BulkEditable(allowClear = true)
   @UISchema(

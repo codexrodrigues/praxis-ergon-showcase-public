@@ -2457,6 +2457,72 @@ public class ErgonRuleEngineFacade {
       putTextOrNull(node, "sexo", p.getSexo());
       return node;
     }
+    if (draftEntity instanceof ParametroContagemFerias pcf) {
+      putLongOrNull(node, "id", pcf.getId());
+      putIntOrNull(node, "empCodigo", pcf.getEmpCodigo());
+      putTextOrNull(node, "regimeJuridico", pcf.getRegimeJuridico());
+      putTextOrNull(node, "tipoVinculo", pcf.getTipoVinculo());
+      putTextOrNull(node, "categoria", pcf.getCategoria());
+      putTextOrNull(node, "subcategoria", pcf.getSubcategoria());
+      putDateOrNull(node, "dtini", pcf.getDtini());
+      putDateOrNull(node, "dtfim", pcf.getDtfim());
+      putBooleanOrNull(node, "temFerias", pcf.getTemFerias());
+      putIntOrNull(node, "totDiasFer", pcf.getTotDiasFer());
+      putIntOrNull(node, "minPerFer", pcf.getMinPerFer());
+      putIntOrNull(node, "maxPerFer", pcf.getMaxPerFer());
+      putIntOrNull(node, "minDiasPerFer", pcf.getMinDiasPerFer());
+      putIntOrNull(node, "maxDiasPerFer", pcf.getMaxDiasPerFer());
+      putIntOrNull(node, "minDiasPerPrincFer", pcf.getMinDiasPerPrincFer());
+      putTextOrNull(node, "abonoDirGozo", pcf.getAbonoDirGozo());
+      putBooleanOrNull(node, "contDobroFerias", pcf.getContDobroFerias());
+      putLongOrNull(node, "documentoLegalFeriasId", pcf.getDocumentoLegalFeriasId());
+      return node;
+    }
+    if (draftEntity instanceof PeriodoAquisitivoFerias paf) {
+      putLongOrNull(node, "id", paf.getId());
+      putIntOrNull(node, "empCodigo", paf.getEmpCodigo());
+      putLongOrNull(node, "numfunc", paf.getNumfunc());
+      putIntOrNull(node, "numvinc", paf.getNumvinc());
+      putIntOrNull(node, "chave", paf.getChave());
+      putIntOrNull(node, "exercicio", paf.getExercicio());
+      putDateOrNull(node, "dtini", paf.getDtini());
+      putDateOrNull(node, "dtfim", paf.getDtfim());
+      putIntOrNull(node, "totDiasDireito", paf.getTotDiasDireito());
+      putIntOrNull(node, "faltasApuradas", paf.getFaltasApuradas());
+      putIntOrNull(node, "diasAfastamentoSuspensivo", paf.getDiasAfastamentoSuspensivo());
+      putIntOrNull(node, "diasGozados", paf.getDiasGozados());
+      putIntOrNull(node, "diasVendidosAbono", paf.getDiasVendidosAbono());
+      putIntOrNull(node, "diasConvertidosDobro", paf.getDiasConvertidosDobro());
+      putIntOrNull(node, "saldoDiasDisponivel", paf.getSaldoDiasDisponivel());
+      putTextOrNull(node, "situacao", paf.getSituacao());
+      putDateOrNull(node, "dtPrescricao", paf.getDtPrescricao());
+      putLongOrNull(node, "documentoLegalId", paf.getDocumentoLegalId());
+      return node;
+    }
+    if (draftEntity instanceof FeriasGozo fg) {
+      putLongOrNull(node, "id", fg.getId());
+      putIntOrNull(node, "empCodigo", fg.getEmpCodigo());
+      putLongOrNull(node, "numfunc", fg.getNumfunc());
+      putIntOrNull(node, "numvinc", fg.getNumvinc());
+      putLongOrNull(node, "periodoAquisitivoId", fg.getPeriodoAquisitivoId());
+      putIntOrNull(node, "chavePeraqfer", fg.getChavePeraqfer());
+      putIntOrNull(node, "ordemParcela", fg.getOrdemParcela());
+      putDateOrNull(node, "dtini", fg.getDtini());
+      putDateOrNull(node, "dtprevfim", fg.getDtprevfim());
+      putDateOrNull(node, "dtfim", fg.getDtfim());
+      putIntOrNull(node, "diasGozo", fg.getDiasGozo());
+      putIntOrNull(node, "totDiasDireitoPa", fg.getTotDiasDireitoPa());
+      putBooleanOrNull(node, "abonoPecuniario", fg.getAbonoPecuniario());
+      putTextOrNull(node, "iniFimAbono", fg.getIniFimAbono());
+      putIntOrNull(node, "diasAbonoVendidos", fg.getDiasAbonoVendidos());
+      putBooleanOrNull(node, "abonoConstitucional", fg.getAbonoConstitucional());
+      putBooleanOrNull(node, "adiantamento13", fg.getAdiantamento13());
+      putBooleanOrNull(node, "adiantamentoSalario", fg.getAdiantamentoSalario());
+      putBooleanOrNull(node, "emprestimoFerias", fg.getEmprestimoFerias());
+      putTextOrNull(node, "situacao", fg.getSituacao());
+      putLongOrNull(node, "documentoLegalId", fg.getDocumentoLegalId());
+      return node;
+    }
     if (draftEntity instanceof Map<?, ?> map) {
       for (Map.Entry<?, ?> entry : map.entrySet()) {
         if (entry.getKey() != null) {
@@ -3878,6 +3944,10 @@ public class ErgonRuleEngineFacade {
           || a.getDtini() == null) {
         continue;
       }
+      if (a.getCodigoFrequenciaEntidade() != null
+          && Boolean.TRUE.equals(a.getCodigoFrequenciaEntidade().getOnus())) {
+        continue;
+      }
       LocalDate aEnd =
           a.getDtfim() != null
               ? a.getDtfim()
@@ -4165,12 +4235,25 @@ public class ErgonRuleEngineFacade {
       antecedenciaDias = ChronoUnit.DAYS.between(d.getDtVendaAbono(), d.getDtini());
     }
 
+    Integer maxDiasAbonoPelaFracao = null;
+    if (effective.numDiasAbonoFer() != null
+        && effective.denDiasAbonoFer() != null
+        && effective.denDiasAbonoFer() > 0) {
+      int baseCalculo =
+          "G".equalsIgnoreCase(effective.abonoDirGozo())
+              ? (d != null && d.getDiasGozo() != null ? d.getDiasGozo() : 0)
+              : totDiasDireitoPa;
+      maxDiasAbonoPelaFracao =
+          (baseCalculo * effective.numDiasAbonoFer()) / effective.denDiasAbonoFer();
+    }
+
     ObjectNode derivedNode = root.putObject("derived");
     if (antecedenciaDias != null) {
       derivedNode.put("antecedenciaDias", antecedenciaDias);
     } else {
       derivedNode.putNull("antecedenciaDias");
     }
+    putIntOrNull(derivedNode, "maxDiasAbonoPelaFracao", maxDiasAbonoPelaFracao);
     derivedNode.put("overlappingNormalFrequenciasCount", overlappingNormalFrequenciasCount);
     derivedNode.put("overlappingAfastamentosCount", overlappingAfastamentosCount);
     derivedNode.put("overlappingFeriasGozoCount", overlappingFeriasGozoCount);

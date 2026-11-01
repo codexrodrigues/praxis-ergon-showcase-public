@@ -194,7 +194,11 @@ public class ParametroContagemFeriasService
   protected org.praxisplatform.uischema.service.base.ResourceFilterAccessScope<
           ParametroContagemFerias>
       resolveResourceFilterAccessScope() {
-    int orgao = tenant.orgao();
+    var explicit = tenant.explicitOrgao();
+    if (explicit.isEmpty()) {
+      return org.praxisplatform.uischema.service.base.ResourceFilterAccessScope.unrestricted();
+    }
+    int orgao = explicit.getAsInt();
     return org.praxisplatform.uischema.service.base.ResourceFilterAccessScope.restricted(
         (root, query, cb) ->
             cb.or(cb.isNull(root.get("empCodigo")), cb.equal(root.get("empCodigo"), orgao)));

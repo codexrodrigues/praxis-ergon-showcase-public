@@ -81,7 +81,9 @@ public class AtualizarOverridesPeriodoAquisitivoDTO {
   private Integer minDiasPerPrincFer;
 
   @Pattern(regexp = "I|D|G|N")
-  @Schema(description = "Override da base de abono pecuniário: I (herda), D, G ou N.")
+  @Schema(
+      description = "Override da base de abono pecuniário: I (herda), D, G ou N.",
+      allowableValues = {"I", "D", "G", "N"})
   @UISchema(
       label = "Override base de abono",
       helpText = "Informe I (herda), D (direito), G (gozo) ou N (sem abono).",
@@ -93,7 +95,9 @@ public class AtualizarOverridesPeriodoAquisitivoDTO {
   private String abonoDirGozo;
 
   @Pattern(regexp = "I|S|N")
-  @Schema(description = "Override do terço constitucional: I (herda), S ou N.")
+  @Schema(
+      description = "Override do terço constitucional: I (herda), S ou N.",
+      allowableValues = {"I", "S", "N"})
   @UISchema(
       label = "Override terço constitucional",
       helpText = "Informe I (herda), S (concede) ou N (veda).",
@@ -105,7 +109,9 @@ public class AtualizarOverridesPeriodoAquisitivoDTO {
   private String abonoConstFer;
 
   @Pattern(regexp = "I|S|N")
-  @Schema(description = "Override de adiantamento de 13º salário: I (herda), S ou N.")
+  @Schema(
+      description = "Override de adiantamento de 13º salário: I (herda), S ou N.",
+      allowableValues = {"I", "S", "N"})
   @UISchema(
       label = "Override adiantamento 13º",
       helpText = "Informe I (herda), S (permite) ou N (bloqueia).",
@@ -117,7 +123,9 @@ public class AtualizarOverridesPeriodoAquisitivoDTO {
   private String adiant13Fer;
 
   @Pattern(regexp = "I|S|N")
-  @Schema(description = "Override de adiantamento salarial: I (herda), S ou N.")
+  @Schema(
+      description = "Override de adiantamento salarial: I (herda), S ou N.",
+      allowableValues = {"I", "S", "N"})
   @UISchema(
       label = "Override adiant. salarial",
       helpText = "Informe I (herda), S (permite) ou N (bloqueia).",
@@ -129,7 +137,9 @@ public class AtualizarOverridesPeriodoAquisitivoDTO {
   private String adiantSalFer;
 
   @Pattern(regexp = "I|S|N")
-  @Schema(description = "Override de empréstimo de férias: I (herda), S ou N.")
+  @Schema(
+      description = "Override de empréstimo de férias: I (herda), S ou N.",
+      allowableValues = {"I", "S", "N"})
   @UISchema(
       label = "Override empréstimo",
       helpText = "Informe I (herda), S (permite) ou N (bloqueia).",
@@ -141,7 +151,9 @@ public class AtualizarOverridesPeriodoAquisitivoDTO {
   private String emprestFer;
 
   @Pattern(regexp = "I|S|N")
-  @Schema(description = "Override de gozo antes do fim deste PA: I (herda), S ou N.")
+  @Schema(
+      description = "Override de gozo antes do fim deste PA: I (herda), S ou N.",
+      allowableValues = {"I", "S", "N"})
   @UISchema(
       label = "Override gozo antecipado",
       helpText = "Informe I (herda), S (permite) ou N (bloqueia).",
@@ -205,7 +217,9 @@ public class AtualizarOverridesPeriodoAquisitivoDTO {
   private Integer denDiasAbonoFer;
 
   @Pattern(regexp = "I|S|N")
-  @Schema(description = "Override de contagem em dobro de férias: I (herda), S ou N.")
+  @Schema(
+      description = "Override de contagem em dobro de férias: I (herda), S ou N.",
+      allowableValues = {"I", "S", "N"})
   @UISchema(
       label = "Override contagem em dobro",
       helpText = "Informe I (herda), S (permite) ou N (bloqueia).",

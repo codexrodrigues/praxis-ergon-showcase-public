@@ -36,6 +36,11 @@ public abstract class ErgonResourceService<E, R, I, F extends GenericFilterDTO, 
     return Sort.by(identityPaths.toArray(String[]::new));
   }
 
+  @Override
+  public boolean supportsCursorPagination() {
+    return true;
+  }
+
   protected abstract List<CollectionExportField> exportFields();
 
   protected abstract F emptyFilter();
@@ -96,7 +101,9 @@ public abstract class ErgonResourceService<E, R, I, F extends GenericFilterDTO, 
         Comparable value =
             p.getJavaType() == Long.class
                 ? Long.valueOf(values.get(i))
-                : Integer.valueOf(values.get(i));
+                : p.getJavaType() == Integer.class
+                    ? Integer.valueOf(values.get(i))
+                    : values.get(i);
         List<Predicate> branch = new ArrayList<>(equal);
         branch.add(greater ? cb.greaterThan(p, value) : cb.lessThan(p, value));
         alternatives.add(cb.and(branch.toArray(Predicate[]::new)));
@@ -127,17 +134,21 @@ public abstract class ErgonResourceService<E, R, I, F extends GenericFilterDTO, 
     if (cursor != null)
       try {
         List<String> values = List.of(CursorEncoder.BASE64_URL.decode(cursor).split(":"));
-        if (values.size() != identityPaths.size())
+        if (values.size() != identityPaths.size() || values.stream().anyMatch(String::isBlank))
           throw bad("Cursor incompatível com a identidade.");
-        values.forEach(Long::parseLong);
         spec = spec.and(boundary(values, sort.toList().getFirst().isAscending() != backwards));
       } catch (IllegalArgumentException e) {
         throw bad("Cursor inválido.");
       }
     Sort querySort = backwards ? Sort.by(sort.stream().map(Sort.Order::reverse).toList()) : sort;
-    List<E> rows =
-        new ArrayList<>(
-            getRepository().findAll(spec, PageRequest.of(0, size + 1, querySort)).getContent());
+    List<E> rows;
+    try {
+      rows =
+          new ArrayList<>(
+              getRepository().findAll(spec, PageRequest.of(0, size + 1, querySort)).getContent());
+    } catch (IllegalArgumentException e) {
+      throw bad("Cursor inválido.");
+    }
     boolean more = rows.size() > size;
     if (more) rows.removeLast();
     if (backwards) Collections.reverse(rows);
@@ -195,7 +206,12 @@ public abstract class ErgonResourceService<E, R, I, F extends GenericFilterDTO, 
                 CollectionExportFormat.CSV,
                 CollectionExportFormat.JSON,
                 CollectionExportFormat.EXCEL),
-            List.of(CollectionExportScope.FILTERED),
+            List.of(
+                CollectionExportScope.AUTO,
+                CollectionExportScope.SELECTED,
+                CollectionExportScope.FILTERED,
+                CollectionExportScope.CURRENT_PAGE,
+                CollectionExportScope.ALL),
             Map.of("csv", 1000, "json", 1000, "excel", 1000),
             false));
   }
@@ -203,29 +219,81 @@ public abstract class ErgonResourceService<E, R, I, F extends GenericFilterDTO, 
   @Override
   @Transactional(readOnly = true)
   public CollectionExportResult exportCollection(CollectionExportRequest<F> request) {
-    if (request.scope() != CollectionExportScope.AUTO
-            && request.scope() != CollectionExportScope.FILTERED
-        || request.selection() != null
-        || request.pagination() != null
-        || request.sort() != null)
-      throw bad("Exportação aceita o conjunto filtrado na ordem canônica de identidade.");
     if (!getCollectionExportCapability().orElseThrow().formats().contains(request.format()))
       throw bad("Formato não suportado.");
     int limit = request.maxRows() == null ? 1000 : Math.min(request.maxRows(), 1000);
     if (limit < 1) throw bad("Limite de linhas inválido.");
-    var rows =
-        filter(
-                request.filters() == null ? emptyFilter() : request.filters(),
-                PageRequest.of(0, limit + 1, getDefaultSort()),
-                null)
-            .getContent();
-    boolean truncated = rows.size() > limit;
+    CollectionExportScope requestedScope =
+        request.scope() != null ? request.scope() : CollectionExportScope.AUTO;
+    boolean hasSelection =
+        request.selection() != null
+            && request.selection().selectedKeys() != null
+            && !request.selection().selectedKeys().isEmpty();
+    CollectionExportScope effectiveScope =
+        requestedScope == CollectionExportScope.AUTO
+            ? (hasSelection
+                ? CollectionExportScope.SELECTED
+                : (request.pagination() != null
+                    ? CollectionExportScope.CURRENT_PAGE
+                    : CollectionExportScope.FILTERED))
+            : requestedScope;
+    F effectiveFilter =
+        effectiveScope == CollectionExportScope.ALL || request.filters() == null
+            ? emptyFilter()
+            : request.filters();
+    List<R> slice;
+    boolean truncated;
+    if (effectiveScope == CollectionExportScope.CURRENT_PAGE && request.pagination() != null) {
+      int pageNum =
+          request.pagination().pageIndex() != null
+              ? Math.max(0, request.pagination().pageIndex())
+              : (request.pagination().pageNumber() != null
+                  ? Math.max(0, request.pagination().pageNumber())
+                  : 0);
+      int pageSize =
+          request.pagination().pageSize() != null && request.pagination().pageSize() > 0
+              ? Math.min(request.pagination().pageSize(), limit)
+              : limit;
+      var pageResult =
+          filter(effectiveFilter, PageRequest.of(pageNum, pageSize, getDefaultSort()), null);
+      slice = pageResult.getContent();
+      truncated = pageResult.hasNext() && slice.size() >= limit;
+    } else {
+      var rows =
+          filter(effectiveFilter, PageRequest.of(0, limit + 1, getDefaultSort()), null)
+              .getContent();
+      if (effectiveScope == CollectionExportScope.SELECTED && hasSelection) {
+        Set<String> selectedIds =
+            request.selection().selectedKeys().stream()
+                .map(String::valueOf)
+                .collect(java.util.stream.Collectors.toSet());
+        String keyProp =
+            request.selection().keyField() != null && !request.selection().keyField().isBlank()
+                ? request.selection().keyField().trim()
+                : "id";
+        rows =
+            rows.stream()
+                .filter(
+                    row -> {
+                      var bw = new BeanWrapperImpl(row);
+                      Object keyVal =
+                          bw.isReadableProperty(keyProp)
+                              ? bw.getPropertyValue(keyProp)
+                              : (bw.isReadableProperty("id") ? bw.getPropertyValue("id") : null);
+                      return keyVal != null && selectedIds.contains(String.valueOf(keyVal));
+                    })
+                .toList();
+      }
+      truncated = rows.size() > limit;
+      slice = rows.subList(0, Math.min(rows.size(), limit));
+    }
+    String scopeName = effectiveScope.name().toLowerCase(Locale.ROOT);
     return exports.export(
         request,
-        rows.subList(0, Math.min(rows.size(), limit)),
+        slice,
         exportFields(),
         CollectionExportValueResolver.reflective(),
-        Map.of("effectiveMaxRows", limit, "truncated", truncated, "scope", "filtered"));
+        Map.of("effectiveMaxRows", limit, "truncated", truncated, "scope", scopeName));
   }
 
   @Autowired protected ErgonReadFacts readFacts;

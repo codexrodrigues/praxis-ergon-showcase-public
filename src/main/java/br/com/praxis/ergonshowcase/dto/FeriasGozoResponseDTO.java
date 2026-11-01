@@ -439,6 +439,7 @@ public class FeriasGozoResponseDTO {
   @Schema(
       description =
           "Posição cronológica do abono pecuniário em relação ao gozo: I (no início das férias) ou F (ao final das férias).",
+      allowableValues = {"I", "F"},
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Posição do abono (I/F)",
@@ -597,6 +598,14 @@ public class FeriasGozoResponseDTO {
   @Schema(
       description =
           "Situação operacional da parcela de gozo (PROGRAMADA, HOMOLOGADA, EM_GOZO, GOZADA, INTERROMPIDA, CANCELADA).",
+      allowableValues = {
+        "PROGRAMADA",
+        "HOMOLOGADA",
+        "EM_GOZO",
+        "GOZADA",
+        "INTERROMPIDA",
+        "CANCELADA"
+      },
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Situação da parcela",

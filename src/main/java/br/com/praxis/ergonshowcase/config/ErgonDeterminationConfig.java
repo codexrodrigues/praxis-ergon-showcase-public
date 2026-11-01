@@ -190,6 +190,11 @@ public class ErgonDeterminationConfig {
     var inputs = new ArrayList<ReactiveDeterminationInputBinding>();
     for (int i = 0; i < source.size(); i++)
       inputs.add(new ReactiveDeterminationInputBinding("/" + source.get(i), "/" + request.get(i)));
+    ReactiveDeterminationTriggerMode triggerMode =
+        switch (resource) {
+          case "ServidorPessoa", "Vinculo", "Cargo" -> ReactiveDeterminationTriggerMode.ON_CHANGE;
+          default -> ReactiveDeterminationTriggerMode.ON_INIT_AND_CHANGE;
+        };
     return new ReactiveDeterminationDefinition(
         id,
         List.of(
@@ -198,7 +203,7 @@ public class ErgonDeterminationConfig {
             new ReactiveDeterminationScope(
                 "updateErgon" + resource, ReactiveDeterminationFormMode.EDIT)),
         operation,
-        ReactiveDeterminationTriggerMode.ON_CHANGE,
+        triggerMode,
         source.stream().map(v -> "/" + v).toList(),
         inputs,
         outputs,

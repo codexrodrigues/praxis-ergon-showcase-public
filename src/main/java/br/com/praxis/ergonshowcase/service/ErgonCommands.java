@@ -5,7 +5,12 @@ import br.com.praxis.ergonshowcase.domain.*;
 import br.com.praxis.ergonshowcase.dto.*;
 import br.com.praxis.ergonshowcase.mapper.*;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import org.praxisplatform.uischema.concurrency.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,6 +32,9 @@ public class ErgonCommands {
   @Autowired private TenantContext tenant;
   @Autowired private OrgaoMapper orgaos;
   @Autowired private ErgonReadFacts readFacts;
+
+  @Autowired(required = false)
+  private AfastamentoService afastamentoService;
 
   public ResourceRepresentationResult<OrgaoResponseDTO> ativarOrgao(
       Integer id, AlterarSituacaoOrgaoDTO dto, ResourceVersionUpdatePrecondition<Integer> p) {
@@ -64,30 +72,76 @@ public class ErgonCommands {
         em.find(CodigoFrequencia.class, new CodigoFrequenciaId(dto.tipofreq(), dto.codfreq()));
     if (codigo == null || !Boolean.TRUE.equals(codigo.getAfastamento()))
       ErgonInvariants.fail("Código de frequência não habilitado para afastamento.");
+    if (codigo.getSexo() != null && Set.of("F", "M").contains(codigo.getSexo())) {
+      ServidorPessoa pessoa = em.find(ServidorPessoa.class, id.numfunc());
+      if (pessoa != null && !Objects.equals(codigo.getSexo(), pessoa.getSexo())) {
+        ErgonInvariants.fail(
+            "A modalidade de licença selecionada é exclusiva para servidores do sexo "
+                + codigo.getSexo()
+                + ".");
+      }
+    }
     ErgonInvariants.chronology(e.getDtexerc(), dto.dtini(), "Afastamento anterior ao exercício.");
     ErgonInvariants.chronology(
         dto.dtini(), dto.dtprevfim(), "Término previsto anterior ao início do afastamento.");
-    long conflitos =
+    Integer dias = null;
+    if (dto.dtini() != null && dto.dtprevfim() != null && !dto.dtprevfim().isBefore(dto.dtini())) {
+      dias = Math.toIntExact(ChronoUnit.DAYS.between(dto.dtini(), dto.dtprevfim()) + 1);
+      BigDecimal diasDec = BigDecimal.valueOf(dias);
+      if (codigo.getQtdmin() != null && diasDec.compareTo(codigo.getQtdmin()) < 0) {
+        ErgonInvariants.fail(
+            "A duração do afastamento é inferior ao mínimo regulamentar da modalidade ("
+                + codigo.getQtdmin()
+                + " dias).");
+      }
+      if (codigo.getQtdmax() != null && diasDec.compareTo(codigo.getQtdmax()) > 0) {
+        ErgonInvariants.fail(
+            "A duração do afastamento excede o limite máximo regulamentar da modalidade ("
+                + codigo.getQtdmax()
+                + " dias).");
+      }
+    }
+    var qExistentes =
         em.createQuery(
-                "select count(a) from Afastamento a where a.numfunc=:p and a.numvinc=:v and a.situacao='HOMOLOGADO' and (a.dtfim is null or a.dtfim>=:inicio)",
-                Long.class)
-            .setParameter("p", id.numfunc())
-            .setParameter("v", id.numero())
-            .setParameter("inicio", dto.dtini())
-            .getSingleResult();
-    if (conflitos > 0)
-      ErgonInvariants.fail("Período conflita com afastamento homologado existente.");
+            "select a from Afastamento a where a.numfunc=:p and a.numvinc=:v and a.situacao='HOMOLOGADO'",
+            Afastamento.class);
+    List<Afastamento> existentes =
+        qExistentes != null
+            ? qExistentes
+                .setParameter("p", id.numfunc())
+                .setParameter("v", id.numero())
+                .getResultList()
+            : List.of();
+    if (existentes != null && dto.dtini() != null) {
+      LocalDate startA = dto.dtini();
+      LocalDate endA = dto.dtprevfim() != null ? dto.dtprevfim() : LocalDate.MAX;
+      for (Afastamento other : existentes) {
+        if (other == null || other.getDtini() == null) continue;
+        LocalDate startB = other.getDtini();
+        LocalDate endB =
+            other.getDtfim() != null
+                ? other.getDtfim()
+                : (other.getDtprevfim() != null ? other.getDtprevfim() : LocalDate.MAX);
+        if (!startA.isAfter(endB) && !startB.isAfter(endA)) {
+          ErgonInvariants.fail("Período conflita com afastamento homologado existente.");
+        }
+      }
+    }
     Afastamento a = new Afastamento();
     a.setNumfunc(id.numfunc());
     a.setNumvinc(id.numero());
     a.setEmpCodigo(e.getEmpCodigo());
     a.setDtini(dto.dtini());
     a.setDtprevfim(dto.dtprevfim());
+    a.setQuantidadeDias(dias);
     a.setTipofreq(dto.tipofreq());
     a.setCodfreq(dto.codfreq());
     a.setMotivo(dto.motivo());
     a.setDocumentoLegalId(dto.documentoLegalId());
     a.setSituacao("HOMOLOGADO");
+    if (afastamentoService != null) {
+      afastamentoService.validateAfastamentoConcessao(a, true);
+    }
     em.persist(a);
     e.setSituacao("AFASTADO");
     e.setDocumentoLegalId(dto.documentoLegalId());
@@ -119,8 +173,7 @@ public class ErgonCommands {
     ErgonInvariants.chronology(
         a.getDtini(), dto.dtfim(), "Encerramento anterior ao início do afastamento.");
     a.setDtfim(dto.dtfim());
-    a.setQuantidadeDias(
-        Math.toIntExact(java.time.temporal.ChronoUnit.DAYS.between(a.getDtini(), dto.dtfim()) + 1));
+    a.setQuantidadeDias(Math.toIntExact(ChronoUnit.DAYS.between(a.getDtini(), dto.dtfim()) + 1));
     e.setSituacao("ATIVO");
     e.setDocumentoLegalId(dto.documentoLegalId());
     return finish(e);

@@ -38,6 +38,9 @@ import org.springframework.web.server.ResponseStatusException;
     label = "Com saldo disponível",
     description = "Verdadeiro quando o período aquisitivo possui saldo líquido de dias disponível para programação.",
     dataType = "boolean",
+    icon = "event_available",
+    tone = "success",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @ResourceFact(
     key = "possuiOverridesAtivos",
@@ -45,6 +48,9 @@ import org.springframework.web.server.ResponseStatusException;
     label = "Com override individual",
     description = "Verdadeiro quando o período aquisitivo sobrescreve parâmetros herdados de PARAMETROS_CONTA.",
     dataType = "boolean",
+    icon = "tune",
+    tone = "warning",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @ResourceFact(
     key = "emRiscoPrescricao",
@@ -52,6 +58,25 @@ import org.springframework.web.server.ResponseStatusException;
     label = "Em risco de prescrição",
     description = "Verdadeiro quando há saldo disponível e data de prescrição apurada ou prescrição efetivada.",
     dataType = "boolean",
+    icon = "warning_amber",
+    tone = "danger",
+    valuePresentation = "badge",
+    sourceKind = "computed")
+@ResourceFact(
+    key = "saldoDiasDisponivel",
+    resourceKey = "administracao-pessoal.periodos-aquisitivos-ferias",
+    label = "Saldo disponível",
+    description = "Saldo líquido de dias de férias disponível para programação ou conversão.",
+    dataType = "integer",
+    unit = "days",
+    icon = "event_available",
+    tone = "info",
+    valuePresentation = "metric",
+    thresholds = {
+      @Threshold(max = 0, tone = "neutral", label = "Quitado"),
+      @Threshold(min = 1, max = 10, tone = "warning", label = "Saldo residual"),
+      @Threshold(min = 11, max = 60, tone = "success", label = "Saldo regular")
+    },
     sourceKind = "computed")
 @BulkResourceOperations(
     proposalOperationId = "ergon.periodos-aquisitivos-ferias.bulk.proposal",

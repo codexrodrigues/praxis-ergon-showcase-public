@@ -20,6 +20,7 @@ import org.praxisplatform.uischema.annotation.ApiGroup;
 import org.praxisplatform.uischema.annotation.ApiResource;
 import org.praxisplatform.uischema.annotation.QuickFilter;
 import org.praxisplatform.uischema.annotation.ResourceIdentity;
+import org.praxisplatform.uischema.annotation.Threshold;
 import org.praxisplatform.uischema.annotation.UiAnalytics;
 import org.praxisplatform.uischema.annotation.UiSurface;
 import org.praxisplatform.uischema.controller.base.AbstractReadOnlyResourceController;
@@ -56,6 +57,9 @@ import org.springframework.web.server.ResponseStatusException;
     description =
         "Verdadeiro quando o período aquisitivo está vencido/prescrito ou em janela crítica de até 30 dias.",
     dataType = "boolean",
+    icon = "notification_important",
+    tone = "danger",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @ResourceFact(
     key = "possuiSaldoDescoberto",
@@ -64,6 +68,9 @@ import org.springframework.web.server.ResponseStatusException;
     description =
         "Verdadeiro quando há saldo disponível de dias ainda não coberto por parcelas futuras programadas.",
     dataType = "boolean",
+    icon = "event_busy",
+    tone = "warning",
+    valuePresentation = "badge",
     sourceKind = "computed")
 @ResourceFact(
     key = "emRiscoImediatoGovernanca",
@@ -72,6 +79,27 @@ import org.springframework.web.server.ResponseStatusException;
     description =
         "Verdadeiro quando o vínculo acumula 2+ períodos com saldo aberto ou possui prescrição crítica/vencida.",
     dataType = "boolean",
+    icon = "gpp_maybe",
+    tone = "danger",
+    valuePresentation = "badge",
+    sourceKind = "computed")
+@ResourceFact(
+    key = "diasAtePrescricao",
+    resourceKey = "administracao-pessoal.radar-ferias-prescricao",
+    label = "Dias até prescrição",
+    description =
+        "Dias corridos restantes até a prescrição do período aquisitivo monitorado.",
+    dataType = "integer",
+    unit = "days",
+    icon = "timer",
+    tone = "warning",
+    valuePresentation = "metric",
+    thresholds = {
+      @Threshold(max = 0, tone = "danger", label = "Vencido"),
+      @Threshold(min = 1, max = 30, tone = "danger", label = "Crítico 30d"),
+      @Threshold(min = 31, max = 60, tone = "warning", label = "Alerta 60d"),
+      @Threshold(min = 61, tone = "success", label = "Regular")
+    },
     sourceKind = "computed")
 @ApiResource(
     value = ApiPaths.RADAR_FERIAS_PRESCRICAO,

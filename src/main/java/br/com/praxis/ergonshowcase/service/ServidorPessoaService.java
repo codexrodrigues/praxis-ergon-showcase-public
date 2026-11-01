@@ -39,7 +39,7 @@ public class ServidorPessoaService
   public org.praxisplatform.uischema.filter.specification.GenericSpecificationsBuilder<
           ServidorPessoa>
       getSpecificationsBuilder() {
-    return new br.com.praxis.ergonshowcase.config.PessoaSpecificationsBuilder();
+    return new org.praxisplatform.uischema.filter.specification.GenericSpecificationsBuilder<>();
   }
 
   protected final ServidorPessoaMapper mapper;

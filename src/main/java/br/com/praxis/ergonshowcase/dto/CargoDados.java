@@ -229,5 +229,6 @@ public abstract class CargoDados {
       readOnly = true,
       tableHidden = true,
       icon = "info")
+  @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
   private String cargoAglutinadorNomePrevisto;
 }

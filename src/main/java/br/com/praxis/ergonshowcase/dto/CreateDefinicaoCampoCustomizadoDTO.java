@@ -12,6 +12,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchema;
     description =
         "Payload de criação de definição de campo customizado multi-órgão no catálogo governado (substituto de FLEX_CAMPO_01..40).")
 public class CreateDefinicaoCampoCustomizadoDTO extends DefinicaoCampoCustomizadoDados {
+  @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
   @Schema(
       description =
           "Descrição prevista da tabela geral selecionada para abastecer opções (prévia reativa não persistida).",
@@ -25,6 +26,7 @@ public class CreateDefinicaoCampoCustomizadoDTO extends DefinicaoCampoCustomizad
       tableHidden = true)
   private String optionTabelaDescricaoPrevista;
 
+  @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
   @Schema(
       description =
           "Indica em tempo de formulário se a combinação de tipo e controle exige informar tabela geral de opções.",
@@ -41,6 +43,7 @@ public class CreateDefinicaoCampoCustomizadoDTO extends DefinicaoCampoCustomizad
       tableHidden = true)
   private Boolean requerTabelaOpcoesPrevisto;
 
+  @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
   @Schema(
       description =
           "Indica em tempo de formulário se o campo customizado terá escopo global para todos os órgãos (empCodigo nulo).",

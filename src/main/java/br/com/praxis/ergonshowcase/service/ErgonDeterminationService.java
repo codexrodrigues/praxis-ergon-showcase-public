@@ -294,6 +294,19 @@ public class ErgonDeterminationService {
     int diasSuspensivos = 0;
     for (Afastamento a : afasts) {
       if (a == null || a.getDtini() == null) continue;
+      CodigoFrequencia cf = a.getCodigoFrequenciaEntidade();
+      if (cf == null
+          && a.getTipofreq() != null
+          && !a.getTipofreq().isBlank()
+          && a.getCodfreq() != null) {
+        cf =
+            em.find(
+                CodigoFrequencia.class,
+                new CodigoFrequenciaId(a.getTipofreq().trim(), a.getCodfreq()));
+      }
+      if (cf != null && Boolean.TRUE.equals(cf.getOnus())) {
+        continue;
+      }
       LocalDate aEnd =
           a.getDtfim() != null
               ? a.getDtfim()

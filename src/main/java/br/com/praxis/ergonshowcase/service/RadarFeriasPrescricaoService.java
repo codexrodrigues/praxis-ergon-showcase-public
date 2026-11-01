@@ -6,11 +6,16 @@ import br.com.praxis.ergonshowcase.dto.RadarFeriasPrescricaoFilterDTO;
 import br.com.praxis.ergonshowcase.dto.RadarFeriasPrescricaoResponseDTO;
 import br.com.praxis.ergonshowcase.mapper.RadarFeriasPrescricaoMapper;
 import br.com.praxis.ergonshowcase.repository.RadarFeriasPrescricaoRepository;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
+import java.util.stream.Collectors;
+import org.praxisplatform.uischema.dto.CursorPage;
 import org.praxisplatform.uischema.exporting.CollectionExportCapability;
 import org.praxisplatform.uischema.exporting.CollectionExportExecutor;
 import org.praxisplatform.uischema.exporting.CollectionExportField;
@@ -25,9 +30,13 @@ import org.praxisplatform.uischema.service.base.ResourceFilterAccessScope;
 import org.praxisplatform.uischema.stats.StatsFieldRegistry;
 import org.praxisplatform.uischema.stats.StatsMetric;
 import org.praxisplatform.uischema.stats.StatsSupportMode;
+import org.praxisplatform.uischema.util.CursorEncoder;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,8 +91,102 @@ public class RadarFeriasPrescricaoService
   }
 
   @Override
+  public boolean supportsCursorPagination() {
+    return true;
+  }
+
+  private Specification<RadarFeriasPrescricao> filtered(RadarFeriasPrescricaoFilterDTO filter) {
+    return resolveResourceFilterAccessScope()
+        .specification()
+        .and(getSpecificationsBuilder().buildSpecification(filter, Pageable.unpaged()).spec());
+  }
+
+  private Sort identitySort(Sort sort) {
+    if (sort == null || sort.isUnsorted() || sort.equals(getDefaultSort())) {
+      return Sort.by(Sort.Order.asc("id"));
+    }
+    var orders = sort.toList();
+    if (orders.size() == 1 && "id".equals(orders.getFirst().getProperty())) {
+      return sort;
+    }
+    throw new ResponseStatusException(
+        HttpStatus.UNPROCESSABLE_ENTITY, "Cursor e localização exigem ordenação pela identidade.");
+  }
+
+  private String token(RadarFeriasPrescricao e) {
+    return CursorEncoder.BASE64_URL.encode(String.valueOf(e.getId()));
+  }
+
+  @Override
+  protected CursorPage<RadarFeriasPrescricao> filterEntitiesByCursor(
+      RadarFeriasPrescricaoFilterDTO filter,
+      Sort requested,
+      String after,
+      String before,
+      int size) {
+    if (size < 1 || size > 200 || (after != null && before != null)) {
+      throw new ResponseStatusException(
+          HttpStatus.UNPROCESSABLE_ENTITY, "Tamanho inválido ou cursores conflitantes.");
+    }
+    Sort sort = identitySort(requested);
+    boolean backwards = before != null;
+    var spec = filtered(filter == null ? new RadarFeriasPrescricaoFilterDTO() : filter);
+    String cursor = backwards ? before : after;
+    if (cursor != null) {
+      try {
+        Long idValue = Long.valueOf(CursorEncoder.BASE64_URL.decode(cursor));
+        boolean greater = sort.toList().getFirst().isAscending() != backwards;
+        spec =
+            spec.and(
+                (root, q, cb) ->
+                    greater
+                        ? cb.greaterThan(root.get("id"), idValue)
+                        : cb.lessThan(root.get("id"), idValue));
+      } catch (IllegalArgumentException e) {
+        throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Cursor inválido.");
+      }
+    }
+    Sort querySort = backwards ? Sort.by(sort.stream().map(Sort.Order::reverse).toList()) : sort;
+    List<RadarFeriasPrescricao> rows =
+        new ArrayList<>(
+            getRepository().findAll(spec, PageRequest.of(0, size + 1, querySort)).getContent());
+    boolean more = rows.size() > size;
+    if (more) rows.removeLast();
+    if (backwards) Collections.reverse(rows);
+    return new CursorPage<>(
+        rows,
+        rows.isEmpty()
+            ? null
+            : (!backwards && more || backwards && cursor != null ? token(rows.getLast()) : null),
+        rows.isEmpty()
+            ? null
+            : (backwards && more || !backwards && cursor != null ? token(rows.getFirst()) : null),
+        size);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public OptionalLong locate(RadarFeriasPrescricaoFilterDTO filter, Sort requested, Long id) {
+    Sort sort = identitySort(requested);
+    var entity = getRepository().findById(id);
+    if (entity.isEmpty()) return OptionalLong.empty();
+    var effectiveFilter = filter == null ? new RadarFeriasPrescricaoFilterDTO() : filter;
+    Specification<RadarFeriasPrescricao> match = (root, q, cb) -> cb.equal(root.get("id"), id);
+    if (!getRepository().exists(filtered(effectiveFilter).and(match))) return OptionalLong.empty();
+    boolean greater = sort.toList().getFirst().isDescending();
+    Specification<RadarFeriasPrescricao> bound =
+        (root, q, cb) ->
+            greater ? cb.greaterThan(root.get("id"), id) : cb.lessThan(root.get("id"), id);
+    return OptionalLong.of(getRepository().count(filtered(effectiveFilter).and(bound)));
+  }
+
+  @Override
   protected ResourceFilterAccessScope<RadarFeriasPrescricao> resolveResourceFilterAccessScope() {
-    int orgao = tenant.orgao();
+    var explicitOrgao = tenant.explicitOrgao();
+    if (explicitOrgao.isEmpty()) {
+      return ResourceFilterAccessScope.unrestricted();
+    }
+    int orgao = explicitOrgao.getAsInt();
     return ResourceFilterAccessScope.restricted(
         (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
   }
@@ -91,7 +194,8 @@ public class RadarFeriasPrescricaoService
   @Override
   public RadarFeriasPrescricao findEntityById(Long id) {
     RadarFeriasPrescricao entity = super.findEntityById(id);
-    if (entity.getEmpCodigo() != null && !java.util.Objects.equals(entity.getEmpCodigo(), tenant.orgao())) {
+    if (entity.getEmpCodigo() != null
+        && !java.util.Objects.equals(entity.getEmpCodigo(), tenant.orgao())) {
       throw new ResponseStatusException(
           HttpStatus.UNPROCESSABLE_ENTITY,
           "Órgão do registro no radar de prescrição diverge de X-Tenant.");
@@ -232,18 +336,74 @@ public class RadarFeriasPrescricaoService
       throw new ResponseStatusException(
           HttpStatus.UNPROCESSABLE_ENTITY, "Limite de linhas inválido.");
     }
-    var filter = request.filters() == null ? new RadarFeriasPrescricaoFilterDTO() : request.filters();
-    var rows = filter(filter, PageRequest.of(0, limit + 1, getDefaultSort()), null).getContent();
-    boolean truncated = rows.size() > limit;
-    var slice = rows.subList(0, Math.min(rows.size(), limit));
-    String effectiveScope =
-        request.scope() != null ? request.scope().name().toLowerCase() : "filtered";
+    CollectionExportScope requestedScope =
+        request.scope() != null ? request.scope() : CollectionExportScope.AUTO;
+    boolean hasSelection =
+        request.selection() != null
+            && request.selection().selectedKeys() != null
+            && !request.selection().selectedKeys().isEmpty();
+    CollectionExportScope effectiveScope =
+        requestedScope == CollectionExportScope.AUTO
+            ? (hasSelection
+                ? CollectionExportScope.SELECTED
+                : (request.pagination() != null
+                    ? CollectionExportScope.CURRENT_PAGE
+                    : CollectionExportScope.FILTERED))
+            : requestedScope;
+    var filter =
+        effectiveScope == CollectionExportScope.ALL || request.filters() == null
+            ? new RadarFeriasPrescricaoFilterDTO()
+            : request.filters();
+    List<RadarFeriasPrescricaoResponseDTO> slice;
+    boolean truncated;
+    if (effectiveScope == CollectionExportScope.CURRENT_PAGE && request.pagination() != null) {
+      int pageNum =
+          request.pagination().pageIndex() != null
+              ? Math.max(0, request.pagination().pageIndex())
+              : (request.pagination().pageNumber() != null
+                  ? Math.max(0, request.pagination().pageNumber())
+                  : 0);
+      int pageSize =
+          request.pagination().pageSize() != null && request.pagination().pageSize() > 0
+              ? Math.min(request.pagination().pageSize(), limit)
+              : limit;
+      var pageResult = filter(filter, PageRequest.of(pageNum, pageSize, getDefaultSort()), null);
+      slice = pageResult.getContent();
+      truncated = pageResult.hasNext() && slice.size() >= limit;
+    } else {
+      var rows = filter(filter, PageRequest.of(0, limit + 1, getDefaultSort()), null).getContent();
+      if (effectiveScope == CollectionExportScope.SELECTED && hasSelection) {
+        Set<String> selectedIds =
+            request.selection().selectedKeys().stream()
+                .map(String::valueOf)
+                .collect(Collectors.toSet());
+        String keyProp =
+            request.selection().keyField() != null && !request.selection().keyField().isBlank()
+                ? request.selection().keyField().trim()
+                : "id";
+        rows =
+            rows.stream()
+                .filter(
+                    row -> {
+                      var bw = new BeanWrapperImpl(row);
+                      Object keyVal =
+                          bw.isReadableProperty(keyProp)
+                              ? bw.getPropertyValue(keyProp)
+                              : (bw.isReadableProperty("id") ? bw.getPropertyValue("id") : null);
+                      return keyVal != null && selectedIds.contains(String.valueOf(keyVal));
+                    })
+                .toList();
+      }
+      truncated = rows.size() > limit;
+      slice = rows.subList(0, Math.min(rows.size(), limit));
+    }
+    String scopeName = effectiveScope.name().toLowerCase(Locale.ROOT);
     return exports.export(
         request,
         slice,
         exportFields(),
         CollectionExportValueResolver.reflective(),
-        Map.of("effectiveMaxRows", limit, "truncated", truncated, "scope", effectiveScope));
+        Map.of("effectiveMaxRows", limit, "truncated", truncated, "scope", scopeName));
   }
 
   @Override

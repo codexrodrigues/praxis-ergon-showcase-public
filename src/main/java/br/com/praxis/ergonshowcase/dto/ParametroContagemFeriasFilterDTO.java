@@ -179,7 +179,9 @@ public class ParametroContagemFeriasFilterDTO implements GenericFilterDTO {
   @Filterable(operation = FilterOperation.EQUAL, relation = "temFerias")
   private Boolean temFerias;
 
-  @Schema(description = "Filtra pela base de abono pecuniário (D, G ou N).")
+  @Schema(
+      description = "Filtra pela base de abono pecuniário (D, G ou N).",
+      allowableValues = {"D", "G", "N"})
   @UISchema(
       label = "Base do abono pecuniário",
       helpText = "Filtra por D (direito), G (gozo) ou N (sem abono).",

@@ -4,6 +4,8 @@ import br.com.praxis.ergonshowcase.bulk.ErgonBulkDomain.Resource;
 import br.com.praxis.ergonshowcase.config.TenantContext;
 import br.com.praxis.ergonshowcase.domain.*;
 import br.com.praxis.ergonshowcase.operations.InstallBulkStorage;
+import br.com.praxis.ergonshowcase.rules.ErgonRuleErrorCatalog;
+import br.com.praxis.ergonshowcase.rules.ErgonRuleViolationException;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.*;
 import java.nio.charset.StandardCharsets;
@@ -165,6 +167,13 @@ public class ErgonBulkOperations {
               eligibility=BulkTargetEligibility.executable();
             } catch(SecurityException denied) { plan.put("blockedReason","DENIED");eligibility=blocked("DENIED"); }
             catch(BulkInputViolation invalid) { plan.put("blockedReason",invalid.code);eligibility=blocked(invalid.code); }
+            catch(ErgonRuleViolationException ruleViolation) {
+              String code = ruleViolation.getReasonCodes() != null && !ruleViolation.getReasonCodes().isEmpty()
+                  ? ruleViolation.getReasonCodes().getFirst()
+                  : "INVALID";
+              plan.put("blockedReason", code);
+              eligibility = blocked(code);
+            }
             catch(IllegalArgumentException | ResponseStatusException invalid) {
               if(!plan.has("blockedReason")) plan.put("blockedReason","INVALID");eligibility=blocked(plan.path("blockedReason").asText());
             }
@@ -172,18 +181,29 @@ public class ErgonBulkOperations {
           }
           LOG.debug("Captura de avaliação concluída: registros={}",all.size());
           return new BulkEvaluationSnapshot(proposal,Instant.now(),all,new BulkEvaluationGovernance(REVISION,fingerprint(),List.of()));
-        },evaluation->new BulkPreviewProjection(evaluation,"1",publicDiagnostics()),()->Duration.ofNanos(Math.max(0,deadline-System.nanoTime()))));
+        },evaluation->new BulkPreviewProjection(evaluation,"1",publicDiagnostics(evaluation)),()->Duration.ofNanos(Math.max(0,deadline-System.nanoTime()))));
     return proposal(resource,operation,evidence.proposal().id());
   }
-  private List<BulkPreviewProjection.PublicDiagnostic> publicDiagnostics() {
-    return List.of("INVALID","CONFLICT","DENIED","JORNADA_FORA_INTERVALO").stream().map(code->new BulkPreviewProjection.PublicDiagnostic(ResourceCommandErrorCategory.VALIDATION,code,diagnosticMessage(code))).toList();
+  private List<BulkPreviewProjection.PublicDiagnostic> publicDiagnostics(BulkEvaluationSnapshot evaluation) {
+    var codes = new LinkedHashSet<>(List.of("INVALID","CONFLICT","DENIED","JORNADA_FORA_INTERVALO"));
+    if (evaluation != null && evaluation.targets() != null) {
+      for (var target : evaluation.targets()) {
+        String blockedReason = target.plan() != null ? target.plan().path("blockedReason").asText(null) : null;
+        if (blockedReason != null && !blockedReason.isBlank() && codes.size() < 64) {
+          codes.add(blockedReason);
+        }
+      }
+    }
+    return codes.stream().map(code->new BulkPreviewProjection.PublicDiagnostic(ResourceCommandErrorCategory.VALIDATION,code,diagnosticMessage(code))).toList();
   }
   private String diagnosticMessage(String code) {
     return switch(code) {
       case "JORNADA_FORA_INTERVALO" -> "Informe jornadaSemanal entre 1 e 168 horas e avalie novamente.";
       case "CONFLICT" -> "O registro mudou. Atualize a seleção e avalie novamente antes de confirmar.";
       case "DENIED" -> "Não foi possível autorizar este item. Revise o órgão selecionado e solicite acesso ao responsável.";
-      default -> "Os valores não atendem às regras do cadastro. Revise os campos alterados e avalie novamente.";
+      default -> ErgonRuleErrorCatalog.find(code)
+          .map(ErgonRuleErrorCatalog.RuleErrorDescriptor::messagePtBr)
+          .orElse("Os valores não atendem às regras do cadastro. Revise os campos alterados e avalie novamente.");
     };
   }
   private BulkTargetEligibility blocked(String code) {
