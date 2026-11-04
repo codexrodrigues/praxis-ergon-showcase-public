@@ -4,12 +4,16 @@ import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import br.com.praxis.ergonshowcase.repository.CargoRepository;
 import java.util.Map;
 import org.praxisplatform.uischema.capability.*;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /** Disponibilidade do preparo e seus pré-requisitos; a execução revalida a origem no serviço. */
 @Component
+@Primary
 public class CargoDraftAvailability implements ResourceOperationAvailabilityProvider {
+  private static final OrganogramaPhaseOneAvailability ORGANOGRAMA_AVAILABILITY =
+      new OrganogramaPhaseOneAvailability();
   private static final java.util.Set<String> DRAFT_WITH_EXPLICIT_ELIGIBILITY = java.util.Set.of(
       ApiPaths.KEY_VENDAS_LICENCA_ESPECIAL, ApiPaths.KEY_FUNCOES, ApiPaths.KEY_DESIGNACOES, ApiPaths.KEY_SUBSTITUICOES);
   private final CargoRepository cargos;
@@ -22,6 +26,9 @@ public class CargoDraftAvailability implements ResourceOperationAvailabilityProv
 
   @Override
   public AvailabilityDecision evaluate(ResourceOperationAvailabilityContext context) {
+    if (OrganogramaPhaseOneAvailability.RESOURCES.contains(context.resourceKey())) {
+      return ORGANOGRAMA_AVAILABILITY.evaluate(context);
+    }
     if(java.util.Set.of(br.com.praxis.ergonshowcase.constants.ApiPaths.KEY_AVERBACOES_TEMPO_SERVICO,
         br.com.praxis.ergonshowcase.constants.ApiPaths.KEY_PERIODOS_AQUISITIVOS_LICENCA_ESPECIAL,
         br.com.praxis.ergonshowcase.constants.ApiPaths.KEY_LICENCAS_ESPECIAIS_GOZO).contains(context.resourceKey())

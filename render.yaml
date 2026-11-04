@@ -3,7 +3,7 @@ services:
     name: praxis-ergon-showcase
     runtime: docker
     plan: starter
-    region: oregon
+    region: virginia
     healthCheckPath: /actuator/health
     envVars:
       - key: PORT
