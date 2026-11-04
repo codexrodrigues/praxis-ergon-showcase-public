@@ -1,5 +1,6 @@
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
+COPY .mvn/local-repo/io /root/.m2/repository/io
 COPY pom.xml .
 COPY src ./src
 RUN mvn -B -Dmaven.test.skip=true package

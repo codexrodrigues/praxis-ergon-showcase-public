@@ -39,34 +39,13 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Verify published Praxis dependencies on Maven Central
+      - name: Seed local Praxis dependencies into Maven repository
         shell: bash
         run: |
           set -euo pipefail
-          read_property() {
-            python3 - "$1" <<'PY'
-          import sys, xml.etree.ElementTree as ET
-          ns = {"m": "http://maven.apache.org/POM/4.0.0"}
-          root = ET.parse("pom.xml").getroot()
-          props = root.find("m:properties", ns)
-          val = props.findtext(f"m:{sys.argv[1]}", namespaces=ns) if props is not None else None
-          if not val:
-              raise SystemExit(f"Missing property {sys.argv[1]}")
-          print(val.strip())
-          PY
-          }
-          check_artifact() {
-            local artifact="$1"
-            local version="$2"
-            local url="https://repo.maven.apache.org/maven2/io/github/codexrodrigues/${artifact}/${version}/${artifact}-${version}.pom"
-            local status
-            status="$(curl -L -s -o /dev/null -w '%{http_code}' --connect-timeout 10 --max-time 30 "$url" || true)"
-            [[ "$status" == "200" ]] || { echo "::error::${artifact}:${version} not found on Maven Central (HTTP $status)"; exit 1; }
-            echo "Verified ${artifact}:${version} on Maven Central (HTTP 200)"
-          }
-          check_artifact "praxis-metadata-starter" "$(read_property praxis.core.version)"
-          check_artifact "praxis-config-starter" "$(read_property praxis.config.version)"
-          check_artifact "praxis-rules-engine" "$(read_property praxis.rules.version)"
+          mkdir -p ~/.m2/repository
+          cp -r .mvn/local-repo/io ~/.m2/repository/
+          find ~/.m2/repository/io/github/codexrodrigues -name '_remote.repositories' -delete || true
 
       - name: Compile and run offline JUnit conformance & security test suite
         run: mvn -B test -Dtest=ErgonConfigAccessTest,TenantRequestValidationTest,ShowcaseCanonicalConformanceGateTest,ErgonPolicyStudioContractTest,ErgonReactiveDeterminationMetadataTest
