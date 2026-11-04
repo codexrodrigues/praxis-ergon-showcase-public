@@ -203,6 +203,7 @@ public class SetorService
         .categoricalGroupByBucket("tipoSetor", "tipoSetor")
         .categoricalGroupByBucket("empCodigo", "empCodigo")
         .numericHistogramMeasureField("quantidadeSubordinadosDiretos", "quantidadeSubordinadosDiretos")
+        .categoricalTermsBucket("ufLotacao", "ufLotacao")
         .temporalTimeSeriesField("dtini", "dtini")
         .build();
   }

@@ -89,7 +89,8 @@ class OntologyG1CompletionContractTest {
                     assertThat(invocation.path("operationId").asText()).isEqualTo(operation==null?"":operation.operationId());
                     String annotation=invocation.path("method").asText().toLowerCase();annotation=Character.toUpperCase(annotation.charAt(0))+annotation.substring(1)+"Mapping";
                     var mapping=Arrays.stream(method.getAnnotations()).filter(a->a.annotationType().getSimpleName().equals(invocation.path("method").asText().substring(0,1)+invocation.path("method").asText().substring(1).toLowerCase()+"Mapping")).findFirst().orElseThrow();
-                    assertThat(JSON.valueToTree(mapping.annotationType().getMethod("value").invoke(mapping))).isEqualTo(invocation.path("paths"));
+                    JsonNode actualPaths=JSON.valueToTree(mapping.annotationType().getMethod("value").invoke(mapping));
+                    assertThat(actualPaths).isEqualTo(invocation.path("paths"));
                 }
                 for(var method:controller.getMethods())if(!method.isBridge())for(var a:method.getAnnotations())
                     if(Set.of("PostMapping","PutMapping","PatchMapping","DeleteMapping").contains(a.annotationType().getSimpleName()))assertThat(recorded).contains(method.getName());

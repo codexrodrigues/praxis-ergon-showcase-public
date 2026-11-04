@@ -49,7 +49,7 @@ public class SetorParametrizacaoErgonController extends AbstractResourceControll
       @AnalyticsProjection(id = "distribuicao", intent = AnalyticsIntent.DISTRIBUTION,
           sourceOperation = AnalyticsOperation.DISTRIBUTION,
           primaryDimension = @AnalyticsDimensionBinding(field = "grauRiscoAmbiental"),
-          primaryMetrics = @AnalyticsMetricBinding(field = "grauRiscoAmbiental", aggregation = "terms", label = "Parametrizações por grau de risco")),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Parametrizações por grau de risco")),
       @AnalyticsProjection(id = "comparativo-por-vigencia", intent = AnalyticsIntent.COMPARISON,
           sourceOperation = AnalyticsOperation.COMPARISON,
           primaryDimension = @AnalyticsDimensionBinding(field = "tipoAcesso"),

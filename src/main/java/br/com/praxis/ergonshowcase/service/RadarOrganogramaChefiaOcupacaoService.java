@@ -24,6 +24,7 @@ import org.praxisplatform.uischema.stats.StatsMetric;
         .labeledGroupByBucket("id", "id", "nomeSetor", Set.of(StatsMetric.COUNT))
         .categoricalGroupByBucket("situacaoComandoSetor", "situacaoComandoSetor")
         .numericHistogramMeasureField("vagasAutorizadasSetor", "vagasAutorizadasSetor")
+        .categoricalTermsBucket("tipoSetor", "tipoSetor")
         .temporalTimeSeriesField("dtini", "dtini")
         .build();
   }

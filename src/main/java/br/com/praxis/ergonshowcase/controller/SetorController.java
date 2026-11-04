@@ -48,7 +48,7 @@ import org.springframework.web.server.ResponseStatusException;
     value = ApiPaths.SETORES,
     resourceKey = ApiPaths.KEY_SETORES,
     title = "Unidades organizacionais",
-    description = "Consulta do cadastro auxiliar para inspeção das referências funcionais.",
+    description = "Diretório de unidades e composição temporal do organograma para inspeção de lotações, quadro e comando.",
     identity =
         @ResourceIdentity(
             keyField = "id",
@@ -120,8 +120,8 @@ public class SetorController
           primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Unidades por início")),
       @AnalyticsProjection(id = "distribuicao", intent = AnalyticsIntent.DISTRIBUTION,
           sourceOperation = AnalyticsOperation.DISTRIBUTION,
-          primaryDimension = @AnalyticsDimensionBinding(field = "quantidadeSubordinadosDiretos"),
-          primaryMetrics = @AnalyticsMetricBinding(field = "quantidadeSubordinadosDiretos", aggregation = "histogram", label = "Subordinados diretos por unidade")),
+          primaryDimension = @AnalyticsDimensionBinding(field = "ufLotacao"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Unidades por UF de lotação")),
       @AnalyticsProjection(id = "comparativo-por-vigencia", intent = AnalyticsIntent.COMPARISON,
           sourceOperation = AnalyticsOperation.COMPARISON,
           primaryDimension = @AnalyticsDimensionBinding(field = "tipoSetor"),

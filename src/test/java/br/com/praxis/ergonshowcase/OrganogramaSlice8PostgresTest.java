@@ -566,8 +566,9 @@ class OrganogramaSlice8PostgresTest {
           .andExpect(status().isOk()).andExpect(jsonPath("$.data.points").isNotEmpty());
       mvc.perform(post(data.path() + "/stats/distribution").contentType("application/json")
               .content("""
-                  {"filter":%s,"field":"%s","mode":"%s","metric":{"operation":"COUNT"},"bucketSize":5}
-                  """.formatted(filter, data.distribution(), data.mode())))
+                  {"filter":%s,"field":"%s","mode":"%s","metric":{"operation":"COUNT"}%s}
+                  """.formatted(filter, data.distribution(), data.mode(),
+                      data.mode().equals("HISTOGRAM") ? ",\"bucketSize\":5" : "")))
           .andExpect(status().isOk()).andExpect(jsonPath("$.data.mode").value(data.mode()));
       mvc.perform(post(data.path() + "/stats/comparison").contentType("application/json")
               .content("""

@@ -1,0 +1,80 @@
+{
+  "method": "Neon connector SELECT only; no mutations",
+  "projectId": "holy-mouse-40140108",
+  "branchId": "br-purple-dust-b70ss3dj",
+  "database_name": "ps3b_config",
+  "captured_at": "2026-11-04T11:30:23.419Z",
+  "snapshots": "0",
+  "heads": "0",
+  "definitions": [
+    {
+      "id": "d5ddf230-a106-4e4a-b598-b794c12e1569",
+      "status": "approved",
+      "ruleKey": "customer.orgao2.replace.chefia.erg-01154",
+      "version": 1,
+      "tenantId": "2",
+      "condition": {
+        "!=": [
+          {
+            "var": "draft.funcao"
+          },
+          null
+        ]
+      },
+      "approvedAt": "2026-11-04T00:59:25.609098+00:00",
+      "contextKey": "administracao-pessoal.vagas-funcao",
+      "definition": {
+        "ergonCustomization": {
+          "mode": "REPLACE_SLOT_EXPRESSION",
+          "slotKey": "chefia.erg-01154",
+          "messagePtBr": "Informe a função da vaga.",
+          "expressionJson": {
+            "!=": [
+              {
+                "var": "draft.funcao"
+              },
+              null
+            ]
+          },
+          "falseReasonCode": "CERG-PS3C-FUNCAO"
+        }
+      },
+      "parameters": {
+        "hostContractVersion": "ergon-policy-studio/1.0"
+      },
+      "serviceKey": "praxis-ergon-showcase",
+      "environment": "stage",
+      "resourceKey": "ergon.administracao-pessoal.vagas-funcao.chefia"
+    },
+    {
+      "id": "a02b6e2c-c1e9-4a90-8c95-c9e6e5e7121c",
+      "status": "approved",
+      "ruleKey": "ps3c.iam-proof.17f0aa58-2f68-4f63-a268-4d9993bb6597",
+      "version": 1,
+      "tenantId": "2",
+      "condition": null,
+      "approvedAt": "2026-11-04T00:59:33.0359+00:00",
+      "contextKey": "ps3c-iam-proof",
+      "definition": {},
+      "parameters": {},
+      "serviceKey": "praxis-ergon-showcase",
+      "environment": "stage",
+      "resourceKey": "ps3c-iam-proof"
+    },
+    {
+      "id": "8bb9f45f-0915-48bf-a52e-963357387248",
+      "status": "approved",
+      "ruleKey": "ps3c.iam-proof.adfcd096-e572-4537-a7e6-a57eb2c14e07",
+      "version": 1,
+      "tenantId": "2",
+      "condition": null,
+      "approvedAt": "2026-11-03T22:44:41.38634+00:00",
+      "contextKey": "ps3c-iam-proof",
+      "definition": {},
+      "parameters": {},
+      "serviceKey": "praxis-ergon-showcase",
+      "environment": "stage",
+      "resourceKey": "ps3c-iam-proof"
+    }
+  ]
+}

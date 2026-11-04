@@ -49,7 +49,7 @@ public class SubempresaLocalidadeController extends AbstractResourceController<S
       @AnalyticsProjection(id = "distribuicao", intent = AnalyticsIntent.DISTRIBUTION,
           sourceOperation = AnalyticsOperation.DISTRIBUTION,
           primaryDimension = @AnalyticsDimensionBinding(field = "uf"),
-          primaryMetrics = @AnalyticsMetricBinding(field = "uf", aggregation = "terms", label = "Unidades por UF")),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Unidades por UF")),
       @AnalyticsProjection(id = "comparativo-por-vigencia", intent = AnalyticsIntent.COMPARISON,
           sourceOperation = AnalyticsOperation.COMPARISON,
           primaryDimension = @AnalyticsDimensionBinding(field = "naturezaUnidade"),

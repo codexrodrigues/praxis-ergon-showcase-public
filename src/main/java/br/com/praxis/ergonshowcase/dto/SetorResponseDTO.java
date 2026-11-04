@@ -217,10 +217,10 @@ public class SetorResponseDTO {
   @Schema(description = "Primeiro início conhecido da unidade, distinto do início do período corrente.", accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(label = "Criação original", group = "Configuração organizacional", tableHidden = true, readOnly = true, type = FieldDataType.DATE, controlType = FieldControlType.DATE_PICKER, icon = "event", preset = UISchemaPreset.DATE_RANGE)
   private LocalDate dataCriacaoOriginal;
-  @Schema(description = "Quantidade de unidades diretamente subordinadas na hierarquia oficial corrente.", accessMode = Schema.AccessMode.READ_ONLY)
+  @Schema(description = "Quantidade de subordinados diretos na hierarquia e data da composição consultada.", accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(label = "Subordinados diretos", group = "Configuração organizacional", tableHidden = true, readOnly = true, type = FieldDataType.NUMBER, icon = "numbers")
   private Integer quantidadeSubordinadosDiretos;
-  @Schema(description = "Centro de custo da parametrização funcional corrente da unidade.", accessMode = Schema.AccessMode.READ_ONLY)
+  @Schema(description = "Centro de custo da parametrização funcional válida na data da composição consultada.", accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(label = "Centro de custo", group = "Configuração organizacional", tableHidden = true, readOnly = true, type = FieldDataType.TEXT, icon = "description")
   private String centroCustoPadrao;
   @Schema(description = "Cargo parametrizado para identificar o titular do comando da unidade.", accessMode = Schema.AccessMode.READ_ONLY)

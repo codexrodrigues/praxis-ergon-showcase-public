@@ -32,6 +32,7 @@ public class CargoSetorService extends ErgonResourceService<CargoSetor,CargoSeto
         .labeledGroupByBucket("id", "id", "cargoNome", Set.of(StatsMetric.COUNT))
         .categoricalGroupByBucket("tipoControleQuadro", "tipoControleQuadro")
         .numericHistogramMeasureField("lotacaoMaximaAutorizada", "lotacaoMaximaAutorizada")
+        .categoricalTermsBucket("setor", "setor")
         .temporalTimeSeriesField("dtini", "dtini")
         .build();
   }

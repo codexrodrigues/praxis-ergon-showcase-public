@@ -49,7 +49,7 @@ public class GrupoSetorController extends AbstractResourceController<GrupoSetorR
       @AnalyticsProjection(id = "distribuicao", intent = AnalyticsIntent.DISTRIBUTION,
           sourceOperation = AnalyticsOperation.DISTRIBUTION,
           primaryDimension = @AnalyticsDimensionBinding(field = "ufAbrangencia"),
-          primaryMetrics = @AnalyticsMetricBinding(field = "ufAbrangencia", aggregation = "terms", label = "Grupos por UF de abrangência")),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Grupos por UF de abrangência")),
       @AnalyticsProjection(id = "comparativo-por-vigencia", intent = AnalyticsIntent.COMPARISON,
           sourceOperation = AnalyticsOperation.COMPARISON,
           primaryDimension = @AnalyticsDimensionBinding(field = "tipoAgrupamento"),

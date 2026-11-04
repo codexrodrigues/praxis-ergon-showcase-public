@@ -93,17 +93,25 @@ class ErgonReactiveDeterminationMetadataTest {
     var registry = new DefaultReactiveDeterminationDefinitionRegistry(List.of(() -> definitions));
     var compiler = new ReactiveDeterminationMetadataCompiler(registry, operations, new FilteredSchemaReferenceResolver(), documents);
     int compiled = 0;
+    var golden = json.createArrayNode();
     for (var definition : definitions) {
       for (var scope : definition.scopes()) {
         String operation = scope.schemaOperationId();
         var metadata = compiler.compile(refs.get(operation), "request", document, requests.get(operation));
         assertThat(metadata).as("/schemas/filtered?operationId=%s&schemaType=request", operation).hasSize(1);
         assertThat(metadata.getFirst()).containsEntry("id", definition.id());
+        var entry = golden.addObject();
+        entry.put("schemaOperationId", operation);
+        entry.put("formMode", scope.formMode().name());
+        entry.set("metadata", json.valueToTree(metadata.getFirst()));
         assertThat(compiler.compile(refs.get(operation), "response", document, requests.get(operation))).isEmpty();
         compiled++;
       }
     }
     assertThat(compiled).isEqualTo(36);
+    java.nio.file.Files.writeString(java.nio.file.Path.of("target/ontology-g1-determination-projections.json"), golden.toPrettyString());
+    var candidate = java.nio.file.Path.of("docs/rules/ontology/curated/completion/determination-projections.json");
+    if (java.nio.file.Files.exists(candidate)) assertThat(json.readTree(candidate.toFile())).isEqualTo(golden);
   }
 
   private static JsonNode schema(ModelConverters converters, Type type, ObjectNode schemas, ObjectMapper json) {

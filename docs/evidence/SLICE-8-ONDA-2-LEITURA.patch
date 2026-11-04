@@ -1,0 +1,1649 @@
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/constants/ApiPaths.java b/src/main/java/br/com/praxis/ergonshowcase/constants/ApiPaths.java
+index 78efda4..a6fa826 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/constants/ApiPaths.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/constants/ApiPaths.java
+@@ -24,6 +24,8 @@ public final class ApiPaths {
+   public static final String PESSOAS = BASE + "/servidor-pessoas";
+   public static final String VINCULOS = BASE + "/vinculos";
+   public static final String SETORES = BASE + "/setores";
++  public static final String SETOR_ARVORE = "/arvore-organograma";
++  public static final String SETORES_ARVORE = SETORES + SETOR_ARVORE;
+   public static final String DOCUMENTOS_LEGAIS = BASE + "/documentos-legais";
+   public static final String DEPENDENTES = BASE + "/dependentes";
+   public static final String TIPOS_DEPENDENTE = BASE + "/tipos-dependente";
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/controller/CargoSetorController.java b/src/main/java/br/com/praxis/ergonshowcase/controller/CargoSetorController.java
+index e7f58e1..fdaa187 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/controller/CargoSetorController.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/controller/CargoSetorController.java
+@@ -5,10 +5,17 @@ import br.com.praxis.ergonshowcase.service.CargoSetorService;
+ import org.praxisplatform.uischema.annotation.*;
+ import org.praxisplatform.uischema.controller.base.AbstractResourceController;
+ import org.praxisplatform.uischema.surface.*;
++import org.praxisplatform.uischema.stats.dto.GroupByStatsRequest;
++import org.praxisplatform.uischema.stats.dto.GroupByStatsResponse;
++import org.praxisplatform.uischema.fact.ResourceFact;
++import org.praxisplatform.uischema.rest.response.RestApiResponse;
+ import org.springframework.web.bind.annotation.*;
+ import org.springframework.security.access.prepost.PreAuthorize;
+ import org.springframework.http.ResponseEntity;
+ import io.swagger.v3.oas.annotations.*;
++@ResourceFact(key = "lotacaoMaximaAutorizada", resourceKey = ApiPaths.KEY_CARGOS_POR_SETOR, label = "Limite autorizado",
++    description = "Limite de lotação para este cargo e vigência. O indicador abrange subordinados somente quando a autorização assim determina.",
++    dataType = "integer", unit = "vagas", sourceKind = "field")
+ @ApiResource(value=ApiPaths.CARGOS_POR_SETOR, resourceKey=ApiPaths.KEY_CARGOS_POR_SETOR, title="Cargos e quadro por setor",
+  description="Inspeção temporal da estrutura organizacional. Alterações dependem da liberação dos comandos governados.", icon="account_tree",
+  identity=@ResourceIdentity(keyField="id",titleField="cargoNome",subtitleField="setor",metadataFields={"observacao"}),
+@@ -20,6 +27,40 @@ public class CargoSetorController extends AbstractResourceController<CargoSetorR
+  public CargoSetorController(CargoSetorService service) {this.service=service;}
+  @Override protected CargoSetorService getService() {return service;}
+  @Override protected Long getResponseId(CargoSetorResponseDTO dto) {return dto.getId();}
++  @Override
++  @PostMapping("/stats/group-by")
++  @Operation(summary = "Agrupar autorizações", description = "Apura registros do órgão autorizado no recorte filtrado.")
++  @UiAnalytics(projections = {
++      @AnalyticsProjection(id = "composicao", intent = AnalyticsIntent.COMPOSITION,
++          sourceOperation = AnalyticsOperation.GROUP_BY,
++          primaryDimension = @AnalyticsDimensionBinding(field = "tipoControleQuadro"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Autorizações")),
++      @AnalyticsProjection(id = "registros-nominais", intent = AnalyticsIntent.RANKING,
++          sourceOperation = AnalyticsOperation.GROUP_BY,
++          primaryDimension = @AnalyticsDimensionBinding(field = "id"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Autorizações"),
++          recordOpen = @AnalyticsRecordOpen(sourceIdentityField = "key",
++              target = @AnalyticsSurfaceTarget(resourceKey = ApiPaths.KEY_CARGOS_POR_SETOR, surfaceId = "detail"))),
++      @AnalyticsProjection(id = "inicios-de-vigencia", intent = AnalyticsIntent.TREND,
++          sourceOperation = AnalyticsOperation.TIMESERIES,
++          primaryDimension = @AnalyticsDimensionBinding(field = "dtini"),
++          defaultGranularity = AnalyticsGranularity.MONTH, defaultTimezone = "America/Sao_Paulo",
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Autorizações por início")),
++      @AnalyticsProjection(id = "distribuicao", intent = AnalyticsIntent.DISTRIBUTION,
++          sourceOperation = AnalyticsOperation.DISTRIBUTION,
++          primaryDimension = @AnalyticsDimensionBinding(field = "setor"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Autorizações por unidade")),
++      @AnalyticsProjection(id = "comparativo-por-vigencia", intent = AnalyticsIntent.COMPARISON,
++          sourceOperation = AnalyticsOperation.COMPARISON,
++          primaryDimension = @AnalyticsDimensionBinding(field = "tipoControleQuadro"),
++          comparisonPeriod = @AnalyticsComparisonPeriodBinding(field = "dtini", timezone = "America/Sao_Paulo"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Autorizações"))
++  })
++  public ResponseEntity<RestApiResponse<GroupByStatsResponse>> groupByStats(
++      @RequestBody GroupByStatsRequest<CargoSetorFilterDTO> request) {
++    return super.groupByStats(request);
++  }
++
+  @GetMapping("/{id}/detail") @PreAuthorize("hasAuthority('ERGON_READ')")
+  @UiSurface(id="detail",kind=SurfaceKind.READ_PROJECTION,scope=SurfaceScope.ITEM,title="Ficha do período",description="Configuração organizacional e fundamento da vigência.",requiredAuthorities={"ERGON_READ"})
+  @Operation(summary="Inspecionar período organizacional",description="Apresenta o assentamento do órgão autorizado com a sua fundamentação administrativa.")
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/controller/GrupoSetorController.java b/src/main/java/br/com/praxis/ergonshowcase/controller/GrupoSetorController.java
+index 99f2e7f..18580cb 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/controller/GrupoSetorController.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/controller/GrupoSetorController.java
+@@ -5,10 +5,17 @@ import br.com.praxis.ergonshowcase.service.GrupoSetorService;
+ import org.praxisplatform.uischema.annotation.*;
+ import org.praxisplatform.uischema.controller.base.AbstractResourceController;
+ import org.praxisplatform.uischema.surface.*;
++import org.praxisplatform.uischema.stats.dto.GroupByStatsRequest;
++import org.praxisplatform.uischema.stats.dto.GroupByStatsResponse;
++import org.praxisplatform.uischema.fact.ResourceFact;
++import org.praxisplatform.uischema.rest.response.RestApiResponse;
+ import org.springframework.web.bind.annotation.*;
+ import org.springframework.security.access.prepost.PreAuthorize;
+ import org.springframework.http.ResponseEntity;
+ import io.swagger.v3.oas.annotations.*;
++@ResourceFact(key = "tipoAgrupamento", resourceKey = ApiPaths.KEY_GRUPOS_SETORES, label = "Tipo de agrupamento",
++    description = "Finalidade administrativa da classificação que reúne unidades sob o mesmo grupo na vigência.",
++    dataType = "string", sourceKind = "field")
+ @ApiResource(value=ApiPaths.GRUPOS_SETORES, resourceKey=ApiPaths.KEY_GRUPOS_SETORES, title="Grupos de setores",
+  description="Inspeção temporal da estrutura organizacional. Alterações dependem da liberação dos comandos governados.", icon="account_tree",
+  identity=@ResourceIdentity(keyField="id",titleField="nome",subtitleField="sigla",metadataFields={"observacao"}),
+@@ -20,6 +27,40 @@ public class GrupoSetorController extends AbstractResourceController<GrupoSetorR
+  public GrupoSetorController(GrupoSetorService service) {this.service=service;}
+  @Override protected GrupoSetorService getService() {return service;}
+  @Override protected Long getResponseId(GrupoSetorResponseDTO dto) {return dto.getId();}
++  @Override
++  @PostMapping("/stats/group-by")
++  @Operation(summary = "Agrupar grupos", description = "Apura registros do órgão autorizado no recorte filtrado.")
++  @UiAnalytics(projections = {
++      @AnalyticsProjection(id = "composicao", intent = AnalyticsIntent.COMPOSITION,
++          sourceOperation = AnalyticsOperation.GROUP_BY,
++          primaryDimension = @AnalyticsDimensionBinding(field = "tipoAgrupamento"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Grupos")),
++      @AnalyticsProjection(id = "registros-nominais", intent = AnalyticsIntent.RANKING,
++          sourceOperation = AnalyticsOperation.GROUP_BY,
++          primaryDimension = @AnalyticsDimensionBinding(field = "id"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Grupos"),
++          recordOpen = @AnalyticsRecordOpen(sourceIdentityField = "key",
++              target = @AnalyticsSurfaceTarget(resourceKey = ApiPaths.KEY_GRUPOS_SETORES, surfaceId = "detail"))),
++      @AnalyticsProjection(id = "inicios-de-vigencia", intent = AnalyticsIntent.TREND,
++          sourceOperation = AnalyticsOperation.TIMESERIES,
++          primaryDimension = @AnalyticsDimensionBinding(field = "dtini"),
++          defaultGranularity = AnalyticsGranularity.MONTH, defaultTimezone = "America/Sao_Paulo",
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Grupos por início")),
++      @AnalyticsProjection(id = "distribuicao", intent = AnalyticsIntent.DISTRIBUTION,
++          sourceOperation = AnalyticsOperation.DISTRIBUTION,
++          primaryDimension = @AnalyticsDimensionBinding(field = "ufAbrangencia"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Grupos por UF de abrangência")),
++      @AnalyticsProjection(id = "comparativo-por-vigencia", intent = AnalyticsIntent.COMPARISON,
++          sourceOperation = AnalyticsOperation.COMPARISON,
++          primaryDimension = @AnalyticsDimensionBinding(field = "tipoAgrupamento"),
++          comparisonPeriod = @AnalyticsComparisonPeriodBinding(field = "dtini", timezone = "America/Sao_Paulo"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Grupos"))
++  })
++  public ResponseEntity<RestApiResponse<GroupByStatsResponse>> groupByStats(
++      @RequestBody GroupByStatsRequest<GrupoSetorFilterDTO> request) {
++    return super.groupByStats(request);
++  }
++
+  @GetMapping("/{id}/detail") @PreAuthorize("hasAuthority('ERGON_READ')")
+  @UiSurface(id="detail",kind=SurfaceKind.READ_PROJECTION,scope=SurfaceScope.ITEM,title="Ficha do período",description="Configuração organizacional e fundamento da vigência.",requiredAuthorities={"ERGON_READ"})
+  @Operation(summary="Inspecionar período organizacional",description="Apresenta o assentamento do órgão autorizado com a sua fundamentação administrativa.")
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/controller/HistoricoSetorController.java b/src/main/java/br/com/praxis/ergonshowcase/controller/HistoricoSetorController.java
+index 48f598e..d90c150 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/controller/HistoricoSetorController.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/controller/HistoricoSetorController.java
+@@ -5,11 +5,18 @@ import br.com.praxis.ergonshowcase.service.HistoricoSetorService;
+ import org.praxisplatform.uischema.annotation.*;
+ import org.praxisplatform.uischema.controller.base.AbstractResourceController;
+ import org.praxisplatform.uischema.surface.*;
++import org.praxisplatform.uischema.stats.dto.GroupByStatsRequest;
++import org.praxisplatform.uischema.stats.dto.GroupByStatsResponse;
++import org.praxisplatform.uischema.fact.ResourceFact;
++import org.praxisplatform.uischema.rest.response.RestApiResponse;
+ import org.springframework.web.bind.annotation.*;
+ import org.springframework.security.access.prepost.PreAuthorize;
+ import org.springframework.http.ResponseEntity;
+ import io.swagger.v3.oas.annotations.*;
+ @ResourceHierarchy(parentField="setorPai", hierarchyPathField="caminhoHierarquico", levelField="nivelHierarquico", extinctField="extinto", auxiliaryParentFields={"setorPaiHier1","setorPaiHier2","setorPaiHier3","setorPaiHier4"})
++@ResourceFact(key = "diagnosticoHierarquia", resourceKey = ApiPaths.KEY_HISTORICO_SETORES, label = "Integridade da hierarquia",
++    description = "Indica se a composição temporal resolveu o caminho da unidade ou encontrou ciclo ou superior ausente.",
++    dataType = "string", sourceKind = "field")
+ @ApiResource(value=ApiPaths.HISTORICO_SETORES, resourceKey=ApiPaths.KEY_HISTORICO_SETORES, title="Históricos de setores",
+  description="Inspeção temporal da estrutura organizacional. Alterações dependem da liberação dos comandos governados.", icon="account_tree",
+  identity=@ResourceIdentity(keyField="id",titleField="nome",subtitleField="sigla",metadataFields={"observacao"}),
+@@ -21,6 +28,40 @@ public class HistoricoSetorController extends AbstractResourceController<Histori
+  public HistoricoSetorController(HistoricoSetorService service) {this.service=service;}
+  @Override protected HistoricoSetorService getService() {return service;}
+  @Override protected Long getResponseId(HistoricoSetorResponseDTO dto) {return dto.getId();}
++  @Override
++  @PostMapping("/stats/group-by")
++  @Operation(summary = "Agrupar vigências", description = "Apura registros do órgão autorizado no recorte filtrado.")
++  @UiAnalytics(projections = {
++      @AnalyticsProjection(id = "composicao", intent = AnalyticsIntent.COMPOSITION,
++          sourceOperation = AnalyticsOperation.GROUP_BY,
++          primaryDimension = @AnalyticsDimensionBinding(field = "tipoSetor"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Vigências")),
++      @AnalyticsProjection(id = "registros-nominais", intent = AnalyticsIntent.RANKING,
++          sourceOperation = AnalyticsOperation.GROUP_BY,
++          primaryDimension = @AnalyticsDimensionBinding(field = "id"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Vigências"),
++          recordOpen = @AnalyticsRecordOpen(sourceIdentityField = "key",
++              target = @AnalyticsSurfaceTarget(resourceKey = ApiPaths.KEY_HISTORICO_SETORES, surfaceId = "detail"))),
++      @AnalyticsProjection(id = "inicios-de-vigencia", intent = AnalyticsIntent.TREND,
++          sourceOperation = AnalyticsOperation.TIMESERIES,
++          primaryDimension = @AnalyticsDimensionBinding(field = "dtini"),
++          defaultGranularity = AnalyticsGranularity.MONTH, defaultTimezone = "America/Sao_Paulo",
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Vigências por início")),
++      @AnalyticsProjection(id = "distribuicao", intent = AnalyticsIntent.DISTRIBUTION,
++          sourceOperation = AnalyticsOperation.DISTRIBUTION,
++          primaryDimension = @AnalyticsDimensionBinding(field = "ufLotacao"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Vigências por UF de lotação")),
++      @AnalyticsProjection(id = "comparativo-por-vigencia", intent = AnalyticsIntent.COMPARISON,
++          sourceOperation = AnalyticsOperation.COMPARISON,
++          primaryDimension = @AnalyticsDimensionBinding(field = "tipoSetor"),
++          comparisonPeriod = @AnalyticsComparisonPeriodBinding(field = "dtini", timezone = "America/Sao_Paulo"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Vigências"))
++  })
++  public ResponseEntity<RestApiResponse<GroupByStatsResponse>> groupByStats(
++      @RequestBody GroupByStatsRequest<HistoricoSetorFilterDTO> request) {
++    return super.groupByStats(request);
++  }
++
+  @GetMapping("/{id}/detail") @PreAuthorize("hasAuthority('ERGON_READ')")
+  @UiSurface(id="detail",kind=SurfaceKind.READ_PROJECTION,scope=SurfaceScope.ITEM,title="Ficha do período",description="Configuração organizacional e fundamento da vigência.",requiredAuthorities={"ERGON_READ"})
+  @Operation(summary="Inspecionar período organizacional",description="Apresenta o assentamento do órgão autorizado com a sua fundamentação administrativa.")
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/controller/RadarOrganogramaChefiaOcupacaoController.java b/src/main/java/br/com/praxis/ergonshowcase/controller/RadarOrganogramaChefiaOcupacaoController.java
+index 000bcf7..51a5f9d 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/controller/RadarOrganogramaChefiaOcupacaoController.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/controller/RadarOrganogramaChefiaOcupacaoController.java
+@@ -5,11 +5,24 @@ import br.com.praxis.ergonshowcase.service.RadarOrganogramaChefiaOcupacaoService
+ import org.praxisplatform.uischema.annotation.*;
+ import org.praxisplatform.uischema.controller.base.AbstractReadOnlyResourceController;
+ import org.praxisplatform.uischema.surface.*;
++import org.praxisplatform.uischema.stats.dto.GroupByStatsRequest;
++import org.praxisplatform.uischema.stats.dto.GroupByStatsResponse;
++import org.praxisplatform.uischema.fact.ResourceFact;
++import org.praxisplatform.uischema.rest.response.RestApiResponse;
+ import org.springframework.web.bind.annotation.*;
+ import org.springframework.security.access.prepost.PreAuthorize;
+ import org.springframework.http.ResponseEntity;
+ import io.swagger.v3.oas.annotations.*;
+ @ResourceHierarchy(parentField="setorPai",hierarchyPathField="caminhoHierarquico",levelField="nivelHierarquico",childrenCountField="quantidadeSubordinadosDiretos",extinctField="extinto",auxiliaryParentFields={"setorPaiHier1","setorPaiHier2","setorPaiHier3","setorPaiHier4"})
++@ResourceFact(key = "situacaoComandoSetor", resourceKey = ApiPaths.KEY_RADAR_ORGANOGRAMA_CHEFIAS_OCUPACAO, label = "Situação do comando",
++    description = "Diagnóstico calculado pela vigência da função, designação, exercício, impedimento e substituição. A apuração por cargo permanece indisponível.",
++    dataType = "string", sourceKind = "field")
++@ResourceFact(key = "vagasAutorizadasSetor", resourceKey = ApiPaths.KEY_RADAR_ORGANOGRAMA_CHEFIAS_OCUPACAO, label = "Vagas diretas autorizadas",
++    description = "Total das autorizações vigentes que se restringem ao setor. Reservas para subordinados e ocupação ficam fora dessa soma.",
++    dataType = "integer", unit = "vagas", sourceKind = "field")
++@ResourceFact(key = "escopoApuracao", resourceKey = ApiPaths.KEY_RADAR_ORGANOGRAMA_CHEFIAS_OCUPACAO, label = "Escopo da apuração",
++    description = "Identifica as fontes integradas ao segmento e as lacunas de provimento, exercício, folha e comando por cargo.",
++    dataType = "string", sourceKind = "field")
+ @ApiResource(value=ApiPaths.RADAR_ORGANOGRAMA_CHEFIAS_OCUPACAO,resourceKey=ApiPaths.KEY_RADAR_ORGANOGRAMA_CHEFIAS_OCUPACAO,title="Organograma temporal",description="Estrutura histórica e escopo da apuração de comando e ocupação.",icon="account_tree",
+  identity=@ResourceIdentity(keyField="id",titleField="nomeSetor",subtitleField="siglaSetor",metadataFields={"tipoHierarquia"}),
+  quickFilters={@QuickFilter(id="extintos",label="Unidades extintas",filter="{\"extinto\":true}"),@QuickFilter(id="sem-apuracao",label="Comando não apurado",filter="{\"semComandoApurado\":true}")})
+@@ -19,6 +32,40 @@ public class RadarOrganogramaChefiaOcupacaoController extends AbstractReadOnlyRe
+  public RadarOrganogramaChefiaOcupacaoController(RadarOrganogramaChefiaOcupacaoService service) {this.service=service;}
+  @Override protected RadarOrganogramaChefiaOcupacaoService getService() {return service;}
+  @Override protected String getResponseId(RadarOrganogramaChefiaOcupacaoResponseDTO dto) {return dto.getId();}
++  @Override
++  @PostMapping("/stats/group-by")
++  @Operation(summary = "Agrupar nós do organograma", description = "Apura registros do órgão autorizado no recorte filtrado.")
++  @UiAnalytics(projections = {
++      @AnalyticsProjection(id = "composicao", intent = AnalyticsIntent.COMPOSITION,
++          sourceOperation = AnalyticsOperation.GROUP_BY,
++          primaryDimension = @AnalyticsDimensionBinding(field = "situacaoComandoSetor"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Nós do organograma")),
++      @AnalyticsProjection(id = "registros-nominais", intent = AnalyticsIntent.RANKING,
++          sourceOperation = AnalyticsOperation.GROUP_BY,
++          primaryDimension = @AnalyticsDimensionBinding(field = "id"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Nós do organograma"),
++          recordOpen = @AnalyticsRecordOpen(sourceIdentityField = "key",
++              target = @AnalyticsSurfaceTarget(resourceKey = ApiPaths.KEY_RADAR_ORGANOGRAMA_CHEFIAS_OCUPACAO, surfaceId = "detail"))),
++      @AnalyticsProjection(id = "inicios-de-vigencia", intent = AnalyticsIntent.TREND,
++          sourceOperation = AnalyticsOperation.TIMESERIES,
++          primaryDimension = @AnalyticsDimensionBinding(field = "dtini"),
++          defaultGranularity = AnalyticsGranularity.MONTH, defaultTimezone = "America/Sao_Paulo",
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Nós do organograma por início")),
++      @AnalyticsProjection(id = "distribuicao", intent = AnalyticsIntent.DISTRIBUTION,
++          sourceOperation = AnalyticsOperation.DISTRIBUTION,
++          primaryDimension = @AnalyticsDimensionBinding(field = "tipoSetor"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Nós por classificação")),
++      @AnalyticsProjection(id = "comparativo-por-vigencia", intent = AnalyticsIntent.COMPARISON,
++          sourceOperation = AnalyticsOperation.COMPARISON,
++          primaryDimension = @AnalyticsDimensionBinding(field = "situacaoComandoSetor"),
++          comparisonPeriod = @AnalyticsComparisonPeriodBinding(field = "dtini", timezone = "America/Sao_Paulo"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Nós do organograma"))
++  })
++  public ResponseEntity<RestApiResponse<GroupByStatsResponse>> groupByStats(
++      @RequestBody GroupByStatsRequest<RadarOrganogramaChefiaOcupacaoFilterDTO> request) {
++    return super.groupByStats(request);
++  }
++
+  @GetMapping("/{id}/detail") @PreAuthorize("hasAuthority('ERGON_READ')")
+  @UiSurface(id="detail",kind=SurfaceKind.READ_PROJECTION,scope=SurfaceScope.ITEM,title="Ficha temporal",description="Composição histórica da unidade e escopo dos indicadores.",requiredAuthorities={"ERGON_READ"})
+  @Operation(summary="Inspecionar nó temporal",description="Consulta o período e a hierarquia identificados no órgão autorizado.")
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/controller/SetorController.java b/src/main/java/br/com/praxis/ergonshowcase/controller/SetorController.java
+index 71d7d96..5b1090b 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/controller/SetorController.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/controller/SetorController.java
+@@ -4,18 +4,35 @@ import br.com.praxis.ergonshowcase.constants.ApiPaths;
+ import br.com.praxis.ergonshowcase.dto.*;
+ import br.com.praxis.ergonshowcase.service.*;
+ import io.swagger.v3.oas.annotations.*;
++import io.swagger.v3.oas.annotations.enums.ParameterIn;
++import java.util.List;
++import java.util.function.BiConsumer;
++import org.springdoc.core.annotations.ParameterObject;
+ import org.praxisplatform.uischema.annotation.*;
+ import org.praxisplatform.uischema.controller.base.AbstractReadOnlyResourceController;
+ import org.praxisplatform.uischema.fact.ResourceFact;
++import org.praxisplatform.uischema.stats.dto.GroupByStatsRequest;
++import org.praxisplatform.uischema.stats.dto.GroupByStatsResponse;
++import org.praxisplatform.uischema.filter.dto.GenericFilterDTO;
++import org.praxisplatform.uischema.rest.response.RestApiResponse;
++import org.praxisplatform.uischema.service.base.BaseResourceQueryService;
+ import org.praxisplatform.uischema.surface.*;
++import org.praxisplatform.uischema.util.PageableBuilder;
++import org.springframework.data.domain.Page;
++import org.springframework.data.domain.PageRequest;
++import org.springframework.data.domain.Pageable;
++import org.springframework.hateoas.Links;
++import org.springframework.http.HttpStatus;
+ import org.springframework.http.ResponseEntity;
+ import org.springframework.security.access.prepost.PreAuthorize;
++import org.springframework.util.MultiValueMap;
+ import org.springframework.web.bind.annotation.*;
++import org.springframework.web.server.ResponseStatusException;
+ 
+ /** Consulta auxiliar que sustenta opções e referências 360° dos pilotos. */
+ @ResourceFact(
+     key = "tipoSetor",
+-    resourceKey = "administracao-pessoal.setores",
++    resourceKey = ApiPaths.KEY_SETORES,
+     label = "Classificação da unidade",
+     description =
+         "Natureza organizacional ou administrativa da unidade de lotação no organograma do órgão.",
+@@ -24,11 +41,14 @@ import org.springframework.web.bind.annotation.*;
+     tone = "info",
+     valuePresentation = "badge",
+     sourceKind = "field")
++@ResourceFact(key = "quantidadeSubordinadosDiretos", resourceKey = ApiPaths.KEY_SETORES, label = "Subordinados diretos",
++    description = "Quantidade de unidades diretamente ligadas ao setor na composição disponível. O valor é desconhecido quando a composição não resolve o nó.",
++    dataType = "integer", unit = "unidades", sourceKind = "field")
+ @ApiResource(
+     value = ApiPaths.SETORES,
+-    resourceKey = "administracao-pessoal.setores",
++    resourceKey = ApiPaths.KEY_SETORES,
+     title = "Unidades organizacionais",
+-    description = "Consulta do cadastro auxiliar para inspeção das referências funcionais.",
++    description = "Diretório de unidades e composição temporal do organograma para inspeção de lotações, quadro e comando.",
+     identity =
+         @ResourceIdentity(
+             keyField = "id",
+@@ -52,9 +72,21 @@ import org.springframework.web.bind.annotation.*;
+ public class SetorController
+     extends AbstractReadOnlyResourceController<SetorResponseDTO, String, SetorFilterDTO> {
+   private final SetorService service;
++  private final HistoricoSetorService historicos;
++  private final SetorParametrizacaoErgonService parametrizacoes;
++  private final CargoSetorService cargos;
++  private final DesignacaoFuncaoService designacoes;
++  private final RadarOrganogramaChefiaOcupacaoService radar;
+ 
+-  public SetorController(SetorService service) {
++  public SetorController(SetorService service, HistoricoSetorService historicos,
++      SetorParametrizacaoErgonService parametrizacoes, CargoSetorService cargos,
++      DesignacaoFuncaoService designacoes, RadarOrganogramaChefiaOcupacaoService radar) {
+     this.service = service;
++    this.historicos = historicos;
++    this.parametrizacoes = parametrizacoes;
++    this.cargos = cargos;
++    this.designacoes = designacoes;
++    this.radar = radar;
+   }
+ 
+   @Override
+@@ -67,6 +99,40 @@ public class SetorController
+     return dto.getReferenciaFicha();
+   }
+ 
++  @Override
++  @PostMapping("/stats/group-by")
++  @Operation(summary = "Agrupar unidades", description = "Apura registros do órgão autorizado no recorte filtrado.")
++  @UiAnalytics(projections = {
++      @AnalyticsProjection(id = "composicao", intent = AnalyticsIntent.COMPOSITION,
++          sourceOperation = AnalyticsOperation.GROUP_BY,
++          primaryDimension = @AnalyticsDimensionBinding(field = "tipoSetor"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Unidades")),
++      @AnalyticsProjection(id = "registros-nominais", intent = AnalyticsIntent.RANKING,
++          sourceOperation = AnalyticsOperation.GROUP_BY,
++          primaryDimension = @AnalyticsDimensionBinding(field = "id"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Unidades"),
++          recordOpen = @AnalyticsRecordOpen(sourceIdentityField = "key",
++              target = @AnalyticsSurfaceTarget(resourceKey = ApiPaths.KEY_SETORES, surfaceId = "ficha-unidade"))),
++      @AnalyticsProjection(id = "inicios-de-vigencia", intent = AnalyticsIntent.TREND,
++          sourceOperation = AnalyticsOperation.TIMESERIES,
++          primaryDimension = @AnalyticsDimensionBinding(field = "dtini"),
++          defaultGranularity = AnalyticsGranularity.MONTH, defaultTimezone = "America/Sao_Paulo",
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Unidades por início")),
++      @AnalyticsProjection(id = "distribuicao", intent = AnalyticsIntent.DISTRIBUTION,
++          sourceOperation = AnalyticsOperation.DISTRIBUTION,
++          primaryDimension = @AnalyticsDimensionBinding(field = "ufLotacao"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Unidades por UF de lotação")),
++      @AnalyticsProjection(id = "comparativo-por-vigencia", intent = AnalyticsIntent.COMPARISON,
++          sourceOperation = AnalyticsOperation.COMPARISON,
++          primaryDimension = @AnalyticsDimensionBinding(field = "tipoSetor"),
++          comparisonPeriod = @AnalyticsComparisonPeriodBinding(field = "dtini", timezone = "America/Sao_Paulo"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Unidades"))
++  })
++  public ResponseEntity<RestApiResponse<GroupByStatsResponse>> groupByStats(
++      @RequestBody GroupByStatsRequest<SetorFilterDTO> request) {
++    return super.groupByStats(request);
++  }
++
+   @GetMapping("/{id}/ficha-unidade")
+   @PreAuthorize("hasAuthority('ERGON_READ')")
+   @UiSurface(
+@@ -83,4 +149,121 @@ public class SetorController
+       @Parameter(description = "Código da unidade ou referência temporal publicada na consulta") @PathVariable String id) {
+     return withResourceVersion(ResponseEntity.ok(), id, service.findById(id));
+   }
++
++  @GetMapping(ApiPaths.SETOR_ARVORE)
++  @PreAuthorize("hasAuthority('ERGON_READ')")
++  @UiSurface(id = "organograma-tree", kind = SurfaceKind.HIERARCHY_TREE,
++      scope = SurfaceScope.COLLECTION, title = "Árvore do organograma",
++      description = "Composição paginada das unidades vigentes na data e na hierarquia selecionadas.",
++      requiredAuthorities = {"ERGON_READ"})
++  @Operation(operationId = "consultarArvoreOrganograma", summary = "Consultar árvore do organograma",
++      description = "Aplica filtros de unidade à composição do órgão autorizado. A data padrão é hoje e a hierarquia padrão é a oficial.",
++      parameters = @Parameter(name = "sort", in = ParameterIn.QUERY,
++          description = "Ordenação no formato campo,direção. Repita o parâmetro para ordenar por mais de um campo."))
++  public ResponseEntity<RestApiResponse<Page<SetorResponseDTO>>> arvore(
++      @ParameterObject @ModelAttribute SetorFilterDTO filter,
++      @Parameter(description = "Número da página, a partir de zero")
++      @RequestParam(defaultValue = "0") int page,
++      @Parameter(description = "Quantidade de unidades por página, de 1 a 200")
++      @RequestParam(defaultValue = "20") int size,
++      @Parameter(description = "Códigos de unidade que restringem a página")
++      @RequestParam(required = false) List<String> includeIds,
++      @Parameter(hidden = true) @RequestParam MultiValueMap<String, String> queryParams) {
++    ErgonHttpContract.childPage(page, size);
++    if (filter.getTipoHierarquia() == null) {
++      filter.setTipoHierarquia(0);
++    }
++    var pageable = treePage(page, size, queryParams.get("sort"));
++    var rows = service.filter(filter, pageable, includeIds);
++    var links = buildCollectionDiscoveryLinks();
++    links.add(linkToUiSchema(ApiPaths.SETOR_ARVORE, "get", "response"));
++    return successEnvelope(ResponseEntity.ok(), rows, hateoasOrNull(Links.of(links)));
++  }
++
++  private Pageable treePage(int page, int size, List<String> sort) {
++    try {
++      return PageableBuilder.from(page, size, sort, service.getDefaultSort());
++    } catch (IllegalArgumentException e) {
++      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
++    }
++  }
++
++  @GetMapping("/{id}/historico-vigencias")
++  @PreAuthorize("hasAuthority('ERGON_READ')")
++  @UiSurface(id = "historico-vigencias", kind = SurfaceKind.READ_PROJECTION, scope = SurfaceScope.ITEM,
++      title = "Histórico de vigências", description = "Períodos organizacionais registrados para a unidade.",
++      relatedChildResourceKey = ApiPaths.KEY_HISTORICO_SETORES, relatedChildResourcePath = ApiPaths.HISTORICO_SETORES,
++      relatedChildParentField = "setor", relatedChildOperations = RelatedResourceChildOperation.FILTER,
++      requiredAuthorities = {"ERGON_READ"})
++  @Operation(operationId = "historicoVigenciasDoSetor", summary = "Histórico de vigências", description = "Períodos organizacionais registrados para a unidade.")
++  public ResponseEntity<RestApiResponse<Page<HistoricoSetorResponseDTO>>> historicoVigencias(
++      @PathVariable String id, @RequestParam(defaultValue = "0") int page,
++      @RequestParam(defaultValue = "20") int size) {
++    return related(id, page, size, historicos, new HistoricoSetorFilterDTO(), (filter, unidade) -> filter.setSetor(unidade.getId()));
++  }
++
++  @GetMapping("/{id}/parametrizacoes-ergon")
++  @PreAuthorize("hasAuthority('ERGON_READ')")
++  @UiSurface(id = "parametrizacoes-ergon", kind = SurfaceKind.READ_PROJECTION, scope = SurfaceScope.ITEM,
++      title = "Parametrizações Ergon", description = "Histórico de comando, classificação funcional e custo da unidade.",
++      relatedChildResourceKey = ApiPaths.KEY_SETORES_ERGON, relatedChildResourcePath = ApiPaths.SETORES_ERGON,
++      relatedChildParentField = "setor", relatedChildOperations = RelatedResourceChildOperation.FILTER,
++      requiredAuthorities = {"ERGON_READ"})
++  @Operation(operationId = "parametrizacoesErgonDoSetor", summary = "Parametrizações Ergon", description = "Histórico de comando, classificação funcional e custo da unidade.")
++  public ResponseEntity<RestApiResponse<Page<SetorParametrizacaoErgonResponseDTO>>> parametrizacoesErgon(
++      @PathVariable String id, @RequestParam(defaultValue = "0") int page,
++      @RequestParam(defaultValue = "20") int size) {
++    return related(id, page, size, parametrizacoes, new SetorParametrizacaoErgonFilterDTO(), (filter, unidade) -> filter.setSetor(unidade.getId()));
++  }
++
++  @GetMapping("/{id}/cargos-autorizados")
++  @PreAuthorize("hasAuthority('ERGON_READ')")
++  @UiSurface(id = "cargos-autorizados", kind = SurfaceKind.READ_PROJECTION, scope = SurfaceScope.ITEM,
++      title = "Cargos autorizados", description = "Autorizações de quadro diretamente registradas para a unidade.",
++      relatedChildResourceKey = ApiPaths.KEY_CARGOS_POR_SETOR, relatedChildResourcePath = ApiPaths.CARGOS_POR_SETOR,
++      relatedChildParentField = "setor", relatedChildOperations = RelatedResourceChildOperation.FILTER,
++      requiredAuthorities = {"ERGON_READ"})
++  @Operation(operationId = "cargosAutorizadosDoSetor", summary = "Cargos autorizados", description = "Autorizações de quadro diretamente registradas para a unidade.")
++  public ResponseEntity<RestApiResponse<Page<CargoSetorResponseDTO>>> cargosAutorizados(
++      @PathVariable String id, @RequestParam(defaultValue = "0") int page,
++      @RequestParam(defaultValue = "20") int size) {
++    return related(id, page, size, cargos, new CargoSetorFilterDTO(), (filter, unidade) -> filter.setSetor(unidade.getId()));
++  }
++
++  @GetMapping("/{id}/designacoes-chefia")
++  @PreAuthorize("hasAuthority('ERGON_READ')")
++  @UiSurface(id = "designacoes-chefia", kind = SurfaceKind.READ_PROJECTION, scope = SurfaceScope.ITEM,
++      title = "Designações de chefia", description = "Atos de designação funcional registrados para a unidade.",
++      relatedChildResourceKey = ApiPaths.KEY_DESIGNACOES, relatedChildResourcePath = ApiPaths.DESIGNACOES,
++      relatedChildParentField = "setorId", relatedChildOperations = RelatedResourceChildOperation.FILTER,
++      requiredAuthorities = {"ERGON_READ"})
++  @Operation(operationId = "designacoesChefiaDoSetor", summary = "Designações de chefia", description = "Atos de designação funcional registrados para a unidade.")
++  public ResponseEntity<RestApiResponse<Page<DesignacaoFuncaoResponseDTO>>> designacoesChefia(
++      @PathVariable String id, @RequestParam(defaultValue = "0") int page,
++      @RequestParam(defaultValue = "20") int size) {
++    return related(id, page, size, designacoes, new DesignacaoFuncaoFilterDTO(), (filter, unidade) -> filter.setSetorId(unidade.getId()));
++  }
++
++  @GetMapping("/{id}/radar-subarvore")
++  @PreAuthorize("hasAuthority('ERGON_READ')")
++  @UiSurface(id = "radar-subarvore", kind = SurfaceKind.READ_PROJECTION, scope = SurfaceScope.ITEM,
++      title = "Radar da subárvore", description = "Apuração da unidade e de todos os seus descendentes na composição consultada.",
++      relatedChildResourceKey = ApiPaths.KEY_RADAR_ORGANOGRAMA_CHEFIAS_OCUPACAO, relatedChildResourcePath = ApiPaths.RADAR_ORGANOGRAMA_CHEFIAS_OCUPACAO,
++      relatedChildParentField = "raizSubarvore", relatedChildOperations = RelatedResourceChildOperation.FILTER,
++      requiredAuthorities = {"ERGON_READ"})
++  @Operation(operationId = "radarSubarvoreDoSetor", summary = "Radar da subárvore", description = "Apuração da unidade e de todos os seus descendentes na composição consultada.")
++  public ResponseEntity<RestApiResponse<Page<RadarOrganogramaChefiaOcupacaoResponseDTO>>> radarSubarvore(
++      @PathVariable String id, @RequestParam(defaultValue = "0") int page,
++      @RequestParam(defaultValue = "20") int size) {
++    return related(id, page, size, radar, new RadarOrganogramaChefiaOcupacaoFilterDTO(), service::bindRadarSubtree);
++  }
++
++  private <R, I, F extends GenericFilterDTO> ResponseEntity<RestApiResponse<Page<R>>> related(
++      String id, int page, int size, BaseResourceQueryService<R, I, F> child, F filter,
++      BiConsumer<F, SetorResponseDTO> bindParent) {
++    ErgonHttpContract.childPage(page, size);
++    bindParent.accept(filter, service.findById(id).body());
++    var rows = child.filter(filter, PageRequest.of(page, size, child.getDefaultSort()), List.of());
++    return successEnvelope(ResponseEntity.ok(), rows, null);
++  }
+ }
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/controller/SetorParametrizacaoErgonController.java b/src/main/java/br/com/praxis/ergonshowcase/controller/SetorParametrizacaoErgonController.java
+index e53fc2c..43179aa 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/controller/SetorParametrizacaoErgonController.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/controller/SetorParametrizacaoErgonController.java
+@@ -5,10 +5,17 @@ import br.com.praxis.ergonshowcase.service.SetorParametrizacaoErgonService;
+ import org.praxisplatform.uischema.annotation.*;
+ import org.praxisplatform.uischema.controller.base.AbstractResourceController;
+ import org.praxisplatform.uischema.surface.*;
++import org.praxisplatform.uischema.stats.dto.GroupByStatsRequest;
++import org.praxisplatform.uischema.stats.dto.GroupByStatsResponse;
++import org.praxisplatform.uischema.fact.ResourceFact;
++import org.praxisplatform.uischema.rest.response.RestApiResponse;
+ import org.springframework.web.bind.annotation.*;
+ import org.springframework.security.access.prepost.PreAuthorize;
+ import org.springframework.http.ResponseEntity;
+ import io.swagger.v3.oas.annotations.*;
++@ResourceFact(key = "centroCusto", resourceKey = ApiPaths.KEY_SETORES_ERGON, label = "Centro de custo",
++    description = "Classificação de apropriação de custo registrada na parametrização Ergon para esta vigência.",
++    dataType = "string", sourceKind = "field")
+ @ApiResource(value=ApiPaths.SETORES_ERGON, resourceKey=ApiPaths.KEY_SETORES_ERGON, title="Parâmetros funcionais de setores",
+  description="Inspeção temporal da estrutura organizacional. Alterações dependem da liberação dos comandos governados.", icon="account_tree",
+  identity=@ResourceIdentity(keyField="id",titleField="setorNome",subtitleField="setor",metadataFields={"observacao"}),
+@@ -20,6 +27,40 @@ public class SetorParametrizacaoErgonController extends AbstractResourceControll
+  public SetorParametrizacaoErgonController(SetorParametrizacaoErgonService service) {this.service=service;}
+  @Override protected SetorParametrizacaoErgonService getService() {return service;}
+  @Override protected Long getResponseId(SetorParametrizacaoErgonResponseDTO dto) {return dto.getId();}
++  @Override
++  @PostMapping("/stats/group-by")
++  @Operation(summary = "Agrupar parametrizações", description = "Apura registros do órgão autorizado no recorte filtrado.")
++  @UiAnalytics(projections = {
++      @AnalyticsProjection(id = "composicao", intent = AnalyticsIntent.COMPOSITION,
++          sourceOperation = AnalyticsOperation.GROUP_BY,
++          primaryDimension = @AnalyticsDimensionBinding(field = "tipoAcesso"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Parametrizações")),
++      @AnalyticsProjection(id = "registros-nominais", intent = AnalyticsIntent.RANKING,
++          sourceOperation = AnalyticsOperation.GROUP_BY,
++          primaryDimension = @AnalyticsDimensionBinding(field = "id"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Parametrizações"),
++          recordOpen = @AnalyticsRecordOpen(sourceIdentityField = "key",
++              target = @AnalyticsSurfaceTarget(resourceKey = ApiPaths.KEY_SETORES_ERGON, surfaceId = "detail"))),
++      @AnalyticsProjection(id = "inicios-de-vigencia", intent = AnalyticsIntent.TREND,
++          sourceOperation = AnalyticsOperation.TIMESERIES,
++          primaryDimension = @AnalyticsDimensionBinding(field = "dtini"),
++          defaultGranularity = AnalyticsGranularity.MONTH, defaultTimezone = "America/Sao_Paulo",
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Parametrizações por início")),
++      @AnalyticsProjection(id = "distribuicao", intent = AnalyticsIntent.DISTRIBUTION,
++          sourceOperation = AnalyticsOperation.DISTRIBUTION,
++          primaryDimension = @AnalyticsDimensionBinding(field = "grauRiscoAmbiental"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Parametrizações por grau de risco")),
++      @AnalyticsProjection(id = "comparativo-por-vigencia", intent = AnalyticsIntent.COMPARISON,
++          sourceOperation = AnalyticsOperation.COMPARISON,
++          primaryDimension = @AnalyticsDimensionBinding(field = "tipoAcesso"),
++          comparisonPeriod = @AnalyticsComparisonPeriodBinding(field = "dtini", timezone = "America/Sao_Paulo"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Parametrizações"))
++  })
++  public ResponseEntity<RestApiResponse<GroupByStatsResponse>> groupByStats(
++      @RequestBody GroupByStatsRequest<SetorParametrizacaoErgonFilterDTO> request) {
++    return super.groupByStats(request);
++  }
++
+  @GetMapping("/{id}/detail") @PreAuthorize("hasAuthority('ERGON_READ')")
+  @UiSurface(id="detail",kind=SurfaceKind.READ_PROJECTION,scope=SurfaceScope.ITEM,title="Ficha do período",description="Configuração organizacional e fundamento da vigência.",requiredAuthorities={"ERGON_READ"})
+  @Operation(summary="Inspecionar período organizacional",description="Apresenta o assentamento do órgão autorizado com a sua fundamentação administrativa.")
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/controller/SubempresaLocalidadeController.java b/src/main/java/br/com/praxis/ergonshowcase/controller/SubempresaLocalidadeController.java
+index 7f01210..afb5a11 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/controller/SubempresaLocalidadeController.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/controller/SubempresaLocalidadeController.java
+@@ -5,10 +5,17 @@ import br.com.praxis.ergonshowcase.service.SubempresaLocalidadeService;
+ import org.praxisplatform.uischema.annotation.*;
+ import org.praxisplatform.uischema.controller.base.AbstractResourceController;
+ import org.praxisplatform.uischema.surface.*;
++import org.praxisplatform.uischema.stats.dto.GroupByStatsRequest;
++import org.praxisplatform.uischema.stats.dto.GroupByStatsResponse;
++import org.praxisplatform.uischema.fact.ResourceFact;
++import org.praxisplatform.uischema.rest.response.RestApiResponse;
+ import org.springframework.web.bind.annotation.*;
+ import org.springframework.security.access.prepost.PreAuthorize;
+ import org.springframework.http.ResponseEntity;
+ import io.swagger.v3.oas.annotations.*;
++@ResourceFact(key = "naturezaUnidade", resourceKey = ApiPaths.KEY_SUBEMPRESAS_LOCALIDADES, label = "Natureza da unidade",
++    description = "Distingue a unidade empregadora fiscal da referência de localização administrativa no registro vigente.",
++    dataType = "string", sourceKind = "field")
+ @ApiResource(value=ApiPaths.SUBEMPRESAS_LOCALIDADES, resourceKey=ApiPaths.KEY_SUBEMPRESAS_LOCALIDADES, title="Subempresas e localidades",
+  description="Inspeção temporal da estrutura organizacional. Alterações dependem da liberação dos comandos governados.", icon="account_tree",
+  identity=@ResourceIdentity(keyField="id",titleField="nome",subtitleField="codigo",metadataFields={"observacao"}),
+@@ -20,6 +27,40 @@ public class SubempresaLocalidadeController extends AbstractResourceController<S
+  public SubempresaLocalidadeController(SubempresaLocalidadeService service) {this.service=service;}
+  @Override protected SubempresaLocalidadeService getService() {return service;}
+  @Override protected Long getResponseId(SubempresaLocalidadeResponseDTO dto) {return dto.getId();}
++  @Override
++  @PostMapping("/stats/group-by")
++  @Operation(summary = "Agrupar unidades territoriais", description = "Apura registros do órgão autorizado no recorte filtrado.")
++  @UiAnalytics(projections = {
++      @AnalyticsProjection(id = "composicao", intent = AnalyticsIntent.COMPOSITION,
++          sourceOperation = AnalyticsOperation.GROUP_BY,
++          primaryDimension = @AnalyticsDimensionBinding(field = "naturezaUnidade"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Unidades territoriais")),
++      @AnalyticsProjection(id = "registros-nominais", intent = AnalyticsIntent.RANKING,
++          sourceOperation = AnalyticsOperation.GROUP_BY,
++          primaryDimension = @AnalyticsDimensionBinding(field = "id"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Unidades territoriais"),
++          recordOpen = @AnalyticsRecordOpen(sourceIdentityField = "key",
++              target = @AnalyticsSurfaceTarget(resourceKey = ApiPaths.KEY_SUBEMPRESAS_LOCALIDADES, surfaceId = "detail"))),
++      @AnalyticsProjection(id = "inicios-de-vigencia", intent = AnalyticsIntent.TREND,
++          sourceOperation = AnalyticsOperation.TIMESERIES,
++          primaryDimension = @AnalyticsDimensionBinding(field = "dtini"),
++          defaultGranularity = AnalyticsGranularity.MONTH, defaultTimezone = "America/Sao_Paulo",
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Unidades territoriais por início")),
++      @AnalyticsProjection(id = "distribuicao", intent = AnalyticsIntent.DISTRIBUTION,
++          sourceOperation = AnalyticsOperation.DISTRIBUTION,
++          primaryDimension = @AnalyticsDimensionBinding(field = "uf"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Unidades por UF")),
++      @AnalyticsProjection(id = "comparativo-por-vigencia", intent = AnalyticsIntent.COMPARISON,
++          sourceOperation = AnalyticsOperation.COMPARISON,
++          primaryDimension = @AnalyticsDimensionBinding(field = "naturezaUnidade"),
++          comparisonPeriod = @AnalyticsComparisonPeriodBinding(field = "dtini", timezone = "America/Sao_Paulo"),
++          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Unidades territoriais"))
++  })
++  public ResponseEntity<RestApiResponse<GroupByStatsResponse>> groupByStats(
++      @RequestBody GroupByStatsRequest<SubempresaLocalidadeFilterDTO> request) {
++    return super.groupByStats(request);
++  }
++
+  @GetMapping("/{id}/detail") @PreAuthorize("hasAuthority('ERGON_READ')")
+  @UiSurface(id="detail",kind=SurfaceKind.READ_PROJECTION,scope=SurfaceScope.ITEM,title="Ficha do período",description="Configuração organizacional e fundamento da vigência.",requiredAuthorities={"ERGON_READ"})
+  @Operation(summary="Inspecionar período organizacional",description="Apresenta o assentamento do órgão autorizado com a sua fundamentação administrativa.")
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/dto/RadarOrganogramaChefiaOcupacaoFilterDTO.java b/src/main/java/br/com/praxis/ergonshowcase/dto/RadarOrganogramaChefiaOcupacaoFilterDTO.java
+index c4b4c07..bf0c8ea 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/dto/RadarOrganogramaChefiaOcupacaoFilterDTO.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/dto/RadarOrganogramaChefiaOcupacaoFilterDTO.java
+@@ -14,6 +14,12 @@ import org.praxisplatform.uischema.filter.annotation.Filterable.FilterOperation;
+ import org.praxisplatform.uischema.filter.dto.GenericFilterDTO;
+ @Getter @Setter @Schema(description="Pesquisa temporal e hierárquica do organograma por órgão e composição válida na data.")
+ public class RadarOrganogramaChefiaOcupacaoFilterDTO implements GenericFilterDTO {
++  @Schema(description = "Código da raiz do recorte 360° ou referência temporal da sua ficha. Inclui a unidade e todos os descendentes na composição selecionada.")
++  @UISchema(label = "Raiz da subárvore", group = "Organograma", type = FieldDataType.TEXT,
++      controlType = FieldControlType.ENTITY_LOOKUP, icon = "account_tree",
++      preset = UISchemaPreset.ENTERPRISE_ID, endpoint = ApiPaths.SETOR_OPTIONS,
++      valueField = "id", displayField = "label")
++  private String raizSubarvore;
+   @Schema(description="Inclui descendentes do caminho selecionado; falso restringe a inspeção ao próprio nó.")
+   @UISchema(label="Incluir subordinados",group="Organograma",type=FieldDataType.BOOLEAN,controlType=FieldControlType.CHECKBOX,icon="account_tree",preset=UISchemaPreset.BOOLEAN_FLAG)
+   private Boolean incluirSubordinados;
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/dto/SetorFilterDTO.java b/src/main/java/br/com/praxis/ergonshowcase/dto/SetorFilterDTO.java
+index 547cffe..3fc5912 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/dto/SetorFilterDTO.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/dto/SetorFilterDTO.java
+@@ -17,6 +17,7 @@ public class SetorFilterDTO implements GenericFilterDTO {
+   @Schema(description="Data da composição histórica procurada; a consulta seleciona historico_setores, não a linha corrente do diretório.")
+   @UISchema(label="Data de referência",group="Organograma",type=org.praxisplatform.uischema.FieldDataType.DATE,controlType=org.praxisplatform.uischema.FieldControlType.DATE_PICKER,icon="event")
+   @Filterable(operation=FilterOperation.EFFECTIVE_ON_DATE,relation="dtini",endRelation="dtfim")
++  @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
+   private java.time.LocalDate dataReferencia;
+   @Schema(description="Zero para hierarquia oficial; um a quatro para hierarquias alternativas na data consultada.")
+   @UISchema(label="Hierarquia",group="Organograma",icon="account_tree")
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/dto/SetorResponseDTO.java b/src/main/java/br/com/praxis/ergonshowcase/dto/SetorResponseDTO.java
+index 02a87da..0c15ba9 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/dto/SetorResponseDTO.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/dto/SetorResponseDTO.java
+@@ -217,10 +217,10 @@ public class SetorResponseDTO {
+   @Schema(description = "Primeiro início conhecido da unidade, distinto do início do período corrente.", accessMode = Schema.AccessMode.READ_ONLY)
+   @UISchema(label = "Criação original", group = "Configuração organizacional", tableHidden = true, readOnly = true, type = FieldDataType.DATE, controlType = FieldControlType.DATE_PICKER, icon = "event", preset = UISchemaPreset.DATE_RANGE)
+   private LocalDate dataCriacaoOriginal;
+-  @Schema(description = "Quantidade de unidades diretamente subordinadas na hierarquia oficial corrente.", accessMode = Schema.AccessMode.READ_ONLY)
++  @Schema(description = "Quantidade de subordinados diretos na hierarquia e data da composição consultada.", accessMode = Schema.AccessMode.READ_ONLY)
+   @UISchema(label = "Subordinados diretos", group = "Configuração organizacional", tableHidden = true, readOnly = true, type = FieldDataType.NUMBER, icon = "numbers")
+   private Integer quantidadeSubordinadosDiretos;
+-  @Schema(description = "Centro de custo da parametrização funcional corrente da unidade.", accessMode = Schema.AccessMode.READ_ONLY)
++  @Schema(description = "Centro de custo da parametrização funcional válida na data da composição consultada.", accessMode = Schema.AccessMode.READ_ONLY)
+   @UISchema(label = "Centro de custo", group = "Configuração organizacional", tableHidden = true, readOnly = true, type = FieldDataType.TEXT, icon = "description")
+   private String centroCustoPadrao;
+   @Schema(description = "Cargo parametrizado para identificar o titular do comando da unidade.", accessMode = Schema.AccessMode.READ_ONLY)
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/service/CargoSetorService.java b/src/main/java/br/com/praxis/ergonshowcase/service/CargoSetorService.java
+index 22fd597..8677789 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/CargoSetorService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/CargoSetorService.java
+@@ -5,16 +5,55 @@ import br.com.praxis.ergonshowcase.dto.*;
+ import br.com.praxis.ergonshowcase.mapper.CargoSetorMapper;
+ import br.com.praxis.ergonshowcase.repository.CargoSetorRepository;
+ import org.springframework.stereotype.Service;
++import java.util.List;
++import java.util.Set;
++import org.praxisplatform.uischema.exporting.CollectionExportField;
++import org.praxisplatform.uischema.exporting.CollectionExportFieldPresentation;
++import org.praxisplatform.uischema.stats.StatsFieldRegistry;
++import org.praxisplatform.uischema.stats.StatsMetric;
+ import org.springframework.security.access.AccessDeniedException;
+ /** Contrato mutável preparado; execução exige os gates transacionais das Ondas 2–3. */
+ @Service
+ public class CargoSetorService extends ErgonResourceService<CargoSetor,CargoSetorResponseDTO,Long,CargoSetorFilterDTO,CreateCargoSetorDTO,UpdateCargoSetorDTO> {
+  private final CargoSetorMapper mapper;
++  @Override
++  public org.praxisplatform.uischema.filter.specification.GenericSpecificationsBuilder<CargoSetor> getSpecificationsBuilder() {
++    return SetorFichaReference.relatedFilter(CargoSetorFilterDTO.class, CargoSetorFilterDTO::new,
++        CargoSetorFilterDTO::getSetor, CargoSetorFilterDTO::setSetor, "setor");
++  }
++
+  public CargoSetorService(CargoSetorRepository repository,CargoSetorMapper mapper) {super(repository,CargoSetor.class,"id");this.mapper=mapper;}
+  @Override protected CargoSetorMapper getResourceMapper() {return mapper;}
+  @Override protected CargoSetorFilterDTO emptyFilter() {return new CargoSetorFilterDTO();}
+  @Override protected String resolveResourceKey() {return ApiPaths.KEY_CARGOS_POR_SETOR;}
+- @Override protected java.util.List<org.praxisplatform.uischema.exporting.CollectionExportField> exportFields() {return java.util.List.of();}
++  @Override
++  public StatsFieldRegistry getStatsFieldRegistry() {
++    return StatsFieldRegistry.builder()
++        .labeledGroupByBucket("id", "id", "cargoNome", Set.of(StatsMetric.COUNT))
++        .categoricalGroupByBucket("tipoControleQuadro", "tipoControleQuadro")
++        .numericHistogramMeasureField("lotacaoMaximaAutorizada", "lotacaoMaximaAutorizada")
++        .categoricalTermsBucket("setor", "setor")
++        .temporalTimeSeriesField("dtini", "dtini")
++        .build();
++  }
++
++  @Override
++  protected List<CollectionExportField> exportFields() {
++    var date = new CollectionExportFieldPresentation(
++        "date", "dd/MM/yyyy", null, "pt-BR", "America/Sao_Paulo", null, null, "Não informado");
++    var flag = new CollectionExportFieldPresentation(
++        "boolean", null, null, "pt-BR", null, "Sim", "Não", "Não informado");
++    return List.of(
++        field("id", "Identificador", "integer"),
++        field("setor", "Unidade", "string"),
++        field("cargoNome", "Cargo", "string"),
++        field("tipoControleQuadro", "Controle de quadro", "string"),
++        field("lotacaoMaximaAutorizada", "Limite autorizado", "integer"),
++        presentedField("abrangeSubordinados", "Abrange subordinados", "boolean", flag),
++        field("lotacaoOcupadaAtual", "Lotação ocupada registrada", "integer"),
++        presentedField("dtini", "Início de vigência", "date", date),
++        presentedField("dtfim", "Término de vigência", "date", date));
++  }
+  @Override protected void beforeCreate(CreateCargoSetorDTO dto,CargoSetor entity) {throw blocked();}
+  @Override protected void beforeUpdate(Long id,CargoSetor entity,UpdateCargoSetorDTO dto) {throw blocked();}
+  @Override protected void beforeDelete(Long id,CargoSetor entity) {throw blocked();}
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/service/DesignacaoFuncaoService.java b/src/main/java/br/com/praxis/ergonshowcase/service/DesignacaoFuncaoService.java
+index 2ada70c..411da34 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/DesignacaoFuncaoService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/DesignacaoFuncaoService.java
+@@ -30,6 +30,12 @@ public class DesignacaoFuncaoService extends ChefiaResourceService<DesignacaoFun
+   private final DesignacaoFuncaoMapper mapper;
+   private final ErgonRuleEngineFacade rules;
+ 
++  @Override
++  public org.praxisplatform.uischema.filter.specification.GenericSpecificationsBuilder<DesignacaoFuncao> getSpecificationsBuilder() {
++    return SetorFichaReference.relatedFilter(DesignacaoFuncaoFilterDTO.class, DesignacaoFuncaoFilterDTO::new,
++        DesignacaoFuncaoFilterDTO::getSetorId, DesignacaoFuncaoFilterDTO::setSetorId, "setorId");
++  }
++
+   public DesignacaoFuncaoService(DesignacaoFuncaoRepository repository, DesignacaoFuncaoMapper mapper,
+       ErgonRuleEngineFacade rules) {
+     super(repository, DesignacaoFuncao.class, "id");
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/service/GrupoSetorService.java b/src/main/java/br/com/praxis/ergonshowcase/service/GrupoSetorService.java
+index be686d6..9e768d6 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/GrupoSetorService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/GrupoSetorService.java
+@@ -5,6 +5,12 @@ import br.com.praxis.ergonshowcase.dto.*;
+ import br.com.praxis.ergonshowcase.mapper.GrupoSetorMapper;
+ import br.com.praxis.ergonshowcase.repository.GrupoSetorRepository;
+ import org.springframework.stereotype.Service;
++import java.util.List;
++import java.util.Set;
++import org.praxisplatform.uischema.exporting.CollectionExportField;
++import org.praxisplatform.uischema.exporting.CollectionExportFieldPresentation;
++import org.praxisplatform.uischema.stats.StatsFieldRegistry;
++import org.praxisplatform.uischema.stats.StatsMetric;
+ import org.springframework.security.access.AccessDeniedException;
+ /** Contrato mutável preparado; execução exige os gates transacionais das Ondas 2–3. */
+ @Service
+@@ -14,7 +20,33 @@ public class GrupoSetorService extends ErgonResourceService<GrupoSetor,GrupoSeto
+  @Override protected GrupoSetorMapper getResourceMapper() {return mapper;}
+  @Override protected GrupoSetorFilterDTO emptyFilter() {return new GrupoSetorFilterDTO();}
+  @Override protected String resolveResourceKey() {return ApiPaths.KEY_GRUPOS_SETORES;}
+- @Override protected java.util.List<org.praxisplatform.uischema.exporting.CollectionExportField> exportFields() {return java.util.List.of();}
++  @Override
++  public StatsFieldRegistry getStatsFieldRegistry() {
++    return StatsFieldRegistry.builder()
++        .labeledGroupByBucket("id", "id", "nome", Set.of(StatsMetric.COUNT))
++        .categoricalGroupByBucket("tipoAgrupamento", "tipoAgrupamento")
++        .categoricalTermsBucket("ufAbrangencia", "ufAbrangencia")
++        .temporalTimeSeriesField("dtini", "dtini")
++        .build();
++  }
++
++  @Override
++  protected List<CollectionExportField> exportFields() {
++    var date = new CollectionExportFieldPresentation(
++        "date", "dd/MM/yyyy", null, "pt-BR", "America/Sao_Paulo", null, null, "Não informado");
++    var flag = new CollectionExportFieldPresentation(
++        "boolean", null, null, "pt-BR", null, "Sim", "Não", "Não informado");
++    return List.of(
++        field("id", "Identificador", "integer"),
++        field("sigla", "Sigla", "string"),
++        field("nome", "Denominação", "string"),
++        field("tipoAgrupamento", "Agrupamento", "string"),
++        field("setorSede", "Setor sede", "string"),
++        field("ufAbrangencia", "UF de abrangência", "string"),
++        presentedField("ativo", "Ativo", "boolean", flag),
++        presentedField("dtini", "Início de vigência", "date", date),
++        presentedField("dtfim", "Término de vigência", "date", date));
++  }
+  @Override protected void beforeCreate(CreateGrupoSetorDTO dto,GrupoSetor entity) {throw blocked();}
+  @Override protected void beforeUpdate(Long id,GrupoSetor entity,UpdateGrupoSetorDTO dto) {throw blocked();}
+  @Override protected void beforeDelete(Long id,GrupoSetor entity) {throw blocked();}
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/service/HistoricoSetorService.java b/src/main/java/br/com/praxis/ergonshowcase/service/HistoricoSetorService.java
+index 745e868..846f6de 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/HistoricoSetorService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/HistoricoSetorService.java
+@@ -5,6 +5,12 @@ import br.com.praxis.ergonshowcase.dto.*;
+ import br.com.praxis.ergonshowcase.mapper.HistoricoSetorMapper;
+ import br.com.praxis.ergonshowcase.repository.HistoricoSetorRepository;
+ import org.springframework.stereotype.Service;
++import java.util.List;
++import java.util.Set;
++import org.praxisplatform.uischema.exporting.CollectionExportField;
++import org.praxisplatform.uischema.exporting.CollectionExportFieldPresentation;
++import org.praxisplatform.uischema.stats.StatsFieldRegistry;
++import org.praxisplatform.uischema.stats.StatsMetric;
+ import org.springframework.security.access.AccessDeniedException;
+ /** Contrato mutÃ¡vel preparado; execuÃ§Ã£o exige os gates transacionais das Ondas 2â€“3. */
+ @Service
+@@ -29,7 +35,33 @@ public class HistoricoSetorService extends ErgonResourceService<HistoricoSetor,H
+  @Override protected HistoricoSetorMapper getResourceMapper() {return mapper;}
+  @Override protected HistoricoSetorFilterDTO emptyFilter() {return new HistoricoSetorFilterDTO();}
+  @Override protected String resolveResourceKey() {return ApiPaths.KEY_HISTORICO_SETORES;}
+- @Override protected java.util.List<org.praxisplatform.uischema.exporting.CollectionExportField> exportFields() {return java.util.List.of();}
++  @Override
++  public StatsFieldRegistry getStatsFieldRegistry() {
++    return StatsFieldRegistry.builder()
++        .labeledGroupByBucket("id", "id", "nome", Set.of(StatsMetric.COUNT))
++        .categoricalGroupByBucket("tipoSetor", "tipoSetor")
++        .categoricalTermsBucket("ufLotacao", "ufLotacao")
++        .temporalTimeSeriesField("dtini", "dtini")
++        .build();
++  }
++
++  @Override
++  protected List<CollectionExportField> exportFields() {
++    var date = new CollectionExportFieldPresentation(
++        "date", "dd/MM/yyyy", null, "pt-BR", "America/Sao_Paulo", null, null, "Não informado");
++    var flag = new CollectionExportFieldPresentation(
++        "boolean", null, null, "pt-BR", null, "Sim", "Não", "Não informado");
++    return List.of(
++        field("id", "Identificador", "integer"),
++        field("setor", "Unidade", "string"),
++        field("nome", "Denominação", "string"),
++        field("tipoSetor", "Tipo de unidade", "string"),
++        field("setorPai", "Superior oficial", "string"),
++        field("ufLotacao", "UF", "string"),
++        presentedField("extinto", "Extinto", "boolean", flag),
++        presentedField("dtini", "Início de vigência", "date", date),
++        presentedField("dtfim", "Término de vigência", "date", date));
++  }
+  @Override protected void beforeCreate(CreateHistoricoSetorDTO dto,HistoricoSetor entity) {throw blocked();}
+  @Override protected void beforeUpdate(Long id,HistoricoSetor entity,UpdateHistoricoSetorDTO dto) {throw blocked();}
+  @Override protected void beforeDelete(Long id,HistoricoSetor entity) {throw blocked();}
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/service/OrganogramaRadarQuery.java b/src/main/java/br/com/praxis/ergonshowcase/service/OrganogramaRadarQuery.java
+index c37138f..fdca6db 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/OrganogramaRadarQuery.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/OrganogramaRadarQuery.java
+@@ -21,6 +21,12 @@ public final class OrganogramaRadarQuery extends GenericSpecificationsBuilder<Ra
+       CustomFieldDefinitionProvider definitions,ResourceTenantContextResolver tenant,String key) {
+     var copy=new RadarOrganogramaChefiaOcupacaoFilterDTO();
+     if(f!=null)BeanUtils.copyProperties(f,copy);
++    String subtreeRoot = copy.getRaizSubarvore();
++    var reference = SetorFichaReference.parse(subtreeRoot);
++    if (reference != null) {
++      copy.setDataReferencia(reference.date());
++      copy.setTipoHierarquia(reference.hierarchy());
++    }
+     if(copy.getDataReferencia()==null)copy.setDataReferencia(LocalDate.now());
+     if(copy.getTipoHierarquia()==null)copy.setTipoHierarquia(0);
+     if(copy.getTipoHierarquia()<0||copy.getTipoHierarquia()>4)throw invalid("Hierarquia deve estar entre zero e quatro.");
+@@ -29,8 +35,30 @@ public final class OrganogramaRadarQuery extends GenericSpecificationsBuilder<Ra
+     boolean exact=Boolean.FALSE.equals(copy.getIncluirSubordinados());
+     if(exact)copy.setCaminhoSubarvore(null);
+     var result=new GenericSpecificationsBuilder<RadarOrganogramaChefiaOcupacao>().buildSpecification(copy,p,definitions,tenant,key);
+-    if(path==null||!exact)return result;
+-    return new GenericSpecification<>(result.spec().and((root,query,cb)->cb.equal(root.get("caminhoHierarquico"),path)),result.pageable());
++    var specification = result.spec();
++    if (path != null && exact) {
++      specification = specification.and((root, query, cb) -> cb.equal(root.get("caminhoHierarquico"), path));
++    }
++    if (subtreeRoot != null) {
++      if (reference == null && (subtreeRoot.isBlank() || subtreeRoot.length() > 30)) {
++        throw invalid("Informe o código da unidade que inicia a subárvore.");
++      }
++      specification = specification.and((node, query, cb) -> {
++        var branch = query.subquery(Integer.class);
++        var ancestor = branch.from(RadarOrganogramaChefiaOcupacao.class);
++        var date = copy.getDataReferencia();
++        branch.select(cb.literal(1)).where(
++            reference == null ? cb.equal(ancestor.get("setor"), subtreeRoot)
++                : cb.equal(ancestor.get("periodoId"), reference.period()),
++            cb.equal(ancestor.get("empCodigo"), node.get("empCodigo")),
++            cb.equal(ancestor.get("tipoHierarquia"), node.get("tipoHierarquia")),
++            cb.lessThanOrEqualTo(ancestor.get("dtini"), date),
++            cb.or(cb.isNull(ancestor.get("dtfim")), cb.greaterThanOrEqualTo(ancestor.get("dtfim"), date)),
++            cb.like(node.get("caminhoHierarquico"), cb.concat(ancestor.get("caminhoHierarquico"), "%")));
++        return cb.exists(branch);
++      });
++    }
++    return new GenericSpecification<>(specification,result.pageable());
+   }
+   private ResponseStatusException invalid(String message) {return new ResponseStatusException(HttpStatus.BAD_REQUEST,message);}
+ }
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/service/OrganogramaTemporalQuery.java b/src/main/java/br/com/praxis/ergonshowcase/service/OrganogramaTemporalQuery.java
+index 3059be2..0d30c30 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/OrganogramaTemporalQuery.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/OrganogramaTemporalQuery.java
+@@ -54,7 +54,18 @@ public final class OrganogramaTemporalQuery extends GenericSpecificationsBuilder
+       org.praxisplatform.uischema.customfields.CustomFieldDefinitionProvider definitions,
+       org.praxisplatform.uischema.customfields.ResourceTenantContextResolver context,String key) {
+     var delegate=new GenericSpecificationsBuilder<HistoricoSetor>();
+-    if(!(filter instanceof HistoricoSetorFilterDTO f)||!temporal(f))return delegate.buildSpecification(filter,pageable,definitions,context,key);
++    if (!(filter instanceof HistoricoSetorFilterDTO f)) {
++      return delegate.buildSpecification(filter, pageable, definitions, context, key);
++    }
++    var reference = SetorFichaReference.parse(f.getSetor());
++    if (reference != null) {
++      var normalized = new HistoricoSetorFilterDTO();
++      BeanUtils.copyProperties(f, normalized);
++      normalized.setSetor(null);
++      var canonical = buildSpecification(normalized, pageable, definitions, context, key);
++      return new GenericSpecification<>(canonical.spec().and(reference.matchesSector("setor")), canonical.pageable());
++    }
++    if(!temporal(f))return delegate.buildSpecification(filter,pageable,definitions,context,key);
+     var copy=new HistoricoSetorFilterDTO();BeanUtils.copyProperties(f,copy);
+     copy.setCaminhoSubarvore(null);copy.setNivelHierarquico(null);copy.setSetorPai(null);
+     if(copy.getDataReferencia()==null)copy.setDataReferencia(LocalDate.now());
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/service/RadarOrganogramaChefiaOcupacaoService.java b/src/main/java/br/com/praxis/ergonshowcase/service/RadarOrganogramaChefiaOcupacaoService.java
+index a82901e..9e29dae 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/RadarOrganogramaChefiaOcupacaoService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/RadarOrganogramaChefiaOcupacaoService.java
+@@ -5,6 +5,12 @@ import br.com.praxis.ergonshowcase.dto.*;
+ import br.com.praxis.ergonshowcase.mapper.RadarOrganogramaChefiaOcupacaoMapper;
+ import br.com.praxis.ergonshowcase.repository.RadarOrganogramaChefiaOcupacaoRepository;
+ import org.springframework.stereotype.Service;
++import java.util.List;
++import java.util.Set;
++import org.praxisplatform.uischema.exporting.CollectionExportField;
++import org.praxisplatform.uischema.exporting.CollectionExportFieldPresentation;
++import org.praxisplatform.uischema.stats.StatsFieldRegistry;
++import org.praxisplatform.uischema.stats.StatsMetric;
+ @Service public class RadarOrganogramaChefiaOcupacaoService extends ErgonReadOnlyResourceService<RadarOrganogramaChefiaOcupacao,RadarOrganogramaChefiaOcupacaoResponseDTO,String,RadarOrganogramaChefiaOcupacaoFilterDTO> {
+  private final RadarOrganogramaChefiaOcupacaoMapper mapper;
+  @Override public org.praxisplatform.uischema.filter.specification.GenericSpecificationsBuilder<RadarOrganogramaChefiaOcupacao> getSpecificationsBuilder() {return new OrganogramaRadarQuery();}
+@@ -12,5 +18,31 @@ import org.springframework.stereotype.Service;
+  @Override protected RadarOrganogramaChefiaOcupacaoMapper getResourceMapper() {return mapper;}
+  @Override protected RadarOrganogramaChefiaOcupacaoFilterDTO emptyFilter() {return new RadarOrganogramaChefiaOcupacaoFilterDTO();}
+  @Override protected String resolveResourceKey() {return ApiPaths.KEY_RADAR_ORGANOGRAMA_CHEFIAS_OCUPACAO;}
+- @Override protected java.util.List<org.praxisplatform.uischema.exporting.CollectionExportField> exportFields() {return java.util.List.of();}
++  @Override
++  public StatsFieldRegistry getStatsFieldRegistry() {
++    return StatsFieldRegistry.builder()
++        .labeledGroupByBucket("id", "id", "nomeSetor", Set.of(StatsMetric.COUNT))
++        .categoricalGroupByBucket("situacaoComandoSetor", "situacaoComandoSetor")
++        .numericHistogramMeasureField("vagasAutorizadasSetor", "vagasAutorizadasSetor")
++        .categoricalTermsBucket("tipoSetor", "tipoSetor")
++        .temporalTimeSeriesField("dtini", "dtini")
++        .build();
++  }
++
++  @Override
++  protected List<CollectionExportField> exportFields() {
++    var date = new CollectionExportFieldPresentation(
++        "date", "dd/MM/yyyy", null, "pt-BR", "America/Sao_Paulo", null, null, "Não informado");
++    return List.of(
++        field("id", "Identificador", "string"),
++        field("setor", "Unidade", "string"),
++        field("nomeSetor", "Denominação", "string"),
++        field("tipoHierarquia", "Hierarquia", "integer"),
++        field("situacaoComandoSetor", "Situação do comando", "string"),
++        field("vagasAutorizadasSetor", "Vagas diretas autorizadas", "integer"),
++        field("vagasOcupadasSetor", "Vagas ocupadas", "integer"),
++        field("escopoApuracao", "Escopo da apuração", "string"),
++        presentedField("dtini", "Início de vigência", "date", date),
++        presentedField("dtfim", "Término de vigência", "date", date));
++  }
+ }
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/service/SetorFichaReference.java b/src/main/java/br/com/praxis/ergonshowcase/service/SetorFichaReference.java
+new file mode 100644
+index 0000000..2efe742
+--- /dev/null
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/SetorFichaReference.java
+@@ -0,0 +1,81 @@
++package br.com.praxis.ergonshowcase.service;
++
++import br.com.praxis.ergonshowcase.domain.HistoricoSetor;
++import java.time.LocalDate;
++import java.time.format.DateTimeParseException;
++import java.util.function.BiConsumer;
++import java.util.function.Function;
++import java.util.function.Supplier;
++import org.praxisplatform.uischema.customfields.CustomFieldDefinitionProvider;
++import org.praxisplatform.uischema.customfields.ResourceTenantContextResolver;
++import org.praxisplatform.uischema.filter.dto.GenericFilterDTO;
++import org.praxisplatform.uischema.filter.specification.GenericSpecification;
++import org.praxisplatform.uischema.filter.specification.GenericSpecificationsBuilder;
++import org.springframework.beans.BeanUtils;
++import org.springframework.data.domain.Pageable;
++import org.springframework.data.jpa.domain.Specification;
++import org.springframework.http.HttpStatus;
++import org.springframework.web.server.ResponseStatusException;
++
++/** Identidade da ficha e predicado de relacionamento para os filtros enviados pelo outlet 360°. */
++record SetorFichaReference(long period, LocalDate date, int hierarchy) {
++  // O prefixo excede o limite do código físico de setor.
++  private static final String PREFIX = "periodo-organizacional-em-vigencia:";
++
++  String encode() {
++    return PREFIX + period + ":" + date + ":" + hierarchy;
++  }
++
++  static SetorFichaReference parse(String value) {
++    if (value == null || !value.startsWith(PREFIX)) {
++      return null;
++    }
++    String[] parts = value.substring(PREFIX.length()).split(":", -1);
++    if (parts.length == 3 && parts[2].matches("[0-4]")) {
++      try {
++        return new SetorFichaReference(Long.parseLong(parts[0]), LocalDate.parse(parts[1]), Integer.parseInt(parts[2]));
++      } catch (NumberFormatException | DateTimeParseException ignored) {
++        // A referência malformada recebe o mesmo resultado de uma ficha indisponível.
++      }
++    }
++    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Referência da unidade indisponível.");
++  }
++
++  <E> Specification<E> matchesSector(String sectorField) {
++    return (child, query, cb) -> {
++      var periodQuery = query.subquery(Integer.class);
++      var history = periodQuery.from(HistoricoSetor.class);
++      periodQuery.select(cb.literal(1)).where(
++          cb.equal(history.get("id"), period),
++          cb.equal(history.get("empCodigo"), child.get("empCodigo")),
++          cb.equal(history.get("setor"), child.get(sectorField)),
++          cb.lessThanOrEqualTo(history.get("dtini"), date),
++          cb.or(cb.isNull(history.get("dtfim")), cb.greaterThanOrEqualTo(history.get("dtfim"), date)));
++      return cb.exists(periodQuery);
++    };
++  }
++
++  static <E, F extends GenericFilterDTO> GenericSpecificationsBuilder<E> relatedFilter(
++      Class<F> type, Supplier<F> factory, Function<F, String> parentValue,
++      BiConsumer<F, String> bindParent, String sectorField) {
++    return new GenericSpecificationsBuilder<>() {
++      @Override
++      public <Q extends GenericFilterDTO> GenericSpecification<E> buildSpecification(Q filter, Pageable pageable,
++          CustomFieldDefinitionProvider definitions, ResourceTenantContextResolver tenant, String key) {
++        if (!type.isInstance(filter)) {
++          return super.buildSpecification(filter, pageable, definitions, tenant, key);
++        }
++        F typed = type.cast(filter);
++        var reference = parse(parentValue.apply(typed));
++        if (reference == null) {
++          return super.buildSpecification(filter, pageable, definitions, tenant, key);
++        }
++        F copy = factory.get();
++        BeanUtils.copyProperties(typed, copy);
++        bindParent.accept(copy, null);
++        var ordinary = super.buildSpecification(copy, pageable, definitions, tenant, key);
++        return new GenericSpecification<>(ordinary.spec().and(reference.matchesSector(sectorField)), ordinary.pageable());
++      }
++    };
++  }
++}
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/service/SetorParametrizacaoErgonService.java b/src/main/java/br/com/praxis/ergonshowcase/service/SetorParametrizacaoErgonService.java
+index a1dd321..3ec0d2f 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/SetorParametrizacaoErgonService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/SetorParametrizacaoErgonService.java
+@@ -5,16 +5,54 @@ import br.com.praxis.ergonshowcase.dto.*;
+ import br.com.praxis.ergonshowcase.mapper.SetorParametrizacaoErgonMapper;
+ import br.com.praxis.ergonshowcase.repository.SetorParametrizacaoErgonRepository;
+ import org.springframework.stereotype.Service;
++import java.util.List;
++import java.util.Set;
++import org.praxisplatform.uischema.exporting.CollectionExportField;
++import org.praxisplatform.uischema.exporting.CollectionExportFieldPresentation;
++import org.praxisplatform.uischema.stats.StatsFieldRegistry;
++import org.praxisplatform.uischema.stats.StatsMetric;
+ import org.springframework.security.access.AccessDeniedException;
+ /** Contrato mutável preparado; execução exige os gates transacionais das Ondas 2–3. */
+ @Service
+ public class SetorParametrizacaoErgonService extends ErgonResourceService<SetorParametrizacaoErgon,SetorParametrizacaoErgonResponseDTO,Long,SetorParametrizacaoErgonFilterDTO,CreateSetorParametrizacaoErgonDTO,UpdateSetorParametrizacaoErgonDTO> {
+  private final SetorParametrizacaoErgonMapper mapper;
++  @Override
++  public org.praxisplatform.uischema.filter.specification.GenericSpecificationsBuilder<SetorParametrizacaoErgon> getSpecificationsBuilder() {
++    return SetorFichaReference.relatedFilter(SetorParametrizacaoErgonFilterDTO.class, SetorParametrizacaoErgonFilterDTO::new,
++        SetorParametrizacaoErgonFilterDTO::getSetor, SetorParametrizacaoErgonFilterDTO::setSetor, "setor");
++  }
++
+  public SetorParametrizacaoErgonService(SetorParametrizacaoErgonRepository repository,SetorParametrizacaoErgonMapper mapper) {super(repository,SetorParametrizacaoErgon.class,"id");this.mapper=mapper;}
+  @Override protected SetorParametrizacaoErgonMapper getResourceMapper() {return mapper;}
+  @Override protected SetorParametrizacaoErgonFilterDTO emptyFilter() {return new SetorParametrizacaoErgonFilterDTO();}
+  @Override protected String resolveResourceKey() {return ApiPaths.KEY_SETORES_ERGON;}
+- @Override protected java.util.List<org.praxisplatform.uischema.exporting.CollectionExportField> exportFields() {return java.util.List.of();}
++  @Override
++  public StatsFieldRegistry getStatsFieldRegistry() {
++    return StatsFieldRegistry.builder()
++        .labeledGroupByBucket("id", "id", "setorNome", Set.of(StatsMetric.COUNT))
++        .categoricalGroupByBucket("tipoAcesso", "tipoAcesso")
++        .categoricalTermsBucket("grauRiscoAmbiental", "grauRiscoAmbiental")
++        .temporalTimeSeriesField("dtini", "dtini")
++        .build();
++  }
++
++  @Override
++  protected List<CollectionExportField> exportFields() {
++    var date = new CollectionExportFieldPresentation(
++        "date", "dd/MM/yyyy", null, "pt-BR", "America/Sao_Paulo", null, null, "Não informado");
++    var flag = new CollectionExportFieldPresentation(
++        "boolean", null, null, "pt-BR", null, "Sim", "Não", "Não informado");
++    return List.of(
++        field("id", "Identificador", "integer"),
++        field("setor", "Unidade", "string"),
++        field("setorNome", "Denominação", "string"),
++        field("centroCusto", "Centro de custo", "string"),
++        field("tipoAcesso", "Tipo de acesso", "string"),
++        field("grauRiscoAmbiental", "Grau de risco", "string"),
++        presentedField("exigeEpiObrigatorio", "EPI obrigatório", "boolean", flag),
++        presentedField("dtini", "Início de vigência", "date", date),
++        presentedField("dtfim", "Término de vigência", "date", date));
++  }
+  @Override protected void beforeCreate(CreateSetorParametrizacaoErgonDTO dto,SetorParametrizacaoErgon entity) {throw blocked();}
+  @Override protected void beforeUpdate(Long id,SetorParametrizacaoErgon entity,UpdateSetorParametrizacaoErgonDTO dto) {throw blocked();}
+  @Override protected void beforeDelete(Long id,SetorParametrizacaoErgon entity) {throw blocked();}
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/service/SetorService.java b/src/main/java/br/com/praxis/ergonshowcase/service/SetorService.java
+index ed553f4..62c22a5 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/SetorService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/SetorService.java
+@@ -1,15 +1,16 @@
+ package br.com.praxis.ergonshowcase.service;
+ 
+ import br.com.praxis.ergonshowcase.config.TenantContext;
++import br.com.praxis.ergonshowcase.constants.ApiPaths;
+ import br.com.praxis.ergonshowcase.domain.Setor;
+ import br.com.praxis.ergonshowcase.dto.HistoricoSetorFilterDTO;
+ import br.com.praxis.ergonshowcase.dto.HistoricoSetorResponseDTO;
++import br.com.praxis.ergonshowcase.dto.RadarOrganogramaChefiaOcupacaoFilterDTO;
+ import br.com.praxis.ergonshowcase.dto.SetorFilterDTO;
+ import br.com.praxis.ergonshowcase.dto.SetorResponseDTO;
+ import br.com.praxis.ergonshowcase.mapper.SetorMapper;
+ import br.com.praxis.ergonshowcase.repository.SetorRepository;
+ import java.time.LocalDate;
+-import java.time.format.DateTimeParseException;
+ import java.util.List;
+ import java.util.OptionalLong;
+ import java.util.Set;
+@@ -18,7 +19,6 @@ import org.praxisplatform.uischema.exporting.CollectionExportFieldPresentation;
+ import org.praxisplatform.uischema.concurrency.ResourceRepresentationResult;
+ import org.praxisplatform.uischema.stats.StatsFieldRegistry;
+ import org.praxisplatform.uischema.stats.StatsMetric;
+-import org.praxisplatform.uischema.stats.StatsSupportMode;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.stereotype.Service;
+ import org.springframework.transaction.annotation.Transactional;
+@@ -27,8 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
+ @Service
+ public class SetorService
+     extends ErgonReadOnlyResourceService<Setor, SetorResponseDTO, String, SetorFilterDTO> {
+-  // O prefixo excede os 30 caracteres do código físico de setor.
+-  private static final String PERIODO_FICHA_PREFIX = "periodo-organizacional-em-vigencia:";
+   private final SetorMapper mapper;
+   private final TenantContext tenant;
+   @Autowired private HistoricoSetorService history;
+@@ -48,41 +46,35 @@ public class SetorService
+     org.springframework.beans.BeanUtils.copyProperties(period, dto, "id");
+     dto.setId(period.getSetor());
+     int hierarchy = filter.getTipoHierarquia() == null ? 0 : filter.getTipoHierarquia();
+-    dto.setReferenciaFicha(PERIODO_FICHA_PREFIX + period.getId() + ":" + filter.getDataReferencia() + ":" + hierarchy);
++    dto.setReferenciaFicha(new SetorFichaReference(period.getId(), filter.getDataReferencia(), hierarchy).encode());
+     return dto;
+   }
+ 
++  public void bindRadarSubtree(RadarOrganogramaChefiaOcupacaoFilterDTO filter, SetorResponseDTO parent) {
++    filter.setRaizSubarvore(parent.getReferenciaFicha() == null ? parent.getId() : parent.getReferenciaFicha());
++  }
++
+   @Override
+   @Transactional(readOnly = true)
+   public ResourceRepresentationResult<SetorResponseDTO> findById(String id) {
+-    if (id == null || !id.startsWith(PERIODO_FICHA_PREFIX)) {
++    var reference = SetorFichaReference.parse(id);
++    if (reference == null) {
+       return super.findById(id);
+     }
+-    var parts = id.substring(PERIODO_FICHA_PREFIX.length()).split(":", -1);
+-    if (parts.length != 3 || !parts[2].matches("[0-4]")) {
+-      throw getNotFoundException();
+-    }
+-    long periodId;
+-    LocalDate date;
+-    try {
+-      periodId = Long.parseLong(parts[0]);
+-      date = LocalDate.parse(parts[1]);
+-    } catch (NumberFormatException | DateTimeParseException e) {
+-      throw getNotFoundException();
+-    }
++    LocalDate date = reference.date();
+     var periods = getEntityManager().createQuery("""
+         select h.id from HistoricoSetor h
+         where h.id = :id and h.empCodigo = :org and h.dtini <= :date
+           and (h.dtfim is null or h.dtfim >= :date)
+         """, Long.class)
+-        .setParameter("id", periodId)
++        .setParameter("id", reference.period())
+         .setParameter("org", tenant.orgao())
+         .setParameter("date", date)
+         .getResultList();
+     var historical = history.findById(periods.stream().findFirst().orElseThrow(this::getNotFoundException));
+     var filter = new HistoricoSetorFilterDTO();
+     filter.setDataReferencia(date);
+-    filter.setTipoHierarquia(Integer.parseInt(parts[2]));
++    filter.setTipoHierarquia(reference.hierarchy());
+     new OrganogramaTemporalQuery(getEntityManager(), tenant).enrich(List.of(historical.body()), filter);
+     var dto = historicalResponse(historical.body(), filter);
+     enrichHistorical(List.of(dto), date);
+@@ -210,10 +202,12 @@ public class SetorService
+         .labeledGroupByBucket("id", "setor", "nome", Set.of(StatsMetric.COUNT))
+         .categoricalGroupByBucket("tipoSetor", "tipoSetor")
+         .categoricalGroupByBucket("empCodigo", "empCodigo")
++        .numericHistogramMeasureField("quantidadeSubordinadosDiretos", "quantidadeSubordinadosDiretos")
++        .categoricalTermsBucket("ufLotacao", "ufLotacao")
+         .temporalTimeSeriesField("dtini", "dtini")
+         .build();
+   }
+ 
+-  @Override protected String resolveResourceKey() { return "administracao-pessoal.setores"; }
++  @Override protected String resolveResourceKey() { return ApiPaths.KEY_SETORES; }
+ 
+ }
+diff --git a/src/main/java/br/com/praxis/ergonshowcase/service/SubempresaLocalidadeService.java b/src/main/java/br/com/praxis/ergonshowcase/service/SubempresaLocalidadeService.java
+index 17a8b1d..3c6be78 100644
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/SubempresaLocalidadeService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/SubempresaLocalidadeService.java
+@@ -5,6 +5,12 @@ import br.com.praxis.ergonshowcase.dto.*;
+ import br.com.praxis.ergonshowcase.mapper.SubempresaLocalidadeMapper;
+ import br.com.praxis.ergonshowcase.repository.SubempresaLocalidadeRepository;
+ import org.springframework.stereotype.Service;
++import java.util.List;
++import java.util.Set;
++import org.praxisplatform.uischema.exporting.CollectionExportField;
++import org.praxisplatform.uischema.exporting.CollectionExportFieldPresentation;
++import org.praxisplatform.uischema.stats.StatsFieldRegistry;
++import org.praxisplatform.uischema.stats.StatsMetric;
+ import org.springframework.security.access.AccessDeniedException;
+ /** Contrato mutável preparado; execução exige os gates transacionais das Ondas 2–3. */
+ @Service
+@@ -14,7 +20,33 @@ public class SubempresaLocalidadeService extends ErgonResourceService<Subempresa
+  @Override protected SubempresaLocalidadeMapper getResourceMapper() {return mapper;}
+  @Override protected SubempresaLocalidadeFilterDTO emptyFilter() {return new SubempresaLocalidadeFilterDTO();}
+  @Override protected String resolveResourceKey() {return ApiPaths.KEY_SUBEMPRESAS_LOCALIDADES;}
+- @Override protected java.util.List<org.praxisplatform.uischema.exporting.CollectionExportField> exportFields() {return java.util.List.of();}
++  @Override
++  public StatsFieldRegistry getStatsFieldRegistry() {
++    return StatsFieldRegistry.builder()
++        .labeledGroupByBucket("id", "id", "nome", Set.of(StatsMetric.COUNT))
++        .categoricalGroupByBucket("naturezaUnidade", "naturezaUnidade")
++        .categoricalTermsBucket("uf", "uf")
++        .temporalTimeSeriesField("dtini", "dtini")
++        .build();
++  }
++
++  @Override
++  protected List<CollectionExportField> exportFields() {
++    var date = new CollectionExportFieldPresentation(
++        "date", "dd/MM/yyyy", null, "pt-BR", "America/Sao_Paulo", null, null, "Não informado");
++    var flag = new CollectionExportFieldPresentation(
++        "boolean", null, null, "pt-BR", null, "Sim", "Não", "Não informado");
++    return List.of(
++        field("id", "Identificador", "integer"),
++        field("codigo", "Código da unidade", "string"),
++        field("nome", "Denominação", "string"),
++        field("naturezaUnidade", "Natureza", "string"),
++        field("uf", "UF", "string"),
++        field("municipio", "Município", "string"),
++        presentedField("ativo", "Ativo", "boolean", flag),
++        presentedField("dtini", "Início de vigência", "date", date),
++        presentedField("dtfim", "Término de vigência", "date", date));
++  }
+  @Override protected void beforeCreate(CreateSubempresaLocalidadeDTO dto,SubempresaLocalidade entity) {throw blocked();}
+  @Override protected void beforeUpdate(Long id,SubempresaLocalidade entity,UpdateSubempresaLocalidadeDTO dto) {throw blocked();}
+  @Override protected void beforeDelete(Long id,SubempresaLocalidade entity) {throw blocked();}
+diff --git a/src/test/java/br/com/praxis/ergonshowcase/OrganogramaSlice8Phase2ContractTest.java b/src/test/java/br/com/praxis/ergonshowcase/OrganogramaSlice8Phase2ContractTest.java
+new file mode 100644
+index 0000000..1db1010
+--- /dev/null
++++ b/src/test/java/br/com/praxis/ergonshowcase/OrganogramaSlice8Phase2ContractTest.java
+@@ -0,0 +1,85 @@
++package br.com.praxis.ergonshowcase;
++
++import static org.assertj.core.api.Assertions.assertThat;
++import static org.mockito.Mockito.mock;
++import static org.mockito.Mockito.when;
++
++import br.com.praxis.ergonshowcase.controller.SetorController;
++import br.com.praxis.ergonshowcase.service.SetorService;
++import com.fasterxml.jackson.databind.JsonNode;
++import java.net.URI;
++import org.junit.jupiter.api.Test;
++import org.praxisplatform.uischema.configuration.OpenApiResponseGenerationAutoConfiguration;
++import org.praxisplatform.uischema.configuration.OpenApiUiSchemaAutoConfiguration;
++import org.praxisplatform.uischema.configuration.PraxisMetadataAutoConfiguration;
++import org.praxisplatform.uischema.controller.docs.OpenApiDocsSupport;
++import org.springdoc.core.configuration.SpringDocConfiguration;
++import org.springdoc.core.properties.SpringDocConfigProperties;
++import org.springdoc.webmvc.core.configuration.MultipleOpenApiSupportConfiguration;
++import org.springdoc.webmvc.core.configuration.SpringDocWebMvcConfiguration;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
++import org.springframework.boot.autoconfigure.http.HttpMessageConvertersAutoConfiguration;
++import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
++import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration;
++import org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration;
++import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
++import org.springframework.boot.test.context.SpringBootTest;
++import org.springframework.boot.test.web.client.TestRestTemplate;
++import org.springframework.boot.test.web.server.LocalServerPort;
++import org.springframework.context.annotation.Bean;
++import org.springframework.context.annotation.Configuration;
++import org.springframework.test.util.ReflectionTestUtils;
++
++/** Exercita a publicação Springdoc e o schema estrutural consumido pela Table. */
++@SpringBootTest(classes = OrganogramaSlice8Phase2ContractTest.SchemaFixture.class,
++    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
++    properties = {"praxis.domain-catalog.auto-sync.enabled=false",
++        "praxis.resource-version.etag.secret=fixture-organograma-schema-local"})
++class OrganogramaSlice8Phase2ContractTest {
++  private static final String TREE = "/api/ergon/setores/arvore-organograma";
++  @LocalServerPort int port;
++  @Autowired TestRestTemplate rest;
++  @Autowired OpenApiDocsSupport docs;
++
++  @Test
++  void treeDiscoveryFollowsTheRealGetSchemaAndKeepsStringIdentity() {
++    String origin = "http://localhost:" + port;
++    ReflectionTestUtils.setField(docs, "openApiInternalBaseUrl", origin);
++    var catalog = rest.getForEntity("/schemas/surfaces?resource=administracao-pessoal.setores", JsonNode.class);
++    assertThat(catalog.getStatusCode().value()).isEqualTo(200);
++    var tree = catalog.getBody().path("surfaces").valueStream()
++        .filter(surface -> surface.path("id").asText().equals("organograma-tree")).findFirst().orElseThrow();
++    assertThat(tree.path("kind").asText()).isEqualTo("HIERARCHY_TREE");
++    assertThat(tree.path("scope").asText()).isEqualTo("COLLECTION");
++    assertThat(tree.path("method").asText()).isEqualTo("GET");
++    assertThat(tree.path("path").asText()).isEqualTo(TREE);
++    var operation = rest.getForObject("/v3/api-docs/ergon", JsonNode.class).path("paths").path(TREE).path("get");
++    assertThat(operation.path("operationId").asText()).isEqualTo("consultarArvoreOrganograma");
++    assertThat(operation.path("parameters").valueStream().map(p -> p.path("name").asText()))
++        .contains("page", "size", "dataReferencia", "tipoHierarquia", "buscaAmpla", "includeIds");
++    var response = rest.getForEntity(URI.create(origin + tree.path("schemaUrl").asText()), JsonNode.class);
++    assertThat(response.getStatusCode().value()).isEqualTo(200);
++    assertThat(response.getHeaders().getFirst("X-Schema-Hash")).isNotBlank();
++    var schema = response.getBody();
++    assertThat(schema.at("/properties/id/type").asText()).isEqualTo("string");
++    assertThat(schema.at("/properties/nome/x-ui/resourceReference/valueField").asText()).isEqualTo("referenciaFicha");
++    assertThat(schema.at("/properties/nome/x-ui/resourceReference/previewSurfaceId").asText()).isEqualTo("ficha-unidade");
++    assertThat(schema.at("/x-ui/hierarchy/parentField").asText()).isEqualTo("setorPai");
++  }
++
++  @Configuration(proxyBeanMethods = false)
++  @ImportAutoConfiguration({ServletWebServerFactoryAutoConfiguration.class, DispatcherServletAutoConfiguration.class,
++      WebMvcAutoConfiguration.class, JacksonAutoConfiguration.class, HttpMessageConvertersAutoConfiguration.class,
++      PraxisMetadataAutoConfiguration.class, OpenApiUiSchemaAutoConfiguration.class,
++      OpenApiResponseGenerationAutoConfiguration.class, SpringDocConfiguration.class, SpringDocConfigProperties.class,
++      SpringDocWebMvcConfiguration.class, MultipleOpenApiSupportConfiguration.class})
++  static class SchemaFixture {
++    @Bean
++    SetorController setorController() {
++      var service = mock(SetorService.class);
++      when(service.getIdFieldName()).thenReturn("id");
++      return new SetorController(service, null, null, null, null, null);
++    }
++  }
++}
+diff --git a/src/test/java/br/com/praxis/ergonshowcase/OrganogramaSlice8PostgresTest.java b/src/test/java/br/com/praxis/ergonshowcase/OrganogramaSlice8PostgresTest.java
+index 94fabcd..7159716 100644
+--- a/src/test/java/br/com/praxis/ergonshowcase/OrganogramaSlice8PostgresTest.java
++++ b/src/test/java/br/com/praxis/ergonshowcase/OrganogramaSlice8PostgresTest.java
+@@ -7,6 +7,13 @@ import br.com.praxis.ergonshowcase.config.TenantContext;
+ import br.com.praxis.ergonshowcase.config.OptionSourcesConfig;
+ import br.com.praxis.ergonshowcase.constants.ApiPaths;
+ import br.com.praxis.ergonshowcase.controller.SetorController;
++import br.com.praxis.ergonshowcase.controller.CargoSetorController;
++import br.com.praxis.ergonshowcase.controller.DesignacaoFuncaoController;
++import br.com.praxis.ergonshowcase.controller.GrupoSetorController;
++import br.com.praxis.ergonshowcase.controller.HistoricoSetorController;
++import br.com.praxis.ergonshowcase.controller.RadarOrganogramaChefiaOcupacaoController;
++import br.com.praxis.ergonshowcase.controller.SetorParametrizacaoErgonController;
++import br.com.praxis.ergonshowcase.controller.SubempresaLocalidadeController;
+ import br.com.praxis.ergonshowcase.domain.*;
+ import br.com.praxis.ergonshowcase.dto.*;
+ import br.com.praxis.ergonshowcase.mapper.*;
+@@ -36,6 +43,10 @@ import org.praxisplatform.uischema.options.service.jpa.JpaOptionSourceProvider;
+ import org.praxisplatform.uischema.options.service.jpa.JpaOptionSourceQueryExecutor;
+ import org.praxisplatform.uischema.rest.exceptionhandler.GlobalExceptionHandler;
+ import org.praxisplatform.uischema.schema.FilteredSchemaReferenceResolver;
++import org.praxisplatform.uischema.stats.StatsEligibility;
++import org.praxisplatform.uischema.stats.StatsProperties;
++import org.praxisplatform.uischema.stats.StatsSupportMode;
++import org.praxisplatform.uischema.stats.service.jpa.JpaStatsQueryExecutor;
+ import org.praxisplatform.uischema.surface.AnnotationDrivenSurfaceDefinitionRegistry;
+ import org.praxisplatform.uischema.surface.DefaultSurfaceAvailabilityContextResolver;
+ import org.praxisplatform.uischema.surface.DefaultSurfaceAvailabilityEvaluator;
+@@ -50,6 +61,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
+ import org.springframework.security.core.authority.SimpleGrantedAuthority;
+ import org.springframework.security.core.context.SecurityContextHolder;
+ import org.springframework.test.util.ReflectionTestUtils;
++import org.springframework.test.web.servlet.MockMvc;
+ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+ 
+@@ -267,7 +279,9 @@ class OrganogramaSlice8PostgresTest {
+     insert(1, "X8-LEG", "Unidade antiga", null, "2000-01-01", "2001-12-31", "X8-PAI");
+     insert(1, "X8-LEG", "Unidade posterior", null, "2002-01-01", "2003-12-31", "X8-PAI");
+     insert(2, "X8-LEG", "Unidade de outro órgão", null, "2000-01-01", "2001-12-31", null);
+-    var controller = new SetorController(sectors);
++    var controller = new SetorController(sectors, history, mock(SetorParametrizacaoErgonService.class),
++        mock(CargoSetorService.class), mock(DesignacaoFuncaoService.class),
++        mock(RadarOrganogramaChefiaOcupacaoService.class));
+     ReflectionTestUtils.setField(controller, "paginationMaxSize", 100);
+     ReflectionTestUtils.invokeMethod(controller, "initializeBasePath");
+     var mvc = MockMvcBuilders.standaloneSetup(controller).setControllerAdvice(new GlobalExceptionHandler()).build();
+@@ -391,6 +405,210 @@ class OrganogramaSlice8PostgresTest {
+     return session.createNativeQuery("select situacao_comando_setor from radar_organograma_chefias_ocupacao where setor=:s and tipo_hierarquia=0 and cast(:d as date) between dtini and coalesce(dtfim,date '9999-12-31')",String.class).setParameter("s",sector).setParameter("d",day).getSingleResult();
+   }
+ 
++  private MockMvc phase2Mvc() {
++    var repo = new JpaRepositoryFactory(session);
++    var params = new SetorParametrizacaoErgonService(repo.getRepository(SetorParametrizacaoErgonRepository.class),
++        Mappers.getMapper(SetorParametrizacaoErgonMapper.class));
++    var quadro = new CargoSetorService(repo.getRepository(CargoSetorRepository.class), Mappers.getMapper(CargoSetorMapper.class));
++    var designacoes = new DesignacaoFuncaoService(repo.getRepository(DesignacaoFuncaoRepository.class),
++        Mappers.getMapper(DesignacaoFuncaoMapper.class), mock(br.com.praxis.ergonshowcase.rules.ErgonRuleEngineFacade.class));
++    var radar = new RadarOrganogramaChefiaOcupacaoService(repo.getRepository(RadarOrganogramaChefiaOcupacaoRepository.class),
++        Mappers.getMapper(RadarOrganogramaChefiaOcupacaoMapper.class));
++    var grupos = new GrupoSetorService(repo.getRepository(GrupoSetorRepository.class), Mappers.getMapper(GrupoSetorMapper.class));
++    var localidades = new SubempresaLocalidadeService(repo.getRepository(SubempresaLocalidadeRepository.class),
++        Mappers.getMapper(SubempresaLocalidadeMapper.class));
++    for (Object resource : List.of(sectors, history, params, quadro, designacoes, radar, grupos, localidades)) {
++      ReflectionTestUtils.setField(resource, "entityManager", session);
++      ReflectionTestUtils.setField(resource, "resourceTenant", tenant);
++      CanonicalResourceTestContext.exports(resource);
++      ReflectionTestUtils.setField(resource, "statsProperties", new StatsProperties(true, 20, 100, StatsSupportMode.AUTO));
++      ReflectionTestUtils.setField(resource, "statsEligibility", new StatsEligibility());
++      ReflectionTestUtils.setField(resource, "statsQueryExecutor", new JpaStatsQueryExecutor());
++    }
++    var setorController = new SetorController(sectors, history, params, quadro, designacoes, radar);
++    var controllers = List.of(setorController, new HistoricoSetorController(history),
++        new SetorParametrizacaoErgonController(params), new CargoSetorController(quadro),
++        new DesignacaoFuncaoController(designacoes, null, null), new RadarOrganogramaChefiaOcupacaoController(radar),
++        new GrupoSetorController(grupos), new SubempresaLocalidadeController(localidades));
++    for (Object controller : controllers) {
++      ReflectionTestUtils.setField(controller, "paginationMaxSize", 200);
++      ReflectionTestUtils.invokeMethod(controller, "initializeBasePath");
++    }
++    var mvc = MockMvcBuilders.standaloneSetup(controllers.toArray())
++        .setControllerAdvice(new GlobalExceptionHandler()).build();
++    var context = mvc.getDispatcherServlet().getWebApplicationContext();
++    var mappings = context.getBean(RequestMappingHandlerMapping.class);
++    var documents = mock(OpenApiDocumentService.class);
++    when(documents.resolveGroupFromPath(anyString())).thenReturn("ergon");
++    var operations = new OpenApiCanonicalOperationResolver(documents, mappings);
++    var definitions = new AnnotationDrivenSurfaceDefinitionRegistry(mappings, context, operations,
++        new FilteredSchemaReferenceResolver(), AnnotationConflictMode.FAIL);
++    var catalog = new SurfaceCatalogService(definitions, new DefaultSurfaceAvailabilityEvaluator(),
++        new DefaultSurfaceAvailabilityContextResolver());
++    for (Object controller : controllers) {
++      ReflectionTestUtils.setField(controller, "surfaceCatalogService", catalog);
++    }
++    SecurityContextHolder.getContext().setAuthentication(UsernamePasswordAuthenticationToken.authenticated(
++        "leitor", "", List.of(new SimpleGrantedAuthority("ERGON_READ"))));
++    return mvc;
++  }
++
++  @Test void treeAndRelatedSurfacesUseTheAuthorizedCompositionAndTheWholeBranch() throws Exception {
++    insert(1, "X8-GRAND", "Descendente de terceiro nível", "S8-1-DIR", "2020-01-01", null, "S8-1-DIR");
++    insert(2, "X8-GRAND", "Descendente de outro órgão", "S8-2-DIR", "2020-01-01", null, "S8-2-DIR");
++    var mvc = phase2Mvc();
++    var tree = mvc.perform(get("/api/ergon/setores/arvore-organograma")
++            .param("dataReferencia", "2021-06-01").param("tipoHierarquia", "4")
++            .param("buscaAmpla", "S8-1").param("sort", "id,desc").param("page", "1").param("size", "1"))
++        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(2))
++        .andExpect(jsonPath("$._links.surfaces.href").value(org.hamcrest.Matchers.containsString("/schemas/surfaces")))
++        .andExpect(jsonPath("$.data.number").value(1))
++        .andExpect(jsonPath("$.data.content[0].id").value("S8-1-DIR"))
++        .andExpect(jsonPath("$.data.content[0].nome").value("Diretoria histórica 1"))
++        .andExpect(jsonPath("$.data.content[0].setorPai").value("S8-1-RAIZ")).andReturn();
++    var json = new com.fasterxml.jackson.databind.ObjectMapper();
++    var ref = json.readTree(tree.getResponse().getContentAsByteArray()).at("/data/content/0/referenciaFicha").asText();
++    mvc.perform(get(ApiPaths.SETORES + "/{id}/ficha-unidade", ref))
++        .andExpect(status().isOk()).andExpect(jsonPath("$.nome").value("Diretoria histórica 1"));
++    mvc.perform(get(ApiPaths.SETORES + "/{id}/radar-subarvore", ref))
++        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(2))
++        .andExpect(jsonPath("$.data.content[*].setor").value(org.hamcrest.Matchers.containsInAnyOrder("S8-1-DIR", "X8-GRAND")))
++        .andExpect(jsonPath("$.data.content[*].tipoHierarquia").value(org.hamcrest.Matchers.everyItem(org.hamcrest.Matchers.is(4))));
++    mvc.perform(get(ApiPaths.SETORES + "/{id}/surfaces", ref))
++        .andExpect(status().isOk())
++        .andExpect(jsonPath("$.surfaces[?(@.id=='radar-subarvore')].relatedResource.childParentField").value("raizSubarvore"))
++        .andExpect(jsonPath("$.surfaces[?(@.id=='designacoes-chefia')].relatedResource.childParentField").value("setorId"));
++    mvc.perform(post(ApiPaths.RADAR_ORGANOGRAMA_CHEFIAS_OCUPACAO + "/filter").contentType("application/json")
++            .content("""
++                {"raizSubarvore":"S8-1-RAIZ","dataReferencia":"2021-06-01","tipoHierarquia":4}
++                """))
++        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(3))
++        .andExpect(jsonPath("$.data.content[*].setor").value(
++            org.hamcrest.Matchers.containsInAnyOrder("S8-1-RAIZ", "S8-1-DIR", "X8-GRAND")));
++    // O outlet envia o identificador explícito de discovery no campo de filtro do filho.
++    mvc.perform(post(ApiPaths.RADAR_ORGANOGRAMA_CHEFIAS_OCUPACAO + "/filter").contentType("application/json")
++            .content("{\"raizSubarvore\":\"" + ref + "\"}"))
++        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(2))
++        .andExpect(jsonPath("$.data.content[*].tipoHierarquia").value(org.hamcrest.Matchers.everyItem(org.hamcrest.Matchers.is(4))));
++    mvc.perform(post(ApiPaths.HISTORICO_SETORES + "/filter").contentType("application/json")
++            .content("{\"setor\":\"" + ref + "\"}"))
++        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(3));
++    mvc.perform(post(ApiPaths.CARGOS_POR_SETOR + "/filter").contentType("application/json")
++            .content("{\"setor\":\"" + ref + "\"}"))
++        .andExpect(status().isOk()).andExpect(jsonPath("$.data.content[0].lotacaoMaximaAutorizada").value(8));
++    mvc.perform(get(ApiPaths.SETORES + "/S8-1-DIR/historico-vigencias"))
++        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(3));
++    mvc.perform(get(ApiPaths.SETORES + "/S8-1-SUB/parametrizacoes-ergon"))
++        .andExpect(status().isOk()).andExpect(jsonPath("$.data.content[0].setor").value("S8-1-SUB"));
++    mvc.perform(get(ApiPaths.SETORES + "/S8-1-DIR/cargos-autorizados"))
++        .andExpect(status().isOk()).andExpect(jsonPath("$.data.content[0].lotacaoMaximaAutorizada").value(8));
++    mvc.perform(get(ApiPaths.SETORES + "/S8-1-SUB/designacoes-chefia"))
++        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(1))
++        .andExpect(jsonPath("$.data.content[0].setorId").value("S8-1-SUB"))
++        .andExpect(jsonPath("$.data.content[0].empCodigo").value(1));
++    var sub = mvc.perform(get("/api/ergon/setores/arvore-organograma")
++            .param("setor", "S8-1-SUB").param("dataReferencia", "2026-11-04"))
++        .andExpect(status().isOk()).andReturn();
++    String subRef = json.readTree(sub.getResponse().getContentAsByteArray()).at("/data/content/0/referenciaFicha").asText();
++    mvc.perform(post(ApiPaths.DESIGNACOES + "/filter").contentType("application/json")
++            .content("{\"setorId\":\"" + subRef + "\"}"))
++        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(1))
++        .andExpect(jsonPath("$.data.content[0].setorId").value("S8-1-SUB"));
++    mvc.perform(post(ApiPaths.SETORES_ERGON + "/filter").contentType("application/json")
++            .content("{\"setor\":\"" + subRef + "\"}"))
++        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(1));
++    when(tenant.orgao()).thenReturn(2);
++    when(tenant.resolveTenant()).thenReturn(Optional.of("2"));
++    mvc.perform(post(ApiPaths.DESIGNACOES + "/filter").contentType("application/json")
++            .content("{\"setorId\":\"" + subRef + "\"}"))
++        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(0));
++    when(tenant.orgao()).thenReturn(1);
++    when(tenant.resolveTenant()).thenReturn(Optional.of("1"));
++    mvc.perform(get(ApiPaths.SETORES + "/S8-2-SUB/designacoes-chefia")).andExpect(status().isForbidden());
++    mvc.perform(get("/api/ergon/setores/arvore-organograma").param("tipoHierarquia", "5"))
++        .andExpect(status().isBadRequest());
++    mvc.perform(get("/api/ergon/setores/arvore-organograma").param("size", "201"))
++        .andExpect(status().isUnprocessableEntity());
++  }
++
++  @Test void everyOrganizationResourceExecutesScopedStatsExportsAndItsPublishedDetail() throws Exception {
++    var mvc = phase2Mvc();
++    var json = new com.fasterxml.jackson.databind.ObjectMapper();
++    record Dataset(String path, String filter, String dimension, String distribution, String mode, String detail, int count) {}
++    for (var data : List.of(
++        new Dataset(ApiPaths.SETORES, "\"setor\":\"S8-1-DIR\"", "tipoSetor", "quantidadeSubordinadosDiretos", "HISTOGRAM", "ficha-unidade", 1),
++        new Dataset(ApiPaths.HISTORICO_SETORES, "\"setor\":\"S8-1-DIR\"", "tipoSetor", "ufLotacao", "TERMS", "detail", 3),
++        new Dataset(ApiPaths.SETORES_ERGON, "\"setor\":\"S8-1-RAIZ\"", "tipoAcesso", "grauRiscoAmbiental", "TERMS", "detail", 1),
++        new Dataset(ApiPaths.CARGOS_POR_SETOR, "\"setor\":\"S8-1-DIR\"", "tipoControleQuadro", "lotacaoMaximaAutorizada", "HISTOGRAM", "detail", 1),
++        new Dataset(ApiPaths.SUBEMPRESAS_LOCALIDADES, "\"codigo\":\"S8-UG\"", "naturezaUnidade", "uf", "TERMS", "detail", 1),
++        new Dataset(ApiPaths.GRUPOS_SETORES, "\"sigla\":\"S8-REG\"", "tipoAgrupamento", "ufAbrangencia", "TERMS", "detail", 1),
++        new Dataset(ApiPaths.RADAR_ORGANOGRAMA_CHEFIAS_OCUPACAO, "\"setor\":\"S8-1-DIR\",\"dataReferencia\":\"2026-11-04\"",
++            "situacaoComandoSetor", "vagasAutorizadasSetor", "HISTOGRAM", "detail", 1))) {
++      String filter = "{" + data.filter() + "}";
++      var list = mvc.perform(post(data.path() + "/filter").contentType("application/json").content(filter))
++          .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(data.count())).andReturn();
++      String id = json.readTree(list.getResponse().getContentAsByteArray()).at("/data/content/0/id").asText();
++      mvc.perform(get(data.path() + "/{id}/" + data.detail(), id))
++          .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(id)).andExpect(jsonPath("$.empCodigo").value(1));
++      var nominal = mvc.perform(post(data.path() + "/stats/group-by").contentType("application/json")
++              .content("{\"filter\":" + filter + ",\"field\":\"id\",\"metric\":{\"operation\":\"COUNT\"}}"))
++          .andExpect(status().isOk()).andReturn();
++      assertThat(json.readTree(nominal.getResponse().getContentAsByteArray()).at("/data/buckets").size())
++          .as(data.path()).isEqualTo(data.count());
++      mvc.perform(post(data.path() + "/stats/group-by").contentType("application/json")
++              .content("{\"filter\":{\"empCodigo\":2," + data.filter() + "},\"field\":\"id\",\"metric\":{\"operation\":\"COUNT\"}}"))
++          .andExpect(status().isOk()).andExpect(jsonPath("$.data.buckets").isEmpty());
++      mvc.perform(post(data.path() + "/stats/timeseries").contentType("application/json")
++              .content("""
++                  {"filter":%s,"field":"dtini","granularity":"MONTH","metric":{"operation":"COUNT"},
++                   "from":"2020-01-01","to":"2026-12-31"}
++                  """.formatted(filter)))
++          .andExpect(status().isOk()).andExpect(jsonPath("$.data.points").isNotEmpty());
++      mvc.perform(post(data.path() + "/stats/distribution").contentType("application/json")
++              .content("""
++                  {"filter":%s,"field":"%s","mode":"%s","metric":{"operation":"COUNT"}%s}
++                  """.formatted(filter, data.distribution(), data.mode(),
++                      data.mode().equals("HISTOGRAM") ? ",\"bucketSize\":5" : "")))
++          .andExpect(status().isOk()).andExpect(jsonPath("$.data.mode").value(data.mode()));
++      mvc.perform(post(data.path() + "/stats/comparison").contentType("application/json")
++              .content("""
++                  {"filter":%s,"field":"%s","periodField":"dtini","metrics":[{"operation":"COUNT"}],
++                   "period":{"from":"2026-01-01","to":"2026-12-31","timezone":"America/Sao_Paulo"}}
++                  """.formatted(filter, data.dimension())))
++          .andExpect(status().isOk()).andExpect(jsonPath("$.data.periodField").value("dtini"));
++      for (var format : List.of("CSV", "JSON", "EXCEL")) {
++        var export = mvc.perform(post(data.path() + "/export").contentType("application/json")
++                .content("""
++                    {"format":"%s","scope":"FILTERED","filters":%s,"applyFormatting":true}
++                    """.formatted(format, filter)))
++            .andExpect(status().isOk())
++            .andExpect(header().string("X-Export-Row-Count", Integer.toString(data.count())))
++            .andReturn();
++        assertThat(export.getResponse().getContentAsByteArray()).isNotEmpty();
++      }
++    }
++    String radar = ApiPaths.RADAR_ORGANOGRAMA_CHEFIAS_OCUPACAO;
++    mvc.perform(post(radar + "/filter").contentType("application/json")
++            .content("{\"setor\":\"S8-1-DIR\",\"dataReferencia\":\"2026-11-04\"}"))
++        .andExpect(status().isOk()).andExpect(jsonPath("$.data.content[0].vagasAutorizadasSetor").value(8))
++        .andExpect(jsonPath("$.data.content[0].vagasOcupadasSetor").doesNotExist())
++        .andExpect(jsonPath("$.data.content[0].escopoApuracao").value(
++            org.hamcrest.Matchers.containsString("PROVIMENTO_EXERCICIO_FOLHA_E_COMANDO_POR_CARGO_NAO_INTEGRADOS")));
++    mvc.perform(post(radar + "/export").contentType("application/json")
++            .content("""
++                {"format":"JSON","fields":[{"key":"chefeTitularNome","label":"Titular"}]}
++                """))
++        .andExpect(status().isBadRequest());
++    mvc.perform(post(radar + "/export").contentType("application/json")
++            .content("{\"format\":\"CSV\",\"maxRows\":1001}"))
++        .andExpect(status().isBadRequest());
++    mvc.perform(post(ApiPaths.SETORES + "/export").contentType("application/json")
++            .content("""
++                {"format":"JSON","scope":"SELECTED","selection":{"keyField":"id","selectedKeys":["S8-1-DIR","S8-2-DIR"]}}
++                """))
++        .andExpect(status().isOk()).andExpect(header().string("X-Export-Row-Count", "1"));
++  }
++
+   @Test void parentChangeRebuildsChildPathInAllFiveHierarchiesWithoutChangingChildPeriod() {
+     insert(1,"X8-R1","Raiz um",null,"2020-01-01",null,null);
+     insert(1,"X8-R2","Raiz dois",null,"2020-01-01",null,null);
