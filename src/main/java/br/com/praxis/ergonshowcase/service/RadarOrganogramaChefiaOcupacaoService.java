@@ -16,4 +16,32 @@ import org.praxisplatform.uischema.stats.StatsMetric;
  @Override public org.praxisplatform.uischema.filter.specification.GenericSpecificationsBuilder<RadarOrganogramaChefiaOcupacao> getSpecificationsBuilder() {return new OrganogramaRadarQuery();}
  public RadarOrganogramaChefiaOcupacaoService(RadarOrganogramaChefiaOcupacaoRepository repository,RadarOrganogramaChefiaOcupacaoMapper mapper) {super(repository,RadarOrganogramaChefiaOcupacao.class,"id");this.mapper=mapper;}
  @Override protected RadarOrganogramaChefiaOcupacaoMapper getResourceMapper() {return mapper;}
- @Override protected RadarOrganogramaChefiaOcupacaoFilterDTO emptyFilter
+ @Override protected RadarOrganogramaChefiaOcupacaoFilterDTO emptyFilter() {return new RadarOrganogramaChefiaOcupacaoFilterDTO();}
+ @Override protected String resolveResourceKey() {return ApiPaths.KEY_RADAR_ORGANOGRAMA_CHEFIAS_OCUPACAO;}
+  @Override
+  public StatsFieldRegistry getStatsFieldRegistry() {
+    return StatsFieldRegistry.builder()
+        .labeledGroupByBucket("id", "id", "nomeSetor", Set.of(StatsMetric.COUNT))
+        .categoricalGroupByBucket("situacaoComandoSetor", "situacaoComandoSetor")
+        .numericHistogramMeasureField("vagasAutorizadasSetor", "vagasAutorizadasSetor")
+        .temporalTimeSeriesField("dtini", "dtini")
+        .build();
+  }
+
+  @Override
+  protected List<CollectionExportField> exportFields() {
+    var date = new CollectionExportFieldPresentation(
+        "date", "dd/MM/yyyy", null, "pt-BR", "America/Sao_Paulo", null, null, "Não informado");
+    return List.of(
+        field("id", "Identificador", "string"),
+        field("setor", "Unidade", "string"),
+        field("nomeSetor", "Denominação", "string"),
+        field("tipoHierarquia", "Hierarquia", "integer"),
+        field("situacaoComandoSetor", "Situação do comando", "string"),
+        field("vagasAutorizadasSetor", "Vagas diretas autorizadas", "integer"),
+        field("vagasOcupadasSetor", "Vagas ocupadas", "integer"),
+        field("escopoApuracao", "Escopo da apuração", "string"),
+        presentedField("dtini", "Início de vigência", "date", date),
+        presentedField("dtfim", "Término de vigência", "date", date));
+  }
+}

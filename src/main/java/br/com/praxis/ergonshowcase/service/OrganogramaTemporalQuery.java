@@ -54,7 +54,18 @@ public final class OrganogramaTemporalQuery extends GenericSpecificationsBuilder
       org.praxisplatform.uischema.customfields.CustomFieldDefinitionProvider definitions,
       org.praxisplatform.uischema.customfields.ResourceTenantContextResolver context,String key) {
     var delegate=new GenericSpecificationsBuilder<HistoricoSetor>();
-    if(!(filter instanceof HistoricoSetorFilterDTO f)||!temporal(f))return delegate.buildSpecification(filter,pageable,definitions,context,key);
+    if (!(filter instanceof HistoricoSetorFilterDTO f)) {
+      return delegate.buildSpecification(filter, pageable, definitions, context, key);
+    }
+    var reference = SetorFichaReference.parse(f.getSetor());
+    if (reference != null) {
+      var normalized = new HistoricoSetorFilterDTO();
+      BeanUtils.copyProperties(f, normalized);
+      normalized.setSetor(null);
+      var canonical = buildSpecification(normalized, pageable, definitions, context, key);
+      return new GenericSpecification<>(canonical.spec().and(reference.matchesSector("setor")), canonical.pageable());
+    }
+    if(!temporal(f))return delegate.buildSpecification(filter,pageable,definitions,context,key);
     var copy=new HistoricoSetorFilterDTO();BeanUtils.copyProperties(f,copy);
     copy.setCaminhoSubarvore(null);copy.setNivelHierarquico(null);copy.setSetorPai(null);
     if(copy.getDataReferencia()==null)copy.setDataReferencia(LocalDate.now());

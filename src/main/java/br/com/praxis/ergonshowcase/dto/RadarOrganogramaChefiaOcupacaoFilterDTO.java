@@ -14,7 +14,7 @@ import org.praxisplatform.uischema.filter.annotation.Filterable.FilterOperation;
 import org.praxisplatform.uischema.filter.dto.GenericFilterDTO;
 @Getter @Setter @Schema(description="Pesquisa temporal e hierárquica do organograma por órgão e composição válida na data.")
 public class RadarOrganogramaChefiaOcupacaoFilterDTO implements GenericFilterDTO {
-  @Schema(description = "Código da raiz do recorte 360°. Inclui a unidade e todos os descendentes na data e na hierarquia consultadas.")
+  @Schema(description = "Código da raiz do recorte 360° ou referência temporal da sua ficha. Inclui a unidade e todos os descendentes na composição selecionada.")
   @UISchema(label = "Raiz da subárvore", group = "Organograma", type = FieldDataType.TEXT,
       controlType = FieldControlType.ENTITY_LOOKUP, icon = "account_tree",
       preset = UISchemaPreset.ENTERPRISE_ID, endpoint = ApiPaths.SETOR_OPTIONS,

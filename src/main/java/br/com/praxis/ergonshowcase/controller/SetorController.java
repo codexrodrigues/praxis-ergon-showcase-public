@@ -4,12 +4,15 @@ import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import br.com.praxis.ergonshowcase.dto.*;
 import br.com.praxis.ergonshowcase.service.*;
 import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import java.util.List;
 import java.util.function.BiConsumer;
 import org.springdoc.core.annotations.ParameterObject;
 import org.praxisplatform.uischema.annotation.*;
 import org.praxisplatform.uischema.controller.base.AbstractReadOnlyResourceController;
 import org.praxisplatform.uischema.fact.ResourceFact;
+import org.praxisplatform.uischema.stats.dto.GroupByStatsRequest;
+import org.praxisplatform.uischema.stats.dto.GroupByStatsResponse;
 import org.praxisplatform.uischema.filter.dto.GenericFilterDTO;
 import org.praxisplatform.uischema.rest.response.RestApiResponse;
 import org.praxisplatform.uischema.service.base.BaseResourceQueryService;
@@ -17,6 +20,7 @@ import org.praxisplatform.uischema.surface.*;
 import org.praxisplatform.uischema.util.PageableBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Links;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +32,7 @@ import org.springframework.web.server.ResponseStatusException;
 /** Consulta auxiliar que sustenta opções e referências 360° dos pilotos. */
 @ResourceFact(
     key = "tipoSetor",
-    resourceKey = "administracao-pessoal.setores",
+    resourceKey = ApiPaths.KEY_SETORES,
     label = "Classificação da unidade",
     description =
         "Natureza organizacional ou administrativa da unidade de lotação no organograma do órgão.",
@@ -37,9 +41,12 @@ import org.springframework.web.server.ResponseStatusException;
     tone = "info",
     valuePresentation = "badge",
     sourceKind = "field")
+@ResourceFact(key = "quantidadeSubordinadosDiretos", resourceKey = ApiPaths.KEY_SETORES, label = "Subordinados diretos",
+    description = "Quantidade de unidades diretamente ligadas ao setor na composição disponível. O valor é desconhecido quando a composição não resolve o nó.",
+    dataType = "integer", unit = "unidades", sourceKind = "field")
 @ApiResource(
     value = ApiPaths.SETORES,
-    resourceKey = "administracao-pessoal.setores",
+    resourceKey = ApiPaths.KEY_SETORES,
     title = "Unidades organizacionais",
     description = "Consulta do cadastro auxiliar para inspeção das referências funcionais.",
     identity =
@@ -92,6 +99,40 @@ public class SetorController
     return dto.getReferenciaFicha();
   }
 
+  @Override
+  @PostMapping("/stats/group-by")
+  @Operation(summary = "Agrupar unidades", description = "Apura registros do órgão autorizado no recorte filtrado.")
+  @UiAnalytics(projections = {
+      @AnalyticsProjection(id = "composicao", intent = AnalyticsIntent.COMPOSITION,
+          sourceOperation = AnalyticsOperation.GROUP_BY,
+          primaryDimension = @AnalyticsDimensionBinding(field = "tipoSetor"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Unidades")),
+      @AnalyticsProjection(id = "registros-nominais", intent = AnalyticsIntent.RANKING,
+          sourceOperation = AnalyticsOperation.GROUP_BY,
+          primaryDimension = @AnalyticsDimensionBinding(field = "id"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Unidades"),
+          recordOpen = @AnalyticsRecordOpen(sourceIdentityField = "key",
+              target = @AnalyticsSurfaceTarget(resourceKey = ApiPaths.KEY_SETORES, surfaceId = "ficha-unidade"))),
+      @AnalyticsProjection(id = "inicios-de-vigencia", intent = AnalyticsIntent.TREND,
+          sourceOperation = AnalyticsOperation.TIMESERIES,
+          primaryDimension = @AnalyticsDimensionBinding(field = "dtini"),
+          defaultGranularity = AnalyticsGranularity.MONTH, defaultTimezone = "America/Sao_Paulo",
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Unidades por início")),
+      @AnalyticsProjection(id = "distribuicao", intent = AnalyticsIntent.DISTRIBUTION,
+          sourceOperation = AnalyticsOperation.DISTRIBUTION,
+          primaryDimension = @AnalyticsDimensionBinding(field = "quantidadeSubordinadosDiretos"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "quantidadeSubordinadosDiretos", aggregation = "histogram", label = "Subordinados diretos por unidade")),
+      @AnalyticsProjection(id = "comparativo-por-vigencia", intent = AnalyticsIntent.COMPARISON,
+          sourceOperation = AnalyticsOperation.COMPARISON,
+          primaryDimension = @AnalyticsDimensionBinding(field = "tipoSetor"),
+          comparisonPeriod = @AnalyticsComparisonPeriodBinding(field = "dtini", timezone = "America/Sao_Paulo"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Unidades"))
+  })
+  public ResponseEntity<RestApiResponse<GroupByStatsResponse>> groupByStats(
+      @RequestBody GroupByStatsRequest<SetorFilterDTO> request) {
+    return super.groupByStats(request);
+  }
+
   @GetMapping("/{id}/ficha-unidade")
   @PreAuthorize("hasAuthority('ERGON_READ')")
   @UiSurface(
@@ -116,10 +157,14 @@ public class SetorController
       description = "Composição paginada das unidades vigentes na data e na hierarquia selecionadas.",
       requiredAuthorities = {"ERGON_READ"})
   @Operation(operationId = "consultarArvoreOrganograma", summary = "Consultar árvore do organograma",
-      description = "Aplica filtros de unidade à composição do órgão autorizado. A data padrão é hoje e a hierarquia padrão é a oficial.")
+      description = "Aplica filtros de unidade à composição do órgão autorizado. A data padrão é hoje e a hierarquia padrão é a oficial.",
+      parameters = @Parameter(name = "sort", in = ParameterIn.QUERY,
+          description = "Ordenação no formato campo,direção. Repita o parâmetro para ordenar por mais de um campo."))
   public ResponseEntity<RestApiResponse<Page<SetorResponseDTO>>> arvore(
       @ParameterObject @ModelAttribute SetorFilterDTO filter,
+      @Parameter(description = "Número da página, a partir de zero")
       @RequestParam(defaultValue = "0") int page,
+      @Parameter(description = "Quantidade de unidades por página, de 1 a 200")
       @RequestParam(defaultValue = "20") int size,
       @Parameter(description = "Códigos de unidade que restringem a página")
       @RequestParam(required = false) List<String> includeIds,
@@ -135,7 +180,7 @@ public class SetorController
     return successEnvelope(ResponseEntity.ok(), rows, hateoasOrNull(Links.of(links)));
   }
 
-  private org.springframework.data.domain.Pageable treePage(int page, int size, List<String> sort) {
+  private Pageable treePage(int page, int size, List<String> sort) {
     try {
       return PageableBuilder.from(page, size, sort, service.getDefaultSort());
     } catch (IllegalArgumentException e) {

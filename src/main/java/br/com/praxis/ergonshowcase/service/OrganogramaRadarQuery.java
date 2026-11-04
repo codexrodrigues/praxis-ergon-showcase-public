@@ -21,6 +21,12 @@ public final class OrganogramaRadarQuery extends GenericSpecificationsBuilder<Ra
       CustomFieldDefinitionProvider definitions,ResourceTenantContextResolver tenant,String key) {
     var copy=new RadarOrganogramaChefiaOcupacaoFilterDTO();
     if(f!=null)BeanUtils.copyProperties(f,copy);
+    String subtreeRoot = copy.getRaizSubarvore();
+    var reference = SetorFichaReference.parse(subtreeRoot);
+    if (reference != null) {
+      copy.setDataReferencia(reference.date());
+      copy.setTipoHierarquia(reference.hierarchy());
+    }
     if(copy.getDataReferencia()==null)copy.setDataReferencia(LocalDate.now());
     if(copy.getTipoHierarquia()==null)copy.setTipoHierarquia(0);
     if(copy.getTipoHierarquia()<0||copy.getTipoHierarquia()>4)throw invalid("Hierarquia deve estar entre zero e quatro.");
@@ -33,9 +39,8 @@ public final class OrganogramaRadarQuery extends GenericSpecificationsBuilder<Ra
     if (path != null && exact) {
       specification = specification.and((root, query, cb) -> cb.equal(root.get("caminhoHierarquico"), path));
     }
-    String subtreeRoot = copy.getRaizSubarvore();
     if (subtreeRoot != null) {
-      if (subtreeRoot.isBlank() || subtreeRoot.length() > 30) {
+      if (reference == null && (subtreeRoot.isBlank() || subtreeRoot.length() > 30)) {
         throw invalid("Informe o código da unidade que inicia a subárvore.");
       }
       specification = specification.and((node, query, cb) -> {
@@ -43,7 +48,8 @@ public final class OrganogramaRadarQuery extends GenericSpecificationsBuilder<Ra
         var ancestor = branch.from(RadarOrganogramaChefiaOcupacao.class);
         var date = copy.getDataReferencia();
         branch.select(cb.literal(1)).where(
-            cb.equal(ancestor.get("setor"), subtreeRoot),
+            reference == null ? cb.equal(ancestor.get("setor"), subtreeRoot)
+                : cb.equal(ancestor.get("periodoId"), reference.period()),
             cb.equal(ancestor.get("empCodigo"), node.get("empCodigo")),
             cb.equal(ancestor.get("tipoHierarquia"), node.get("tipoHierarquia")),
             cb.lessThanOrEqualTo(ancestor.get("dtini"), date),

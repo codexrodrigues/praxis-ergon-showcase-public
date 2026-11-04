@@ -7,6 +7,13 @@ import br.com.praxis.ergonshowcase.config.TenantContext;
 import br.com.praxis.ergonshowcase.config.OptionSourcesConfig;
 import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import br.com.praxis.ergonshowcase.controller.SetorController;
+import br.com.praxis.ergonshowcase.controller.CargoSetorController;
+import br.com.praxis.ergonshowcase.controller.DesignacaoFuncaoController;
+import br.com.praxis.ergonshowcase.controller.GrupoSetorController;
+import br.com.praxis.ergonshowcase.controller.HistoricoSetorController;
+import br.com.praxis.ergonshowcase.controller.RadarOrganogramaChefiaOcupacaoController;
+import br.com.praxis.ergonshowcase.controller.SetorParametrizacaoErgonController;
+import br.com.praxis.ergonshowcase.controller.SubempresaLocalidadeController;
 import br.com.praxis.ergonshowcase.domain.*;
 import br.com.praxis.ergonshowcase.dto.*;
 import br.com.praxis.ergonshowcase.mapper.*;
@@ -36,6 +43,10 @@ import org.praxisplatform.uischema.options.service.jpa.JpaOptionSourceProvider;
 import org.praxisplatform.uischema.options.service.jpa.JpaOptionSourceQueryExecutor;
 import org.praxisplatform.uischema.rest.exceptionhandler.GlobalExceptionHandler;
 import org.praxisplatform.uischema.schema.FilteredSchemaReferenceResolver;
+import org.praxisplatform.uischema.stats.StatsEligibility;
+import org.praxisplatform.uischema.stats.StatsProperties;
+import org.praxisplatform.uischema.stats.StatsSupportMode;
+import org.praxisplatform.uischema.stats.service.jpa.JpaStatsQueryExecutor;
 import org.praxisplatform.uischema.surface.AnnotationDrivenSurfaceDefinitionRegistry;
 import org.praxisplatform.uischema.surface.DefaultSurfaceAvailabilityContextResolver;
 import org.praxisplatform.uischema.surface.DefaultSurfaceAvailabilityEvaluator;
@@ -50,6 +61,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
@@ -391,6 +403,209 @@ class OrganogramaSlice8PostgresTest {
 
   private String command(String sector,String day) {
     return session.createNativeQuery("select situacao_comando_setor from radar_organograma_chefias_ocupacao where setor=:s and tipo_hierarquia=0 and cast(:d as date) between dtini and coalesce(dtfim,date '9999-12-31')",String.class).setParameter("s",sector).setParameter("d",day).getSingleResult();
+  }
+
+  private MockMvc phase2Mvc() {
+    var repo = new JpaRepositoryFactory(session);
+    var params = new SetorParametrizacaoErgonService(repo.getRepository(SetorParametrizacaoErgonRepository.class),
+        Mappers.getMapper(SetorParametrizacaoErgonMapper.class));
+    var quadro = new CargoSetorService(repo.getRepository(CargoSetorRepository.class), Mappers.getMapper(CargoSetorMapper.class));
+    var designacoes = new DesignacaoFuncaoService(repo.getRepository(DesignacaoFuncaoRepository.class),
+        Mappers.getMapper(DesignacaoFuncaoMapper.class), mock(br.com.praxis.ergonshowcase.rules.ErgonRuleEngineFacade.class));
+    var radar = new RadarOrganogramaChefiaOcupacaoService(repo.getRepository(RadarOrganogramaChefiaOcupacaoRepository.class),
+        Mappers.getMapper(RadarOrganogramaChefiaOcupacaoMapper.class));
+    var grupos = new GrupoSetorService(repo.getRepository(GrupoSetorRepository.class), Mappers.getMapper(GrupoSetorMapper.class));
+    var localidades = new SubempresaLocalidadeService(repo.getRepository(SubempresaLocalidadeRepository.class),
+        Mappers.getMapper(SubempresaLocalidadeMapper.class));
+    for (Object resource : List.of(sectors, history, params, quadro, designacoes, radar, grupos, localidades)) {
+      ReflectionTestUtils.setField(resource, "entityManager", session);
+      ReflectionTestUtils.setField(resource, "resourceTenant", tenant);
+      CanonicalResourceTestContext.exports(resource);
+      ReflectionTestUtils.setField(resource, "statsProperties", new StatsProperties(true, 20, 100, StatsSupportMode.AUTO));
+      ReflectionTestUtils.setField(resource, "statsEligibility", new StatsEligibility());
+      ReflectionTestUtils.setField(resource, "statsQueryExecutor", new JpaStatsQueryExecutor());
+    }
+    var setorController = new SetorController(sectors, history, params, quadro, designacoes, radar);
+    var controllers = List.of(setorController, new HistoricoSetorController(history),
+        new SetorParametrizacaoErgonController(params), new CargoSetorController(quadro),
+        new DesignacaoFuncaoController(designacoes, null, null), new RadarOrganogramaChefiaOcupacaoController(radar),
+        new GrupoSetorController(grupos), new SubempresaLocalidadeController(localidades));
+    for (Object controller : controllers) {
+      ReflectionTestUtils.setField(controller, "paginationMaxSize", 200);
+      ReflectionTestUtils.invokeMethod(controller, "initializeBasePath");
+    }
+    var mvc = MockMvcBuilders.standaloneSetup(controllers.toArray())
+        .setControllerAdvice(new GlobalExceptionHandler()).build();
+    var context = mvc.getDispatcherServlet().getWebApplicationContext();
+    var mappings = context.getBean(RequestMappingHandlerMapping.class);
+    var documents = mock(OpenApiDocumentService.class);
+    when(documents.resolveGroupFromPath(anyString())).thenReturn("ergon");
+    var operations = new OpenApiCanonicalOperationResolver(documents, mappings);
+    var definitions = new AnnotationDrivenSurfaceDefinitionRegistry(mappings, context, operations,
+        new FilteredSchemaReferenceResolver(), AnnotationConflictMode.FAIL);
+    var catalog = new SurfaceCatalogService(definitions, new DefaultSurfaceAvailabilityEvaluator(),
+        new DefaultSurfaceAvailabilityContextResolver());
+    for (Object controller : controllers) {
+      ReflectionTestUtils.setField(controller, "surfaceCatalogService", catalog);
+    }
+    SecurityContextHolder.getContext().setAuthentication(UsernamePasswordAuthenticationToken.authenticated(
+        "leitor", "", List.of(new SimpleGrantedAuthority("ERGON_READ"))));
+    return mvc;
+  }
+
+  @Test void treeAndRelatedSurfacesUseTheAuthorizedCompositionAndTheWholeBranch() throws Exception {
+    insert(1, "X8-GRAND", "Descendente de terceiro nível", "S8-1-DIR", "2020-01-01", null, "S8-1-DIR");
+    insert(2, "X8-GRAND", "Descendente de outro órgão", "S8-2-DIR", "2020-01-01", null, "S8-2-DIR");
+    var mvc = phase2Mvc();
+    var tree = mvc.perform(get("/api/ergon/setores/arvore-organograma")
+            .param("dataReferencia", "2021-06-01").param("tipoHierarquia", "4")
+            .param("buscaAmpla", "S8-1").param("sort", "id,desc").param("page", "1").param("size", "1"))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(2))
+        .andExpect(jsonPath("$._links.surfaces.href").value(org.hamcrest.Matchers.containsString("/schemas/surfaces")))
+        .andExpect(jsonPath("$.data.number").value(1))
+        .andExpect(jsonPath("$.data.content[0].id").value("S8-1-DIR"))
+        .andExpect(jsonPath("$.data.content[0].nome").value("Diretoria histórica 1"))
+        .andExpect(jsonPath("$.data.content[0].setorPai").value("S8-1-RAIZ")).andReturn();
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    var ref = json.readTree(tree.getResponse().getContentAsByteArray()).at("/data/content/0/referenciaFicha").asText();
+    mvc.perform(get(ApiPaths.SETORES + "/{id}/ficha-unidade", ref))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.nome").value("Diretoria histórica 1"));
+    mvc.perform(get(ApiPaths.SETORES + "/{id}/radar-subarvore", ref))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(2))
+        .andExpect(jsonPath("$.data.content[*].setor").value(org.hamcrest.Matchers.containsInAnyOrder("S8-1-DIR", "X8-GRAND")))
+        .andExpect(jsonPath("$.data.content[*].tipoHierarquia").value(org.hamcrest.Matchers.everyItem(org.hamcrest.Matchers.is(4))));
+    mvc.perform(get(ApiPaths.SETORES + "/{id}/surfaces", ref))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.surfaces[?(@.id=='radar-subarvore')].relatedResource.childParentField").value("raizSubarvore"))
+        .andExpect(jsonPath("$.surfaces[?(@.id=='designacoes-chefia')].relatedResource.childParentField").value("setorId"));
+    mvc.perform(post(ApiPaths.RADAR_ORGANOGRAMA_CHEFIAS_OCUPACAO + "/filter").contentType("application/json")
+            .content("""
+                {"raizSubarvore":"S8-1-RAIZ","dataReferencia":"2021-06-01","tipoHierarquia":4}
+                """))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(3))
+        .andExpect(jsonPath("$.data.content[*].setor").value(
+            org.hamcrest.Matchers.containsInAnyOrder("S8-1-RAIZ", "S8-1-DIR", "X8-GRAND")));
+    // O outlet envia o identificador explícito de discovery no campo de filtro do filho.
+    mvc.perform(post(ApiPaths.RADAR_ORGANOGRAMA_CHEFIAS_OCUPACAO + "/filter").contentType("application/json")
+            .content("{\"raizSubarvore\":\"" + ref + "\"}"))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(2))
+        .andExpect(jsonPath("$.data.content[*].tipoHierarquia").value(org.hamcrest.Matchers.everyItem(org.hamcrest.Matchers.is(4))));
+    mvc.perform(post(ApiPaths.HISTORICO_SETORES + "/filter").contentType("application/json")
+            .content("{\"setor\":\"" + ref + "\"}"))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(3));
+    mvc.perform(post(ApiPaths.CARGOS_POR_SETOR + "/filter").contentType("application/json")
+            .content("{\"setor\":\"" + ref + "\"}"))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.content[0].lotacaoMaximaAutorizada").value(8));
+    mvc.perform(get(ApiPaths.SETORES + "/S8-1-DIR/historico-vigencias"))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(3));
+    mvc.perform(get(ApiPaths.SETORES + "/S8-1-SUB/parametrizacoes-ergon"))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.content[0].setor").value("S8-1-SUB"));
+    mvc.perform(get(ApiPaths.SETORES + "/S8-1-DIR/cargos-autorizados"))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.content[0].lotacaoMaximaAutorizada").value(8));
+    mvc.perform(get(ApiPaths.SETORES + "/S8-1-SUB/designacoes-chefia"))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(1))
+        .andExpect(jsonPath("$.data.content[0].setorId").value("S8-1-SUB"))
+        .andExpect(jsonPath("$.data.content[0].empCodigo").value(1));
+    var sub = mvc.perform(get("/api/ergon/setores/arvore-organograma")
+            .param("setor", "S8-1-SUB").param("dataReferencia", "2026-11-04"))
+        .andExpect(status().isOk()).andReturn();
+    String subRef = json.readTree(sub.getResponse().getContentAsByteArray()).at("/data/content/0/referenciaFicha").asText();
+    mvc.perform(post(ApiPaths.DESIGNACOES + "/filter").contentType("application/json")
+            .content("{\"setorId\":\"" + subRef + "\"}"))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(1))
+        .andExpect(jsonPath("$.data.content[0].setorId").value("S8-1-SUB"));
+    mvc.perform(post(ApiPaths.SETORES_ERGON + "/filter").contentType("application/json")
+            .content("{\"setor\":\"" + subRef + "\"}"))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(1));
+    when(tenant.orgao()).thenReturn(2);
+    when(tenant.resolveTenant()).thenReturn(Optional.of("2"));
+    mvc.perform(post(ApiPaths.DESIGNACOES + "/filter").contentType("application/json")
+            .content("{\"setorId\":\"" + subRef + "\"}"))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(0));
+    when(tenant.orgao()).thenReturn(1);
+    when(tenant.resolveTenant()).thenReturn(Optional.of("1"));
+    mvc.perform(get(ApiPaths.SETORES + "/S8-2-SUB/designacoes-chefia")).andExpect(status().isForbidden());
+    mvc.perform(get("/api/ergon/setores/arvore-organograma").param("tipoHierarquia", "5"))
+        .andExpect(status().isBadRequest());
+    mvc.perform(get("/api/ergon/setores/arvore-organograma").param("size", "201"))
+        .andExpect(status().isUnprocessableEntity());
+  }
+
+  @Test void everyOrganizationResourceExecutesScopedStatsExportsAndItsPublishedDetail() throws Exception {
+    var mvc = phase2Mvc();
+    var json = new com.fasterxml.jackson.databind.ObjectMapper();
+    record Dataset(String path, String filter, String dimension, String distribution, String mode, String detail, int count) {}
+    for (var data : List.of(
+        new Dataset(ApiPaths.SETORES, "\"setor\":\"S8-1-DIR\"", "tipoSetor", "quantidadeSubordinadosDiretos", "HISTOGRAM", "ficha-unidade", 1),
+        new Dataset(ApiPaths.HISTORICO_SETORES, "\"setor\":\"S8-1-DIR\"", "tipoSetor", "ufLotacao", "TERMS", "detail", 3),
+        new Dataset(ApiPaths.SETORES_ERGON, "\"setor\":\"S8-1-RAIZ\"", "tipoAcesso", "grauRiscoAmbiental", "TERMS", "detail", 1),
+        new Dataset(ApiPaths.CARGOS_POR_SETOR, "\"setor\":\"S8-1-DIR\"", "tipoControleQuadro", "lotacaoMaximaAutorizada", "HISTOGRAM", "detail", 1),
+        new Dataset(ApiPaths.SUBEMPRESAS_LOCALIDADES, "\"codigo\":\"S8-UG\"", "naturezaUnidade", "uf", "TERMS", "detail", 1),
+        new Dataset(ApiPaths.GRUPOS_SETORES, "\"sigla\":\"S8-REG\"", "tipoAgrupamento", "ufAbrangencia", "TERMS", "detail", 1),
+        new Dataset(ApiPaths.RADAR_ORGANOGRAMA_CHEFIAS_OCUPACAO, "\"setor\":\"S8-1-DIR\",\"dataReferencia\":\"2026-11-04\"",
+            "situacaoComandoSetor", "vagasAutorizadasSetor", "HISTOGRAM", "detail", 1))) {
+      String filter = "{" + data.filter() + "}";
+      var list = mvc.perform(post(data.path() + "/filter").contentType("application/json").content(filter))
+          .andExpect(status().isOk()).andExpect(jsonPath("$.data.totalElements").value(data.count())).andReturn();
+      String id = json.readTree(list.getResponse().getContentAsByteArray()).at("/data/content/0/id").asText();
+      mvc.perform(get(data.path() + "/{id}/" + data.detail(), id))
+          .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(id)).andExpect(jsonPath("$.empCodigo").value(1));
+      var nominal = mvc.perform(post(data.path() + "/stats/group-by").contentType("application/json")
+              .content("{\"filter\":" + filter + ",\"field\":\"id\",\"metric\":{\"operation\":\"COUNT\"}}"))
+          .andExpect(status().isOk()).andReturn();
+      assertThat(json.readTree(nominal.getResponse().getContentAsByteArray()).at("/data/buckets").size())
+          .as(data.path()).isEqualTo(data.count());
+      mvc.perform(post(data.path() + "/stats/group-by").contentType("application/json")
+              .content("{\"filter\":{\"empCodigo\":2," + data.filter() + "},\"field\":\"id\",\"metric\":{\"operation\":\"COUNT\"}}"))
+          .andExpect(status().isOk()).andExpect(jsonPath("$.data.buckets").isEmpty());
+      mvc.perform(post(data.path() + "/stats/timeseries").contentType("application/json")
+              .content("""
+                  {"filter":%s,"field":"dtini","granularity":"MONTH","metric":{"operation":"COUNT"},
+                   "from":"2020-01-01","to":"2026-12-31"}
+                  """.formatted(filter)))
+          .andExpect(status().isOk()).andExpect(jsonPath("$.data.points").isNotEmpty());
+      mvc.perform(post(data.path() + "/stats/distribution").contentType("application/json")
+              .content("""
+                  {"filter":%s,"field":"%s","mode":"%s","metric":{"operation":"COUNT"},"bucketSize":5}
+                  """.formatted(filter, data.distribution(), data.mode())))
+          .andExpect(status().isOk()).andExpect(jsonPath("$.data.mode").value(data.mode()));
+      mvc.perform(post(data.path() + "/stats/comparison").contentType("application/json")
+              .content("""
+                  {"filter":%s,"field":"%s","periodField":"dtini","metrics":[{"operation":"COUNT"}],
+                   "period":{"from":"2026-01-01","to":"2026-12-31","timezone":"America/Sao_Paulo"}}
+                  """.formatted(filter, data.dimension())))
+          .andExpect(status().isOk()).andExpect(jsonPath("$.data.periodField").value("dtini"));
+      for (var format : List.of("CSV", "JSON", "EXCEL")) {
+        var export = mvc.perform(post(data.path() + "/export").contentType("application/json")
+                .content("""
+                    {"format":"%s","scope":"FILTERED","filters":%s,"applyFormatting":true}
+                    """.formatted(format, filter)))
+            .andExpect(status().isOk())
+            .andExpect(header().string("X-Export-Row-Count", Integer.toString(data.count())))
+            .andReturn();
+        assertThat(export.getResponse().getContentAsByteArray()).isNotEmpty();
+      }
+    }
+    String radar = ApiPaths.RADAR_ORGANOGRAMA_CHEFIAS_OCUPACAO;
+    mvc.perform(post(radar + "/filter").contentType("application/json")
+            .content("{\"setor\":\"S8-1-DIR\",\"dataReferencia\":\"2026-11-04\"}"))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data.content[0].vagasAutorizadasSetor").value(8))
+        .andExpect(jsonPath("$.data.content[0].vagasOcupadasSetor").doesNotExist())
+        .andExpect(jsonPath("$.data.content[0].escopoApuracao").value(
+            org.hamcrest.Matchers.containsString("PROVIMENTO_EXERCICIO_FOLHA_E_COMANDO_POR_CARGO_NAO_INTEGRADOS")));
+    mvc.perform(post(radar + "/export").contentType("application/json")
+            .content("""
+                {"format":"JSON","fields":[{"key":"chefeTitularNome","label":"Titular"}]}
+                """))
+        .andExpect(status().isBadRequest());
+    mvc.perform(post(radar + "/export").contentType("application/json")
+            .content("{\"format\":\"CSV\",\"maxRows\":1001}"))
+        .andExpect(status().isBadRequest());
+    mvc.perform(post(ApiPaths.SETORES + "/export").contentType("application/json")
+            .content("""
+                {"format":"JSON","scope":"SELECTED","selection":{"keyField":"id","selectedKeys":["S8-1-DIR","S8-2-DIR"]}}
+                """))
+        .andExpect(status().isOk()).andExpect(header().string("X-Export-Row-Count", "1"));
   }
 
   @Test void parentChangeRebuildsChildPathInAllFiveHierarchiesWithoutChangingChildPeriod() {

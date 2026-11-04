@@ -1,15 +1,16 @@
 package br.com.praxis.ergonshowcase.service;
 
 import br.com.praxis.ergonshowcase.config.TenantContext;
+import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import br.com.praxis.ergonshowcase.domain.Setor;
 import br.com.praxis.ergonshowcase.dto.HistoricoSetorFilterDTO;
 import br.com.praxis.ergonshowcase.dto.HistoricoSetorResponseDTO;
+import br.com.praxis.ergonshowcase.dto.RadarOrganogramaChefiaOcupacaoFilterDTO;
 import br.com.praxis.ergonshowcase.dto.SetorFilterDTO;
 import br.com.praxis.ergonshowcase.dto.SetorResponseDTO;
 import br.com.praxis.ergonshowcase.mapper.SetorMapper;
 import br.com.praxis.ergonshowcase.repository.SetorRepository;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.OptionalLong;
 import java.util.Set;
@@ -18,7 +19,6 @@ import org.praxisplatform.uischema.exporting.CollectionExportFieldPresentation;
 import org.praxisplatform.uischema.concurrency.ResourceRepresentationResult;
 import org.praxisplatform.uischema.stats.StatsFieldRegistry;
 import org.praxisplatform.uischema.stats.StatsMetric;
-import org.praxisplatform.uischema.stats.StatsSupportMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SetorService
     extends ErgonReadOnlyResourceService<Setor, SetorResponseDTO, String, SetorFilterDTO> {
-  // O prefixo excede os 30 caracteres do código físico de setor.
-  private static final String PERIODO_FICHA_PREFIX = "periodo-organizacional-em-vigencia:";
   private final SetorMapper mapper;
   private final TenantContext tenant;
   @Autowired private HistoricoSetorService history;
@@ -48,52 +46,35 @@ public class SetorService
     org.springframework.beans.BeanUtils.copyProperties(period, dto, "id");
     dto.setId(period.getSetor());
     int hierarchy = filter.getTipoHierarquia() == null ? 0 : filter.getTipoHierarquia();
-    dto.setReferenciaFicha(PERIODO_FICHA_PREFIX + period.getId() + ":" + filter.getDataReferencia() + ":" + hierarchy);
+    dto.setReferenciaFicha(new SetorFichaReference(period.getId(), filter.getDataReferencia(), hierarchy).encode());
     return dto;
   }
 
   public void bindRadarSubtree(RadarOrganogramaChefiaOcupacaoFilterDTO filter, SetorResponseDTO parent) {
-    filter.setRaizSubarvore(parent.getId());
-    String reference = parent.getReferenciaFicha();
-    if (reference != null && reference.startsWith(PERIODO_FICHA_PREFIX)) {
-      // A ficha já validou o período, a data e o órgão antes de entregar esta referência.
-      String[] parts = reference.substring(PERIODO_FICHA_PREFIX.length()).split(":");
-      filter.setDataReferencia(LocalDate.parse(parts[1]));
-      filter.setTipoHierarquia(Integer.parseInt(parts[2]));
-    }
+    filter.setRaizSubarvore(parent.getReferenciaFicha() == null ? parent.getId() : parent.getReferenciaFicha());
   }
 
   @Override
   @Transactional(readOnly = true)
   public ResourceRepresentationResult<SetorResponseDTO> findById(String id) {
-    if (id == null || !id.startsWith(PERIODO_FICHA_PREFIX)) {
+    var reference = SetorFichaReference.parse(id);
+    if (reference == null) {
       return super.findById(id);
     }
-    var parts = id.substring(PERIODO_FICHA_PREFIX.length()).split(":", -1);
-    if (parts.length != 3 || !parts[2].matches("[0-4]")) {
-      throw getNotFoundException();
-    }
-    long periodId;
-    LocalDate date;
-    try {
-      periodId = Long.parseLong(parts[0]);
-      date = LocalDate.parse(parts[1]);
-    } catch (NumberFormatException | DateTimeParseException e) {
-      throw getNotFoundException();
-    }
+    LocalDate date = reference.date();
     var periods = getEntityManager().createQuery("""
         select h.id from HistoricoSetor h
         where h.id = :id and h.empCodigo = :org and h.dtini <= :date
           and (h.dtfim is null or h.dtfim >= :date)
         """, Long.class)
-        .setParameter("id", periodId)
+        .setParameter("id", reference.period())
         .setParameter("org", tenant.orgao())
         .setParameter("date", date)
         .getResultList();
     var historical = history.findById(periods.stream().findFirst().orElseThrow(this::getNotFoundException));
     var filter = new HistoricoSetorFilterDTO();
     filter.setDataReferencia(date);
-    filter.setTipoHierarquia(Integer.parseInt(parts[2]));
+    filter.setTipoHierarquia(reference.hierarchy());
     new OrganogramaTemporalQuery(getEntityManager(), tenant).enrich(List.of(historical.body()), filter);
     var dto = historicalResponse(historical.body(), filter);
     enrichHistorical(List.of(dto), date);
@@ -224,4 +205,8 @@ public class SetorService
         .numericHistogramMeasureField("quantidadeSubordinadosDiretos", "quantidadeSubordinadosDiretos")
         .temporalTimeSeriesField("dtini", "dtini")
         .build();
-  
+  }
+
+  @Override protected String resolveResourceKey() { return ApiPaths.KEY_SETORES; }
+
+}

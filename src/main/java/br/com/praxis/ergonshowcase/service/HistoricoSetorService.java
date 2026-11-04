@@ -41,4 +41,29 @@ public class HistoricoSetorService extends ErgonResourceService<HistoricoSetor,H
         .labeledGroupByBucket("id", "id", "nome", Set.of(StatsMetric.COUNT))
         .categoricalGroupByBucket("tipoSetor", "tipoSetor")
         .categoricalTermsBucket("ufLotacao", "ufLotacao")
-        .temporalTimeSeriesFie
+        .temporalTimeSeriesField("dtini", "dtini")
+        .build();
+  }
+
+  @Override
+  protected List<CollectionExportField> exportFields() {
+    var date = new CollectionExportFieldPresentation(
+        "date", "dd/MM/yyyy", null, "pt-BR", "America/Sao_Paulo", null, null, "Não informado");
+    var flag = new CollectionExportFieldPresentation(
+        "boolean", null, null, "pt-BR", null, "Sim", "Não", "Não informado");
+    return List.of(
+        field("id", "Identificador", "integer"),
+        field("setor", "Unidade", "string"),
+        field("nome", "Denominação", "string"),
+        field("tipoSetor", "Tipo de unidade", "string"),
+        field("setorPai", "Superior oficial", "string"),
+        field("ufLotacao", "UF", "string"),
+        presentedField("extinto", "Extinto", "boolean", flag),
+        presentedField("dtini", "Início de vigência", "date", date),
+        presentedField("dtfim", "Término de vigência", "date", date));
+  }
+ @Override protected void beforeCreate(CreateHistoricoSetorDTO dto,HistoricoSetor entity) {throw blocked();}
+ @Override protected void beforeUpdate(Long id,HistoricoSetor entity,UpdateHistoricoSetorDTO dto) {throw blocked();}
+ @Override protected void beforeDelete(Long id,HistoricoSetor entity) {throw blocked();}
+ private AccessDeniedException blocked() {return new AccessDeniedException("EdiÃ§Ã£o organizacional indisponÃ­vel atÃ© a validaÃ§Ã£o dos comandos e regras de domÃ­nio.");}
+}

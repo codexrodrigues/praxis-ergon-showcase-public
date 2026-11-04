@@ -16,6 +16,12 @@ import org.springframework.security.access.AccessDeniedException;
 @Service
 public class SetorParametrizacaoErgonService extends ErgonResourceService<SetorParametrizacaoErgon,SetorParametrizacaoErgonResponseDTO,Long,SetorParametrizacaoErgonFilterDTO,CreateSetorParametrizacaoErgonDTO,UpdateSetorParametrizacaoErgonDTO> {
  private final SetorParametrizacaoErgonMapper mapper;
+  @Override
+  public org.praxisplatform.uischema.filter.specification.GenericSpecificationsBuilder<SetorParametrizacaoErgon> getSpecificationsBuilder() {
+    return SetorFichaReference.relatedFilter(SetorParametrizacaoErgonFilterDTO.class, SetorParametrizacaoErgonFilterDTO::new,
+        SetorParametrizacaoErgonFilterDTO::getSetor, SetorParametrizacaoErgonFilterDTO::setSetor, "setor");
+  }
+
  public SetorParametrizacaoErgonService(SetorParametrizacaoErgonRepository repository,SetorParametrizacaoErgonMapper mapper) {super(repository,SetorParametrizacaoErgon.class,"id");this.mapper=mapper;}
  @Override protected SetorParametrizacaoErgonMapper getResourceMapper() {return mapper;}
  @Override protected SetorParametrizacaoErgonFilterDTO emptyFilter() {return new SetorParametrizacaoErgonFilterDTO();}
@@ -26,4 +32,29 @@ public class SetorParametrizacaoErgonService extends ErgonResourceService<SetorP
         .labeledGroupByBucket("id", "id", "setorNome", Set.of(StatsMetric.COUNT))
         .categoricalGroupByBucket("tipoAcesso", "tipoAcesso")
         .categoricalTermsBucket("grauRiscoAmbiental", "grauRiscoAmbiental")
-        .temporalTimeSeriesField("dtini",
+        .temporalTimeSeriesField("dtini", "dtini")
+        .build();
+  }
+
+  @Override
+  protected List<CollectionExportField> exportFields() {
+    var date = new CollectionExportFieldPresentation(
+        "date", "dd/MM/yyyy", null, "pt-BR", "America/Sao_Paulo", null, null, "Não informado");
+    var flag = new CollectionExportFieldPresentation(
+        "boolean", null, null, "pt-BR", null, "Sim", "Não", "Não informado");
+    return List.of(
+        field("id", "Identificador", "integer"),
+        field("setor", "Unidade", "string"),
+        field("setorNome", "Denominação", "string"),
+        field("centroCusto", "Centro de custo", "string"),
+        field("tipoAcesso", "Tipo de acesso", "string"),
+        field("grauRiscoAmbiental", "Grau de risco", "string"),
+        presentedField("exigeEpiObrigatorio", "EPI obrigatório", "boolean", flag),
+        presentedField("dtini", "Início de vigência", "date", date),
+        presentedField("dtfim", "Término de vigência", "date", date));
+  }
+ @Override protected void beforeCreate(CreateSetorParametrizacaoErgonDTO dto,SetorParametrizacaoErgon entity) {throw blocked();}
+ @Override protected void beforeUpdate(Long id,SetorParametrizacaoErgon entity,UpdateSetorParametrizacaoErgonDTO dto) {throw blocked();}
+ @Override protected void beforeDelete(Long id,SetorParametrizacaoErgon entity) {throw blocked();}
+ private AccessDeniedException blocked() {return new AccessDeniedException("Edição organizacional indisponível até a validação dos comandos e regras de domínio.");}
+}

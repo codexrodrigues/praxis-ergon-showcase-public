@@ -30,6 +30,12 @@ public class DesignacaoFuncaoService extends ChefiaResourceService<DesignacaoFun
   private final DesignacaoFuncaoMapper mapper;
   private final ErgonRuleEngineFacade rules;
 
+  @Override
+  public org.praxisplatform.uischema.filter.specification.GenericSpecificationsBuilder<DesignacaoFuncao> getSpecificationsBuilder() {
+    return SetorFichaReference.relatedFilter(DesignacaoFuncaoFilterDTO.class, DesignacaoFuncaoFilterDTO::new,
+        DesignacaoFuncaoFilterDTO::getSetorId, DesignacaoFuncaoFilterDTO::setSetorId, "setorId");
+  }
+
   public DesignacaoFuncaoService(DesignacaoFuncaoRepository repository, DesignacaoFuncaoMapper mapper,
       ErgonRuleEngineFacade rules) {
     super(repository, DesignacaoFuncao.class, "id");

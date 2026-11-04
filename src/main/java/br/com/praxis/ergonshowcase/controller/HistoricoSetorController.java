@@ -30,4 +30,40 @@ public class HistoricoSetorController extends AbstractResourceController<Histori
  @Override protected Long getResponseId(HistoricoSetorResponseDTO dto) {return dto.getId();}
   @Override
   @PostMapping("/stats/group-by")
-  @Operation(summary = "Agrupar vigências", description = "Apura regi
+  @Operation(summary = "Agrupar vigências", description = "Apura registros do órgão autorizado no recorte filtrado.")
+  @UiAnalytics(projections = {
+      @AnalyticsProjection(id = "composicao", intent = AnalyticsIntent.COMPOSITION,
+          sourceOperation = AnalyticsOperation.GROUP_BY,
+          primaryDimension = @AnalyticsDimensionBinding(field = "tipoSetor"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Vigências")),
+      @AnalyticsProjection(id = "registros-nominais", intent = AnalyticsIntent.RANKING,
+          sourceOperation = AnalyticsOperation.GROUP_BY,
+          primaryDimension = @AnalyticsDimensionBinding(field = "id"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Vigências"),
+          recordOpen = @AnalyticsRecordOpen(sourceIdentityField = "key",
+              target = @AnalyticsSurfaceTarget(resourceKey = ApiPaths.KEY_HISTORICO_SETORES, surfaceId = "detail"))),
+      @AnalyticsProjection(id = "inicios-de-vigencia", intent = AnalyticsIntent.TREND,
+          sourceOperation = AnalyticsOperation.TIMESERIES,
+          primaryDimension = @AnalyticsDimensionBinding(field = "dtini"),
+          defaultGranularity = AnalyticsGranularity.MONTH, defaultTimezone = "America/Sao_Paulo",
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Vigências por início")),
+      @AnalyticsProjection(id = "distribuicao", intent = AnalyticsIntent.DISTRIBUTION,
+          sourceOperation = AnalyticsOperation.DISTRIBUTION,
+          primaryDimension = @AnalyticsDimensionBinding(field = "ufLotacao"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "ufLotacao", aggregation = "terms", label = "Vigências por UF de lotação")),
+      @AnalyticsProjection(id = "comparativo-por-vigencia", intent = AnalyticsIntent.COMPARISON,
+          sourceOperation = AnalyticsOperation.COMPARISON,
+          primaryDimension = @AnalyticsDimensionBinding(field = "tipoSetor"),
+          comparisonPeriod = @AnalyticsComparisonPeriodBinding(field = "dtini", timezone = "America/Sao_Paulo"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Vigências"))
+  })
+  public ResponseEntity<RestApiResponse<GroupByStatsResponse>> groupByStats(
+      @RequestBody GroupByStatsRequest<HistoricoSetorFilterDTO> request) {
+    return super.groupByStats(request);
+  }
+
+ @GetMapping("/{id}/detail") @PreAuthorize("hasAuthority('ERGON_READ')")
+ @UiSurface(id="detail",kind=SurfaceKind.READ_PROJECTION,scope=SurfaceScope.ITEM,title="Ficha do período",description="Configuração organizacional e fundamento da vigência.",requiredAuthorities={"ERGON_READ"})
+ @Operation(summary="Inspecionar período organizacional",description="Apresenta o assentamento do órgão autorizado com a sua fundamentação administrativa.")
+ public ResponseEntity<HistoricoSetorResponseDTO> detail(@Parameter(description="Identificador do período organizacional") @PathVariable Long id) {return withResourceVersion(ResponseEntity.ok(),id,service.findById(id));}
+}

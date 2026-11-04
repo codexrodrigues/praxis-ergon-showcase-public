@@ -25,4 +25,30 @@ public class GrupoSetorService extends ErgonResourceService<GrupoSetor,GrupoSeto
     return StatsFieldRegistry.builder()
         .labeledGroupByBucket("id", "id", "nome", Set.of(StatsMetric.COUNT))
         .categoricalGroupByBucket("tipoAgrupamento", "tipoAgrupamento")
-        .categoricalTermsBucket("ufAbrangen
+        .categoricalTermsBucket("ufAbrangencia", "ufAbrangencia")
+        .temporalTimeSeriesField("dtini", "dtini")
+        .build();
+  }
+
+  @Override
+  protected List<CollectionExportField> exportFields() {
+    var date = new CollectionExportFieldPresentation(
+        "date", "dd/MM/yyyy", null, "pt-BR", "America/Sao_Paulo", null, null, "Não informado");
+    var flag = new CollectionExportFieldPresentation(
+        "boolean", null, null, "pt-BR", null, "Sim", "Não", "Não informado");
+    return List.of(
+        field("id", "Identificador", "integer"),
+        field("sigla", "Sigla", "string"),
+        field("nome", "Denominação", "string"),
+        field("tipoAgrupamento", "Agrupamento", "string"),
+        field("setorSede", "Setor sede", "string"),
+        field("ufAbrangencia", "UF de abrangência", "string"),
+        presentedField("ativo", "Ativo", "boolean", flag),
+        presentedField("dtini", "Início de vigência", "date", date),
+        presentedField("dtfim", "Término de vigência", "date", date));
+  }
+ @Override protected void beforeCreate(CreateGrupoSetorDTO dto,GrupoSetor entity) {throw blocked();}
+ @Override protected void beforeUpdate(Long id,GrupoSetor entity,UpdateGrupoSetorDTO dto) {throw blocked();}
+ @Override protected void beforeDelete(Long id,GrupoSetor entity) {throw blocked();}
+ private AccessDeniedException blocked() {return new AccessDeniedException("Edição organizacional indisponível até a validação dos comandos e regras de domínio.");}
+}

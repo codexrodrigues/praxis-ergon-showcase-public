@@ -29,4 +29,40 @@ public class CargoSetorController extends AbstractResourceController<CargoSetorR
  @Override protected Long getResponseId(CargoSetorResponseDTO dto) {return dto.getId();}
   @Override
   @PostMapping("/stats/group-by")
-  @Operation(summary = "Agrupa
+  @Operation(summary = "Agrupar autorizações", description = "Apura registros do órgão autorizado no recorte filtrado.")
+  @UiAnalytics(projections = {
+      @AnalyticsProjection(id = "composicao", intent = AnalyticsIntent.COMPOSITION,
+          sourceOperation = AnalyticsOperation.GROUP_BY,
+          primaryDimension = @AnalyticsDimensionBinding(field = "tipoControleQuadro"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Autorizações")),
+      @AnalyticsProjection(id = "registros-nominais", intent = AnalyticsIntent.RANKING,
+          sourceOperation = AnalyticsOperation.GROUP_BY,
+          primaryDimension = @AnalyticsDimensionBinding(field = "id"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Autorizações"),
+          recordOpen = @AnalyticsRecordOpen(sourceIdentityField = "key",
+              target = @AnalyticsSurfaceTarget(resourceKey = ApiPaths.KEY_CARGOS_POR_SETOR, surfaceId = "detail"))),
+      @AnalyticsProjection(id = "inicios-de-vigencia", intent = AnalyticsIntent.TREND,
+          sourceOperation = AnalyticsOperation.TIMESERIES,
+          primaryDimension = @AnalyticsDimensionBinding(field = "dtini"),
+          defaultGranularity = AnalyticsGranularity.MONTH, defaultTimezone = "America/Sao_Paulo",
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Autorizações por início")),
+      @AnalyticsProjection(id = "distribuicao", intent = AnalyticsIntent.DISTRIBUTION,
+          sourceOperation = AnalyticsOperation.DISTRIBUTION,
+          primaryDimension = @AnalyticsDimensionBinding(field = "lotacaoMaximaAutorizada"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "lotacaoMaximaAutorizada", aggregation = "histogram", label = "Faixas de lotação autorizada")),
+      @AnalyticsProjection(id = "comparativo-por-vigencia", intent = AnalyticsIntent.COMPARISON,
+          sourceOperation = AnalyticsOperation.COMPARISON,
+          primaryDimension = @AnalyticsDimensionBinding(field = "tipoControleQuadro"),
+          comparisonPeriod = @AnalyticsComparisonPeriodBinding(field = "dtini", timezone = "America/Sao_Paulo"),
+          primaryMetrics = @AnalyticsMetricBinding(field = "count", aggregation = "count", label = "Autorizações"))
+  })
+  public ResponseEntity<RestApiResponse<GroupByStatsResponse>> groupByStats(
+      @RequestBody GroupByStatsRequest<CargoSetorFilterDTO> request) {
+    return super.groupByStats(request);
+  }
+
+ @GetMapping("/{id}/detail") @PreAuthorize("hasAuthority('ERGON_READ')")
+ @UiSurface(id="detail",kind=SurfaceKind.READ_PROJECTION,scope=SurfaceScope.ITEM,title="Ficha do período",description="Configuração organizacional e fundamento da vigência.",requiredAuthorities={"ERGON_READ"})
+ @Operation(summary="Inspecionar período organizacional",description="Apresenta o assentamento do órgão autorizado com a sua fundamentação administrativa.")
+ public ResponseEntity<CargoSetorResponseDTO> detail(@Parameter(description="Identificador do período organizacional") @PathVariable Long id) {return withResourceVersion(ResponseEntity.ok(),id,service.findById(id));}
+}

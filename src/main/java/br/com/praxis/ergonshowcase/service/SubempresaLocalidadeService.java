@@ -26,4 +26,29 @@ public class SubempresaLocalidadeService extends ErgonResourceService<Subempresa
         .labeledGroupByBucket("id", "id", "nome", Set.of(StatsMetric.COUNT))
         .categoricalGroupByBucket("naturezaUnidade", "naturezaUnidade")
         .categoricalTermsBucket("uf", "uf")
-        .temporalTimeSeriesField("dtini", "dtini
+        .temporalTimeSeriesField("dtini", "dtini")
+        .build();
+  }
+
+  @Override
+  protected List<CollectionExportField> exportFields() {
+    var date = new CollectionExportFieldPresentation(
+        "date", "dd/MM/yyyy", null, "pt-BR", "America/Sao_Paulo", null, null, "Não informado");
+    var flag = new CollectionExportFieldPresentation(
+        "boolean", null, null, "pt-BR", null, "Sim", "Não", "Não informado");
+    return List.of(
+        field("id", "Identificador", "integer"),
+        field("codigo", "Código da unidade", "string"),
+        field("nome", "Denominação", "string"),
+        field("naturezaUnidade", "Natureza", "string"),
+        field("uf", "UF", "string"),
+        field("municipio", "Município", "string"),
+        presentedField("ativo", "Ativo", "boolean", flag),
+        presentedField("dtini", "Início de vigência", "date", date),
+        presentedField("dtfim", "Término de vigência", "date", date));
+  }
+ @Override protected void beforeCreate(CreateSubempresaLocalidadeDTO dto,SubempresaLocalidade entity) {throw blocked();}
+ @Override protected void beforeUpdate(Long id,SubempresaLocalidade entity,UpdateSubempresaLocalidadeDTO dto) {throw blocked();}
+ @Override protected void beforeDelete(Long id,SubempresaLocalidade entity) {throw blocked();}
+ private AccessDeniedException blocked() {return new AccessDeniedException("Edição organizacional indisponível até a validação dos comandos e regras de domínio.");}
+}
