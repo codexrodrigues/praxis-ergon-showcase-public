@@ -29,11 +29,13 @@ final class NeonDomainFixture {
       var keys = new HashMap<String, List<String>>();
       var parents = new HashMap<String, Set<String>>();
       try (var query = connection.createStatement(); var rows = query.executeQuery(
-          "select table_name,column_name from information_schema.columns "
-              + "where table_schema='public' order by table_name,ordinal_position")) {
+          "select c.table_name,c.column_name from information_schema.columns c "
+              + "join information_schema.tables t using (table_catalog,table_schema,table_name) "
+              + "where c.table_schema='public' and t.table_type='BASE TABLE' "
+              + "order by c.table_name,c.ordinal_position")) {
         while (rows.next()) columns.computeIfAbsent(rows.getString(1), k -> new ArrayList<>()).add(rows.getString(2));
       }
-      assertThat(columns).hasSize(16);
+      assertThat(columns).hasSize(29);
       try (var query = connection.createStatement(); var rows = query.executeQuery(
           "select c.relname,a.attname from pg_index i join pg_class c on c.oid=i.indrelid "
               + "join pg_namespace n on n.oid=c.relnamespace "

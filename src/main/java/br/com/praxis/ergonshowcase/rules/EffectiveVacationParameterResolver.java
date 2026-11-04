@@ -128,35 +128,21 @@ public final class EffectiveVacationParameterResolver {
       Integer empCodigo,
       Vinculo vinculo,
       LocalDate referenceDate) {
-    if (candidates == null || candidates.isEmpty()) {
-      return Optional.empty();
-    }
-    Integer targetEmp =
-        empCodigo != null ? empCodigo : (vinculo != null ? vinculo.getEmpCodigo() : null);
-    return candidates.stream()
-        .filter(Objects::nonNull)
-        .filter(p -> Boolean.TRUE.equals(p.getActive()))
-        .filter(
-            p ->
-                referenceDate == null
-                    || p.getDtini() == null
-                    || !p.getDtini().isAfter(referenceDate))
-        .filter(
-            p ->
-                referenceDate == null
-                    || p.getDtfim() == null
-                    || !p.getDtfim().isBefore(referenceDate))
-        .filter(p -> matchesScope(p, targetEmp, vinculo))
-        .sorted(
-            Comparator.comparingInt(
-                    (ParametroContagemFerias p) -> specificityScore(p, targetEmp, vinculo))
-                .reversed()
-                .thenComparing(
-                    ParametroContagemFerias::getDtini,
-                    Comparator.nullsLast(Comparator.reverseOrder()))
-                .thenComparing(
-                    ParametroContagemFerias::getId, Comparator.nullsLast(Comparator.naturalOrder())))
-        .findFirst();
+    if (candidates == null || candidates.isEmpty()) return Optional.empty();
+    Integer targetEmp = empCodigo != null ? empCodigo : vinculo == null ? null : vinculo.getEmpCodigo();
+    var criteria = new java.util.ArrayList<org.praxisplatform.rules.parametric.EffectiveDatedMatrixMatcher.Criterion<ParametroContagemFerias>>();
+    // Preserve the domain's ordered specificity and its treatment of absent vínculo dimensions.
+    for (int bit : new int[] {16, 8, 4, 2, 1})
+      criteria.add(new org.praxisplatform.rules.parametric.EffectiveDatedMatrixMatcher.Criterion<>(
+          row -> (specificityScore(row, targetEmp, vinculo) & bit) == 0 ? null : Boolean.TRUE, Boolean.TRUE));
+    var matcher = new org.praxisplatform.rules.parametric.EffectiveDatedMatrixMatcher<ParametroContagemFerias>(
+        row -> referenceDate == null ? null : row.getDtini(),
+        row -> referenceDate == null ? null : row.getDtfim(), criteria,
+        Comparator.comparing(ParametroContagemFerias::getDtini, Comparator.nullsLast(Comparator.reverseOrder()))
+            .thenComparing(ParametroContagemFerias::getId, Comparator.nullsLast(Comparator.naturalOrder())));
+    return matcher.match(candidates.stream().filter(Objects::nonNull)
+        .filter(row -> Boolean.TRUE.equals(row.getActive())).filter(row -> matchesScope(row, targetEmp, vinculo)).toList(),
+        referenceDate == null ? LocalDate.MIN : referenceDate);
   }
 
   public EffectiveParametroFeriasFacts resolveEffectiveFacts(
@@ -366,12 +352,12 @@ public final class EffectiveVacationParameterResolver {
     }
     var q =
         em.createQuery(
-            "select x from ParametroContagemFerias x where x.active=true and x.regimeJuridico=:rj and x.tipoVinculo=:tv",
+            "select x from ParametroContagemFerias x where x.active=true and (x.empCodigo=:org or x.empCodigo is null) and x.regimeJuridico=:rj and x.tipoVinculo=:tv",
             ParametroContagemFerias.class);
     if (q == null) {
       return List.of();
     }
-    var r1 = q.setParameter("rj", vinculo.getRegimejur());
+    var r1 = q.setParameter("org", vinculo.getEmpCodigo()).setParameter("rj", vinculo.getRegimejur());
     var r2 = r1 != null ? r1.setParameter("tv", vinculo.getTipovinc()) : null;
     var flushed = r2 != null ? r2.setFlushMode(FlushModeType.COMMIT) : null;
     var list =
@@ -502,16 +488,9 @@ public final class EffectiveVacationParameterResolver {
 
   public static boolean mergeTriStateBoolean(
       String paOverride, Boolean baseValue, boolean fallbackDefault) {
-    if (paOverride != null && !paOverride.isBlank()) {
-      String norm = paOverride.trim().toUpperCase();
-      if ("S".equals(norm)) {
-        return true;
-      }
-      if ("N".equals(norm)) {
-        return false;
-      }
-    }
-    return baseValue != null ? baseValue : fallbackDefault;
+    return org.praxisplatform.rules.parametric.TriStateOverrideResolver.resolve(
+        paOverride != null && java.util.Set.of("S", "N", "I").contains(paOverride.trim().toUpperCase(java.util.Locale.ROOT)) ? paOverride : null,
+        baseValue == null ? null : baseValue ? "S" : "N").orElse(fallbackDefault);
   }
 
   public static boolean hasIndividualOverrides(PeriodoAquisitivoFerias pa) {

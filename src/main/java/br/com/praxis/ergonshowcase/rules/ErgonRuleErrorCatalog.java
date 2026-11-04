@@ -2,6 +2,7 @@ package br.com.praxis.ergonshowcase.rules;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -63,18 +64,36 @@ public final class ErgonRuleErrorCatalog {
           "ERG-03182",
           DependenteElegibilidadeRuleSet.SLOT_DATA_NASCIMENTO,
           "dtnasc",
-          "A data de nascimento do dependente não pode ser futura nem ultrapassar o limite máximo de 120 anos de idade.",
-          "PCK_DEPENDENTES.VALID_IDADE_LIMITE",
-          "IF p_depen.dtnasc > sysdate THEN pack_hades.trata_erro(3182); ELSIF add_months(p_depen.dtnasc, 1440) < sysdate THEN pack_hades.trata_erro(3181); END IF;");
+          "A data de nascimento do dependente não pode ser futura.",
+          "PCK_DEPENDENTES.VALID_DEPENDENTES:854-860",
+          "IF p_depen.dtnasc > sysdate THEN pack_hades.trata_erro(3182); END IF;");
+
+  public static final RuleErrorDescriptor ERG_03181 =
+      new RuleErrorDescriptor(
+          "ERG-03181",
+          DependenteElegibilidadeRuleSet.SLOT_DATA_NASCIMENTO,
+          "dtnasc",
+          "A idade do dependente na data de referência não pode ultrapassar o limite máximo de 120 anos.",
+          "PCK_DEPENDENTES.VALID_DEPENDENTES:854-860",
+          "IF add_months(p_depen.dtnasc, 1440) < sysdate THEN pack_hades.trata_erro(3181); END IF;");
 
   public static final RuleErrorDescriptor ERG_03183 =
       new RuleErrorDescriptor(
           "ERG-03183",
           DependenteElegibilidadeRuleSet.SLOT_COERENCIA_PARENTESCO,
           "parentesco",
-          "Inconsistência genealógica ou documental entre dependente e servidor titular: filhos/enteados devem nascer após o titular, pais/avós antes do titular e o CPF do dependente não pode coincidir com o CPF do servidor.",
+          "Inconsistência genealógica ou documental entre dependente e servidor titular: filhos/enteados devem nascer após o titular e o CPF do dependente não pode coincidir com o CPF do servidor titular.",
           "PCK_DEPENDENTES.VALID_IDADE_LIMITE / PRC_VALID_CPF",
-          "IF v_dtnasc_func > p_depen.dtnasc THEN pack_hades.trata_erro(3183); ELSIF v_dtnasc_func < p_depen.dtnasc THEN pack_hades.trata_erro(3184); END IF;");
+          "IF v_dtnasc_func > p_depen.dtnasc THEN pack_hades.trata_erro(3183); END IF;");
+
+  public static final RuleErrorDescriptor ERG_03184 =
+      new RuleErrorDescriptor(
+          "ERG-03184",
+          DependenteElegibilidadeRuleSet.SLOT_COERENCIA_PARENTESCO,
+          "parentesco",
+          "Inconsistência genealógica entre dependente e servidor titular: pais, mães, genitores e avós devem possuir data de nascimento anterior à do servidor titular.",
+          "PCK_DEPENDENTES.VALID_DEPENDENTES:871-875",
+          "IF v_dtnasc_func < p_depen.dtnasc THEN pack_hades.trata_erro(3184); END IF;");
 
   public static final RuleErrorDescriptor ERG_03185 =
       new RuleErrorDescriptor(
@@ -442,9 +461,18 @@ public final class ErgonRuleErrorCatalog {
             "ERG-00410",
             FrequenciaLancamentoRuleSet.SLOT_VINCULO_VIGENTE_NO_PERIODO,
             "dtini",
-            "O período da ocorrência de frequência deve estar contido na vigência ativa do vínculo funcional (após o exercício e antes da vacância/aposentadoria).",
+            "O início da ocorrência de frequência deve ser igual ou posterior à entrada em exercício do vínculo funcional ativo.",
             "PCK_FREQUENCIAS.verifica_data_freq",
-            "IF p_dtini < v_dtexerc THEN pack_hades.trata_erro(410); ELSIF p_dtini >= v_dtvac THEN pack_hades.trata_erro(411); END IF;"));
+            "IF p_dtini < v_dtexerc THEN pack_hades.trata_erro(410); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-00411",
+            FrequenciaLancamentoRuleSet.SLOT_VINCULO_VIGENTE_NO_PERIODO,
+            "dtini",
+            "O período da ocorrência de frequência deve ser anterior à data de vacância ou aposentadoria do vínculo funcional.",
+            "PCK_FREQUENCIAS.verifica_data_freq",
+            "IF p_dtini >= v_dtvac THEN pack_hades.trata_erro(411); END IF;"));
     register(
         map,
         new RuleErrorDescriptor(
@@ -571,10 +599,23 @@ public final class ErgonRuleErrorCatalog {
         new RuleErrorDescriptor(
             "ERG-04312",
             AfastamentoConcessaoRuleSet.SLOT_PERIODO_ORDEM_VALIDA,
-            "dtprevfim",
-            "A data de término previsto ou efetivo do afastamento não pode anteceder a data de início.",
+            "dtfim",
+            "A data de término efetivo do afastamento não pode anteceder a data de início.",
             "PCK_LIC_AFAST.MAIN_PRE",
-            "IF v_lic_afast.dtfim < v_lic_afast.dtini THEN pack_hades.trata_erro(4312); ELSIF v_lic_afast.dtprevfim < v_lic_afast.dtini THEN pack_hades.trata_erro(4313); END IF;"));
+            "IF v_lic_afast.dtfim < v_lic_afast.dtini THEN pack_hades.trata_erro(4312); END IF;"));
+    register(
+        map,
+        new RuleErrorDescriptor(
+            "ERG-04313",
+            AfastamentoConcessaoRuleSet.SLOT_PERIODO_ORDEM_VALIDA,
+            "dtprevfim",
+            "A data de término previsto do afastamento não pode anteceder a data de início.",
+            "PCK_LIC_AFAST.MAIN_PRE",
+            "IF v_lic_afast.dtprevfim < v_lic_afast.dtini THEN pack_hades.trata_erro(4313); END IF;"));
+    register(map, new RuleErrorDescriptor("CERG-04319",
+        AfastamentoConcessaoRuleSet.SLOT_PERIODO_ORDEM_VALIDA, "novaDataPrevisaoFim",
+        "A nova previsão de término deve ser posterior à previsão vigente.",
+        "POLITICA_AFASTAMENTO_SHOWCASE", "Prorrogação no próprio registro amplia a previsão anterior."));
     register(
         map,
         new RuleErrorDescriptor(
@@ -711,9 +752,9 @@ public final class ErgonRuleErrorCatalog {
             "CERG-09001",
             Rn013RegrasFrequenciaRuleSet.SLOT_CONSEC_ANO_CALENDAR_LIMIT,
             "documentoLegalId",
-            "Para este órgão, regras de frequência com teto superior a 30 dias exigem vínculo obrigatório com documento legal normativo.",
+            "Para este órgão, regras de frequência com limite anual consecutivo superior a 30 dias exigem vínculo obrigatório com documento legal normativo.",
             "EPB__REGRAS_FREQ.MAIN_PRE (AUGMENT)",
-            "Customização aditiva do órgão (OverridePolicy.RESTRICT_ONLY + CompositionPolicy.AUGMENT sob DENY_OVERRIDES)"));
+            "QTD_MAX_CONSEC_ANO > 30 e ausência de documento legal normativo (política do Órgão 2)"));
     register(
         map,
         new RuleErrorDescriptor(
@@ -765,7 +806,9 @@ public final class ErgonRuleErrorCatalog {
     // =========================================================================
     register(map, ERG_03162);
     register(map, ERG_03182);
+    register(map, ERG_03181);
     register(map, ERG_03183);
+    register(map, ERG_03184);
     register(map, ERG_03185);
     register(map, ERG_03171);
     register(map, ERG_03177);
@@ -801,6 +844,30 @@ public final class ErgonRuleErrorCatalog {
     // =========================================================================
     registerFeriasDescriptors(map);
 
+    registerTempoLicenca(map, AverbacaoTempoServicoRuleSet.RESOURCE,
+        AverbacaoTempoServicoRuleSet.PRODUCT, AverbacaoTempoServicoRuleSet.ACTIONS, AverbacaoTempoServicoRuleSet.CUSTOMER);
+    registerTempoLicenca(map, PeriodoAquisitivoLicencaEspecialRuleSet.RESOURCE,
+        PeriodoAquisitivoLicencaEspecialRuleSet.PRODUCT, PeriodoAquisitivoLicencaEspecialRuleSet.ACTIONS, PeriodoAquisitivoLicencaEspecialRuleSet.CUSTOMER);
+    registerTempoLicenca(map, LicencaEspecialGozoRuleSet.RESOURCE,
+        LicencaEspecialGozoRuleSet.PRODUCT, LicencaEspecialGozoRuleSet.ACTIONS, LicencaEspecialGozoRuleSet.CUSTOMER);
+    registerTempoLicenca(map, VendaLicencaEspecialRuleSet.RESOURCE,
+        VendaLicencaEspecialRuleSet.PRODUCT, VendaLicencaEspecialRuleSet.ACTIONS, VendaLicencaEspecialRuleSet.CUSTOMER);
+
+    CargoQuadroRuleSet.PRODUCT.forEach(rule ->
+        register(map, rule.descriptor(rule.slot(CargoQuadroRuleSet.RESOURCE))));
+    register(map, CargoQuadroRuleSet.CUSTOMER.descriptor(
+        CargoQuadroRuleSet.CUSTOMER.slot(CargoQuadroRuleSet.RESOURCE)));
+    ServidorPessoaCadastroRuleSet.PRODUCT.forEach(rule ->
+        register(map, rule.descriptor(rule.slot(ServidorPessoaCadastroRuleSet.RESOURCE))));
+    register(map, ServidorPessoaCadastroRuleSet.CUSTOMER.descriptor(
+        ServidorPessoaCadastroRuleSet.CUSTOMER.slot(ServidorPessoaCadastroRuleSet.RESOURCE)));
+    for (var operationalRule : OperationalRuleSet.values()) {
+      register(map, operationalRule.descriptor());
+    }
+    registerChefia(map, FuncaoConfiancaRuleSet.RULES, FuncaoConfiancaRuleSet.CUSTOMER);
+    registerChefia(map, VagaFuncaoRuleSet.RULES, VagaFuncaoRuleSet.CUSTOMER);
+    registerChefia(map, DesignacaoFuncaoRuleSet.RULES, DesignacaoFuncaoRuleSet.CUSTOMER);
+    registerChefia(map, SubstituicaoFuncaoRuleSet.RULES, SubstituicaoFuncaoRuleSet.CUSTOMER);
     CATALOG = Collections.unmodifiableMap(map);
   }
 
@@ -858,8 +925,8 @@ public final class ErgonRuleErrorCatalog {
             ParametroContagemFeriasRuleSet.SLOT_ABONO_PECUNIARIO_FRACAO_LIMITES,
             "abonoDirGozo",
             "Modalidade de abono pecuniário deve ser 'D' (sobre direito), 'G' (sobre gozo) ou 'N' (sem abono).",
-            "PCK_PARAMETROS_CONTA.MAIN_PRE",
-            "IF v_row_new.abono_dir_gozo NOT IN ('D','G','N') THEN pack_hades.trata_erro(1801); END IF;"));
+            "PCK_PARAMETROS_CONTA.MAIN_PRE / PCK_PERAQFER.MAIN_PRE:424-425",
+            "ABONO_DIR_GOZO NOT IN ('D','G','N') -> erro 1801 sobre V_ROW_NEW no parâmetro e V_PARAM após o merge no período."));
     register(
         map,
         new RuleErrorDescriptor(
@@ -1354,7 +1421,7 @@ public final class ErgonRuleErrorCatalog {
         map,
         new RuleErrorDescriptor(
             "ERG-00514",
-            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            FeriasGozoRuleSet.parcelamentoSlotKey("ERG-00514"),
             "dtini",
             "Conflito de datas ou ordem de parcela duplicada com outra parcela de férias ativa do vínculo.",
             "PCK_FERIAS.MAIN_POS",
@@ -1381,7 +1448,7 @@ public final class ErgonRuleErrorCatalog {
         map,
         new RuleErrorDescriptor(
             "ERG-00518",
-            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            FeriasGozoRuleSet.parcelamentoSlotKey("ERG-00518"),
             "diasGozo",
             "A duração da parcela de férias supera o máximo de dias por parcela permitido pelos parâmetros efetivos.",
             "PCK_FERIAS.MAIN_PRE",
@@ -1399,7 +1466,7 @@ public final class ErgonRuleErrorCatalog {
         map,
         new RuleErrorDescriptor(
             "ERG-00520",
-            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            FeriasGozoRuleSet.parcelamentoSlotKey("ERG-00520"),
             "ordemParcela",
             "A quantidade de parcelas de férias supera o máximo de parcelas permitido para o período aquisitivo.",
             "PCK_FERIAS.MAIN_PRE",
@@ -1471,7 +1538,7 @@ public final class ErgonRuleErrorCatalog {
         map,
         new RuleErrorDescriptor(
             "ERG-00523",
-            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            FeriasGozoRuleSet.parcelamentoSlotKey("ERG-00523"),
             "diasGozo",
             "A soma dos dias de gozo, abono pecuniário e contagem em dobro excede o total de dias de direito do período aquisitivo.",
             "PCK_FERIAS.MAIN_POS",
@@ -1480,7 +1547,7 @@ public final class ErgonRuleErrorCatalog {
         map,
         new RuleErrorDescriptor(
             "ERG-00525",
-            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            FeriasGozoRuleSet.parcelamentoSlotKey("ERG-00525"),
             "diasGozo",
             "O saldo remanescente do período aquisitivo não poderá ser esgotado nas parcelas restantes respeitando o teto máximo de dias por parcela.",
             "PCK_FERIAS.MAIN_POS",
@@ -1489,7 +1556,7 @@ public final class ErgonRuleErrorCatalog {
         map,
         new RuleErrorDescriptor(
             "ERG-00526",
-            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            FeriasGozoRuleSet.parcelamentoSlotKey("ERG-00526"),
             "diasGozo",
             "O saldo residual do período aquisitivo é inferior ao mínimo de dias permitido para uma futura parcela ou inviabiliza a parcela principal mínima.",
             "PCK_FERIAS.MAIN_POS",
@@ -1525,7 +1592,7 @@ public final class ErgonRuleErrorCatalog {
         map,
         new RuleErrorDescriptor(
             "ERG-00531",
-            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            FeriasGozoRuleSet.parcelamentoSlotKey("ERG-00531"),
             "ordemParcela",
             "O período aquisitivo não pode ser integralmente quitado em quantidade de parcelas inferior ao mínimo exigido (minPerFer).",
             "PCK_FERIAS.MAIN_POS",
@@ -1534,7 +1601,7 @@ public final class ErgonRuleErrorCatalog {
         map,
         new RuleErrorDescriptor(
             "ERG-00532",
-            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            FeriasGozoRuleSet.parcelamentoSlotKey("ERG-00532"),
             "diasGozo",
             "Ao atingir o número máximo de parcelas permitido (maxPerFer), não pode restar saldo positivo de dias no período aquisitivo.",
             "PCK_FERIAS.MAIN_POS",
@@ -1553,24 +1620,6 @@ public final class ErgonRuleErrorCatalog {
     register(
         map,
         new RuleErrorDescriptor(
-            "CERG-PARAM-PRE-001",
-            ParametroContagemFeriasRuleSet.SLOT_HOOK_PRE_VALIDACAO,
-            "documentoLegalId",
-            "Violação de regra customizada pré-validação em parâmetros de contagem.",
-            "EPB__PARAMETROS_CONTA",
-            "EPB__PARAMETROS_CONTA(v_row_new, v_mens);"));
-    register(
-        map,
-        new RuleErrorDescriptor(
-            "CERG-PARAM-201",
-            ParametroContagemFeriasRuleSet.SLOT_FERIAS_LIMITES_DIAS_TEMPLATE,
-            "totDiasFer",
-            "Órgão 2 exige direito de férias entre 20 e 30 dias e no máximo 2 parcelas.",
-            "PARAMETROS_CONTA.TEMPLATE",
-            "Template ergon.parametros-conta:ferias-bounds@1.0 parametrizado para Órgão 2."));
-    register(
-        map,
-        new RuleErrorDescriptor(
             "CERG-PARAM-301",
             ParametroContagemFeriasRuleSet.SLOT_HOOK_PRE_VALIDACAO,
             "documentoLegalId",
@@ -1586,34 +1635,7 @@ public final class ErgonRuleErrorCatalog {
             "Órgão 2 veda parametrização de abono pecuniário (exige abonoDirGozo = 'N').",
             "PCK_PARAMETROS_CONTA.MAIN_PRE",
             "IF v_row_new.abono_dir_gozo <> 'N' THEN pack_hades.trata_erro('CERG-PARAM-401'); END IF;"));
-    register(
-        map,
-        new RuleErrorDescriptor(
-            "CERG-PARAM-POST-001",
-            ParametroContagemFeriasRuleSet.SLOT_HOOK_POS_VALIDACAO,
-            "dtini",
-            "Violação de regra customizada pós-validação em parâmetros de contagem.",
-            "EPA__PARAMETROS_CONTA",
-            "EPA__PARAMETROS_CONTA(v_row_new, v_mens);"));
 
-    register(
-        map,
-        new RuleErrorDescriptor(
-            "CERG-PA-PRE-001",
-            PeriodoAquisitivoFeriasRuleSet.SLOT_HOOK_PRE_VALIDACAO,
-            "documentoLegalId",
-            "Violação de regra customizada pré-validação no período aquisitivo.",
-            "EPB__PERAQFER",
-            "EPB__PERAQFER(v_row_new, v_mens);"));
-    register(
-        map,
-        new RuleErrorDescriptor(
-            "CERG-PA-201",
-            PeriodoAquisitivoFeriasRuleSet.SLOT_ACUMULO_E_FALTAS_LIMITES_TEMPLATE,
-            "faltasApuradas",
-            "Órgão 2 permite no máximo 1 período aquisitivo acumulado em aberto e até 20 faltas.",
-            "PERAQFER.TEMPLATE",
-            "Template ergon.peraqfer:accumulation-and-reduction-bounds@1.0 parametrizado para Órgão 2."));
     register(
         map,
         new RuleErrorDescriptor(
@@ -1632,34 +1654,7 @@ public final class ErgonRuleErrorCatalog {
             "Órgão 2 exige documento legal expresso para autorizar parcelas após a data de prescrição.",
             "EP__VERIFICA_DT_PRESCR",
             "IF v_parcelas_apos_prescr > 0 AND v_row_new.documento_legal_id IS NULL THEN pack_hades.trata_erro('CERG-PA-401'); END IF;"));
-    register(
-        map,
-        new RuleErrorDescriptor(
-            "CERG-PA-POST-001",
-            PeriodoAquisitivoFeriasRuleSet.SLOT_HOOK_POS_VALIDACAO,
-            "dtini",
-            "Violação de regra customizada pós-validação no período aquisitivo.",
-            "EPA__PERAQFER",
-            "EPA__PERAQFER(v_row_new, v_mens);"));
 
-    register(
-        map,
-        new RuleErrorDescriptor(
-            "CERG-FER-PRE-001",
-            FeriasGozoRuleSet.SLOT_HOOK_PRE_VALIDACAO,
-            "documentoLegalId",
-            "Violação de regra customizada pré-validação na concessão de férias.",
-            "EPB__FERIAS",
-            "EPB__FERIAS(v_row_new, v_mens);"));
-    register(
-        map,
-        new RuleErrorDescriptor(
-            "CERG-FER-201",
-            FeriasGozoRuleSet.SLOT_FRACIONAMENTO_LIMITES_TEMPLATE,
-            "diasGozo",
-            "Órgão 2 exige máximo de 2 parcelas, mínimo de 10 dias por parcela, 15 dias na parcela principal e antecedência mínima de 15 dias.",
-            "FERIAS.TEMPLATE",
-            "Template ergon.ferias:fracionamento-and-abono-bounds@1.0 parametrizado para Órgão 2."));
     register(
         map,
         new RuleErrorDescriptor(
@@ -1678,36 +1673,23 @@ public final class ErgonRuleErrorCatalog {
             "Órgão 2 permite abono pecuniário exclusivamente na 1ª parcela e ao final do gozo (iniFimAbono = 'F').",
             "EP__TRATA_ABONO",
             "IF v_row_new.abono_pecuniario = 'S' AND (v_row_new.ordem_parcela <> 1 OR v_row_new.ini_fim_abono <> 'F') THEN pack_hades.trata_erro('CERG-FER-401'); END IF;"));
-    register(
-        map,
-        new RuleErrorDescriptor(
-            "CERG-FER-POST-001",
-            FeriasGozoRuleSet.SLOT_HOOK_POS_VALIDACAO,
-            "dtini",
-            "Violação de regra customizada pós-validação na concessão de férias.",
-            "EPA__FERIAS",
-            "EPA__FERIAS(v_row_new, v_mens);"));
-    register(
-        map,
-        new RuleErrorDescriptor(
-            "CERG-FERIAS-PRE-001",
-            FeriasGozoRuleSet.SLOT_HOOK_PRE_VALIDACAO,
-            "documentoLegalId",
-            "Violação de regra customizada pré-validação na concessão de férias.",
-            "EPB__FERIAS",
-            "EPB__FERIAS(v_row_new, v_mens);"));
-    register(
-        map,
-        new RuleErrorDescriptor(
-            "CERG-FERIAS-POST-001",
-            FeriasGozoRuleSet.SLOT_HOOK_POS_VALIDACAO,
-            "dtini",
-            "Violação de regra customizada pós-validação na concessão de férias.",
-            "EPA__FERIAS",
-            "EPA__FERIAS(v_row_new, v_mens);"));
   }
 
   private ErgonRuleErrorCatalog() {}
+
+  private static void registerChefia(Map<String, RuleErrorDescriptor> map,
+      List<ChefiaRuleSetSupport.Rule> rules, ChefiaRuleSetSupport.Rule customer) {
+    rules.forEach(rule -> register(map, rule.descriptor()));
+    register(map, customer.descriptor());
+  }
+
+  private static void registerTempoLicenca(Map<String, RuleErrorDescriptor> map, String resource,
+      List<CadastroPessoalRuleSetSupport.Rule> rules, List<CadastroPessoalRuleSetSupport.Rule> actions,
+      CadastroPessoalRuleSetSupport.Rule customer) {
+    actions.forEach(rule -> register(map, rule.descriptor(rule.slot(resource))));
+    rules.forEach(rule -> register(map, rule.descriptor(rule.slot(resource))));
+    register(map, customer.descriptor(customer.slot(resource)));
+  }
 
   private static void register(Map<String, RuleErrorDescriptor> map, RuleErrorDescriptor descriptor) {
     map.put(descriptor.code(), descriptor);
@@ -1735,4 +1717,17 @@ public final class ErgonRuleErrorCatalog {
         .map(RuleErrorDescriptor::messagePtBr)
         .orElse("Violação determinística da política de regras de negócio Ergon (" + reasonCode + ").");
   }
+  /** Public-safe adapter; product lineage and atomic error identities remain host-owned. */
+  public static org.praxisplatform.rules.violation.RuleErrorCatalog canonical() {
+    return canonical(Map.of());
+  }
+
+  public static org.praxisplatform.rules.violation.RuleErrorCatalog canonical(
+      Map<String, RuleErrorDescriptor> localErrors) {
+    return code -> Optional.ofNullable(localErrors.get(code)).or(() -> find(code)).map(error -> new org.praxisplatform.rules.violation.RuleErrorDescriptor(
+        error.code(), error.targetField(), error.messagePtBr(), error.plsqlOrigin() + ": " + error.plsqlLineage(),
+        java.util.Set.of("ERG-08393", "ERG-00424", "ERG-04300", "ERG-03193", "ERG-00300", "CERG-02205").contains(error.code())
+            ? "CONFLICT" : "BUSINESS_LOGIC"));
+  }
+
 }

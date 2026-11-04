@@ -18,7 +18,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchema;
     titleField = "nome",
     displayLabelField = "nome",
     subtitleField = "id",
-    metadataFields = {"influiConta", "horaExtra"})
+    metadataFields = {"documentoLegalNumero"})
 public class TipoFrequenciaResponseDTO {
   @Schema(
       description =

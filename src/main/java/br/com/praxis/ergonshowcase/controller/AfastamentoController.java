@@ -77,7 +77,7 @@ import org.springframework.web.bind.annotation.*;
             titleField = "motivo",
             displayLabelField = "motivo",
             subtitleField = "pessoaNome",
-            metadataFields = {"vinculoMatricula", "codigoFrequenciaNome", "situacao", "dtini"}),
+            metadataFields = {"orgaoNome", "codigoFrequenciaNome"}),
     quickFilters = {
       @QuickFilter(
           id = "homologados",
@@ -106,7 +106,7 @@ import org.springframework.web.bind.annotation.*;
     description = "Cadastros civis e assentamentos funcionais dos órgãos públicos.",
     icon = "groups")
 public class AfastamentoController
-    extends AbstractResourceController<
+    extends org.praxisplatform.uischema.controller.base.AbstractBulkGovernedResourceController<
         AfastamentoResponseDTO,
         Long,
         AfastamentoFilterDTO,
@@ -114,8 +114,6 @@ public class AfastamentoController
         UpdateAfastamentoDTO> {
 
   private final AfastamentoService service;
-  private final ResourceVersionEtagService etags;
-  private final ResourceVersionScopeProvider scopes;
   @Autowired private ErgonBulkOperations bulk;
   @Autowired private ErgonDeterminationService determinations;
 
@@ -124,8 +122,7 @@ public class AfastamentoController
       ResourceVersionEtagService etags,
       ResourceVersionScopeProvider scopes) {
     this.service = service;
-    this.etags = etags;
-    this.scopes = scopes;
+    configureResourceVersioning(etags, scopes);
   }
 
   @Override
@@ -283,10 +280,7 @@ public class AfastamentoController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody AtualizarSubstitutoAfastamentoDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags, ifMatch, scopes.currentScope(), "administracao-pessoal.afastamentos", id);
-    return withResourceVersion(ResponseEntity.ok(), id, service.atualizarSubstituto(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemPatch("substituto-funcional", id, ifMatch, condition -> service.atualizarSubstituto(id, dto, condition)));
   }
 
   @PatchMapping("/{id}/atos-publicacao")
@@ -312,11 +306,7 @@ public class AfastamentoController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody AtualizarAtosPublicacaoAfastamentoDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags, ifMatch, scopes.currentScope(), "administracao-pessoal.afastamentos", id);
-    return withResourceVersion(
-        ResponseEntity.ok(), id, service.atualizarAtosPublicacao(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemPatch("atos-publicacao", id, ifMatch, condition -> service.atualizarAtosPublicacao(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/homologar-afastamento")
@@ -339,10 +329,8 @@ public class AfastamentoController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody HomologarAfastamentoDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags, ifMatch, scopes.currentScope(), "administracao-pessoal.afastamentos", id);
-    return withResourceVersion(ResponseEntity.ok(), id, service.homologarAfastamento(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("homologar-afastamento", id, ifMatch, null, dto,
+        condition -> service.homologarAfastamento(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/rejeitar-afastamento")
@@ -365,10 +353,8 @@ public class AfastamentoController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody RejeitarAfastamentoDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags, ifMatch, scopes.currentScope(), "administracao-pessoal.afastamentos", id);
-    return withResourceVersion(ResponseEntity.ok(), id, service.rejeitarAfastamento(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("rejeitar-afastamento", id, ifMatch, null, dto,
+        condition -> service.rejeitarAfastamento(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/prorrogar-afastamento")
@@ -391,10 +377,8 @@ public class AfastamentoController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody ProrrogarAfastamentoDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags, ifMatch, scopes.currentScope(), "administracao-pessoal.afastamentos", id);
-    return withResourceVersion(ResponseEntity.ok(), id, service.prorrogarAfastamento(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("prorrogar-afastamento", id, ifMatch, null, dto,
+        condition -> service.prorrogarAfastamento(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/encerrar-afastamento")
@@ -417,10 +401,8 @@ public class AfastamentoController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody EncerrarAfastamentoItemDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags, ifMatch, scopes.currentScope(), "administracao-pessoal.afastamentos", id);
-    return withResourceVersion(ResponseEntity.ok(), id, service.encerrarAfastamento(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("encerrar-afastamento", id, ifMatch, null, dto,
+        condition -> service.encerrarAfastamento(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/cancelar-afastamento")
@@ -444,10 +426,8 @@ public class AfastamentoController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody CancelarAfastamentoDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags, ifMatch, scopes.currentScope(), "administracao-pessoal.afastamentos", id);
-    return withResourceVersion(ResponseEntity.ok(), id, service.cancelarAfastamento(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("cancelar-afastamento", id, ifMatch, null, dto,
+        condition -> service.cancelarAfastamento(id, dto, condition)));
   }
 
   @PostMapping("/determinations/previa")
@@ -462,42 +442,31 @@ public class AfastamentoController
     return ResponseEntity.ok(determinations.previaAfastamento(draft));
   }
 
+  @Override
   @PostMapping("/bulk/update/evaluation")
   @Operation(
       operationId = "ergon.afastamentos.bulk.uniform.evaluation",
       summary = "Avaliar edição uniforme de afastamentos",
       description =
           "Avalia seleção, versões e alterações de afastamentos sem modificar o cadastro; produz uma proposta protegida.")
-  public RestApiResponse<BulkProposal> bulkEvaluate(
-      @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              content =
-                  @io.swagger.v3.oas.annotations.media.Content(
-                      schema =
-                          @io.swagger.v3.oas.annotations.media.Schema(
-                              implementation = ErgonBulkSchema.AfastamentoUniform.class)))
-          @RequestBody
-          BulkUniformEvaluationRequest<String, AfastamentoFilterDTO> request) {
-    return RestApiResponse.success(bulk.uniform(Resource.AFASTAMENTOS, request), null);
+  @BulkResourceOperation(BulkResourceOperation.Role.UNIFORM_EVALUATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> evaluateBulkUpdate(@RequestBody BulkUniformEvaluationRequest<?, AfastamentoFilterDTO> request) {
+    return super.evaluateBulkUpdate(request);
   }
 
+  @Override
   @PostMapping("/bulk/update-items/evaluation")
   @Operation(
       operationId = "ergon.afastamentos.bulk.items.evaluation",
       summary = "Avaliar edições por afastamento",
       description =
           "Avalia deltas distintos e a versão esperada de cada afastamento, com impedimentos individualizados.")
-  public RestApiResponse<BulkProposal> bulkEvaluateItems(
-      @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              content =
-                  @io.swagger.v3.oas.annotations.media.Content(
-                      schema =
-                          @io.swagger.v3.oas.annotations.media.Schema(
-                              implementation = ErgonBulkSchema.AfastamentoItems.class)))
-          @RequestBody
-          BulkItemEvaluationRequest<String> request) {
-    return RestApiResponse.success(bulk.items(Resource.AFASTAMENTOS, request), null);
+  @BulkResourceOperation(BulkResourceOperation.Role.ITEM_EVALUATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> evaluateBulkUpdateItems(@RequestBody BulkItemEvaluationRequest<?> request) {
+    return super.evaluateBulkUpdateItems(request);
   }
 
+  @Override
   @PostMapping("/bulk/update")
   @BulkOperation(
       mode = BulkMode.UNIFORM_UPDATE,
@@ -508,17 +477,12 @@ public class AfastamentoController
       summary = "Confirmar edição uniforme de afastamentos",
       description =
           "Confirma uma proposta avaliada; cada afastamento é revalidado e possui recibo durável, sem repetir efeitos no replay.")
-  public RestApiResponse<BulkExecution> bulkConfirm(
-      @RequestBody BulkConfirmationRequest request,
-      @Parameter(
-              description =
-                  "Chave estável desta confirmação; repetir a mesma chave recupera a execução.")
-          @RequestHeader("Idempotency-Key")
-          String key) {
-    return RestApiResponse.success(
-        bulk.confirm(Resource.AFASTAMENTOS, "ergon.afastamentos.bulk.uniform", request, key), null);
+  @BulkResourceOperation(BulkResourceOperation.Role.UNIFORM_CONFIRMATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> confirmBulkUpdate(@RequestBody BulkConfirmationRequest request, @RequestHeader("Idempotency-Key") String key) {
+    return super.confirmBulkUpdate(request, key);
   }
 
+  @Override
   @PostMapping("/bulk/update-items")
   @BulkOperation(
       mode = BulkMode.PER_ITEM_UPDATE,
@@ -529,121 +493,20 @@ public class AfastamentoController
       summary = "Confirmar edições por afastamento",
       description =
           "Aplica os deltas individualizados preservados na proposta, com versão e resultado próprios por afastamento.")
-  public RestApiResponse<BulkExecution> bulkConfirmItems(
-      @RequestBody BulkConfirmationRequest request,
-      @Parameter(
-              description =
-                  "Chave estável de confirmação para recuperar a mesma execução em caso de repetição.")
-          @RequestHeader("Idempotency-Key")
-          String key) {
-    return RestApiResponse.success(
-        bulk.confirm(Resource.AFASTAMENTOS, "ergon.afastamentos.bulk.items", request, key), null);
+  @BulkResourceOperation(BulkResourceOperation.Role.ITEM_CONFIRMATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> confirmBulkUpdateItems(@RequestBody BulkConfirmationRequest request, @RequestHeader("Idempotency-Key") String key) {
+    return super.confirmBulkUpdateItems(request, key);
   }
 
-  @GetMapping("/bulk/proposals/{proposalId}")
-  @BulkResourceOperation(BulkResourceOperation.Role.PROPOSAL)
-  @Operation(
-      operationId = "ergon.afastamentos.bulk.proposal",
-      summary = "Consultar proposta de lote de afastamentos",
-      description =
-          "Consulta totais e intenção pública da proposta após conferir acesso ao conjunto completo de afastamentos.")
-  public RestApiResponse<BulkProposal> bulkProposal(
-      @Parameter(description = "Identidade da proposta avaliada.") @PathVariable UUID proposalId) {
-    return RestApiResponse.success(
-        bulk.proposal(
-            Resource.AFASTAMENTOS,
-            bulk.locate(Resource.AFASTAMENTOS, proposalId, false),
-            proposalId),
-        null);
-  }
 
-  @GetMapping("/bulk/proposals/{proposalId}/results")
-  @BulkResourceOperation(BulkResourceOperation.Role.PROPOSAL_RESULTS)
-  @Operation(
-      operationId = "ergon.afastamentos.bulk.proposal-results",
-      summary = "Inspecionar avaliação do lote de afastamentos",
-      description =
-          "Pagina afastamentos executáveis e bloqueados, com diagnósticos seguros e cursor vinculado ao solicitante.")
-  public RestApiResponse<CursorPage<BulkProposalItemResult<Object>>> bulkProposalResults(
-      @Parameter(description = "Identidade da proposta avaliada.") @PathVariable UUID proposalId,
-      @Parameter(description = "Quantidade de registros por página, de 1 a 200.")
-          @RequestParam(defaultValue = "50")
-          int size,
-      @Parameter(description = "Cursor opaco emitido na página anterior.")
-          @RequestParam(required = false)
-          String after) {
-    return RestApiResponse.success(
-        bulk.proposalResults(
-            Resource.AFASTAMENTOS,
-            bulk.locate(Resource.AFASTAMENTOS, proposalId, false),
-            proposalId,
-            size,
-            after),
-        null);
-  }
 
-  @GetMapping("/bulk/executions/{executionId}")
-  @BulkResourceOperation(BulkResourceOperation.Role.EXECUTION)
-  @Operation(
-      operationId = "ergon.afastamentos.bulk.execution",
-      summary = "Consultar execução do lote de afastamentos",
-      description = "Retorna estado e contadores reconciliados a partir dos recibos persistidos.")
-  public RestApiResponse<BulkExecution> bulkExecution(
-      @Parameter(description = "Identidade da execução confirmada.")
-          @PathVariable
-          UUID executionId) {
-    return RestApiResponse.success(
-        bulk.execution(
-            Resource.AFASTAMENTOS,
-            bulk.locate(Resource.AFASTAMENTOS, executionId, true),
-            executionId),
-        null);
-  }
 
-  @GetMapping("/bulk/executions/{executionId}/results")
-  @BulkResourceOperation(BulkResourceOperation.Role.EXECUTION_RESULTS)
-  @Operation(
-      operationId = "ergon.afastamentos.bulk.results",
-      summary = "Consultar recibos do lote de afastamentos",
-      description = "Pagina resultados por afastamento sem expor dados sensíveis da proposta.")
-  public RestApiResponse<CursorPage<BulkItemResult<Object>>> bulkResults(
-      @Parameter(description = "Identidade da execução confirmada.")
-          @PathVariable
-          UUID executionId,
-      @Parameter(description = "Quantidade de recibos por página, de 1 a 200.")
-          @RequestParam(defaultValue = "50")
-          int size,
-      @Parameter(description = "Cursor opaco da página anterior de recibos.")
-          @RequestParam(required = false)
-          String after) {
-    return RestApiResponse.success(
-        bulk.results(
-            Resource.AFASTAMENTOS,
-            bulk.locate(Resource.AFASTAMENTOS, executionId, true),
-            executionId,
-            size,
-            after),
-        null);
-  }
 
-  @PostMapping("/bulk/executions/{executionId}/cancel")
-  @BulkResourceOperation(BulkResourceOperation.Role.CANCEL)
-  @Operation(
-      operationId = "ergon.afastamentos.bulk.cancel",
-      summary = "Solicitar parada do lote de afastamentos",
-      description =
-          "Registra a solicitação de parada sem desfazer alterações já confirmadas e sem reabrir efeitos no replay.")
-  public RestApiResponse<BulkExecution> bulkCancel(
-      @Parameter(description = "Identidade da execução a interromper.")
-          @PathVariable
-          UUID executionId) {
-    return RestApiResponse.success(
-        bulk.cancel(
-            Resource.AFASTAMENTOS,
-            bulk.locate(Resource.AFASTAMENTOS, executionId, true),
-            executionId),
-        null);
-  }
+
+
+
+
+
 
   @PostMapping("/bulk/homologar-afastamento-lote/evaluation")
   @Operation(
@@ -651,18 +514,12 @@ public class AfastamentoController
       summary = "Avaliar homologação coletiva de afastamentos",
       description =
           "Avalia homologação coletiva de licenças pendentes com portaria/ata do mesmo órgão, sem persistir alterações.")
-  public RestApiResponse<BulkProposal> bulkHomologarEvaluate(
-      @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              content =
-                  @io.swagger.v3.oas.annotations.media.Content(
-                      schema =
-                          @io.swagger.v3.oas.annotations.media.Schema(
-                              implementation = ErgonBulkSchema.HomologarAfastamentoCommand.class)))
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> bulkHomologarEvaluate(
+
           @RequestBody
-          BulkCommandEvaluationRequest<HomologarAfastamentoLoteDTO, String, AfastamentoFilterDTO>
+          BulkCommandEvaluationRequest<HomologarAfastamentoLoteDTO, ?, AfastamentoFilterDTO>
               request) {
-    return RestApiResponse.success(
-        bulk.command(Resource.AFASTAMENTOS, "homologar-afastamento-lote", request), null);
+    return evaluateBulkDomainCommand("homologar-afastamento-lote", request);
   }
 
   @PostMapping("/actions/homologar-afastamento-lote")
@@ -685,14 +542,16 @@ public class AfastamentoController
       operationId = "ergon.afastamentos.homologar-afastamento-lote",
       summary = "Homologar afastamentos em lote",
       description = "Executa homologação coletiva governada de licenças pendentes.")
-  public RestApiResponse<BulkExecution> bulkHomologarConfirm(
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> bulkHomologarConfirm(
       @RequestBody BulkConfirmationRequest request,
       @Parameter(description = "Chave estável do ato coletivo para impedir efeitos duplicados.")
           @RequestHeader("Idempotency-Key")
           String key) {
-    return RestApiResponse.success(
-        bulk.confirm(
-            Resource.AFASTAMENTOS, "ergon.afastamentos.homologar-afastamento-lote", request, key),
-        null);
+    return confirmBulkDomainCommand("homologar-afastamento-lote", request, key);
   }
+  @Override @SuppressWarnings({"unchecked", "rawtypes"})
+  protected org.praxisplatform.uischema.bulk.JpaResourceBulkEngine getBulkEngine() { return bulk.engine(Resource.AFASTAMENTOS); }
+  @Override protected String bulkProposalOperationId(UUID id) { return bulk.locate(Resource.AFASTAMENTOS, id, false); }
+  @Override protected String bulkExecutionOperationId(UUID id) { return bulk.locate(Resource.AFASTAMENTOS, id, true); }
+
 }

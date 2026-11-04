@@ -18,11 +18,14 @@ import org.hibernate.type.SqlTypes;
 @Setter
 @Entity
 @Table(name = "setores")
+@org.hibernate.annotations.Immutable
+@org.hibernate.annotations.Subselect("select * from diretorio_setores_correntes")
+@org.hibernate.annotations.Synchronize({"setores", "historico_setores", "setores_ergon"})
 @Comment(
     "Estrutura organizacional e unidades de lotação funcional/financeira por órgão público (equivalente a SETORES_ / SETORES_ERGON / HSETOR no legado Ergon). Possui suporte a campos customizados multi-órgão em JSONB indexado via GIN.")
 public class Setor {
   /** Vigência para novas seleções; referências históricas continuam reidratáveis por identidade. */
-  @org.hibernate.annotations.Formula("case when dtini > current_date then 'FUTURO' when dtfim is not null and dtfim < current_date then 'ENCERRADO' else 'VIGENTE' end")
+  @org.hibernate.annotations.Formula("case when dtini > current_date then 'FUTURO' when dtfim is not null and dtfim < current_date then 'ENCERRADO' when extinto then 'INATIVO' else 'VIGENTE' end")
   private String situacaoLookup;
   @Id
   /** Código alfanumérico estruturado identificador único do setor ou unidade de lotação. */
@@ -122,4 +125,88 @@ public class Setor {
 
   /** Proveniência temporal do assentamento funcional ou cadastral. */
   @Embedded private AuditoriaErgon auditoria = new AuditoriaErgon();
+
+  @Column(name="nome_longo")
+  private String nomeLongo;
+
+  @Column(name="data_criacao_original")
+  private LocalDate dataCriacaoOriginal;
+
+  @Column(name="quantidade_subordinados_diretos")
+  private Integer quantidadeSubordinadosDiretos;
+
+  @Column(name="centro_custo_padrao")
+  private String centroCustoPadrao;
+
+  @Column(name="cargo_chefe_id")
+  private Integer cargoChefeId;
+
+  @Column(name="funcao_chefe_id")
+  private Long funcaoChefeId;
+
+  @Column(name="observacao")
+  private String observacao;
+
+  @Column(name="setor_pai_hier1")
+  private String setorPaiHier1;
+
+  @Column(name="setor_pai_hier2")
+  private String setorPaiHier2;
+
+  @Column(name="setor_pai_hier3")
+  private String setorPaiHier3;
+
+  @Column(name="setor_pai_hier4")
+  private String setorPaiHier4;
+
+  @Column(name="caminho_hierarquico")
+  private String caminhoHierarquico;
+
+  @Column(name="nivel_hierarquico")
+  private Integer nivelHierarquico;
+
+  @Column(name="subemp_codigo")
+  private String subempCodigo;
+
+  @Column(name="localidade_codigo")
+  private String localidadeCodigo;
+
+  @Column(name="grupo_setor_id")
+  private Long grupoSetorId;
+
+  @Column(name="extinto")
+  private Boolean extinto;
+
+  @Column(name="data_extincao")
+  private LocalDate dataExtincao;
+
+  @Column(name="setor_substituto")
+  private String setorSubstituto;
+
+  @Column(name="tipo_logradouro")
+  private String tipoLogradouro;
+
+  @Column(name="logradouro")
+  private String logradouro;
+
+  @Column(name="numero_endereco")
+  private String numeroEndereco;
+
+  @Column(name="complemento_endereco")
+  private String complementoEndereco;
+
+  @Column(name="bairro")
+  private String bairro;
+
+  @Column(name="cep")
+  private String cep;
+
+  @Column(name="telefone")
+  private String telefone;
+
+  @Column(name="fax")
+  private String fax;
+
+  @Column(name="email_unidade")
+  private String emailUnidade;
 }

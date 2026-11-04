@@ -1,0 +1,72 @@
+{
+  "status": "CANDIDATE_NOT_RUNTIME",
+  "hostContractVersion": "ergon-policy-studio/2.0",
+  "scope": "Four leadership families; remaining 14 families and 38 operational definitions remain outside this curated batch.",
+  "families": [
+    {
+      "resourceKey": "administracao-pessoal.funcoes",
+      "entity": "FuncaoConfianca",
+      "operations": 9,
+      "catalog": "funcoes.fact-catalog.candidate.json",
+      "bindings": "funcoes.operation-bindings.candidate.json",
+      "fixtures": "funcoes.fixtures.json"
+    },
+    {
+      "resourceKey": "administracao-pessoal.vagas-funcao",
+      "entity": "VagaFuncao",
+      "operations": 9,
+      "catalog": "vagas-funcao.fact-catalog.candidate.json",
+      "bindings": "vagas-funcao.operation-bindings.candidate.json",
+      "fixtures": "vagas-funcao.fixtures.json"
+    },
+    {
+      "resourceKey": "administracao-pessoal.designacoes",
+      "entity": "DesignacaoFuncao",
+      "operations": 10,
+      "catalog": "designacoes.fact-catalog.candidate.json",
+      "bindings": "designacoes.operation-bindings.candidate.json",
+      "fixtures": "designacoes.fixtures.json"
+    },
+    {
+      "resourceKey": "administracao-pessoal.substituicoes",
+      "entity": "SubstituicaoFuncao",
+      "operations": 11,
+      "catalog": "substituicoes.fact-catalog.candidate.json",
+      "bindings": "substituicoes.operation-bindings.candidate.json",
+      "fixtures": "substituicoes.fixtures.json"
+    }
+  ],
+  "g1": "OPEN",
+  "sourceHashes": {
+    "src/main/java/br/com/praxis/ergonshowcase/bulk/ErgonBulkDomain.java": "d607a2e36e213bd7d43f97900d94368da8c04c7a421f9ab75c67e238ad552efa",
+    "src/main/java/br/com/praxis/ergonshowcase/bulk/ErgonBulkOperations.java": "13ac5b984c78725f5b908b3c9e58c7a660ffa435ac9a993d58c426085f20e589",
+    "src/main/java/br/com/praxis/ergonshowcase/constants/ApiPaths.java": "b42c5a105ca9edb9ceb00ba112823bb81f07820e6a8457398f38ce1691f2fcbb",
+    "src/main/java/br/com/praxis/ergonshowcase/controller/DesignacaoFuncaoController.java": "30406845cc3cb329118f33f4818c47647249d8520ec665a980d63be2c571f24e",
+    "src/main/java/br/com/praxis/ergonshowcase/controller/FuncaoConfiancaController.java": "644210cf97588a43e7ae1ad7b39843b801e516f1b048ca9fe3408d541c41ad1a",
+    "src/main/java/br/com/praxis/ergonshowcase/controller/SubstituicaoFuncaoController.java": "174cefcb6d78f88ac2e9833f3c10fe697836b67927c119a15c3912f6307a8a10",
+    "src/main/java/br/com/praxis/ergonshowcase/controller/VagaFuncaoController.java": "c24762cfe20a56bf609aa960e5b315c86ccbdd2589c0371c922fb80180568cfc",
+    "src/main/java/br/com/praxis/ergonshowcase/domain/Afastamento.java": "9fd39e6e5b612f22f38e55128ed1f1cc465b7b02785c3ff9ae3b1ff0cd9478e7",
+    "src/main/java/br/com/praxis/ergonshowcase/domain/DesignacaoFuncao.java": "40a981abdbea09f5a3237a522562b2bf66092bb7e5e55dbd6bb47356b0a51a38",
+    "src/main/java/br/com/praxis/ergonshowcase/domain/FeriasGozo.java": "ac3f72c031feb716d485a3182d4f4925738aa4499b5b423a4562b5080bca1d63",
+    "src/main/java/br/com/praxis/ergonshowcase/domain/FuncaoConfianca.java": "4c556d3225860cc65e79746cb87d40e75f3402596685ad93f8fe8c53de2b28bb",
+    "src/main/java/br/com/praxis/ergonshowcase/domain/SubstituicaoFuncao.java": "030ffe3e9b8f0f9084a11e802674eb9270c5b8db6cc12f2fdea0651042015f5f",
+    "src/main/java/br/com/praxis/ergonshowcase/domain/VagaFuncao.java": "555ad41fc42836cedd1645703ed27535d92428ae835dd3eaae25d3318017401b",
+    "src/main/java/br/com/praxis/ergonshowcase/domain/Vinculo.java": "90c5b4866df34a6a0557f811befffa8fedc4115e92abe28d0462b704993308a9",
+    "src/main/java/br/com/praxis/ergonshowcase/domain/VinculoId.java": "69abf9777354179dbd3962a9d203e2188c93578c5942a6af31c970ee7a09f7e1",
+    "src/main/java/br/com/praxis/ergonshowcase/rules/ChefiaRuleSetSupport.java": "513e866481168b0b982bf53b505ec22982eea0970036e638ec325512a1c85c80",
+    "src/main/java/br/com/praxis/ergonshowcase/rules/DesignacaoFuncaoFacts.java": "92ed76ba64fd844cb5b09c93af725e8309009e089f39c26a65213dee306191cc",
+    "src/main/java/br/com/praxis/ergonshowcase/rules/DesignacaoFuncaoRuleSet.java": "c929c80155b4607bdc2ff5675c3acdc5b1b0a0d8531327b4f86efe11f757e268",
+    "src/main/java/br/com/praxis/ergonshowcase/rules/ErgonOntologyRuleSetSupport.java": "a311b8516a34802c8b0b3e99d834740362568b79ec2a3b9ed447b9563414f947",
+    "src/main/java/br/com/praxis/ergonshowcase/rules/ErgonRuleEngineFacade.java": "63f6689e66d8eb0414ab3ce21aa84a7390a5858cbde96ba44810753d87432bc7",
+    "src/main/java/br/com/praxis/ergonshowcase/rules/FuncaoConfiancaRuleSet.java": "d4f1e6ac8c5ed17da2a57128d619598e38e03fe9906954f244f18db57af736da",
+    "src/main/java/br/com/praxis/ergonshowcase/rules/SubstituicaoFuncaoFacts.java": "9ec6ad8fbca2a0c5b1eb8c62467cabf5697c177c69dbd7a89050def21be1794c",
+    "src/main/java/br/com/praxis/ergonshowcase/rules/SubstituicaoFuncaoRuleSet.java": "201e6a9523e18249632cfecc12255346342840314ffaa9b24b8794c7ae7b0a08",
+    "src/main/java/br/com/praxis/ergonshowcase/rules/VagaFuncaoRuleSet.java": "46b3475f9cecc99d9f667dc1358a34923aedc6eb9dae22828d7e170a2839024c",
+    "src/main/java/br/com/praxis/ergonshowcase/service/ChefiaResourceService.java": "5599ccde17a8ad1fb51eca252ba557dfcb595f8fcc7644d3df1b472e3749aed4",
+    "src/main/java/br/com/praxis/ergonshowcase/service/DesignacaoFuncaoService.java": "31b4de9eb27765c608054b1dd518552f67b1b66c5684dc9c3669dd7653360009",
+    "src/main/java/br/com/praxis/ergonshowcase/service/ErgonDeterminationService.java": "1677c09b6cd83148a8324cea7cfeb8792ce816220791722b0bf8d4a6ab47cd8d",
+    "src/main/java/br/com/praxis/ergonshowcase/service/FuncaoConfiancaService.java": "6159d1932d2a19838e44286df84ac9995fa07a1bbe7353daffcecf4676b84a14",
+    "src/main/java/br/com/praxis/ergonshowcase/service/SubstituicaoFuncaoService.java": "4af26be3452d141c172aaca6c189752e8021b202d6864793dbc95eed0562fc5c",
+    "src/main/java/br/com/praxis/ergonshowcase/service/VagaFuncaoService.java": "efe472e1efd0122c6f31129cabba7d4c9911a31d72a124c5701fd894f2aac154"
+  }
+}

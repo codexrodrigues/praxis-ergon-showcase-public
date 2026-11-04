@@ -18,6 +18,38 @@ import org.praxisplatform.uischema.extension.annotation.UISchema;
 @Setter
 public abstract class PeriodoAquisitivoFeriasDados {
 
+  // Prévia não persistida. Linhagem: docs-legado/v7x/aps/peraqfer.tab (DTFIM, TOTDIAS, FALTAS).
+  @Schema(description = "Término projetado da aquisição de férias após as suspensões apuradas no rascunho; a gravação recalcula o período autorizado.", accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(label = "Término previsto", helpText = "Confira o término calculado antes de registrar o período.", group = "Prévia do período", order = 951, type = FieldDataType.DATE, controlType = FieldControlType.DATE_PICKER, icon = "event", preset = org.praxisplatform.uischema.extension.annotation.UISchemaPreset.NONE, readOnly = true, tableHidden = true)
+  @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+  private LocalDate dtfimPrevista;
+
+  @Schema(description = "Dias de férias projetados para o período após aplicar o parâmetro estatutário e a redução por faltas; não altera os dias informados no rascunho.", accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(label = "Direito previsto", helpText = "Direito calculado com a frequência e os parâmetros do vínculo.", group = "Prévia do período", order = 952, type = FieldDataType.NUMBER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "verified", readOnly = true, tableHidden = true)
+  @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+  private Integer diasDireitoPrevistos;
+
+  @Schema(description = "Saldo estimado de férias após descontar do direito projetado os dias gozados, vendidos e convertidos em dobro; não constitui autorização de gozo.", accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(label = "Saldo previsto", helpText = "Saldo estimado antes da validação definitiva do período.", group = "Prévia do período", order = 953, type = FieldDataType.NUMBER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "balance", readOnly = true, tableHidden = true)
+  @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+  private Integer saldoDiasDisponivelPrevisto;
+
+  @Schema(description = "Faltas injustificadas consideradas pela prévia na janela de aquisição, obtidas da frequência homologada quando o rascunho não informa a quantidade.", accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(label = "Faltas previstas", helpText = "Faltas consideradas no cálculo do direito às férias.", group = "Prévia do período", order = 954, type = FieldDataType.NUMBER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "event_busy", readOnly = true, tableHidden = true)
+  @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+  private Integer faltasApuradasPrevistas;
+
+  @Schema(description = "Dias de afastamento suspensivo considerados na projeção do período, apurados no órgão do vínculo quando não informados no rascunho.", accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(label = "Suspensão prevista", helpText = "Dias de suspensão considerados no término projetado.", group = "Prévia do período", order = 955, type = FieldDataType.NUMBER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "pause_circle", readOnly = true, tableHidden = true)
+  @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+  private Integer diasSuspensivosPrevistos;
+
+  // DT_PRESCRICAO em docs-legado/v7x/aps/peraqfer.tab é a expiração do ciclo.
+  @Schema(description = "Data estimada de expiração do direito a férias a partir do término calculado da aquisição; não altera a data de prescrição registrada.", accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(label = "Prescrição prevista", helpText = "Confira a estimativa antes de informar a data oficial.", group = "Prévia do período", order = 956, type = FieldDataType.DATE, controlType = FieldControlType.DATE_PICKER, icon = "event_busy", preset = org.praxisplatform.uischema.extension.annotation.UISchemaPreset.NONE, readOnly = true, tableHidden = true)
+  @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+  private LocalDate dataPrescricaoPrevista;
+
   @NotNull
   @Schema(description = "Código do órgão público de lotação do vínculo funcional.")
   @UISchema(

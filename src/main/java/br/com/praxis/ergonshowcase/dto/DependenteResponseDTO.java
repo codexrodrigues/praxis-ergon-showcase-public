@@ -20,7 +20,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchema;
     titleField = "nome",
     displayLabelField = "nome",
     subtitleField = "pessoaNome",
-    metadataFields = {"parentesco", "depIr", "dtini"})
+    metadataFields = {"dtini", "dependenteVigente"})
 public class DependenteResponseDTO extends DependenteDados {
   @Schema(
       description =
@@ -220,4 +220,16 @@ public class DependenteResponseDTO extends DependenteDados {
       previewSurfaceId = "ficha-documento",
       detailPresentation = "drawer")
   private String documentoLegalNumero;
+  @Override
+  @Schema(
+      description =
+          "Nome civil completo do dependente registrado no assentamento funcional do servidor.", accessMode = Schema.AccessMode.READ_ONLY)
+  @org.praxisplatform.uischema.annotation.ResourceReference(
+      resourceKey = "administracao-pessoal.dependentes",
+      valueField = "id",
+      surfaceId = "ficha-dependente",
+      previewSurfaceId = "ficha-dependente",
+      detailPresentation = "drawer")
+  public String getNome() { return super.getNome(); }
+
 }

@@ -27,13 +27,14 @@ public class FrequenciaFilterDTO implements GenericFilterDTO {
         "pessoa.nome",
         "pessoa.cpf",
         "vinculo.matric",
+        "vinculo.lotacao.nome",
         "codigoFrequenciaEntidade.nome",
         "obs",
         "documentoLegal.numeroDocumento"
       })
   @Schema(
       description =
-          "Busca ampla por nome ou CPF do servidor, matrícula do vínculo, modalidade de frequência, justificativa ou documento.")
+          "Busca ampla por nome ou CPF do servidor, matrícula do vínculo, nome da lotação, modalidade de frequência, justificativa ou documento.")
   @UISchema(
       label = "Busca ampla de frequência",
       type = FieldDataType.TEXT,
@@ -41,7 +42,7 @@ public class FrequenciaFilterDTO implements GenericFilterDTO {
       icon = "search",
       group = "Pesquisa Rápida",
       order = 1,
-      helpText = "Pesquise por servidor, CPF, matrícula, modalidade, justificativa ou documento.")
+      helpText = "Pesquise por servidor, CPF, matrícula, lotação, modalidade, justificativa ou documento.")
   private String searchTerm;
 
   @Filterable(operation = FilterOperation.EQUAL, relation = "empCodigo")
@@ -242,6 +243,53 @@ public class FrequenciaFilterDTO implements GenericFilterDTO {
       displayField = "label",
       helpText = "Selecione o vínculo funcional titular para listar suas frequências.")
   private br.com.praxis.ergonshowcase.domain.VinculoId vinculoId;
+
+  @Filterable(operation = FilterOperation.LIKE, relation = "vinculo.lotacao.nome")
+  @Schema(
+      description =
+          "Pesquisa textual pelo nome oficial da unidade de lotação do vínculo (ex.: UPA, Hospital, Secretaria de Saúde).",
+      example = "Saúde")
+  @UISchema(
+      label = "Nome da lotação",
+      type = FieldDataType.TEXT,
+      controlType = FieldControlType.INPUT,
+      icon = "account_tree",
+      group = "Vínculo e Servidor",
+      order = 36,
+      helpText = "Digite parte do nome do setor de lotação do servidor.")
+  private String setorLotacaoNome;
+
+  @Filterable(operation = FilterOperation.IN, relation = "vinculo.lotacao.tipoSetor")
+  @Schema(
+      description =
+          "Filtra ocorrências de frequência pela natureza da unidade organizacional de lotação do vínculo (ex.: SECRETARIA, DIRETORIA, COORDENADORIA, NUCLEO, UNIDADE_SAUDE, ESCOLA).")
+  @UISchema(
+      label = "Tipos de unidade de lotação",
+      type = FieldDataType.ARRAY,
+      controlType = FieldControlType.MULTI_SELECT,
+      icon = "category",
+      group = "Vínculo e Servidor",
+      order = 37,
+      options =
+          "[{\"value\":\"SECRETARIA\",\"label\":\"Secretaria\"},{\"value\":\"DIRETORIA\",\"label\":\"Diretoria\"},{\"value\":\"COORDENADORIA\",\"label\":\"Coordenadoria\"},{\"value\":\"NUCLEO\",\"label\":\"Núcleo\"},{\"value\":\"UNIDADE_SAUDE\",\"label\":\"Unidade de Saúde\"},{\"value\":\"ESCOLA\",\"label\":\"Unidade Escolar\"}]",
+      helpText = "Selecione os tipos de unidade organizacional.")
+  private List<String> tipoSetorLotacao;
+
+  @Filterable(operation = FilterOperation.IN, relation = "vinculo.categoria")
+  @Schema(
+      description =
+          "Filtra ocorrências de frequência pela categoria funcional do vínculo (ex.: ADMINISTRATIVO, MAGISTERIO, SAUDE, GUARDA_MUNICIPAL).")
+  @UISchema(
+      label = "Categorias funcionais",
+      type = FieldDataType.ARRAY,
+      controlType = FieldControlType.MULTI_SELECT,
+      icon = "badge",
+      group = "Vínculo e Servidor",
+      order = 38,
+      options =
+          "[{\"value\":\"ADMINISTRATIVO\",\"label\":\"Administrativo\"},{\"value\":\"MAGISTERIO\",\"label\":\"Magistério\"},{\"value\":\"SAUDE\",\"label\":\"Saúde\"},{\"value\":\"GUARDA_MUNICIPAL\",\"label\":\"Guarda Municipal\"}]",
+      helpText = "Selecione uma ou mais categorias funcionais.")
+  private List<String> categoriaVinculo;
 
   @Schema(
       description =

@@ -684,7 +684,7 @@ public final class Rn013RegrasFrequenciaRuleSet {
   /**
    * <b>Modo 3 ({@link OverridePolicy#RESTRICT_ONLY} + {@link CompositionPolicy#AUGMENT}):</b>
    * adiciona a regra específica do órgão {@code empCodigo = 2} ({@code CERG-09001}) exigindo
-   * {@code documentoLegalId != null} quando {@code qtdMaxDias > 30}, preservando a regra do produto
+   * {@code documentoLegalId != null} quando {@code qtdMaxConsecAno > 30}, preservando a regra do produto
    * {@code ERG-08391} ativa sob {@link DecisionAggregationPolicy#DENY_OVERRIDES}.
    */
   public static DecisionBinding customerMode3AugmentBinding() {
@@ -698,8 +698,8 @@ public final class Rn013RegrasFrequenciaRuleSet {
                 """
                 {
                   "or": [
-                    {"==": [{"var": "draft.qtdMaxDias"}, null]},
-                    {"<=": [{"var": "draft.qtdMaxDias"}, 30]},
+                    {"==": [{"var": "draft.qtdMaxConsecAno"}, null]},
+                    {"<=": [{"var": "draft.qtdMaxConsecAno"}, 30]},
                     {"!=": [{"var": "draft.documentoLegalId"}, null]}
                   ]
                 }
@@ -774,18 +774,19 @@ public final class Rn013RegrasFrequenciaRuleSet {
       String jsonLogic,
       String falseReasonCode,
       List<String> requiredFactPaths) {
+    JsonNode parsed = parseJson(jsonLogic);
     return new DecisionBinding(
         bindingKey,
         slotKey,
         DecisionSource.PRODUCT,
         null,
-        RuleExecutorRef.jsonLogic(parseJson(jsonLogic)),
+        RuleExecutorRef.jsonLogic(parsed),
         List.of(),
         order,
         true,
         RuleDecision.DENY,
         falseReasonCode,
-        requiredFactPaths,
+        ErgonOntologyRuleSetSupport.mergeRequiredRoots(requiredFactPaths, parsed),
         null);
   }
 

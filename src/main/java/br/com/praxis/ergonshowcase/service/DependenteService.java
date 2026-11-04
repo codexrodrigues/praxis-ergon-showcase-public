@@ -41,8 +41,6 @@ public class DependenteService
 
   @Autowired(required = false)
   private ErgonInvariants invariants;
-
-  @PersistenceContext protected EntityManager entityManager;
   protected final DependenteMapper mapper;
   private final TenantContext tenant;
   private final ErgonRuleEngineFacade ruleEngineFacade;
@@ -123,6 +121,10 @@ public class DependenteService
       return new ErgonRuleEngineFacade.DependenteRuleContext(
           null, effectiveOrg, null, null, null, List.of(), referenceDate);
     }
+    if (!Objects.equals(effectiveOrg, tenant.orgao()))
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Órgão do dependente fora do escopo corrente.");
+    if (getEntityManager() != null && draft.getId() != null && draft.getId().numfunc() != null)
+      assertEntityAccessAllowed(draft);
     ServidorPessoa pessoa = draft.getPessoa();
     if (draft.getId() == null || draft.getId().numfunc() == null) {
       pessoa = null;
@@ -130,10 +132,10 @@ public class DependenteService
       pessoa = null;
     }
     if (pessoa == null
-        && entityManager != null
+        && getEntityManager() != null
         && draft.getId() != null
         && draft.getId().numfunc() != null) {
-      pessoa = entityManager.find(ServidorPessoa.class, draft.getId().numfunc());
+      pessoa = getEntityManager().find(ServidorPessoa.class, draft.getId().numfunc());
     }
     TipoDependente tipo = draft.getTipoDependenteEntidade();
     if (draft.getTipodepen() == null || draft.getTipodepen().isBlank()) {
@@ -142,10 +144,10 @@ public class DependenteService
       tipo = null;
     }
     if (tipo == null
-        && entityManager != null
+        && getEntityManager() != null
         && draft.getTipodepen() != null
         && !draft.getTipodepen().isBlank()) {
-      tipo = entityManager.find(TipoDependente.class, draft.getTipodepen());
+      tipo = getEntityManager().find(TipoDependente.class, draft.getTipodepen());
     }
     DocumentoLegal doc = draft.getDocumentoLegal();
     if (draft.getDocumentoLegalId() == null) {
@@ -153,18 +155,19 @@ public class DependenteService
     } else if (doc != null && !Objects.equals(doc.getId(), draft.getDocumentoLegalId())) {
       doc = null;
     }
-    if (doc == null && entityManager != null && draft.getDocumentoLegalId() != null) {
-      doc = entityManager.find(DocumentoLegal.class, draft.getDocumentoLegalId());
+    if (doc == null && getEntityManager() != null && draft.getDocumentoLegalId() != null) {
+      doc = getEntityManager().find(DocumentoLegal.class, draft.getDocumentoLegalId());
     }
+    ErgonTenantAccess.requireReferencesInOrganization(effectiveOrg, doc);
     List<Dependente> existing = List.of();
-    if (entityManager != null && draft.getId() != null && draft.getId().numfunc() != null) {
+    if (getEntityManager() != null && draft.getId() != null && draft.getId().numfunc() != null) {
       var q =
-          entityManager.createQuery(
-              "select x from Dependente x where x.id.numfunc=:f and (:n is null or x.id.numdep<>:n)",
+          getEntityManager().createQuery(
+              "select x from Dependente x where x.id.numfunc=:f and (:n is null or x.id.numdep<>:n) and exists (select 1 from Vinculo v where v.id.numfunc=x.id.numfunc and v.empCodigo=:org and v.situacao in ('ATIVO','AFASTADO','CEDIDO'))",
               Dependente.class);
       if (q != null) {
         existing =
-            q.setParameter("f", draft.getId().numfunc())
+            q.setParameter("org", effectiveOrg).setParameter("f", draft.getId().numfunc())
                 .setParameter("n", draft.getId().numdep())
                 .setFlushMode(FlushModeType.COMMIT)
                 .getResultList();
@@ -208,10 +211,6 @@ public class DependenteService
     return new DependenteFilterDTO();
   }
 
-  @Override
-  protected OptionalLong getEntityResourceVersion(Dependente entity) {
-    return OptionalLong.of(entity.getVersion());
-  }
 
   @Override
   public Optional<String> getDatasetVersion() {
@@ -249,54 +248,17 @@ public class DependenteService
   }
 
   @Override
-  public StatsSupportMode getGroupByStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getTimeSeriesStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getDistributionStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getComparisonStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  @Transactional
-  public ResourceRepresentationResult<DependenteResponseDTO> update(
-      DependenteId id,
-      UpdateDependenteDTO dto,
-      ResourceVersionUpdatePrecondition<DependenteId> precondition) {
-    if (precondition == null) throw ResourceVersionPreconditionException.required();
-    var readOnlyKeys = validateCustomFields(dto, "request");
-    Dependente entity = findEntityById(id);
-    entityManager.lock(entity, LockModeType.PESSIMISTIC_WRITE);
-    entityManager.refresh(entity);
-    precondition.requireMatch(entity.getVersion());
-    beforeUpdate(id, entity, dto);
-    var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
+  protected void applyResourceUpdate(DependenteId id, Dependente entity, UpdateDependenteDTO dto) {
     mapper.applyUpdate(entity, dto);
     if (invariants != null) {
       invariants.dependente(entity, false, false);
     }
     validateDependenteElegibilidade(entity);
-    CustomFieldSupport.restoreReadOnlyValues(entity, readOnlyKeys, old);
-    var saved = getRepository().save(entity);
-    afterUpdate(id, saved, dto);
-    entityManager.flush();
-    entityManager.refresh(saved);
-    return toResourceRepresentation(saved);
   }
 
   @Override
   protected void beforeCreate(CreateDependenteDTO dto, Dependente entity) {
+    assertEntityAccessAllowed(entity);
     if (invariants != null) {
       invariants.dependente(entity, true, false);
     }
@@ -307,24 +269,30 @@ public class DependenteService
     }
   }
 
+  @Override
+  protected void beforeDelete(DependenteId id, Dependente entity) {
+    if (entity != null
+        && entity.getDtfim() == null
+        && (Boolean.TRUE.equals(entity.getDepIr())
+            || Boolean.TRUE.equals(entity.getDepSalarioFamilia())
+            || Boolean.TRUE.equals(entity.getDepPlanoSaude()))) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "Não é permitido excluir dependente em vigência ativa com benefícios habilitados; encerre a dependência antes da exclusão.");
+    }
+  }
+
   private ResourceRepresentationResult<DependenteResponseDTO> command(
       DependenteId id,
       ResourceVersionUpdatePrecondition<DependenteId> precondition,
       Consumer<Dependente> action) {
-    if (precondition == null) throw ResourceVersionPreconditionException.required();
-    Dependente entity = findEntityById(id);
-    entityManager.lock(entity, LockModeType.PESSIMISTIC_WRITE);
-    entityManager.refresh(entity);
-    precondition.requireMatch(entity.getVersion());
-    action.accept(entity);
+    return executeVersionedMutation(id, precondition, entity -> {
+      action.accept(entity);
     if (invariants != null) {
       invariants.dependente(entity, false, false);
     }
     validateDependenteElegibilidade(entity);
-    var saved = getRepository().save(entity);
-    entityManager.flush();
-    entityManager.refresh(saved);
-    return toResourceRepresentation(saved);
+    });
   }
 
   @Transactional
@@ -438,4 +406,13 @@ public class DependenteService
           d.setDepIr(dto.depIr());
         });
   }
+  @Override protected java.util.Optional<org.praxisplatform.uischema.capability.ResourceStateSnapshot> toResourceStateSnapshot(Dependente e) {
+    return java.util.Optional.of(snapshotState(e));
+  }
+  private org.praxisplatform.uischema.capability.ResourceStateSnapshot snapshotState(Dependente e) {
+    return new org.praxisplatform.uischema.capability.ResourceStateSnapshot(e.getDtfim() == null ? "VIGENTE" : "ENCERRADO", java.util.Map.of("invalido",Boolean.TRUE.equals(e.getInvalido())));
+  }
+
+  @Override protected String resolveResourceKey() { return "administracao-pessoal.dependentes"; }
+
 }

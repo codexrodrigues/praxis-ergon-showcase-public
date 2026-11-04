@@ -1,0 +1,82 @@
+{
+  "status": "PASS_LOCAL_CURATED_BATCH_ONLY",
+  "date": "2026-11-04",
+  "g1": "OPEN",
+  "databaseAccessInThisBatch": false,
+  "runtimeChanged": false,
+  "families": 4,
+  "evaluationSchemas": 39,
+  "migratedProductAndFactoryPaths": 55,
+  "selectedSemanticCases": 19,
+  "checkedArtifacts": 24,
+  "checkedCuratedSourceHashes": 30,
+  "initialCensusSourceHashesChecked": 20,
+  "tests": [
+    {
+      "suite": "org.praxisplatform.config.service.DomainRuleFactCatalogCandidateContractTest",
+      "tests": 54,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "reportSha256": "374227c745a444d60ca51f1cd91cd63a883774ccab4a73d596262a494c526767"
+    },
+    {
+      "suite": "org.praxisplatform.config.service.DomainRuleCuratedHostCandidateContractTest",
+      "tests": 43,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "reportSha256": "8a3f4949a5d171edf6c43530f7c091007011c40f9b19408fd5ee036fbede5b0a"
+    },
+    {
+      "suite": "org.praxisplatform.config.service.DomainCatalogContractSynchronizationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "reportSha256": "f23e1a5800f85cb2e2d068e9b9d8a0c4facdc2a32ed507268355f19e2ea486fb"
+    },
+    {
+      "suite": "br.com.praxis.ergonshowcase.OntologyCuratedLeadershipContractTest",
+      "tests": 65,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "reportSha256": "bfb3833322701c75ef47ea11ff6c3e3bfa800e9a90947063dd676a43c1af69c7"
+    }
+  ],
+  "hostCompiler": "forked javac, GraalVM JDK 21.0.2+13.1",
+  "standardHostBuild": "NOT_CERTIFIED: in-process annotation processing failed; proc=full also failed. No dependency or POM workaround.",
+  "remainingScope": "14 families, 38 operational definitions, pending global G1 format/boundary/consumer/history reconciliation; no G2-G5 acceptance.",
+  "errors": [],
+  "logHashes": {
+    "ontology-g1-curated-config-tests.log": "acaaf9d6001b9f8e0d7fadcc53b10e3face954d884e29bc6181a8adeffb90f1e",
+    "ontology-g1-curated-host-fork-tests.log": "f2932b303b96df0b8a55d8c2300897478db7c82d6f61ce1c3214c6b687cd4c01"
+  },
+  "artifactHashes": {
+    "C:\\Users\\rodrigo.moreira\\.gemini\\antigravity\\brain\\6fa001e2-f9ef-4b40-bbe7-2369a4d1945c\\praxis-ontology-first-principles-blueprint.md": "cf6d8fc32b84b43e9bd84d71b7c29a09dc6ed9b490ee2edd2e54ccba3b13a59e",
+    "D:\\Developer\\praxis-plataform\\praxis-config-starter\\docs\\domain-rules\\contracts\\praxis-domain-rule-fact-catalog-v2.candidate.schema.json": "e3ea4aa3f7ad237457581c7e08d77c4d34a4f5561848b4021c5da96bec206b93",
+    "D:\\Developer\\praxis-plataform\\praxis-config-starter\\docs\\domain-rules\\ontology-g1-contracts.md": "2760929118eca3840001975b985f8d2d8535313a4df39a24304e7b2c65858076",
+    "D:\\Developer\\praxis-plataform\\praxis-config-starter\\src\\test\\java\\org\\praxisplatform\\config\\service\\DomainRuleCuratedHostCandidateContractTest.java": "9370ce54c1f4028605f8f53e09ab7f7657ca04b7fc5474d9dbab9f816a428fe9",
+    "D:\\Developer\\praxis-plataform\\praxis-config-starter\\src\\test\\java\\org\\praxisplatform\\config\\service\\DomainRuleFactCatalogCandidateContractTest.java": "87ab10ac835e703434b768eead63bfd28dac4a774590c7c53eb875e65be7d5a3",
+    "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\docs\\rules\\ontology\\curated\\designacoes.fact-catalog.candidate.json": "a307bdb8b7f10c4cf5fe901a5a1cba5dccd336414f63f7580481dae065dcf035",
+    "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\docs\\rules\\ontology\\curated\\designacoes.fixtures.json": "47266f04275c3cbf8b31f7d39232115a7e9be5f968b06cb42a9b161e9012bf0f",
+    "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\docs\\rules\\ontology\\curated\\designacoes.operation-bindings.candidate.json": "75f13770f4318fa83693b06d98692ccbe9301be97d670bbf463453400b5a914a",
+    "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\docs\\rules\\ontology\\curated\\funcoes.fact-catalog.candidate.json": "25fa3d6d63db2cbe4310c37e14479aded411ca6d85a73537e4ec30f58a4ea4ec",
+    "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\docs\\rules\\ontology\\curated\\funcoes.fixtures.json": "45c8e077c5fdca0b725f89fb413e147dbc83d2b8f24533872eb608a4b54b11cd",
+    "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\docs\\rules\\ontology\\curated\\funcoes.operation-bindings.candidate.json": "001258c5b5e44793548bc8128ccf3edd5f0e55b046ebd9052e45c01c68917d34",
+    "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\docs\\rules\\ontology\\curated\\manifest.json": "4920b7135b1dd04d9f54f391247f19a5ab1f46bdc23ea2a5c2e7d61c780611ef",
+    "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\docs\\rules\\ontology\\curated\\path-migration.candidate.json": "fd176174d777f74fc9775fb3ef7379938b9f8382dce550688081b4aa5e465aa4",
+    "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\docs\\rules\\ontology\\curated\\README.md": "9b03034299fc497d061bfd7280e61fffafe5297da291152f0e93df4e681517ca",
+    "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\docs\\rules\\ontology\\curated\\semantic-fixtures.json": "6593a0068b8ce7b68369d3b476526f754755e2b5d2fbff134c04d819e3ed875d",
+    "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\docs\\rules\\ontology\\curated\\substituicoes.fact-catalog.candidate.json": "59b9091a6fe2aa62e3d9141c220db4aa6d1ba8b09f24fe27cc4f1b9ef826aafb",
+    "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\docs\\rules\\ontology\\curated\\substituicoes.fixtures.json": "bff626d45365c640ff6d9bd5abc3686b58382b9f84fbfd86d4089d087d1ffb13",
+    "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\docs\\rules\\ontology\\curated\\substituicoes.operation-bindings.candidate.json": "d2ebac3296b9455f1bb146aa45d4c03471666cffcd12be0d78aff932b41496ed",
+    "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\docs\\rules\\ontology\\curated\\vagas-funcao.fact-catalog.candidate.json": "8c505ddcc168e3ecce98d8ddc24cb582f59a2b7202ada44137e102711c0bc9f2",
+    "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\docs\\rules\\ontology\\curated\\vagas-funcao.fixtures.json": "3b9dd1ebe3da96b0cc18a4e12fc16246f20d6795836e4eb8d1e20ddfb8e96776",
+    "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\docs\\rules\\ontology\\curated\\vagas-funcao.operation-bindings.candidate.json": "fc36d43b1e3e7de01819367098b6f8d4dbe7f6adedf60baa62cf3d9a43006eca",
+    "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\docs\\rules\\ontology\\fact-source-inventory.json": "c8fac804acc27c36b927e04f3c27fe2709a76d1d4840977aeb58fc9d291057c0",
+    "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\docs\\rules\\ontology\\README.md": "e4499ea21b22195cbde31f59f444b42b315c7dcf3ab8c7dc8c626adfbf83dd7d",
+    "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\src\\test\\java\\br\\com\\praxis\\ergonshowcase\\OntologyCuratedLeadershipContractTest.java": "d9fdc3e4b938f98fa9ab5e849b7f6290af6b6afb28971d602d39e2f7a6f0418e"
+  }
+}

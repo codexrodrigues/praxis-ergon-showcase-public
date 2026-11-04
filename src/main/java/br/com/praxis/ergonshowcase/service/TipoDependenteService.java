@@ -38,10 +38,6 @@ public class TipoDependenteService
     return new TipoDependenteFilterDTO();
   }
 
-  @Override
-  protected OptionalLong getEntityResourceVersion(TipoDependente entity) {
-    return OptionalLong.of(entity.getVersion());
-  }
 
   @Override
   protected List<CollectionExportField> exportFields() {
@@ -66,13 +62,7 @@ public class TipoDependenteService
         .build();
   }
 
-  @Override
-  public StatsSupportMode getGroupByStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
 
-  @Override
-  public StatsSupportMode getDistributionStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
+  @Override protected String resolveResourceKey() { return "administracao-pessoal.tipos-dependente"; }
+
 }

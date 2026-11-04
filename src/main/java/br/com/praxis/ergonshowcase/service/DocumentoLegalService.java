@@ -48,21 +48,8 @@ public class DocumentoLegalService
     return new DocumentoLegalFilterDTO();
   }
 
-  @Override
-  protected OptionalLong getEntityResourceVersion(DocumentoLegal entity) {
-    return OptionalLong.of(entity.getVersion());
-  }
 
-  @Override
-  protected ResourceFilterAccessScope<DocumentoLegal> resolveResourceFilterAccessScope() {
-    var explicit = tenant.explicitOrgao();
-    if (explicit.isEmpty()) {
-      return ResourceFilterAccessScope.unrestricted();
-    }
-    int orgao = explicit.getAsInt();
-    return ResourceFilterAccessScope.restricted(
-        (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
-  }
+
 
   @Override
   protected List<CollectionExportField> exportFields() {
@@ -90,23 +77,6 @@ public class DocumentoLegalService
         .build();
   }
 
-  @Override
-  public StatsSupportMode getGroupByStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
+  @Override protected String resolveResourceKey() { return "administracao-pessoal.documentos-legais"; }
 
-  @Override
-  public StatsSupportMode getTimeSeriesStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getDistributionStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getComparisonStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
 }

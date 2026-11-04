@@ -5,12 +5,7 @@ import br.com.praxis.ergonshowcase.domain.*;
 import br.com.praxis.ergonshowcase.dto.*;
 import br.com.praxis.ergonshowcase.mapper.*;
 import jakarta.persistence.*;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import org.praxisplatform.uischema.concurrency.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,13 +24,11 @@ public class ErgonCommands {
   @Autowired private CargoMapper cargos;
   @Autowired private ServidorPessoaMapper pessoas;
   @Autowired private ErgonInvariants rules;
-  @Autowired(required = false) private ErgonInvariants invariants;
   @Autowired private TenantContext tenant;
   @Autowired private OrgaoMapper orgaos;
   @Autowired private ErgonReadFacts readFacts;
 
-  @Autowired(required = false)
-  private AfastamentoService afastamentoService;
+  @Autowired private AfastamentoService afastamentoService;
 
   public ResourceRepresentationResult<OrgaoResponseDTO> ativarOrgao(
       Integer id, AlterarSituacaoOrgaoDTO dto, ResourceVersionUpdatePrecondition<Integer> p) {
@@ -60,147 +53,89 @@ public class ErgonCommands {
   }
 
   private void documentoDoOrgao(Long id, Integer orgao) {
+    if (id == null) return;
     DocumentoLegal doc = em.find(DocumentoLegal.class, id);
-    if (doc == null || !Objects.equals(doc.getEmpCodigo(), orgao))
-      ErgonInvariants.fail("Documento legal deve existir no mesmo órgão do vínculo.");
+    if (doc == null)
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Documento legal inexistente.");
+    ErgonTenantAccess.requireReferencesInOrganization(orgao, doc);
   }
 
   public ResourceRepresentationResult<VinculoResponseDTO> registrarAfastamento(
       VinculoId id, RegistrarAfastamentoDTO dto, ResourceVersionUpdatePrecondition<VinculoId> p) {
-    Vinculo e = vinculo(id, p, "ATIVO");
+    Vinculo e = vinculo(id, p, null);
+    if (!java.util.Set.of("ATIVO", "AFASTADO", "CEDIDO").contains(e.getSituacao()))
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Vínculo encerrado não recebe novo afastamento.");
     documentoDoOrgao(dto.documentoLegalId(), e.getEmpCodigo());
+    documentoDoOrgao(dto.atoPublicacaoId(), e.getEmpCodigo());
     CodigoFrequencia codigo =
         em.find(CodigoFrequencia.class, new CodigoFrequenciaId(dto.tipofreq(), dto.codfreq()));
-    if (codigo == null || !Boolean.TRUE.equals(codigo.getAfastamento()))
-      ErgonInvariants.fail("Código de frequência não habilitado para afastamento.");
-    if (codigo.getSexo() != null && Set.of("F", "M").contains(codigo.getSexo())) {
-      ServidorPessoa pessoa = em.find(ServidorPessoa.class, id.numfunc());
-      if (pessoa != null && !Objects.equals(codigo.getSexo(), pessoa.getSexo())) {
-        ErgonInvariants.fail(
-            "A modalidade de licença selecionada é exclusiva para servidores do sexo "
-                + codigo.getSexo()
-                + ".");
-      }
-    }
-    ErgonInvariants.chronology(e.getDtexerc(), dto.dtini(), "Afastamento anterior ao exercício.");
-    ErgonInvariants.chronology(
-        dto.dtini(), dto.dtprevfim(), "Término previsto anterior ao início do afastamento.");
-    Integer dias = null;
-    if (dto.dtini() != null && dto.dtprevfim() != null && !dto.dtprevfim().isBefore(dto.dtini())) {
-      dias = Math.toIntExact(ChronoUnit.DAYS.between(dto.dtini(), dto.dtprevfim()) + 1);
-      BigDecimal diasDec = BigDecimal.valueOf(dias);
-      if (codigo.getQtdmin() != null && diasDec.compareTo(codigo.getQtdmin()) < 0) {
-        ErgonInvariants.fail(
-            "A duração do afastamento é inferior ao mínimo regulamentar da modalidade ("
-                + codigo.getQtdmin()
-                + " dias).");
-      }
-      if (codigo.getQtdmax() != null && diasDec.compareTo(codigo.getQtdmax()) > 0) {
-        ErgonInvariants.fail(
-            "A duração do afastamento excede o limite máximo regulamentar da modalidade ("
-                + codigo.getQtdmax()
-                + " dias).");
-      }
-    }
-    var qExistentes =
-        em.createQuery(
-            "select a from Afastamento a where a.numfunc=:p and a.numvinc=:v and a.situacao='HOMOLOGADO'",
-            Afastamento.class);
-    List<Afastamento> existentes =
-        qExistentes != null
-            ? qExistentes
-                .setParameter("p", id.numfunc())
-                .setParameter("v", id.numero())
-                .getResultList()
-            : List.of();
-    if (existentes != null && dto.dtini() != null) {
-      LocalDate startA = dto.dtini();
-      LocalDate endA = dto.dtprevfim() != null ? dto.dtprevfim() : LocalDate.MAX;
-      for (Afastamento other : existentes) {
-        if (other == null || other.getDtini() == null) continue;
-        LocalDate startB = other.getDtini();
-        LocalDate endB =
-            other.getDtfim() != null
-                ? other.getDtfim()
-                : (other.getDtprevfim() != null ? other.getDtprevfim() : LocalDate.MAX);
-        if (!startA.isAfter(endB) && !startB.isAfter(endA)) {
-          ErgonInvariants.fail("Período conflita com afastamento homologado existente.");
-        }
-      }
-    }
+    if (codigo == null)
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Código de frequência inexistente.");
     Afastamento a = new Afastamento();
     a.setNumfunc(id.numfunc());
     a.setNumvinc(id.numero());
     a.setEmpCodigo(e.getEmpCodigo());
     a.setDtini(dto.dtini());
     a.setDtprevfim(dto.dtprevfim());
-    a.setQuantidadeDias(dias);
     a.setTipofreq(dto.tipofreq());
     a.setCodfreq(dto.codfreq());
     a.setMotivo(dto.motivo());
     a.setDocumentoLegalId(dto.documentoLegalId());
+    a.setAtoPublicacaoId(dto.atoPublicacaoId());
     a.setSituacao("HOMOLOGADO");
-    ErgonInvariants inv = this.invariants != null ? this.invariants : this.rules;
-    if (inv != null) {
-      inv.afastamento(a, true);
-    }
-    if (afastamentoService != null) {
-      afastamentoService.validateAfastamentoConcessao(a, true);
-    }
+    a.setCodigoFrequenciaEntidade(codigo);
+    afastamentoService.validateAfastamentoConcessao(a, false);
     em.persist(a);
-    e.setSituacao("AFASTADO");
-    e.setDocumentoLegalId(dto.documentoLegalId());
+    if ("ATIVO".equals(e.getSituacao())) e.setSituacao("AFASTADO");
+    if (dto.documentoLegalId() != null) e.setDocumentoLegalId(dto.documentoLegalId());
     return finish(e);
   }
 
   public ResourceRepresentationResult<VinculoResponseDTO> encerrarAfastamento(
       VinculoId id, EncerrarAfastamentoDTO dto, ResourceVersionUpdatePrecondition<VinculoId> p) {
-    Vinculo e = vinculo(id, p, "AFASTADO");
+    Vinculo e = vinculo(id, p, null);
+    if (!java.util.Set.of("AFASTADO", "CEDIDO").contains(e.getSituacao()))
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Estado funcional incompatível com o retorno.");
     Afastamento a = locked(Afastamento.class, dto.afastamentoId());
     if (!Objects.equals(a.getNumfunc(), id.numfunc())
         || !Objects.equals(a.getNumvinc(), id.numero())
         || !Objects.equals(a.getEmpCodigo(), e.getEmpCodigo()))
-      ErgonInvariants.fail("Afastamento não pertence ao vínculo selecionado.");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Afastamento não pertence ao vínculo selecionado.");
     if (!"HOMOLOGADO".equals(a.getSituacao()) || a.getDtfim() != null)
       throw new ResponseStatusException(
           HttpStatus.CONFLICT, "Afastamento não está homologado e aberto.");
     long abertos =
         em.createQuery(
-                "select count(a) from Afastamento a where a.numfunc=:p and a.numvinc=:v and a.situacao='HOMOLOGADO' and a.dtfim is null",
+                "select count(a) from Afastamento a where a.empCodigo=:org and a.numfunc=:p and a.numvinc=:v and a.situacao='HOMOLOGADO' and a.dtfim is null",
                 Long.class)
+            .setParameter("org", e.getEmpCodigo())
             .setParameter("p", id.numfunc())
             .setParameter("v", id.numero())
             .getSingleResult();
-    if (abertos != 1)
-      throw new ResponseStatusException(
-          HttpStatus.CONFLICT, "Retorno exige um único afastamento homologado aberto.");
     documentoDoOrgao(dto.documentoLegalId(), e.getEmpCodigo());
-    ErgonInvariants.chronology(
-        a.getDtini(), dto.dtfim(), "Encerramento anterior ao início do afastamento.");
+    boolean prorrogado = AfastamentoService.prorrogadoNoMesmoRegistro(a);
     a.setDtfim(dto.dtfim());
-    a.setQuantidadeDias(Math.toIntExact(ChronoUnit.DAYS.between(a.getDtini(), dto.dtfim()) + 1));
-    ErgonInvariants inv = this.invariants != null ? this.invariants : this.rules;
-    if (inv != null) {
-      inv.afastamento(a, false);
-    }
-    if (afastamentoService != null) {
-      afastamentoService.validateAfastamentoConcessao(a, false);
-    }
-    e.setSituacao("ATIVO");
+    a.setDocumentoLegalId(dto.documentoLegalId());
+    afastamentoService.validateAfastamentoConcessao(a, prorrogado);
+    if (abertos == 1 && "AFASTADO".equals(e.getSituacao())) e.setSituacao("ATIVO");
     e.setDocumentoLegalId(dto.documentoLegalId());
     return finish(e);
   }
 
   private <E> E locked(Class<E> type, Object id) {
-    E e = em.find(type, id, LockModeType.PESSIMISTIC_WRITE);
+    E e = em.find(type, id);
     if (e == null)
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assentamento inexistente.");
+    if (e instanceof Vinculo vinculo) org(vinculo.getEmpCodigo());
+    ErgonTenantAccess.assertAllowed(e, tenant, em, false);
+    em.lock(e, LockModeType.PESSIMISTIC_WRITE);
     em.refresh(e);
+    ErgonTenantAccess.assertAllowed(e, tenant, em, false);
     return e;
   }
 
   private void org(Integer id) {
-    if (!Objects.equals(id, tenant.orgao())) ErgonInvariants.fail("Órgão diverge de X-Tenant.");
+    if (!Objects.equals(id, tenant.orgao())) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Órgão diverge de X-Tenant.");
   }
 
   private Vinculo vinculo(
@@ -225,9 +160,6 @@ public class ErgonCommands {
   public ResourceRepresentationResult<VinculoResponseDTO> registrarCessao(
       VinculoId id, RegistrarCessaoDTO dto, ResourceVersionUpdatePrecondition<VinculoId> p) {
     Vinculo e = vinculo(id, p, "ATIVO");
-    ErgonInvariants.chronology(e.getDtexerc(), dto.dtiniCessao(), "Cessão anterior ao exercício.");
-    ErgonInvariants.chronology(
-        dto.dtiniCessao(), dto.dtfimCessao(), "Fim da cessão anterior ao início.");
     e.setTipoReq(dto.tipoReq());
     e.setOrgaoReq(dto.orgaoReq());
     e.setFuncaoReq(dto.funcaoReq());
@@ -242,24 +174,15 @@ public class ErgonCommands {
   public ResourceRepresentationResult<VinculoResponseDTO> encerrarCessao(
       VinculoId id, EncerrarCessaoDTO dto, ResourceVersionUpdatePrecondition<VinculoId> p) {
     Vinculo e = vinculo(id, p, "CEDIDO");
-    ErgonInvariants.chronology(
-        e.getDtiniCessao(), dto.dtfimCessao(), "Encerramento anterior ao início da cessão.");
     e.setDtfimCessao(dto.dtfimCessao());
     e.setSituacao("ATIVO");
     return finish(e);
   }
 
-  private void documento(Long id) {
-    if (id != null && em.find(DocumentoLegal.class, id) == null)
-      ErgonInvariants.fail("Documento legal inexistente.");
-  }
-
   public ResourceRepresentationResult<VinculoResponseDTO> concederAposentadoria(
       VinculoId id, ConcederAposentadoriaDTO dto, ResourceVersionUpdatePrecondition<VinculoId> p) {
     Vinculo e = vinculo(id, p, "ATIVO");
-    documento(dto.documentoLegalId());
-    ErgonInvariants.chronology(
-        e.getDtexerc(), dto.dtaposent(), "Aposentadoria anterior ao exercício.");
+    documentoDoOrgao(dto.documentoLegalId(), e.getEmpCodigo());
     e.setDtaposent(dto.dtaposent());
     e.setTipoapos(dto.tipoapos());
     e.setFatorProporcAposent(dto.fatorProporcAposent());
@@ -273,9 +196,7 @@ public class ErgonCommands {
     Vinculo e = vinculo(id, p, "ATIVO");
     if (e.getDtHomologEstagio() != null)
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Estágio já homologado.");
-    documento(dto.documentoLegalId());
-    ErgonInvariants.chronology(
-        e.getDtexerc(), dto.dtHomologEstagio(), "Homologação anterior ao exercício.");
+    documentoDoOrgao(dto.documentoLegalId(), e.getEmpCodigo());
     e.setDtHomologEstagio(dto.dtHomologEstagio());
     e.setDocumentoLegalId(dto.documentoLegalId());
     return finish(e);
@@ -288,11 +209,9 @@ public class ErgonCommands {
     org(e.getEmpCodigo());
     if (e.getDtExtincao() != null)
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Cargo já extinto.");
-    if (rules.ocupadas(id, null) > 0)
-      ErgonInvariants.fail("Cargo ocupado por vínculo ativo, afastado ou cedido.");
-    ErgonInvariants.chronology(
-        e.getDtInicioContrVaga(), dto.dtExtincao(), "Extinção anterior à vigência do cargo.");
+    if (dto.documentoLegalId() != null) e.setDocumentoLegalId(dto.documentoLegalId());
     e.setDtExtincao(dto.dtExtincao());
+    rules.cargo(e, true);
     em.flush();
     return ResourceRepresentationResult.versioned(
         readFacts.enrichOne(cargos.toResponse(e)), e.getVersion());
@@ -308,7 +227,7 @@ public class ErgonCommands {
     if (dto.wasSupplied("cargoComissao")) e.setCargoComissao(dto.getCargoComissao());
     if (dto.wasSupplied("jornadaSemanal")) e.setJornadaSemanal(dto.getJornadaSemanal());
     if (dto.wasSupplied("documentoLegalId")) e.setDocumentoLegalId(dto.getDocumentoLegalId());
-    documento(e.getDocumentoLegalId());
+    documentoDoOrgao(e.getDocumentoLegalId(), e.getEmpCodigo());
     return finish(e);
   }
 
@@ -325,7 +244,7 @@ public class ErgonCommands {
     if (dto.wasSupplied("agencia")) e.setAgencia(dto.getAgencia());
     if (dto.wasSupplied("conta")) e.setConta(dto.getConta());
     if (dto.wasSupplied("tipopag")) e.setTipopag(dto.getTipopag());
-    documento(e.getDocumentoLegalId());
+    documentoDoOrgao(e.getDocumentoLegalId(), e.getEmpCodigo());
     return finish(e);
   }
 

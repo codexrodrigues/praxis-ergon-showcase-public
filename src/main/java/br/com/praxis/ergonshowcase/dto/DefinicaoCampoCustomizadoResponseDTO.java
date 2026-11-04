@@ -20,7 +20,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
     titleField = "label",
     displayLabelField = "label",
     subtitleField = "resourceKey",
-    metadataFields = {"fieldKey", "fieldType", "controlType", "active"})
+    metadataFields = {"empCodigo", "active"})
 public class DefinicaoCampoCustomizadoResponseDTO {
   @Schema(
       description = "Identificador único surrogate da definição de campo customizado.",

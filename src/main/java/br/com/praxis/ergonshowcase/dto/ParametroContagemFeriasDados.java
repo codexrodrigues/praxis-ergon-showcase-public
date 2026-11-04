@@ -17,6 +17,10 @@ import org.praxisplatform.uischema.extension.annotation.UISchema;
 @Getter
 @Setter
 public abstract class ParametroContagemFeriasDados {
+  @NotNull
+  @Schema(description = "Permite fruição de licença-prêmio antes do encerramento do período aquisitivo, conforme a Tarefa 103339. Desabilitado por padrão; não antecipa automaticamente a aquisição do direito.", defaultValue = "false")
+  @UISchema(label = "Gozo antecipado de licença", helpText = "Habilite somente quando o regime admitir gozo antes do fim da aquisição.", group = "Licença Especial", order = 475, type = FieldDataType.BOOLEAN, controlType = FieldControlType.CHECKBOX, icon = "event_available", tableHidden = true, preset = org.praxisplatform.uischema.extension.annotation.UISchemaPreset.BOOLEAN_FLAG)
+  private Boolean permGozoLicEspAntFimPe = false;
 
   @Schema(
       description =
@@ -664,7 +668,6 @@ public abstract class ParametroContagemFeriasDados {
   @Schema(
       description =
           "Base de cálculo para conversão de licença especial em pecúnia: D (dias de direito), G (dias de gozo) ou N (vedado).",
-      allowableValues = {"D", "G", "N"},
       nullable = true)
   @BulkEditable(allowClear = true)
   @UISchema(

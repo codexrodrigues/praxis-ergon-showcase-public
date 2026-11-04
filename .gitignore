@@ -3,5 +3,6 @@ target/
 .env.*
 !.env.example
 .local/
+.codex/
 .idea/
 *.log

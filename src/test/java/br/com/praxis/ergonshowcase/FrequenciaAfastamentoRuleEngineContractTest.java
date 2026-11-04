@@ -75,7 +75,7 @@ class FrequenciaAfastamentoRuleEngineContractTest {
 
   @BeforeEach
   void setUp() {
-    facade = new ErgonRuleEngineFacade();
+    facade = RuleCatalogExecution.facade();
   }
 
   @Test
@@ -87,7 +87,7 @@ class FrequenciaAfastamentoRuleEngineContractTest {
     RuleEvaluationResult freqResult = facade.evaluateFrequencia(validFrequenciaContext());
     assertThat(freqResult.decision()).isEqualTo(RuleDecision.ALLOW);
     assertThat(freqResult.reasonCodes()).isEmpty();
-    assertThat(freqResult.bindingResults()).hasSize(16);
+    assertThat(freqResult.bindingResults()).hasSize(17);
 
     RuleDecisionPlan afastPlan = facade.resolveAfastamentoPlan(1);
     assertThat(afastPlan.slotsByKey()).hasSize(15);
@@ -96,7 +96,7 @@ class FrequenciaAfastamentoRuleEngineContractTest {
     RuleEvaluationResult afastResult = facade.evaluateAfastamento(validAfastamentoContext());
     assertThat(afastResult.decision()).isEqualTo(RuleDecision.ALLOW);
     assertThat(afastResult.reasonCodes()).isEmpty();
-    assertThat(afastResult.bindingResults()).hasSize(15);
+    assertThat(afastResult.bindingResults()).hasSize(17);
   }
 
   static Stream<Arguments> frequenciaProductDecisionViolations() {
@@ -128,6 +128,17 @@ class FrequenciaAfastamentoRuleEngineContractTest {
                   FrequenciaRuleContext base = validFrequenciaContext();
                   base.draft().setDtini(LocalDate.of(2019, 1, 1));
                   base.draft().setDtfim(LocalDate.of(2019, 1, 1));
+                  return base;
+                }),
+        Arguments.of(
+            "ERG-00411",
+            FrequenciaLancamentoRuleSet.SLOT_VINCULO_VIGENTE_NO_PERIODO,
+            (Supplier<FrequenciaRuleContext>)
+                () -> {
+                  FrequenciaRuleContext base = validFrequenciaContext();
+                  base.vinculo().setDtvac(LocalDate.of(2026, 5, 1));
+                  base.draft().setDtini(LocalDate.of(2026, 5, 10));
+                  base.draft().setDtfim(LocalDate.of(2026, 5, 10));
                   return base;
                 }),
         Arguments.of(
@@ -383,6 +394,17 @@ class FrequenciaAfastamentoRuleEngineContractTest {
     return Stream.of(
         Arguments.of(
             "ERG-04312",
+            AfastamentoConcessaoRuleSet.SLOT_PERIODO_ORDEM_VALIDA,
+            (Supplier<AfastamentoRuleContext>)
+                () -> {
+                  AfastamentoRuleContext base = validAfastamentoContext();
+                  base.draft().setDtini(LocalDate.of(2026, 3, 15));
+                  base.draft().setDtfim(LocalDate.of(2026, 3, 1));
+                  base.draft().setDtprevfim(LocalDate.of(2026, 3, 20));
+                  return base;
+                }),
+        Arguments.of(
+            "ERG-04313",
             AfastamentoConcessaoRuleSet.SLOT_PERIODO_ORDEM_VALIDA,
             (Supplier<AfastamentoRuleContext>)
                 () -> {
@@ -1047,7 +1069,7 @@ class FrequenciaAfastamentoRuleEngineContractTest {
     assertThat(docAfastResult.reasonCodes()).containsExactly("ERG-07513");
   }
 
-  private static FrequenciaRuleContext validFrequenciaContext() {
+  static FrequenciaRuleContext validFrequenciaContext() {
     Vinculo vinculo = validVinculo();
     ServidorPessoa pessoa = validPessoa();
 
@@ -1082,7 +1104,7 @@ class FrequenciaAfastamentoRuleEngineContractTest {
         draft, vinculo, pessoa, codigo, rule, List.of(), List.of(), LocalDate.of(2026, 5, 15));
   }
 
-  private static AfastamentoRuleContext validAfastamentoContext() {
+  static AfastamentoRuleContext validAfastamentoContext() {
     Vinculo vinculo = validVinculo();
     ServidorPessoa pessoa = validPessoa();
 
@@ -1123,6 +1145,24 @@ class FrequenciaAfastamentoRuleEngineContractTest {
 
     return new AfastamentoRuleContext(
         draft, vinculo, pessoa, codigo, rule, List.of(), List.of(), null, null);
+  }
+
+  @Test
+  void prorrogacaoNoMesmoRegistroPrecisaAmpliarAPrevisaoVigente() {
+    var base = validAfastamentoContext();
+    var draft = base.draft();
+    draft.setSituacao("HOMOLOGADO");
+    draft.setProrrogacao(true);
+    var previsaoVigente = draft.getDtprevfim();
+    var context = new AfastamentoRuleContext(draft, base.vinculo(), base.pessoa(),
+        base.codigoFrequencia(), base.effectiveStatutoryRule(), base.existingAfastamentos(),
+        base.activeFrequencias(), null, null, true, previsaoVigente);
+
+    ErgonFailureAssertions.assertViolation("CERG-04319", DecisionSource.PRODUCT,
+        () -> facade.enforceAfastamento(context));
+    draft.setDtprevfim(previsaoVigente.plusDays(1));
+    draft.setQuantidadeDias(11);
+    assertThat(facade.enforceAfastamento(context).decision()).isEqualTo(RuleDecision.ALLOW);
   }
 
   private static Vinculo validVinculo() {

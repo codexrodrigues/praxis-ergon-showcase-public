@@ -1,0 +1,2643 @@
+{
+  "status": "CANDIDATE_NOT_RUNTIME",
+  "claim": "Pure expressions proving selected migration semantics; not all product-rule parity and not provider integration.",
+  "cases": [
+    {
+      "name": "ERG-01301 denies same person even with another vinculo",
+      "expression": {
+        "!==": [
+          {
+            "jsonGet": [
+              {
+                "var": "draft.substitutoId"
+              },
+              "numfunc"
+            ]
+          },
+          {
+            "jsonGet": [
+              {
+                "var": "designacao.titularId"
+              },
+              "numfunc"
+            ]
+          }
+        ]
+      },
+      "facts": {
+        "draft": {
+          "id": null,
+          "empCodigo": 1,
+          "descricao": "Registro de exemplo",
+          "dtini": "2026-01-01",
+          "dtfim": "2026-01-31",
+          "situacao": "ATIVA",
+          "designacaoId": 103,
+          "substitutoId": {
+            "numfunc": 1001,
+            "numero": 1
+          },
+          "motivo": "FERIAS",
+          "afastamentoId": null,
+          "feriasGozoId": 104,
+          "dtiniRemunerada": "2026-01-05",
+          "dtfimRemunerada": "2026-01-20",
+          "competenciaFolha": "2026-01-01",
+          "valorSubstituicao": 500,
+          "documentoLegalId": 10,
+          "atoPublicacaoId": 11,
+          "observacoes": null
+        },
+        "current": null,
+        "designacao": {
+          "id": 103,
+          "empCodigo": 1,
+          "titularId": {
+            "numfunc": 1001,
+            "numero": 1
+          },
+          "funcaoId": 101,
+          "situacao": "ATIVA",
+          "dtExercicio": "2026-01-02",
+          "dtfim": "2026-01-31"
+        },
+        "substituto": {
+          "id": {
+            "numfunc": 1001,
+            "numero": 1
+          },
+          "empCodigo": 1,
+          "dtexerc": "2020-01-01",
+          "dtvac": null,
+          "dtiniCessao": null,
+          "dtfimCessao": null
+        },
+        "funcao": {
+          "id": 101,
+          "empCodigo": 1,
+          "permiteSubstituicao": true,
+          "diasMinimosSubstituicao": 15
+        },
+        "feriasImpedimento": {
+          "id": 104,
+          "empCodigo": 1,
+          "numfunc": 1001,
+          "numvinc": 1,
+          "dtini": "2026-01-01",
+          "dtfim": "2026-01-31",
+          "dtprevfim": "2026-01-31",
+          "situacao": "ATIVA",
+          "dtInterrupcao": null
+        },
+        "afastamentoImpedimento": null,
+        "neighborhood": {
+          "substituicoesDoTitular": [],
+          "substituicoesDoSubstituto": [],
+          "feriasDoSubstituto": [],
+          "afastamentosDoSubstituto": []
+        },
+        "context": {
+          "empCodigo": 1,
+          "operation": "createErgonSubstituicaoFuncao",
+          "referenceDate": "2026-01-01",
+          "lifecycle": "CREATE"
+        }
+      },
+      "expected": false
+    },
+    {
+      "name": "ERG-01301 full key difference does not authorize self substitution",
+      "expression": {
+        "!==": [
+          {
+            "jsonGet": [
+              {
+                "var": "draft.substitutoId"
+              },
+              "numfunc"
+            ]
+          },
+          {
+            "jsonGet": [
+              {
+                "var": "designacao.titularId"
+              },
+              "numfunc"
+            ]
+          }
+        ]
+      },
+      "facts": {
+        "draft": {
+          "id": null,
+          "empCodigo": 1,
+          "descricao": "Registro de exemplo",
+          "dtini": "2026-01-01",
+          "dtfim": "2026-01-31",
+          "situacao": "ATIVA",
+          "designacaoId": 103,
+          "substitutoId": {
+            "numfunc": 1001,
+            "numero": 2
+          },
+          "motivo": "FERIAS",
+          "afastamentoId": null,
+          "feriasGozoId": 104,
+          "dtiniRemunerada": "2026-01-05",
+          "dtfimRemunerada": "2026-01-20",
+          "competenciaFolha": "2026-01-01",
+          "valorSubstituicao": 500,
+          "documentoLegalId": 10,
+          "atoPublicacaoId": 11,
+          "observacoes": null
+        },
+        "current": null,
+        "designacao": {
+          "id": 103,
+          "empCodigo": 1,
+          "titularId": {
+            "numfunc": 1001,
+            "numero": 1
+          },
+          "funcaoId": 101,
+          "situacao": "ATIVA",
+          "dtExercicio": "2026-01-02",
+          "dtfim": "2026-01-31"
+        },
+        "substituto": {
+          "id": {
+            "numfunc": 1001,
+            "numero": 1
+          },
+          "empCodigo": 1,
+          "dtexerc": "2020-01-01",
+          "dtvac": null,
+          "dtiniCessao": null,
+          "dtfimCessao": null
+        },
+        "funcao": {
+          "id": 101,
+          "empCodigo": 1,
+          "permiteSubstituicao": true,
+          "diasMinimosSubstituicao": 15
+        },
+        "feriasImpedimento": {
+          "id": 104,
+          "empCodigo": 1,
+          "numfunc": 1001,
+          "numvinc": 1,
+          "dtini": "2026-01-01",
+          "dtfim": "2026-01-31",
+          "dtprevfim": "2026-01-31",
+          "situacao": "ATIVA",
+          "dtInterrupcao": null
+        },
+        "afastamentoImpedimento": null,
+        "neighborhood": {
+          "substituicoesDoTitular": [],
+          "substituicoesDoSubstituto": [],
+          "feriasDoSubstituto": [],
+          "afastamentosDoSubstituto": []
+        },
+        "context": {
+          "empCodigo": 1,
+          "operation": "createErgonSubstituicaoFuncao",
+          "referenceDate": "2026-01-01",
+          "lifecycle": "CREATE"
+        }
+      },
+      "expected": false
+    },
+    {
+      "name": "ERG-01301 admits another person",
+      "expression": {
+        "!==": [
+          {
+            "jsonGet": [
+              {
+                "var": "draft.substitutoId"
+              },
+              "numfunc"
+            ]
+          },
+          {
+            "jsonGet": [
+              {
+                "var": "designacao.titularId"
+              },
+              "numfunc"
+            ]
+          }
+        ]
+      },
+      "facts": {
+        "draft": {
+          "id": null,
+          "empCodigo": 1,
+          "descricao": "Registro de exemplo",
+          "dtini": "2026-01-01",
+          "dtfim": "2026-01-31",
+          "situacao": "ATIVA",
+          "designacaoId": 103,
+          "substitutoId": {
+            "numfunc": 2002,
+            "numero": 2
+          },
+          "motivo": "FERIAS",
+          "afastamentoId": null,
+          "feriasGozoId": 104,
+          "dtiniRemunerada": "2026-01-05",
+          "dtfimRemunerada": "2026-01-20",
+          "competenciaFolha": "2026-01-01",
+          "valorSubstituicao": 500,
+          "documentoLegalId": 10,
+          "atoPublicacaoId": 11,
+          "observacoes": null
+        },
+        "current": null,
+        "designacao": {
+          "id": 103,
+          "empCodigo": 1,
+          "titularId": {
+            "numfunc": 1001,
+            "numero": 1
+          },
+          "funcaoId": 101,
+          "situacao": "ATIVA",
+          "dtExercicio": "2026-01-02",
+          "dtfim": "2026-01-31"
+        },
+        "substituto": {
+          "id": {
+            "numfunc": 1001,
+            "numero": 1
+          },
+          "empCodigo": 1,
+          "dtexerc": "2020-01-01",
+          "dtvac": null,
+          "dtiniCessao": null,
+          "dtfimCessao": null
+        },
+        "funcao": {
+          "id": 101,
+          "empCodigo": 1,
+          "permiteSubstituicao": true,
+          "diasMinimosSubstituicao": 15
+        },
+        "feriasImpedimento": {
+          "id": 104,
+          "empCodigo": 1,
+          "numfunc": 1001,
+          "numvinc": 1,
+          "dtini": "2026-01-01",
+          "dtfim": "2026-01-31",
+          "dtprevfim": "2026-01-31",
+          "situacao": "ATIVA",
+          "dtInterrupcao": null
+        },
+        "afastamentoImpedimento": null,
+        "neighborhood": {
+          "substituicoesDoTitular": [],
+          "substituicoesDoSubstituto": [],
+          "feriasDoSubstituto": [],
+          "afastamentosDoSubstituto": []
+        },
+        "context": {
+          "empCodigo": 1,
+          "operation": "createErgonSubstituicaoFuncao",
+          "referenceDate": "2026-01-01",
+          "lifecycle": "CREATE"
+        }
+      },
+      "expected": true
+    },
+    {
+      "name": "one civil day",
+      "expression": {
+        "+": [
+          {
+            "/": [
+              {
+                "-": [
+                  {
+                    "date": {
+                      "var": "draft.dtfim"
+                    }
+                  },
+                  {
+                    "date": {
+                      "var": "draft.dtini"
+                    }
+                  }
+                ]
+              },
+              86400000
+            ]
+          },
+          1
+        ]
+      },
+      "facts": {
+        "draft": {
+          "dtini": "2026-01-01",
+          "dtfim": "2026-01-01"
+        }
+      },
+      "expected": 1
+    },
+    {
+      "name": "leap day",
+      "expression": {
+        "+": [
+          {
+            "/": [
+              {
+                "-": [
+                  {
+                    "date": {
+                      "var": "draft.dtfim"
+                    }
+                  },
+                  {
+                    "date": {
+                      "var": "draft.dtini"
+                    }
+                  }
+                ]
+              },
+              86400000
+            ]
+          },
+          1
+        ]
+      },
+      "facts": {
+        "draft": {
+          "dtini": "2024-02-28",
+          "dtfim": "2024-03-01"
+        }
+      },
+      "expected": 3
+    },
+    {
+      "name": "DST boundary is still civil days",
+      "expression": {
+        "+": [
+          {
+            "/": [
+              {
+                "-": [
+                  {
+                    "date": {
+                      "var": "draft.dtfim"
+                    }
+                  },
+                  {
+                    "date": {
+                      "var": "draft.dtini"
+                    }
+                  }
+                ]
+              },
+              86400000
+            ]
+          },
+          1
+        ]
+      },
+      "facts": {
+        "draft": {
+          "dtini": "2026-03-07",
+          "dtfim": "2026-03-09"
+        }
+      },
+      "expected": 3
+    },
+    {
+      "name": "empty complete neighborhood",
+      "expression": {
+        "==": [
+          {
+            "jsonGet": [
+              {
+                "reduce": [
+                  {
+                    "var": "neighborhood.substituicoesDoSubstituto"
+                  },
+                  {
+                    "inicio": {
+                      "var": "accumulator.inicio"
+                    },
+                    "fim": {
+                      "var": "accumulator.fim"
+                    },
+                    "bloqueios": {
+                      "+": [
+                        {
+                          "var": "accumulator.bloqueios"
+                        },
+                        {
+                          "if": [
+                            {
+                              "and": [
+                                {
+                                  "!==": [
+                                    {
+                                      "var": "current.situacao"
+                                    },
+                                    "CANCELADA"
+                                  ]
+                                },
+                                {
+                                  "!==": [
+                                    {
+                                      "var": "current.dtini"
+                                    },
+                                    null
+                                  ]
+                                },
+                                {
+                                  "!==": [
+                                    {
+                                      "var": "current.dtfim"
+                                    },
+                                    null
+                                  ]
+                                },
+                                {
+                                  "<=": [
+                                    {
+                                      "date": {
+                                        "var": "current.dtini"
+                                      }
+                                    },
+                                    {
+                                      "date": {
+                                        "var": "accumulator.fim"
+                                      }
+                                    }
+                                  ]
+                                },
+                                {
+                                  ">=": [
+                                    {
+                                      "date": {
+                                        "var": "current.dtfim"
+                                      }
+                                    },
+                                    {
+                                      "date": {
+                                        "var": "accumulator.inicio"
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            1,
+                            0
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "inicio": {
+                      "var": "draft.dtini"
+                    },
+                    "fim": {
+                      "var": "draft.dtfim"
+                    },
+                    "bloqueios": 0
+                  }
+                ]
+              },
+              "bloqueios"
+            ]
+          },
+          0
+        ]
+      },
+      "facts": {
+        "draft": {
+          "dtini": "2026-01-01",
+          "dtfim": "2026-01-31"
+        },
+        "current": {
+          "situacao": "CANCELADA",
+          "dtini": "1900-01-01",
+          "dtfim": "1900-01-02"
+        },
+        "neighborhood": {
+          "substituicoesDoSubstituto": []
+        }
+      },
+      "expected": true
+    },
+    {
+      "name": "boundary overlap",
+      "expression": {
+        "==": [
+          {
+            "jsonGet": [
+              {
+                "reduce": [
+                  {
+                    "var": "neighborhood.substituicoesDoSubstituto"
+                  },
+                  {
+                    "inicio": {
+                      "var": "accumulator.inicio"
+                    },
+                    "fim": {
+                      "var": "accumulator.fim"
+                    },
+                    "bloqueios": {
+                      "+": [
+                        {
+                          "var": "accumulator.bloqueios"
+                        },
+                        {
+                          "if": [
+                            {
+                              "and": [
+                                {
+                                  "!==": [
+                                    {
+                                      "var": "current.situacao"
+                                    },
+                                    "CANCELADA"
+                                  ]
+                                },
+                                {
+                                  "!==": [
+                                    {
+                                      "var": "current.dtini"
+                                    },
+                                    null
+                                  ]
+                                },
+                                {
+                                  "!==": [
+                                    {
+                                      "var": "current.dtfim"
+                                    },
+                                    null
+                                  ]
+                                },
+                                {
+                                  "<=": [
+                                    {
+                                      "date": {
+                                        "var": "current.dtini"
+                                      }
+                                    },
+                                    {
+                                      "date": {
+                                        "var": "accumulator.fim"
+                                      }
+                                    }
+                                  ]
+                                },
+                                {
+                                  ">=": [
+                                    {
+                                      "date": {
+                                        "var": "current.dtfim"
+                                      }
+                                    },
+                                    {
+                                      "date": {
+                                        "var": "accumulator.inicio"
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            1,
+                            0
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "inicio": {
+                      "var": "draft.dtini"
+                    },
+                    "fim": {
+                      "var": "draft.dtfim"
+                    },
+                    "bloqueios": 0
+                  }
+                ]
+              },
+              "bloqueios"
+            ]
+          },
+          0
+        ]
+      },
+      "facts": {
+        "draft": {
+          "dtini": "2026-01-01",
+          "dtfim": "2026-01-31"
+        },
+        "current": {
+          "situacao": "CANCELADA",
+          "dtini": "1900-01-01",
+          "dtfim": "1900-01-02"
+        },
+        "neighborhood": {
+          "substituicoesDoSubstituto": [
+            {
+              "situacao": "PROGRAMADA",
+              "dtini": "2026-01-31",
+              "dtfim": "2026-02-03"
+            }
+          ]
+        }
+      },
+      "expected": false
+    },
+    {
+      "name": "cancelled occurrence remains visible",
+      "expression": {
+        "==": [
+          {
+            "jsonGet": [
+              {
+                "reduce": [
+                  {
+                    "var": "neighborhood.substituicoesDoSubstituto"
+                  },
+                  {
+                    "inicio": {
+                      "var": "accumulator.inicio"
+                    },
+                    "fim": {
+                      "var": "accumulator.fim"
+                    },
+                    "bloqueios": {
+                      "+": [
+                        {
+                          "var": "accumulator.bloqueios"
+                        },
+                        {
+                          "if": [
+                            {
+                              "and": [
+                                {
+                                  "!==": [
+                                    {
+                                      "var": "current.situacao"
+                                    },
+                                    "CANCELADA"
+                                  ]
+                                },
+                                {
+                                  "!==": [
+                                    {
+                                      "var": "current.dtini"
+                                    },
+                                    null
+                                  ]
+                                },
+                                {
+                                  "!==": [
+                                    {
+                                      "var": "current.dtfim"
+                                    },
+                                    null
+                                  ]
+                                },
+                                {
+                                  "<=": [
+                                    {
+                                      "date": {
+                                        "var": "current.dtini"
+                                      }
+                                    },
+                                    {
+                                      "date": {
+                                        "var": "accumulator.fim"
+                                      }
+                                    }
+                                  ]
+                                },
+                                {
+                                  ">=": [
+                                    {
+                                      "date": {
+                                        "var": "current.dtfim"
+                                      }
+                                    },
+                                    {
+                                      "date": {
+                                        "var": "accumulator.inicio"
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            1,
+                            0
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "inicio": {
+                      "var": "draft.dtini"
+                    },
+                    "fim": {
+                      "var": "draft.dtfim"
+                    },
+                    "bloqueios": 0
+                  }
+                ]
+              },
+              "bloqueios"
+            ]
+          },
+          0
+        ]
+      },
+      "facts": {
+        "draft": {
+          "dtini": "2026-01-01",
+          "dtfim": "2026-01-31"
+        },
+        "current": {
+          "situacao": "CANCELADA",
+          "dtini": "1900-01-01",
+          "dtfim": "1900-01-02"
+        },
+        "neighborhood": {
+          "substituicoesDoSubstituto": [
+            {
+              "situacao": "CANCELADA",
+              "dtini": "2026-01-02",
+              "dtfim": "2026-01-05"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "name": "disjoint interval",
+      "expression": {
+        "==": [
+          {
+            "jsonGet": [
+              {
+                "reduce": [
+                  {
+                    "var": "neighborhood.substituicoesDoSubstituto"
+                  },
+                  {
+                    "inicio": {
+                      "var": "accumulator.inicio"
+                    },
+                    "fim": {
+                      "var": "accumulator.fim"
+                    },
+                    "bloqueios": {
+                      "+": [
+                        {
+                          "var": "accumulator.bloqueios"
+                        },
+                        {
+                          "if": [
+                            {
+                              "and": [
+                                {
+                                  "!==": [
+                                    {
+                                      "var": "current.situacao"
+                                    },
+                                    "CANCELADA"
+                                  ]
+                                },
+                                {
+                                  "!==": [
+                                    {
+                                      "var": "current.dtini"
+                                    },
+                                    null
+                                  ]
+                                },
+                                {
+                                  "!==": [
+                                    {
+                                      "var": "current.dtfim"
+                                    },
+                                    null
+                                  ]
+                                },
+                                {
+                                  "<=": [
+                                    {
+                                      "date": {
+                                        "var": "current.dtini"
+                                      }
+                                    },
+                                    {
+                                      "date": {
+                                        "var": "accumulator.fim"
+                                      }
+                                    }
+                                  ]
+                                },
+                                {
+                                  ">=": [
+                                    {
+                                      "date": {
+                                        "var": "current.dtfim"
+                                      }
+                                    },
+                                    {
+                                      "date": {
+                                        "var": "accumulator.inicio"
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            1,
+                            0
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "inicio": {
+                      "var": "draft.dtini"
+                    },
+                    "fim": {
+                      "var": "draft.dtfim"
+                    },
+                    "bloqueios": 0
+                  }
+                ]
+              },
+              "bloqueios"
+            ]
+          },
+          0
+        ]
+      },
+      "facts": {
+        "draft": {
+          "dtini": "2026-01-01",
+          "dtfim": "2026-01-31"
+        },
+        "current": {
+          "situacao": "CANCELADA",
+          "dtini": "1900-01-01",
+          "dtfim": "1900-01-02"
+        },
+        "neighborhood": {
+          "substituicoesDoSubstituto": [
+            {
+              "situacao": "PROGRAMADA",
+              "dtini": "2026-02-01",
+              "dtfim": "2026-02-03"
+            }
+          ]
+        }
+      },
+      "expected": true
+    },
+    {
+      "name": "single vacation covers substitution using planned end",
+      "expression": {
+        "and": [
+          {
+            "!==": [
+              {
+                "!==": [
+                  {
+                    "var": "feriasImpedimento"
+                  },
+                  null
+                ]
+              },
+              {
+                "!==": [
+                  {
+                    "var": "afastamentoImpedimento"
+                  },
+                  null
+                ]
+              }
+            ]
+          },
+          {
+            "or": [
+              {
+                "and": [
+                  {
+                    "!==": [
+                      {
+                        "var": "feriasImpedimento"
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "!==": [
+                      {
+                        "jsonGet": [
+                          {
+                            "var": "feriasImpedimento"
+                          },
+                          "dtini"
+                        ]
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "!==": [
+                      {
+                        "coalesce": [
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "feriasImpedimento"
+                              },
+                              "dtfim"
+                            ]
+                          },
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "feriasImpedimento"
+                              },
+                              "dtprevfim"
+                            ]
+                          }
+                        ]
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "in": [
+                      {
+                        "jsonGet": [
+                          {
+                            "var": "feriasImpedimento"
+                          },
+                          "situacao"
+                        ]
+                      },
+                      [
+                        "HOMOLOGADA",
+                        "EM_GOZO",
+                        "GOZADA",
+                        "INTERROMPIDA"
+                      ]
+                    ]
+                  },
+                  {
+                    "<=": [
+                      {
+                        "date": {
+                          "jsonGet": [
+                            {
+                              "var": "feriasImpedimento"
+                            },
+                            "dtini"
+                          ]
+                        }
+                      },
+                      {
+                        "date": {
+                          "var": "draft.dtini"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    ">=": [
+                      {
+                        "date": {
+                          "coalesce": [
+                            {
+                              "jsonGet": [
+                                {
+                                  "var": "feriasImpedimento"
+                                },
+                                "dtfim"
+                              ]
+                            },
+                            {
+                              "jsonGet": [
+                                {
+                                  "var": "feriasImpedimento"
+                                },
+                                "dtprevfim"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "date": {
+                          "var": "draft.dtfim"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "or": [
+                      {
+                        "===": [
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "feriasImpedimento"
+                              },
+                              "dtInterrupcao"
+                            ]
+                          },
+                          null
+                        ]
+                      },
+                      {
+                        ">": [
+                          {
+                            "date": {
+                              "jsonGet": [
+                                {
+                                  "var": "feriasImpedimento"
+                                },
+                                "dtInterrupcao"
+                              ]
+                            }
+                          },
+                          {
+                            "date": {
+                              "var": "draft.dtfim"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "and": [
+                  {
+                    "!==": [
+                      {
+                        "var": "afastamentoImpedimento"
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "!==": [
+                      {
+                        "jsonGet": [
+                          {
+                            "var": "afastamentoImpedimento"
+                          },
+                          "dtini"
+                        ]
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "!==": [
+                      {
+                        "coalesce": [
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "afastamentoImpedimento"
+                              },
+                              "dtfim"
+                            ]
+                          },
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "afastamentoImpedimento"
+                              },
+                              "dtprevfim"
+                            ]
+                          }
+                        ]
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "in": [
+                      {
+                        "jsonGet": [
+                          {
+                            "var": "afastamentoImpedimento"
+                          },
+                          "situacao"
+                        ]
+                      },
+                      [
+                        "HOMOLOGADO"
+                      ]
+                    ]
+                  },
+                  {
+                    "<=": [
+                      {
+                        "date": {
+                          "jsonGet": [
+                            {
+                              "var": "afastamentoImpedimento"
+                            },
+                            "dtini"
+                          ]
+                        }
+                      },
+                      {
+                        "date": {
+                          "var": "draft.dtini"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    ">=": [
+                      {
+                        "date": {
+                          "coalesce": [
+                            {
+                              "jsonGet": [
+                                {
+                                  "var": "afastamentoImpedimento"
+                                },
+                                "dtfim"
+                              ]
+                            },
+                            {
+                              "jsonGet": [
+                                {
+                                  "var": "afastamentoImpedimento"
+                                },
+                                "dtprevfim"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "date": {
+                          "var": "draft.dtfim"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "facts": {
+        "draft": {
+          "dtini": "2026-01-05",
+          "dtfim": "2026-01-20"
+        },
+        "feriasImpedimento": {
+          "dtini": "2026-01-01",
+          "dtfim": null,
+          "dtprevfim": "2026-01-31",
+          "dtInterrupcao": null,
+          "situacao": "HOMOLOGADA"
+        },
+        "afastamentoImpedimento": null
+      },
+      "expected": true
+    },
+    {
+      "name": "both references are present and the rule rejects",
+      "expression": {
+        "and": [
+          {
+            "!==": [
+              {
+                "!==": [
+                  {
+                    "var": "feriasImpedimento"
+                  },
+                  null
+                ]
+              },
+              {
+                "!==": [
+                  {
+                    "var": "afastamentoImpedimento"
+                  },
+                  null
+                ]
+              }
+            ]
+          },
+          {
+            "or": [
+              {
+                "and": [
+                  {
+                    "!==": [
+                      {
+                        "var": "feriasImpedimento"
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "!==": [
+                      {
+                        "jsonGet": [
+                          {
+                            "var": "feriasImpedimento"
+                          },
+                          "dtini"
+                        ]
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "!==": [
+                      {
+                        "coalesce": [
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "feriasImpedimento"
+                              },
+                              "dtfim"
+                            ]
+                          },
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "feriasImpedimento"
+                              },
+                              "dtprevfim"
+                            ]
+                          }
+                        ]
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "in": [
+                      {
+                        "jsonGet": [
+                          {
+                            "var": "feriasImpedimento"
+                          },
+                          "situacao"
+                        ]
+                      },
+                      [
+                        "HOMOLOGADA",
+                        "EM_GOZO",
+                        "GOZADA",
+                        "INTERROMPIDA"
+                      ]
+                    ]
+                  },
+                  {
+                    "<=": [
+                      {
+                        "date": {
+                          "jsonGet": [
+                            {
+                              "var": "feriasImpedimento"
+                            },
+                            "dtini"
+                          ]
+                        }
+                      },
+                      {
+                        "date": {
+                          "var": "draft.dtini"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    ">=": [
+                      {
+                        "date": {
+                          "coalesce": [
+                            {
+                              "jsonGet": [
+                                {
+                                  "var": "feriasImpedimento"
+                                },
+                                "dtfim"
+                              ]
+                            },
+                            {
+                              "jsonGet": [
+                                {
+                                  "var": "feriasImpedimento"
+                                },
+                                "dtprevfim"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "date": {
+                          "var": "draft.dtfim"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "or": [
+                      {
+                        "===": [
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "feriasImpedimento"
+                              },
+                              "dtInterrupcao"
+                            ]
+                          },
+                          null
+                        ]
+                      },
+                      {
+                        ">": [
+                          {
+                            "date": {
+                              "jsonGet": [
+                                {
+                                  "var": "feriasImpedimento"
+                                },
+                                "dtInterrupcao"
+                              ]
+                            }
+                          },
+                          {
+                            "date": {
+                              "var": "draft.dtfim"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "and": [
+                  {
+                    "!==": [
+                      {
+                        "var": "afastamentoImpedimento"
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "!==": [
+                      {
+                        "jsonGet": [
+                          {
+                            "var": "afastamentoImpedimento"
+                          },
+                          "dtini"
+                        ]
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "!==": [
+                      {
+                        "coalesce": [
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "afastamentoImpedimento"
+                              },
+                              "dtfim"
+                            ]
+                          },
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "afastamentoImpedimento"
+                              },
+                              "dtprevfim"
+                            ]
+                          }
+                        ]
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "in": [
+                      {
+                        "jsonGet": [
+                          {
+                            "var": "afastamentoImpedimento"
+                          },
+                          "situacao"
+                        ]
+                      },
+                      [
+                        "HOMOLOGADO"
+                      ]
+                    ]
+                  },
+                  {
+                    "<=": [
+                      {
+                        "date": {
+                          "jsonGet": [
+                            {
+                              "var": "afastamentoImpedimento"
+                            },
+                            "dtini"
+                          ]
+                        }
+                      },
+                      {
+                        "date": {
+                          "var": "draft.dtini"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    ">=": [
+                      {
+                        "date": {
+                          "coalesce": [
+                            {
+                              "jsonGet": [
+                                {
+                                  "var": "afastamentoImpedimento"
+                                },
+                                "dtfim"
+                              ]
+                            },
+                            {
+                              "jsonGet": [
+                                {
+                                  "var": "afastamentoImpedimento"
+                                },
+                                "dtprevfim"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "date": {
+                          "var": "draft.dtfim"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "facts": {
+        "draft": {
+          "dtini": "2026-01-05",
+          "dtfim": "2026-01-20"
+        },
+        "feriasImpedimento": {
+          "dtini": "2026-01-01",
+          "dtfim": null,
+          "dtprevfim": "2026-01-31",
+          "dtInterrupcao": null,
+          "situacao": "HOMOLOGADA"
+        },
+        "afastamentoImpedimento": {
+          "dtini": "2026-01-01",
+          "dtfim": "2026-01-31",
+          "dtprevfim": null,
+          "situacao": "HOMOLOGADO"
+        }
+      },
+      "expected": false
+    },
+    {
+      "name": "no referenced impediment is rejected by the predicate",
+      "expression": {
+        "and": [
+          {
+            "!==": [
+              {
+                "!==": [
+                  {
+                    "var": "feriasImpedimento"
+                  },
+                  null
+                ]
+              },
+              {
+                "!==": [
+                  {
+                    "var": "afastamentoImpedimento"
+                  },
+                  null
+                ]
+              }
+            ]
+          },
+          {
+            "or": [
+              {
+                "and": [
+                  {
+                    "!==": [
+                      {
+                        "var": "feriasImpedimento"
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "!==": [
+                      {
+                        "jsonGet": [
+                          {
+                            "var": "feriasImpedimento"
+                          },
+                          "dtini"
+                        ]
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "!==": [
+                      {
+                        "coalesce": [
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "feriasImpedimento"
+                              },
+                              "dtfim"
+                            ]
+                          },
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "feriasImpedimento"
+                              },
+                              "dtprevfim"
+                            ]
+                          }
+                        ]
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "in": [
+                      {
+                        "jsonGet": [
+                          {
+                            "var": "feriasImpedimento"
+                          },
+                          "situacao"
+                        ]
+                      },
+                      [
+                        "HOMOLOGADA",
+                        "EM_GOZO",
+                        "GOZADA",
+                        "INTERROMPIDA"
+                      ]
+                    ]
+                  },
+                  {
+                    "<=": [
+                      {
+                        "date": {
+                          "jsonGet": [
+                            {
+                              "var": "feriasImpedimento"
+                            },
+                            "dtini"
+                          ]
+                        }
+                      },
+                      {
+                        "date": {
+                          "var": "draft.dtini"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    ">=": [
+                      {
+                        "date": {
+                          "coalesce": [
+                            {
+                              "jsonGet": [
+                                {
+                                  "var": "feriasImpedimento"
+                                },
+                                "dtfim"
+                              ]
+                            },
+                            {
+                              "jsonGet": [
+                                {
+                                  "var": "feriasImpedimento"
+                                },
+                                "dtprevfim"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "date": {
+                          "var": "draft.dtfim"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "or": [
+                      {
+                        "===": [
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "feriasImpedimento"
+                              },
+                              "dtInterrupcao"
+                            ]
+                          },
+                          null
+                        ]
+                      },
+                      {
+                        ">": [
+                          {
+                            "date": {
+                              "jsonGet": [
+                                {
+                                  "var": "feriasImpedimento"
+                                },
+                                "dtInterrupcao"
+                              ]
+                            }
+                          },
+                          {
+                            "date": {
+                              "var": "draft.dtfim"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "and": [
+                  {
+                    "!==": [
+                      {
+                        "var": "afastamentoImpedimento"
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "!==": [
+                      {
+                        "jsonGet": [
+                          {
+                            "var": "afastamentoImpedimento"
+                          },
+                          "dtini"
+                        ]
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "!==": [
+                      {
+                        "coalesce": [
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "afastamentoImpedimento"
+                              },
+                              "dtfim"
+                            ]
+                          },
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "afastamentoImpedimento"
+                              },
+                              "dtprevfim"
+                            ]
+                          }
+                        ]
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "in": [
+                      {
+                        "jsonGet": [
+                          {
+                            "var": "afastamentoImpedimento"
+                          },
+                          "situacao"
+                        ]
+                      },
+                      [
+                        "HOMOLOGADO"
+                      ]
+                    ]
+                  },
+                  {
+                    "<=": [
+                      {
+                        "date": {
+                          "jsonGet": [
+                            {
+                              "var": "afastamentoImpedimento"
+                            },
+                            "dtini"
+                          ]
+                        }
+                      },
+                      {
+                        "date": {
+                          "var": "draft.dtini"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    ">=": [
+                      {
+                        "date": {
+                          "coalesce": [
+                            {
+                              "jsonGet": [
+                                {
+                                  "var": "afastamentoImpedimento"
+                                },
+                                "dtfim"
+                              ]
+                            },
+                            {
+                              "jsonGet": [
+                                {
+                                  "var": "afastamentoImpedimento"
+                                },
+                                "dtprevfim"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "date": {
+                          "var": "draft.dtfim"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "facts": {
+        "draft": {
+          "dtini": "2026-01-05",
+          "dtfim": "2026-01-20"
+        },
+        "feriasImpedimento": null,
+        "afastamentoImpedimento": null
+      },
+      "expected": false
+    },
+    {
+      "name": "interruption at final day does not cover entire substitution",
+      "expression": {
+        "and": [
+          {
+            "!==": [
+              {
+                "!==": [
+                  {
+                    "var": "feriasImpedimento"
+                  },
+                  null
+                ]
+              },
+              {
+                "!==": [
+                  {
+                    "var": "afastamentoImpedimento"
+                  },
+                  null
+                ]
+              }
+            ]
+          },
+          {
+            "or": [
+              {
+                "and": [
+                  {
+                    "!==": [
+                      {
+                        "var": "feriasImpedimento"
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "!==": [
+                      {
+                        "jsonGet": [
+                          {
+                            "var": "feriasImpedimento"
+                          },
+                          "dtini"
+                        ]
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "!==": [
+                      {
+                        "coalesce": [
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "feriasImpedimento"
+                              },
+                              "dtfim"
+                            ]
+                          },
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "feriasImpedimento"
+                              },
+                              "dtprevfim"
+                            ]
+                          }
+                        ]
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "in": [
+                      {
+                        "jsonGet": [
+                          {
+                            "var": "feriasImpedimento"
+                          },
+                          "situacao"
+                        ]
+                      },
+                      [
+                        "HOMOLOGADA",
+                        "EM_GOZO",
+                        "GOZADA",
+                        "INTERROMPIDA"
+                      ]
+                    ]
+                  },
+                  {
+                    "<=": [
+                      {
+                        "date": {
+                          "jsonGet": [
+                            {
+                              "var": "feriasImpedimento"
+                            },
+                            "dtini"
+                          ]
+                        }
+                      },
+                      {
+                        "date": {
+                          "var": "draft.dtini"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    ">=": [
+                      {
+                        "date": {
+                          "coalesce": [
+                            {
+                              "jsonGet": [
+                                {
+                                  "var": "feriasImpedimento"
+                                },
+                                "dtfim"
+                              ]
+                            },
+                            {
+                              "jsonGet": [
+                                {
+                                  "var": "feriasImpedimento"
+                                },
+                                "dtprevfim"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "date": {
+                          "var": "draft.dtfim"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "or": [
+                      {
+                        "===": [
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "feriasImpedimento"
+                              },
+                              "dtInterrupcao"
+                            ]
+                          },
+                          null
+                        ]
+                      },
+                      {
+                        ">": [
+                          {
+                            "date": {
+                              "jsonGet": [
+                                {
+                                  "var": "feriasImpedimento"
+                                },
+                                "dtInterrupcao"
+                              ]
+                            }
+                          },
+                          {
+                            "date": {
+                              "var": "draft.dtfim"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "and": [
+                  {
+                    "!==": [
+                      {
+                        "var": "afastamentoImpedimento"
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "!==": [
+                      {
+                        "jsonGet": [
+                          {
+                            "var": "afastamentoImpedimento"
+                          },
+                          "dtini"
+                        ]
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "!==": [
+                      {
+                        "coalesce": [
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "afastamentoImpedimento"
+                              },
+                              "dtfim"
+                            ]
+                          },
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "afastamentoImpedimento"
+                              },
+                              "dtprevfim"
+                            ]
+                          }
+                        ]
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "in": [
+                      {
+                        "jsonGet": [
+                          {
+                            "var": "afastamentoImpedimento"
+                          },
+                          "situacao"
+                        ]
+                      },
+                      [
+                        "HOMOLOGADO"
+                      ]
+                    ]
+                  },
+                  {
+                    "<=": [
+                      {
+                        "date": {
+                          "jsonGet": [
+                            {
+                              "var": "afastamentoImpedimento"
+                            },
+                            "dtini"
+                          ]
+                        }
+                      },
+                      {
+                        "date": {
+                          "var": "draft.dtini"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    ">=": [
+                      {
+                        "date": {
+                          "coalesce": [
+                            {
+                              "jsonGet": [
+                                {
+                                  "var": "afastamentoImpedimento"
+                                },
+                                "dtfim"
+                              ]
+                            },
+                            {
+                              "jsonGet": [
+                                {
+                                  "var": "afastamentoImpedimento"
+                                },
+                                "dtprevfim"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "date": {
+                          "var": "draft.dtfim"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "facts": {
+        "draft": {
+          "dtini": "2026-01-05",
+          "dtfim": "2026-01-20"
+        },
+        "feriasImpedimento": {
+          "dtini": "2026-01-01",
+          "dtfim": null,
+          "dtprevfim": "2026-01-31",
+          "dtInterrupcao": "2026-01-20",
+          "situacao": "HOMOLOGADA"
+        },
+        "afastamentoImpedimento": null
+      },
+      "expected": false
+    },
+    {
+      "name": "actual end takes precedence over planned end in the rule",
+      "expression": {
+        "and": [
+          {
+            "!==": [
+              {
+                "!==": [
+                  {
+                    "var": "feriasImpedimento"
+                  },
+                  null
+                ]
+              },
+              {
+                "!==": [
+                  {
+                    "var": "afastamentoImpedimento"
+                  },
+                  null
+                ]
+              }
+            ]
+          },
+          {
+            "or": [
+              {
+                "and": [
+                  {
+                    "!==": [
+                      {
+                        "var": "feriasImpedimento"
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "!==": [
+                      {
+                        "jsonGet": [
+                          {
+                            "var": "feriasImpedimento"
+                          },
+                          "dtini"
+                        ]
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "!==": [
+                      {
+                        "coalesce": [
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "feriasImpedimento"
+                              },
+                              "dtfim"
+                            ]
+                          },
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "feriasImpedimento"
+                              },
+                              "dtprevfim"
+                            ]
+                          }
+                        ]
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "in": [
+                      {
+                        "jsonGet": [
+                          {
+                            "var": "feriasImpedimento"
+                          },
+                          "situacao"
+                        ]
+                      },
+                      [
+                        "HOMOLOGADA",
+                        "EM_GOZO",
+                        "GOZADA",
+                        "INTERROMPIDA"
+                      ]
+                    ]
+                  },
+                  {
+                    "<=": [
+                      {
+                        "date": {
+                          "jsonGet": [
+                            {
+                              "var": "feriasImpedimento"
+                            },
+                            "dtini"
+                          ]
+                        }
+                      },
+                      {
+                        "date": {
+                          "var": "draft.dtini"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    ">=": [
+                      {
+                        "date": {
+                          "coalesce": [
+                            {
+                              "jsonGet": [
+                                {
+                                  "var": "feriasImpedimento"
+                                },
+                                "dtfim"
+                              ]
+                            },
+                            {
+                              "jsonGet": [
+                                {
+                                  "var": "feriasImpedimento"
+                                },
+                                "dtprevfim"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "date": {
+                          "var": "draft.dtfim"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "or": [
+                      {
+                        "===": [
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "feriasImpedimento"
+                              },
+                              "dtInterrupcao"
+                            ]
+                          },
+                          null
+                        ]
+                      },
+                      {
+                        ">": [
+                          {
+                            "date": {
+                              "jsonGet": [
+                                {
+                                  "var": "feriasImpedimento"
+                                },
+                                "dtInterrupcao"
+                              ]
+                            }
+                          },
+                          {
+                            "date": {
+                              "var": "draft.dtfim"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "and": [
+                  {
+                    "!==": [
+                      {
+                        "var": "afastamentoImpedimento"
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "!==": [
+                      {
+                        "jsonGet": [
+                          {
+                            "var": "afastamentoImpedimento"
+                          },
+                          "dtini"
+                        ]
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "!==": [
+                      {
+                        "coalesce": [
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "afastamentoImpedimento"
+                              },
+                              "dtfim"
+                            ]
+                          },
+                          {
+                            "jsonGet": [
+                              {
+                                "var": "afastamentoImpedimento"
+                              },
+                              "dtprevfim"
+                            ]
+                          }
+                        ]
+                      },
+                      null
+                    ]
+                  },
+                  {
+                    "in": [
+                      {
+                        "jsonGet": [
+                          {
+                            "var": "afastamentoImpedimento"
+                          },
+                          "situacao"
+                        ]
+                      },
+                      [
+                        "HOMOLOGADO"
+                      ]
+                    ]
+                  },
+                  {
+                    "<=": [
+                      {
+                        "date": {
+                          "jsonGet": [
+                            {
+                              "var": "afastamentoImpedimento"
+                            },
+                            "dtini"
+                          ]
+                        }
+                      },
+                      {
+                        "date": {
+                          "var": "draft.dtini"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    ">=": [
+                      {
+                        "date": {
+                          "coalesce": [
+                            {
+                              "jsonGet": [
+                                {
+                                  "var": "afastamentoImpedimento"
+                                },
+                                "dtfim"
+                              ]
+                            },
+                            {
+                              "jsonGet": [
+                                {
+                                  "var": "afastamentoImpedimento"
+                                },
+                                "dtprevfim"
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "date": {
+                          "var": "draft.dtfim"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "facts": {
+        "draft": {
+          "dtini": "2026-01-05",
+          "dtfim": "2026-01-20"
+        },
+        "feriasImpedimento": {
+          "dtini": "2026-01-01",
+          "dtfim": "2026-01-10",
+          "dtprevfim": "2026-01-31",
+          "dtInterrupcao": null,
+          "situacao": "HOMOLOGADA"
+        },
+        "afastamentoImpedimento": null
+      },
+      "expected": false
+    },
+    {
+      "name": "CERG-07003 CREATE None",
+      "expression": {
+        "if": [
+          {
+            "===": [
+              {
+                "var": "context.lifecycle"
+              },
+              "COMMAND_ITEM"
+            ]
+          },
+          {
+            "===": [
+              {
+                "jsonGet": [
+                  {
+                    "var": "current"
+                  },
+                  "situacao"
+                ]
+              },
+              "DESIGNADA"
+            ]
+          },
+          true
+        ]
+      },
+      "facts": {
+        "context": {
+          "lifecycle": "CREATE"
+        },
+        "current": null
+      },
+      "expected": true
+    },
+    {
+      "name": "CERG-07003 UPDATE {'situacao': 'EM_EXERCICIO'}",
+      "expression": {
+        "if": [
+          {
+            "===": [
+              {
+                "var": "context.lifecycle"
+              },
+              "COMMAND_ITEM"
+            ]
+          },
+          {
+            "===": [
+              {
+                "jsonGet": [
+                  {
+                    "var": "current"
+                  },
+                  "situacao"
+                ]
+              },
+              "DESIGNADA"
+            ]
+          },
+          true
+        ]
+      },
+      "facts": {
+        "context": {
+          "lifecycle": "UPDATE"
+        },
+        "current": {
+          "situacao": "EM_EXERCICIO"
+        }
+      },
+      "expected": true
+    },
+    {
+      "name": "CERG-07003 COMMAND_ITEM {'situacao': 'DESIGNADA'}",
+      "expression": {
+        "if": [
+          {
+            "===": [
+              {
+                "var": "context.lifecycle"
+              },
+              "COMMAND_ITEM"
+            ]
+          },
+          {
+            "===": [
+              {
+                "jsonGet": [
+                  {
+                    "var": "current"
+                  },
+                  "situacao"
+                ]
+              },
+              "DESIGNADA"
+            ]
+          },
+          true
+        ]
+      },
+      "facts": {
+        "context": {
+          "lifecycle": "COMMAND_ITEM"
+        },
+        "current": {
+          "situacao": "DESIGNADA"
+        }
+      },
+      "expected": true
+    },
+    {
+      "name": "CERG-07003 COMMAND_ITEM {'situacao': 'EM_EXERCICIO'}",
+      "expression": {
+        "if": [
+          {
+            "===": [
+              {
+                "var": "context.lifecycle"
+              },
+              "COMMAND_ITEM"
+            ]
+          },
+          {
+            "===": [
+              {
+                "jsonGet": [
+                  {
+                    "var": "current"
+                  },
+                  "situacao"
+                ]
+              },
+              "DESIGNADA"
+            ]
+          },
+          true
+        ]
+      },
+      "facts": {
+        "context": {
+          "lifecycle": "COMMAND_ITEM"
+        },
+        "current": {
+          "situacao": "EM_EXERCICIO"
+        }
+      },
+      "expected": false
+    }
+  ]
+}

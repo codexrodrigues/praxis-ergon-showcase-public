@@ -2,6 +2,8 @@ package br.com.praxis.ergonshowcase.operations;
 
 import java.sql.*;
 import java.util.*;
+import br.com.praxis.ergonshowcase.bulk.ErgonBulkDomain.Resource;
+import br.com.praxis.ergonshowcase.bulk.ErgonBulkOperations;
 import org.praxisplatform.uischema.bulk.*;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
@@ -27,6 +29,26 @@ public final class InstallBulkStorage {
     ids.add(new BulkOperationControlIdentity(NAMESPACE, "ergon.parametros-contagem-ferias.ativar-parametro-ferias-lote"));
     ids.add(new BulkOperationControlIdentity(NAMESPACE, "ergon.periodos-aquisitivos-ferias.homologar-periodo-aquisitivo-lote"));
     ids.add(new BulkOperationControlIdentity(NAMESPACE, "ergon.ferias-gozo.homologar-ferias-gozo-lote"));
+    ids.add(new BulkOperationControlIdentity(NAMESPACE,"ergon.averbacoes-tempo-servico.bulk.uniform"));
+    ids.add(new BulkOperationControlIdentity(NAMESPACE,"ergon.averbacoes-tempo-servico.bulk.items"));
+    ids.add(new BulkOperationControlIdentity(NAMESPACE,"ergon.averbacoes-tempo-servico.homologar-averbacoes-lote"));
+    ids.add(new BulkOperationControlIdentity(NAMESPACE,"ergon.periodos-aquisitivos-licenca-especial.bulk.uniform"));
+    ids.add(new BulkOperationControlIdentity(NAMESPACE,"ergon.periodos-aquisitivos-licenca-especial.bulk.items"));
+    ids.add(new BulkOperationControlIdentity(NAMESPACE,"ergon.periodos-aquisitivos-licenca-especial.recalcular-saldos-licenca-especial-lote"));
+    ids.add(new BulkOperationControlIdentity(NAMESPACE,"ergon.licencas-especiais-gozo.bulk.uniform"));
+    ids.add(new BulkOperationControlIdentity(NAMESPACE,"ergon.licencas-especiais-gozo.bulk.items"));
+    ids.add(new BulkOperationControlIdentity(NAMESPACE,"ergon.licencas-especiais-gozo.homologar-licencas-especiais-lote"));
+    ids.add(new BulkOperationControlIdentity(NAMESPACE,"ergon.vendas-licenca-especial.bulk.uniform"));
+    ids.add(new BulkOperationControlIdentity(NAMESPACE,"ergon.vendas-licenca-especial.bulk.items"));
+    ids.add(new BulkOperationControlIdentity(NAMESPACE,"ergon.vendas-licenca-especial.autorizar-vendas-licenca-especial-lote"));
+    ids.add(new BulkOperationControlIdentity(NAMESPACE, "administracao-pessoal.designacoes.bulk.update"));
+    ids.add(new BulkOperationControlIdentity(NAMESPACE, "administracao-pessoal.designacoes.bulk.update-items"));
+    ids.add(new BulkOperationControlIdentity(NAMESPACE, "ergon.designacoes.homologar-designacoes-lote"));
+    for (var resource : List.of(Resource.FUNCOES, Resource.VAGAS_FUNCAO, Resource.SUBSTITUICOES)) {
+      for (var mode : List.of(BulkMode.UNIFORM_UPDATE, BulkMode.PER_ITEM_UPDATE)) {
+        ids.add(new BulkOperationControlIdentity(NAMESPACE, ErgonBulkOperations.operation(resource, mode)));
+      }
+    }
     return List.copyOf(ids);
   }
 

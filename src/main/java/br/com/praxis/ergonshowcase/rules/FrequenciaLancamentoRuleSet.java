@@ -179,9 +179,9 @@ public final class FrequenciaLancamentoRuleSet {
         new DecisionSlot(
             SLOT_VINCULO_VIGENTE_NO_PERIODO,
             DecisionStage.PROTECTED_GUARD,
-            SlotCardinality.SINGLE,
+            SlotCardinality.MULTIPLE,
             OverridePolicy.FORBIDDEN,
-            DecisionAggregationPolicy.SINGLE_RESULT,
+            DecisionAggregationPolicy.DENY_OVERRIDES,
             null),
 
         // Stage 2: DOMAIN_DECISION
@@ -323,7 +323,7 @@ public final class FrequenciaLancamentoRuleSet {
             "ERG-00400",
             baseRequiredFacts),
 
-        // 3. ERG-00410: período dentro da vigência ativa do vínculo (dtexerc, dtvac, dtaposent)
+        // 3. ERG-00410: início da frequência >= data de exercício do vínculo ativo
         productJsonLogicBinding(
             "product.ergon.freq.erg00410",
             SLOT_VINCULO_VIGENTE_NO_PERIODO,
@@ -333,7 +333,21 @@ public final class FrequenciaLancamentoRuleSet {
               "and": [
                 {"==": [{"var": "vinculo.present"}, true]},
                 {"==": [{"var": "vinculo.sameOrgao"}, true]},
-                {">=": [{"date": [{"var": "draft.dtini"}]}, {"date": [{"var": "vinculo.dtexerc"}]}]},
+                {">=": [{"date": [{"var": "draft.dtini"}]}, {"date": [{"var": "vinculo.dtexerc"}]}]}
+              ]
+            }
+            """,
+            "ERG-00410",
+            baseRequiredFacts),
+
+        // 3b. ERG-00411: período da frequência anterior à vacância ou aposentadoria do vínculo
+        productJsonLogicBinding(
+            "product.ergon.freq.erg00411",
+            SLOT_VINCULO_VIGENTE_NO_PERIODO,
+            31,
+            """
+            {
+              "and": [
                 {
                   "or": [
                     {"==": [{"var": "vinculo.dtvac"}, null]},
@@ -369,7 +383,7 @@ public final class FrequenciaLancamentoRuleSet {
               ]
             }
             """,
-            "ERG-00410",
+            "ERG-00411",
             baseRequiredFacts),
 
         // 4. ERG-00436: horário de entrada/saída obrigatório quando horaEntradaSaida == true e coerente
@@ -829,7 +843,7 @@ public final class FrequenciaLancamentoRuleSet {
         true,
         RuleDecision.DENY,
         "CERG-00417",
-        List.of("draft.dtini", "draft.tipofreq", "draft.codfreq"),
+        List.of("draft.dtini", "draft.tipofreq", "draft.codfreq", "effectiveStatutoryRule"),
         null);
   }
 
@@ -849,18 +863,19 @@ public final class FrequenciaLancamentoRuleSet {
       String jsonLogic,
       String falseReasonCode,
       List<String> requiredFactPaths) {
+    JsonNode parsed = parseJson(jsonLogic);
     return new DecisionBinding(
         bindingKey,
         slotKey,
         DecisionSource.PRODUCT,
         null,
-        RuleExecutorRef.jsonLogic(parseJson(jsonLogic)),
+        RuleExecutorRef.jsonLogic(parsed),
         List.of(),
         order,
         true,
         RuleDecision.DENY,
         falseReasonCode,
-        requiredFactPaths,
+        ErgonOntologyRuleSetSupport.mergeRequiredRoots(requiredFactPaths, parsed),
         null);
   }
 

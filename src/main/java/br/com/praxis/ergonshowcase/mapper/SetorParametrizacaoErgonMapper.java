@@ -1,0 +1,60 @@
+package br.com.praxis.ergonshowcase.mapper;
+import br.com.praxis.ergonshowcase.domain.SetorParametrizacaoErgon;
+import br.com.praxis.ergonshowcase.dto.*;
+import org.mapstruct.*;
+import org.praxisplatform.uischema.mapper.base.ResourceMapper;
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+public abstract class SetorParametrizacaoErgonMapper implements ResourceMapper<SetorParametrizacaoErgon,SetorParametrizacaoErgonResponseDTO,CreateSetorParametrizacaoErgonDTO,UpdateSetorParametrizacaoErgonDTO,Long> {
+ public abstract SetorParametrizacaoErgonResponseDTO toResponse(SetorParametrizacaoErgon entity);
+ @BeanMapping(ignoreByDefault=true)
+ @Mapping(target="empCodigo",source="empCodigo")
+ @Mapping(target="dtini",source="dtini")
+ @Mapping(target="dtfim",source="dtfim")
+ @Mapping(target="documentoLegalId",source="documentoLegalId")
+ @Mapping(target="observacao",source="observacao")
+ @Mapping(target="customFields",source="customFields")
+ @Mapping(target="setor",source="setor")
+ @Mapping(target="cargoChefeId",source="cargoChefeId")
+ @Mapping(target="funcaoChefeId",source="funcaoChefeId")
+ @Mapping(target="tipoSetor",source="tipoSetor")
+ @Mapping(target="tipoAcesso",source="tipoAcesso")
+ @Mapping(target="tipoClassifFolha",source="tipoClassifFolha")
+ @Mapping(target="classifFolha",source="classifFolha")
+ @Mapping(target="centroCusto",source="centroCusto")
+ @Mapping(target="sindicato",source="sindicato")
+ @Mapping(target="cep",source="cep")
+ @Mapping(target="codigoLogradouro",source="codigoLogradouro")
+ @Mapping(target="percInsalubridade",source="percInsalubridade")
+ @Mapping(target="percPericulosidade",source="percPericulosidade")
+ @Mapping(target="grauRiscoAmbiental",source="grauRiscoAmbiental")
+ @Mapping(target="agenteNocivoPrincipal",source="agenteNocivoPrincipal")
+ @Mapping(target="exigeEpiObrigatorio",source="exigeEpiObrigatorio")
+ @Mapping(target="numeroProcesso",source="numeroProcesso")
+ public abstract SetorParametrizacaoErgon newEntity(CreateSetorParametrizacaoErgonDTO dto);
+ @BeanMapping(ignoreByDefault=true)
+ @Mapping(target="empCodigo",source="empCodigo")
+ @Mapping(target="dtini",source="dtini")
+ @Mapping(target="dtfim",source="dtfim")
+ @Mapping(target="documentoLegalId",source="documentoLegalId")
+ @Mapping(target="observacao",source="observacao")
+ @Mapping(target="customFields",source="customFields")
+ @Mapping(target="setor",source="setor")
+ @Mapping(target="cargoChefeId",source="cargoChefeId")
+ @Mapping(target="funcaoChefeId",source="funcaoChefeId")
+ @Mapping(target="tipoSetor",source="tipoSetor")
+ @Mapping(target="tipoAcesso",source="tipoAcesso")
+ @Mapping(target="tipoClassifFolha",source="tipoClassifFolha")
+ @Mapping(target="classifFolha",source="classifFolha")
+ @Mapping(target="centroCusto",source="centroCusto")
+ @Mapping(target="sindicato",source="sindicato")
+ @Mapping(target="cep",source="cep")
+ @Mapping(target="codigoLogradouro",source="codigoLogradouro")
+ @Mapping(target="percInsalubridade",source="percInsalubridade")
+ @Mapping(target="percPericulosidade",source="percPericulosidade")
+ @Mapping(target="grauRiscoAmbiental",source="grauRiscoAmbiental")
+ @Mapping(target="agenteNocivoPrincipal",source="agenteNocivoPrincipal")
+ @Mapping(target="exigeEpiObrigatorio",source="exigeEpiObrigatorio")
+ @Mapping(target="numeroProcesso",source="numeroProcesso")
+ public abstract void applyUpdate(@MappingTarget SetorParametrizacaoErgon entity, UpdateSetorParametrizacaoErgonDTO dto);
+ public Long extractId(SetorParametrizacaoErgon entity) {return entity.getId();}
+}

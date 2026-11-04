@@ -1,0 +1,81 @@
+{
+  "capturedAtUtc": "2026-11-01T15:29:27.963279+00:00",
+  "verdict": "CHANGES REQUESTED",
+  "baselineManifest": "docs\\evidence\\SLICE-6-FASE-2-VALIDACAO.json",
+  "baselineManifestSha256": "7e9f79e01a21f594caff62b17acbc5586e0e1f7f2209607869c1c007bb9d4237",
+  "sourceFilesVerified": 395,
+  "sourceDrift": [],
+  "productionEditsByReview": false,
+  "suite": {
+    "command": "mvn -B test",
+    "tests": 296,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "neonExcludedByProfile": true
+  },
+  "strictAudit": {
+    "resources": 25,
+    "staticPass": 25,
+    "exitCode": 0
+  },
+  "serviceCounterexamples": {
+    "confirmed": 6,
+    "expected": 6,
+    "exitCode": 0,
+    "mockPersistence": true
+  },
+  "postgresProof": {
+    "version": "14.22",
+    "loopbackOnly": true,
+    "bulkReadFailuresConfirmed": 4,
+    "migrationV6Unmodified": true,
+    "ddlV5WithoutDemoSeed": true,
+    "syntheticParentSchema": true,
+    "httpKernelProof": false,
+    "stopped": true,
+    "dataDirectoryRemoved": true
+  },
+  "gitDiffCheckExitCode": 0,
+  "findings": [
+    {
+      "id": "R1",
+      "priority": "P1"
+    },
+    {
+      "id": "R2",
+      "priority": "P1"
+    },
+    {
+      "id": "R3",
+      "priority": "P1"
+    },
+    {
+      "id": "R4",
+      "priority": "P1"
+    },
+    {
+      "id": "R5",
+      "priority": "P2"
+    },
+    {
+      "id": "R6",
+      "priority": "P2"
+    },
+    {
+      "id": "R7",
+      "priority": "P2"
+    }
+  ],
+  "artifactsSha256": {
+    "REVISAO.md": "5a291d12e2f3009bf30bf5aafca48feb5ee9bfe2fb326e615239451bb458cd7d",
+    "Phase2ReviewProbe.java": "070ee208485b6b269d079ee056397e5173d2c8094370f44da4996205bc889f8d",
+    "PostgresBulkReadProbe.java": "9723cac15b55fcbecea3735a08a021eeef1638f955cf4261164fcf39ec15d8b2",
+    "counterexamples.log": "aaacb1db9840629b182e2c16cf938b137ddebe6cc1f826525e9108a97424af26",
+    "postgres-bulk-read.log": "94ba1ca6719e2e3dbc22bc4f408d702c3df0c5959fa2d92bc59bc7b3bd5cc056",
+    "mvn-test.log": "be60b77c54569029ac246c6b847793fc0fbdbbfd53a9567c5ce1594dfd70b5c2",
+    "scorecard.md": "81e0e94e3f2f2762dbe42ee1015701f2ce54ce0efb6db51768a26d39a8313e0a",
+    "classpath.txt": "7998d011a8ea1507d82305b557c31fc2d84e51dd60c3cd615ec35b4f9743ff81",
+    "postgres-classpath.txt": "ad8986ed4e164b54d32d73ecf2d5c1afb455c11886c26b7d85adb7fe5d9e7d40"
+  }
+}

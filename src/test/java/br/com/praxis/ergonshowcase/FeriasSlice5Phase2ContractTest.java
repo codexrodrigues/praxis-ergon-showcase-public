@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 import br.com.praxis.ergonshowcase.bulk.ErgonBulkDomain;
 import br.com.praxis.ergonshowcase.bulk.ErgonBulkDomain.Resource;
 import br.com.praxis.ergonshowcase.config.TenantContext;
-import br.com.praxis.ergonshowcase.config.VinculoStateProvider;
 import br.com.praxis.ergonshowcase.controller.FeriasGozoController;
 import br.com.praxis.ergonshowcase.controller.ParametroContagemFeriasController;
 import br.com.praxis.ergonshowcase.controller.PeriodoAquisitivoFeriasController;
@@ -54,6 +53,7 @@ import br.com.praxis.ergonshowcase.repository.ParametroContagemFeriasRepository;
 import br.com.praxis.ergonshowcase.repository.PeriodoAquisitivoFeriasRepository;
 import br.com.praxis.ergonshowcase.repository.RadarFeriasPrescricaoRepository;
 import br.com.praxis.ergonshowcase.repository.VinculoRepository;
+import br.com.praxis.ergonshowcase.rules.ErgonRuleViolationException;
 import br.com.praxis.ergonshowcase.service.ErgonInvariants;
 import br.com.praxis.ergonshowcase.service.ErgonReadFacts;
 import br.com.praxis.ergonshowcase.service.FeriasGozoService;
@@ -199,7 +199,7 @@ class FeriasSlice5Phase2ContractTest {
     var paramRepo = mock(ParametroContagemFeriasRepository.class);
     var paramMapper = new ParametroContagemFeriasMapper(tenant);
     var paramService = new ParametroContagemFeriasService(paramRepo, paramMapper, tenant);
-    ReflectionTestUtils.setField(paramService, "entityManager", em);
+    CanonicalResourceTestContext.wire(paramService, em);
     ReflectionTestUtils.setField(paramService, "invariants", invariants);
     ReflectionTestUtils.setField(paramService, "readFacts", readFacts);
 
@@ -279,7 +279,7 @@ class FeriasSlice5Phase2ContractTest {
     var paRepo = mock(PeriodoAquisitivoFeriasRepository.class);
     var paMapper = new PeriodoAquisitivoFeriasMapper(tenant);
     var paService = new PeriodoAquisitivoFeriasService(paRepo, paMapper, tenant);
-    ReflectionTestUtils.setField(paService, "entityManager", em);
+    CanonicalResourceTestContext.wire(paService, em);
     ReflectionTestUtils.setField(paService, "invariants", invariants);
     ReflectionTestUtils.setField(paService, "readFacts", readFacts);
 
@@ -400,6 +400,7 @@ class FeriasSlice5Phase2ContractTest {
     // Verificar exposição de todos os 7 @WorkflowAction de item em PeriodoAquisitivoFeriasController (incluindo recalcular-faltas-direito-periodo)
     ResourceVersionScopeProvider scopes = () -> SCOPE;
     var paController = new PeriodoAquisitivoFeriasController(paService, etags, scopes);
+    ReflectionTestUtils.invokeMethod(paController, "initializeBasePath");
     pa.setSituacao("SUSPENSO");
     pa.setSaldoDiasDisponivel(20);
     String validPaEtag =
@@ -488,7 +489,7 @@ class FeriasSlice5Phase2ContractTest {
     var fgRepo = mock(FeriasGozoRepository.class);
     var fgMapper = new FeriasGozoMapper(tenant);
     var fgService = new FeriasGozoService(fgRepo, fgMapper, tenant);
-    ReflectionTestUtils.setField(fgService, "entityManager", em);
+    CanonicalResourceTestContext.wire(fgService, em);
     ReflectionTestUtils.setField(fgService, "invariants", invariants);
     ReflectionTestUtils.setField(fgService, "readFacts", readFacts);
 
@@ -563,15 +564,24 @@ class FeriasSlice5Phase2ContractTest {
     var interromperInvalidoDto = new InterromperFeriasGozoDTO();
     interromperInvalidoDto.setDtInterrupcao(LocalDate.of(2025, 7, 25));
     interromperInvalidoDto.setMotivoInterrupcao("Data posterior ao término previsto");
+    var fimAntesDaRejeicao = parcel.getDtfim();
+    var diasAntesDaRejeicao = parcel.getDiasGozo();
     assertThatThrownBy(
             () ->
                 fgService.interromperFeriasGozo(
                     901L,
                     interromperInvalidoDto,
                     precondition(etags, "administracao-pessoal.ferias-gozo", 901L, 1L)))
-        .isInstanceOf(ResponseStatusException.class)
-        .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
-        .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+        .isInstanceOfSatisfying(ErgonRuleViolationException.class, failure -> {
+          assertThat(failure.getHttpStatus()).isEqualTo(422);
+          assertThat(failure.getReasonCodes()).contains("VALID_FERIAS");
+        });
+    // O repositório simulado conserva a mesma instância e não executa rollback.
+    parcel.setSituacao("EM_GOZO");
+    parcel.setDtInterrupcao(null);
+    parcel.setDtfim(fimAntesDaRejeicao);
+    parcel.setMotivoInterrupcao(null);
+    parcel.setDiasGozo(diasAntesDaRejeicao);
 
     // Interromper após 8 dias (01/07 a 09/07 = 8 dias efetivos) -> PA volta a PARCIALMENTE_GOZADO com saldo 12
     var interromperDto = new InterromperFeriasGozoDTO();
@@ -630,7 +640,7 @@ class FeriasSlice5Phase2ContractTest {
     var paramRepo = mock(ParametroContagemFeriasRepository.class);
     var paramMapper = new ParametroContagemFeriasMapper(tenant);
     var paramService = new ParametroContagemFeriasService(paramRepo, paramMapper, tenant);
-    ReflectionTestUtils.setField(paramService, "entityManager", em);
+    CanonicalResourceTestContext.wire(paramService, em);
     ReflectionTestUtils.setField(paramService, "invariants", invariants);
     ReflectionTestUtils.setField(paramService, "readFacts", readFacts);
 
@@ -701,7 +711,7 @@ class FeriasSlice5Phase2ContractTest {
     var paRepo = mock(PeriodoAquisitivoFeriasRepository.class);
     var paMapper = new PeriodoAquisitivoFeriasMapper(tenant);
     var paService = new PeriodoAquisitivoFeriasService(paRepo, paMapper, tenant);
-    ReflectionTestUtils.setField(paService, "entityManager", em);
+    CanonicalResourceTestContext.wire(paService, em);
     ReflectionTestUtils.setField(paService, "invariants", invariants);
     ReflectionTestUtils.setField(paService, "readFacts", readFacts);
 
@@ -756,7 +766,7 @@ class FeriasSlice5Phase2ContractTest {
     var fgRepo = mock(FeriasGozoRepository.class);
     var fgMapper = new FeriasGozoMapper(tenant);
     var fgService = new FeriasGozoService(fgRepo, fgMapper, tenant);
-    ReflectionTestUtils.setField(fgService, "entityManager", em);
+    CanonicalResourceTestContext.wire(fgService, em);
     ReflectionTestUtils.setField(fgService, "invariants", invariants);
     ReflectionTestUtils.setField(fgService, "readFacts", readFacts);
 
@@ -850,7 +860,9 @@ class FeriasSlice5Phase2ContractTest {
 
     var fgRepo = mock(FeriasGozoRepository.class);
     var fgService = new FeriasGozoService(fgRepo, new FeriasGozoMapper(tenant), tenant);
-    ReflectionTestUtils.setField(fgService, "entityManager", em);
+    when(fgRepo.findById(88L)).thenReturn(Optional.of(fg));
+    when(fgRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+    CanonicalResourceTestContext.wire(fgService, em);
     ReflectionTestUtils.setField(fgService, "invariants", invariants);
 
     var bulkDomain = new ErgonBulkDomain();
@@ -859,10 +871,6 @@ class FeriasSlice5Phase2ContractTest {
     ReflectionTestUtils.setField(bulkDomain, "validator", validator);
     ReflectionTestUtils.setField(bulkDomain, "tenant", tenant);
     ReflectionTestUtils.setField(bulkDomain, "invariants", invariants);
-    ReflectionTestUtils.setField(
-        bulkDomain, "parametrosContagemFerias", new ParametroContagemFeriasMapper(tenant));
-    ReflectionTestUtils.setField(
-        bulkDomain, "periodosAquisitivosFerias", new PeriodoAquisitivoFeriasMapper(tenant));
     ReflectionTestUtils.setField(bulkDomain, "feriasGozo", new FeriasGozoMapper(tenant));
     ReflectionTestUtils.setField(bulkDomain, "feriasGozoService", fgService);
 
@@ -892,9 +900,9 @@ class FeriasSlice5Phase2ContractTest {
             new BulkFieldChange(
                 "adiantamento13", BulkChangeOperator.SET, json.valueToTree(true)));
     Object uniformDto =
-        bulkDomain.candidate(
-            Resource.FERIAS_GOZO, fg, uniformChanges, fgFields, BulkMode.UNIFORM_UPDATE);
-    assertThat(bulkDomain.apply(Resource.FERIAS_GOZO, fg, uniformDto)).isTrue();
+        BulkCandidateFixture.candidate(
+            fgService, fg, uniformChanges, fgFields, BulkMode.UNIFORM_UPDATE);
+    BulkCandidateFixture.apply(fgService, fg, uniformDto);
     assertThat(fg.getNumFolha()).isEqualTo(2);
     assertThat(fg.getAdiantamento13()).isTrue();
 
@@ -905,9 +913,9 @@ class FeriasSlice5Phase2ContractTest {
             new BulkFieldChange(
                 "dtprevfim", BulkChangeOperator.SET, json.valueToTree("2025-10-20")));
     Object itemDto =
-        bulkDomain.candidate(
-            Resource.FERIAS_GOZO, fg, itemChanges, fgFields, BulkMode.PER_ITEM_UPDATE);
-    assertThat(bulkDomain.apply(Resource.FERIAS_GOZO, fg, itemDto)).isTrue();
+        BulkCandidateFixture.candidate(
+            fgService, fg, itemChanges, fgFields, BulkMode.PER_ITEM_UPDATE);
+    BulkCandidateFixture.apply(fgService, fg, itemDto);
     assertThat(fg.getDiasGozo()).isEqualTo(20);
     assertThat(pa.getDiasGozados()).isEqualTo(20);
     assertThat(pa.getSaldoDiasDisponivel()).isEqualTo(10);
@@ -972,6 +980,7 @@ class FeriasSlice5Phase2ContractTest {
     var pa = new PeriodoAquisitivoFerias();
     pa.setId(800L);
     pa.setEmpCodigo(1);
+    pa.setEmpCodigo(1);
     pa.setNumfunc(100L);
     pa.setNumvinc(1);
     pa.setChave(2);
@@ -989,6 +998,7 @@ class FeriasSlice5Phase2ContractTest {
 
     var fgProg = new FeriasGozo();
     fgProg.setId(950L);
+    fgProg.setEmpCodigo(1);
     fgProg.setPeriodoAquisitivoId(800L);
     fgProg.setDtini(LocalDate.of(2026, 6, 10));
     fgProg.setDiasGozo(10);
@@ -1060,9 +1070,8 @@ class FeriasSlice5Phase2ContractTest {
         .hasSize(1);
 
     // 5. VinculoStateProvider resolve administracao-pessoal.radar-ferias-prescricao
-    var stateProvider = new VinculoStateProvider(mock(VinculoRepository.class));
-    ReflectionTestUtils.setField(stateProvider, "radarFeriasPrescricao", radarRepo);
-    ReflectionTestUtils.setField(stateProvider, "tenant", new TenantContext());
+    var stateProvider = StateSnapshotFixture.provider(StateSnapshotFixture.service(br.com.praxis.ergonshowcase.service.RadarFeriasPrescricaoService.class, radarRepo));
+
     var snap =
         stateProvider
             .resolve("administracao-pessoal.radar-ferias-prescricao", 800L)
@@ -1192,7 +1201,9 @@ class FeriasSlice5Phase2ContractTest {
 
     var fgRepo = mock(FeriasGozoRepository.class);
     var fgService = new FeriasGozoService(fgRepo, new FeriasGozoMapper(tenant), tenant);
-    ReflectionTestUtils.setField(fgService, "entityManager", em);
+    when(fgRepo.findById(88L)).thenReturn(Optional.of(fg));
+    when(fgRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+    CanonicalResourceTestContext.wire(fgService, em);
     ReflectionTestUtils.setField(fgService, "invariants", invariants);
     ReflectionTestUtils.setField(fgService, "ruleEngineFacade", ruleEngine);
 
@@ -1202,10 +1213,6 @@ class FeriasSlice5Phase2ContractTest {
     ReflectionTestUtils.setField(bulkDomain, "validator", validator);
     ReflectionTestUtils.setField(bulkDomain, "tenant", tenant);
     ReflectionTestUtils.setField(bulkDomain, "invariants", invariants);
-    ReflectionTestUtils.setField(
-        bulkDomain, "parametrosContagemFerias", new ParametroContagemFeriasMapper(tenant));
-    ReflectionTestUtils.setField(
-        bulkDomain, "periodosAquisitivosFerias", new PeriodoAquisitivoFeriasMapper(tenant));
     ReflectionTestUtils.setField(bulkDomain, "feriasGozo", new FeriasGozoMapper(tenant));
     ReflectionTestUtils.setField(bulkDomain, "feriasGozoService", fgService);
 
@@ -1222,8 +1229,8 @@ class FeriasSlice5Phase2ContractTest {
                 "dtprevfim", BulkChangeOperator.SET, json.valueToTree("2025-10-05")));
     assertThatThrownBy(
             () ->
-                bulkDomain.candidate(
-                    Resource.FERIAS_GOZO,
+                BulkCandidateFixture.candidate(
+                    fgService,
                     fg,
                     invalidItemChanges,
                     fgFields,
@@ -1316,7 +1323,9 @@ class FeriasSlice5Phase2ContractTest {
     when(em.find(eq(FeriasGozo.class), eq(301L), any(LockModeType.class))).thenReturn(fg);
 
     var fgService = new FeriasGozoService(fgRepo, new FeriasGozoMapper(tenant), tenant);
-    ReflectionTestUtils.setField(fgService, "entityManager", em);
+    when(fgRepo.findById(88L)).thenReturn(Optional.of(fg));
+    when(fgRepo.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+    CanonicalResourceTestContext.wire(fgService, em);
     ReflectionTestUtils.setField(fgService, "invariants", invariants);
     ReflectionTestUtils.setField(fgService, "readFacts", readFacts);
 
@@ -1353,6 +1362,7 @@ class FeriasSlice5Phase2ContractTest {
               if (jpql.contains(":paId")) {
                 TypedQuery<FeriasGozo> q = mock(TypedQuery.class);
                 when(q.setFlushMode(any(FlushModeType.class))).thenReturn(q);
+                when(q.setParameter("org", 1)).thenReturn(q);
                 when(q.setParameter(eq("paId"), eq(201L))).thenReturn(queryOld);
                 when(q.setParameter(eq("paId"), eq(202L))).thenReturn(queryNew);
                 return q;
@@ -1464,7 +1474,7 @@ class FeriasSlice5Phase2ContractTest {
     when(em.find(eq(PeriodoAquisitivoFerias.class), eq(401L))).thenReturn(pa);
 
     var paService = new PeriodoAquisitivoFeriasService(paRepo, new PeriodoAquisitivoFeriasMapper(tenant), tenant);
-    ReflectionTestUtils.setField(paService, "entityManager", em);
+    CanonicalResourceTestContext.wire(paService, em);
     ReflectionTestUtils.setField(paService, "invariants", invariants);
     ReflectionTestUtils.setField(paService, "readFacts", readFacts);
 
@@ -1519,6 +1529,7 @@ class FeriasSlice5Phase2ContractTest {
             mock(br.com.praxis.ergonshowcase.repository.SetorRepository.class),
             mock(br.com.praxis.ergonshowcase.mapper.SetorMapper.class),
             tenant);
+    CanonicalResourceTestContext.exports(setorService);
     assertThat(setorService.supportsCursorPagination()).isTrue();
     assertThat(setorService.supportsCollectionExport()).isTrue();
     assertThat(setorService.getCollectionExportCapability().orElseThrow().scopes())
@@ -1563,7 +1574,7 @@ class FeriasSlice5Phase2ContractTest {
     var gozoService =
         new FeriasGozoService(
             mock(FeriasGozoRepository.class), new FeriasGozoMapper(new TenantContext()), new TenantContext());
-    ReflectionTestUtils.setField(gozoService, "entityManager", em);
+    CanonicalResourceTestContext.wire(gozoService, em);
     var entity = new FeriasGozo();
     entity.setPeriodoAquisitivoId(202L);
     gozoService.hydrateParentPeriodoAquisitivo(entity);

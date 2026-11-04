@@ -38,6 +38,7 @@ import org.praxisplatform.rules.contract.SlotCardinality;
  * ({@link EffectiveVacationParameterResolver}) através da raiz {@code effectiveParametroConta}.
  */
 public final class FeriasGozoRuleSet {
+  static final String BINDING_CRONOLOGIA = "product.ferias-gozo.valid-ferias-cronologia";
 
   public static final String DOMAIN_SCOPE = "workforce.vacation-and-leave";
   public static final String RESOURCE_KEY = "administracao-pessoal.ferias-gozo";
@@ -66,11 +67,6 @@ public final class FeriasGozoRuleSet {
           + "@"
           + TEMPLATE_FRACIONAMENTO_AND_ABONO_BOUNDS_VERSION;
 
-  public static final String JAVA_EXECUTOR_CONCOMITANCIA_KEY =
-      "ergon.ferias:concomitancia-e-saldo-fracionamento";
-  public static final String JAVA_EXECUTOR_VERSION = "1.0";
-  public static final String EXECUTOR_CONCOMITANCIA_E_SALDO_FRACIONAMENTO =
-      JAVA_EXECUTOR_CONCOMITANCIA_KEY + "@" + JAVA_EXECUTOR_VERSION;
 
   public static final String SLOT_CRONOLOGIA_E_INTERRUPCAO_VALIDA =
       "ferias-gozo.guard.cronologia-e-interrupcao-valida";
@@ -92,8 +88,6 @@ public final class FeriasGozoRuleSet {
       "ferias-gozo.core.fracionamento-limites-template";
   public static final String SLOT_ABONO_PECUNIARIO_ELEGIBILIDADE_E_LIMITES =
       "ferias-gozo.core.abono-pecuniario-elegibilidade-e-limites";
-  public static final String SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO =
-      "ferias-gozo.post.concomitancia-e-saldo-fracionamento";
   public static final String SLOT_HOOK_POS_VALIDACAO =
       "ferias-gozo.hook.pos-validacao-orgao";
 
@@ -152,13 +146,16 @@ public final class FeriasGozoRuleSet {
   }
 
   public static RuleParameterTemplate fracionamentoAndAbonoBoundsTemplate() {
+    JsonNode parsed = parseJson(ERG00519_TEMPLATE_EXPRESSION);
     return new RuleParameterTemplate(
         TEMPLATE_FRACIONAMENTO_AND_ABONO_BOUNDS_KEY,
         TEMPLATE_FRACIONAMENTO_AND_ABONO_BOUNDS_VERSION,
-        RuleExecutorRef.jsonLogic(parseJson(ERG00519_TEMPLATE_EXPRESSION)),
+        RuleExecutorRef.jsonLogic(parsed),
         RuleDecision.DENY,
         "ERG-00519",
-        List.of("draft.dtini", "draft.dtprevfim", "draft.diasGozo", "draft.ordemParcela"),
+        ErgonOntologyRuleSetSupport.mergeRequiredRoots(
+            List.of("draft.dtini", "draft.dtprevfim", "draft.diasGozo", "draft.ordemParcela"),
+            parsed),
         List.of(
             new RuleParameterDefinition(
                 "maxParcelasPermitidas",
@@ -294,13 +291,14 @@ public final class FeriasGozoRuleSet {
             OverridePolicy.REPLACEABLE,
             DecisionAggregationPolicy.DENY_OVERRIDES,
             null),
-        new DecisionSlot(
-            SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
-            DecisionStage.POST_DECISION,
-            SlotCardinality.SINGLE,
-            OverridePolicy.FORBIDDEN,
-            DecisionAggregationPolicy.SINGLE_RESULT,
-            null),
+        parcelamentoSlot("ERG-00514"),
+        parcelamentoSlot("ERG-00518"),
+        parcelamentoSlot("ERG-00520"),
+        parcelamentoSlot("ERG-00523"),
+        parcelamentoSlot("ERG-00531"),
+        parcelamentoSlot("ERG-00532"),
+        parcelamentoSlot("ERG-00525"),
+        parcelamentoSlot("ERG-00526"),
         new DecisionSlot(
             SLOT_HOOK_POS_VALIDACAO,
             DecisionStage.POST_DECISION,
@@ -315,7 +313,7 @@ public final class FeriasGozoRuleSet {
     return List.of(
         // 1. VALID_FERIAS: cronologia dtini <= dtprevfim, dtini <= dtfim, dtInterrupcao em [dtini, dtprevfim]
         productJsonLogicBinding(
-            "product.ferias-gozo.valid-ferias-cronologia",
+            BINDING_CRONOLOGIA,
             SLOT_CRONOLOGIA_E_INTERRUPCAO_VALIDA,
             10,
             """
@@ -381,14 +379,6 @@ public final class FeriasGozoRuleSet {
             }
             """,
             "VALID_FERIAS",
-            baseFacts),
-        // 3. Hook pré-validação
-        productJsonLogicBinding(
-            "product.ferias-gozo.hook-pre-baseline",
-            SLOT_HOOK_PRE_VALIDACAO,
-            30,
-            "{\"==\": [1, 1]}",
-            "CERG-FER-PRE-001",
             baseFacts),
         // 4. ERG-00506: direito a férias habilitado e PA apto
         productJsonLogicBinding(
@@ -797,33 +787,30 @@ public final class FeriasGozoRuleSet {
             """,
             "ERG-03315",
             baseFacts),
-        // 11. ERG-00514, ERG-00518, ERG-00520, ERG-00523, ERG-00525, ERG-00531, ERG-00532, ERG-00526 (Executor Java)
-        new DecisionBinding(
-            "product.ferias-gozo.concomitancia-e-saldo",
-            SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
-            DecisionSource.PRODUCT,
-            null,
-            RuleExecutorRef.java(JAVA_EXECUTOR_CONCOMITANCIA_KEY, JAVA_EXECUTOR_VERSION),
-            List.of(),
-            110,
-            true,
-            null,
-            null,
-            List.of(
-                "draft.diasGozo",
-                "draft.ordemParcela",
-                "pa.totDiasDireito",
-                "derived.overlappingFeriasGozoCount",
-                "derived.totalDiasConsumidosPa"),
-            null),
-        // 12. Hook pós-validação
-        productJsonLogicBinding(
-            "product.ferias-gozo.hook-pos-baseline",
-            SLOT_HOOK_POS_VALIDACAO,
-            120,
-            "{\"==\": [1, 1]}",
-            "CERG-FER-POST-001",
-            baseFacts));
+        parcelamentoBinding("ERG-00514", 110, """
+            {"or":[{">":[{"var":"derived.overlappingFeriasGozoCount"},0]},{">":[{"var":"derived.duplicateOrdemParcelaCount"},0]}]}
+            """),
+        parcelamentoBinding("ERG-00518", 111, """
+            {"and":[{"!=":[{"var":"effectiveParametroConta.maxDiasPerFer"},null]},{">":[{"var":"draft.diasGozo"},{"var":"effectiveParametroConta.maxDiasPerFer"}]}]}
+            """),
+        parcelamentoBinding("ERG-00520", 112, """
+            {"and":[{"!=":[{"var":"effectiveParametroConta.maxPerFer"},null]},{"or":[{">":[{"var":"derived.totalParcelasNoPa"},{"var":"effectiveParametroConta.maxPerFer"}]},{">":[{"var":"draft.ordemParcela"},{"var":"effectiveParametroConta.maxPerFer"}]}]}]}
+            """),
+        parcelamentoBinding("ERG-00523", 113, """
+            {"or":[{">":[{"var":"derived.totalDiasConsumidosPa"},{"var":"pa.totDiasDireito"}]},{"<":[{"var":"derived.saldoRemanescentePa"},0]}]}
+            """),
+        parcelamentoBinding("ERG-00531", 114, """
+            {"and":[{"==":[{"var":"derived.enforceStrictResidualBalance"},true]},{"!=":[{"var":"draft.situacao"},"INTERROMPIDA"]},{"==":[{"var":"derived.saldoRemanescentePa"},0]},{"!=":[{"var":"effectiveParametroConta.minPerFer"},null]},{"<":[{"var":"derived.totalParcelasNoPa"},{"var":"effectiveParametroConta.minPerFer"}]}]}
+            """),
+        parcelamentoBinding("ERG-00532", 115, """
+            {"and":[{"==":[{"var":"derived.enforceStrictResidualBalance"},true]},{"!=":[{"var":"draft.situacao"},"INTERROMPIDA"]},{">":[{"var":"derived.saldoRemanescentePa"},0]},{"!=":[{"var":"effectiveParametroConta.maxPerFer"},null]},{"or":[{">=":[{"var":"derived.totalParcelasNoPa"},{"var":"effectiveParametroConta.maxPerFer"}]},{">=":[{"var":"draft.ordemParcela"},{"var":"effectiveParametroConta.maxPerFer"}]}]}]}
+            """),
+        parcelamentoBinding("ERG-00525", 116, """
+            {"and":[{"==":[{"var":"derived.enforceStrictResidualBalance"},true]},{"!=":[{"var":"draft.situacao"},"INTERROMPIDA"]},{">":[{"var":"derived.saldoRemanescentePa"},0]},{"!=":[{"var":"effectiveParametroConta.maxPerFer"},null]},{"!=":[{"var":"effectiveParametroConta.maxDiasPerFer"},null]},{">":[{"var":"derived.saldoRemanescentePa"},{"*":[{"max":[0,{"-":[{"var":"effectiveParametroConta.maxPerFer"},{"var":"derived.totalParcelasNoPa"}]}]},{"var":"effectiveParametroConta.maxDiasPerFer"}]}]}]}
+            """),
+        parcelamentoBinding("ERG-00526", 117, """
+            {"and":[{"==":[{"var":"derived.enforceStrictResidualBalance"},true]},{"!=":[{"var":"draft.situacao"},"INTERROMPIDA"]},{"or":[{"and":[{">":[{"var":"derived.saldoRemanescentePa"},0]},{"!=":[{"var":"effectiveParametroConta.minDiasPerFer"},null]},{"<":[{"var":"derived.saldoRemanescentePa"},{"var":"effectiveParametroConta.minDiasPerFer"}]}]},{"and":[{"!=":[{"var":"effectiveParametroConta.minDiasPerPrincFer"},null]},{">":[{"var":"effectiveParametroConta.minDiasPerPrincFer"},1]},{"<":[{"var":"derived.maxParcelaDiasNoPa"},{"var":"effectiveParametroConta.minDiasPerPrincFer"}]},{"<":[{"var":"derived.saldoRemanescentePa"},{"var":"effectiveParametroConta.minDiasPerPrincFer"}]}]}]}]}
+            """));
   }
 
   public static RuleSetDefinition productRuleSet() {
@@ -834,6 +821,24 @@ public final class FeriasGozoRuleSet {
         productBindings(),
         RuleRuntimeCompatibility.current(),
         RuleFailPolicy.FAIL_CLOSED);
+  }
+
+  public static String parcelamentoSlotKey(String code) {
+    return "ferias.gozo." + code.toLowerCase(java.util.Locale.ROOT);
+  }
+
+  private static DecisionSlot parcelamentoSlot(String code) {
+    return new DecisionSlot(parcelamentoSlotKey(code), DecisionStage.POST_DECISION,
+        SlotCardinality.SINGLE, OverridePolicy.REPLACEABLE, DecisionAggregationPolicy.SINGLE_RESULT, null);
+  }
+
+  private static DecisionBinding parcelamentoBinding(String code, int order, String negacao) {
+    String expression = """
+        {"or":[{"==":[{"var":"draft.situacao"},"CANCELADA"]},{"!":[%s]}]}
+        """.formatted(negacao);
+    return productJsonLogicBinding("product.ferias-gozo." + code.toLowerCase(java.util.Locale.ROOT),
+        parcelamentoSlotKey(code), order, expression, code,
+        List.of("draft", "pa", "derived", "effectiveParametroConta"));
   }
 
   public static RuleSetDefinition withCustomerBindings(List<DecisionBinding> customerBindings) {
@@ -888,8 +893,8 @@ public final class FeriasGozoRuleSet {
   public static RuleSetDefinition customerMode1ForbiddenOverrideAttempt() {
     DecisionBinding illegalOverride =
         new DecisionBinding(
-            "customer.orgao2.ferias-gozo.forbidden-erg-00523",
-            SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            "customer.orgao2.ferias-gozo.forbidden-cronologia",
+            SLOT_CRONOLOGIA_E_INTERRUPCAO_VALIDA,
             DecisionSource.CUSTOMER,
             CompositionPolicy.REPLACE_EXACT,
             RuleExecutorRef.jsonLogic(parseJson("{\"==\": [1, 1]}")),
@@ -1050,7 +1055,7 @@ public final class FeriasGozoRuleSet {
         true,
         RuleDecision.DENY,
         "CERG-FER-401",
-        List.of("draft.dtini", "draft.dtprevfim", "draft.diasGozo"),
+        List.of("draft.dtini", "draft.dtprevfim", "draft.diasGozo", "effectiveParametroConta", "derived"),
         null);
   }
 
@@ -1069,18 +1074,19 @@ public final class FeriasGozoRuleSet {
       String jsonLogic,
       String falseReasonCode,
       List<String> requiredFactPaths) {
+    JsonNode parsed = parseJson(jsonLogic);
     return new DecisionBinding(
         bindingKey,
         slotKey,
         DecisionSource.PRODUCT,
         null,
-        RuleExecutorRef.jsonLogic(parseJson(jsonLogic)),
+        RuleExecutorRef.jsonLogic(parsed),
         List.of(),
         order,
         true,
         RuleDecision.DENY,
         falseReasonCode,
-        requiredFactPaths,
+        ErgonOntologyRuleSetSupport.mergeRequiredRoots(requiredFactPaths, parsed),
         null);
   }
 

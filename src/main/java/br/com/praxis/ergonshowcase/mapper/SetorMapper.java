@@ -9,6 +9,7 @@ import org.praxisplatform.uischema.mapper.base.ResourceMapper;
 @Mapper(componentModel = "spring")
 public interface SetorMapper extends ResourceMapper<Setor, SetorResponseDTO, Void, Void, String> {
   @Mapping(target = "id", source = "setor")
+  @Mapping(target = "referenciaFicha", ignore = true)
   SetorResponseDTO toResponse(Setor entity);
 
   default String extractId(Setor entity) {

@@ -99,7 +99,7 @@ import org.springframework.web.bind.annotation.*;
             titleField = "label",
             displayLabelField = "label",
             subtitleField = "resourceKey",
-            metadataFields = {"fieldKey", "fieldType", "controlType", "active"}),
+            metadataFields = {"empCodigo", "active"}),
     quickFilters = {
       @QuickFilter(
           id = "ativos",
@@ -128,7 +128,7 @@ import org.springframework.web.bind.annotation.*;
     description = "Cadastros civis e assentamentos funcionais dos órgãos públicos.",
     icon = "groups")
 public class DefinicaoCampoCustomizadoController
-    extends AbstractResourceController<
+    extends org.praxisplatform.uischema.controller.base.AbstractBulkGovernedResourceController<
         DefinicaoCampoCustomizadoResponseDTO,
         Long,
         DefinicaoCampoCustomizadoFilterDTO,
@@ -136,8 +136,6 @@ public class DefinicaoCampoCustomizadoController
         UpdateDefinicaoCampoCustomizadoDTO> {
 
   private final DefinicaoCampoCustomizadoService service;
-  private final ResourceVersionEtagService etags;
-  private final ResourceVersionScopeProvider scopes;
   @Autowired private ErgonBulkOperations bulk;
   @Autowired private ErgonDeterminationService determinations;
 
@@ -146,8 +144,7 @@ public class DefinicaoCampoCustomizadoController
       ResourceVersionEtagService etags,
       ResourceVersionScopeProvider scopes) {
     this.service = service;
-    this.etags = etags;
-    this.scopes = scopes;
+    configureResourceVersioning(etags, scopes);
   }
 
   @Override
@@ -306,11 +303,7 @@ public class DefinicaoCampoCustomizadoController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody AtualizarApresentacaoCampoCustomizadoDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags, ifMatch, scopes.currentScope(), "administracao-pessoal.campos-customizados", id);
-    return withResourceVersion(
-        ResponseEntity.ok(), id, service.atualizarApresentacao(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemPatch("apresentacao-formulario", id, ifMatch, condition -> service.atualizarApresentacao(id, dto, condition)));
   }
 
   @PatchMapping("/{id}/regras-governanca")
@@ -336,10 +329,7 @@ public class DefinicaoCampoCustomizadoController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody AtualizarGovernancaCampoCustomizadoDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags, ifMatch, scopes.currentScope(), "administracao-pessoal.campos-customizados", id);
-    return withResourceVersion(ResponseEntity.ok(), id, service.atualizarGovernanca(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemPatch("regras-governanca", id, ifMatch, condition -> service.atualizarGovernanca(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/ativar-campo-customizado")
@@ -362,11 +352,8 @@ public class DefinicaoCampoCustomizadoController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody AlterarSituacaoCampoCustomizadoDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags, ifMatch, scopes.currentScope(), "administracao-pessoal.campos-customizados", id);
-    return withResourceVersion(
-        ResponseEntity.ok(), id, service.ativarCampoCustomizado(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("ativar-campo-customizado", id, ifMatch, null, dto,
+        condition -> service.ativarCampoCustomizado(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/desativar-campo-customizado")
@@ -390,11 +377,8 @@ public class DefinicaoCampoCustomizadoController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody AlterarSituacaoCampoCustomizadoDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags, ifMatch, scopes.currentScope(), "administracao-pessoal.campos-customizados", id);
-    return withResourceVersion(
-        ResponseEntity.ok(), id, service.desativarCampoCustomizado(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("desativar-campo-customizado", id, ifMatch, null, dto,
+        condition -> service.desativarCampoCustomizado(id, dto, condition)));
   }
 
   @PostMapping("/determinations/previa")
@@ -409,44 +393,31 @@ public class DefinicaoCampoCustomizadoController
     return ResponseEntity.ok(determinations.previaCampoCustomizado(draft));
   }
 
+  @Override
   @PostMapping("/bulk/update/evaluation")
   @Operation(
       operationId = "ergon.campos-customizados.bulk.uniform.evaluation",
       summary = "Avaliar edição uniforme de campos customizados",
       description =
           "Avalia seleção, versões e alterações de campos customizados sem modificar o catálogo; produz uma proposta protegida.")
-  public RestApiResponse<BulkProposal> bulkEvaluate(
-      @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              content =
-                  @io.swagger.v3.oas.annotations.media.Content(
-                      schema =
-                          @io.swagger.v3.oas.annotations.media.Schema(
-                              implementation =
-                                  ErgonBulkSchema.CampoCustomizadoUniform.class)))
-          @RequestBody
-          BulkUniformEvaluationRequest<String, DefinicaoCampoCustomizadoFilterDTO> request) {
-    return RestApiResponse.success(bulk.uniform(Resource.CAMPOS_CUSTOMIZADOS, request), null);
+  @BulkResourceOperation(BulkResourceOperation.Role.UNIFORM_EVALUATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> evaluateBulkUpdate(@RequestBody BulkUniformEvaluationRequest<?, DefinicaoCampoCustomizadoFilterDTO> request) {
+    return super.evaluateBulkUpdate(request);
   }
 
+  @Override
   @PostMapping("/bulk/update-items/evaluation")
   @Operation(
       operationId = "ergon.campos-customizados.bulk.items.evaluation",
       summary = "Avaliar edições por campo customizado",
       description =
           "Avalia deltas distintos e a versão esperada de cada definição de campo customizado, com impedimentos individualizados.")
-  public RestApiResponse<BulkProposal> bulkEvaluateItems(
-      @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              content =
-                  @io.swagger.v3.oas.annotations.media.Content(
-                      schema =
-                          @io.swagger.v3.oas.annotations.media.Schema(
-                              implementation =
-                                  ErgonBulkSchema.CampoCustomizadoItems.class)))
-          @RequestBody
-          BulkItemEvaluationRequest<String> request) {
-    return RestApiResponse.success(bulk.items(Resource.CAMPOS_CUSTOMIZADOS, request), null);
+  @BulkResourceOperation(BulkResourceOperation.Role.ITEM_EVALUATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> evaluateBulkUpdateItems(@RequestBody BulkItemEvaluationRequest<?> request) {
+    return super.evaluateBulkUpdateItems(request);
   }
 
+  @Override
   @PostMapping("/bulk/update")
   @BulkOperation(
       mode = BulkMode.UNIFORM_UPDATE,
@@ -457,19 +428,12 @@ public class DefinicaoCampoCustomizadoController
       summary = "Confirmar edição uniforme de campos customizados",
       description =
           "Confirma uma proposta avaliada; cada definição de campo customizado é revalidada e possui recibo durável.")
-  public RestApiResponse<BulkExecution> bulkConfirm(
-      @RequestBody BulkConfirmationRequest request,
-      @Parameter(
-              description =
-                  "Chave estável desta confirmação; repetir a mesma chave recupera a execução.")
-          @RequestHeader("Idempotency-Key")
-          String key) {
-    return RestApiResponse.success(
-        bulk.confirm(
-            Resource.CAMPOS_CUSTOMIZADOS, "ergon.campos-customizados.bulk.uniform", request, key),
-        null);
+  @BulkResourceOperation(BulkResourceOperation.Role.UNIFORM_CONFIRMATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> confirmBulkUpdate(@RequestBody BulkConfirmationRequest request, @RequestHeader("Idempotency-Key") String key) {
+    return super.confirmBulkUpdate(request, key);
   }
 
+  @Override
   @PostMapping("/bulk/update-items")
   @BulkOperation(
       mode = BulkMode.PER_ITEM_UPDATE,
@@ -480,123 +444,20 @@ public class DefinicaoCampoCustomizadoController
       summary = "Confirmar edições por campo customizado",
       description =
           "Aplica os deltas individualizados preservados na proposta, com versão e resultado próprios por definição.")
-  public RestApiResponse<BulkExecution> bulkConfirmItems(
-      @RequestBody BulkConfirmationRequest request,
-      @Parameter(
-              description =
-                  "Chave estável de confirmação para recuperar a mesma execução em caso de repetição.")
-          @RequestHeader("Idempotency-Key")
-          String key) {
-    return RestApiResponse.success(
-        bulk.confirm(
-            Resource.CAMPOS_CUSTOMIZADOS, "ergon.campos-customizados.bulk.items", request, key),
-        null);
+  @BulkResourceOperation(BulkResourceOperation.Role.ITEM_CONFIRMATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> confirmBulkUpdateItems(@RequestBody BulkConfirmationRequest request, @RequestHeader("Idempotency-Key") String key) {
+    return super.confirmBulkUpdateItems(request, key);
   }
 
-  @GetMapping("/bulk/proposals/{proposalId}")
-  @BulkResourceOperation(BulkResourceOperation.Role.PROPOSAL)
-  @Operation(
-      operationId = "ergon.campos-customizados.bulk.proposal",
-      summary = "Consultar proposta de lote de campos customizados",
-      description =
-          "Consulta totais e intenção pública da proposta após conferir acesso ao conjunto completo de definições.")
-  public RestApiResponse<BulkProposal> bulkProposal(
-      @Parameter(description = "Identidade da proposta avaliada.") @PathVariable UUID proposalId) {
-    return RestApiResponse.success(
-        bulk.proposal(
-            Resource.CAMPOS_CUSTOMIZADOS,
-            bulk.locate(Resource.CAMPOS_CUSTOMIZADOS, proposalId, false),
-            proposalId),
-        null);
-  }
 
-  @GetMapping("/bulk/proposals/{proposalId}/results")
-  @BulkResourceOperation(BulkResourceOperation.Role.PROPOSAL_RESULTS)
-  @Operation(
-      operationId = "ergon.campos-customizados.bulk.proposal-results",
-      summary = "Inspecionar avaliação do lote de campos customizados",
-      description =
-          "Pagina definições executáveis e bloqueadas, com diagnósticos seguros e cursor vinculado ao solicitante.")
-  public RestApiResponse<CursorPage<BulkProposalItemResult<Object>>> bulkProposalResults(
-      @Parameter(description = "Identidade da proposta avaliada.") @PathVariable UUID proposalId,
-      @Parameter(description = "Quantidade de registros por página, de 1 a 200.")
-          @RequestParam(defaultValue = "50")
-          int size,
-      @Parameter(description = "Cursor opaco emitido na página anterior.")
-          @RequestParam(required = false)
-          String after) {
-    return RestApiResponse.success(
-        bulk.proposalResults(
-            Resource.CAMPOS_CUSTOMIZADOS,
-            bulk.locate(Resource.CAMPOS_CUSTOMIZADOS, proposalId, false),
-            proposalId,
-            size,
-            after),
-        null);
-  }
 
-  @GetMapping("/bulk/executions/{executionId}")
-  @BulkResourceOperation(BulkResourceOperation.Role.EXECUTION)
-  @Operation(
-      operationId = "ergon.campos-customizados.bulk.execution",
-      summary = "Consultar execução do lote de campos customizados",
-      description = "Retorna estado e contadores reconciliados a partir dos recibos persistidos.")
-  public RestApiResponse<BulkExecution> bulkExecution(
-      @Parameter(description = "Identidade da execução confirmada.")
-          @PathVariable
-          UUID executionId) {
-    return RestApiResponse.success(
-        bulk.execution(
-            Resource.CAMPOS_CUSTOMIZADOS,
-            bulk.locate(Resource.CAMPOS_CUSTOMIZADOS, executionId, true),
-            executionId),
-        null);
-  }
 
-  @GetMapping("/bulk/executions/{executionId}/results")
-  @BulkResourceOperation(BulkResourceOperation.Role.EXECUTION_RESULTS)
-  @Operation(
-      operationId = "ergon.campos-customizados.bulk.results",
-      summary = "Consultar recibos do lote de campos customizados",
-      description = "Pagina resultados por definição sem expor dados sensíveis da proposta.")
-  public RestApiResponse<CursorPage<BulkItemResult<Object>>> bulkResults(
-      @Parameter(description = "Identidade da execução confirmada.")
-          @PathVariable
-          UUID executionId,
-      @Parameter(description = "Quantidade de recibos por página, de 1 a 200.")
-          @RequestParam(defaultValue = "50")
-          int size,
-      @Parameter(description = "Cursor opaco da página anterior de recibos.")
-          @RequestParam(required = false)
-          String after) {
-    return RestApiResponse.success(
-        bulk.results(
-            Resource.CAMPOS_CUSTOMIZADOS,
-            bulk.locate(Resource.CAMPOS_CUSTOMIZADOS, executionId, true),
-            executionId,
-            size,
-            after),
-        null);
-  }
 
-  @PostMapping("/bulk/executions/{executionId}/cancel")
-  @BulkResourceOperation(BulkResourceOperation.Role.CANCEL)
-  @Operation(
-      operationId = "ergon.campos-customizados.bulk.cancel",
-      summary = "Solicitar parada do lote de campos customizados",
-      description =
-          "Registra a solicitação de parada sem desfazer alterações já confirmadas e sem reabrir efeitos no replay.")
-  public RestApiResponse<BulkExecution> bulkCancel(
-      @Parameter(description = "Identidade da execução a interromper.")
-          @PathVariable
-          UUID executionId) {
-    return RestApiResponse.success(
-        bulk.cancel(
-            Resource.CAMPOS_CUSTOMIZADOS,
-            bulk.locate(Resource.CAMPOS_CUSTOMIZADOS, executionId, true),
-            executionId),
-        null);
-  }
+
+
+
+
+
 
   @PostMapping("/bulk/ativar-campo-customizado-lote/evaluation")
   @Operation(
@@ -604,20 +465,13 @@ public class DefinicaoCampoCustomizadoController
       summary = "Avaliar ativação coletiva de campos customizados",
       description =
           "Avalia ativação coletiva de definições de campos customizados inativas do mesmo órgão, sem persistir alterações.")
-  public RestApiResponse<BulkProposal> bulkAtivarEvaluate(
-      @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              content =
-                  @io.swagger.v3.oas.annotations.media.Content(
-                      schema =
-                          @io.swagger.v3.oas.annotations.media.Schema(
-                              implementation =
-                                  ErgonBulkSchema.AtivarCampoCustomizadoCommand.class)))
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> bulkAtivarEvaluate(
+
           @RequestBody
           BulkCommandEvaluationRequest<
-                  AtivarCampoCustomizadoLoteDTO, String, DefinicaoCampoCustomizadoFilterDTO>
+                  AtivarCampoCustomizadoLoteDTO, ?, DefinicaoCampoCustomizadoFilterDTO>
               request) {
-    return RestApiResponse.success(
-        bulk.command(Resource.CAMPOS_CUSTOMIZADOS, "ativar-campo-customizado-lote", request), null);
+    return evaluateBulkDomainCommand("ativar-campo-customizado-lote", request);
   }
 
   @PostMapping("/actions/ativar-campo-customizado-lote")
@@ -642,17 +496,16 @@ public class DefinicaoCampoCustomizadoController
       summary = "Ativar campos customizados em lote",
       description =
           "Executa ativação coletiva governada de definições de campos customizados inativas.")
-  public RestApiResponse<BulkExecution> bulkAtivarConfirm(
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> bulkAtivarConfirm(
       @RequestBody BulkConfirmationRequest request,
       @Parameter(description = "Chave estável do ato coletivo para impedir efeitos duplicados.")
           @RequestHeader("Idempotency-Key")
           String key) {
-    return RestApiResponse.success(
-        bulk.confirm(
-            Resource.CAMPOS_CUSTOMIZADOS,
-            "ergon.campos-customizados.ativar-campo-customizado-lote",
-            request,
-            key),
-        null);
+    return confirmBulkDomainCommand("ativar-campo-customizado-lote", request, key);
   }
+  @Override @SuppressWarnings({"unchecked", "rawtypes"})
+  protected org.praxisplatform.uischema.bulk.JpaResourceBulkEngine getBulkEngine() { return bulk.engine(Resource.CAMPOS_CUSTOMIZADOS); }
+  @Override protected String bulkProposalOperationId(UUID id) { return bulk.locate(Resource.CAMPOS_CUSTOMIZADOS, id, false); }
+  @Override protected String bulkExecutionOperationId(UUID id) { return bulk.locate(Resource.CAMPOS_CUSTOMIZADOS, id, true); }
+
 }

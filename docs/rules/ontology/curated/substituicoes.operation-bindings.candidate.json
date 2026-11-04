@@ -1,0 +1,1918 @@
+{
+  "ruleSetKey": "ergon.administracao-pessoal.substituicoes.chefia",
+  "operations": [
+    {
+      "operationKey": "createErgonSubstituicaoFuncao",
+      "mode": "CREATE",
+      "controller": "SubstituicaoFuncaoController",
+      "operationId": "createErgonSubstituicaoFuncao",
+      "method": "POST",
+      "pathConstant": "ApiPaths.SUBSTITUICOES",
+      "relativePath": "",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "GOVERNED_FAMILY_WITH_OPERATION_APPLICABILITY",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [
+        {
+          "root": "designacao",
+          "role": "designacao",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.designacoes"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "designacaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "substituto",
+          "role": "substituto",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.vinculos"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "identity": [
+            "id.numfunc",
+            "id.numero"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "funcao",
+          "role": "funcao",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.funcoes"
+          },
+          "fromRoot": "designacao",
+          "foreignKey": [
+            "funcaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "feriasImpedimento",
+          "role": "feriasImpedimento",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.ferias-gozo"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "feriasGozoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "ownerLink": {
+            "fromRoot": "designacao",
+            "fields": [
+              "titularId.numfunc",
+              "titularId.numero"
+            ],
+            "targetFields": [
+              "numfunc",
+              "numvinc"
+            ]
+          },
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "afastamentoImpedimento",
+          "role": "afastamentoImpedimento",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.afastamentos"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "afastamentoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "ownerLink": {
+            "fromRoot": "designacao",
+            "fields": [
+              "titularId.numfunc",
+              "titularId.numero"
+            ],
+            "targetFields": [
+              "numfunc",
+              "numvinc"
+            ]
+          },
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        }
+      ],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "substituicoesDoTitular",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "designacaoId"
+          ],
+          "targetFields": [
+            "designacaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "draft.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "substituicoesDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "draft.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "feriasDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.ferias-gozo",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "numfunc",
+            "numvinc"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "afastamentosDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.afastamentos",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "numfunc",
+            "numvinc"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ]
+    },
+    {
+      "operationKey": "updateErgonSubstituicaoFuncao",
+      "mode": "UPDATE",
+      "controller": "SubstituicaoFuncaoController",
+      "operationId": "updateErgonSubstituicaoFuncao",
+      "method": "PUT",
+      "pathConstant": "ApiPaths.SUBSTITUICOES",
+      "relativePath": "/{id}",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "GOVERNED_FAMILY_WITH_OPERATION_APPLICABILITY",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [
+        {
+          "root": "designacao",
+          "role": "designacao",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.designacoes"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "designacaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "substituto",
+          "role": "substituto",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.vinculos"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "identity": [
+            "id.numfunc",
+            "id.numero"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "funcao",
+          "role": "funcao",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.funcoes"
+          },
+          "fromRoot": "designacao",
+          "foreignKey": [
+            "funcaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "feriasImpedimento",
+          "role": "feriasImpedimento",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.ferias-gozo"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "feriasGozoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "ownerLink": {
+            "fromRoot": "designacao",
+            "fields": [
+              "titularId.numfunc",
+              "titularId.numero"
+            ],
+            "targetFields": [
+              "numfunc",
+              "numvinc"
+            ]
+          },
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "afastamentoImpedimento",
+          "role": "afastamentoImpedimento",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.afastamentos"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "afastamentoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "ownerLink": {
+            "fromRoot": "designacao",
+            "fields": [
+              "titularId.numfunc",
+              "titularId.numero"
+            ],
+            "targetFields": [
+              "numfunc",
+              "numvinc"
+            ]
+          },
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        }
+      ],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "substituicoesDoTitular",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "designacaoId"
+          ],
+          "targetFields": [
+            "designacaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "draft.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "substituicoesDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "draft.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "feriasDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.ferias-gozo",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "numfunc",
+            "numvinc"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "afastamentosDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.afastamentos",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "numfunc",
+            "numvinc"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ]
+    },
+    {
+      "operationKey": "ergon.substituicoes.bulk.uniform.evaluation",
+      "mode": "BULK_ITEM",
+      "controller": "SubstituicaoFuncaoController",
+      "operationId": "ergon.substituicoes.bulk.uniform.evaluation",
+      "method": "POST",
+      "pathConstant": "ApiPaths.SUBSTITUICOES",
+      "relativePath": "/bulk/update/evaluation",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "GOVERNED_FAMILY_WITH_OPERATION_APPLICABILITY",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [
+        {
+          "root": "designacao",
+          "role": "designacao",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.designacoes"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "designacaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "substituto",
+          "role": "substituto",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.vinculos"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "identity": [
+            "id.numfunc",
+            "id.numero"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "funcao",
+          "role": "funcao",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.funcoes"
+          },
+          "fromRoot": "designacao",
+          "foreignKey": [
+            "funcaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "feriasImpedimento",
+          "role": "feriasImpedimento",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.ferias-gozo"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "feriasGozoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "ownerLink": {
+            "fromRoot": "designacao",
+            "fields": [
+              "titularId.numfunc",
+              "titularId.numero"
+            ],
+            "targetFields": [
+              "numfunc",
+              "numvinc"
+            ]
+          },
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "afastamentoImpedimento",
+          "role": "afastamentoImpedimento",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.afastamentos"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "afastamentoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "ownerLink": {
+            "fromRoot": "designacao",
+            "fields": [
+              "titularId.numfunc",
+              "titularId.numero"
+            ],
+            "targetFields": [
+              "numfunc",
+              "numvinc"
+            ]
+          },
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        }
+      ],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "substituicoesDoTitular",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "designacaoId"
+          ],
+          "targetFields": [
+            "designacaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "draft.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "substituicoesDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "draft.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "feriasDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.ferias-gozo",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "numfunc",
+            "numvinc"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "afastamentosDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.afastamentos",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "numfunc",
+            "numvinc"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ]
+    },
+    {
+      "operationKey": "ergon.substituicoes.bulk.items.evaluation",
+      "mode": "BULK_ITEM",
+      "controller": "SubstituicaoFuncaoController",
+      "operationId": "ergon.substituicoes.bulk.items.evaluation",
+      "method": "POST",
+      "pathConstant": "ApiPaths.SUBSTITUICOES",
+      "relativePath": "/bulk/update-items/evaluation",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "GOVERNED_FAMILY_WITH_OPERATION_APPLICABILITY",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [
+        {
+          "root": "designacao",
+          "role": "designacao",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.designacoes"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "designacaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "substituto",
+          "role": "substituto",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.vinculos"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "identity": [
+            "id.numfunc",
+            "id.numero"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "funcao",
+          "role": "funcao",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.funcoes"
+          },
+          "fromRoot": "designacao",
+          "foreignKey": [
+            "funcaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "feriasImpedimento",
+          "role": "feriasImpedimento",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.ferias-gozo"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "feriasGozoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "ownerLink": {
+            "fromRoot": "designacao",
+            "fields": [
+              "titularId.numfunc",
+              "titularId.numero"
+            ],
+            "targetFields": [
+              "numfunc",
+              "numvinc"
+            ]
+          },
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "afastamentoImpedimento",
+          "role": "afastamentoImpedimento",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.afastamentos"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "afastamentoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "ownerLink": {
+            "fromRoot": "designacao",
+            "fields": [
+              "titularId.numfunc",
+              "titularId.numero"
+            ],
+            "targetFields": [
+              "numfunc",
+              "numvinc"
+            ]
+          },
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        }
+      ],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "substituicoesDoTitular",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "designacaoId"
+          ],
+          "targetFields": [
+            "designacaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "draft.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "substituicoesDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "draft.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "feriasDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.ferias-gozo",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "numfunc",
+            "numvinc"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "afastamentosDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.afastamentos",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "numfunc",
+            "numvinc"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ]
+    },
+    {
+      "operationKey": "ergon.substituicoes.bulk.uniform",
+      "mode": "BULK_ITEM",
+      "controller": "SubstituicaoFuncaoController",
+      "operationId": "ergon.substituicoes.bulk.uniform",
+      "method": "POST",
+      "pathConstant": "ApiPaths.SUBSTITUICOES",
+      "relativePath": "/bulk/update",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "GOVERNED_FAMILY_WITH_OPERATION_APPLICABILITY",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [
+        {
+          "root": "designacao",
+          "role": "designacao",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.designacoes"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "designacaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "substituto",
+          "role": "substituto",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.vinculos"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "identity": [
+            "id.numfunc",
+            "id.numero"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "funcao",
+          "role": "funcao",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.funcoes"
+          },
+          "fromRoot": "designacao",
+          "foreignKey": [
+            "funcaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "feriasImpedimento",
+          "role": "feriasImpedimento",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.ferias-gozo"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "feriasGozoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "ownerLink": {
+            "fromRoot": "designacao",
+            "fields": [
+              "titularId.numfunc",
+              "titularId.numero"
+            ],
+            "targetFields": [
+              "numfunc",
+              "numvinc"
+            ]
+          },
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "afastamentoImpedimento",
+          "role": "afastamentoImpedimento",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.afastamentos"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "afastamentoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "ownerLink": {
+            "fromRoot": "designacao",
+            "fields": [
+              "titularId.numfunc",
+              "titularId.numero"
+            ],
+            "targetFields": [
+              "numfunc",
+              "numvinc"
+            ]
+          },
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        }
+      ],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "substituicoesDoTitular",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "designacaoId"
+          ],
+          "targetFields": [
+            "designacaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "draft.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "substituicoesDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "draft.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "feriasDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.ferias-gozo",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "numfunc",
+            "numvinc"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "afastamentosDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.afastamentos",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "numfunc",
+            "numvinc"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ]
+    },
+    {
+      "operationKey": "ergon.substituicoes.bulk.items",
+      "mode": "BULK_ITEM",
+      "controller": "SubstituicaoFuncaoController",
+      "operationId": "ergon.substituicoes.bulk.items",
+      "method": "POST",
+      "pathConstant": "ApiPaths.SUBSTITUICOES",
+      "relativePath": "/bulk/update-items",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "GOVERNED_FAMILY_WITH_OPERATION_APPLICABILITY",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [
+        {
+          "root": "designacao",
+          "role": "designacao",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.designacoes"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "designacaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "substituto",
+          "role": "substituto",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.vinculos"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "identity": [
+            "id.numfunc",
+            "id.numero"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "funcao",
+          "role": "funcao",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.funcoes"
+          },
+          "fromRoot": "designacao",
+          "foreignKey": [
+            "funcaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "feriasImpedimento",
+          "role": "feriasImpedimento",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.ferias-gozo"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "feriasGozoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "ownerLink": {
+            "fromRoot": "designacao",
+            "fields": [
+              "titularId.numfunc",
+              "titularId.numero"
+            ],
+            "targetFields": [
+              "numfunc",
+              "numvinc"
+            ]
+          },
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "afastamentoImpedimento",
+          "role": "afastamentoImpedimento",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.afastamentos"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "afastamentoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "ownerLink": {
+            "fromRoot": "designacao",
+            "fields": [
+              "titularId.numfunc",
+              "titularId.numero"
+            ],
+            "targetFields": [
+              "numfunc",
+              "numvinc"
+            ]
+          },
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        }
+      ],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "substituicoesDoTitular",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "designacaoId"
+          ],
+          "targetFields": [
+            "designacaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "draft.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "substituicoesDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "draft.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "feriasDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.ferias-gozo",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "numfunc",
+            "numvinc"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "afastamentosDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.afastamentos",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "numfunc",
+            "numvinc"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ]
+    },
+    {
+      "operationKey": "administracao-pessoal.substituicoes.delete",
+      "mode": "DELETE",
+      "controller": "SubstituicaoFuncaoController",
+      "operationId": null,
+      "method": "DELETE",
+      "pathConstant": "ApiPaths.SUBSTITUICOES",
+      "relativePath": "/{id}",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "DELETE_GUARDS_TO_MIGRATE",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [
+        {
+          "root": "designacao",
+          "role": "designacao",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.designacoes"
+          },
+          "fromRoot": "current",
+          "foreignKey": [
+            "designacaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "substituto",
+          "role": "substituto",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.vinculos"
+          },
+          "fromRoot": "current",
+          "foreignKey": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "identity": [
+            "id.numfunc",
+            "id.numero"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "funcao",
+          "role": "funcao",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.funcoes"
+          },
+          "fromRoot": "designacao",
+          "foreignKey": [
+            "funcaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "feriasImpedimento",
+          "role": "feriasImpedimento",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.ferias-gozo"
+          },
+          "fromRoot": "current",
+          "foreignKey": [
+            "feriasGozoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "ownerLink": {
+            "fromRoot": "designacao",
+            "fields": [
+              "titularId.numfunc",
+              "titularId.numero"
+            ],
+            "targetFields": [
+              "numfunc",
+              "numvinc"
+            ]
+          },
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "afastamentoImpedimento",
+          "role": "afastamentoImpedimento",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.afastamentos"
+          },
+          "fromRoot": "current",
+          "foreignKey": [
+            "afastamentoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "ownerLink": {
+            "fromRoot": "designacao",
+            "fields": [
+              "titularId.numfunc",
+              "titularId.numero"
+            ],
+            "targetFields": [
+              "numfunc",
+              "numvinc"
+            ]
+          },
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        }
+      ],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "substituicoesDoTitular",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "current",
+          "sourceFields": [
+            "designacaoId"
+          ],
+          "targetFields": [
+            "designacaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "current.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "substituicoesDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "current",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "current.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "feriasDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.ferias-gozo",
+          "fromRoot": "current",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "numfunc",
+            "numvinc"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "afastamentosDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.afastamentos",
+          "fromRoot": "current",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "numfunc",
+            "numvinc"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ],
+      "httpIdentity": "METHOD_AND_PATH; operationId must be obtained from canonical resolver in G2",
+      "providerPlan": "Pass detached OLD to dedicated delete guards; do not apply CREATE rules to draft=null."
+    },
+    {
+      "operationKey": "administracao-pessoal.substituicoes.delete-batch",
+      "mode": "DELETE",
+      "controller": "SubstituicaoFuncaoController",
+      "operationId": null,
+      "method": "DELETE",
+      "pathConstant": "ApiPaths.SUBSTITUICOES",
+      "relativePath": "/batch",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "DELETE_GUARDS_TO_MIGRATE",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [
+        {
+          "root": "designacao",
+          "role": "designacao",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.designacoes"
+          },
+          "fromRoot": "current",
+          "foreignKey": [
+            "designacaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "substituto",
+          "role": "substituto",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.vinculos"
+          },
+          "fromRoot": "current",
+          "foreignKey": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "identity": [
+            "id.numfunc",
+            "id.numero"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "funcao",
+          "role": "funcao",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.funcoes"
+          },
+          "fromRoot": "designacao",
+          "foreignKey": [
+            "funcaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "feriasImpedimento",
+          "role": "feriasImpedimento",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.ferias-gozo"
+          },
+          "fromRoot": "current",
+          "foreignKey": [
+            "feriasGozoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "ownerLink": {
+            "fromRoot": "designacao",
+            "fields": [
+              "titularId.numfunc",
+              "titularId.numero"
+            ],
+            "targetFields": [
+              "numfunc",
+              "numvinc"
+            ]
+          },
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "afastamentoImpedimento",
+          "role": "afastamentoImpedimento",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.afastamentos"
+          },
+          "fromRoot": "current",
+          "foreignKey": [
+            "afastamentoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "ownerLink": {
+            "fromRoot": "designacao",
+            "fields": [
+              "titularId.numfunc",
+              "titularId.numero"
+            ],
+            "targetFields": [
+              "numfunc",
+              "numvinc"
+            ]
+          },
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        }
+      ],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "substituicoesDoTitular",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "current",
+          "sourceFields": [
+            "designacaoId"
+          ],
+          "targetFields": [
+            "designacaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "current.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "substituicoesDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "current",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "current.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "feriasDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.ferias-gozo",
+          "fromRoot": "current",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "numfunc",
+            "numvinc"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "afastamentosDoSubstituto",
+          "targetResourceKey": "administracao-pessoal.afastamentos",
+          "fromRoot": "current",
+          "sourceFields": [
+            "substitutoId.numfunc",
+            "substitutoId.numero"
+          ],
+          "targetFields": [
+            "numfunc",
+            "numvinc"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ],
+      "httpIdentity": "METHOD_AND_PATH; operationId must be obtained from canonical resolver in G2",
+      "providerPlan": "Pass detached OLD to dedicated delete guards; do not apply CREATE rules to draft=null."
+    },
+    {
+      "operationKey": "preview-product.chefia.erg-01300",
+      "mode": "PREVIEW",
+      "controller": "SubstituicaoFuncaoController",
+      "operationId": "determineErgonSubstituicaoFuncaoPrevia",
+      "method": "POST",
+      "pathConstant": "ApiPaths.SUBSTITUICOES",
+      "relativePath": "/determinations/previa",
+      "evaluationUnit": "ONE_SELECTED_SLOT",
+      "ruleSelection": "ACTIVE_SLOT_COMPOSITION",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [],
+      "collectionBindings": [],
+      "slotKey": "chefia.erg-01300",
+      "reasonCode": "ERG-01300",
+      "facadeMethod": "enforceSubstituicaoPreviewDates",
+      "activationCondition": "dtini != null && dtfim != null",
+      "customizationAdmission": "Validate each active replacement against this scope before activation; do not fabricate missing facts or silently fall back to product."
+    },
+    {
+      "operationKey": "preview-product.chefia.erg-01315",
+      "mode": "PREVIEW",
+      "controller": "SubstituicaoFuncaoController",
+      "operationId": "determineErgonSubstituicaoFuncaoPrevia",
+      "method": "POST",
+      "pathConstant": "ApiPaths.SUBSTITUICOES",
+      "relativePath": "/determinations/previa",
+      "evaluationUnit": "ONE_SELECTED_SLOT",
+      "ruleSelection": "ACTIVE_SLOT_COMPOSITION",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [
+        {
+          "root": "designacao",
+          "role": "designacao",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.designacoes"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "designacaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        },
+        {
+          "root": "funcao",
+          "role": "funcao",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.funcoes"
+          },
+          "fromRoot": "designacao",
+          "foreignKey": [
+            "funcaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        }
+      ],
+      "collectionBindings": [],
+      "slotKey": "chefia.erg-01315",
+      "reasonCode": "ERG-01315",
+      "facadeMethod": "enforceSubstituicaoFuncaoPermitePreview",
+      "activationCondition": "designacaoId != null",
+      "customizationAdmission": "Validate each active replacement against this scope before activation; do not fabricate missing facts or silently fall back to product."
+    },
+    {
+      "operationKey": "preview-product.chefia.erg-01319",
+      "mode": "PREVIEW",
+      "controller": "SubstituicaoFuncaoController",
+      "operationId": "determineErgonSubstituicaoFuncaoPrevia",
+      "method": "POST",
+      "pathConstant": "ApiPaths.SUBSTITUICOES",
+      "relativePath": "/determinations/previa",
+      "evaluationUnit": "ONE_SELECTED_SLOT",
+      "ruleSelection": "ACTIVE_SLOT_COMPOSITION",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [
+        {
+          "root": "designacao",
+          "role": "designacao",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.designacoes"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "designacaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        }
+      ],
+      "collectionBindings": [],
+      "slotKey": "chefia.erg-01319",
+      "reasonCode": "ERG-01319",
+      "facadeMethod": "enforceSubstituicaoDesignacaoVigenciaPreview",
+      "activationCondition": "designacaoId != null && dtini != null && dtfim != null",
+      "customizationAdmission": "Validate each active replacement against this scope before activation; do not fabricate missing facts or silently fall back to product."
+    }
+  ],
+  "nonEvaluatingOperations": [],
+  "exclusions": [
+    {
+      "field": "version",
+      "reason": "Optimistic concurrency belongs to If-Match/transaction; not a business fact."
+    },
+    {
+      "field": "auditoria",
+      "reason": "Technical audit envelope; no migrated rule consumes it."
+    },
+    {
+      "field": "customFields",
+      "reason": "Separate CustomFieldValidator contract; no untyped map admitted in this RuleSet snapshot."
+    }
+  ],
+  "entityProjection": [
+    "id",
+    "empCodigo",
+    "descricao",
+    "dtini",
+    "dtfim",
+    "situacao",
+    "designacaoId",
+    "substitutoId",
+    "motivo",
+    "afastamentoId",
+    "feriasGozoId",
+    "dtiniRemunerada",
+    "dtfimRemunerada",
+    "competenciaFolha",
+    "valorSubstituicao",
+    "documentoLegalId",
+    "atoPublicacaoId",
+    "observacoes"
+  ],
+  "collectionContract": {
+    "scope": "IDENTITY_RELATION_AND_TENANT_ONLY",
+    "maxItems": 10000,
+    "onOverflow": {
+      "decision": "INCONCLUSIVE",
+      "reasonCode": "FACTS_LIMIT_EXCEEDED"
+    },
+    "onQueryFailure": "ABORT_EVALUATION",
+    "missingIsEmpty": false,
+    "businessPredicates": "RuleSet with raw status and dates; reduce accumulator carries outer interval without implicit global access."
+  }
+}

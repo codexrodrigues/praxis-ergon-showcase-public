@@ -41,6 +41,7 @@ public class FeriasGozoFilterDTO implements GenericFilterDTO {
         "pessoa.nome",
         "pessoa.cpf",
         "vinculo.matric",
+        "vinculo.lotacao.nome",
         "pessoaSubstituta.nome",
         "motivoInterrupcao",
         "observacoes"
@@ -264,6 +265,54 @@ public class FeriasGozoFilterDTO implements GenericFilterDTO {
       icon = "find_in_page")
   @Filterable(operation = FilterOperation.IS_NULL, relation = "documentoLegalId")
   private Boolean semDocumentoLegal;
+
+  @Schema(
+      description =
+          "Filtra parcelas de férias sem substituto designado para auditoria de cobertura operacional.")
+  @UISchema(
+      label = "Sem substituto",
+      helpText = "Exibe parcelas sem substituto formalizado.",
+      type = FieldDataType.BOOLEAN,
+      controlType = FieldControlType.CHECKBOX,
+      icon = "person_off")
+  @Filterable(operation = FilterOperation.IS_NULL, relation = "numfuncSubstituto")
+  private Boolean semSubstituto;
+
+  @Schema(
+      description =
+          "Trecho do nome da unidade organizacional de lotação do vínculo em gozo de férias (ex.: Saúde, Educação, Fazenda).")
+  @UISchema(
+      label = "Nome da unidade",
+      helpText = "Pesquise férias pelo nome da secretaria ou setor de lotação.",
+      type = FieldDataType.TEXT,
+      controlType = FieldControlType.INPUT,
+      icon = "account_tree")
+  @Filterable(operation = FilterOperation.LIKE, relation = "vinculo.lotacao.nome")
+  private String setorLotacaoNome;
+
+  @Schema(
+      description =
+          "Classificação estrutural da unidade de lotação do vínculo titular das férias (ex.: SECRETARIA, DIRETORIA, HOSPITAL, UNIDADE_ENSINO).")
+  @UISchema(
+      label = "Tipo de unidade",
+      helpText = "Filtra parcelas pela classificação da unidade de lotação.",
+      type = FieldDataType.TEXT,
+      controlType = FieldControlType.INPUT,
+      icon = "domain")
+  @Filterable(operation = FilterOperation.EQUAL, relation = "vinculo.lotacao.tipoSetor")
+  private String tipoSetorLotacao;
+
+  @Schema(
+      description =
+          "Categoria funcional do vínculo titular das férias (ex.: SAUDE, MAGISTERIO, GERAL, GUARDA_MUNICIPAL).")
+  @UISchema(
+      label = "Categoria funcional",
+      helpText = "Filtra parcelas pela carreira ou categoria do vínculo.",
+      type = FieldDataType.TEXT,
+      controlType = FieldControlType.INPUT,
+      icon = "category")
+  @Filterable(operation = FilterOperation.EQUAL, relation = "vinculo.categoria")
+  private String categoriaVinculo;
 
   @Schema(description = "Critérios de filtragem sobre atributos dinâmicos customizados.")
   @CustomFields(resourceKey = "administracao-pessoal.ferias-gozo")

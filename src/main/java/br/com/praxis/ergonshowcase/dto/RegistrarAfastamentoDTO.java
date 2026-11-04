@@ -38,7 +38,7 @@ public record RegistrarAfastamentoDTO(
         Integer codfreq,
     @NotNull
         @PastOrPresent
-        @Schema(description = "Primeiro dia do afastamento; não pode anteceder o exercício.")
+        @Schema(description = "Primeiro dia do afastamento já iniciado, para alterar a situação funcional imediatamente. Não pode anteceder o exercício.")
         @UISchema(
             type = FieldDataType.DATE,
             controlType = FieldControlType.DATE_PICKER,
@@ -56,11 +56,10 @@ public record RegistrarAfastamentoDTO(
             label = "Término previsto",
             group = "Período")
         LocalDate dtprevfim,
-    @NotBlank
-        @Size(max = 4000)
+    @Size(max = 4000)
         @Schema(
             description =
-                "Fundamentação administrativa, clínica ou jurídica da concessão de afastamento.")
+                "Fundamentação complementar da concessão de afastamento, quando houver informação além da modalidade.")
         @DomainGovernance(
             kind = DomainGovernanceKind.PRIVACY,
             classification = DomainClassification.RESTRICTED,
@@ -72,9 +71,8 @@ public record RegistrarAfastamentoDTO(
                     trainingUse = AiTrainingUseMode.DENY))
         @UISchema(label = "Fundamentação", group = "Ato")
         String motivo,
-    @NotNull
-        @Positive
-        @Schema(description = "Documento legal do mesmo órgão que fundamenta a concessão.")
+    @Positive
+        @Schema(description = "Ato do mesmo órgão que fundamenta a concessão. Obrigatório quando exigido pela regra de frequência aplicável.")
         @UISchema(
             label = "Documento legal",
             group = "Ato",
@@ -84,4 +82,16 @@ public record RegistrarAfastamentoDTO(
             endpoint = ApiPaths.DOCUMENTO_OPTIONS,
             valueField = "id",
             displayField = "label")
-        Long documentoLegalId) {}
+        Long documentoLegalId,
+    @Positive
+        @Schema(description = "Ato de publicação oficial da concessão, quando exigido pela política do órgão.")
+        @UISchema(
+            label = "Ato de publicação",
+            group = "Ato",
+            type = FieldDataType.NUMBER,
+            controlType = FieldControlType.ENTITY_LOOKUP,
+            icon = "description",
+            endpoint = ApiPaths.DOCUMENTO_OPTIONS,
+            valueField = "id",
+            displayField = "label")
+        Long atoPublicacaoId) {}

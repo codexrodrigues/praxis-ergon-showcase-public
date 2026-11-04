@@ -26,7 +26,6 @@ public class CargoService
         DuplicateDraftResourceService<CargoResponseDTO, Integer, CargoFilterDTO,
             CreateCargoDTO, UpdateCargoDTO, CargoDuplicateDraftDTO> {
   @org.springframework.beans.factory.annotation.Autowired private ErgonInvariants invariants;
-  @PersistenceContext protected EntityManager entityManager;
   protected final CargoMapper mapper;
   private final TenantContext tenant;
   private final CargoRepository cargos;
@@ -89,10 +88,6 @@ public class CargoService
     return new CargoFilterDTO();
   }
 
-  @Override
-  protected OptionalLong getEntityResourceVersion(Cargo e) {
-    return OptionalLong.of(e.getVersion());
-  }
 
   @Override
   public Optional<String> getDatasetVersion() {
@@ -129,67 +124,19 @@ public class CargoService
         .build();
   }
 
-  @Override
-  public StatsSupportMode getGroupByStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
+
 
   @Override
-  public StatsSupportMode getTimeSeriesStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getDistributionStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getComparisonStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  protected ResourceFilterAccessScope<Cargo> resolveResourceFilterAccessScope() {
-    var explicit = tenant != null ? tenant.explicitOrgao() : OptionalInt.empty();
-    if (explicit.isEmpty()) {
-      return ResourceFilterAccessScope.unrestricted();
-    }
-    int orgao = explicit.getAsInt();
-    return ResourceFilterAccessScope.restricted(
-        (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
-  }
-
-  @Override
-  @Transactional
-  public ResourceRepresentationResult<CargoResponseDTO> update(
-      Integer id, UpdateCargoDTO dto, ResourceVersionUpdatePrecondition<Integer> precondition) {
-    if (precondition == null) throw ResourceVersionPreconditionException.required();
-    var readOnlyKeys = validateCustomFields(dto, "request");
-    var entity = findEntityById(id);
-    entityManager.lock(entity, LockModeType.PESSIMISTIC_WRITE);
-    entityManager.refresh(entity);
-    precondition.requireMatch(entity.getVersion());
-    beforeUpdate(id, entity, dto);
-    var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
+  protected void applyResourceUpdate(Integer id, Cargo entity, UpdateCargoDTO dto) {
     mapper.applyUpdate(entity, dto);
     checkOrg(entity.getEmpCodigo());
     invariants.cargo(entity);
-    CustomFieldSupport.restoreReadOnlyValues(entity, readOnlyKeys, old);
-    var saved = getRepository().save(entity);
-    afterUpdate(id, saved, dto);
-    entityManager.flush();
-    entityManager.refresh(saved);
-    return enriched(toResourceRepresentation(saved));
   }
 
   @Override
   protected void beforeCreate(CreateCargoDTO dto, Cargo e) {
-    if (dto.getControleVaga() == null || dto.getPorReferencia() == null || dto.getEAglutinador() == null)
-      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-          "Informe controle de vagas, referência salarial e aglutinação explicitamente.");
-    invariants.cargo(e);
     checkOrg(e.getEmpCodigo());
+    invariants.cargo(e);
     if (getRepository().existsById(e.getCargo()))
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Cargo já cadastrado.");
   }
@@ -199,9 +146,40 @@ public class CargoService
     checkOrg(e.getEmpCodigo());
   }
 
+  @Override
+  protected void beforeDelete(Integer id, Cargo entity) {
+    if (entity != null) {
+      checkOrg(entity.getEmpCodigo());
+    }
+    if (getEntityManager() != null && id != null && entity != null) {
+      long ocupacoes =
+          getEntityManager()
+              .createQuery(
+                  "select count(v) from Vinculo v where v.empCodigo=:org and (v.cargo=:c or v.cargoComissao=:c)",
+                  Long.class)
+              .setParameter("org", entity.getEmpCodigo())
+              .setParameter("c", id)
+              .getSingleResult();
+      if (ocupacoes > 0) {
+        throw new ResponseStatusException(
+            HttpStatus.CONFLICT,
+            "Não é permitido excluir cargo que possui vínculos funcionais associados.");
+      }
+    }
+  }
+
   private void checkOrg(Integer orgao) {
     if (!java.util.Objects.equals(orgao, tenant.orgao()))
       throw new ResponseStatusException(
-          HttpStatus.UNPROCESSABLE_ENTITY, "Órgão do cargo diverge de X-Tenant.");
+          HttpStatus.FORBIDDEN, "Órgão do cargo diverge de X-Tenant.");
   }
+  @Override protected java.util.Optional<org.praxisplatform.uischema.capability.ResourceStateSnapshot> toResourceStateSnapshot(Cargo e) {
+    return java.util.Optional.of(snapshotState(e));
+  }
+  private org.praxisplatform.uischema.capability.ResourceStateSnapshot snapshotState(Cargo e) {
+    return org.praxisplatform.uischema.capability.ResourceStateSnapshot.of(e.getDtExtincao() == null ? "VIGENTE" : "EXTINTO");
+  }
+
+  @Override protected String resolveResourceKey() { return "administracao-pessoal.cargos"; }
+
 }

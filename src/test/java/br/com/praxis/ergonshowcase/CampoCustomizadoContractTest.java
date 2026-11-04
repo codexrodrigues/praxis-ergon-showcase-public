@@ -10,12 +10,12 @@ import static org.mockito.Mockito.when;
 
 import br.com.praxis.ergonshowcase.config.ErgonDeterminationConfig;
 import br.com.praxis.ergonshowcase.config.TenantContext;
-import br.com.praxis.ergonshowcase.config.VinculoStateProvider;
 import br.com.praxis.ergonshowcase.domain.*;
 import br.com.praxis.ergonshowcase.dto.*;
 import br.com.praxis.ergonshowcase.mapper.*;
 import br.com.praxis.ergonshowcase.repository.DefinicaoCampoCustomizadoRepository;
 import br.com.praxis.ergonshowcase.repository.VinculoRepository;
+import br.com.praxis.ergonshowcase.rules.ErgonRuleViolationException;
 import br.com.praxis.ergonshowcase.service.ErgonDeterminationService;
 import br.com.praxis.ergonshowcase.service.ErgonInvariants;
 import br.com.praxis.ergonshowcase.service.ErgonReadFacts;
@@ -227,15 +227,21 @@ class CampoCustomizadoContractTest {
     // 1. SELECT sem optionTabela -> 422
     cc.setOptionTabela(null);
     assertThatThrownBy(() -> invariants.campoCustomizado(cc, false))
-        .isInstanceOf(ResponseStatusException.class)
-        .hasMessageContaining("exige informar a tabela geral de opções");
+        .isInstanceOfSatisfying(ErgonRuleViolationException.class, failure -> {
+          assertThat(failure.getHttpStatus()).isEqualTo(422);
+          assertThat(failure.getReasonCodes()).containsExactly("CERG-09051");
+        });
     cc.setOptionTabela("ERG_TIPO_SANGUINEO");
 
-    // 2. Tipo de dado inválido -> 422
+    // 2. Tipo de dado inválido -> 400
     cc.setFieldType("XML");
     assertThatThrownBy(() -> invariants.campoCustomizado(cc, false))
         .isInstanceOf(ResponseStatusException.class)
-        .hasMessageContaining("Tipo de dado inválido");
+        .satisfies(ex -> {
+          var status = (ResponseStatusException) ex;
+          assertThat(status.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+          assertThat(status.getReason()).contains("Tipo de dado inválido");
+        });
     cc.setFieldType("SELECT");
 
     // 3. Chave duplicada para o mesmo órgão e recurso -> 409 CONFLICT
@@ -274,9 +280,8 @@ class CampoCustomizadoContractTest {
     cc.setActive(true);
     when(repo.findById(900L)).thenReturn(Optional.of(cc));
 
-    var stateProvider = new VinculoStateProvider(mock(VinculoRepository.class));
-    ReflectionTestUtils.setField(stateProvider, "camposCustomizados", repo);
-    ReflectionTestUtils.setField(stateProvider, "tenant", new TenantContext());
+    var stateProvider = StateSnapshotFixture.provider(StateSnapshotFixture.service(br.com.praxis.ergonshowcase.service.DefinicaoCampoCustomizadoService.class, repo));
+
 
     var ativoSnap =
         stateProvider.resolve("administracao-pessoal.campos-customizados", "900").orElseThrow();

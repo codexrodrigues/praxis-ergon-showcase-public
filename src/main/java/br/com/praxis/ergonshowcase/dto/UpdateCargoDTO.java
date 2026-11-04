@@ -14,10 +14,4 @@ import org.praxisplatform.uischema.annotation.*;
     description =
         "Manutenção cadastral de cargos, com identidade preservada e versão exigida em If-Match.")
 public class UpdateCargoDTO extends CargoDados {
-  /** Defaults históricos exclusivos da substituição cadastral; CREATE exige escolhas explícitas. */
-  public UpdateCargoDTO() {
-    setControleVaga(false);
-    setPorReferencia(false);
-    setEAglutinador(false);
-  }
 }

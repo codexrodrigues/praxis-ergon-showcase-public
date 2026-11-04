@@ -18,6 +18,27 @@ import org.praxisplatform.uischema.extension.annotation.UISchema;
 @Setter
 public abstract class FeriasGozoDados {
 
+  // Prévia não persistida. Linhagem: docs-legado/v7x/aps/FERIAS.tab (DTINI, DTFIM, ABONO, TOTDIAS).
+  @Schema(description = "Duração inclusiva projetada da parcela entre início e término previstos; permite conferir a duração sem substituir as datas e os dias informados.", accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(label = "Duração prevista", helpText = "Dias de gozo calculados para as datas do rascunho.", group = "Prévia da parcela", order = 951, type = FieldDataType.NUMBER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "date_range", readOnly = true, tableHidden = true)
+  @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+  private Integer diasGozoPrevistos;
+
+  @Schema(description = "Término da parcela projetado a partir do início e da duração, ou conferido pela data final informada; a gravação permanece sujeita ao período autorizado.", accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(label = "Término calculado", helpText = "Confira o término previsto da parcela de férias.", group = "Prévia da parcela", order = 952, type = FieldDataType.DATE, controlType = FieldControlType.DATE_PICKER, icon = "event", preset = org.praxisplatform.uischema.extension.annotation.UISchemaPreset.NONE, readOnly = true, tableHidden = true)
+  @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+  private LocalDate dtprevfimPrevista;
+
+  @Schema(description = "Dias de abono pecuniário sugeridos para a parcela segundo a fração do parâmetro estatutário e o direito do período; não autoriza a venda de dias.", accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(label = "Abono previsto", helpText = "Dias de abono considerados na estimativa de saldo.", group = "Prévia da parcela", order = 953, type = FieldDataType.NUMBER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "sell", readOnly = true, tableHidden = true)
+  @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+  private Integer diasAbonoPrevistos;
+
+  @Schema(description = "Saldo estimado do período aquisitivo após debitar o gozo e o abono desta parcela, antes da confirmação transacional e da concorrência.", accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(label = "Saldo após parcela", helpText = "Saldo projetado após os dias de gozo e de abono.", group = "Prévia da parcela", order = 954, type = FieldDataType.NUMBER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "balance", readOnly = true, tableHidden = true)
+  @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+  private Integer saldoPaAposParcela;
+
   @Schema(
       description =
           "Código do órgão público de lotação do vínculo funcional (hidratado automaticamente pelo período aquisitivo quando omitido).",
@@ -129,8 +150,7 @@ public abstract class FeriasGozoDados {
       icon = "event")
   private LocalDate dtini;
 
-  @NotNull
-  @Schema(description = "Data de término previsto da parcela de férias programada.")
+  @Schema(description = "Data de término previsto. Pode ser omitida quando a quantidade de dias de gozo for informada.")
   @BulkEditable
   @UISchema(
       label = "Término previsto",
@@ -157,10 +177,9 @@ public abstract class FeriasGozoDados {
       icon = "event_busy")
   private LocalDate dtfim;
 
-  @NotNull
   @Min(1)
   @Max(90)
-  @Schema(description = "Quantidade de dias corridos de gozo nesta parcela de férias.")
+  @Schema(description = "Dias corridos de gozo. Podem ser omitidos quando o término previsto for informado.")
   @BulkEditable
   @UISchema(
       label = "Dias de gozo",
@@ -207,7 +226,6 @@ public abstract class FeriasGozoDados {
   @Schema(
       description =
           "Posição cronológica do abono pecuniário em relação ao gozo: I (no início das férias) ou F (ao final das férias).",
-      allowableValues = {"I", "F"},
       nullable = true)
   @BulkEditable(allowClear = true)
   @UISchema(

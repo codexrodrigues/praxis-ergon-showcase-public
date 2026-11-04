@@ -1,0 +1,792 @@
+[
+  {
+    "operationKey": "createErgonDesignacaoFuncao",
+    "positive": {
+      "draft": {
+        "id": null,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "vagaFuncaoId": 102,
+        "setorId": "001",
+        "dtExercicio": "2026-01-02",
+        "substituto1Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "substituto2Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "opcaoRemuneracao": "FUNCAO",
+        "valorRemuneracao": 1000,
+        "atoDispensaId": null,
+        "motivoDispensa": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": null,
+      "vaga": {
+        "id": 102,
+        "empCodigo": 1,
+        "situacao": "ATIVA",
+        "funcaoId": 101,
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        }
+      },
+      "neighborhood": {
+        "designacoesDaVaga": [],
+        "substituicoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "createErgonDesignacaoFuncao",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "CREATE"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "updateErgonDesignacaoFuncao",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "vagaFuncaoId": 102,
+        "setorId": "001",
+        "dtExercicio": "2026-01-02",
+        "substituto1Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "substituto2Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "opcaoRemuneracao": "FUNCAO",
+        "valorRemuneracao": 1000,
+        "atoDispensaId": null,
+        "motivoDispensa": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "vagaFuncaoId": 102,
+        "setorId": "001",
+        "dtExercicio": "2026-01-02",
+        "substituto1Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "substituto2Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "opcaoRemuneracao": "FUNCAO",
+        "valorRemuneracao": 1000,
+        "atoDispensaId": null,
+        "motivoDispensa": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "vaga": {
+        "id": 102,
+        "empCodigo": 1,
+        "situacao": "ATIVA",
+        "funcaoId": 101,
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        }
+      },
+      "neighborhood": {
+        "designacoesDaVaga": [],
+        "substituicoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "updateErgonDesignacaoFuncao",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "UPDATE"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "administracao-pessoal.designacoes.bulk.update.evaluation",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "vagaFuncaoId": 102,
+        "setorId": "001",
+        "dtExercicio": "2026-01-02",
+        "substituto1Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "substituto2Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "opcaoRemuneracao": "FUNCAO",
+        "valorRemuneracao": 1000,
+        "atoDispensaId": null,
+        "motivoDispensa": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "vagaFuncaoId": 102,
+        "setorId": "001",
+        "dtExercicio": "2026-01-02",
+        "substituto1Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "substituto2Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "opcaoRemuneracao": "FUNCAO",
+        "valorRemuneracao": 1000,
+        "atoDispensaId": null,
+        "motivoDispensa": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "vaga": {
+        "id": 102,
+        "empCodigo": 1,
+        "situacao": "ATIVA",
+        "funcaoId": 101,
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        }
+      },
+      "neighborhood": {
+        "designacoesDaVaga": [],
+        "substituicoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "administracao-pessoal.designacoes.bulk.update.evaluation",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "BULK_ITEM"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "administracao-pessoal.designacoes.bulk.update-items.evaluation",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "vagaFuncaoId": 102,
+        "setorId": "001",
+        "dtExercicio": "2026-01-02",
+        "substituto1Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "substituto2Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "opcaoRemuneracao": "FUNCAO",
+        "valorRemuneracao": 1000,
+        "atoDispensaId": null,
+        "motivoDispensa": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "vagaFuncaoId": 102,
+        "setorId": "001",
+        "dtExercicio": "2026-01-02",
+        "substituto1Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "substituto2Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "opcaoRemuneracao": "FUNCAO",
+        "valorRemuneracao": 1000,
+        "atoDispensaId": null,
+        "motivoDispensa": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "vaga": {
+        "id": 102,
+        "empCodigo": 1,
+        "situacao": "ATIVA",
+        "funcaoId": 101,
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        }
+      },
+      "neighborhood": {
+        "designacoesDaVaga": [],
+        "substituicoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "administracao-pessoal.designacoes.bulk.update-items.evaluation",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "BULK_ITEM"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "administracao-pessoal.designacoes.bulk.update",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "vagaFuncaoId": 102,
+        "setorId": "001",
+        "dtExercicio": "2026-01-02",
+        "substituto1Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "substituto2Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "opcaoRemuneracao": "FUNCAO",
+        "valorRemuneracao": 1000,
+        "atoDispensaId": null,
+        "motivoDispensa": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "vagaFuncaoId": 102,
+        "setorId": "001",
+        "dtExercicio": "2026-01-02",
+        "substituto1Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "substituto2Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "opcaoRemuneracao": "FUNCAO",
+        "valorRemuneracao": 1000,
+        "atoDispensaId": null,
+        "motivoDispensa": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "vaga": {
+        "id": 102,
+        "empCodigo": 1,
+        "situacao": "ATIVA",
+        "funcaoId": 101,
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        }
+      },
+      "neighborhood": {
+        "designacoesDaVaga": [],
+        "substituicoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "administracao-pessoal.designacoes.bulk.update",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "BULK_ITEM"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "administracao-pessoal.designacoes.bulk.update-items",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "vagaFuncaoId": 102,
+        "setorId": "001",
+        "dtExercicio": "2026-01-02",
+        "substituto1Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "substituto2Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "opcaoRemuneracao": "FUNCAO",
+        "valorRemuneracao": 1000,
+        "atoDispensaId": null,
+        "motivoDispensa": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "vagaFuncaoId": 102,
+        "setorId": "001",
+        "dtExercicio": "2026-01-02",
+        "substituto1Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "substituto2Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "opcaoRemuneracao": "FUNCAO",
+        "valorRemuneracao": 1000,
+        "atoDispensaId": null,
+        "motivoDispensa": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "vaga": {
+        "id": 102,
+        "empCodigo": 1,
+        "situacao": "ATIVA",
+        "funcaoId": 101,
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        }
+      },
+      "neighborhood": {
+        "designacoesDaVaga": [],
+        "substituicoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "administracao-pessoal.designacoes.bulk.update-items",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "BULK_ITEM"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "administracao-pessoal.designacoes.delete",
+    "positive": {
+      "draft": null,
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "vagaFuncaoId": 102,
+        "setorId": "001",
+        "dtExercicio": "2026-01-02",
+        "substituto1Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "substituto2Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "opcaoRemuneracao": "FUNCAO",
+        "valorRemuneracao": 1000,
+        "atoDispensaId": null,
+        "motivoDispensa": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "vaga": {
+        "id": 102,
+        "empCodigo": 1,
+        "situacao": "ATIVA",
+        "funcaoId": 101,
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        }
+      },
+      "neighborhood": {
+        "designacoesDaVaga": [],
+        "substituicoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "administracao-pessoal.designacoes.delete",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "DELETE"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "administracao-pessoal.designacoes.delete-batch",
+    "positive": {
+      "draft": null,
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "vagaFuncaoId": 102,
+        "setorId": "001",
+        "dtExercicio": "2026-01-02",
+        "substituto1Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "substituto2Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "opcaoRemuneracao": "FUNCAO",
+        "valorRemuneracao": 1000,
+        "atoDispensaId": null,
+        "motivoDispensa": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "vaga": {
+        "id": 102,
+        "empCodigo": 1,
+        "situacao": "ATIVA",
+        "funcaoId": 101,
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        }
+      },
+      "neighborhood": {
+        "designacoesDaVaga": [],
+        "substituicoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "administracao-pessoal.designacoes.delete-batch",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "DELETE"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "ergon.designacoes.homologar-designacoes-lote.evaluation",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "vagaFuncaoId": 102,
+        "setorId": "001",
+        "dtExercicio": "2026-01-02",
+        "substituto1Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "substituto2Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "opcaoRemuneracao": "FUNCAO",
+        "valorRemuneracao": 1000,
+        "atoDispensaId": null,
+        "motivoDispensa": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "vagaFuncaoId": 102,
+        "setorId": "001",
+        "dtExercicio": "2026-01-02",
+        "substituto1Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "substituto2Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "opcaoRemuneracao": "FUNCAO",
+        "valorRemuneracao": 1000,
+        "atoDispensaId": null,
+        "motivoDispensa": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "vaga": {
+        "id": 102,
+        "empCodigo": 1,
+        "situacao": "ATIVA",
+        "funcaoId": 101,
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        }
+      },
+      "neighborhood": {
+        "designacoesDaVaga": [],
+        "substituicoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "ergon.designacoes.homologar-designacoes-lote.evaluation",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "COMMAND_ITEM"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "ergon.designacoes.homologar-designacoes-lote",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "vagaFuncaoId": 102,
+        "setorId": "001",
+        "dtExercicio": "2026-01-02",
+        "substituto1Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "substituto2Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "opcaoRemuneracao": "FUNCAO",
+        "valorRemuneracao": 1000,
+        "atoDispensaId": null,
+        "motivoDispensa": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "vagaFuncaoId": 102,
+        "setorId": "001",
+        "dtExercicio": "2026-01-02",
+        "substituto1Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "substituto2Id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "opcaoRemuneracao": "FUNCAO",
+        "valorRemuneracao": 1000,
+        "atoDispensaId": null,
+        "motivoDispensa": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "vaga": {
+        "id": 102,
+        "empCodigo": 1,
+        "situacao": "ATIVA",
+        "funcaoId": 101,
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        }
+      },
+      "neighborhood": {
+        "designacoesDaVaga": [],
+        "substituicoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "ergon.designacoes.homologar-designacoes-lote",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "COMMAND_ITEM"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  }
+]

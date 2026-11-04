@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import br.com.praxis.ergonshowcase.config.ErgonDeterminationConfig;
 import br.com.praxis.ergonshowcase.config.TenantContext;
-import br.com.praxis.ergonshowcase.config.VinculoStateProvider;
 import br.com.praxis.ergonshowcase.domain.*;
 import br.com.praxis.ergonshowcase.dto.*;
 import br.com.praxis.ergonshowcase.mapper.*;
@@ -199,7 +198,7 @@ class FrequenciaContractTest {
     invalidDraft.setDtini(LocalDate.of(2026, 5, 10));
     invalidDraft.setDtfim(LocalDate.of(2026, 5, 1));
     assertThatThrownBy(() -> service.previaFrequencia(invalidDraft))
-        .isInstanceOf(ResponseStatusException.class)
+        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
         .hasMessageContaining("não pode anteceder a data de início");
   }
 
@@ -209,6 +208,23 @@ class FrequenciaContractTest {
     EntityManager em = mock(EntityManager.class);
     var invariants = new ErgonInvariants();
     ReflectionTestUtils.setField(invariants, "em", em);
+    var governed = new br.com.praxis.ergonshowcase.service.FrequenciaService(
+        null, null, mock(br.com.praxis.ergonshowcase.config.TenantContext.class));
+    ReflectionTestUtils.setField(governed, "entityManager", em);
+    ReflectionTestUtils.setField(invariants, "frequenciaService", governed);
+
+    TypedQuery<br.com.praxis.ergonshowcase.domain.RegraFrequenciaEstatutaria> statutory =
+        mock(TypedQuery.class, org.mockito.Mockito.RETURNS_SELF);
+    when(em.createQuery(anyString(), eq(br.com.praxis.ergonshowcase.domain.RegraFrequenciaEstatutaria.class)))
+        .thenReturn(statutory);
+    when(statutory.getResultList()).thenReturn(List.of());
+    TypedQuery<br.com.praxis.ergonshowcase.domain.Afastamento> crossResource =
+        mock(TypedQuery.class, org.mockito.Mockito.RETURNS_SELF);
+    when(em.createQuery(anyString(), eq(br.com.praxis.ergonshowcase.domain.Afastamento.class)))
+        .thenReturn(crossResource);
+    when(crossResource.getResultList()).thenReturn(List.of());
+
+
 
     var titular = new Vinculo();
     titular.setId(new VinculoId(1001L, 1));
@@ -218,9 +234,11 @@ class FrequenciaContractTest {
     when(em.find(eq(Vinculo.class), eq(new VinculoId(1001L, 1)), any(LockModeType.class)))
         .thenReturn(titular);
 
+    when(em.find(Vinculo.class, titular.getId())).thenReturn(titular);
     var pessoa = new ServidorPessoa();
     pessoa.setNumero(1001L);
     pessoa.setSexo("M");
+    when(em.find(ServidorPessoa.class, 1001L)).thenReturn(pessoa);
     when(em.find(eq(ServidorPessoa.class), eq(1001L), any(LockModeType.class))).thenReturn(pessoa);
 
     var codigo = new CodigoFrequencia();
@@ -261,26 +279,27 @@ class FrequenciaContractTest {
     // 1. Falta de horário quando horaEntradaSaida = true -> 422
     freq.setHoraSaida(null);
     assertThatThrownBy(() -> invariants.frequencia(freq, false))
-        .isInstanceOf(ResponseStatusException.class)
-        .hasMessageContaining("exige o preenchimento de hora de entrada e hora de saída");
+        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
+        .satisfies(ex -> assertThat(((org.praxisplatform.rules.violation.PraxisRuleViolationException) ex).getReasonCodes()).contains("ERG-00436"));
     freq.setHoraSaida(LocalTime.of(20, 0));
 
     // 2. Quantidade superior a qtdmax (4h) -> 422
     freq.setQuantidade(new BigDecimal("6.00"));
     assertThatThrownBy(() -> invariants.frequencia(freq, false))
-        .isInstanceOf(ResponseStatusException.class)
-        .hasMessageContaining("excede o limite máximo permitido");
+        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
+        .satisfies(ex -> assertThat(((org.praxisplatform.rules.violation.PraxisRuleViolationException) ex).getReasonCodes()).contains("ERG-00428"));
     freq.setQuantidade(new BigDecimal("2.00"));
 
     // 3. Código não habilitado para lançamento via frequência -> 422
     codigo.setViaFrequencia(false);
     assertThatThrownBy(() -> invariants.frequencia(freq, false))
-        .isInstanceOf(ResponseStatusException.class)
-        .hasMessageContaining("não permite lançamento via frequência");
+        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
+        .satisfies(ex -> assertThat(((org.praxisplatform.rules.violation.PraxisRuleViolationException) ex).getReasonCodes()).contains("ERG-00400"));
     codigo.setViaFrequencia(true);
 
     // 4. Sobreposição com outra ocorrência ativa do mesmo código -> 409 CONFLICT
     var existente = new Frequencia();
+    existente.setEmpCodigo(1);
     existente.setId(699L);
     existente.setNumfunc(1001L);
     existente.setNumvinc(1);
@@ -292,10 +311,10 @@ class FrequenciaContractTest {
     when(overlapQuery.getResultList()).thenReturn(List.of(existente));
 
     assertThatThrownBy(() -> invariants.frequencia(freq, false))
-        .isInstanceOf(ResponseStatusException.class)
+        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
         .satisfies(
             ex ->
-                assertThat(((ResponseStatusException) ex).getStatusCode())
+                assertThat(ErgonFailureAssertions.status(ex))
                     .isEqualTo(HttpStatus.CONFLICT));
   }
 
@@ -320,9 +339,8 @@ class FrequenciaContractTest {
     freq.setHoraSaida(LocalTime.of(20, 0));
     when(freqRepo.findById(700L)).thenReturn(Optional.of(freq));
 
-    var stateProvider = new VinculoStateProvider(mock(VinculoRepository.class));
-    ReflectionTestUtils.setField(stateProvider, "frequencias", freqRepo);
-    ReflectionTestUtils.setField(stateProvider, "tenant", new TenantContext());
+    var stateProvider = StateSnapshotFixture.provider(StateSnapshotFixture.service(br.com.praxis.ergonshowcase.service.FrequenciaService.class, freqRepo));
+
 
     var pendenteSnap =
         stateProvider.resolve("administracao-pessoal.frequencias", "700").orElseThrow();

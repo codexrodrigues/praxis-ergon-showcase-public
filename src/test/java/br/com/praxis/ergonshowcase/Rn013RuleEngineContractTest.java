@@ -53,7 +53,7 @@ class Rn013RuleEngineContractTest {
 
   @BeforeEach
   void setUp() {
-    facade = new ErgonRuleEngineFacade();
+    facade = RuleCatalogExecution.facade();
   }
 
   @Test
@@ -255,17 +255,17 @@ class Rn013RuleEngineContractTest {
 
   @Test
   void mode3RestrictOnlyWithAugmentEnforcesCustomerAndProductRulesUnderDenyOverrides() {
-    RuleDecisionPlan orgao2AugmentPlan =
-        facade.compilePlan(
-            Rn013RegrasFrequenciaRuleSet.withCustomerBindings(
-                List.of(Rn013RegrasFrequenciaRuleSet.customerMode3AugmentBinding())));
+    RuleDecisionPlan orgao2AugmentPlan = facade.resolveRn013Plan(2);
 
-    // Rascunho com qtdMaxDias = 45 e sem documentoLegalId
     RegraFrequenciaEstatutaria draftWithoutDoc = validBaselineDraft();
-    draftWithoutDoc.setQtdMaxDias(BigDecimal.valueOf(45));
+    draftWithoutDoc.setQtdMaxDias(BigDecimal.valueOf(12));
+    draftWithoutDoc.setQtdMaxConsecAno(30);
     draftWithoutDoc.setDocumentoLegalId(null);
+    assertThat(facade.evaluate(orgao2AugmentPlan, facade.buildRn013Facts(draftWithoutDoc, List.of(), 2))
+        .decision()).isEqualTo(RuleDecision.ALLOW);
+    draftWithoutDoc.setQtdMaxConsecAno(31);
 
-    // Órgão 1 permite (produto não exige documentoLegalId para qtdMaxDias > 30)
+    // O produto permite 31 dias consecutivos acumulados no ano sem documento.
     RuleEvaluationResult orgao1Allow =
         facade.evaluate(
             facade.resolveRn013Plan(1), facade.buildRn013Facts(draftWithoutDoc, List.of(), 1));
@@ -286,8 +286,9 @@ class Rn013RuleEngineContractTest {
               assertThat(b.reasonCodes()).containsExactly("CERG-09001");
             });
 
-    // Quando documentoLegalId é informado, mas qtdMaxConsecAno = 367, a regra do produto ERG-08391 continua ativa!
     draftWithoutDoc.setDocumentoLegalId(91L);
+    assertThat(facade.evaluate(orgao2AugmentPlan, facade.buildRn013Facts(draftWithoutDoc, List.of(), 2))
+        .decision()).isEqualTo(RuleDecision.ALLOW);
     draftWithoutDoc.setQtdMaxConsecAno(367);
     RuleEvaluationResult orgao2DenyProduct =
         facade.evaluate(orgao2AugmentPlan, facade.buildRn013Facts(draftWithoutDoc, List.of(), 2));
@@ -403,7 +404,7 @@ class Rn013RuleEngineContractTest {
                   .contains(Rn013RegrasFrequenciaRuleSet.SLOT_QTD_MAX_NON_NEGATIVE);
               assertThat(ruleEx.getDecisionSources()).containsExactly(DecisionSource.PRODUCT);
               assertThat(ruleEx.getReason())
-                  .contains("[ERG-08380 | PRODUCT | slot=rn013.qtd_max_non_negative]");
+                  .isEqualTo(ErgonRuleErrorCatalog.resolveMessagePtBr("ERG-08380"));
               assertThat(ruleEx.getBody().getProperties())
                   .containsEntry("ruleSetKey", Rn013RegrasFrequenciaRuleSet.RULESET_KEY)
                   .containsEntry("decision", "DENY");
@@ -533,11 +534,11 @@ class Rn013RuleEngineContractTest {
               assertThat(ruleEx.getReasonCodes()).containsExactly("CERG-08385");
               assertThat(ruleEx.getDecisionSources()).containsExactly(DecisionSource.CUSTOMER);
               assertThat(ruleEx.getReason())
-                  .contains("[CERG-08385 | CUSTOMER | slot=rn013.interp_mes_non_negative]");
+                  .isEqualTo(ErgonRuleErrorCatalog.resolveMessagePtBr("CERG-08385"));
             });
   }
 
-  private static RegraFrequenciaEstatutaria validBaselineDraft() {
+  static RegraFrequenciaEstatutaria validBaselineDraft() {
     RegraFrequenciaEstatutaria draft = new RegraFrequenciaEstatutaria();
     draft.setId(10L);
     draft.setEmpCodigo(1);

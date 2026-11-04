@@ -36,12 +36,17 @@ class ApiPathsContractTest {
         FrequenciaController.class, TabelaController.class,
         ItemTabelaController.class, DefinicaoCampoCustomizadoController.class,
         ParametroContagemFeriasController.class, PeriodoAquisitivoFeriasController.class,
-        FeriasGozoController.class, RadarFeriasPrescricaoController.class)) {
+        FeriasGozoController.class, RadarFeriasPrescricaoController.class,
+        AverbacaoTempoServicoController.class, PeriodoAquisitivoLicencaEspecialController.class,
+        LicencaEspecialGozoController.class, VendaLicencaEspecialController.class,
+        RadarTempoServicoLicencaEspecialController.class, FuncaoConfiancaController.class,
+        VagaFuncaoController.class, DesignacaoFuncaoController.class,
+        SubstituicaoFuncaoController.class, RadarChefiaSubstituicaoController.class, HistoricoSetorController.class, SetorParametrizacaoErgonController.class, CargoSetorController.class, SubempresaLocalidadeController.class, GrupoSetorController.class, RadarOrganogramaChefiaOcupacaoController.class)) {
       var mapping = AnnotatedElementUtils.findMergedAnnotation(controller, RequestMapping.class);
       assertThat(mapping).as(controller.getSimpleName()).isNotNull();
       controllerPaths.addAll(Arrays.asList(mapping.value()));
     }
-    assertThat(descriptors).hasSize(19);
+    assertThat(descriptors).hasSize(32);
     for (var source : descriptors) {
       assertThat(controllerPaths).contains(source.resourcePath());
       assertThat(source.runtimeContract().byIdsEndpoint()).isNotBlank();

@@ -38,7 +38,7 @@ public final class ParametroContagemFeriasRuleSet {
   public static final String DOMAIN_SCOPE = "workforce.vacation-and-leave";
   public static final String RESOURCE_KEY = "administracao-pessoal.parametros-contagem-ferias";
   public static final String RULE_SET_KEY =
-      "ergon.administracao-pessoal.parametros-contagem-ferias.validacao";
+      "ergon.administracao-pessoal.parametros-contagem-ferias.matriz";
   public static final String OPERATION = "validate";
   public static final int VERSION = 1;
 
@@ -185,9 +185,9 @@ public final class ParametroContagemFeriasRuleSet {
         new DecisionSlot(
             SLOT_FERIAS_HABILITADAS_OBRIGATORIOS,
             DecisionStage.DOMAIN_DECISION,
-            SlotCardinality.SINGLE,
+            SlotCardinality.MULTIPLE,
             OverridePolicy.FORBIDDEN,
-            DecisionAggregationPolicy.SINGLE_RESULT,
+            DecisionAggregationPolicy.DENY_OVERRIDES,
             null),
         new DecisionSlot(
             SLOT_FERIAS_LIMITES_DIAS_TEMPLATE,
@@ -265,14 +265,6 @@ public final class ParametroContagemFeriasRuleSet {
             """,
             "ERG-01873",
             baseFacts),
-        // 2. Hook pré-validação
-        productJsonLogicBinding(
-            "product.parametros-conta.hook-pre-baseline",
-            SLOT_HOOK_PRE_VALIDACAO,
-            20,
-            "{\"==\": [1, 1]}",
-            "CERG-PARAM-PRE-001",
-            baseFacts),
         // 3a. ERG-01870: criterioPrescricao em ['I', 'F']
         productJsonLogicBinding(
             "product.parametros-conta.erg-01870",
@@ -312,7 +304,7 @@ public final class ParametroContagemFeriasRuleSet {
             """,
             "ERG-01872",
             baseFacts),
-        // 4. ERG-01800: campos obrigatórios quando temFerias == true
+        // 4a. ERG-01800: totDiasFer obrigatório quando temFerias == true
         productJsonLogicBinding(
             "product.parametros-conta.erg-01800",
             SLOT_FERIAS_HABILITADAS_OBRIGATORIOS,
@@ -324,7 +316,25 @@ public final class ParametroContagemFeriasRuleSet {
                 {
                   "and": [
                     {"!=": [{"var": "draft.totDiasFer"}, null]},
-                    {">": [{"var": "draft.totDiasFer"}, 0]},
+                    {">": [{"var": "draft.totDiasFer"}, 0]}
+                  ]
+                }
+              ]
+            }
+            """,
+            "ERG-01800",
+            baseFacts),
+        // 4b. ERG-01801: limites de períodos e dias por parcela obrigatórios quando temFerias == true
+        productJsonLogicBinding(
+            "product.parametros-conta.erg-01801",
+            SLOT_FERIAS_HABILITADAS_OBRIGATORIOS,
+            41,
+            """
+            {
+              "or": [
+                {"!=": [{"var": "draft.temFerias"}, true]},
+                {
+                  "and": [
                     {"!=": [{"var": "draft.maxPerFer"}, null]},
                     {">": [{"var": "draft.maxPerFer"}, 0]},
                     {"!=": [{"var": "draft.minPerFer"}, null]},
@@ -338,7 +348,7 @@ public final class ParametroContagemFeriasRuleSet {
               ]
             }
             """,
-            "ERG-01800",
+            "ERG-01801",
             baseFacts),
         // 5. ERG-01806: template parametrizável de limites de dias e parcelas
         productJsonLogicBinding(
@@ -915,15 +925,7 @@ public final class ParametroContagemFeriasRuleSet {
             null,
             null,
             List.of("draft.dtini", "scope.overlappingActiveCount"),
-            null),
-        // 12. Hook pós-validação
-        productJsonLogicBinding(
-            "product.parametros-conta.hook-pos-baseline",
-            SLOT_HOOK_POS_VALIDACAO,
-            120,
-            "{\"==\": [1, 1]}",
-            "CERG-PARAM-POST-001",
-            baseFacts));
+            null));
   }
 
   public static RuleSetDefinition productRuleSet() {

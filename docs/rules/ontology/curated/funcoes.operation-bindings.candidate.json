@@ -1,0 +1,485 @@
+{
+  "ruleSetKey": "ergon.administracao-pessoal.funcoes.chefia",
+  "operations": [
+    {
+      "operationKey": "createErgonFuncaoConfianca",
+      "mode": "CREATE",
+      "controller": "FuncaoConfiancaController",
+      "operationId": "createErgonFuncaoConfianca",
+      "method": "POST",
+      "pathConstant": "ApiPaths.FUNCOES",
+      "relativePath": "",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "GOVERNED_FAMILY_WITH_OPERATION_APPLICABILITY",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "vagas",
+          "targetResourceKey": "administracao-pessoal.vagas-funcao",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "funcaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "designacoes",
+          "targetResourceKey": "administracao-pessoal.designacoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "funcaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ]
+    },
+    {
+      "operationKey": "updateErgonFuncaoConfianca",
+      "mode": "UPDATE",
+      "controller": "FuncaoConfiancaController",
+      "operationId": "updateErgonFuncaoConfianca",
+      "method": "PUT",
+      "pathConstant": "ApiPaths.FUNCOES",
+      "relativePath": "/{id}",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "GOVERNED_FAMILY_WITH_OPERATION_APPLICABILITY",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "vagas",
+          "targetResourceKey": "administracao-pessoal.vagas-funcao",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "funcaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "designacoes",
+          "targetResourceKey": "administracao-pessoal.designacoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "funcaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ]
+    },
+    {
+      "operationKey": "ergon.funcoes.bulk.uniform.evaluation",
+      "mode": "BULK_ITEM",
+      "controller": "FuncaoConfiancaController",
+      "operationId": "ergon.funcoes.bulk.uniform.evaluation",
+      "method": "POST",
+      "pathConstant": "ApiPaths.FUNCOES",
+      "relativePath": "/bulk/update/evaluation",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "GOVERNED_FAMILY_WITH_OPERATION_APPLICABILITY",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "vagas",
+          "targetResourceKey": "administracao-pessoal.vagas-funcao",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "funcaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "designacoes",
+          "targetResourceKey": "administracao-pessoal.designacoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "funcaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ]
+    },
+    {
+      "operationKey": "ergon.funcoes.bulk.items.evaluation",
+      "mode": "BULK_ITEM",
+      "controller": "FuncaoConfiancaController",
+      "operationId": "ergon.funcoes.bulk.items.evaluation",
+      "method": "POST",
+      "pathConstant": "ApiPaths.FUNCOES",
+      "relativePath": "/bulk/update-items/evaluation",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "GOVERNED_FAMILY_WITH_OPERATION_APPLICABILITY",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "vagas",
+          "targetResourceKey": "administracao-pessoal.vagas-funcao",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "funcaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "designacoes",
+          "targetResourceKey": "administracao-pessoal.designacoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "funcaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ]
+    },
+    {
+      "operationKey": "ergon.funcoes.bulk.uniform",
+      "mode": "BULK_ITEM",
+      "controller": "FuncaoConfiancaController",
+      "operationId": "ergon.funcoes.bulk.uniform",
+      "method": "POST",
+      "pathConstant": "ApiPaths.FUNCOES",
+      "relativePath": "/bulk/update",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "GOVERNED_FAMILY_WITH_OPERATION_APPLICABILITY",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "vagas",
+          "targetResourceKey": "administracao-pessoal.vagas-funcao",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "funcaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "designacoes",
+          "targetResourceKey": "administracao-pessoal.designacoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "funcaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ]
+    },
+    {
+      "operationKey": "ergon.funcoes.bulk.items",
+      "mode": "BULK_ITEM",
+      "controller": "FuncaoConfiancaController",
+      "operationId": "ergon.funcoes.bulk.items",
+      "method": "POST",
+      "pathConstant": "ApiPaths.FUNCOES",
+      "relativePath": "/bulk/update-items",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "GOVERNED_FAMILY_WITH_OPERATION_APPLICABILITY",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "vagas",
+          "targetResourceKey": "administracao-pessoal.vagas-funcao",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "funcaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "designacoes",
+          "targetResourceKey": "administracao-pessoal.designacoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "funcaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ]
+    },
+    {
+      "operationKey": "administracao-pessoal.funcoes.delete",
+      "mode": "DELETE",
+      "controller": "FuncaoConfiancaController",
+      "operationId": null,
+      "method": "DELETE",
+      "pathConstant": "ApiPaths.FUNCOES",
+      "relativePath": "/{id}",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "DELETE_GUARDS_TO_MIGRATE",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "vagas",
+          "targetResourceKey": "administracao-pessoal.vagas-funcao",
+          "fromRoot": "current",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "funcaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "designacoes",
+          "targetResourceKey": "administracao-pessoal.designacoes",
+          "fromRoot": "current",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "funcaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ],
+      "httpIdentity": "METHOD_AND_PATH; operationId must be obtained from canonical resolver in G2",
+      "providerPlan": "Pass detached OLD to dedicated delete guards; do not apply CREATE rules to draft=null."
+    },
+    {
+      "operationKey": "administracao-pessoal.funcoes.delete-batch",
+      "mode": "DELETE",
+      "controller": "FuncaoConfiancaController",
+      "operationId": null,
+      "method": "DELETE",
+      "pathConstant": "ApiPaths.FUNCOES",
+      "relativePath": "/batch",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "DELETE_GUARDS_TO_MIGRATE",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "vagas",
+          "targetResourceKey": "administracao-pessoal.vagas-funcao",
+          "fromRoot": "current",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "funcaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "designacoes",
+          "targetResourceKey": "administracao-pessoal.designacoes",
+          "fromRoot": "current",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "funcaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ],
+      "httpIdentity": "METHOD_AND_PATH; operationId must be obtained from canonical resolver in G2",
+      "providerPlan": "Pass detached OLD to dedicated delete guards; do not apply CREATE rules to draft=null."
+    },
+    {
+      "operationKey": "preview-product.chefia.erg-01101",
+      "mode": "PREVIEW",
+      "controller": "FuncaoConfiancaController",
+      "operationId": "determineErgonFuncaoConfiancaPrevia",
+      "method": "POST",
+      "pathConstant": "ApiPaths.FUNCOES",
+      "relativePath": "/determinations/previa",
+      "evaluationUnit": "ONE_SELECTED_SLOT",
+      "ruleSelection": "ACTIVE_SLOT_COMPOSITION",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [],
+      "collectionBindings": [],
+      "slotKey": "chefia.erg-01101",
+      "reasonCode": "ERG-01101",
+      "facadeMethod": "enforceFuncaoPreviewDates",
+      "activationCondition": "dtini != null && dtfim != null",
+      "customizationAdmission": "Validate each active replacement against this scope before activation; do not fabricate missing facts or silently fall back to product."
+    }
+  ],
+  "nonEvaluatingOperations": [],
+  "exclusions": [
+    {
+      "field": "version",
+      "reason": "Optimistic concurrency belongs to If-Match/transaction; not a business fact."
+    },
+    {
+      "field": "auditoria",
+      "reason": "Technical audit envelope; no migrated rule consumes it."
+    },
+    {
+      "field": "customFields",
+      "reason": "Separate CustomFieldValidator contract; no untyped map admitted in this RuleSet snapshot."
+    }
+  ],
+  "entityProjection": [
+    "id",
+    "empCodigo",
+    "descricao",
+    "dtini",
+    "dtfim",
+    "situacao",
+    "codigo",
+    "categoria",
+    "simbolo",
+    "controleVaga",
+    "dtInicioContrVaga",
+    "permiteSubstituicao",
+    "tipoSubstituicao",
+    "diasMinimosSubstituicao",
+    "valorGratificacao",
+    "percentualOpcaoEfetivo",
+    "exigeVinculoEfetivo",
+    "requisitos",
+    "documentoLegalId",
+    "atoPublicacaoId",
+    "observacoes"
+  ],
+  "collectionContract": {
+    "scope": "IDENTITY_RELATION_AND_TENANT_ONLY",
+    "maxItems": 10000,
+    "onOverflow": {
+      "decision": "INCONCLUSIVE",
+      "reasonCode": "FACTS_LIMIT_EXCEEDED"
+    },
+    "onQueryFailure": "ABORT_EVALUATION",
+    "missingIsEmpty": false,
+    "businessPredicates": "RuleSet with raw status and dates; reduce accumulator carries outer interval without implicit global access."
+  }
+}

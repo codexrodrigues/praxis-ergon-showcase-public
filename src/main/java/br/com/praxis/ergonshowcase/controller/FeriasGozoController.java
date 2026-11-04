@@ -71,8 +71,7 @@ import org.springframework.web.bind.annotation.*;
       "chavePeraqfer",
       "totDiasDireitoPa",
       "ordemParcela",
-      "dtini",
-      "situacao"
+      "dtini"
     })
 @ApiResource(
     value = ApiPaths.FERIAS_GOZO,
@@ -87,13 +86,7 @@ import org.springframework.web.bind.annotation.*;
             titleField = "parcelaResumo",
             displayLabelField = "parcelaResumo",
             subtitleField = "pessoaNome",
-            metadataFields = {
-              "vinculoMatricula",
-              "ordemParcela",
-              "situacao",
-              "dtini",
-              "diasGozo"
-            }),
+            metadataFields = {"orgaoNome", "situacao", "periodoAquisitivoExercicio"}),
     quickFilters = {
       @QuickFilter(
           id = "programadas",
@@ -122,7 +115,7 @@ import org.springframework.web.bind.annotation.*;
     description = "Cadastros civis e assentamentos funcionais dos órgãos públicos.",
     icon = "groups")
 public class FeriasGozoController
-    extends AbstractResourceController<
+    extends org.praxisplatform.uischema.controller.base.AbstractBulkGovernedResourceController<
         FeriasGozoResponseDTO,
         Long,
         FeriasGozoFilterDTO,
@@ -130,8 +123,6 @@ public class FeriasGozoController
         UpdateFeriasGozoDTO> {
 
   private final FeriasGozoService service;
-  private final ResourceVersionEtagService etags;
-  private final ResourceVersionScopeProvider scopes;
   @Autowired private ErgonBulkOperations bulk;
   @Autowired private ErgonDeterminationService determinations;
 
@@ -140,8 +131,7 @@ public class FeriasGozoController
       ResourceVersionEtagService etags,
       ResourceVersionScopeProvider scopes) {
     this.service = service;
-    this.etags = etags;
-    this.scopes = scopes;
+    configureResourceVersioning(etags, scopes);
   }
 
   @Override
@@ -301,11 +291,7 @@ public class FeriasGozoController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody AtualizarAbonoFinanceiroFeriasGozoDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags, ifMatch, scopes.currentScope(), "administracao-pessoal.ferias-gozo", id);
-    return withResourceVersion(
-        ResponseEntity.ok(), id, service.atualizarAbonoFinanceiro(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemPatch("abono-financeiro", id, ifMatch, condition -> service.atualizarAbonoFinanceiro(id, dto, condition)));
   }
 
   @PatchMapping("/{id}/substituto-folha")
@@ -331,11 +317,7 @@ public class FeriasGozoController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody AtualizarSubstitutoFolhaFeriasGozoDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags, ifMatch, scopes.currentScope(), "administracao-pessoal.ferias-gozo", id);
-    return withResourceVersion(
-        ResponseEntity.ok(), id, service.atualizarSubstitutoFolha(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemPatch("substituto-folha", id, ifMatch, condition -> service.atualizarSubstitutoFolha(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/homologar-ferias-gozo")
@@ -358,10 +340,8 @@ public class FeriasGozoController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody TransicaoFeriasGozoDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags, ifMatch, scopes.currentScope(), "administracao-pessoal.ferias-gozo", id);
-    return withResourceVersion(ResponseEntity.ok(), id, service.homologarFeriasGozo(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("homologar-ferias-gozo", id, ifMatch, null, dto,
+        condition -> service.homologarFeriasGozo(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/iniciar-ferias-gozo")
@@ -384,10 +364,8 @@ public class FeriasGozoController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody TransicaoFeriasGozoDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags, ifMatch, scopes.currentScope(), "administracao-pessoal.ferias-gozo", id);
-    return withResourceVersion(ResponseEntity.ok(), id, service.iniciarFeriasGozo(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("iniciar-ferias-gozo", id, ifMatch, null, dto,
+        condition -> service.iniciarFeriasGozo(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/concluir-ferias-gozo")
@@ -410,10 +388,8 @@ public class FeriasGozoController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody TransicaoFeriasGozoDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags, ifMatch, scopes.currentScope(), "administracao-pessoal.ferias-gozo", id);
-    return withResourceVersion(ResponseEntity.ok(), id, service.concluirFeriasGozo(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("concluir-ferias-gozo", id, ifMatch, null, dto,
+        condition -> service.concluirFeriasGozo(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/interromper-ferias-gozo")
@@ -437,10 +413,8 @@ public class FeriasGozoController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody InterromperFeriasGozoDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags, ifMatch, scopes.currentScope(), "administracao-pessoal.ferias-gozo", id);
-    return withResourceVersion(ResponseEntity.ok(), id, service.interromperFeriasGozo(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("interromper-ferias-gozo", id, ifMatch, null, dto,
+        condition -> service.interromperFeriasGozo(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/cancelar-ferias-gozo")
@@ -464,10 +438,8 @@ public class FeriasGozoController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody TransicaoFeriasGozoDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags, ifMatch, scopes.currentScope(), "administracao-pessoal.ferias-gozo", id);
-    return withResourceVersion(ResponseEntity.ok(), id, service.cancelarFeriasGozo(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("cancelar-ferias-gozo", id, ifMatch, null, dto,
+        condition -> service.cancelarFeriasGozo(id, dto, condition)));
   }
 
   @PostMapping("/determinations/previa")
@@ -482,42 +454,31 @@ public class FeriasGozoController
     return ResponseEntity.ok(determinations.previaFeriasGozo(draft));
   }
 
+  @Override
   @PostMapping("/bulk/update/evaluation")
   @Operation(
       operationId = "ergon.ferias-gozo.bulk.uniform.evaluation",
       summary = "Avaliar edição uniforme de parcelas de gozo de férias",
       description =
           "Avalia seleção, versões e alterações de parcelas de férias sem modificar o cadastro; produz uma proposta protegida.")
-  public RestApiResponse<BulkProposal> bulkEvaluate(
-      @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              content =
-                  @io.swagger.v3.oas.annotations.media.Content(
-                      schema =
-                          @io.swagger.v3.oas.annotations.media.Schema(
-                              implementation = ErgonBulkSchema.FeriasGozoUniform.class)))
-          @RequestBody
-          BulkUniformEvaluationRequest<String, FeriasGozoFilterDTO> request) {
-    return RestApiResponse.success(bulk.uniform(Resource.FERIAS_GOZO, request), null);
+  @BulkResourceOperation(BulkResourceOperation.Role.UNIFORM_EVALUATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> evaluateBulkUpdate(@RequestBody BulkUniformEvaluationRequest<?, FeriasGozoFilterDTO> request) {
+    return super.evaluateBulkUpdate(request);
   }
 
+  @Override
   @PostMapping("/bulk/update-items/evaluation")
   @Operation(
       operationId = "ergon.ferias-gozo.bulk.items.evaluation",
       summary = "Avaliar edições por parcela de gozo de férias",
       description =
           "Avalia deltas distintos e a versão esperada de cada parcela de férias, com impedimentos individualizados.")
-  public RestApiResponse<BulkProposal> bulkEvaluateItems(
-      @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              content =
-                  @io.swagger.v3.oas.annotations.media.Content(
-                      schema =
-                          @io.swagger.v3.oas.annotations.media.Schema(
-                              implementation = ErgonBulkSchema.FeriasGozoItems.class)))
-          @RequestBody
-          BulkItemEvaluationRequest<String> request) {
-    return RestApiResponse.success(bulk.items(Resource.FERIAS_GOZO, request), null);
+  @BulkResourceOperation(BulkResourceOperation.Role.ITEM_EVALUATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> evaluateBulkUpdateItems(@RequestBody BulkItemEvaluationRequest<?> request) {
+    return super.evaluateBulkUpdateItems(request);
   }
 
+  @Override
   @PostMapping("/bulk/update")
   @BulkOperation(
       mode = BulkMode.UNIFORM_UPDATE,
@@ -528,17 +489,12 @@ public class FeriasGozoController
       summary = "Confirmar edição uniforme de parcelas de gozo de férias",
       description =
           "Confirma uma proposta avaliada; cada parcela de férias é revalidada e possui recibo durável.")
-  public RestApiResponse<BulkExecution> bulkConfirm(
-      @RequestBody BulkConfirmationRequest request,
-      @Parameter(
-              description =
-                  "Chave estável desta confirmação; repetir a mesma chave recupera a execução.")
-          @RequestHeader("Idempotency-Key")
-          String key) {
-    return RestApiResponse.success(
-        bulk.confirm(Resource.FERIAS_GOZO, "ergon.ferias-gozo.bulk.uniform", request, key), null);
+  @BulkResourceOperation(BulkResourceOperation.Role.UNIFORM_CONFIRMATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> confirmBulkUpdate(@RequestBody BulkConfirmationRequest request, @RequestHeader("Idempotency-Key") String key) {
+    return super.confirmBulkUpdate(request, key);
   }
 
+  @Override
   @PostMapping("/bulk/update-items")
   @BulkOperation(
       mode = BulkMode.PER_ITEM_UPDATE,
@@ -549,121 +505,20 @@ public class FeriasGozoController
       summary = "Confirmar edições por parcela de gozo de férias",
       description =
           "Aplica os deltas individualizados preservados na proposta, com versão e resultado próprios por parcela.")
-  public RestApiResponse<BulkExecution> bulkConfirmItems(
-      @RequestBody BulkConfirmationRequest request,
-      @Parameter(
-              description =
-                  "Chave estável de confirmação para recuperar a mesma execução em caso de repetição.")
-          @RequestHeader("Idempotency-Key")
-          String key) {
-    return RestApiResponse.success(
-        bulk.confirm(Resource.FERIAS_GOZO, "ergon.ferias-gozo.bulk.items", request, key), null);
+  @BulkResourceOperation(BulkResourceOperation.Role.ITEM_CONFIRMATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> confirmBulkUpdateItems(@RequestBody BulkConfirmationRequest request, @RequestHeader("Idempotency-Key") String key) {
+    return super.confirmBulkUpdateItems(request, key);
   }
 
-  @GetMapping("/bulk/proposals/{proposalId}")
-  @BulkResourceOperation(BulkResourceOperation.Role.PROPOSAL)
-  @Operation(
-      operationId = "ergon.ferias-gozo.bulk.proposal",
-      summary = "Consultar proposta de lote de parcelas de férias",
-      description =
-          "Consulta totais e intenção pública da proposta após conferir acesso ao conjunto completo de parcelas.")
-  public RestApiResponse<BulkProposal> bulkProposal(
-      @Parameter(description = "Identidade da proposta avaliada.") @PathVariable UUID proposalId) {
-    return RestApiResponse.success(
-        bulk.proposal(
-            Resource.FERIAS_GOZO,
-            bulk.locate(Resource.FERIAS_GOZO, proposalId, false),
-            proposalId),
-        null);
-  }
 
-  @GetMapping("/bulk/proposals/{proposalId}/results")
-  @BulkResourceOperation(BulkResourceOperation.Role.PROPOSAL_RESULTS)
-  @Operation(
-      operationId = "ergon.ferias-gozo.bulk.proposal-results",
-      summary = "Inspecionar avaliação do lote de parcelas de férias",
-      description =
-          "Pagina parcelas executáveis e bloqueadas, com diagnósticos seguros e cursor vinculado ao solicitante.")
-  public RestApiResponse<CursorPage<BulkProposalItemResult<Object>>> bulkProposalResults(
-      @Parameter(description = "Identidade da proposta avaliada.") @PathVariable UUID proposalId,
-      @Parameter(description = "Quantidade de registros por página, de 1 a 200.")
-          @RequestParam(defaultValue = "50")
-          int size,
-      @Parameter(description = "Cursor opaco emitido na página anterior.")
-          @RequestParam(required = false)
-          String after) {
-    return RestApiResponse.success(
-        bulk.proposalResults(
-            Resource.FERIAS_GOZO,
-            bulk.locate(Resource.FERIAS_GOZO, proposalId, false),
-            proposalId,
-            size,
-            after),
-        null);
-  }
 
-  @GetMapping("/bulk/executions/{executionId}")
-  @BulkResourceOperation(BulkResourceOperation.Role.EXECUTION)
-  @Operation(
-      operationId = "ergon.ferias-gozo.bulk.execution",
-      summary = "Consultar execução do lote de parcelas de férias",
-      description = "Retorna estado e contadores reconciliados a partir dos recibos persistidos.")
-  public RestApiResponse<BulkExecution> bulkExecution(
-      @Parameter(description = "Identidade da execução confirmada.")
-          @PathVariable
-          UUID executionId) {
-    return RestApiResponse.success(
-        bulk.execution(
-            Resource.FERIAS_GOZO,
-            bulk.locate(Resource.FERIAS_GOZO, executionId, true),
-            executionId),
-        null);
-  }
 
-  @GetMapping("/bulk/executions/{executionId}/results")
-  @BulkResourceOperation(BulkResourceOperation.Role.EXECUTION_RESULTS)
-  @Operation(
-      operationId = "ergon.ferias-gozo.bulk.results",
-      summary = "Consultar recibos do lote de parcelas de férias",
-      description = "Pagina resultados por parcela sem expor dados sensíveis da proposta.")
-  public RestApiResponse<CursorPage<BulkItemResult<Object>>> bulkResults(
-      @Parameter(description = "Identidade da execução confirmada.")
-          @PathVariable
-          UUID executionId,
-      @Parameter(description = "Quantidade de recibos por página, de 1 a 200.")
-          @RequestParam(defaultValue = "50")
-          int size,
-      @Parameter(description = "Cursor opaco da página anterior de recibos.")
-          @RequestParam(required = false)
-          String after) {
-    return RestApiResponse.success(
-        bulk.results(
-            Resource.FERIAS_GOZO,
-            bulk.locate(Resource.FERIAS_GOZO, executionId, true),
-            executionId,
-            size,
-            after),
-        null);
-  }
 
-  @PostMapping("/bulk/executions/{executionId}/cancel")
-  @BulkResourceOperation(BulkResourceOperation.Role.CANCEL)
-  @Operation(
-      operationId = "ergon.ferias-gozo.bulk.cancel",
-      summary = "Solicitar parada do lote de parcelas de férias",
-      description =
-          "Registra a solicitação de parada sem desfazer alterações já confirmadas e sem reabrir efeitos no replay.")
-  public RestApiResponse<BulkExecution> bulkCancel(
-      @Parameter(description = "Identidade da execução a interromper.")
-          @PathVariable
-          UUID executionId) {
-    return RestApiResponse.success(
-        bulk.cancel(
-            Resource.FERIAS_GOZO,
-            bulk.locate(Resource.FERIAS_GOZO, executionId, true),
-            executionId),
-        null);
-  }
+
+
+
+
+
 
   @PostMapping("/bulk/homologar-ferias-gozo-lote/evaluation")
   @Operation(
@@ -671,18 +526,12 @@ public class FeriasGozoController
       summary = "Avaliar homologação coletiva de parcelas de gozo de férias",
       description =
           "Avalia homologação coletiva de parcelas de férias programadas do mesmo órgão, sem persistir alterações.")
-  public RestApiResponse<BulkProposal> bulkHomologarEvaluate(
-      @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              content =
-                  @io.swagger.v3.oas.annotations.media.Content(
-                      schema =
-                          @io.swagger.v3.oas.annotations.media.Schema(
-                              implementation = ErgonBulkSchema.HomologarFeriasGozoCommand.class)))
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> bulkHomologarEvaluate(
+
           @RequestBody
-          BulkCommandEvaluationRequest<TransicaoFeriasGozoDTO, String, FeriasGozoFilterDTO>
+          BulkCommandEvaluationRequest<TransicaoFeriasGozoDTO, ?, FeriasGozoFilterDTO>
               request) {
-    return RestApiResponse.success(
-        bulk.command(Resource.FERIAS_GOZO, "homologar-ferias-gozo-lote", request), null);
+    return evaluateBulkDomainCommand("homologar-ferias-gozo-lote", request);
   }
 
   @PostMapping("/actions/homologar-ferias-gozo-lote")
@@ -706,14 +555,16 @@ public class FeriasGozoController
       operationId = "ergon.ferias-gozo.homologar-ferias-gozo-lote",
       summary = "Homologar parcelas de férias em lote",
       description = "Executa homologação coletiva governada de parcelas de férias programadas.")
-  public RestApiResponse<BulkExecution> bulkHomologarConfirm(
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> bulkHomologarConfirm(
       @RequestBody BulkConfirmationRequest request,
       @Parameter(description = "Chave estável do ato coletivo para impedir efeitos duplicados.")
           @RequestHeader("Idempotency-Key")
           String key) {
-    return RestApiResponse.success(
-        bulk.confirm(
-            Resource.FERIAS_GOZO, "ergon.ferias-gozo.homologar-ferias-gozo-lote", request, key),
-        null);
+    return confirmBulkDomainCommand("homologar-ferias-gozo-lote", request, key);
   }
+  @Override @SuppressWarnings({"unchecked", "rawtypes"})
+  protected org.praxisplatform.uischema.bulk.JpaResourceBulkEngine getBulkEngine() { return bulk.engine(Resource.FERIAS_GOZO); }
+  @Override protected String bulkProposalOperationId(UUID id) { return bulk.locate(Resource.FERIAS_GOZO, id, false); }
+  @Override protected String bulkExecutionOperationId(UUID id) { return bulk.locate(Resource.FERIAS_GOZO, id, true); }
+
 }

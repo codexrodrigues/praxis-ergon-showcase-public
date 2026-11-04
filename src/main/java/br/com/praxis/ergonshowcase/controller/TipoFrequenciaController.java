@@ -49,7 +49,7 @@ import org.springframework.web.bind.annotation.*;
             titleField = "nome",
             displayLabelField = "nome",
             subtitleField = "id",
-            metadataFields = {"influiConta", "horaExtra"}),
+            metadataFields = {"documentoLegalNumero"}),
     quickFilters = {
       @QuickFilter(
           id = "influi-contagem",

@@ -1,0 +1,2863 @@
+--- a/src/main/java/br/com/praxis/ergonshowcase/bulk/ErgonBulkDomain.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/bulk/ErgonBulkDomain.java
+@@ -69,14 +69,10 @@
+   @Autowired TenantContext tenant;
+   @Autowired ErgonInvariants invariants;
+   @Autowired VinculoMapper vinculos;
+-  @Autowired ServidorPessoaMapper pessoas;
+   @Autowired CargoMapper cargos;
+   @Autowired DependenteMapper dependentes;
+   @Autowired AfastamentoMapper afastamentos;
+   @Autowired FrequenciaMapper frequencias;
+-  @Autowired DefinicaoCampoCustomizadoMapper camposCustomizados;
+-  @Autowired ParametroContagemFeriasMapper parametrosContagemFerias;
+-  @Autowired PeriodoAquisitivoFeriasMapper periodosAquisitivosFerias;
+   @Autowired FeriasGozoMapper feriasGozo;
+   @Autowired VinculoService vinculoService;
+   @Autowired ServidorPessoaService pessoaService;
+@@ -97,24 +93,7 @@
+   @Autowired LicencaEspecialGozoService licencaEspecialGozoService;
+   @Autowired VendaLicencaEspecialMapper vendaLicencaEspecial;
+   @Autowired VendaLicencaEspecialService vendaLicencaEspecialService;
+-  ResourceMapper mapper(Resource r) {
+-    return switch(r) {
+-      case VINCULOS -> vinculos;
+-      case PESSOAS -> pessoas;
+-      case CARGOS -> cargos;
+-      case DEPENDENTES -> dependentes;
+-      case AFASTAMENTOS -> afastamentos;
+-      case FREQUENCIAS -> frequencias;
+-      case CAMPOS_CUSTOMIZADOS -> camposCustomizados;
+-      case PARAMETROS_CONTAGEM_FERIAS -> parametrosContagemFerias;
+-      case PERIODOS_AQUISITIVOS_FERIAS -> periodosAquisitivosFerias;
+-      case AVERBACOES_TEMPO_SERVICO -> averbacaoTempoServico;
+-      case PERIODOS_AQUISITIVOS_LICENCA_ESPECIAL -> periodoAquisitivoLicencaEspecial;
+-      case LICENCAS_ESPECIAIS_GOZO -> licencaEspecialGozo;
+-      case VENDAS_LICENCA_ESPECIAL -> vendaLicencaEspecial;
+-      case FERIAS_GOZO -> feriasGozo;
+-    };
+-  }
++
+   public ErgonResourceService service(Resource resource) {
+     return switch (resource) {
+       case VINCULOS -> vinculoService; case PESSOAS -> pessoaService; case CARGOS -> cargoService;
+@@ -152,24 +131,7 @@
+       }
+     };
+   }
+-  public Object wire(Resource r, Object e) {
+-    return switch(r) {
+-      case CARGOS -> ((Cargo)e).getCargo();
+-      case PESSOAS -> ((ServidorPessoa)e).getNumero().toString();
+-      case AFASTAMENTOS -> ((Afastamento)e).getId().toString();
+-      case FREQUENCIAS -> ((Frequencia)e).getId().toString();
+-      case CAMPOS_CUSTOMIZADOS -> ((DefinicaoCampoCustomizado)e).getId().toString();
+-      case PARAMETROS_CONTAGEM_FERIAS -> ((ParametroContagemFerias)e).getId().toString();
+-      case PERIODOS_AQUISITIVOS_FERIAS -> ((PeriodoAquisitivoFerias)e).getId().toString();
+-      case AVERBACOES_TEMPO_SERVICO -> ((AverbacaoTempoServico)e).getId().toString();
+-      case PERIODOS_AQUISITIVOS_LICENCA_ESPECIAL -> ((PeriodoAquisitivoLicencaEspecial)e).getId().toString();
+-      case LICENCAS_ESPECIAIS_GOZO -> ((LicencaEspecialGozo)e).getId().toString();
+-      case VENDAS_LICENCA_ESPECIAL -> ((VendaLicencaEspecial)e).getId().toString();
+-      case FERIAS_GOZO -> ((FeriasGozo)e).getId().toString();
+-      case VINCULOS -> CompositeIdSupport.encode(((Vinculo)e).getId());
+-      case DEPENDENTES -> CompositeIdSupport.encode(((Dependente)e).getId());
+-    };
+-  }
++
+   public long version(Object e) {
+     return e instanceof AssentamentoTempoLicenca t ? t.getVersion()
+         : e instanceof Vinculo v ? v.getVersion()
+@@ -185,8 +147,13 @@
+   }
+   public Object load(Resource r, Object wire, boolean lock) {
+     if (em.unwrap(org.hibernate.Session.class).isDirty()) throw new IllegalStateException("Contexto de persistência deve estar limpo antes do lote.");
+-    Object e = lock ? em.find(r.entity, identity(r,wire), LockModeType.PESSIMISTIC_WRITE, Map.of("jakarta.persistence.lock.timeout",1000)) : em.find(r.entity,identity(r,wire));
++    Object e = em.find(r.entity, identity(r,wire));
+     if (e != null && !scope(r,e)) throw new SecurityException("Registro fora do órgão selecionado.");
++    if (lock && e != null) {
++      em.lock(e, LockModeType.PESSIMISTIC_WRITE, Map.of("jakarta.persistence.lock.timeout",1000));
++      em.refresh(e);
++      if (!scope(r,e)) throw new SecurityException("Registro fora do órgão selecionado.");
++    }
+     if (lock && e instanceof FeriasGozo fg && fg.getPeriodoAquisitivoId() != null) {
+       em.find(
+           PeriodoAquisitivoFerias.class,
+@@ -197,25 +164,15 @@
+     if(lock && e instanceof AssentamentoTempoLicenca) { em.refresh(e); if(!scope(r,e)) throw new SecurityException("Registro fora do órgão selecionado."); }
+     return e;
+   }
+-  public boolean scope(Resource r, Object e) {
+-    if (r == Resource.CAMPOS_CUSTOMIZADOS) {
+-      Integer emp = ((DefinicaoCampoCustomizado) e).getEmpCodigo();
+-      return emp == null || Objects.equals(emp, tenant.orgao());
+-    }
+-    if (r == Resource.PARAMETROS_CONTAGEM_FERIAS) {
+-      Integer emp = ((ParametroContagemFerias) e).getEmpCodigo();
+-      return emp == null || Objects.equals(emp, tenant.orgao());
+-    }
+-    if(e instanceof AssentamentoTempoLicenca t) return Objects.equals(t.getEmpCodigo(),tenant.orgao());
+-    return r == Resource.PESSOAS || r == Resource.DEPENDENTES
+-        || Objects.equals(
+-            r == Resource.CARGOS ? ((Cargo)e).getEmpCodigo()
+-                : r == Resource.AFASTAMENTOS ? ((Afastamento)e).getEmpCodigo()
+-                : r == Resource.FREQUENCIAS ? ((Frequencia)e).getEmpCodigo()
+-                : r == Resource.PERIODOS_AQUISITIVOS_FERIAS ? ((PeriodoAquisitivoFerias)e).getEmpCodigo()
+-                : r == Resource.FERIAS_GOZO ? ((FeriasGozo)e).getEmpCodigo()
+-                : ((Vinculo)e).getEmpCodigo(),
+-            tenant.orgao());
++  public boolean scope(Resource resource, Object entity) {
++    try {
++      ErgonTenantAccess.assertAllowed(entity, tenant, em,
++          resource == Resource.CAMPOS_CUSTOMIZADOS || resource == Resource.PARAMETROS_CONTAGEM_FERIAS);
++      return true;
++    } catch (org.springframework.web.server.ResponseStatusException denied) {
++      if (denied.getStatusCode().value() == 403) return false;
++      throw denied;
++    }
+   }
+ 
+   public void validate(Object dto) {
+@@ -226,65 +183,8 @@
+   }
+ 
+ 
+-  public void validateEntity(Resource r, Object e) {
+-    validateEntity(r, e, null);
+-  }
+-  public void validateEntity(Resource r, Object e, Object previousSnapshot) {
+-    switch(r) {
+-      case CARGOS -> invariants.cargo((Cargo)e);
+-      case PESSOAS -> invariants.pessoa((ServidorPessoa)e);
+-      case VINCULOS -> {
+-        invariants.vinculo((Vinculo) e, false, false);
+-        if (vinculoService != null) {
+-          vinculoService.validateVinculoProvimento((Vinculo) e, false);
+-        }
+-      }
+-      case DEPENDENTES -> {
+-        invariants.dependente((Dependente) e, false, false);
+-        if (dependenteService != null) {
+-          dependenteService.validateDependenteElegibilidade((Dependente) e);
+-        }
+-      }
+-      case AFASTAMENTOS -> {
+-        if (afastamentoService != null) {
+-          afastamentoService.validateAfastamentoConcessao((Afastamento) e, false);
+-        }
+-        invariants.afastamento((Afastamento) e, false, false, false);
+-      }
+-      case FREQUENCIAS -> {
+-        if (frequenciaService != null) {
+-          frequenciaService.validateFrequenciaLancamento((Frequencia) e);
+-        }
+-        invariants.frequencia((Frequencia) e, false, false);
+-      }
+-      case CAMPOS_CUSTOMIZADOS -> invariants.campoCustomizado((DefinicaoCampoCustomizado)e,false);
+-      case PARAMETROS_CONTAGEM_FERIAS -> {
+-        if (parametroContagemFeriasService != null) {
+-          parametroContagemFeriasService.validateParametroContagemFerias((ParametroContagemFerias) e);
+-        }
+-        invariants.parametroContagemFerias((ParametroContagemFerias) e, false, false);
+-      }
+-      case PERIODOS_AQUISITIVOS_FERIAS -> {
+-        if (periodoAquisitivoFeriasService != null) {
+-          periodoAquisitivoFeriasService.validatePeriodoAquisitivoFerias(
+-              (PeriodoAquisitivoFerias) e,
+-              previousSnapshot instanceof PeriodoAquisitivoFerias paf ? paf : null);
+-        }
+-        invariants.periodoAquisitivoFerias((PeriodoAquisitivoFerias) e, false, false);
+-      }
+-      case AVERBACOES_TEMPO_SERVICO -> averbacaoTempoServicoService.validateBulkCandidate((AverbacaoTempoServico)e, previousSnapshot instanceof AverbacaoTempoServico prior ? prior : null);
+-      case PERIODOS_AQUISITIVOS_LICENCA_ESPECIAL -> periodoAquisitivoLicencaEspecialService.validateBulkCandidate((PeriodoAquisitivoLicencaEspecial)e, previousSnapshot instanceof PeriodoAquisitivoLicencaEspecial prior ? prior : null);
+-      case LICENCAS_ESPECIAIS_GOZO -> licencaEspecialGozoService.validateBulkCandidate((LicencaEspecialGozo)e, previousSnapshot instanceof LicencaEspecialGozo prior ? prior : null);
+-      case VENDAS_LICENCA_ESPECIAL -> vendaLicencaEspecialService.validateBulkCandidate((VendaLicencaEspecial)e, previousSnapshot instanceof VendaLicencaEspecial prior ? prior : null);
+-      case FERIAS_GOZO -> {
+-        if (feriasGozoService != null) {
+-          feriasGozoService.validateFeriasGozo(
+-              (FeriasGozo) e, previousSnapshot instanceof FeriasGozo fg ? fg : null);
+-        }
+-        invariants.feriasGozo((FeriasGozo) e, false, false);
+-      }
+-    }
+-  }
++
++
+ 
+ 
+   public Object commandCandidate(Object current, String operation, JsonNode parameters) {
+--- a/src/main/java/br/com/praxis/ergonshowcase/bulk/ErgonBulkOperations.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/bulk/ErgonBulkOperations.java
+@@ -135,10 +135,12 @@
+             : resource==Resource.CARGOS ? "cargo::text" : "id::text";
+         String table=resource.table;
+         String placeholders=String.join(",",Collections.nCopies(targets.size(),"?"));
+-        boolean crossTenant=resource==Resource.PESSOAS || resource==Resource.DEPENDENTES;
++        boolean crossTenant=resource==Resource.PESSOAS;
+         boolean nullableTenant=resource==Resource.CAMPOS_CUSTOMIZADOS || resource==Resource.PARAMETROS_CONTAGEM_FERIAS;
+-        String tenantClause=crossTenant ? "" : nullableTenant ? " and (emp_codigo is null or emp_codigo=?)" : " and emp_codigo=?";
+-        String sql="select count(*) from public."+table+" where ("+idExpression+") in ("+placeholders+")"+tenantClause;
++        String tenantClause=crossTenant ? "" : resource==Resource.DEPENDENTES
++            ? " and exists (select 1 from public.vinculos v where v.numfunc=t.numfunc and v.emp_codigo=?)"
++            : nullableTenant ? " and (emp_codigo is null or emp_codigo=?)" : " and emp_codigo=?";
++        String sql="select count(*) from public."+table+" t where ("+idExpression+") in ("+placeholders+")"+tenantClause;
+         try {
+           var holder=(org.springframework.jdbc.datasource.ConnectionHolder)TransactionSynchronizationManager.getResource(infrastructure.dataSource());
+           if(holder==null) return ScopeDecision.unavailable();
+@@ -193,10 +195,9 @@
+           var candidate = adapter.evaluate(id, expected, changes, mode, fields);
+           return new Candidate(candidate.observedVersion(), json.createObjectNode().put("orgao",tenant.orgao())
+               .set("resource",candidate.facts()), candidate.plan());
+-        } catch (ErgonRuleViolationException rejection) { throw rejection.canonicalViolation(); }
+-        catch (org.praxisplatform.uischema.customfields.CustomFieldValidationException rejection) {
++        } catch (org.praxisplatform.uischema.customfields.CustomFieldValidationException rejection) {
+           if (br.com.praxis.ergonshowcase.rules.ErgonCustomFieldErrors.isJsonLogic(rejection))
+-            throw br.com.praxis.ergonshowcase.rules.ErgonCustomFieldErrors.violation(rejection).canonicalViolation();
++            throw br.com.praxis.ergonshowcase.rules.ErgonCustomFieldErrors.violation(rejection);
+           throw rejection;
+         } catch (jakarta.validation.ConstraintViolationException invalid) {
+           if (invalid.getConstraintViolations().stream().anyMatch(v -> v.getPropertyPath().toString().equals("jornadaSemanal")))
+@@ -243,8 +244,7 @@
+           if (entity == null) throw new IllegalArgumentException("Registro inexistente.");
+           String observed = etags.create(scopes.currentScope(),resource.key,id,domain.version(entity));
+           if (!observed.equals(expected)) throw ResourceVersionPreconditionException.stale();
+-          try { domain.commandCandidate(entity,operation,parameters); }
+-          catch (ErgonRuleViolationException rejection) { throw rejection.canonicalViolation(); }
++          domain.commandCandidate(entity,operation,parameters);
+           return new BulkDomainResourceAdapter.Candidate(observed, json.createObjectNode().put("orgao",tenant.orgao()),
+               json.createObjectNode().set("parameters",parameters.deepCopy()));
+         }
+--- a/src/main/java/br/com/praxis/ergonshowcase/config/ErgonDeterminationConfig.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/config/ErgonDeterminationConfig.java
+@@ -140,14 +140,14 @@
+                     "diasVendidosAbono",
+                     "diasConvertidosDobro"),
+                 List.of(
+-                    new ReactiveDeterminationOutputBinding("/dtfim", "/dtfim"),
+-                    new ReactiveDeterminationOutputBinding("/totDiasDireito", "/totDiasDireito"),
+-                    new ReactiveDeterminationOutputBinding(
+-                        "/saldoDiasDisponivel", "/saldoDiasDisponivel"),
++                    new ReactiveDeterminationOutputBinding("/dtfim", "/dtfimPrevista"),
++                    new ReactiveDeterminationOutputBinding("/totDiasDireito", "/diasDireitoPrevistos"),
++                    new ReactiveDeterminationOutputBinding(
++                        "/saldoDiasDisponivel", "/saldoDiasDisponivelPrevisto"),
+                     new ReactiveDeterminationOutputBinding("/dtPrescricao", "/dtPrescricao"),
+-                    new ReactiveDeterminationOutputBinding("/faltasApuradas", "/faltasApuradas"),
+-                    new ReactiveDeterminationOutputBinding(
+-                        "/diasAfastamentoSuspensivo", "/diasAfastamentoSuspensivo"))),
++                    new ReactiveDeterminationOutputBinding("/faltasApuradas", "/faltasApuradasPrevistas"),
++                    new ReactiveDeterminationOutputBinding(
++                        "/diasAfastamentoSuspensivo", "/diasSuspensivosPrevistos"))),
+             definition(
+                 "ergon.feriasGozo.previa",
+                 "FeriasGozo",
+@@ -170,11 +170,11 @@
+                     new ReactiveDeterminationOutputBinding("/chavePeraqfer", "/chavePeraqfer"),
+                     new ReactiveDeterminationOutputBinding(
+                         "/totDiasDireitoPa", "/totDiasDireitoPa"),
+-                    new ReactiveDeterminationOutputBinding("/diasGozo", "/diasGozo"),
+-                    new ReactiveDeterminationOutputBinding("/dtprevfim", "/dtprevfim"),
++                    new ReactiveDeterminationOutputBinding("/diasGozo", "/diasGozoPrevistos"),
++                    new ReactiveDeterminationOutputBinding("/dtprevfim", "/dtprevfimPrevista"),
+                     new ReactiveDeterminationOutputBinding("/ordemParcela", "/ordemParcela"),
+                     new ReactiveDeterminationOutputBinding(
+-                        "/diasAbonoVendidos", "/diasAbonoVendidos"),
++                        "/diasAbonoVendidos", "/diasAbonoPrevistos"),
+                     new ReactiveDeterminationOutputBinding("/dtPagtoAbono", "/dtPagtoAbono"),
+                     new ReactiveDeterminationOutputBinding(
+                         "/saldoPaAposParcela", "/saldoPaAposParcela"))));
+--- a/src/main/java/br/com/praxis/ergonshowcase/config/OptionSourcesConfig.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/config/OptionSourcesConfig.java
+@@ -162,11 +162,6 @@
+         : key.equals(ApiPaths.CODIGO_FREQUENCIA_SOURCE) ? List.of("tipofreq")
+         : key.equals(ApiPaths.ITEM_TABELA_SOURCE) ? List.of("tab")
+         : List.<String>of();
+-    var filtering = new LookupFilteringDescriptor(List.of(), Map.of(),
+-        List.of(new LookupSortOption("descricao", label, "asc", "Descrição crescente"),
+-            new LookupSortOption("descricao-desc", label, "desc", "Descrição decrescente")),
+-        "descricao", List.of(), "Pesquisar pela descrição", tempoLicenca
+-            ? List.of(new LookupSearchStrategyDefinition("descricao", "descriptive-text", 1)) : List.of());
+     // O provedor JPA oferece busca textual; estratégias especializadas exigiriam outro provedor.
+     var displayFields = descriptions.stream().map(property -> switch (property) {
+       case "fantasia" -> display(property, "Sigla", "apartment");
+@@ -223,6 +218,12 @@
+                         : key.equals(ApiPaths.PERIODO_AQUISITIVO_FERIAS_SOURCE)
+                             ? "chave"
+                             : key.equals(ApiPaths.FERIAS_GOZO_SOURCE) ? "ordemParcela" : id;
++    var filtering = new LookupFilteringDescriptor(List.of(), Map.of(),
++        List.of(new LookupSortOption("code", codeProperty, "asc", "Código crescente"),
++            new LookupSortOption("description", label, "asc", "Descrição crescente"),
++            new LookupSortOption("description-desc", label, "desc", "Descrição decrescente")),
++        "description", List.of(), "Pesquisar pela descrição",
++        List.of(new LookupSearchStrategyDefinition("text", "descriptive-text", 1)));
+     var lookup = EntityLookupDescriptor.directoryBuilder(entityKey, codeProperty, descriptions.toArray(String[]::new))
+         .status(status).searchPaths(label).dependencies(dependencies)
+         .selectionPolicy(new LookupSelectionPolicy(null, status, allowed, blocked, true, disabledReason, disabledReason))
+--- a/src/main/java/br/com/praxis/ergonshowcase/config/TempoLicencaDeterminationConfig.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/config/TempoLicencaDeterminationConfig.java
+@@ -1,37 +1,35 @@
+ package br.com.praxis.ergonshowcase.config;
+-import java.util.*;
++
++import java.util.List;
+ import org.praxisplatform.uischema.determination.*;
+-import org.springframework.context.annotation.*;
+-/** Determinações de prévia de criação; sem duplicar o enforcement de domínio. */
++import org.springframework.context.annotation.Bean;
++import org.springframework.context.annotation.Configuration;
++
++/** Prévias não persistentes para criação e edição dos assentamentos de tempo e licença. */
+ @Configuration
+ public class TempoLicencaDeterminationConfig {
+-  @Bean public ReactiveDeterminationDefinitionProvider tempoLicencaDeterminations() { return () -> List.of(
+-    new ReactiveDeterminationDefinition("tempo-licenca.averbacao.preview",
+-      List.of(new ReactiveDeterminationScope("createErgonAverbacaoTempoServico",ReactiveDeterminationFormMode.CREATE)),
+-      "determineAverbacaoTempoServico",ReactiveDeterminationTriggerMode.ON_INIT_AND_CHANGE,
+-      List.of("/totalDias","/diasDesaverbados"),
+-      List.of(new ReactiveDeterminationInputBinding("/totalDias","/totalDias"),new ReactiveDeterminationInputBinding("/diasDesaverbados","/diasDesaverbados")),
+-      List.of(new ReactiveDeterminationOutputBinding("/diasPrevistos","/diasPrevistos")),
+-      new ReactiveDeterminationProvenance(ReactiveDeterminationProvenanceKind.HOST,"tempo-licenca-preview","1")),
+-    new ReactiveDeterminationDefinition("tempo-licenca.periodo.preview",
+-      List.of(new ReactiveDeterminationScope("createErgonPeriodoAquisitivoLicencaEspecial",ReactiveDeterminationFormMode.CREATE)),
+-      "determinePeriodoAquisitivoLicencaEspecial",ReactiveDeterminationTriggerMode.ON_INIT_AND_CHANGE,
+-      List.of("/diasDireito","/diasConvertidosDobro"),
+-      List.of(new ReactiveDeterminationInputBinding("/diasDireito","/diasDireito"),new ReactiveDeterminationInputBinding("/diasConvertidosDobro","/diasConvertidosDobro")),
+-      List.of(new ReactiveDeterminationOutputBinding("/diasPrevistos","/diasPrevistos")),
+-      new ReactiveDeterminationProvenance(ReactiveDeterminationProvenanceKind.HOST,"tempo-licenca-preview","1")),
+-    new ReactiveDeterminationDefinition("tempo-licenca.gozo.preview",
+-      List.of(new ReactiveDeterminationScope("createErgonLicencaEspecialGozo",ReactiveDeterminationFormMode.CREATE)),
+-      "determineLicencaEspecialGozo",ReactiveDeterminationTriggerMode.ON_INIT_AND_CHANGE,
+-      List.of("/dtini","/dtprevfim"),
+-      List.of(new ReactiveDeterminationInputBinding("/dtini","/dtini"),new ReactiveDeterminationInputBinding("/dtprevfim","/dtprevfim")),
+-      List.of(new ReactiveDeterminationOutputBinding("/diasPrevistos","/diasPrevistos")),
+-      new ReactiveDeterminationProvenance(ReactiveDeterminationProvenanceKind.HOST,"tempo-licenca-preview","1")),
+-    new ReactiveDeterminationDefinition("tempo-licenca.venda.preview",
+-      List.of(new ReactiveDeterminationScope("createErgonVendaLicencaEspecial",ReactiveDeterminationFormMode.CREATE)),
+-      "determineVendaLicencaEspecial",ReactiveDeterminationTriggerMode.ON_INIT_AND_CHANGE,
+-      List.of("/periodoAquisitivoLicencaId","/diasVendidos"),
+-      List.of(new ReactiveDeterminationInputBinding("/periodoAquisitivoLicencaId","/periodoAquisitivoLicencaId"),new ReactiveDeterminationInputBinding("/diasVendidos","/diasVendidos")),
+-      List.of(new ReactiveDeterminationOutputBinding("/diasPrevistos","/diasPrevistos")),
+-      new ReactiveDeterminationProvenance(ReactiveDeterminationProvenanceKind.HOST,"tempo-licenca-preview","1"))); }
++  @Bean
++  public ReactiveDeterminationDefinitionProvider tempoLicencaDeterminations() {
++    return () -> List.of(
++        definition("tempo-licenca.averbacao.preview", "AverbacaoTempoServico",
++            "determineAverbacaoTempoServico", "/totalDias", "/diasDesaverbados"),
++        definition("tempo-licenca.periodo.preview", "PeriodoAquisitivoLicencaEspecial",
++            "determinePeriodoAquisitivoLicencaEspecial", "/diasDireito", "/diasConvertidosDobro"),
++        definition("tempo-licenca.gozo.preview", "LicencaEspecialGozo",
++            "determineLicencaEspecialGozo", "/dtini", "/dtprevfim"),
++        definition("tempo-licenca.venda.preview", "VendaLicencaEspecial",
++            "determineVendaLicencaEspecial", "/periodoAquisitivoLicencaId", "/diasVendidos"));
++  }
++
++  private ReactiveDeterminationDefinition definition(String id, String resource, String operation,
++      String first, String second) {
++    var builder = ReactiveDeterminationDefinition.forCrudResource(id, "createErgon" + resource,
++        "updateErgon" + resource, operation)
++        .triggerMode(ReactiveDeterminationTriggerMode.ON_INIT_AND_CHANGE)
++        .source(first).source(second).input(first, first).input(second, second)
++        .output("/diasPrevistos", "/diasPrevistos")
++        .provenance(new ReactiveDeterminationProvenance(ReactiveDeterminationProvenanceKind.HOST,
++            "tempo-licenca-preview", "1"));
++    return builder.build();
++  }
+ }
+--- a/src/main/java/br/com/praxis/ergonshowcase/controller/ErgonCustomFieldExceptionHandler.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/controller/ErgonCustomFieldExceptionHandler.java
+@@ -18,7 +18,7 @@
+   @ExceptionHandler(CustomFieldValidationException.class)
+   public ResponseEntity<RestApiResponse<Object>> handle(CustomFieldValidationException exception,WebRequest request) {
+     return ErgonCustomFieldErrors.isJsonLogic(exception)
+-        ? fallback.handleResponseStatusException(ErgonCustomFieldErrors.violation(exception),request)
++        ? fallback.handleRuleViolation(ErgonCustomFieldErrors.violation(exception),request)
+         : fallback.handleCustomFieldValidation(exception,request);
+   }
+ }
+--- a/src/main/java/br/com/praxis/ergonshowcase/dto/FeriasGozoDados.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/dto/FeriasGozoDados.java
+@@ -18,6 +18,27 @@
+ @Setter
+ public abstract class FeriasGozoDados {
+ 
++  // Prévia não persistida. Linhagem: docs-legado/v7x/aps/FERIAS.tab (DTINI, DTFIM, ABONO, TOTDIAS).
++  @Null
++  @Schema(description = "Duração inclusiva projetada da parcela entre início e término previstos; permite conferir a duração sem substituir as datas e os dias informados.", accessMode = Schema.AccessMode.READ_ONLY)
++  @UISchema(label = "Duração prevista", helpText = "Dias de gozo calculados para as datas do rascunho.", group = "Prévia da parcela", order = 951, type = FieldDataType.NUMBER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "date_range", readOnly = true, tableHidden = true)
++  private Integer diasGozoPrevistos;
++
++  @Null
++  @Schema(description = "Término da parcela projetado a partir do início e da duração, ou conferido pela data final informada; a gravação permanece sujeita ao período autorizado.", accessMode = Schema.AccessMode.READ_ONLY)
++  @UISchema(label = "Término calculado", helpText = "Confira o término previsto da parcela de férias.", group = "Prévia da parcela", order = 952, type = FieldDataType.DATE, controlType = FieldControlType.DATE_PICKER, icon = "event", preset = org.praxisplatform.uischema.extension.annotation.UISchemaPreset.NONE, readOnly = true, tableHidden = true)
++  private LocalDate dtprevfimPrevista;
++
++  @Null
++  @Schema(description = "Dias de abono pecuniário sugeridos para a parcela segundo a fração do parâmetro estatutário e o direito do período; não autoriza a venda de dias.", accessMode = Schema.AccessMode.READ_ONLY)
++  @UISchema(label = "Abono previsto", helpText = "Dias de abono considerados na estimativa de saldo.", group = "Prévia da parcela", order = 953, type = FieldDataType.NUMBER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "sell", readOnly = true, tableHidden = true)
++  private Integer diasAbonoPrevistos;
++
++  @Null
++  @Schema(description = "Saldo estimado do período aquisitivo após debitar o gozo e o abono desta parcela, antes da confirmação transacional e da concorrência.", accessMode = Schema.AccessMode.READ_ONLY)
++  @UISchema(label = "Saldo após parcela", helpText = "Saldo projetado após os dias de gozo e de abono.", group = "Prévia da parcela", order = 954, type = FieldDataType.NUMBER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "balance", readOnly = true, tableHidden = true)
++  private Integer saldoPaAposParcela;
++
+   @Schema(
+       description =
+           "Código do órgão público de lotação do vínculo funcional (hidratado automaticamente pelo período aquisitivo quando omitido).",
+--- a/src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoFeriasDados.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoFeriasDados.java
+@@ -18,6 +18,32 @@
+ @Setter
+ public abstract class PeriodoAquisitivoFeriasDados {
+ 
++  // Prévia não persistida. Linhagem: docs-legado/v7x/aps/peraqfer.tab (DTFIM, TOTDIAS, FALTAS).
++  @Null
++  @Schema(description = "Término projetado da aquisição de férias após as suspensões apuradas no rascunho; a gravação recalcula o período autorizado.", accessMode = Schema.AccessMode.READ_ONLY)
++  @UISchema(label = "Término previsto", helpText = "Confira o término calculado antes de registrar o período.", group = "Prévia do período", order = 951, type = FieldDataType.DATE, controlType = FieldControlType.DATE_PICKER, icon = "event", preset = org.praxisplatform.uischema.extension.annotation.UISchemaPreset.NONE, readOnly = true, tableHidden = true)
++  private LocalDate dtfimPrevista;
++
++  @Null
++  @Schema(description = "Dias de férias projetados para o período após aplicar o parâmetro estatutário e a redução por faltas; não altera os dias informados no rascunho.", accessMode = Schema.AccessMode.READ_ONLY)
++  @UISchema(label = "Direito previsto", helpText = "Direito calculado com a frequência e os parâmetros do vínculo.", group = "Prévia do período", order = 952, type = FieldDataType.NUMBER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "verified", readOnly = true, tableHidden = true)
++  private Integer diasDireitoPrevistos;
++
++  @Null
++  @Schema(description = "Saldo estimado de férias após descontar do direito projetado os dias gozados, vendidos e convertidos em dobro; não constitui autorização de gozo.", accessMode = Schema.AccessMode.READ_ONLY)
++  @UISchema(label = "Saldo previsto", helpText = "Saldo estimado antes da validação definitiva do período.", group = "Prévia do período", order = 953, type = FieldDataType.NUMBER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "balance", readOnly = true, tableHidden = true)
++  private Integer saldoDiasDisponivelPrevisto;
++
++  @Null
++  @Schema(description = "Faltas injustificadas consideradas pela prévia na janela de aquisição, obtidas da frequência homologada quando o rascunho não informa a quantidade.", accessMode = Schema.AccessMode.READ_ONLY)
++  @UISchema(label = "Faltas previstas", helpText = "Faltas consideradas no cálculo do direito às férias.", group = "Prévia do período", order = 954, type = FieldDataType.NUMBER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "event_busy", readOnly = true, tableHidden = true)
++  private Integer faltasApuradasPrevistas;
++
++  @Null
++  @Schema(description = "Dias de afastamento suspensivo considerados na projeção do período, apurados no órgão do vínculo quando não informados no rascunho.", accessMode = Schema.AccessMode.READ_ONLY)
++  @UISchema(label = "Suspensão prevista", helpText = "Dias de suspensão considerados no término projetado.", group = "Prévia do período", order = 955, type = FieldDataType.NUMBER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "pause_circle", readOnly = true, tableHidden = true)
++  private Integer diasSuspensivosPrevistos;
++
+   @NotNull
+   @Schema(description = "Código do órgão público de lotação do vínculo funcional.")
+   @UISchema(
+--- a/src/main/java/br/com/praxis/ergonshowcase/rules/ErgonCustomFieldErrors.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/rules/ErgonCustomFieldErrors.java
+@@ -10,9 +10,14 @@
+     return exception.getFieldErrors().stream().anyMatch(error -> "CUSTOM_FIELD_JSON_LOGIC".equals(error.getCode()));
+   }
+   public static ErgonRuleViolationException violation(CustomFieldValidationException exception) {
+-    var error=exception.getFieldErrors().stream().filter(e -> "CUSTOM_FIELD_JSON_LOGIC".equals(e.getCode())).findFirst().orElseThrow();
+-    return new ErgonRuleViolationException(ErgonRuleErrorCatalog.ERG_21502.code(),ErgonRuleErrorCatalog.ERG_21502.slotKey(),
+-        "product.ergon.customField."+error.getField().replace("customFields.",""),DecisionSource.PRODUCT,DecisionStage.DOMAIN_DECISION,
+-        error.getField(),error.getDefaultMessage());
++    return new ErgonRuleViolationException(exception.getFieldErrors().stream().map(error ->
++        ErgonRuleViolationException.detail(
++            "CUSTOM_FIELD_JSON_LOGIC".equals(error.getCode()) ? ErgonRuleErrorCatalog.ERG_21502.code()
++                : error.getCode() == null ? "CUSTOM_FIELD_VALIDATION" : error.getCode(),
++            ErgonRuleErrorCatalog.ERG_21502.slotKey(),
++            "product.ergon.customField." + error.getField().replace("customFields.", ""),
++            DecisionSource.PRODUCT, DecisionStage.DOMAIN_DECISION, error.getField(),
++            error.getDefaultMessage() == null ? ErgonRuleErrorCatalog.ERG_21502.messagePtBr() : error.getDefaultMessage()))
++        .toList());
+   }
+ }
+--- a/src/main/java/br/com/praxis/ergonshowcase/rules/ErgonRuleEngineFacade.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/rules/ErgonRuleEngineFacade.java
+@@ -841,7 +841,7 @@
+   public Map<String, Object> toDiagnosticPayload(
+       RuleDecisionPlan plan, RuleEvaluationResult result) {
+     Objects.requireNonNull(result, "result must not be null");
+-    List<ErgonRuleViolationException.SlotViolationDetail> violations =
++    List<org.praxisplatform.rules.violation.SlotViolationDetail> violations =
+         ErgonRuleViolationException.buildViolations(plan, result);
+     Map<String, Object> payload = new java.util.LinkedHashMap<>(template.toDiagnosticPayload(plan, result));
+     if (result.ruleSetRef() != null) {
+@@ -858,12 +858,13 @@
+     payload.put(
+         "slotKeys",
+         violations.stream()
+-            .map(ErgonRuleViolationException.SlotViolationDetail::slotKey)
++            .map(org.praxisplatform.rules.violation.SlotViolationDetail::slotKey)
+             .distinct()
+             .toList());
+     payload.put(
+         "decisionSources",
+         violations.stream()
++            .filter(v -> v.source() != null)
+             .map(v -> v.source().name())
+             .distinct()
+             .toList());
+--- a/src/main/java/br/com/praxis/ergonshowcase/rules/ErgonRuleErrorCatalog.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/rules/ErgonRuleErrorCatalog.java
+@@ -1731,7 +1731,9 @@
+   /** Public-safe adapter; product lineage and atomic error identities remain host-owned. */
+   public static org.praxisplatform.rules.violation.RuleErrorCatalog canonical() {
+     return code -> find(code).map(error -> new org.praxisplatform.rules.violation.RuleErrorDescriptor(
+-        error.code(), error.targetField(), error.messagePtBr(), error.plsqlOrigin() + ": " + error.plsqlLineage(), "BUSINESS"));
++        error.code(), error.targetField(), error.messagePtBr(), error.plsqlOrigin() + ": " + error.plsqlLineage(),
++        java.util.Set.of("ERG-08393", "ERG-00424", "ERG-04300", "ERG-03193", "ERG-00300").contains(error.code())
++            ? "CONFLICT" : "BUSINESS_LOGIC"));
+   }
+ 
+ }
+--- a/src/main/java/br/com/praxis/ergonshowcase/rules/ErgonRuleViolationException.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/rules/ErgonRuleViolationException.java
+@@ -1,390 +1,74 @@
+ package br.com.praxis.ergonshowcase.rules;
+ 
+-import java.util.ArrayList;
+-import java.util.LinkedHashMap;
+ import java.util.List;
+-import java.util.Map;
+ import java.util.Objects;
+-import java.util.Optional;
+-import java.util.stream.Collectors;
+-import org.praxisplatform.rules.contract.DecisionBinding;
+ import org.praxisplatform.rules.contract.DecisionSource;
+ import org.praxisplatform.rules.contract.DecisionStage;
+-import org.praxisplatform.rules.contract.RuleBindingResult;
+ import org.praxisplatform.rules.contract.RuleDecision;
+ import org.praxisplatform.rules.contract.RuleEvaluationResult;
+ import org.praxisplatform.rules.plan.RuleDecisionPlan;
+-import org.springframework.http.HttpStatus;
++import org.praxisplatform.rules.violation.PraxisRuleViolationException;
++import org.praxisplatform.rules.violation.SlotViolationDetail;
++import org.springframework.http.HttpStatusCode;
+ import org.springframework.http.ProblemDetail;
+-import org.springframework.web.server.ResponseStatusException;
+ 
+-/**
+- * Exceção de domínio lançada quando a avaliação determinística de um {@code RuleDecisionPlan} no
+- * {@code praxis-rules-engine} não resulta em {@code RuleDecision.ALLOW} (comportamento
+- * <i>fail-closed</i> para {@code DENY}, {@code INCONCLUSIVE} e {@code TECHNICAL_ERROR}).
+- *
+- * <p>Preserva na mensagem e nas propriedades estruturadas RFC 7807 ({@link ProblemDetail}) todos os
+- * códigos canônicos ({@code ERG-NNNNN} / {@code CERG-NNNNN}), os {@code slotKey}s, os
+- * {@code bindingKey}s, a rastreabilidade da decisão ({@link DecisionSource#PRODUCT} vs
+- * {@link DecisionSource#CUSTOMER}) e o campo alvo ({@code targetField}) para consumo por interfaces
+- * tradicionais, Angular Dynamic Form e agentes de IA.
+- */
+-public class ErgonRuleViolationException extends ResponseStatusException {
+-
+-  /**
+-   * Detalhe estruturado e auditável de uma violação determinística por slot/binding.
+-   *
+-   * @param code código canônico da razão ({@code ERG-*}, {@code CERG-*} ou código técnico fail-closed)
+-   * @param slotKey chave estável do {@code DecisionSlot} no plano
+-   * @param bindingKey identificador do {@code DecisionBinding} que originou a decisão
+-   * @param source origem governada da decisão ({@link DecisionSource#PRODUCT} ou {@link DecisionSource#CUSTOMER})
+-   * @param stage estágio do pipeline ({@link DecisionStage#PROTECTED_GUARD}, {@code DOMAIN_DECISION}, {@code POST_DECISION})
+-   * @param decision estado determinístico retornado pelo binding ({@code DENY}, {@code INCONCLUSIVE}, {@code TECHNICAL_ERROR})
+-   * @param targetField atributo principal do contrato afetado
+-   * @param messagePtBr mensagem oficial de negócio em português do Brasil
+-   * @param plsqlOrigin rotina legada de origem ({@code PCK_*} ou {@code EPB__*})
+-   */
+-  public record SlotViolationDetail(
+-      String code,
+-      String slotKey,
+-      String bindingKey,
+-      DecisionSource source,
+-      DecisionStage stage,
+-      RuleDecision decision,
+-      String targetField,
+-      String messagePtBr,
+-      String plsqlOrigin) {}
+-
++/** Adapta o catálogo Ergon à rejeição canônica, compartilhada por REST, comandos e lotes. */
++public class ErgonRuleViolationException extends PraxisRuleViolationException {
++  private static final long serialVersionUID = 1L;
+   private final transient RuleDecisionPlan plan;
+   private final transient RuleEvaluationResult evaluationResult;
+-  private final List<String> reasonCodes;
+-  private final transient List<ErgonRuleErrorCatalog.RuleErrorDescriptor> descriptors;
+-  private final transient List<SlotViolationDetail> violations;
+ 
+-  public ErgonRuleViolationException(RuleEvaluationResult evaluationResult) {
+-    this(HttpStatus.UNPROCESSABLE_ENTITY, null, evaluationResult);
++  public ErgonRuleViolationException(RuleDecisionPlan plan, RuleEvaluationResult result) {
++    super(plan, result, ErgonRuleErrorCatalog.canonical());
++    this.plan = plan;
++    this.evaluationResult = result;
+   }
+ 
+-  public ErgonRuleViolationException(
+-      RuleDecisionPlan plan, RuleEvaluationResult evaluationResult) {
+-    this(HttpStatus.UNPROCESSABLE_ENTITY, plan, evaluationResult);
++  public ErgonRuleViolationException(List<SlotViolationDetail> violations) {
++    super(violations);
++    this.plan = null;
++    this.evaluationResult = null;
+   }
+ 
+-  public ErgonRuleViolationException(
+-      HttpStatus status, RuleDecisionPlan plan, RuleEvaluationResult evaluationResult) {
+-    super(
+-        status != null ? status : HttpStatus.UNPROCESSABLE_ENTITY,
+-        formatMessage(
+-            plan, Objects.requireNonNull(evaluationResult, "evaluationResult must not be null")));
+-    this.plan = plan;
+-    this.evaluationResult = evaluationResult;
+-    this.reasonCodes = List.copyOf(evaluationResult.reasonCodes());
+-    this.descriptors =
+-        this.reasonCodes.stream()
+-            .map(ErgonRuleErrorCatalog::find)
+-            .flatMap(Optional::stream)
+-            .toList();
+-    this.violations = buildViolations(plan, evaluationResult);
+-    populateProblemDetailProperties();
++  public ErgonRuleViolationException(String code, String slotKey, String bindingKey,
++      DecisionSource source, DecisionStage stage, String targetField, String messagePtBr) {
++    this(List.of(detail(code, slotKey, bindingKey, source, stage, targetField, messagePtBr)));
+   }
+ 
+-  public ErgonRuleViolationException(
+-      String code,
+-      String slotKey,
+-      String bindingKey,
+-      DecisionSource source,
+-      DecisionStage stage,
+-      String targetField,
+-      String messagePtBr) {
+-    this(
+-        HttpStatus.UNPROCESSABLE_ENTITY,
+-        code,
+-        slotKey,
+-        bindingKey,
+-        source,
+-        stage,
+-        targetField,
+-        messagePtBr);
++  public static SlotViolationDetail detail(String code, String slotKey, String bindingKey,
++      DecisionSource source, DecisionStage stage, String targetField, String messagePtBr) {
++    var descriptor = ErgonRuleErrorCatalog.canonical().find(code);
++    return new SlotViolationDetail(code, slotKey, bindingKey, source, stage, RuleDecision.DENY,
++        targetField, messagePtBr,
++        descriptor.map(org.praxisplatform.rules.violation.RuleErrorDescriptor::lineage).orElse(null),
++        descriptor.map(org.praxisplatform.rules.violation.RuleErrorDescriptor::category).orElse("BUSINESS_LOGIC"));
+   }
+ 
+-  public ErgonRuleViolationException(
+-      HttpStatus status,
+-      String code,
+-      String slotKey,
+-      String bindingKey,
+-      DecisionSource source,
+-      DecisionStage stage,
+-      String targetField,
+-      String messagePtBr) {
+-    super(
+-        status != null ? status : HttpStatus.UNPROCESSABLE_ENTITY,
+-        "["
+-            + code
+-            + " | "
+-            + source
+-            + " | slot="
+-            + slotKey
+-            + " | field="
+-            + targetField
+-            + "] "
+-            + messagePtBr);
+-    this.plan = null;
+-    this.evaluationResult = null;
+-    this.reasonCodes = List.of(code);
+-    this.descriptors = ErgonRuleErrorCatalog.find(code).stream().toList();
+-    this.violations =
+-        List.of(
+-            new SlotViolationDetail(
+-                code,
+-                slotKey,
+-                bindingKey,
+-                source,
+-                stage,
+-                RuleDecision.DENY,
+-                targetField,
+-                messagePtBr,
+-                this.descriptors.isEmpty()
+-                    ? "PraxisJsonLogicEngine"
+-                    : this.descriptors.get(0).plsqlOrigin()));
+-    ProblemDetail body = getBody();
+-    body.setTitle("Violação determinística de regra de negócio");
+-    body.setProperty("decision", RuleDecision.DENY.name());
+-    body.setProperty("reasonCodes", this.reasonCodes);
+-    body.setProperty("slotKeys", getSlotKeys());
+-    body.setProperty(
+-        "decisionSources", getDecisionSources().stream().map(Enum::name).toList());
+-    body.setProperty("violations", this.violations);
++  public RuleDecisionPlan getPlan() { return plan; }
++  public RuleEvaluationResult getEvaluationResult() { return evaluationResult; }
++  public List<ErgonRuleErrorCatalog.RuleErrorDescriptor> getDescriptors() {
++    return getReasonCodes().stream().map(ErgonRuleErrorCatalog::find).flatMap(java.util.Optional::stream).toList();
+   }
+ 
+-  /** Retorna nova instância desta exceção com o {@link HttpStatus} informado ({@code 409} ou {@code 422}). */
+-  public ErgonRuleViolationException withStatus(HttpStatus status) {
+-    if (this.evaluationResult != null) {
+-      return new ErgonRuleViolationException(status, this.plan, this.evaluationResult);
++  /** Adaptadores para consumidores diretos; a classificação HTTP permanece no engine. */
++  public HttpStatusCode getStatusCode() { return HttpStatusCode.valueOf(getHttpStatus()); }
++  public String getReason() { return getMessage(); }
++  public ProblemDetail getBody() {
++    var body = ProblemDetail.forStatusAndDetail(getStatusCode(), getMessage());
++    body.setTitle("Violação determinística de regra de negócio");
++    toDiagnosticProperties().forEach(body::setProperty);
++    if (evaluationResult != null) {
++      body.setProperty("ruleSetKey", evaluationResult.ruleSetRef().ruleSetKey());
++      body.setProperty("resourceKey", evaluationResult.ruleSetRef().boundedContextKey());
++      body.setProperty("planDigest", evaluationResult.planDigest());
++      body.setProperty("factsDigest", evaluationResult.factsDigest());
+     }
+-    SlotViolationDetail first = this.violations.get(0);
+-    return new ErgonRuleViolationException(
+-        status,
+-        first.code(),
+-        first.slotKey(),
+-        first.bindingKey(),
+-        first.source(),
+-        first.stage(),
+-        first.targetField(),
+-        first.messagePtBr());
++    return body;
+   }
+ 
+-  /**
+-   * Converte esta violação para {@link HttpStatus#CONFLICT} ({@code 409}) quando algum slot
+-   * acionado pertencer a invariantes de sobreposição temporal ou unicidade cadastral, preservando
+-   * {@link HttpStatus#UNPROCESSABLE_ENTITY} ({@code 422}) nos demais casos.
+-   */
+-  public ErgonRuleViolationException withConflictIfOverlapOrUniqueness() {
+-    boolean isConflictSlot =
+-        getSlotKeys().stream()
+-            .anyMatch(slot -> slot.contains("sobreposicao") || slot.contains("unicidade"));
+-    return isConflictSlot ? withStatus(HttpStatus.CONFLICT) : this;
++  public static List<SlotViolationDetail> buildViolations(RuleDecisionPlan plan, RuleEvaluationResult result) {
++    Objects.requireNonNull(result, "result");
++    return result.decision() == RuleDecision.ALLOW ? List.of()
++        : new PraxisRuleViolationException(plan, result, ErgonRuleErrorCatalog.canonical()).getViolations();
+   }
+-
+-  public RuleDecisionPlan getPlan() {
+-    return plan;
+-  }
+-
+-  public RuleEvaluationResult getEvaluationResult() {
+-    return evaluationResult;
+-  }
+-
+-  public List<String> getReasonCodes() {
+-    return reasonCodes;
+-  }
+-
+-  public List<ErgonRuleErrorCatalog.RuleErrorDescriptor> getDescriptors() {
+-    return descriptors;
+-  }
+-
+-  public List<SlotViolationDetail> getViolations() {
+-    return violations;
+-  }
+-
+-  /** Retorna os {@code slotKey}s distintos acionados na violação. */
+-  public List<String> getSlotKeys() {
+-    return violations.stream()
+-        .map(SlotViolationDetail::slotKey)
+-        .filter(Objects::nonNull)
+-        .distinct()
+-        .toList();
+-  }
+-
+-  /** Retorna as origens ({@code PRODUCT} / {@code CUSTOMER}) distintas acionadas na violação. */
+-  public List<DecisionSource> getDecisionSources() {
+-    return violations.stream()
+-        .map(SlotViolationDetail::source)
+-        .filter(Objects::nonNull)
+-        .distinct()
+-        .toList();
+-  }
+-
+-  private void populateProblemDetailProperties() {
+-    ProblemDetail body = getBody();
+-    String ruleSetKey =
+-        evaluationResult.ruleSetRef() != null
+-            ? evaluationResult.ruleSetRef().ruleSetKey()
+-            : null;
+-    body.setTitle(resolveProblemTitle(ruleSetKey));
+-    if (evaluationResult.ruleSetRef() != null) {
+-      body.setProperty("ruleSetKey", ruleSetKey);
+-      body.setProperty("resourceKey", evaluationResult.ruleSetRef().boundedContextKey());
+-    }
+-    body.setProperty("planDigest", evaluationResult.planDigest());
+-    body.setProperty("factsDigest", evaluationResult.factsDigest());
+-    body.setProperty("decision", evaluationResult.decision().name());
+-    body.setProperty("reasonCodes", reasonCodes);
+-    body.setProperty("slotKeys", getSlotKeys());
+-    body.setProperty(
+-        "decisionSources", getDecisionSources().stream().map(Enum::name).toList());
+-    body.setProperty("violations", violations);
+-  }
+-
+-  public static List<SlotViolationDetail> buildViolations(
+-      RuleDecisionPlan plan, RuleEvaluationResult result) {
+-    if (result.decision() == RuleDecision.ALLOW) return List.of();
+-    if (plan == null) {
+-      return result.reasonCodes().stream().map(code -> {
+-        var descriptor = ErgonRuleErrorCatalog.find(code);
+-        return new SlotViolationDetail(code, descriptor.map(ErgonRuleErrorCatalog.RuleErrorDescriptor::slotKey).orElse(null),
+-            "unknown", null, DecisionStage.DOMAIN_DECISION, result.decision(),
+-            descriptor.map(ErgonRuleErrorCatalog.RuleErrorDescriptor::targetField).orElse(null),
+-            ErgonRuleErrorCatalog.resolveMessagePtBr(code),
+-            descriptor.map(ErgonRuleErrorCatalog.RuleErrorDescriptor::plsqlOrigin).orElse(null));
+-      }).toList();
+-    }
+-    return new org.praxisplatform.rules.violation.PraxisRuleViolationException(plan, result, ErgonRuleErrorCatalog.canonical())
+-        .getViolations().stream().map(v -> new SlotViolationDetail(v.code(), v.slotKey(), v.bindingKey(),
+-            v.source(), v.stage(), v.decision(), v.targetField(), v.messagePtBr(),
+-            ErgonRuleErrorCatalog.find(v.code()).map(ErgonRuleErrorCatalog.RuleErrorDescriptor::plsqlOrigin).orElse(v.lineage())))
+-        .toList();
+-  }
+-
+-  private static String resolveProblemTitle(String ruleSetKey) {
+-    if (ruleSetKey == null) {
+-      return "Violação determinística de regra estatutária (RN-013)";
+-    }
+-    if (ruleSetKey.contains("parametros-contagem-ferias")) {
+-      return "Violação determinística de regra de parâmetros de contagem de férias (PCK_PARAMETROS_CONTA)";
+-    }
+-    if (ruleSetKey.contains("periodos-aquisitivos-ferias")) {
+-      return "Violação determinística de regra de período aquisitivo de férias (PCK_PERAQFER)";
+-    }
+-    if (ruleSetKey.contains("ferias-gozo")) {
+-      return "Violação determinística de regra de concessão e gozo de férias (PCK_FERIAS)";
+-    }
+-    if (ruleSetKey.contains("frequencias") && !ruleSetKey.contains("regras-frequencia")) {
+-      return "Violação determinística de regra de lançamento de frequência (PCK_FREQUENCIAS)";
+-    }
+-    if (ruleSetKey.contains("afastamentos")) {
+-      return "Violação determinística de regra de concessão de afastamento (PCK_LIC_AFAST)";
+-    }
+-    if (ruleSetKey.contains("dependentes")) {
+-      return "Violação determinística de regra de elegibilidade de dependente (PCK_DEPENDENTES)";
+-    }
+-    if (ruleSetKey.contains("vinculos")) {
+-      return "Violação determinística de regra de provimento e movimentação funcional (PCK_VINCULOS)";
+-    }
+-    return "Violação determinística de regra estatutária (RN-013)";
+-  }
+-
+-  private static String resolveDefaultPlsqlOrigin(String ruleSetKey, DecisionSource source) {
+-    boolean customer = source == DecisionSource.CUSTOMER;
+-    if (ruleSetKey == null) {
+-      return customer ? "EPB__REGRAS_FREQ" : "PCK_REGRAS_FREQ";
+-    }
+-    if (ruleSetKey.contains("parametros-contagem-ferias")) {
+-      return customer ? "EPB__PARAMETROS_CONTA" : "PCK_PARAMETROS_CONTA";
+-    }
+-    if (ruleSetKey.contains("periodos-aquisitivos-ferias")) {
+-      return customer ? "EPB__PERAQFER" : "PCK_PERAQFER";
+-    }
+-    if (ruleSetKey.contains("ferias-gozo")) {
+-      return customer ? "EPB__FERIAS" : "PCK_FERIAS";
+-    }
+-    if (ruleSetKey.contains("frequencias") && !ruleSetKey.contains("regras-frequencia")) {
+-      return customer ? "EPB__FREQUENCIAS" : "PCK_FREQUENCIAS";
+-    }
+-    if (ruleSetKey.contains("afastamentos")) {
+-      return customer ? "EPB__LIC_AFAST" : "PCK_LIC_AFAST";
+-    }
+-    if (ruleSetKey.contains("dependentes")) {
+-      return customer ? "EPB__DEPENDENTES" : "PCK_DEPENDENTES";
+-    }
+-    if (ruleSetKey.contains("vinculos")) {
+-      return customer ? "EPB__VINCULOS" : "PCK_VINCULOS";
+-    }
+-    return customer ? "EPB__REGRAS_FREQ" : "PCK_REGRAS_FREQ";
+-  }
+-
+-  private static String resolveDefaultSlotKey(String ruleSetKey) {
+-    if (ruleSetKey == null) {
+-      return "rn013.unknown";
+-    }
+-    if (ruleSetKey.contains("parametros-contagem-ferias")) {
+-      return "parametros-conta.unknown";
+-    }
+-    if (ruleSetKey.contains("periodos-aquisitivos-ferias")) {
+-      return "peraqfer.unknown";
+-    }
+-    if (ruleSetKey.contains("ferias-gozo")) {
+-      return "ferias-gozo.unknown";
+-    }
+-    if (ruleSetKey.contains("frequencias") && !ruleSetKey.contains("regras-frequencia")) {
+-      return "frequencias.unknown";
+-    }
+-    if (ruleSetKey.contains("afastamentos")) {
+-      return "afastamentos.unknown";
+-    }
+-    if (ruleSetKey.contains("dependentes")) {
+-      return "dependentes.unknown";
+-    }
+-    if (ruleSetKey.contains("vinculos")) {
+-      return "vinculos.unknown";
+-    }
+-    return "rn013.unknown";
+-  }
+-
+-  private static DecisionSource inferSource(String bindingKey, List<String> codes) {
+-    if (bindingKey != null && bindingKey.startsWith("customer.")) {
+-      return DecisionSource.CUSTOMER;
+-    }
+-    if (codes != null && codes.stream().anyMatch(c -> c != null && c.startsWith("CERG-"))) {
+-      return DecisionSource.CUSTOMER;
+-    }
+-    return DecisionSource.PRODUCT;
+-  }
+-
+-  private static String formatMessage(RuleDecisionPlan plan, RuleEvaluationResult result) {
+-    List<SlotViolationDetail> details = buildViolations(plan, result);
+-    if (details.isEmpty()) {
+-      return "Decisão determinística bloqueada (fail-closed: " + result.decision() + ").";
+-    }
+-    return details.stream()
+-        .map(
+-            v ->
+-                "["
+-                    + v.code()
+-                    + " | "
+-                    + v.source()
+-                    + " | slot="
+-                    + v.slotKey()
+-                    + "] "
+-                    + v.messagePtBr())
+-        .collect(Collectors.joining(" | "));
+-  }
+-  /** Runtime-neutral rejection for canonical bulk diagnostics; HTTP remains this host adapter. */
+-  public org.praxisplatform.rules.violation.PraxisRuleViolationException canonicalViolation() {
+-    if (plan != null && evaluationResult != null)
+-      return new org.praxisplatform.rules.violation.PraxisRuleViolationException(plan, evaluationResult, ErgonRuleErrorCatalog.canonical());
+-    var first = violations.getFirst();
+-    return new org.praxisplatform.rules.violation.PraxisRuleViolationException(
+-        new org.praxisplatform.rules.violation.SlotViolationDetail(first.code(), first.slotKey(), first.bindingKey(),
+-            first.source(), first.stage(), first.decision(), first.targetField(), first.messagePtBr(), first.plsqlOrigin()));
+-  }
+-
+ }
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/AfastamentoService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/AfastamentoService.java
+@@ -374,16 +374,7 @@
+     }
+   }
+ 
+-  @Override
+-  protected ResourceFilterAccessScope<Afastamento> resolveResourceFilterAccessScope() {
+-    var explicit = tenant != null ? tenant.explicitOrgao() : OptionalInt.empty();
+-    if (explicit.isEmpty()) {
+-      return ResourceFilterAccessScope.unrestricted();
+-    }
+-    int orgao = explicit.getAsInt();
+-    return ResourceFilterAccessScope.restricted(
+-        (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
+-  }
++
+ 
+   @Override
+   protected void applyResourceUpdate(Long id, Afastamento entity, UpdateAfastamentoDTO dto) {
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/AverbacaoTempoServicoService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/AverbacaoTempoServicoService.java
+@@ -41,10 +41,7 @@
+       AverbacaoTempoServicoFilterDTO filter) {
+     return TempoLicencaValidation.scopeFilter(filter == null ? emptyFilter() : filter, tenant);
+   }
+-  @Override protected ResourceFilterAccessScope<AverbacaoTempoServico> resolveResourceFilterAccessScope() {
+-    return ResourceFilterAccessScope.restricted(
+-        (root, query, cb) -> cb.equal(root.get("empCodigo"), tenant.orgao()));
+-  }
++
+   @Override protected void beforeCreate(CreateAverbacaoTempoServicoDTO dto, AverbacaoTempoServico entity) {
+     TempoLicencaLifecycle.requireState(entity, "EM_ANALISE");
+     if(entity.getDiasDesaverbados()==null || entity.getDiasDesaverbados()!=0 || entity.getDataDesaverbacao()!=null || entity.getDataRemocao()!=null || entity.getMotivoRemocao()!=null || entity.getMotivoDesaverbacao()!=null)
+@@ -133,12 +130,7 @@
+     TempoLicencaValidation.orgao(tenant, entity.getEmpCodigo());
+     var dto = new UpdateAverbacaoTempoServicoDTO();
+     org.springframework.beans.BeanUtils.copyProperties(mapper.toResponse(entity), dto);
+-    var source = new org.springframework.beans.BeanWrapperImpl(patch);
+-    var target = new org.springframework.beans.BeanWrapperImpl(dto);
+-    for (var property : source.getPropertyDescriptors()) {
+-      var name = property.getName();
+-      if (patch.wasSupplied(name) && target.isWritableProperty(name)) target.setPropertyValue(name, source.getPropertyValue(name));
+-    }
++    org.praxisplatform.uischema.service.base.ResourceStateCopySupport.copySuppliedPatchProperties(patch, dto);
+     if(!beanValidator.validate(dto).isEmpty()) throw TempoLicencaValidation.invalid("Dados do assentamento incompatíveis com o contrato.");
+     return update(id, dto, precondition);
+   }
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/CargoService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/CargoService.java
+@@ -124,16 +124,7 @@
+         .build();
+   }
+ 
+-  @Override
+-  protected ResourceFilterAccessScope<Cargo> resolveResourceFilterAccessScope() {
+-    var explicit = tenant != null ? tenant.explicitOrgao() : OptionalInt.empty();
+-    if (explicit.isEmpty()) {
+-      return ResourceFilterAccessScope.unrestricted();
+-    }
+-    int orgao = explicit.getAsInt();
+-    return ResourceFilterAccessScope.restricted(
+-        (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
+-  }
++
+ 
+   @Override
+   protected void applyResourceUpdate(Integer id, Cargo entity, UpdateCargoDTO dto) {
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/DefinicaoCampoCustomizadoService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/DefinicaoCampoCustomizadoService.java
+@@ -191,17 +191,7 @@
+     }
+   }
+ 
+-  @Override
+-  protected ResourceFilterAccessScope<DefinicaoCampoCustomizado> resolveResourceFilterAccessScope() {
+-    var explicit = tenant != null ? tenant.explicitOrgao() : OptionalInt.empty();
+-    if (explicit.isEmpty()) {
+-      return ResourceFilterAccessScope.unrestricted();
+-    }
+-    int orgao = explicit.getAsInt();
+-    return ResourceFilterAccessScope.restricted(
+-        (root, query, cb) ->
+-            cb.or(cb.isNull(root.get("empCodigo")), cb.equal(root.get("empCodigo"), orgao)));
+-  }
++
+ 
+   @Override
+   protected void applyResourceUpdate(Long id, DefinicaoCampoCustomizado entity, UpdateDefinicaoCampoCustomizadoDTO dto) {
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/DependenteService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/DependenteService.java
+@@ -253,6 +253,7 @@
+ 
+   @Override
+   protected void beforeCreate(CreateDependenteDTO dto, Dependente entity) {
++    assertEntityAccessAllowed(entity);
+     if (invariants != null) {
+       invariants.dependente(entity, true, false);
+     }
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/DocumentoLegalService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/DocumentoLegalService.java
+@@ -49,16 +49,7 @@
+   }
+ 
+ 
+-  @Override
+-  protected ResourceFilterAccessScope<DocumentoLegal> resolveResourceFilterAccessScope() {
+-    var explicit = tenant.explicitOrgao();
+-    if (explicit.isEmpty()) {
+-      return ResourceFilterAccessScope.unrestricted();
+-    }
+-    int orgao = explicit.getAsInt();
+-    return ResourceFilterAccessScope.restricted(
+-        (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
+-  }
++
+ 
+   @Override
+   protected List<CollectionExportField> exportFields() {
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/ErgonCommands.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/ErgonCommands.java
+@@ -192,15 +192,19 @@
+   }
+ 
+   private <E> E locked(Class<E> type, Object id) {
+-    E e = em.find(type, id, LockModeType.PESSIMISTIC_WRITE);
++    E e = em.find(type, id);
+     if (e == null)
+       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Assentamento inexistente.");
++    if (e instanceof Vinculo vinculo) org(vinculo.getEmpCodigo());
++    ErgonTenantAccess.assertAllowed(e, tenant, em, false);
++    em.lock(e, LockModeType.PESSIMISTIC_WRITE);
+     em.refresh(e);
++    ErgonTenantAccess.assertAllowed(e, tenant, em, false);
+     return e;
+   }
+ 
+   private void org(Integer id) {
+-    if (!Objects.equals(id, tenant.orgao())) ErgonInvariants.fail("Órgão diverge de X-Tenant.");
++    if (!Objects.equals(id, tenant.orgao())) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Órgão diverge de X-Tenant.");
+   }
+ 
+   private Vinculo vinculo(
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/ErgonDeterminationService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/ErgonDeterminationService.java
+@@ -9,6 +9,7 @@
+ import java.time.ZoneOffset;
+ import java.time.temporal.ChronoUnit;
+ import java.util.List;
++import java.util.Objects;
+ import org.springframework.stereotype.Service;
+ import org.springframework.transaction.annotation.Transactional;
+ 
+@@ -189,6 +190,10 @@
+     Vinculo vinculo = null;
+     if (em != null && draft.getNumfunc() != null && draft.getNumvinc() != null) {
+       vinculo = em.find(Vinculo.class, new VinculoId(draft.getNumfunc(), draft.getNumvinc()));
++      if (vinculo == null) throw new org.springframework.web.server.ResponseStatusException(
++          org.springframework.http.HttpStatus.NOT_FOUND, "Vínculo selecionado não encontrado.");
++      if (!Objects.equals(vinculo.getEmpCodigo(), tenant.orgao())) throw new org.springframework.web.server.ResponseStatusException(
++          org.springframework.http.HttpStatus.FORBIDDEN, "Vínculo fora do órgão corrente.");
+     }
+     ParametroContagemFerias param =
+         vacationParameterResolver.resolveActiveParameter(em, vinculo, draft.getDtini());
+@@ -239,20 +244,21 @@
+     }
+     var qFreq =
+         em.createQuery(
+-            "select f from Frequencia f where f.numfunc=:f and f.numvinc=:v and f.situacao='HOMOLOGADO'",
++            "select f from Frequencia f where f.empCodigo=:org and f.numfunc=:f and f.numvinc=:v and f.situacao='HOMOLOGADO'",
+             Frequencia.class);
+     if (qFreq == null) {
+       return 0;
+     }
+     var p1 = qFreq.setParameter("f", numfunc);
+     var p2 = p1 != null ? p1.setParameter("v", numvinc) : null;
+-    var freqs = p2 != null ? p2.getResultList() : List.<Frequencia>of();
++    var p3 = p2 != null ? p2.setParameter("org", tenant.orgao()) : null;
++    var freqs = p3 != null ? p3.getResultList() : List.<Frequencia>of();
+     if (freqs == null) {
+       return 0;
+     }
+     int faltas = 0;
+     for (Frequencia f : freqs) {
+-      if (f == null || f.getDtini() == null) continue;
++      if (f == null || f.getDtini() == null || !Objects.equals(f.getEmpCodigo(), tenant.orgao())) continue;
+       LocalDate fEnd = f.getDtfim() != null ? f.getDtfim() : f.getDtini();
+       if (f.getDtini().isAfter(fimPa) || fEnd.isBefore(iniPa)) continue;
+       boolean desconta =
+@@ -280,20 +286,21 @@
+     }
+     var qAfast =
+         em.createQuery(
+-            "select a from Afastamento a where a.numfunc=:f and a.numvinc=:v and a.situacao='HOMOLOGADO'",
++            "select a from Afastamento a where a.empCodigo=:org and a.numfunc=:f and a.numvinc=:v and a.situacao='HOMOLOGADO'",
+             Afastamento.class);
+     if (qAfast == null) {
+       return 0;
+     }
+     var p1 = qAfast.setParameter("f", numfunc);
+     var p2 = p1 != null ? p1.setParameter("v", numvinc) : null;
+-    var afasts = p2 != null ? p2.getResultList() : List.<Afastamento>of();
++    var p3 = p2 != null ? p2.setParameter("org", tenant.orgao()) : null;
++    var afasts = p3 != null ? p3.getResultList() : List.<Afastamento>of();
+     if (afasts == null) {
+       return 0;
+     }
+     int diasSuspensivos = 0;
+     for (Afastamento a : afasts) {
+-      if (a == null || a.getDtini() == null) continue;
++      if (a == null || a.getDtini() == null || !Objects.equals(a.getEmpCodigo(), tenant.orgao())) continue;
+       CodigoFrequencia cf = a.getCodigoFrequenciaEntidade();
+       if (cf == null
+           && a.getTipofreq() != null
+@@ -334,6 +341,8 @@
+       if (pa == null) {
+         ErgonInvariants.fail("Período aquisitivo selecionado não encontrado.");
+       }
++      if (!Objects.equals(pa.getEmpCodigo(), tenant.orgao())) throw new org.springframework.web.server.ResponseStatusException(
++          org.springframework.http.HttpStatus.FORBIDDEN, "Período aquisitivo fora do órgão corrente.");
+       chave = pa.getChave();
+       totDiasPa = pa.getTotDiasDireito();
+       int gozados = pa.getDiasGozados() != null ? pa.getDiasGozados() : 0;
+@@ -349,10 +358,10 @@
+       if (em != null) {
+         var q =
+             em.createQuery(
+-                "select x from FeriasGozo x where x.periodoAquisitivoId=:paId and x.situacao<>'CANCELADA'",
++                "select x from FeriasGozo x where x.empCodigo=:org and x.periodoAquisitivoId=:paId and x.situacao<>'CANCELADA'",
+                 FeriasGozo.class);
+         if (q != null) {
+-          var r1 = q.setParameter("paId", pa.getId());
++          var r1 = q.setParameter("paId", pa.getId()).setParameter("org", tenant.orgao());
+           var flushed = r1 != null ? r1.setFlushMode(FlushModeType.COMMIT) : null;
+           var parcelas =
+               (flushed != null ? flushed : r1) != null
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/ErgonInvariants.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/ErgonInvariants.java
+@@ -3,7 +3,6 @@
+ import br.com.praxis.ergonshowcase.config.TenantContext;
+ import br.com.praxis.ergonshowcase.domain.*;
+ import br.com.praxis.ergonshowcase.rules.ErgonRuleEngineFacade;
+-import br.com.praxis.ergonshowcase.rules.ErgonRuleViolationException;
+ import jakarta.persistence.*;
+ import java.time.LocalDate;
+ import java.util.*;
+@@ -62,7 +61,6 @@
+           || !Boolean.TRUE.equals(parent.getEAglutinador()))
+         fail("Cargo aglutinador deve existir no mesmo órgão e estar habilitado.");
+     }
+-    customFields("administracao-pessoal.cargos", c.getEmpCodigo(), c.getCustomFields(), c);
+   }
+ 
+   public void pessoa(ServidorPessoa p) {
+@@ -78,8 +76,6 @@
+       throw new ResponseStatusException(HttpStatus.CONFLICT, "CPF já utilizado por outra pessoa.");
+     if (blank(p.getIdentprof()) != blank(p.getTipoidprof()))
+       fail("Registro profissional exige número e tipo correspondentes.");
+-    Integer emp = tenant != null ? tenant.orgao() : 1;
+-    customFields("administracao-pessoal.funcionarios", emp, p.getCustomFields(), p);
+   }
+ 
+   public void orgao(Orgao o) {
+@@ -160,16 +156,11 @@
+         sibling.setCpf(d.getCpf());
+         existentes = List.of(sibling);
+       }
+-      try {
+-        ruleEngine()
+-            .enforceDependente(
+-                new ErgonRuleEngineFacade.DependenteRuleContext(
+-                    d, emp, titular, tipo, doc, existentes, null));
+-      } catch (ErgonRuleViolationException ex) {
+-        throw ex.withConflictIfOverlapOrUniqueness();
+-      }
+-    }
+-    customFields("administracao-pessoal.dependentes", emp, d.getCustomFields(), d);
++      ruleEngine()
++          .enforceDependente(
++              new ErgonRuleEngineFacade.DependenteRuleContext(
++                  d, emp, titular, tipo, doc, existentes, null));
++    }
+   }
+ 
+   public void afastamento(Afastamento a, boolean creating) {
+@@ -262,25 +253,20 @@
+         fail("Ato de publicação oficial inexistente ou pertence a outro órgão.");
+     }
+     if (runRuleEngine) {
+-      try {
+-        ruleEngine()
+-            .enforceAfastamento(
+-                new ErgonRuleEngineFacade.AfastamentoRuleContext(
+-                    a,
+-                    titular,
+-                    pessoa,
+-                    codigo,
+-                    null,
+-                    existentes,
+-                    List.of(),
+-                    origem,
+-                    subst,
+-                    inPlaceProrrogacao));
+-      } catch (ErgonRuleViolationException ex) {
+-        throw ex.withConflictIfOverlapOrUniqueness();
+-      }
+-    }
+-    customFields("administracao-pessoal.afastamentos", a.getEmpCodigo(), a.getCustomFields(), a);
++      ruleEngine()
++          .enforceAfastamento(
++              new ErgonRuleEngineFacade.AfastamentoRuleContext(
++                  a,
++                  titular,
++                  pessoa,
++                  codigo,
++                  null,
++                  existentes,
++                  List.of(),
++                  origem,
++                  subst,
++                  inPlaceProrrogacao));
++    }
+   }
+ 
+   public void frequencia(Frequencia f, boolean creating) {
+@@ -326,16 +312,11 @@
+         fail("Documento comprobatório inexistente ou pertence a outro órgão.");
+     }
+     if (runRuleEngine) {
+-      try {
+-        ruleEngine()
+-            .enforceFrequencia(
+-                new ErgonRuleEngineFacade.FrequenciaRuleContext(
+-                    f, vinculo, pessoa, codigo, null, duplicadas, List.of(), null));
+-      } catch (ErgonRuleViolationException ex) {
+-        throw ex.withConflictIfOverlapOrUniqueness();
+-      }
+-    }
+-    customFields("administracao-pessoal.frequencias", f.getEmpCodigo(), f.getCustomFields(), f);
++      ruleEngine()
++          .enforceFrequencia(
++              new ErgonRuleEngineFacade.FrequenciaRuleContext(
++                  f, vinculo, pessoa, codigo, null, duplicadas, List.of(), null));
++    }
+   }
+ 
+   public void campoCustomizado(DefinicaoCampoCustomizado d, boolean creating) {
+@@ -450,10 +431,6 @@
+           .enforceParametroContagemFerias(
+               new ErgonRuleEngineFacade.ParametroContagemFeriasRuleContext(p, candidatos));
+     }
+-    Integer emp =
+-        p.getEmpCodigo() != null ? p.getEmpCodigo() : (tenant != null ? tenant.orgao() : 1);
+-    customFields(
+-        "administracao-pessoal.parametros-contagem-ferias", emp, p.getCustomFields(), p);
+   }
+ 
+   public void periodoAquisitivoFerias(PeriodoAquisitivoFerias pa, boolean creating) {
+@@ -511,11 +488,6 @@
+               new ErgonRuleEngineFacade.PeriodoAquisitivoFeriasRuleContext(
+                   pa, vinculo, param, List.of(), existentes, List.of(), false));
+     }
+-    customFields(
+-        "administracao-pessoal.periodos-aquisitivos-ferias",
+-        pa.getEmpCodigo(),
+-        pa.getCustomFields(),
+-        pa);
+   }
+ 
+   public void feriasGozo(FeriasGozo fg, boolean creating) {
+@@ -634,7 +606,6 @@
+                   false,
+                   false));
+     }
+-    customFields("administracao-pessoal.ferias-gozo", fg.getEmpCodigo(), fg.getCustomFields(), fg);
+   }
+ 
+   private ParametroContagemFerias resolveEffectiveParametroFerias(
+@@ -724,7 +695,6 @@
+                   openAfastamentosCount,
+                   creating));
+     }
+-    customFields("administracao-pessoal.vinculos", v.getEmpCodigo(), v.getCustomFields(), v);
+   }
+ 
+   public void customFields(
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/ErgonReadOnlyResourceService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/ErgonReadOnlyResourceService.java
+@@ -2,16 +2,12 @@
+ 
+ import br.com.praxis.ergonshowcase.config.TenantContext;
+ import java.util.List;
+-import java.util.Objects;
+ import org.praxisplatform.uischema.exporting.*;
+ import org.praxisplatform.uischema.filter.dto.GenericFilterDTO;
+ import org.praxisplatform.uischema.repository.base.BaseCrudRepository;
+ import org.praxisplatform.uischema.service.base.AbstractReadOnlyResourceService;
+-import org.springframework.beans.BeanWrapperImpl;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.data.domain.Sort;
+-import org.springframework.http.HttpStatus;
+-import org.springframework.web.server.ResponseStatusException;
+ 
+ /** Políticas do host; consulta, versão, snapshots e exportação são executados pelo starter. */
+ public abstract class ErgonReadOnlyResourceService<E, R, I, F extends GenericFilterDTO> extends AbstractReadOnlyResourceService<E, R, I, F> {
+@@ -34,13 +30,13 @@
+   }
+ 
+   @Override protected void assertEntityAccessAllowed(E entity) {
+-    var bean = new BeanWrapperImpl(entity);
+-    if (bean.isReadableProperty("empCodigo")) {
+-      Object orgao = bean.getPropertyValue("empCodigo");
+-      if (orgao != null && !Objects.equals(orgao, resourceTenant.orgao()))
+-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Registro fora do órgão corrente.");
+-    }
++    ErgonTenantAccess.assertAllowed(entity, resourceTenant, getEntityManager(), globalOrganizationRecords());
+   }
++
++  @Override protected final org.praxisplatform.uischema.service.base.ResourceFilterAccessScope<E> resolveResourceFilterAccessScope() {
++    return ErgonTenantAccess.scope(getEntityClass(), resourceTenant, globalOrganizationRecords());
++  }
++  protected boolean globalOrganizationRecords() { return false; }
+ 
+   // As listas editoriais existentes permanecem como política de exportação do host.
+   protected abstract F emptyFilter();
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/ErgonResourceService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/ErgonResourceService.java
+@@ -2,12 +2,10 @@
+ 
+ import br.com.praxis.ergonshowcase.config.TenantContext;
+ import java.util.List;
+-import java.util.Objects;
+ import org.praxisplatform.uischema.exporting.*;
+ import org.praxisplatform.uischema.filter.dto.GenericFilterDTO;
+ import org.praxisplatform.uischema.repository.base.BaseCrudRepository;
+ import org.praxisplatform.uischema.service.base.AbstractBaseResourceService;
+-import org.springframework.beans.BeanWrapperImpl;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.data.domain.Sort;
+ import org.springframework.http.HttpStatus;
+@@ -34,12 +32,7 @@
+   }
+ 
+   @Override protected void assertEntityAccessAllowed(E entity) {
+-    var bean = new BeanWrapperImpl(entity);
+-    if (bean.isReadableProperty("empCodigo")) {
+-      Object orgao = bean.getPropertyValue("empCodigo");
+-      if (orgao != null && !Objects.equals(orgao, resourceTenant.orgao()))
+-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Registro fora do órgão corrente.");
+-    }
++    ErgonTenantAccess.assertAllowed(entity, resourceTenant, getEntityManager(), globalOrganizationRecords());
+   }
+ 
+   // As listas editoriais existentes permanecem como política de exportação do host.
+@@ -109,11 +102,10 @@
+ 
+   /** Bulk always freezes the current organization, including the default tenant when the header is omitted. */
+   @Override protected org.praxisplatform.uischema.service.base.ResourceFilterAccessScope<E> resolveBulkResourceFilterAccessScope() {
+-    if (org.springframework.beans.BeanUtils.getPropertyDescriptor(getEntityClass(), "empCodigo") == null)
+-      return super.resolveBulkResourceFilterAccessScope();
+-    return org.praxisplatform.uischema.service.base.ResourceFilterAccessScope.restricted((root, query, cb) ->
+-        globalOrganizationRecords() ? cb.or(cb.isNull(root.get("empCodigo")),cb.equal(root.get("empCodigo"),resourceTenant.orgao()))
+-            : cb.equal(root.get("empCodigo"),resourceTenant.orgao()));
++    return resolveResourceFilterAccessScope();
++  }
++  @Override protected final org.praxisplatform.uischema.service.base.ResourceFilterAccessScope<E> resolveResourceFilterAccessScope() {
++    return ErgonTenantAccess.scope(getEntityClass(), resourceTenant, globalOrganizationRecords());
+   }
+   protected boolean globalOrganizationRecords() { return false; }
+ 
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/ErgonTenantAccess.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/ErgonTenantAccess.java
+@@ -0,0 +1,62 @@
++package br.com.praxis.ergonshowcase.service;
++
++import br.com.praxis.ergonshowcase.config.TenantContext;
++import br.com.praxis.ergonshowcase.domain.Dependente;
++import br.com.praxis.ergonshowcase.domain.Vinculo;
++import jakarta.persistence.EntityManager;
++import java.util.Objects;
++import org.praxisplatform.uischema.service.base.ResourceFilterAccessScope;
++import org.springframework.beans.BeanUtils;
++import org.springframework.beans.BeanWrapperImpl;
++import org.springframework.http.HttpStatus;
++import org.springframework.web.server.ResponseStatusException;
++
++/** Uma política de órgão para leituras, seleção de lotes e acesso individual do host. */
++public final class ErgonTenantAccess {
++  private ErgonTenantAccess() { }
++
++  public static void assertAllowed(Object entity, TenantContext tenant, EntityManager em, boolean allowGlobal) {
++    if (entity instanceof Dependente dependent) {
++      Long person = dependent.getId() == null ? null : dependent.getId().numfunc();
++      if (person == null || em == null || em.createQuery(
++          "select count(v) from Vinculo v where v.id.numfunc=:person and v.empCodigo=:org", Long.class)
++          .setParameter("person", person).setParameter("org", tenant.orgao()).getSingleResult() == 0)
++        throw denied();
++      return;
++    }
++    String property = organizationProperty(entity.getClass());
++    if (property == null) return;
++    Object organization = new BeanWrapperImpl(entity).getPropertyValue(property);
++    if (!(organization == null && allowGlobal) && !Objects.equals(organization, tenant.orgao()))
++      throw denied();
++  }
++
++  public static <E> ResourceFilterAccessScope<E> scope(Class<E> type, TenantContext tenant, boolean allowGlobal) {
++    int organization = tenant.orgao();
++    if (Dependente.class.isAssignableFrom(type)) {
++      return ResourceFilterAccessScope.restricted((root, query, cb) -> {
++        var membership = query.subquery(Integer.class);
++        var vinculo = membership.from(Vinculo.class);
++        membership.select(cb.literal(1)).where(
++            cb.equal(vinculo.get("id").get("numfunc"), root.get("id").get("numfunc")),
++            cb.equal(vinculo.get("empCodigo"), organization));
++        return cb.exists(membership);
++      });
++    }
++    String property = organizationProperty(type);
++    if (property == null) return ResourceFilterAccessScope.unrestricted();
++    return ResourceFilterAccessScope.restricted((root, query, cb) -> allowGlobal
++        ? cb.or(cb.isNull(root.get(property)), cb.equal(root.get(property), organization))
++        : cb.equal(root.get(property), organization));
++  }
++
++  private static String organizationProperty(Class<?> type) {
++    if (BeanUtils.getPropertyDescriptor(type, "empCodigo") != null) return "empCodigo";
++    if (BeanUtils.getPropertyDescriptor(type, "empresa") != null) return "empresa";
++    return null;
++  }
++
++  private static ResponseStatusException denied() {
++    return new ResponseStatusException(HttpStatus.FORBIDDEN, "Registro fora do órgão corrente.");
++  }
++}
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/FeriasGozoService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/FeriasGozoService.java
+@@ -129,17 +129,7 @@
+     return Optional.empty();
+   }
+ 
+-  @Override
+-  protected org.praxisplatform.uischema.service.base.ResourceFilterAccessScope<FeriasGozo>
+-      resolveResourceFilterAccessScope() {
+-    var explicitOrgao = tenant.explicitOrgao();
+-    if (explicitOrgao.isEmpty()) {
+-      return org.praxisplatform.uischema.service.base.ResourceFilterAccessScope.unrestricted();
+-    }
+-    int orgao = explicitOrgao.getAsInt();
+-    return org.praxisplatform.uischema.service.base.ResourceFilterAccessScope.restricted(
+-        (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
+-  }
++
+ 
+   @Override
+   public StatsFieldRegistry getStatsFieldRegistry() {
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/FrequenciaService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/FrequenciaService.java
+@@ -376,16 +376,7 @@
+     }
+   }
+ 
+-  @Override
+-  protected ResourceFilterAccessScope<Frequencia> resolveResourceFilterAccessScope() {
+-    var explicit = tenant != null ? tenant.explicitOrgao() : OptionalInt.empty();
+-    if (explicit.isEmpty()) {
+-      return ResourceFilterAccessScope.unrestricted();
+-    }
+-    int orgao = explicit.getAsInt();
+-    return ResourceFilterAccessScope.restricted(
+-        (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
+-  }
++
+ 
+   @Override
+   protected void applyResourceUpdate(Long id, Frequencia entity, UpdateFrequenciaDTO dto) {
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/ItemTabelaService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/ItemTabelaService.java
+@@ -50,17 +50,7 @@
+   }
+ 
+ 
+-  @Override
+-  protected ResourceFilterAccessScope<ItemTabela> resolveResourceFilterAccessScope() {
+-    var explicit = tenant.explicitOrgao();
+-    if (explicit.isEmpty()) {
+-      return ResourceFilterAccessScope.unrestricted();
+-    }
+-    int orgao = explicit.getAsInt();
+-    return ResourceFilterAccessScope.restricted(
+-        (root, query, cb) ->
+-            cb.or(cb.isNull(root.get("empCodigo")), cb.equal(root.get("empCodigo"), orgao)));
+-  }
++
+ 
+   @Override
+   protected List<CollectionExportField> exportFields() {
+@@ -90,4 +80,5 @@
+ 
+   @Override protected String resolveResourceKey() { return "administracao-pessoal.itens-tabela"; }
+ 
++  @Override protected boolean globalOrganizationRecords() { return true; }
+ }
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/LicencaEspecialGozoService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/LicencaEspecialGozoService.java
+@@ -41,10 +41,7 @@
+       LicencaEspecialGozoFilterDTO filter) {
+     return TempoLicencaValidation.scopeFilter(filter == null ? emptyFilter() : filter, tenant);
+   }
+-  @Override protected ResourceFilterAccessScope<LicencaEspecialGozo> resolveResourceFilterAccessScope() {
+-    return ResourceFilterAccessScope.restricted(
+-        (root, query, cb) -> cb.equal(root.get("empCodigo"), tenant.orgao()));
+-  }
++
+   @Override protected Object prepareCreateValidationDraft(CreateLicencaEspecialGozoDTO dto, LicencaEspecialGozo candidate) {
+     hydrateParentPeriodoAquisitivo(candidate);
+     return mapper.toResponse(candidate);
+@@ -156,12 +153,7 @@
+     TempoLicencaValidation.orgao(tenant, entity.getEmpCodigo());
+     var dto = new UpdateLicencaEspecialGozoDTO();
+     org.springframework.beans.BeanUtils.copyProperties(mapper.toResponse(entity), dto);
+-    var source = new org.springframework.beans.BeanWrapperImpl(patch);
+-    var target = new org.springframework.beans.BeanWrapperImpl(dto);
+-    for (var property : source.getPropertyDescriptors()) {
+-      var name = property.getName();
+-      if (patch.wasSupplied(name) && target.isWritableProperty(name)) target.setPropertyValue(name, source.getPropertyValue(name));
+-    }
++    org.praxisplatform.uischema.service.base.ResourceStateCopySupport.copySuppliedPatchProperties(patch, dto);
+     if(!beanValidator.validate(dto).isEmpty()) throw TempoLicencaValidation.invalid("Dados do assentamento incompatíveis com o contrato.");
+     return update(id, dto, precondition);
+   }
+@@ -195,6 +187,8 @@
+       throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN,"duplicate-draft-unavailable");
+     var draft=new LicencaEspecialGozoDuplicateDraftDTO();
+     draft.setDescricao(source.getDescricao());
++    draft.setEmpCodigo(source.getEmpCodigo());
++    draft.setDiasGozo(source.getDiasGozo());
+     return draft;
+   }
+   public void synchronizeAbono(LicencaEspecialGozo entity) { TempoLicencaValidation.sincronizarAbono(entity,getEntityManager()); }
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/OrgaoService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/OrgaoService.java
+@@ -88,6 +88,7 @@
+ 
+   @Override
+   protected void beforeCreate(CreateOrgaoDTO dto, Orgao e) {
++    assertEntityAccessAllowed(e);
+     invariants.orgao(e);
+     if (getRepository().existsById(e.getEmpresa()))
+       throw new ResponseStatusException(HttpStatus.CONFLICT, "Identidade já cadastrada.");
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/ParametroContagemFeriasService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/ParametroContagemFeriasService.java
+@@ -184,19 +184,7 @@
+     return Optional.empty();
+   }
+ 
+-  @Override
+-  protected org.praxisplatform.uischema.service.base.ResourceFilterAccessScope<
+-          ParametroContagemFerias>
+-      resolveResourceFilterAccessScope() {
+-    var explicit = tenant.explicitOrgao();
+-    if (explicit.isEmpty()) {
+-      return org.praxisplatform.uischema.service.base.ResourceFilterAccessScope.unrestricted();
+-    }
+-    int orgao = explicit.getAsInt();
+-    return org.praxisplatform.uischema.service.base.ResourceFilterAccessScope.restricted(
+-        (root, query, cb) ->
+-            cb.or(cb.isNull(root.get("empCodigo")), cb.equal(root.get("empCodigo"), orgao)));
+-  }
++
+ 
+   @Override
+   public StatsFieldRegistry getStatsFieldRegistry() {
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/PeriodoAquisitivoFeriasService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/PeriodoAquisitivoFeriasService.java
+@@ -310,16 +310,7 @@
+     return Optional.empty();
+   }
+ 
+-  @Override
+-  protected ResourceFilterAccessScope<PeriodoAquisitivoFerias> resolveResourceFilterAccessScope() {
+-    var explicitOrgao = tenant.explicitOrgao();
+-    if (explicitOrgao.isEmpty()) {
+-      return ResourceFilterAccessScope.unrestricted();
+-    }
+-    int orgao = explicitOrgao.getAsInt();
+-    return ResourceFilterAccessScope.restricted(
+-        (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
+-  }
++
+ 
+   @Override
+   public StatsFieldRegistry getStatsFieldRegistry() {
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/PeriodoAquisitivoLicencaEspecialService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/PeriodoAquisitivoLicencaEspecialService.java
+@@ -41,10 +41,7 @@
+       PeriodoAquisitivoLicencaEspecialFilterDTO filter) {
+     return TempoLicencaValidation.scopeFilter(filter == null ? emptyFilter() : filter, tenant);
+   }
+-  @Override protected ResourceFilterAccessScope<PeriodoAquisitivoLicencaEspecial> resolveResourceFilterAccessScope() {
+-    return ResourceFilterAccessScope.restricted(
+-        (root, query, cb) -> cb.equal(root.get("empCodigo"), tenant.orgao()));
+-  }
++
+   @Override protected void beforeCreate(CreatePeriodoAquisitivoLicencaEspecialDTO dto, PeriodoAquisitivoLicencaEspecial entity) {
+     TempoLicencaLifecycle.requireState(entity, "EM_AQUISICAO");
+     if(entity.getDiasConvertidosDobro()==null || entity.getDiasConvertidosDobro()!=0 || entity.getDtCntDobro()!=null)
+@@ -150,12 +147,7 @@
+     TempoLicencaValidation.orgao(tenant, entity.getEmpCodigo());
+     var dto = new UpdatePeriodoAquisitivoLicencaEspecialDTO();
+     org.springframework.beans.BeanUtils.copyProperties(mapper.toResponse(entity), dto);
+-    var source = new org.springframework.beans.BeanWrapperImpl(patch);
+-    var target = new org.springframework.beans.BeanWrapperImpl(dto);
+-    for (var property : source.getPropertyDescriptors()) {
+-      var name = property.getName();
+-      if (patch.wasSupplied(name) && target.isWritableProperty(name)) target.setPropertyValue(name, source.getPropertyValue(name));
+-    }
++    org.praxisplatform.uischema.service.base.ResourceStateCopySupport.copySuppliedPatchProperties(patch, dto);
+     if(!beanValidator.validate(dto).isEmpty()) throw TempoLicencaValidation.invalid("Dados do assentamento incompatíveis com o contrato.");
+     return update(id, dto, precondition);
+   }
+@@ -188,7 +180,8 @@
+       throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN,"duplicate-draft-unavailable");
+     var draft=new PeriodoAquisitivoLicencaEspecialDuplicateDraftDTO();
+     draft.setDescricao(source.getDescricao());
+-    draft.setDiasDireito(null);
++    draft.setEmpCodigo(source.getEmpCodigo());
++    draft.setDiasDireito(source.getDiasDireito());
+     return draft;
+   }
+   @Override protected java.util.Optional<org.praxisplatform.uischema.capability.ResourceStateSnapshot> toResourceStateSnapshot(PeriodoAquisitivoLicencaEspecial e) {
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/RadarFeriasPrescricaoService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/RadarFeriasPrescricaoService.java
+@@ -176,16 +176,7 @@
+     return OptionalLong.of(getRepository().count(filtered(effectiveFilter).and(bound)));
+   }
+ 
+-  @Override
+-  protected ResourceFilterAccessScope<RadarFeriasPrescricao> resolveResourceFilterAccessScope() {
+-    var explicitOrgao = tenant.explicitOrgao();
+-    if (explicitOrgao.isEmpty()) {
+-      return ResourceFilterAccessScope.unrestricted();
+-    }
+-    int orgao = explicitOrgao.getAsInt();
+-    return ResourceFilterAccessScope.restricted(
+-        (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
+-  }
++
+ 
+   @Override
+   public RadarFeriasPrescricao findEntityById(Long id) {
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/RadarTempoServicoLicencaEspecialService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/RadarTempoServicoLicencaEspecialService.java
+@@ -30,10 +30,7 @@
+       RadarTempoServicoLicencaEspecialFilterDTO filter) {
+     return TempoLicencaValidation.scopeFilter(filter == null ? emptyFilter() : filter, tenant);
+   }
+-  @Override protected ResourceFilterAccessScope<RadarTempoServicoLicencaEspecial> resolveResourceFilterAccessScope() {
+-    return ResourceFilterAccessScope.restricted(
+-        (root, query, cb) -> cb.equal(root.get("empCodigo"), tenant.orgao()));
+-  }
++
+ 
+   @Override protected RadarTempoServicoLicencaEspecial findEntityById(Long id) {
+     var entity = super.findEntityById(id);
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/RegraFrequenciaEstatutariaService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/RegraFrequenciaEstatutariaService.java
+@@ -73,17 +73,7 @@
+   }
+ 
+ 
+-  @Override
+-  protected ResourceFilterAccessScope<RegraFrequenciaEstatutaria> resolveResourceFilterAccessScope() {
+-    var explicit = tenantContext.explicitOrgao();
+-    if (explicit.isEmpty()) {
+-      return ResourceFilterAccessScope.unrestricted();
+-    }
+-    int orgao = explicit.getAsInt();
+-    return ResourceFilterAccessScope.restricted(
+-        (root, query, cb) ->
+-            cb.or(cb.isNull(root.get("empCodigo")), cb.equal(root.get("empCodigo"), orgao)));
+-  }
++
+ 
+   @Override
+   protected List<CollectionExportField> exportFields() {
+@@ -192,4 +182,5 @@
+   }
+   @Override protected String resolveResourceKey() { return "administracao-pessoal.regras-frequencia-estatutaria"; }
+ 
++  @Override protected boolean globalOrganizationRecords() { return true; }
+ }
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/SetorService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/SetorService.java
+@@ -47,16 +47,7 @@
+   }
+ 
+ 
+-  @Override
+-  protected ResourceFilterAccessScope<Setor> resolveResourceFilterAccessScope() {
+-    var explicit = tenant.explicitOrgao();
+-    if (explicit.isEmpty()) {
+-      return ResourceFilterAccessScope.unrestricted();
+-    }
+-    int orgao = explicit.getAsInt();
+-    return ResourceFilterAccessScope.restricted(
+-        (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
+-  }
++
+ 
+   @Override
+   protected List<CollectionExportField> exportFields() {
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/VendaLicencaEspecialService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/VendaLicencaEspecialService.java
+@@ -41,10 +41,7 @@
+       VendaLicencaEspecialFilterDTO filter) {
+     return TempoLicencaValidation.scopeFilter(filter == null ? emptyFilter() : filter, tenant);
+   }
+-  @Override protected ResourceFilterAccessScope<VendaLicencaEspecial> resolveResourceFilterAccessScope() {
+-    return ResourceFilterAccessScope.restricted(
+-        (root, query, cb) -> cb.equal(root.get("empCodigo"), tenant.orgao()));
+-  }
++
+   @Override protected Object prepareCreateValidationDraft(CreateVendaLicencaEspecialDTO dto, VendaLicencaEspecial candidate) {
+     hydrateParentPeriodoAquisitivo(candidate);
+     return mapper.toResponse(candidate);
+@@ -164,12 +161,7 @@
+     precondition.requireMatch(entity.getVersion());
+     var dto = new UpdateVendaLicencaEspecialDTO();
+     org.springframework.beans.BeanUtils.copyProperties(mapper.toResponse(entity), dto);
+-    var source = new org.springframework.beans.BeanWrapperImpl(patch);
+-    var target = new org.springframework.beans.BeanWrapperImpl(dto);
+-    for (var property : source.getPropertyDescriptors()) {
+-      var name = property.getName();
+-      if (patch.wasSupplied(name) && target.isWritableProperty(name)) target.setPropertyValue(name, source.getPropertyValue(name));
+-    }
++    org.praxisplatform.uischema.service.base.ResourceStateCopySupport.copySuppliedPatchProperties(patch, dto);
+     if(!beanValidator.validate(dto).isEmpty()) throw TempoLicencaValidation.invalid("Dados do assentamento incompatíveis com o contrato.");
+     if(entity.getLicencaEspecialGozoId()!=null) {
+       if("ESTORNADA".equals(entity.getSituacao()))
+@@ -204,36 +196,40 @@
+     if(getEntityManager().unwrap(org.hibernate.Session.class).isDirty()) throw new IllegalStateException("A transição exige contexto de persistência limpo.");
+     var entity = findEntityById(id);
+     lockForWrite(entity);
+-    TempoLicencaValidation.orgao(tenant, entity.getEmpCodigo()); precondition.requireMatch(entity.getVersion());
++    var authorizationId = new java.util.concurrent.atomic.AtomicReference<Long>();
++    var result = executeVersionedMutation(id, precondition, current -> {
++    TempoLicencaValidation.orgao(tenant, current.getEmpCodigo());
+     if("reconciliar-abono-vinculado".equals(action)) {
+-      if(entity.getLicencaEspecialGozoId()==null) throw TempoLicencaValidation.invalid("A venda não possui gozo de origem.");
+-      TempoLicencaLifecycle.requireState(entity,"AUTORIZADA","PAGA","ESTORNADA");
++      if(current.getLicencaEspecialGozoId()==null) throw TempoLicencaValidation.invalid("A venda não possui gozo de origem.");
++      TempoLicencaLifecycle.requireState(current,"AUTORIZADA","PAGA","ESTORNADA");
+       if(dto==null || dto.getDataEfeito()==null || dto.getJustificativa()==null || dto.getJustificativa().isBlank())
+         throw TempoLicencaValidation.invalid("Data e justificativa do ato são obrigatórias.");
+-      if(entity.getDtEstorno()!=null && dto.getDataEfeito().isBefore(entity.getDtEstorno()))
++      if(current.getDtEstorno()!=null && dto.getDataEfeito().isBefore(current.getDtEstorno()))
+         throw TempoLicencaValidation.invalid("Reconciliação não pode anteceder o estorno original.");
+       // lockForWrite já bloqueou e atualizou o gozo antes do período e desta venda.
+-      var gozo=getEntityManager().find(LicencaEspecialGozo.class,entity.getLicencaEspecialGozoId());
+-      if(gozo==null || !Objects.equals(gozo.getEmpCodigo(),entity.getEmpCodigo()) || !Objects.equals(gozo.getPeriodoAquisitivoLicencaId(),entity.getPeriodoAquisitivoLicencaId()))
++      var gozo=getEntityManager().find(LicencaEspecialGozo.class,current.getLicencaEspecialGozoId());
++      if(gozo==null || !Objects.equals(gozo.getEmpCodigo(),current.getEmpCodigo()) || !Objects.equals(gozo.getPeriodoAquisitivoLicencaId(),current.getPeriodoAquisitivoLicencaId()))
+         throw TempoLicencaValidation.invalid("Origem do abono incompatível com a venda.");
+       TempoLicencaValidation.parent(gozo.getPeriodoAquisitivoLicencaId(),tenant,getEntityManager());
+       if("PROGRAMADA".equals(gozo.getSituacao()) || "CANCELADO".equals(gozo.getSituacao()) || !Boolean.TRUE.equals(gozo.getAbonoPecuniario()))
+         throw TempoLicencaValidation.invalid("Gozo de origem não possui abono homologado ativo para reconciliação.");
+       var autorizacao=TempoLicencaValidation.reconciliarAbono(gozo,getEntityManager());
+       TempoLicencaValidation.sincronizar(gozo.getPeriodoAquisitivoLicencaId(),tenant,getEntityManager());
+-      getEntityManager().flush();getEntityManager().refresh(entity);
+-      var result=toResourceRepresentation(entity);
+-      if(autorizacao!=null) result.body().setAutorizacaoAtualId(autorizacao.getId());
+-      return result;
+-    }
+-    var input = new UpdateVendaLicencaEspecialDTO(); org.springframework.beans.BeanUtils.copyProperties(mapper.toResponse(entity), input);
++      getEntityManager().flush();getEntityManager().refresh(current);
++      if(autorizacao!=null) authorizationId.set(autorizacao.getId());
++      return;
++    }
++    var input = new UpdateVendaLicencaEspecialDTO(); org.springframework.beans.BeanUtils.copyProperties(mapper.toResponse(current), input);
+     var candidate = mapper.candidate(input); candidate.setId(id);
+     TempoLicencaLifecycle.transition(candidate, action, dto, tenant, getEntityManager());
+     validate(candidate);
+-    org.springframework.beans.BeanUtils.copyProperties(candidate, entity, "id", "version", "auditoria", "orgao", "pessoa", "vinculo", "documentoLegal", "atoPublicacao", "averbacaoOrigem", "periodoAquisitivoLicenca");
++    org.springframework.beans.BeanUtils.copyProperties(candidate, current, "id", "version", "auditoria", "orgao", "pessoa", "vinculo", "documentoLegal", "atoPublicacao", "averbacaoOrigem", "periodoAquisitivoLicenca");
+     getEntityManager().flush();
+-    TempoLicencaValidation.sincronizar(entity.getPeriodoAquisitivoLicencaId(), tenant, getEntityManager());
+-    getEntityManager().refresh(entity); return toResourceRepresentation(entity);
++    TempoLicencaValidation.sincronizar(current.getPeriodoAquisitivoLicencaId(), tenant, getEntityManager());
++    getEntityManager().refresh(current);
++    });
++    if (authorizationId.get() != null) result.body().setAutorizacaoAtualId(authorizationId.get());
++    return result;
+   }
+ 
+   @Override
+@@ -245,6 +241,8 @@
+       throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN,"duplicate-draft-unavailable");
+     var draft=new VendaLicencaEspecialDuplicateDraftDTO();
+     draft.setDescricao(source.getDescricao());
++    draft.setEmpCodigo(source.getEmpCodigo());
++    draft.setDiasVendidos(source.getDiasVendidos());
+     return draft;
+   }
+   private void validateCadastralState(VendaLicencaEspecial candidate, VendaLicencaEspecial previous) {
+--- a/src/main/java/br/com/praxis/ergonshowcase/service/VinculoService.java
++++ b/src/main/java/br/com/praxis/ergonshowcase/service/VinculoService.java
+@@ -275,16 +275,7 @@
+         .build();
+   }
+ 
+-  @Override
+-  protected ResourceFilterAccessScope<Vinculo> resolveResourceFilterAccessScope() {
+-    var explicit = tenant != null ? tenant.explicitOrgao() : OptionalInt.empty();
+-    if (explicit.isEmpty()) {
+-      return ResourceFilterAccessScope.unrestricted();
+-    }
+-    int orgao = explicit.getAsInt();
+-    return ResourceFilterAccessScope.restricted(
+-        (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
+-  }
++
+ 
+   @Override
+   protected void applyResourceUpdate(VinculoId id, Vinculo entity, UpdateVinculoDTO dto) {
+--- a/src/test/java/br/com/praxis/ergonshowcase/AfastamentoContractTest.java
++++ b/src/test/java/br/com/praxis/ergonshowcase/AfastamentoContractTest.java
+@@ -194,7 +194,7 @@
+                 service.previaAfastamento(
+                     new AfastamentoPreviaDraftDTO(
+                         "LICENCA", 201, LocalDate.of(2026, 4, 10), LocalDate.of(2026, 4, 1))))
+-        .isInstanceOf(ResponseStatusException.class)
++        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
+         .hasMessageContaining("término previsto");
+   }
+ 
+@@ -251,14 +251,14 @@
+     // 1. Duração inferior a qtdmin (5 dias) -> 422
+     afast.setDtprevfim(LocalDate.of(2026, 3, 2));
+     assertThatThrownBy(() -> invariants.afastamento(afast, true))
+-        .isInstanceOf(ResponseStatusException.class)
++        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
+         .hasMessageContaining("inferior ao mínimo regulamentar");
+     afast.setDtprevfim(LocalDate.of(2026, 3, 15));
+ 
+     // 2. Restrição de sexo (modalidade exclusiva para sexo F) -> 422
+     codigo.setSexo("F");
+     assertThatThrownBy(() -> invariants.afastamento(afast, true))
+-        .isInstanceOf(ResponseStatusException.class)
++        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
+         .hasMessageContaining("exclusiva para servidores do sexo");
+     codigo.setSexo("I");
+ 
+@@ -266,15 +266,15 @@
+     afast.setNumfuncSubstituto(1001L);
+     afast.setNumvincSubstituto(1);
+     assertThatThrownBy(() -> invariants.afastamento(afast, false))
+-        .isInstanceOf(ResponseStatusException.class)
+-        .hasMessageContaining("ERG-04318");
++        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
++        .satisfies(ex -> assertThat(((org.praxisplatform.rules.violation.PraxisRuleViolationException) ex).getReasonCodes()).contains("ERG-04318"));
+     afast.setNumfuncSubstituto(null);
+     afast.setNumvincSubstituto(null);
+ 
+     // 4. Prorrogação sem afastamentoOrigemId -> 422
+     afast.setProrrogacao(true);
+     assertThatThrownBy(() -> invariants.afastamento(afast, false))
+-        .isInstanceOf(ResponseStatusException.class)
++        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
+         .hasMessageContaining("afastamento de origem");
+     afast.setProrrogacao(false);
+ 
+@@ -289,10 +289,10 @@
+     when(overlapQuery.getResultList()).thenReturn(List.of(existente));
+ 
+     assertThatThrownBy(() -> invariants.afastamento(afast, false))
+-        .isInstanceOf(ResponseStatusException.class)
++        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
+         .satisfies(
+             ex ->
+-                assertThat(((ResponseStatusException) ex).getStatusCode())
++                assertThat(ErgonFailureAssertions.status(ex))
+                     .isEqualTo(HttpStatus.CONFLICT));
+   }
+ 
+--- a/src/test/java/br/com/praxis/ergonshowcase/CanonicalResourceTestContext.java
++++ b/src/test/java/br/com/praxis/ergonshowcase/CanonicalResourceTestContext.java
+@@ -23,6 +23,21 @@
+     if(service instanceof AbstractBaseQueryResourceService query) {
+       Class type=query.getEntityClass();BaseCrudRepository repository=query.getRepository();
+       if (type==null || repository==null) return;
++      var initial = new HashMap<Object,Object>();
++      // Keep explicitly modeled related rows when this EntityManager serves several resources.
++      for (var stubbing : mockingDetails(em).getStubbings()) {
++        var invocation = stubbing.getInvocation();
++        if (invocation.getMethod().getName().equals("find") && invocation.getArguments().length == 2
++            && invocation.getArgument(0) == type && invocation.getArgument(1) != null) {
++          Object id = invocation.getArgument(1);
++          Object row = em.find(type, id);
++          if (row != null) initial.put(id, row);
++        }
++      }
++      when(em.find(eq(type),any())).thenAnswer(i -> {
++        var row=repository.findById(i.getArgument(1));
++        return row.isPresent() ? row.get() : initial.get(i.getArgument(1));
++      });
+       when(em.find(eq(type),any(),eq(LockModeType.PESSIMISTIC_WRITE))).thenAnswer(i->{
+         var row=repository.findById(i.getArgument(1));return row.isPresent()?row.get():em.find(type,i.getArgument(1));
+       });
+--- a/src/test/java/br/com/praxis/ergonshowcase/DependenteContractTest.java
++++ b/src/test/java/br/com/praxis/ergonshowcase/DependenteContractTest.java
+@@ -177,21 +177,21 @@
+     // 1. CPF igual ao titular -> 422
+     dep.setCpf("11122233344");
+     assertThatThrownBy(() -> invariants.dependente(dep, true))
+-        .isInstanceOf(ResponseStatusException.class)
++        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
+         .hasMessageContaining("CPF do servidor titular");
+     dep.setCpf("99988877766");
+ 
+     // 2. depSalarioFamilia = true em modalidade que não gera salário-família -> 422
+     dep.setDepSalarioFamilia(true);
+     assertThatThrownBy(() -> invariants.dependente(dep, false))
+-        .isInstanceOf(ResponseStatusException.class)
++        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
+         .hasMessageContaining("salário-família");
+     dep.setDepSalarioFamilia(false);
+ 
+     // 3. dtfim preenchido com benefício ativo -> 422
+     dep.setDtfim(LocalDate.of(2024, 1, 1));
+     assertThatThrownBy(() -> invariants.dependente(dep, false))
+-        .isInstanceOf(ResponseStatusException.class)
++        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
+         .hasMessageContaining("não pode manter benefícios ativos");
+   }
+ 
+@@ -243,7 +243,13 @@
+     dep.setInvalido(true);
+     when(depRepo.findById(new DependenteId(1001L, 1))).thenReturn(Optional.of(dep));
+ 
+-    var stateProvider = StateSnapshotFixture.provider(StateSnapshotFixture.service(br.com.praxis.ergonshowcase.service.DependenteService.class, depRepo));
++    var dependentService = StateSnapshotFixture.service(br.com.praxis.ergonshowcase.service.DependenteService.class, depRepo);
++    var membershipEntityManager = mock(EntityManager.class);
++    TypedQuery<Long> membership = mock(TypedQuery.class, org.mockito.Mockito.RETURNS_SELF);
++    when(membershipEntityManager.createQuery(org.mockito.ArgumentMatchers.contains("v.empCodigo=:org"), eq(Long.class))).thenReturn(membership);
++    when(membership.getSingleResult()).thenReturn(1L);
++    ReflectionTestUtils.setField(dependentService, "entityManager", membershipEntityManager);
++    var stateProvider = StateSnapshotFixture.provider(dependentService);
+ 
+ 
+     var vigenteSnap = stateProvider.resolve("administracao-pessoal.dependentes", "1001:1").orElseThrow();
+--- a/src/test/java/br/com/praxis/ergonshowcase/ErgonFailureAssertions.java
++++ b/src/test/java/br/com/praxis/ergonshowcase/ErgonFailureAssertions.java
+@@ -0,0 +1,20 @@
++package br.com.praxis.ergonshowcase;
++
++import org.praxisplatform.rules.violation.PraxisRuleViolationException;
++import org.springframework.http.HttpStatusCode;
++import org.springframework.web.server.ResponseStatusException;
++
++/** Asserções do status HTTP para guardas estruturais e para a rejeição canônica de regras. */
++final class ErgonFailureAssertions {
++  private ErgonFailureAssertions() { }
++  static HttpStatusCode status(Throwable failure) {
++    if (failure instanceof PraxisRuleViolationException rule) return HttpStatusCode.valueOf(rule.getHttpStatus());
++    if (failure instanceof ResponseStatusException structural) return structural.getStatusCode();
++    throw new AssertionError("Esperava guarda HTTP ou rejeição canônica de regra.", failure);
++  }
++  static String reason(Throwable failure) {
++    if (failure instanceof PraxisRuleViolationException rule) return rule.getMessage();
++    if (failure instanceof ResponseStatusException structural) return structural.getReason();
++    throw new AssertionError("Esperava guarda HTTP ou rejeição canônica de regra.", failure);
++  }
++}
+--- a/src/test/java/br/com/praxis/ergonshowcase/ErgonReactiveDeterminationMetadataTest.java
++++ b/src/test/java/br/com/praxis/ergonshowcase/ErgonReactiveDeterminationMetadataTest.java
+@@ -0,0 +1,113 @@
++package br.com.praxis.ergonshowcase;
++
++import static org.assertj.core.api.Assertions.*;
++import static org.mockito.ArgumentMatchers.*;
++import static org.mockito.Mockito.*;
++
++import br.com.praxis.ergonshowcase.config.ErgonDeterminationConfig;
++import br.com.praxis.ergonshowcase.config.TempoLicencaDeterminationConfig;
++import br.com.praxis.ergonshowcase.controller.*;
++import com.fasterxml.jackson.databind.JsonNode;
++import com.fasterxml.jackson.databind.ObjectMapper;
++import com.fasterxml.jackson.databind.node.ObjectNode;
++import io.swagger.v3.core.converter.AnnotatedType;
++import io.swagger.v3.core.converter.ModelConverters;
++import io.swagger.v3.oas.annotations.Operation;
++import java.lang.reflect.ParameterizedType;
++import java.lang.reflect.Type;
++import java.util.*;
++import org.junit.jupiter.api.Test;
++import org.praxisplatform.uischema.annotation.ApiResource;
++import org.praxisplatform.uischema.determination.*;
++import org.praxisplatform.uischema.extension.CustomOpenApiResolver;
++import org.praxisplatform.uischema.openapi.*;
++import org.praxisplatform.uischema.schema.FilteredSchemaReferenceResolver;
++import org.springframework.http.ResponseEntity;
++import org.springframework.web.bind.annotation.*;
++
++/** Compila a projeção de /schemas/filtered com os controllers, DTOs e providers reais das Slices 1–6. */
++class ErgonReactiveDeterminationMetadataTest {
++  static final List<Class<?>> CONTROLLERS = List.of(ServidorPessoaController.class, VinculoController.class,
++      CargoController.class, DependenteController.class, AfastamentoController.class, FrequenciaController.class,
++      DefinicaoCampoCustomizadoController.class, ParametroContagemFeriasController.class,
++      PeriodoAquisitivoFeriasController.class, FeriasGozoController.class, AverbacaoTempoServicoController.class,
++      PeriodoAquisitivoLicencaEspecialController.class, LicencaEspecialGozoController.class, VendaLicencaEspecialController.class);
++
++  @Test void allFourteenDeterminationsCompileForBothCreateAndEditAgainstRealOperationSchemas() throws Exception {
++    var definitions = new ArrayList<ReactiveDeterminationDefinition>();
++    definitions.addAll(new ErgonDeterminationConfig().ergonDeterminations().definitions());
++    definitions.addAll(new TempoLicencaDeterminationConfig().tempoLicencaDeterminations().definitions());
++    assertThat(definitions).hasSize(14);
++    var expected = new HashSet<String>();
++    definitions.forEach(definition -> {
++      expected.add(definition.operationId());
++      assertThat(definition.scopes()).extracting(ReactiveDeterminationScope::formMode)
++          .containsExactlyInAnyOrder(ReactiveDeterminationFormMode.CREATE, ReactiveDeterminationFormMode.EDIT);
++      definition.scopes().forEach(scope -> expected.add(scope.schemaOperationId()));
++    });
++    var json = new ObjectMapper().findAndRegisterModules();
++    var converters = new ModelConverters();
++    converters.addConverter(new CustomOpenApiResolver(json));
++    var document = json.createObjectNode();
++    document.put("openapi", "3.0.3");
++    var paths = document.putObject("paths");
++    var schemas = document.putObject("components").putObject("schemas");
++    var refs = new LinkedHashMap<String, CanonicalOperationRef>();
++    var requests = new HashMap<String, JsonNode>();
++    for (Class<?> controller : CONTROLLERS) {
++      String base = org.springframework.core.annotation.AnnotatedElementUtils
++          .findMergedAnnotation(controller, RequestMapping.class).path()[0];
++      for (var method : controller.getDeclaredMethods()) {
++        if (method.isBridge() || method.isSynthetic()) continue;
++        var operation = method.getAnnotation(Operation.class);
++        if (operation == null || !expected.contains(operation.operationId())) continue;
++        var post = method.getAnnotation(PostMapping.class);
++        var put = method.getAnnotation(PutMapping.class);
++        assertThat(post != null || put != null).as("%s mapping", operation.operationId()).isTrue();
++        String verb = post != null ? "POST" : "PUT";
++        String[] mapping = post != null ? post.value() : put.value();
++        String[] namedPath = post != null ? post.path() : put.path();
++        String path = base + (mapping.length > 0 ? mapping[0] : namedPath.length > 0 ? namedPath[0] : "");
++        var node = ((ObjectNode) paths.withObjectProperty(path)).putObject(verb.toLowerCase(Locale.ROOT));
++        node.put("operationId", operation.operationId());
++        assertThat(refs.put(operation.operationId(), new CanonicalOperationRef("ergon", operation.operationId(), path, verb))).isNull();
++        var body = Arrays.stream(method.getParameters()).filter(parameter -> parameter.isAnnotationPresent(RequestBody.class))
++            .findFirst().orElseThrow();
++        JsonNode requestSchema = schema(converters, body.getParameterizedType(), schemas, json);
++        requests.put(operation.operationId(), requestSchema);
++        node.putObject("requestBody").putObject("content").putObject("application/json").set("schema", requestSchema);
++        Type response = method.getGenericReturnType();
++        if (response instanceof ParameterizedType generic && generic.getRawType() == ResponseEntity.class)
++          response = generic.getActualTypeArguments()[0];
++        node.putObject("responses").putObject("200").putObject("content").putObject("application/json")
++            .set("schema", schema(converters, response, schemas, json));
++      }
++    }
++    assertThat(refs.keySet()).containsExactlyInAnyOrderElementsOf(expected);
++    java.nio.file.Files.writeString(java.nio.file.Path.of("target/p5-b-determination-openapi.json"), document.toPrettyString());
++    var operations = mock(CanonicalOperationResolver.class);
++    when(operations.resolveByOperationId(anyString())).thenAnswer(call -> Optional.ofNullable(refs.get(call.getArgument(0))));
++    var documents = mock(OpenApiDocumentService.class, CALLS_REAL_METHODS);
++    when(documents.getDocumentForGroup("ergon")).thenReturn(document);
++    var registry = new DefaultReactiveDeterminationDefinitionRegistry(List.of(() -> definitions));
++    var compiler = new ReactiveDeterminationMetadataCompiler(registry, operations, new FilteredSchemaReferenceResolver(), documents);
++    int compiled = 0;
++    for (var definition : definitions) {
++      for (var scope : definition.scopes()) {
++        String operation = scope.schemaOperationId();
++        var metadata = compiler.compile(refs.get(operation), "request", document, requests.get(operation));
++        assertThat(metadata).as("/schemas/filtered?operationId=%s&schemaType=request", operation).hasSize(1);
++        assertThat(metadata.getFirst()).containsEntry("id", definition.id());
++        assertThat(compiler.compile(refs.get(operation), "response", document, requests.get(operation))).isEmpty();
++        compiled++;
++      }
++    }
++    assertThat(compiled).isEqualTo(28);
++  }
++
++  private static JsonNode schema(ModelConverters converters, Type type, ObjectNode schemas, ObjectMapper json) {
++    var resolved = converters.resolveAsResolvedSchema(new AnnotatedType(type).resolveAsRef(false));
++    resolved.referencedSchemas.forEach((name, schema) -> schemas.set(name, io.swagger.v3.core.util.Json.mapper().valueToTree(schema)));
++    return io.swagger.v3.core.util.Json.mapper().valueToTree(resolved.schema);
++  }
++}
+--- a/src/test/java/br/com/praxis/ergonshowcase/ErgonRuleViolationHttpTest.java
++++ b/src/test/java/br/com/praxis/ergonshowcase/ErgonRuleViolationHttpTest.java
+@@ -0,0 +1,101 @@
++package br.com.praxis.ergonshowcase;
++
++import static org.assertj.core.api.Assertions.*;
++import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
++import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
++
++import br.com.praxis.ergonshowcase.controller.ErgonCustomFieldExceptionHandler;
++import br.com.praxis.ergonshowcase.rules.*;
++import java.util.List;
++import org.junit.jupiter.api.BeforeEach;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.params.ParameterizedTest;
++import org.junit.jupiter.params.provider.ValueSource;
++import org.praxisplatform.rules.contract.*;
++import org.praxisplatform.rules.violation.PraxisRuleViolationException;
++import org.praxisplatform.uischema.command.*;
++import org.praxisplatform.uischema.customfields.CustomFieldValidationException;
++import org.praxisplatform.uischema.rest.exceptionhandler.GlobalExceptionHandler;
++import org.springframework.test.web.servlet.MockMvc;
++import org.springframework.test.web.servlet.setup.MockMvcBuilders;
++import org.springframework.validation.FieldError;
++import org.springframework.web.bind.annotation.*;
++
++/** Fronteira HTTP real do handler e executor; a fixture não inicia JPA nem afirma prova de banco. */
++class ErgonRuleViolationHttpTest {
++  MockMvc mvc;
++  @BeforeEach void setup() {
++    var canonical = new GlobalExceptionHandler();
++    mvc = MockMvcBuilders.standaloneSetup(new WriteBoundary())
++        .setControllerAdvice(new ErgonCustomFieldExceptionHandler(canonical), canonical).build();
++  }
++
++  @ParameterizedTest
++  @ValueSource(strings = {"ERG-08393", "ERG-00424", "ERG-04300", "ERG-03193", "ERG-00300", "ERG-01850"})
++  void c01PreservesCanonicalErrorsAcrossRestIntentsActionsAndCollectionCommands(String code) throws Exception {
++    int status = code.equals("ERG-01850") ? 422 : 409;
++    var descriptor = ErgonRuleErrorCatalog.find(code).orElseThrow();
++    for (var request : List.of(post("/writes/" + code), put("/writes/" + code),
++        patch("/commands/" + code), post("/commands/" + code), post("/bulk/" + code))) {
++      mvc.perform(request).andExpect(status().is(status))
++          .andExpect(jsonPath("$.message").value(descriptor.messagePtBr()))
++          .andExpect(jsonPath("$.errors[0].code").value(code))
++          .andExpect(jsonPath("$.errors[0].target").value(descriptor.targetField()))
++          .andExpect(jsonPath("$.errors[0].targetField").value(descriptor.targetField()))
++          .andExpect(jsonPath("$.errors[0].reasonCodes[0]").value(code))
++          .andExpect(jsonPath("$.errors[0].slotKeys[0]").value(descriptor.slotKey()))
++          .andExpect(jsonPath("$.errors[0].decisionSources[0]").value("PRODUCT"))
++          .andExpect(jsonPath("$.errors[0].violations[0].bindingKey").value("product.regression"))
++          .andExpect(jsonPath("$.errors[0].violations[0].targetField").value(descriptor.targetField()));
++    }
++    assertThat(rejection(code)).isInstanceOf(PraxisRuleViolationException.class);
++    assertThat(rejection(code).getHttpStatus()).isEqualTo(status);
++  }
++
++  @Test void customFieldErrorsRetainEveryFailureAndItsExactTargetThroughTheCommandExecutor() throws Exception {
++    mvc.perform(patch("/custom-fields")).andExpect(status().isUnprocessableEntity())
++        .andExpect(jsonPath("$.errors.length()").value(3))
++        .andExpect(jsonPath("$.errors[0].code").value("ERG-21502"))
++        .andExpect(jsonPath("$.errors[0].target").value("customFields.extra"))
++        .andExpect(jsonPath("$.errors[1].target").value("customFields.second"))
++        .andExpect(jsonPath("$.errors[2].target").value("customFields.note"))
++        .andExpect(jsonPath("$.errors[0].violations.length()").value(3))
++        .andExpect(jsonPath("$.errors[0].reasonCodes[1]").value("CUSTOM_FIELD_VALIDATION"));
++  }
++
++  @Test void primitiveOnlyCustomFieldFailureKeepsTheNative400Contract() throws Exception {
++    mvc.perform(post("/custom-fields/primitive")).andExpect(status().isBadRequest())
++        .andExpect(jsonPath("$.errors[0].target").value("customFields.note"));
++  }
++
++  static ErgonRuleViolationException rejection(String code) {
++    var descriptor = ErgonRuleErrorCatalog.find(code).orElseThrow();
++    return new ErgonRuleViolationException(code, descriptor.slotKey(), "product.regression", DecisionSource.PRODUCT,
++        DecisionStage.DOMAIN_DECISION, descriptor.targetField(), descriptor.messagePtBr());
++  }
++  static FieldError jsonLogicError(String key) {
++    return new FieldError("customFields", "customFields." + key, null, false,
++        new String[]{"CUSTOM_FIELD_JSON_LOGIC"}, null, "Limite do campo excedido.");
++  }
++  static void command(RuntimeException rejection, boolean collection) {
++    var executor = new GovernedResourceCommandExecutor(request -> { throw rejection; });
++    executor.execute(collection
++        ? ResourceCommandExecutionRequest.collection("regression", "/bulk", "validate", null, null)
++        : ResourceCommandExecutionRequest.item("regression", "/writes", "validate", 1L, null, null));
++  }
++  @RestController
++  static class WriteBoundary {
++    @RequestMapping(path = "/writes/{code}", method = {RequestMethod.POST, RequestMethod.PUT})
++    public void write(@PathVariable String code) { throw rejection(code); }
++    @RequestMapping(path = "/commands/{code}", method = {RequestMethod.POST, RequestMethod.PATCH})
++    public void governed(@PathVariable String code) { command(rejection(code), false); }
++    @PostMapping("/bulk/{code}")
++    public void bulk(@PathVariable String code) { command(rejection(code), true); }
++    @PatchMapping("/custom-fields")
++    public void fields() { command(new CustomFieldValidationException(List.of(jsonLogicError("extra"),
++        jsonLogicError("second"), new FieldError("customFields", "customFields.note", "Tipo inválido."))), false); }
++    @PostMapping("/custom-fields/primitive")
++    public void primitive() { throw new CustomFieldValidationException(List.of(
++        new FieldError("customFields", "customFields.note", "Tipo inválido."))); }
++  }
++}
+--- a/src/test/java/br/com/praxis/ergonshowcase/ErgonTenantIsolationTest.java
++++ b/src/test/java/br/com/praxis/ergonshowcase/ErgonTenantIsolationTest.java
+@@ -0,0 +1,250 @@
++package br.com.praxis.ergonshowcase;
++
++import static org.assertj.core.api.Assertions.*;
++import static org.mockito.ArgumentMatchers.*;
++import static org.mockito.Mockito.*;
++
++import br.com.praxis.ergonshowcase.bulk.ErgonBulkDomain;
++import br.com.praxis.ergonshowcase.bulk.ErgonBulkDomain.Resource;
++import br.com.praxis.ergonshowcase.config.TenantContext;
++import br.com.praxis.ergonshowcase.domain.*;
++import br.com.praxis.ergonshowcase.dto.*;
++import br.com.praxis.ergonshowcase.mapper.*;
++import br.com.praxis.ergonshowcase.repository.*;
++import br.com.praxis.ergonshowcase.service.*;
++import jakarta.persistence.*;
++import jakarta.persistence.criteria.*;
++import java.time.LocalDate;
++import java.util.*;
++import org.junit.jupiter.api.AfterEach;
++import org.junit.jupiter.api.Test;
++import org.mockito.ArgumentCaptor;
++import org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition;
++import org.praxisplatform.uischema.exporting.*;
++import org.praxisplatform.uischema.service.base.ResourceFilterAccessScope;
++import org.springframework.data.domain.*;
++import org.springframework.data.jpa.domain.Specification;
++import org.springframework.test.util.ReflectionTestUtils;
++import org.springframework.web.context.request.RequestContextHolder;
++import org.springframework.web.server.ResponseStatusException;
++
++/** Regressões C-04/C-05/H-05 com serviços reais e persistência simulada. */
++@SuppressWarnings({"unchecked", "rawtypes"})
++class ErgonTenantIsolationTest {
++  final TenantContext tenant = new TenantContext();
++  @AfterEach void cleanup() { RequestContextHolder.resetRequestAttributes(); }
++
++  static void forbidden(org.assertj.core.api.ThrowableAssert.ThrowingCallable call) {
++    assertThatThrownBy(call).isInstanceOfSatisfying(ResponseStatusException.class,
++        failure -> assertThat(failure.getStatusCode().value()).isEqualTo(403));
++  }
++  static Orgao organization(int id) { var row = new Orgao(); row.setEmpresa(id); row.setNome("Órgão " + id); return row; }
++
++  @Test void c04DefaultOrganizationProtectsGetLocateExportAndExplicitIncludes() {
++    assertThat(tenant.explicitOrgao()).isEmpty();
++    var repository = mock(OrgaoRepository.class);
++    var service = new OrgaoService(repository, org.mapstruct.factory.Mappers.getMapper(OrgaoMapper.class), tenant);
++    var local = organization(1); var foreign = organization(2);
++    when(repository.findById(1)).thenReturn(Optional.of(local));
++    when(repository.findById(2)).thenReturn(Optional.of(foreign));
++    forbidden(() -> service.findById(2));
++    forbidden(() -> service.locate(new OrgaoFilterDTO(), Sort.by("empresa"), 2));
++    verify(repository, never()).count(any(Specification.class));
++
++    when(repository.findAll(any(Specification.class), any(Sort.class))).thenReturn(List.of(foreign));
++    when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(foreign)));
++    CanonicalResourceTestContext.exports(service);
++    var export = new CollectionExportRequest<OrgaoFilterDTO>(null, null, "/api/ergon/orgaos",
++        CollectionExportFormat.JSON, CollectionExportScope.ALL, null, List.of(), new OrgaoFilterDTO(),
++        null, null, Map.of(), true, false, 10, null, Map.of());
++    forbidden(() -> service.exportCollection(export));
++
++    when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(Page.empty());
++    when(repository.findAll(any(Specification.class))).thenReturn(List.of(foreign));
++    forbidden(() -> service.filter(new OrgaoFilterDTO(), PageRequest.of(0, 10), List.of(2)));
++    assertThat(service.findById(1).body().getId()).isEqualTo(1);
++  }
++
++  @Test void c04NormalAndBulkSelectionsAlwaysContainTheSameEffectiveOrganizationPredicate() {
++    var repository = mock(OrgaoRepository.class);
++    var service = new OrgaoService(repository, org.mapstruct.factory.Mappers.getMapper(OrgaoMapper.class), tenant);
++    when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(Page.empty());
++    service.filter(new OrgaoFilterDTO(), PageRequest.of(0, 10), List.of());
++    service.selectBulkIdentities(new OrgaoFilterDTO(), List.of(1, 2), List.of(), 10);
++    var captor = ArgumentCaptor.forClass(Specification.class);
++    verify(repository, times(2)).findAll(captor.capture(), any(Pageable.class));
++    for (var spec : captor.getAllValues()) {
++      Root root = mock(Root.class, RETURNS_DEEP_STUBS);
++      when(root.getJavaType()).thenReturn(Orgao.class);
++      var query = mock(CriteriaQuery.class);
++      var cb = mock(CriteriaBuilder.class);
++      spec.toPredicate(root, query, cb);
++      verify(cb, atLeastOnce()).equal(root.get("empresa"), 1);
++    }
++    ResourceFilterAccessScope<Orgao> normal = ReflectionTestUtils.invokeMethod(service, "resolveResourceFilterAccessScope");
++    ResourceFilterAccessScope<Orgao> bulk = ReflectionTestUtils.invokeMethod(service, "resolveBulkResourceFilterAccessScope");
++    assertThat(normal.mode()).isEqualTo(ResourceFilterAccessScope.Mode.RESTRICTED);
++    assertThat(bulk.mode()).isEqualTo(normal.mode());
++  }
++
++  @Test void c04ReadOnlyAndGlobalRecordPoliciesUseTheEffectiveTenantToo() {
++    var repository = mock(RadarTempoServicoLicencaEspecialRepository.class);
++    var service = new RadarTempoServicoLicencaEspecialService(repository, org.mapstruct.factory.Mappers.getMapper(RadarTempoServicoLicencaEspecialMapper.class), tenant);
++    var row = new RadarTempoServicoLicencaEspecial(); row.setId(8L); row.setEmpCodigo(2);
++    when(repository.findById(8L)).thenReturn(Optional.of(row));
++    forbidden(() -> service.findById(8L));
++    ResourceFilterAccessScope<?> scope = ReflectionTestUtils.invokeMethod(service, "resolveResourceFilterAccessScope");
++    assertThat(scope.mode()).isEqualTo(ResourceFilterAccessScope.Mode.RESTRICTED);
++    var global = new DefinicaoCampoCustomizado();
++    assertThatCode(() -> ErgonTenantAccess.assertAllowed(global, tenant, null, true)).doesNotThrowAnyException();
++    forbidden(() -> ErgonTenantAccess.assertAllowed(global, tenant, null, false));
++    global.setEmpCodigo(2);
++    forbidden(() -> ErgonTenantAccess.assertAllowed(global, tenant, null, true));
++  }
++
++  @Test void c04DependentsRequireAPersonWithAnEmploymentInTheCurrentOrganizationIncludingBulk() {
++    var em = mock(EntityManager.class);
++    TypedQuery<Long> membership = mock(TypedQuery.class, RETURNS_SELF);
++    when(em.createQuery(contains("v.id.numfunc=:person and v.empCodigo=:org"), eq(Long.class))).thenReturn(membership);
++    var dependent = new Dependente(); dependent.setId(new DependenteId(1001L, 1));
++    var repository = mock(DependenteRepository.class);
++    when(repository.findById(dependent.getId())).thenReturn(Optional.of(dependent));
++    var service = new DependenteService(repository, new DependenteMapper());
++    ReflectionTestUtils.setField(service, "entityManager", em);
++    var bulk = new ErgonBulkDomain(); ReflectionTestUtils.setField(bulk, "em", em); ReflectionTestUtils.setField(bulk, "tenant", tenant);
++    when(membership.getSingleResult()).thenReturn(0L);
++    forbidden(() -> service.findById(dependent.getId()));
++    assertThat(bulk.scope(Resource.DEPENDENTES, dependent)).isFalse();
++    when(membership.getSingleResult()).thenReturn(1L);
++    assertThatCode(() -> service.findById(dependent.getId())).doesNotThrowAnyException();
++    assertThat(bulk.scope(Resource.DEPENDENTES, dependent)).isTrue();
++    verify(membership, atLeastOnce()).setParameter("org", 1);
++    ResourceFilterAccessScope<Dependente> scope = ReflectionTestUtils.invokeMethod(service, "resolveResourceFilterAccessScope");
++    Root<Dependente> root = mock(Root.class, RETURNS_DEEP_STUBS);
++    CriteriaQuery query = mock(CriteriaQuery.class);
++    Subquery subquery = mock(Subquery.class, RETURNS_SELF);
++    Root<Vinculo> vinculos = mock(Root.class, RETURNS_DEEP_STUBS);
++    when(query.subquery(Integer.class)).thenReturn(subquery);
++    when(subquery.from(Vinculo.class)).thenReturn(vinculos);
++    var cb = mock(CriteriaBuilder.class);
++    scope.specification().toPredicate(root, query, cb);
++    verify(cb).equal(vinculos.get("empCodigo"), 1);
++    verify(cb).exists(subquery);
++  }
++
++  @Test void c04CreationCannotWriteAForeignOrganizationOrItsDependents() {
++    var organizationRepository = mock(OrgaoRepository.class);
++    var organizations = new OrgaoService(organizationRepository,
++        org.mapstruct.factory.Mappers.getMapper(OrgaoMapper.class), tenant);
++    var organization = new CreateOrgaoDTO(); organization.setEmpresa(2);
++    forbidden(() -> organizations.create(organization));
++    verify(organizationRepository, never()).save(any());
++
++    var repository = mock(DependenteRepository.class);
++    var dependents = new DependenteService(repository, new DependenteMapper());
++    var em = mock(EntityManager.class);
++    TypedQuery<Long> membership = mock(TypedQuery.class, RETURNS_SELF);
++    when(em.createQuery(anyString(), eq(Long.class))).thenReturn(membership);
++    when(membership.getSingleResult()).thenReturn(0L);
++    ReflectionTestUtils.setField(dependents, "entityManager", em);
++    var input = new CreateDependenteDTO(); input.setNumfunc(2002L); input.setNumdep(1);
++    forbidden(() -> dependents.create(input));
++    verify(repository, never()).save(any());
++  }
++
++  @Test void c04BulkReadAuthorizationRequiresTheDependentOwnerInTheCurrentOrganization() throws Exception {
++    var operations = new br.com.praxis.ergonshowcase.bulk.ErgonBulkOperations();
++    var infrastructure = mock(org.praxisplatform.uischema.bulk.BulkExecutionInfrastructure.class);
++    var source = mock(javax.sql.DataSource.class);
++    var connection = mock(java.sql.Connection.class);
++    var statement = mock(java.sql.PreparedStatement.class);
++    var rows = mock(java.sql.ResultSet.class);
++    when(infrastructure.dataSource()).thenReturn(source);
++    when(connection.prepareStatement(anyString())).thenReturn(statement);
++    when(statement.executeQuery()).thenReturn(rows); when(rows.next()).thenReturn(true);
++    ReflectionTestUtils.setField(operations, "infrastructure", infrastructure);
++    ReflectionTestUtils.setField(operations, "tenant", tenant);
++    org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(
++        new org.springframework.security.authentication.UsernamePasswordAuthenticationToken("operator", "unused",
++            List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ERGON_READ"))));
++    var provider = (org.praxisplatform.uischema.bulk.BulkReadAuthorizationProvider)
++        ReflectionTestUtils.invokeMethod(operations, "authorization", Resource.DEPENDENTES, "ergon.dependentes.bulk.uniform");
++    var context = new org.praxisplatform.uischema.bulk.BulkReadAuthorizationProvider.Context("p5-test",
++        "administracao-pessoal.dependentes", "ergon.dependentes.bulk.uniform", "operator|orgao=1");
++    var targets = List.of(new org.praxisplatform.uischema.bulk.BulkReadAuthorizationProvider.Target(0, "1001:1",
++        new com.fasterxml.jackson.databind.ObjectMapper().createObjectNode().put("orgao", 1)));
++    org.springframework.transaction.support.TransactionSynchronizationManager.bindResource(source,
++        new org.springframework.jdbc.datasource.ConnectionHolder(connection));
++    try {
++      when(rows.getInt(1)).thenReturn(0);
++      assertThat(provider.authorize(context, "operator|orgao=1", targets, java.time.Duration.ofSeconds(2)).state())
++          .isEqualTo(org.praxisplatform.uischema.bulk.BulkReadAuthorizationProvider.State.DENIED_OR_REDUCED);
++      when(rows.getInt(1)).thenReturn(1);
++      assertThat(provider.authorize(context, "operator|orgao=1", targets, java.time.Duration.ofSeconds(2)).state())
++          .isEqualTo(org.praxisplatform.uischema.bulk.BulkReadAuthorizationProvider.State.AUTHORIZED_ALL);
++      var sql = ArgumentCaptor.forClass(String.class);
++      verify(connection, times(2)).prepareStatement(sql.capture());
++      assertThat(sql.getValue()).contains("exists (select 1 from public.vinculos v", "v.numfunc=t.numfunc", "v.emp_codigo=?");
++      verify(statement, times(2)).setInt(2, 1);
++    } finally {
++      org.springframework.transaction.support.TransactionSynchronizationManager.unbindResource(source);
++      org.springframework.security.core.context.SecurityContextHolder.clearContext();
++    }
++  }
++
++  @Test void h05ForeignCommandAndBulkTargetsAreRejectedBeforeAnyExclusiveLock() {
++    var em = mock(EntityManager.class);
++    var commands = new ErgonCommands();
++    ReflectionTestUtils.setField(commands, "em", em); ReflectionTestUtils.setField(commands, "tenant", tenant);
++    var employment = new Vinculo(); employment.setId(new VinculoId(1001L, 1)); employment.setEmpCodigo(2);
++    when(em.find(Vinculo.class, employment.getId())).thenReturn(employment);
++    forbidden(() -> ReflectionTestUtils.invokeMethod(commands, "vinculo", employment.getId(), mock(ResourceVersionUpdatePrecondition.class), "ATIVO"));
++    when(em.find(Orgao.class, 2)).thenReturn(organization(2));
++    forbidden(() -> commands.ativarOrgao(2, null, mock(ResourceVersionUpdatePrecondition.class)));
++    var bulk = new ErgonBulkDomain(); ReflectionTestUtils.setField(bulk, "em", em); ReflectionTestUtils.setField(bulk, "tenant", tenant);
++    when(em.unwrap(org.hibernate.Session.class)).thenReturn(mock(org.hibernate.Session.class));
++    assertThatThrownBy(() -> bulk.load(Resource.VINCULOS,
++        org.praxisplatform.uischema.id.CompositeIdSupport.encode(employment.getId()), true)).isInstanceOf(SecurityException.class);
++    verify(em, never()).lock(any(), any());
++    verify(em, never()).lock(any(), any(), anyMap());
++    verify(em, never()).refresh(any());
++  }
++
++  @Test void c05VacationPreviewsDenyForeignEmploymentAndAcquisitionBeforeReadingTheirFacts() {
++    var em = mock(EntityManager.class);
++    var service = new ErgonDeterminationService(tenant, null); ReflectionTestUtils.setField(service, "em", em);
++    var employment = new Vinculo(); employment.setEmpCodigo(2);
++    when(em.find(eq(Vinculo.class), any())).thenReturn(employment);
++    var period = new PeriodoAquisitivoPreviaDraftDTO(); period.setNumfunc(1001L); period.setNumvinc(1);
++    forbidden(() -> service.previaPeriodoAquisitivo(period));
++    var parent = new PeriodoAquisitivoFerias(); parent.setEmpCodigo(2);
++    when(em.find(PeriodoAquisitivoFerias.class, 7L)).thenReturn(parent);
++    var parcel = new FeriasGozoPreviaDraftDTO(); parcel.setPeriodoAquisitivoId(7L);
++    forbidden(() -> service.previaFeriasGozo(parcel));
++    verify(em, never()).createQuery(anyString(), any(Class.class));
++  }
++
++  @Test void c05AbsencesAndSuspensionsAreQueriedAndCountedOnlyWithinTheCurrentOrganization() {
++    var em = mock(EntityManager.class);
++    var service = new ErgonDeterminationService(tenant, null); ReflectionTestUtils.setField(service, "em", em);
++    var employment = new Vinculo(); employment.setEmpCodigo(1);
++    when(em.find(eq(Vinculo.class), any())).thenReturn(employment);
++    TypedQuery<Frequencia> frequency = mock(TypedQuery.class, RETURNS_SELF);
++    TypedQuery<Afastamento> leave = mock(TypedQuery.class, RETURNS_SELF);
++    when(em.createQuery(anyString(), eq(Frequencia.class))).thenReturn(frequency);
++    when(em.createQuery(anyString(), eq(Afastamento.class))).thenReturn(leave);
++    var local = new Frequencia(); local.setEmpCodigo(1); local.setTipofreq("FALTA"); local.setDtini(LocalDate.of(2024, 2, 2));
++    var foreign = new Frequencia(); foreign.setEmpCodigo(2); foreign.setTipofreq("FALTA"); foreign.setDtini(LocalDate.of(2024, 2, 3));
++    var localLeave = new Afastamento(); localLeave.setEmpCodigo(1); localLeave.setDtini(LocalDate.of(2024, 3, 1)); localLeave.setDtfim(LocalDate.of(2024, 3, 2));
++    var foreignLeave = new Afastamento(); foreignLeave.setEmpCodigo(2); foreignLeave.setDtini(LocalDate.of(2024, 4, 1)); foreignLeave.setDtfim(LocalDate.of(2024, 4, 20));
++    when(frequency.getResultList()).thenReturn(List.of(local, foreign)); when(leave.getResultList()).thenReturn(List.of(localLeave, foreignLeave));
++    var draft = new PeriodoAquisitivoPreviaDraftDTO(); draft.setNumfunc(1001L); draft.setNumvinc(1);
++    draft.setDtini(LocalDate.of(2024, 1, 1)); draft.setDtfim(LocalDate.of(2024, 12, 31));
++    var preview = service.previaPeriodoAquisitivo(draft);
++    assertThat(preview.getFaltasApuradas()).isEqualTo(1);
++    assertThat(preview.getDiasAfastamentoSuspensivo()).isEqualTo(2);
++    verify(em).createQuery(contains("f.empCodigo=:org"), eq(Frequencia.class));
++    verify(em).createQuery(contains("a.empCodigo=:org"), eq(Afastamento.class));
++    verify(frequency).setParameter("org", 1); verify(leave).setParameter("org", 1);
++  }
++}
+--- a/src/test/java/br/com/praxis/ergonshowcase/FeriasRuleEngineAndDeterminationsContractTest.java
++++ b/src/test/java/br/com/praxis/ergonshowcase/FeriasRuleEngineAndDeterminationsContractTest.java
+@@ -1402,6 +1402,7 @@
+ 
+     Frequencia falta = new Frequencia();
+     falta.setId(501L);
++    falta.setEmpCodigo(1);
+     falta.setNumfunc(1001L);
+     falta.setNumvinc(1);
+     falta.setTipofreq("FALTA");
+@@ -1420,6 +1421,7 @@
+ 
+     Afastamento afastSusp = new Afastamento();
+     afastSusp.setId(601L);
++    afastSusp.setEmpCodigo(1);
+     afastSusp.setNumfunc(1001L);
+     afastSusp.setNumvinc(1);
+     afastSusp.setDtini(LocalDate.of(2024, 5, 1));
+--- a/src/test/java/br/com/praxis/ergonshowcase/FeriasSlice5Phase1ContractTest.java
++++ b/src/test/java/br/com/praxis/ergonshowcase/FeriasSlice5Phase1ContractTest.java
+@@ -229,6 +229,7 @@
+     EntityManager em = mock(EntityManager.class);
+     var pa = new PeriodoAquisitivoFerias();
+     pa.setId(700L);
++    pa.setEmpCodigo(1);
+     pa.setChave(3);
+     pa.setTotDiasDireito(30);
+     when(em.find(PeriodoAquisitivoFerias.class, 700L)).thenReturn(pa);
+@@ -316,8 +317,8 @@
+     param.setMinDiasPerFer(10);
+     param.setMaxDiasPerFer(30);
+     assertThatThrownBy(() -> invariants.parametroContagemFerias(param, true))
+-        .isInstanceOf(ResponseStatusException.class)
+-        .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
++        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
++        .extracting(ex -> ErgonFailureAssertions.status(ex))
+         .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+ 
+     param.setMinPerFer(1);
+@@ -341,8 +342,8 @@
+     when(em.createQuery(anyString(), eq(ParametroContagemFerias.class))).thenReturn(paramQuery);
+ 
+     assertThatThrownBy(() -> invariants.parametroContagemFerias(param, true))
+-        .isInstanceOf(ResponseStatusException.class)
+-        .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
++        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
++        .extracting(ex -> ErgonFailureAssertions.status(ex))
+         .isEqualTo(HttpStatus.CONFLICT);
+     when(paramQuery.getResultList()).thenReturn(List.of());
+ 
+@@ -367,8 +368,8 @@
+     novoPa.setDtfim(LocalDate.of(2023, 12, 31));
+     novoPa.setTotDiasDireito(30);
+     assertThatThrownBy(() -> invariants.periodoAquisitivoFerias(novoPa, true))
+-        .isInstanceOf(ResponseStatusException.class)
+-        .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
++        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
++        .extracting(ex -> ErgonFailureAssertions.status(ex))
+         .isEqualTo(HttpStatus.CONFLICT);
+ 
+     // 3. FeriasGozo: override 'N' em pa.abonoDirGozo bloqueia abono pecuniário -> 422
+@@ -403,8 +404,8 @@
+     fg.setDiasAbonoVendidos(10);
+ 
+     assertThatThrownBy(() -> invariants.feriasGozo(fg, true))
+-        .isInstanceOf(ResponseStatusException.class)
+-        .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
++        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
++        .extracting(ex -> ErgonFailureAssertions.status(ex))
+         .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+ 
+     // 4. FeriasGozo: interrupção precoce com 2 dias (< minDiasParcela) é permitida quando situacao = INTERROMPIDA
+@@ -428,8 +429,8 @@
+     fg.setSituacao("PROGRAMADA");
+     fg.setDiasGozo(15);
+     assertThatThrownBy(() -> invariants.feriasGozo(fg, true))
+-        .isInstanceOf(ResponseStatusException.class)
+-        .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
++        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
++        .extracting(ex -> ErgonFailureAssertions.status(ex))
+         .isEqualTo(HttpStatus.CONFLICT);
+   }
+ 
+--- a/src/test/java/br/com/praxis/ergonshowcase/FeriasSlice5Phase2ContractTest.java
++++ b/src/test/java/br/com/praxis/ergonshowcase/FeriasSlice5Phase2ContractTest.java
+@@ -861,10 +861,6 @@
+     ReflectionTestUtils.setField(bulkDomain, "validator", validator);
+     ReflectionTestUtils.setField(bulkDomain, "tenant", tenant);
+     ReflectionTestUtils.setField(bulkDomain, "invariants", invariants);
+-    ReflectionTestUtils.setField(
+-        bulkDomain, "parametrosContagemFerias", new ParametroContagemFeriasMapper(tenant));
+-    ReflectionTestUtils.setField(
+-        bulkDomain, "periodosAquisitivosFerias", new PeriodoAquisitivoFeriasMapper(tenant));
+     ReflectionTestUtils.setField(bulkDomain, "feriasGozo", new FeriasGozoMapper(tenant));
+     ReflectionTestUtils.setField(bulkDomain, "feriasGozoService", fgService);
+ 
+@@ -973,6 +969,7 @@
+     // 2. Projeção completa de PeriodoAquisitivoFerias + parcelas FeriasGozo -> RadarFeriasPrescricaoResponseDTO
+     var pa = new PeriodoAquisitivoFerias();
+     pa.setId(800L);
++    pa.setEmpCodigo(1);
+     pa.setEmpCodigo(1);
+     pa.setNumfunc(100L);
+     pa.setNumvinc(1);
+@@ -991,6 +988,7 @@
+ 
+     var fgProg = new FeriasGozo();
+     fgProg.setId(950L);
++    fgProg.setEmpCodigo(1);
+     fgProg.setPeriodoAquisitivoId(800L);
+     fgProg.setDtini(LocalDate.of(2026, 6, 10));
+     fgProg.setDiasGozo(10);
+@@ -1205,10 +1203,6 @@
+     ReflectionTestUtils.setField(bulkDomain, "validator", validator);
+     ReflectionTestUtils.setField(bulkDomain, "tenant", tenant);
+     ReflectionTestUtils.setField(bulkDomain, "invariants", invariants);
+-    ReflectionTestUtils.setField(
+-        bulkDomain, "parametrosContagemFerias", new ParametroContagemFeriasMapper(tenant));
+-    ReflectionTestUtils.setField(
+-        bulkDomain, "periodosAquisitivosFerias", new PeriodoAquisitivoFeriasMapper(tenant));
+     ReflectionTestUtils.setField(bulkDomain, "feriasGozo", new FeriasGozoMapper(tenant));
+     ReflectionTestUtils.setField(bulkDomain, "feriasGozoService", fgService);
+ 
+--- a/src/test/java/br/com/praxis/ergonshowcase/FrequenciaContractTest.java
++++ b/src/test/java/br/com/praxis/ergonshowcase/FrequenciaContractTest.java
+@@ -198,7 +198,7 @@
+     invalidDraft.setDtini(LocalDate.of(2026, 5, 10));
+     invalidDraft.setDtfim(LocalDate.of(2026, 5, 1));
+     assertThatThrownBy(() -> service.previaFrequencia(invalidDraft))
+-        .isInstanceOf(ResponseStatusException.class)
++        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
+         .hasMessageContaining("não pode anteceder a data de início");
+   }
+ 
+@@ -260,22 +260,22 @@
+     // 1. Falta de horário quando horaEntradaSaida = true -> 422
+     freq.setHoraSaida(null);
+     assertThatThrownBy(() -> invariants.frequencia(freq, false))
+-        .isInstanceOf(ResponseStatusException.class)
+-        .hasMessageContaining("ERG-00436");
++        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
++        .satisfies(ex -> assertThat(((org.praxisplatform.rules.violation.PraxisRuleViolationException) ex).getReasonCodes()).contains("ERG-00436"));
+     freq.setHoraSaida(LocalTime.of(20, 0));
+ 
+     // 2. Quantidade superior a qtdmax (4h) -> 422
+     freq.setQuantidade(new BigDecimal("6.00"));
+     assertThatThrownBy(() -> invariants.frequencia(freq, false))
+-        .isInstanceOf(ResponseStatusException.class)
+-        .hasMessageContaining("ERG-00428");
++        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
++        .satisfies(ex -> assertThat(((org.praxisplatform.rules.violation.PraxisRuleViolationException) ex).getReasonCodes()).contains("ERG-00428"));
+     freq.setQuantidade(new BigDecimal("2.00"));
+ 
+     // 3. Código não habilitado para lançamento via frequência -> 422
+     codigo.setViaFrequencia(false);
+     assertThatThrownBy(() -> invariants.frequencia(freq, false))
+-        .isInstanceOf(ResponseStatusException.class)
+-        .hasMessageContaining("ERG-00400");
++        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
++        .satisfies(ex -> assertThat(((org.praxisplatform.rules.violation.PraxisRuleViolationException) ex).getReasonCodes()).contains("ERG-00400"));
+     codigo.setViaFrequencia(true);
+ 
+     // 4. Sobreposição com outra ocorrência ativa do mesmo código -> 409 CONFLICT
+@@ -291,10 +291,10 @@
+     when(overlapQuery.getResultList()).thenReturn(List.of(existente));
+ 
+     assertThatThrownBy(() -> invariants.frequencia(freq, false))
+-        .isInstanceOf(ResponseStatusException.class)
++        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
+         .satisfies(
+             ex ->
+-                assertThat(((ResponseStatusException) ex).getStatusCode())
++                assertThat(ErgonFailureAssertions.status(ex))
+                     .isEqualTo(HttpStatus.CONFLICT));
+   }
+ 
+--- a/src/test/java/br/com/praxis/ergonshowcase/P5CustomFieldsAndDraftTest.java
++++ b/src/test/java/br/com/praxis/ergonshowcase/P5CustomFieldsAndDraftTest.java
+@@ -0,0 +1,127 @@
++package br.com.praxis.ergonshowcase;
++
++import static org.assertj.core.api.Assertions.*;
++import static org.mockito.Mockito.*;
++
++import br.com.praxis.ergonshowcase.config.TenantContext;
++import br.com.praxis.ergonshowcase.controller.LicencaEspecialGozoController;
++import br.com.praxis.ergonshowcase.domain.DefinicaoCampoCustomizado;
++import br.com.praxis.ergonshowcase.dto.*;
++import br.com.praxis.ergonshowcase.mapper.DefinicaoCampoCustomizadoMapper;
++import br.com.praxis.ergonshowcase.repository.DefinicaoCampoCustomizadoRepository;
++import br.com.praxis.ergonshowcase.rules.*;
++import br.com.praxis.ergonshowcase.service.*;
++import java.util.*;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.params.ParameterizedTest;
++import org.junit.jupiter.params.provider.ValueSource;
++import org.praxisplatform.uischema.bulk.*;
++import org.praxisplatform.uischema.concurrency.*;
++import org.praxisplatform.uischema.customfields.*;
++import org.praxisplatform.uischema.service.base.BaseResourceService;
++import org.springframework.beans.BeanWrapperImpl;
++import org.springframework.test.util.ReflectionTestUtils;
++
++/** R1/R2/R3 e C-02 permanentes, compondo serviços do host com o validador e adapter nativos. */
++@SuppressWarnings({"unchecked", "rawtypes"})
++class P5CustomFieldsAndDraftTest {
++  static CustomFieldDescriptor readonly() {
++    return new CustomFieldDescriptor("audited", "Valor auditado", "Valor mantido exclusivamente pelo servidor.",
++        CustomFieldDataType.INTEGER, null, null, 0, false, true, false, false, false,
++        null, null, null, null, null, null, null, null, null, null, null, null, null);
++  }
++
++  @Test void r1OptionalOmissionAndExplicitNullAreAcceptedByTheActualCreateLifecycle() {
++    for (var values : List.of(Map.<String, Object>of(), Collections.<String, Object>singletonMap("extra", null))) {
++      var fixture = new TempoLicencaCrudContractTest.Fixture();
++      var service = (LicencaEspecialGozoService) fixture.service(2)[0];
++      var input = (CreateLicencaEspecialGozoDTO) new TempoLicencaCrudContractTest().create(2);
++      input.setCustomFields(values);
++      var descriptor = P4CustomFieldAdoptionRegressionTest.descriptor(Map.of(">=", List.of(Map.of("var", "value"), 4)));
++      ReflectionTestUtils.setField(service, "customFieldValidator", new CustomFieldValidator((r, t, s) -> List.of(descriptor)));
++      assertThatCode(() -> service.create(input)).doesNotThrowAnyException();
++    }
++  }
++
++  @Test void c02BothBulkModesRetainServerOwnedCustomFieldsWithoutRejectingAnUnrelatedEdit() {
++    var fixture = new TempoLicencaCrudContractTest.Fixture();
++    var service = (LicencaEspecialGozoService) fixture.service(2)[0];
++    service.create((CreateLicencaEspecialGozoDTO) new TempoLicencaCrudContractTest().create(2));
++    var row = fixture.gozos.getFirst(); row.setCustomFields(new LinkedHashMap<>(Map.of("audited", 99)));
++    ReflectionTestUtils.setField(service, "customFieldValidator", new CustomFieldValidator((r, t, s) -> List.of(readonly())));
++    var compiled = new TempoLicencaBulkAnalyticsExportTest().fields(UpdateLicencaEspecialGozoDTO.class, LicencaEspecialGozoController.class);
++    for (var mode : List.of(BulkMode.UNIFORM_UPDATE, BulkMode.PER_ITEM_UPDATE)) {
++      var candidate = (UpdateLicencaEspecialGozoDTO) BulkCandidateFixture.candidate(service, row,
++          List.of(BulkFieldChange.set("observacoes", BulkCandidateFixture.JSON.valueToTree("Revisão coletiva"))), compiled, mode);
++      assertThat(((Number) candidate.getCustomFields().get("audited")).intValue()).isEqualTo(99);
++      assertThat(row.getObservacoes()).isNull();
++      assertThat(((Number) row.getCustomFields().get("audited")).intValue()).isEqualTo(99);
++      BulkCandidateFixture.apply(service, row, candidate);
++      assertThat(row.getObservacoes()).isEqualTo("Revisão coletiva");
++      assertThat(((Number) row.getCustomFields().get("audited")).intValue()).isEqualTo(99);
++      row.setObservacoes(null);
++    }
++  }
++
++  @ParameterizedTest @ValueSource(strings = {"tenant.orgao", "system.user", "nowUtc", "unknown", "$['tenant'].orgao"})
++  void r2UnknownRootsAreRejectedBeforeCreateOrUpdateCanSaveADefinition(String path) {
++    var expression = Map.<String, Object>of("==", List.of(Map.of("var", path), 1));
++    var repository = mock(DefinicaoCampoCustomizadoRepository.class);
++    var service = new DefinicaoCampoCustomizadoService(repository, new DefinicaoCampoCustomizadoMapper(), tenant(), new ErgonRuleEngineFacade());
++    var create = definition(); create.setValidationRules(expression);
++    assertInvalidDefinition(() -> service.create(create));
++    var row = new DefinicaoCampoCustomizado(); row.setId(1L); row.setEmpCodigo(1); row.setVersion(0L);
++    when(repository.findById(1L)).thenReturn(Optional.of(row));
++    var update = new UpdateDefinicaoCampoCustomizadoDTO(); org.springframework.beans.BeanUtils.copyProperties(create, update);
++    var etags = new ResourceVersionEtagService("p5-definition-validation-test-secret");
++    var scope = new ResourceVersionScope("org=1");
++    var condition = new ResourceVersionUpdatePrecondition<>(etags,
++        etags.create(scope, service.getResourceKey(), 1L, 0), scope, service.getResourceKey(), 1L);
++    assertInvalidDefinition(() -> service.update(1L, update, condition));
++    verify(repository, never()).save(any());
++  }
++
++  @Test void r2AllFourCanonicalRootsAdmitPureExpressionsButNoTemporalOperator() {
++    var facade = new ErgonRuleEngineFacade();
++    for (String path : List.of("value", "draft.empCodigo", "entity.empCodigo", "customFields.extra"))
++      assertThatCode(() -> facade.validateCustomFieldValidationRules(Map.of("==", List.of(Map.of("var", path), 1))))
++          .doesNotThrowAnyException();
++    assertInvalidDefinition(() -> facade.validateCustomFieldValidationRules(Map.of("now", List.of())));
++    assertInvalidDefinition(() -> facade.validateCustomFieldValidationRules(Map.of("<", List.of(Map.of("var", "value"), Map.of("now", List.of())))));
++  }
++
++  @Test void duplicateDraftCopiesReviewedOrganizationAndQuantitiesWithoutPersistingOrCopyingIdentity() {
++    var harness = new TempoLicencaCrudContractTest();
++    for (int kind : List.of(1, 2, 3)) {
++      var fixture = new TempoLicencaCrudContractTest.Fixture();
++      var parts = fixture.service(kind); var service = (BaseResourceService) parts[0];
++      service.create(harness.create(kind));
++      var repository = (org.praxisplatform.uischema.repository.base.BaseCrudRepository) parts[1];
++      clearInvocations(repository, fixture.em);
++      Object draft = switch (kind) {
++        case 1 -> ((PeriodoAquisitivoLicencaEspecialService) service).duplicateDraft(91L);
++        case 2 -> ((LicencaEspecialGozoService) service).duplicateDraft(91L);
++        default -> ((VendaLicencaEspecialService) service).duplicateDraft(91L);
++      };
++      var bean = new BeanWrapperImpl(draft);
++      assertThat(bean.getPropertyValue("empCodigo")).isEqualTo(1);
++      assertThat(bean.getPropertyValue(kind == 1 ? "diasDireito" : kind == 2 ? "diasGozo" : "diasVendidos")).isNotNull();
++      assertThat(bean.getPropertyValue("numfunc")).isNull();
++      assertThat(bean.getPropertyValue("numvinc")).isNull();
++      assertThat(bean.getPropertyValue("dtini")).isNull();
++      verify(repository, never()).save(any()); verify(fixture.em, never()).persist(any()); verify(fixture.em, never()).flush();
++    }
++  }
++
++  static TenantContext tenant() { return new TenantContext(); }
++  static CreateDefinicaoCampoCustomizadoDTO definition() {
++    var input = new CreateDefinicaoCampoCustomizadoDTO(); input.setEmpCodigo(1);
++    input.setResourceKey("administracao-pessoal.vinculos"); input.setFieldKey("extra"); input.setFieldType("INTEGER");
++    input.setControlType("NUMERIC_TEXT_BOX"); input.setLabel("Extra"); return input;
++  }
++  static void assertInvalidDefinition(org.assertj.core.api.ThrowableAssert.ThrowingCallable call) {
++    assertThatThrownBy(call).isInstanceOfSatisfying(ErgonRuleViolationException.class, failure -> {
++      assertThat(failure.getHttpStatus()).isEqualTo(422); assertThat(failure.getReasonCodes()).containsExactly("ERG-21501");
++    });
++  }
++}
+--- a/src/test/java/br/com/praxis/ergonshowcase/PraxisMetadataCompletenessTest.java
++++ b/src/test/java/br/com/praxis/ergonshowcase/PraxisMetadataCompletenessTest.java
+@@ -158,7 +158,9 @@
+       assertThat(lookup.detail().previewSurfaceId()).isNotBlank();
+       assertThat(lookup.display().preset()).isEqualTo("directory");
+       assertThat(lookup.display().fields()).isNotEmpty();
+-      assertThat(lookup.filtering().sortOptions()).hasSize(2);
++      assertThat(lookup.filtering().sortOptions()).extracting(org.praxisplatform.uischema.options.LookupSortOption::key)
++          .contains("code", "description");
++      assertThat(lookup.filtering().defaultSort()).isEqualTo("description");
+       assertThat(descriptor.dependsOn()).containsAll(descriptor.dependencyFilterMap().keySet());
+     }
+     var missing = new OptionSourcePublicationDiagnostics(org.praxisplatform.uischema.options.OptionSourceRegistry.empty(), List.of(inventory));
+--- a/src/test/java/br/com/praxis/ergonshowcase/Rn013RuleEngineContractTest.java
++++ b/src/test/java/br/com/praxis/ergonshowcase/Rn013RuleEngineContractTest.java
+@@ -403,7 +403,7 @@
+                   .contains(Rn013RegrasFrequenciaRuleSet.SLOT_QTD_MAX_NON_NEGATIVE);
+               assertThat(ruleEx.getDecisionSources()).containsExactly(DecisionSource.PRODUCT);
+               assertThat(ruleEx.getReason())
+-                  .contains("[ERG-08380 | PRODUCT | slot=rn013.qtd_max_non_negative]");
++                  .isEqualTo(ErgonRuleErrorCatalog.resolveMessagePtBr("ERG-08380"));
+               assertThat(ruleEx.getBody().getProperties())
+                   .containsEntry("ruleSetKey", Rn013RegrasFrequenciaRuleSet.RULESET_KEY)
+                   .containsEntry("decision", "DENY");
+@@ -533,7 +533,7 @@
+               assertThat(ruleEx.getReasonCodes()).containsExactly("CERG-08385");
+               assertThat(ruleEx.getDecisionSources()).containsExactly(DecisionSource.CUSTOMER);
+               assertThat(ruleEx.getReason())
+-                  .contains("[CERG-08385 | CUSTOMER | slot=rn013.interp_mes_non_negative]");
++                  .isEqualTo(ErgonRuleErrorCatalog.resolveMessagePtBr("CERG-08385"));
+             });
+   }
+ 
+--- a/src/test/java/br/com/praxis/ergonshowcase/RuleCatalogExhaustivenessContractTest.java
++++ b/src/test/java/br/com/praxis/ergonshowcase/RuleCatalogExhaustivenessContractTest.java
+@@ -220,9 +220,12 @@
+             "Conflito de vigência ativa");
+     assertThat(ex422.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+ 
+-    ErgonRuleViolationException ex409 = ex422.withStatus(HttpStatus.CONFLICT);
++    var conflict = ErgonRuleErrorCatalog.find("ERG-08393").orElseThrow();
++    ErgonRuleViolationException ex409 = new ErgonRuleViolationException(conflict.code(), conflict.slotKey(),
++        "product.conflict", org.praxisplatform.rules.contract.DecisionSource.PRODUCT,
++        org.praxisplatform.rules.contract.DecisionStage.DOMAIN_DECISION, conflict.targetField(), conflict.messagePtBr());
+     assertThat(ex409.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+-    assertThat(ex409.getReasonCodes()).containsExactly("ERG-01850");
++    assertThat(ex409.getReasonCodes()).containsExactly("ERG-08393");
+ 
+     Path invariantsFile =
+         Path.of("src/main/java/br/com/praxis/ergonshowcase/service/ErgonInvariants.java");
+--- a/src/test/java/br/com/praxis/ergonshowcase/VinculoDependenteCustomFieldRuleEngineContractTest.java
++++ b/src/test/java/br/com/praxis/ergonshowcase/VinculoDependenteCustomFieldRuleEngineContractTest.java
+@@ -282,7 +282,8 @@
+         .isInstanceOfSatisfying(
+             ErgonRuleViolationException.class,
+             ex -> {
+-              assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
++              assertThat(ex.getStatusCode()).isEqualTo(java.util.Set.of("ERG-03193", "ERG-00300").contains(expectedCode)
++                  ? HttpStatus.CONFLICT : HttpStatus.UNPROCESSABLE_ENTITY);
+               assertThat(ex.getReasonCodes()).contains(expectedCode);
+               assertThat(ex.getSlotKeys()).contains(expectedSlot);
+             });
+@@ -633,7 +634,8 @@
+         .isInstanceOfSatisfying(
+             ErgonRuleViolationException.class,
+             ex -> {
+-              assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
++              assertThat(ex.getStatusCode()).isEqualTo(java.util.Set.of("ERG-03193", "ERG-00300").contains(expectedCode)
++                  ? HttpStatus.CONFLICT : HttpStatus.UNPROCESSABLE_ENTITY);
+               assertThat(ex.getReasonCodes()).contains(expectedCode);
+               assertThat(ex.getSlotKeys()).contains(expectedSlot);
+             });

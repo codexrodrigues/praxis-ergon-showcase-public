@@ -10,6 +10,13 @@ import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.praxisplatform.uischema.surface.RelatedResourceChildOperation;
+import org.praxisplatform.uischema.surface.SurfaceKind;
+import org.praxisplatform.uischema.surface.SurfaceScope;
 
 import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import br.com.praxis.ergonshowcase.domain.*;
@@ -99,14 +106,14 @@ import org.praxisplatform.uischema.fact.ResourceFact;
             titleField = "matric",
             displayLabelField = "matric",
             subtitleField = "pessoaNome",
-            metadataFields = {"orgaoNome", "cargoNome", "situacao"}))
+            metadataFields = {"setorNome", "regimejur", "categoria"}))
 @ApiGroup(
     value = "ergon",
     title = "Administração de pessoal",
     description = "Cadastros civis e assentamentos funcionais dos órgãos públicos.",
     icon = "groups")
 public class VinculoController
-    extends AbstractResourceController<
+    extends org.praxisplatform.uischema.controller.base.AbstractBulkGovernedResourceController<
         VinculoResponseDTO, VinculoId, VinculoFilterDTO, CreateVinculoDTO, UpdateVinculoDTO> {
   private final VinculoService service;
   @org.springframework.beans.factory.annotation.Autowired private AfastamentoService afastamentosService;
@@ -164,14 +171,16 @@ public class VinculoController
   }
 
   @org.springframework.web.bind.annotation.GetMapping("/{id}/resumo-funcional")
+  @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_READ')")
   @UiSurface(
       id = "resumo-funcional",
-      kind = org.praxisplatform.uischema.surface.SurfaceKind.VIEW,
+      kind = org.praxisplatform.uischema.surface.SurfaceKind.READ_PROJECTION,
       scope = org.praxisplatform.uischema.surface.SurfaceScope.ITEM,
       title = "Resumo funcional",
       description = "Consulta do enquadramento e ciclo de vida do vínculo selecionado.",
       intent = "consultar-assentamento",
-      icon = "badge")
+      icon = "badge",
+      requiredAuthorities = {"ERGON_READ"})
   @io.swagger.v3.oas.annotations.Operation(
       summary = "Consultar resumo funcional",
       description =
@@ -223,24 +232,9 @@ public class VinculoController
                   description = "Quantidade de registros da página, de 1 a 200")
               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20")
               int size) {
-    service.findById(id);
-    if (page < 0 || size < 1 || size > 200)
-      throw new org.springframework.web.server.ResponseStatusException(
-          org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
-          "Paginação fora do limite permitido.");
-    var filter = new AfastamentoFilterDTO();
-    filter.setVinculoId(id);
-    var result =
-        afastamentosService.filter(
-            filter,
-            org.springframework.data.domain.PageRequest.of(
-                page, size, afastamentosService.getDefaultSort()),
-            null);
-    return org.springframework.http.ResponseEntity.ok(
-        org.praxisplatform.uischema.rest.response.RestApiResponse.success(
-            result,
-            org.springframework.hateoas.Links.of(
-                org.springframework.hateoas.Link.of(ApiPaths.AFASTAMENTOS, "collection"))));
+    ErgonHttpContract.childPage(page, size);
+    return filterRelatedChildResource(id, afastamentosService, ApiPaths.AFASTAMENTOS, AfastamentoFilterDTO::new,
+        (child, parent) -> { child.setVinculoId(parent); }, page, size);
   }
 
   @org.springframework.web.bind.annotation.GetMapping("/{id}/frequencias")
@@ -280,24 +274,9 @@ public class VinculoController
                   description = "Quantidade de registros da página, de 1 a 200")
               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20")
               int size) {
-    service.findById(id);
-    if (page < 0 || size < 1 || size > 200)
-      throw new org.springframework.web.server.ResponseStatusException(
-          org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
-          "Paginação fora do limite permitido.");
-    var filter = new FrequenciaFilterDTO();
-    filter.setVinculoId(id);
-    var result =
-        frequenciasService.filter(
-            filter,
-            org.springframework.data.domain.PageRequest.of(
-                page, size, frequenciasService.getDefaultSort()),
-            null);
-    return org.springframework.http.ResponseEntity.ok(
-        org.praxisplatform.uischema.rest.response.RestApiResponse.success(
-            result,
-            org.springframework.hateoas.Links.of(
-                org.springframework.hateoas.Link.of(ApiPaths.FREQUENCIAS, "collection"))));
+    ErgonHttpContract.childPage(page, size);
+    return filterRelatedChildResource(id, frequenciasService, ApiPaths.FREQUENCIAS, FrequenciaFilterDTO::new,
+        (child, parent) -> { child.setVinculoId(parent); }, page, size);
   }
 
   @org.springframework.web.bind.annotation.GetMapping("/{id}/periodos-aquisitivos-ferias")
@@ -337,25 +316,9 @@ public class VinculoController
                   description = "Quantidade de registros da página, de 1 a 200")
               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20")
               int size) {
-    service.findById(id);
-    if (page < 0 || size < 1 || size > 200)
-      throw new org.springframework.web.server.ResponseStatusException(
-          org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
-          "Paginação fora do limite permitido.");
-    var filter = new PeriodoAquisitivoFeriasFilterDTO();
-    filter.setVinculoId(id);
-    var result =
-        periodosAquisitivosFeriasService.filter(
-            filter,
-            org.springframework.data.domain.PageRequest.of(
-                page, size, periodosAquisitivosFeriasService.getDefaultSort()),
-            null);
-    return org.springframework.http.ResponseEntity.ok(
-        org.praxisplatform.uischema.rest.response.RestApiResponse.success(
-            result,
-            org.springframework.hateoas.Links.of(
-                org.springframework.hateoas.Link.of(
-                    ApiPaths.PERIODOS_AQUISITIVOS_FERIAS, "collection"))));
+    ErgonHttpContract.childPage(page, size);
+    return filterRelatedChildResource(id, periodosAquisitivosFeriasService, ApiPaths.PERIODOS_AQUISITIVOS_FERIAS, PeriodoAquisitivoFeriasFilterDTO::new,
+        (child, parent) -> { child.setVinculoId(parent); }, page, size);
   }
 
   @org.springframework.web.bind.annotation.GetMapping("/{id}/ferias-gozo")
@@ -395,24 +358,9 @@ public class VinculoController
                   description = "Quantidade de registros da página, de 1 a 200")
               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20")
               int size) {
-    service.findById(id);
-    if (page < 0 || size < 1 || size > 200)
-      throw new org.springframework.web.server.ResponseStatusException(
-          org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
-          "Paginação fora do limite permitido.");
-    var filter = new FeriasGozoFilterDTO();
-    filter.setVinculoId(id);
-    var result =
-        feriasGozoService.filter(
-            filter,
-            org.springframework.data.domain.PageRequest.of(
-                page, size, feriasGozoService.getDefaultSort()),
-            null);
-    return org.springframework.http.ResponseEntity.ok(
-        org.praxisplatform.uischema.rest.response.RestApiResponse.success(
-            result,
-            org.springframework.hateoas.Links.of(
-                org.springframework.hateoas.Link.of(ApiPaths.FERIAS_GOZO, "collection"))));
+    ErgonHttpContract.childPage(page, size);
+    return filterRelatedChildResource(id, feriasGozoService, ApiPaths.FERIAS_GOZO, FeriasGozoFilterDTO::new,
+        (child, parent) -> { child.setVinculoId(parent); }, page, size);
   }
 
   @org.springframework.web.bind.annotation.PostMapping("/{id}/actions/registrar-vacancia")
@@ -448,11 +396,8 @@ public class VinculoController
           String ifMatch,
       @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
           RegistrarVacanciaDTO dto) {
-    var p =
-        new org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition<VinculoId>(
-            etags, ifMatch, scopes.currentScope(), "administracao-pessoal.vinculos", id);
-    return withResourceVersion(
-        org.springframework.http.ResponseEntity.ok(), id, service.registrarVacancia(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("registrar-vacancia", id, ifMatch, null, dto,
+        condition -> service.registrarVacancia(id, dto, condition)));
   }
 
   @Override
@@ -496,15 +441,8 @@ public class VinculoController
           String ifMatch,
       @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
           RegistrarCessaoDTO dto) {
-    var p =
-        new org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition<VinculoId>(
-            commandEtags,
-            ifMatch,
-            commandScopes.currentScope(),
-            "administracao-pessoal.vinculos",
-            id);
-    return withResourceVersion(
-        org.springframework.http.ResponseEntity.ok(), id, commands.registrarCessao(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("registrar-cessao", id, ifMatch, null, dto,
+        condition -> commands.registrarCessao(id, dto, condition)));
   }
 
   @org.springframework.web.bind.annotation.PostMapping("/{id}/actions/encerrar-cessao")
@@ -529,15 +467,8 @@ public class VinculoController
           String ifMatch,
       @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
           EncerrarCessaoDTO dto) {
-    var p =
-        new org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition<VinculoId>(
-            commandEtags,
-            ifMatch,
-            commandScopes.currentScope(),
-            "administracao-pessoal.vinculos",
-            id);
-    return withResourceVersion(
-        org.springframework.http.ResponseEntity.ok(), id, commands.encerrarCessao(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("encerrar-cessao", id, ifMatch, null, dto,
+        condition -> commands.encerrarCessao(id, dto, condition)));
   }
 
   @org.springframework.web.bind.annotation.PostMapping("/{id}/actions/conceder-aposentadoria")
@@ -563,17 +494,8 @@ public class VinculoController
           String ifMatch,
       @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
           ConcederAposentadoriaDTO dto) {
-    var p =
-        new org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition<VinculoId>(
-            commandEtags,
-            ifMatch,
-            commandScopes.currentScope(),
-            "administracao-pessoal.vinculos",
-            id);
-    return withResourceVersion(
-        org.springframework.http.ResponseEntity.ok(),
-        id,
-        commands.concederAposentadoria(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("conceder-aposentadoria", id, ifMatch, null, dto,
+        condition -> commands.concederAposentadoria(id, dto, condition)));
   }
 
   @org.springframework.web.bind.annotation.PostMapping("/{id}/actions/homologar-estagio-probatorio")
@@ -598,15 +520,8 @@ public class VinculoController
           String ifMatch,
       @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
           HomologarEstagioDTO dto) {
-    var p =
-        new org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition<VinculoId>(
-            commandEtags,
-            ifMatch,
-            commandScopes.currentScope(),
-            "administracao-pessoal.vinculos",
-            id);
-    return withResourceVersion(
-        org.springframework.http.ResponseEntity.ok(), id, commands.homologarEstagio(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("homologar-estagio-probatorio", id, ifMatch, null, dto,
+        condition -> commands.homologarEstagio(id, dto, condition)));
   }
 
   @org.springframework.web.bind.annotation.PatchMapping("/{id}/lotacao-exercicio")
@@ -632,17 +547,7 @@ public class VinculoController
           String ifMatch,
       @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
           AlterarLotacaoExercicioDTO dto) {
-    var p =
-        new org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition<VinculoId>(
-            commandEtags,
-            ifMatch,
-            commandScopes.currentScope(),
-            "administracao-pessoal.vinculos",
-            id);
-    return withResourceVersion(
-        org.springframework.http.ResponseEntity.ok(),
-        id,
-        commands.alterarLotacaoExercicio(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemPatch("alterar-lotacao-exercicio", id, ifMatch, condition -> commands.alterarLotacaoExercicio(id, dto, condition)));
   }
 
   @org.springframework.web.bind.annotation.PatchMapping("/{id}/previdencia-pagamento")
@@ -668,17 +573,7 @@ public class VinculoController
           String ifMatch,
       @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
           AtualizarPrevidenciaPagamentoDTO dto) {
-    var p =
-        new org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition<VinculoId>(
-            commandEtags,
-            ifMatch,
-            commandScopes.currentScope(),
-            "administracao-pessoal.vinculos",
-            id);
-    return withResourceVersion(
-        org.springframework.http.ResponseEntity.ok(),
-        id,
-        commands.atualizarPrevidenciaPagamento(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemPatch("atualizar-previdencia-pagamento", id, ifMatch, condition -> commands.atualizarPrevidenciaPagamento(id, dto, condition)));
   }
 
   @org.springframework.web.bind.annotation.PostMapping("/{id}/actions/registrar-afastamento")
@@ -686,10 +581,10 @@ public class VinculoController
       id = "registrar-afastamento",
       title = "Registrar afastamento",
       description =
-          "Concede afastamento fundamentado, registra a licença homologada e altera o vínculo para AFASTADO.",
+          "Concede licença homologada conforme as regras de concomitância do órgão. Vínculo ativo passa a afastado; cessão vigente é preservada.",
       scope = org.praxisplatform.uischema.action.ActionScope.ITEM,
       requiredAuthorities = {"ERGON_WRITE"},
-      allowedStates = {"ATIVO"},
+      allowedStates = {"ATIVO", "AFASTADO", "CEDIDO"},
       confirmationRequired = true,
       resourceVersion = org.praxisplatform.uischema.action.ActionRequirement.REQUIRED,
       resourceVersionTransport =
@@ -698,7 +593,7 @@ public class VinculoController
   @io.swagger.v3.oas.annotations.Operation(
       summary = "Registrar afastamento",
       description =
-          "Concede afastamento fundamentado, registra a licença homologada e altera o vínculo para AFASTADO. Exige If-Match atual.")
+          "Concede licença homologada conforme as regras de concomitância do órgão. Vínculo ativo passa a afastado; cessão vigente é preservada. Exige If-Match atual.")
   public org.springframework.http.ResponseEntity<VinculoResponseDTO> registrarAfastamento(
       @io.swagger.v3.oas.annotations.Parameter(description = "Identidade imutável do assentamento")
           @org.springframework.web.bind.annotation.PathVariable
@@ -710,17 +605,8 @@ public class VinculoController
           String ifMatch,
       @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
           RegistrarAfastamentoDTO dto) {
-    var p =
-        new org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition<VinculoId>(
-            commandEtags,
-            ifMatch,
-            commandScopes.currentScope(),
-            "administracao-pessoal.vinculos",
-            id);
-    return withResourceVersion(
-        org.springframework.http.ResponseEntity.ok(),
-        id,
-        commands.registrarAfastamento(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("registrar-afastamento", id, ifMatch, null, dto,
+        condition -> commands.registrarAfastamento(id, dto, condition)));
   }
 
   @org.springframework.web.bind.annotation.PostMapping("/{id}/actions/encerrar-afastamento")
@@ -728,10 +614,10 @@ public class VinculoController
       id = "encerrar-afastamento",
       title = "Registrar retorno",
       description =
-          "Encerra a licença homologada aberta deste vínculo e registra seu retorno ao estado ATIVO.",
+          "Encerra a licença homologada selecionada. O vínculo afastado volta a ativo quando não resta licença aberta; cessão vigente é preservada.",
       scope = org.praxisplatform.uischema.action.ActionScope.ITEM,
       requiredAuthorities = {"ERGON_WRITE"},
-      allowedStates = {"AFASTADO"},
+      allowedStates = {"AFASTADO", "CEDIDO"},
       confirmationRequired = true,
       resourceVersion = org.praxisplatform.uischema.action.ActionRequirement.REQUIRED,
       resourceVersionTransport =
@@ -740,7 +626,7 @@ public class VinculoController
   @io.swagger.v3.oas.annotations.Operation(
       summary = "Registrar retorno",
       description =
-          "Encerra a licença homologada aberta deste vínculo e registra seu retorno ao estado ATIVO. Exige If-Match atual.")
+          "Encerra a licença homologada selecionada. O vínculo afastado volta a ativo quando não resta licença aberta; cessão vigente é preservada. Exige If-Match atual.")
   public org.springframework.http.ResponseEntity<VinculoResponseDTO> encerrarAfastamento(
       @io.swagger.v3.oas.annotations.Parameter(description = "Identidade imutável do assentamento")
           @org.springframework.web.bind.annotation.PathVariable
@@ -752,15 +638,8 @@ public class VinculoController
           String ifMatch,
       @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
           EncerrarAfastamentoDTO dto) {
-    var p =
-        new org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition<VinculoId>(
-            commandEtags,
-            ifMatch,
-            commandScopes.currentScope(),
-            "administracao-pessoal.vinculos",
-            id);
-    return withResourceVersion(
-        org.springframework.http.ResponseEntity.ok(), id, commands.encerrarAfastamento(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("encerrar-afastamento", id, ifMatch, null, dto,
+        condition -> commands.encerrarAfastamento(id, dto, condition)));
   }
 
   @Override
@@ -815,71 +694,46 @@ public class VinculoController
 
   @org.springframework.beans.factory.annotation.Autowired private ErgonBulkOperations bulk;
 
+  @Override
   @PostMapping("/bulk/update/evaluation")
   @Operation(operationId="ergon.vinculos.bulk.uniform.evaluation", summary="Avaliar edição uniforme",description="Avalia seleção, versões e alterações sem modificar o cadastro; produz uma proposta protegida.")
-  public RestApiResponse<BulkProposal> bulkEvaluate(@io.swagger.v3.oas.annotations.parameters.RequestBody(content=@io.swagger.v3.oas.annotations.media.Content(schema=@io.swagger.v3.oas.annotations.media.Schema(implementation=ErgonBulkSchema.VinculoUniform.class))) @RequestBody BulkUniformEvaluationRequest<String,VinculoFilterDTO> request) {
-    return RestApiResponse.success(bulk.uniform(Resource.VINCULOS,request),null);
+  @BulkResourceOperation(BulkResourceOperation.Role.UNIFORM_EVALUATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> evaluateBulkUpdate(@RequestBody BulkUniformEvaluationRequest<?, VinculoFilterDTO> request) {
+    return super.evaluateBulkUpdate(request);
   }
+  @Override
   @PostMapping("/bulk/update-items/evaluation")
   @Operation(operationId="ergon.vinculos.bulk.items.evaluation",summary="Avaliar edições por registro",description="Avalia deltas distintos e a versão esperada de cada registro, com impedimentos individualizados.")
-  public RestApiResponse<BulkProposal> bulkEvaluateItems(@io.swagger.v3.oas.annotations.parameters.RequestBody(content=@io.swagger.v3.oas.annotations.media.Content(schema=@io.swagger.v3.oas.annotations.media.Schema(implementation=ErgonBulkSchema.VinculoItems.class))) @RequestBody BulkItemEvaluationRequest<String> request) {
-    return RestApiResponse.success(bulk.items(Resource.VINCULOS,request),null);
+  @BulkResourceOperation(BulkResourceOperation.Role.ITEM_EVALUATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> evaluateBulkUpdateItems(@RequestBody BulkItemEvaluationRequest<?> request) {
+    return super.evaluateBulkUpdateItems(request);
   }
+  @Override
   @PostMapping("/bulk/update")
   @BulkOperation(mode=BulkMode.UNIFORM_UPDATE,evaluationOperationId="ergon.vinculos.bulk.uniform.evaluation",atomicity=ActionCollectionAtomicity.PER_ITEM)
   @Operation(operationId="ergon.vinculos.bulk.uniform",summary="Confirmar edição uniforme",description="Confirma uma proposta avaliada; cada registro é revalidado e possui recibo durável, sem repetir efeitos no replay.")
-  public RestApiResponse<BulkExecution> bulkConfirm(@RequestBody BulkConfirmationRequest request,
-      @Parameter(description="Chave estável desta confirmação; repetir a mesma chave recupera a execução.") @RequestHeader("Idempotency-Key") String key) {
-    return RestApiResponse.success(bulk.confirm(Resource.VINCULOS,"ergon.vinculos.bulk.uniform",request,key),null);
+  @BulkResourceOperation(BulkResourceOperation.Role.UNIFORM_CONFIRMATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> confirmBulkUpdate(@RequestBody BulkConfirmationRequest request, @RequestHeader("Idempotency-Key") String key) {
+    return super.confirmBulkUpdate(request, key);
   }
+  @Override
   @PostMapping("/bulk/update-items")
   @BulkOperation(mode=BulkMode.PER_ITEM_UPDATE,evaluationOperationId="ergon.vinculos.bulk.items.evaluation",atomicity=ActionCollectionAtomicity.PER_ITEM)
   @Operation(operationId="ergon.vinculos.bulk.items",summary="Confirmar edições por registro",description="Aplica os deltas individualizados preservados na proposta, com versão e resultado próprios por registro.")
-  public RestApiResponse<BulkExecution> bulkConfirmItems(@RequestBody BulkConfirmationRequest request,
-      @Parameter(description="Chave estável de confirmação para recuperar a mesma execução em caso de repetição.") @RequestHeader("Idempotency-Key") String key) {
-    return RestApiResponse.success(bulk.confirm(Resource.VINCULOS,"ergon.vinculos.bulk.items",request,key),null);
+  @BulkResourceOperation(BulkResourceOperation.Role.ITEM_CONFIRMATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> confirmBulkUpdateItems(@RequestBody BulkConfirmationRequest request, @RequestHeader("Idempotency-Key") String key) {
+    return super.confirmBulkUpdateItems(request, key);
   }
-  @GetMapping("/bulk/proposals/{proposalId}")
-  @BulkResourceOperation(BulkResourceOperation.Role.PROPOSAL)
-  @Operation(operationId="ergon.vinculos.bulk.proposal",summary="Consultar proposta de lote",description="Consulta totais e intenção pública da proposta após conferir acesso ao conjunto completo de registros.")
-  public RestApiResponse<BulkProposal> bulkProposal(@Parameter(description="Identidade da proposta avaliada.") @PathVariable UUID proposalId) {
-    return RestApiResponse.success(bulk.proposal(Resource.VINCULOS,bulk.locate(Resource.VINCULOS,proposalId,false),proposalId),null);
-  }
-  @GetMapping("/bulk/proposals/{proposalId}/results")
-  @BulkResourceOperation(BulkResourceOperation.Role.PROPOSAL_RESULTS)
-  @Operation(operationId="ergon.vinculos.bulk.proposal-results",summary="Inspecionar avaliação do lote",description="Pagina registros executáveis e bloqueados, com diagnósticos seguros e cursor vinculado ao solicitante.")
-  public RestApiResponse<CursorPage<BulkProposalItemResult<Object>>> bulkProposalResults(
-      @Parameter(description="Identidade da proposta avaliada.") @PathVariable UUID proposalId,
-      @Parameter(description="Quantidade de registros por página, de 1 a 200.") @RequestParam(defaultValue="50") int size,
-      @Parameter(description="Cursor opaco emitido na página anterior; preserve o tamanho da página.") @RequestParam(required=false) String after) {
-    return RestApiResponse.success(bulk.proposalResults(Resource.VINCULOS,bulk.locate(Resource.VINCULOS,proposalId,false),proposalId,size,after),null);
-  }
-  @GetMapping("/bulk/executions/{executionId}")
-  @BulkResourceOperation(BulkResourceOperation.Role.EXECUTION)
-  @Operation(operationId="ergon.vinculos.bulk.execution",summary="Consultar execução do lote",description="Retorna estado e contadores reconciliados a partir dos recibos persistidos.")
-  public RestApiResponse<BulkExecution> bulkExecution(@Parameter(description="Identidade da execução confirmada.") @PathVariable UUID executionId) {
-    return RestApiResponse.success(bulk.execution(Resource.VINCULOS,bulk.locate(Resource.VINCULOS,executionId,true),executionId),null);
-  }
-  @GetMapping("/bulk/executions/{executionId}/results")
-  @BulkResourceOperation(BulkResourceOperation.Role.EXECUTION_RESULTS)
-  @Operation(operationId="ergon.vinculos.bulk.results",summary="Consultar recibos do lote",description="Pagina resultados por registro sem expor fatos protegidos, versões ou dados bancários da proposta.")
-  public RestApiResponse<CursorPage<BulkItemResult<Object>>> bulkResults(
-      @Parameter(description="Identidade da execução confirmada.") @PathVariable UUID executionId,
-      @Parameter(description="Quantidade de recibos por página, de 1 a 200.") @RequestParam(defaultValue="50") int size,
-      @Parameter(description="Cursor opaco da página anterior de recibos.") @RequestParam(required=false) String after) {
-    return RestApiResponse.success(bulk.results(Resource.VINCULOS,bulk.locate(Resource.VINCULOS,executionId,true),executionId,size,after),null);
-  }
-  @PostMapping("/bulk/executions/{executionId}/cancel")
-  @BulkResourceOperation(BulkResourceOperation.Role.CANCEL)
-  @Operation(operationId="ergon.vinculos.bulk.cancel",summary="Solicitar parada do lote",description="Registra a solicitação de parada sem desfazer alterações já confirmadas e sem reabrir efeitos no replay.")
-  public RestApiResponse<BulkExecution> bulkCancel(@Parameter(description="Identidade da execução a interromper.") @PathVariable UUID executionId) {
-    return RestApiResponse.success(bulk.cancel(Resource.VINCULOS,bulk.locate(Resource.VINCULOS,executionId,true),executionId),null);
-  }
+
+
+
+
+
 
   @PostMapping("/bulk/realocar-setor-lote/evaluation")
   @Operation(operationId="ergon.vinculos.realocar-setor-lote.evaluation",summary="Avaliar ato coletivo",description="Realoca vínculos ativos ou cedidos por portaria do mesmo órgão, preservando versão e recibo por registro. A avaliação não grava alterações funcionais.")
-  public RestApiResponse<BulkProposal> bulkRealocarEvaluate(@io.swagger.v3.oas.annotations.parameters.RequestBody(content=@io.swagger.v3.oas.annotations.media.Content(schema=@io.swagger.v3.oas.annotations.media.Schema(implementation=ErgonBulkSchema.RealocarCommand.class))) @RequestBody BulkCommandEvaluationRequest<RealocarSetorLoteDTO,String,VinculoFilterDTO> request) {
-    return RestApiResponse.success(bulk.command("realocar-setor-lote",request),null);
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> bulkRealocarEvaluate( @RequestBody BulkCommandEvaluationRequest<RealocarSetorLoteDTO, ?,VinculoFilterDTO> request) {
+    return evaluateBulkDomainCommand("realocar-setor-lote", request);
   }
   @PostMapping("/actions/realocar-setor-lote")
   @WorkflowAction(id="realocar-setor-lote",title="Realocar setor em lote",description="Realoca vínculos ativos ou cedidos por portaria do mesmo órgão, preservando versão e recibo por registro.",scope=ActionScope.COLLECTION,
@@ -887,15 +741,15 @@ public class VinculoController
       atomicity=ActionCollectionAtomicity.PER_ITEM,outcomeMode=ActionOutcomeMode.PER_ITEM,maxSelection=200)
   @BulkOperation(mode=BulkMode.DOMAIN_COMMAND,evaluationOperationId="ergon.vinculos.realocar-setor-lote.evaluation",atomicity=ActionCollectionAtomicity.PER_ITEM)
   @Operation(operationId="ergon.vinculos.realocar-setor-lote",summary="Realocar setor em lote",description="Realoca vínculos ativos ou cedidos por portaria do mesmo órgão, preservando versão e recibo por registro.")
-  public RestApiResponse<BulkExecution> bulkRealocarConfirm(@RequestBody BulkConfirmationRequest request,
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> bulkRealocarConfirm(@RequestBody BulkConfirmationRequest request,
       @Parameter(description="Chave estável do ato coletivo para impedir efeitos duplicados.") @RequestHeader("Idempotency-Key") String key) {
-    return RestApiResponse.success(bulk.confirm(Resource.VINCULOS,"ergon.vinculos.realocar-setor-lote",request,key),null);
+    return confirmBulkDomainCommand("realocar-setor-lote", request, key);
   }
 
   @PostMapping("/bulk/homologar-estagio-lote/evaluation")
   @Operation(operationId="ergon.vinculos.homologar-estagio-lote.evaluation",summary="Avaliar ato coletivo",description="Homologa estágios ainda pendentes de vínculos ativos, com data coerente e documento do órgão. A avaliação não grava alterações funcionais.")
-  public RestApiResponse<BulkProposal> bulkHomologarEvaluate(@io.swagger.v3.oas.annotations.parameters.RequestBody(content=@io.swagger.v3.oas.annotations.media.Content(schema=@io.swagger.v3.oas.annotations.media.Schema(implementation=ErgonBulkSchema.HomologarCommand.class))) @RequestBody BulkCommandEvaluationRequest<HomologarEstagioLoteDTO,String,VinculoFilterDTO> request) {
-    return RestApiResponse.success(bulk.command("homologar-estagio-lote",request),null);
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> bulkHomologarEvaluate( @RequestBody BulkCommandEvaluationRequest<HomologarEstagioLoteDTO, ?,VinculoFilterDTO> request) {
+    return evaluateBulkDomainCommand("homologar-estagio-lote", request);
   }
   @PostMapping("/actions/homologar-estagio-lote")
   @WorkflowAction(id="homologar-estagio-lote",title="Homologar estágio em lote",description="Homologa estágios ainda pendentes de vínculos ativos, com data coerente e documento do órgão.",scope=ActionScope.COLLECTION,
@@ -903,8 +757,83 @@ public class VinculoController
       atomicity=ActionCollectionAtomicity.PER_ITEM,outcomeMode=ActionOutcomeMode.PER_ITEM,maxSelection=200)
   @BulkOperation(mode=BulkMode.DOMAIN_COMMAND,evaluationOperationId="ergon.vinculos.homologar-estagio-lote.evaluation",atomicity=ActionCollectionAtomicity.PER_ITEM)
   @Operation(operationId="ergon.vinculos.homologar-estagio-lote",summary="Homologar estágio em lote",description="Homologa estágios ainda pendentes de vínculos ativos, com data coerente e documento do órgão.")
-  public RestApiResponse<BulkExecution> bulkHomologarConfirm(@RequestBody BulkConfirmationRequest request,
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> bulkHomologarConfirm(@RequestBody BulkConfirmationRequest request,
       @Parameter(description="Chave estável do ato coletivo para impedir efeitos duplicados.") @RequestHeader("Idempotency-Key") String key) {
-    return RestApiResponse.success(bulk.confirm(Resource.VINCULOS,"ergon.vinculos.homologar-estagio-lote",request,key),null);
+    return confirmBulkDomainCommand("homologar-estagio-lote", request, key);
   }
+
+  @org.springframework.beans.factory.annotation.Autowired private AverbacaoTempoServicoService averbacaoTempoServicoChildren;
+  @GetMapping("/{id}/averbacoes-tempo-servico-vinculo") @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_READ')")
+  @Operation(operationId = "childrenVinculoAverbacaoTempoServico", summary = "Averbações do vínculo", description = "Consulta pelo par completo pessoa e vínculo, validado no escopo de órgão; número de vínculo isolado não identifica o pai.")
+  @UiSurface(id = "averbacoes-tempo-servico-vinculo", kind = org.praxisplatform.uischema.surface.SurfaceKind.READ_PROJECTION, scope = org.praxisplatform.uischema.surface.SurfaceScope.ITEM, title = "Averbações do vínculo", relatedChildResourceKey = ApiPaths.KEY_AVERBACOES_TEMPO_SERVICO, relatedChildResourcePath = ApiPaths.AVERBACOES_TEMPO_SERVICO, relatedChildParentField = "vinculoId", relatedChildOperations = {org.praxisplatform.uischema.surface.RelatedResourceChildOperation.FILTER, org.praxisplatform.uischema.surface.RelatedResourceChildOperation.LIST}, requiredAuthorities = {"ERGON_READ"})
+  public org.springframework.http.ResponseEntity<RestApiResponse<org.springframework.data.domain.Page<AverbacaoTempoServicoResponseDTO>>> childrenAverbacaoTempoServico(@PathVariable VinculoId id,
+      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+    ErgonHttpContract.childPage(page, size);
+    return filterRelatedChildResource(id, averbacaoTempoServicoChildren, ApiPaths.AVERBACOES_TEMPO_SERVICO, AverbacaoTempoServicoFilterDTO::new,
+        (child, parent) -> { child.setVinculoId(parent); child.setNumfunc(parent.numfunc()); child.setNumvinc(parent.numero()); }, page, size);
+  }
+
+  @org.springframework.beans.factory.annotation.Autowired private PeriodoAquisitivoLicencaEspecialService periodoAquisitivoLicencaEspecialChildren;
+  @GetMapping("/{id}/periodos-aquisitivos-licenca-especial-vinculo") @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ERGON_READ')")
+  @Operation(operationId = "childrenVinculoPeriodoAquisitivoLicencaEspecial", summary = "Licença especial do vínculo", description = "Consulta pelo par completo pessoa e vínculo, validado no escopo de órgão; número de vínculo isolado não identifica o pai.")
+  @UiSurface(id = "periodos-aquisitivos-licenca-especial-vinculo", kind = org.praxisplatform.uischema.surface.SurfaceKind.READ_PROJECTION, scope = org.praxisplatform.uischema.surface.SurfaceScope.ITEM, title = "Licença especial do vínculo", relatedChildResourceKey = ApiPaths.KEY_PERIODOS_AQUISITIVOS_LICENCA_ESPECIAL, relatedChildResourcePath = ApiPaths.PERIODOS_AQUISITIVOS_LICENCA_ESPECIAL, relatedChildParentField = "vinculoId", relatedChildOperations = {org.praxisplatform.uischema.surface.RelatedResourceChildOperation.FILTER, org.praxisplatform.uischema.surface.RelatedResourceChildOperation.LIST}, requiredAuthorities = {"ERGON_READ"})
+  public org.springframework.http.ResponseEntity<RestApiResponse<org.springframework.data.domain.Page<PeriodoAquisitivoLicencaEspecialResponseDTO>>> childrenPeriodoAquisitivoLicencaEspecial(@PathVariable VinculoId id,
+      @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+    ErgonHttpContract.childPage(page, size);
+    return filterRelatedChildResource(id, periodoAquisitivoLicencaEspecialChildren, ApiPaths.PERIODOS_AQUISITIVOS_LICENCA_ESPECIAL, PeriodoAquisitivoLicencaEspecialFilterDTO::new,
+        (child, parent) -> { child.setVinculoId(parent); child.setNumfunc(parent.numfunc()); child.setNumvinc(parent.numero()); }, page, size);
+  }
+  @Autowired private DesignacaoFuncaoService designacoesChildren;
+
+  @GetMapping("/{id}/designacoes-vinculo")
+  @PreAuthorize("hasAuthority('ERGON_READ')")
+  @Operation(operationId = "childrenVinculoDesignacaoFuncao", summary = "Designações do vínculo",
+      description = "Atos em que o vínculo identificado pelo par de número funcional e número do vínculo é o titular da função. A consulta respeita o órgão corrente.")
+  @UiSurface(id = "designacoes-vinculo", kind = SurfaceKind.READ_PROJECTION, scope = SurfaceScope.ITEM,
+      title = "Designações do vínculo", relatedChildResourceKey = ApiPaths.KEY_DESIGNACOES,
+      relatedChildResourcePath = ApiPaths.DESIGNACOES,
+      relatedChildParentField = "titularId",
+      relatedChildOperations = {RelatedResourceChildOperation.FILTER, RelatedResourceChildOperation.LIST},
+      requiredAuthorities = {"ERGON_READ"})
+  public ResponseEntity<RestApiResponse<Page<DesignacaoFuncaoResponseDTO>>> childrenDesignacaoFuncao(
+      @Parameter(description = "Identidade composta pelo número funcional e pelo número do vínculo.")
+      @PathVariable VinculoId id,
+      @Parameter(description = "Índice da página, começando em zero.")
+      @RequestParam(defaultValue = "0") int page,
+      @Parameter(description = "Quantidade de assentamentos por página, de 1 a 200.")
+      @RequestParam(defaultValue = "20") int size) {
+    ErgonHttpContract.childPage(page, size);
+    return filterRelatedChildResource(id, designacoesChildren, ApiPaths.DESIGNACOES,
+        DesignacaoFuncaoFilterDTO::new, DesignacaoFuncaoFilterDTO::setTitularId, page, size);
+  }
+
+  @Autowired private SubstituicaoFuncaoService substituicoesChildren;
+
+  @GetMapping("/{id}/substituicoes-vinculo")
+  @PreAuthorize("hasAuthority('ERGON_READ')")
+  @Operation(operationId = "childrenVinculoSubstituicaoFuncao", summary = "Substituições do vínculo",
+      description = "Períodos em que o vínculo identificado pelo par de número funcional e número do vínculo assume a função interinamente. A consulta respeita o órgão corrente.")
+  @UiSurface(id = "substituicoes-vinculo", kind = SurfaceKind.READ_PROJECTION, scope = SurfaceScope.ITEM,
+      title = "Substituições do vínculo", relatedChildResourceKey = ApiPaths.KEY_SUBSTITUICOES,
+      relatedChildResourcePath = ApiPaths.SUBSTITUICOES,
+      relatedChildParentField = "substitutoId",
+      relatedChildOperations = {RelatedResourceChildOperation.FILTER, RelatedResourceChildOperation.LIST},
+      requiredAuthorities = {"ERGON_READ"})
+  public ResponseEntity<RestApiResponse<Page<SubstituicaoFuncaoResponseDTO>>> childrenSubstituicaoFuncao(
+      @Parameter(description = "Identidade composta pelo número funcional e pelo número do vínculo.")
+      @PathVariable VinculoId id,
+      @Parameter(description = "Índice da página, começando em zero.")
+      @RequestParam(defaultValue = "0") int page,
+      @Parameter(description = "Quantidade de assentamentos por página, de 1 a 200.")
+      @RequestParam(defaultValue = "20") int size) {
+    ErgonHttpContract.childPage(page, size);
+    return filterRelatedChildResource(id, substituicoesChildren, ApiPaths.SUBSTITUICOES,
+        SubstituicaoFuncaoFilterDTO::new, SubstituicaoFuncaoFilterDTO::setSubstitutoId, page, size);
+  }
+
+  @Override @SuppressWarnings({"unchecked", "rawtypes"})
+  protected org.praxisplatform.uischema.bulk.JpaResourceBulkEngine getBulkEngine() { return bulk.engine(Resource.VINCULOS); }
+  @Override protected String bulkProposalOperationId(UUID id) { return bulk.locate(Resource.VINCULOS, id, false); }
+  @Override protected String bulkExecutionOperationId(UUID id) { return bulk.locate(Resource.VINCULOS, id, true); }
+
 }

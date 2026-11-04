@@ -34,7 +34,6 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class ErgonBulkOperations {
-  private static final org.slf4j.Logger LOG=org.slf4j.LoggerFactory.getLogger(ErgonBulkOperations.class);
   static final String REVISION="ergon-bulk/2";
   @Autowired BulkExecutionInfrastructure infrastructure;
   @Autowired ObjectProvider<BulkOperationLifecycle> lifecycles;
@@ -47,39 +46,55 @@ public class ErgonBulkOperations {
   @Autowired ResourceVersionScopeProvider scopes;
   @Autowired TenantContext tenant;
   @Autowired BulkReadCursorConfiguration cursors;
+  @Autowired jakarta.validation.Validator validator;
+  @Autowired BulkOperationIdentityDiscovery identities;
 
   private BulkOperationLifecycle lifecycle() { return lifecycles.getObject(); }
+
   private JdbcBulkProposalStore store() { return new JdbcBulkProposalStore(infrastructure); }
-  private JdbcBulkDurableExecution executor() { return new JdbcBulkDurableExecution(infrastructure,lifecycle()); }
+
   private BulkOperationControlIdentity identity(String operation) { return new BulkOperationControlIdentity(infrastructure.namespace(),operation); }
-  public static String operation(Resource r, BulkMode mode) { return "ergon."+r.name+".bulk."+(mode==BulkMode.UNIFORM_UPDATE ? "uniform" : "items"); }
+
+  public static String operation(Resource r, BulkMode mode) {
+    if (r == Resource.DESIGNACOES) {
+      return r.key + (mode == BulkMode.UNIFORM_UPDATE ? ".bulk.update" : ".bulk.update-items");
+    }
+    return "ergon."+r.name+".bulk."+(mode==BulkMode.UNIFORM_UPDATE ? "uniform" : "items");
+  }
+
   private void outside() {
     if (TransactionSynchronizationManager.isActualTransactionActive() || TransactionSynchronizationManager.isSynchronizationActive())
       throw new IllegalStateException("A operação em lote deve possuir suas próprias transações.");
   }
+
   private void authority(String name) {
     var auth=SecurityContextHolder.getContext().getAuthentication();
     if (auth==null || !auth.isAuthenticated() || auth.getAuthorities().stream().noneMatch(a -> name.equals(a.getAuthority())))
       throw new AccessDeniedException("Autoridade insuficiente para operação em lote.");
   }
+
   private String subject() {
     var auth=SecurityContextHolder.getContext().getAuthentication();
     if(auth==null || !auth.isAuthenticated()) throw new AccessDeniedException("Autenticação obrigatória.");
     return auth.getName()+"|orgao="+tenant.orgao();
   }
+
   private String fingerprint() {
     var authorities=SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().map(a->a.getAuthority()).sorted().toList();
     try { return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest((REVISION+"\n"+subject()+"\n"+String.join("\n",authorities)).getBytes(StandardCharsets.UTF_8))); }
     catch(java.security.NoSuchAlgorithmException impossible) { throw new IllegalStateException(impossible); }
   }
+
   private BulkFingerprintContext context(Resource resource, String operation) {
     return new BulkFingerprintContext(infrastructure.namespace(),subject(),resource.key,
         operations.requireResourceOperation(resource.key,operation,"POST"),REVISION,ActionCollectionAtomicity.PER_ITEM);
   }
+
   private <T> T transaction(int isolation, java.util.function.Supplier<T> work) {
     var template=new TransactionTemplate(transactionManager); template.setIsolationLevel(isolation);template.setTimeout(30);
     return template.execute(status -> work.get());
   }
+
   private BulkEditableFields editable(Resource resource) {
     return documents.withSchemaCacheReadLock(() -> {
       var binding=operations.requireResourceRequestBody(resource.key,resource.updateOperation,"PUT",json.getTypeFactory());
@@ -88,11 +103,10 @@ public class ErgonBulkOperations {
       return BulkEditableFields.compile(json,binding.bodyType(),schema.schema(),schema.specVersion(),resource.protectedFields());
     });
   }
-  private void remaining(java.util.function.Supplier<Duration> budget) { if(budget.get().toMillis()<1) throw new IllegalStateException("Orçamento do lote esgotado."); }
 
   public BulkPublicationResult publication(BulkPublicationRequest request) {
     authority("ERGON_BULK_ADMIN");outside();domain.validate(request);
-    var selected=InstallBulkStorage.identities().stream().filter(id->id.confirmationOperationId().equals(request.operationId()))
+    var selected=identities.discover(infrastructure.namespace()).stream().filter(id->id.confirmationOperationId().equals(request.operationId()))
         .findFirst().orElseThrow(()->new ResponseStatusException(HttpStatus.BAD_REQUEST,"Operação não declarada pelo host."));
     if(request.intent()==BulkPublicationRequest.Intent.SUSPEND)
       return new BulkPublicationResult(request.operationId(),lifecycle().suspend(selected,request.expectedGeneration()),"SUSPENDED");
@@ -101,155 +115,15 @@ public class ErgonBulkOperations {
     return new BulkPublicationResult(request.operationId(),expectation.generation(),"READY");
   }
 
-  public BulkProposal uniform(Resource resource, BulkUniformEvaluationRequest request) {
-    return evaluate(resource,operation(resource,BulkMode.UNIFORM_UPDATE),request,null,null);
-  }
-  public BulkProposal items(Resource resource, BulkItemEvaluationRequest request) {
-    return evaluate(resource,operation(resource,BulkMode.PER_ITEM_UPDATE),null,request,null);
-  }
-  public BulkProposal command(String action, BulkCommandEvaluationRequest request) {
-    return evaluate(Resource.VINCULOS,"ergon.vinculos."+action,null,null,request);
-  }
-  public BulkProposal command(Resource resource, String action, BulkCommandEvaluationRequest request) {
-    return evaluate(resource,"ergon."+resource.name+"."+action,null,null,request);
-  }
-  private BulkProposal evaluate(Resource resource,String operation,BulkUniformEvaluationRequest uniform,BulkItemEvaluationRequest items,BulkCommandEvaluationRequest command) {
-    authority("ERGON_WRITE");outside();
-    BulkMode mode=uniform!=null ? BulkMode.UNIFORM_UPDATE : items!=null ? BulkMode.PER_ITEM_UPDATE : BulkMode.DOMAIN_COMMAND;
-    BulkExecutionMode execution=uniform!=null ? uniform.executionMode() : items!=null ? items.executionMode() : command.executionMode();
-    BulkSelection selection=uniform!=null ? uniform.selection() : command!=null ? command.selection() : null;
-    BulkSelectionMode selectionMode=selection==null ? BulkSelectionMode.EXPLICIT : selection.mode();
-    int explicitCount=items!=null ? items.items().size() : selectionMode==BulkSelectionMode.EXPLICIT ? selection.targets().size() : -1;
-    if(explicitCount==0 || explicitCount>200)
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Seleção deve conter de 1 a 200 registros.");
-    var admission=lifecycle().requireReady(identity(operation),execution,selectionMode);
-    var context=context(resource,operation);var codec=domain.codec(resource);
-    BulkIntentSnapshot intent=uniform!=null ? BulkIntentSnapshot.uniform(context,codec,uniform,v->json.valueToTree(v))
-        : items!=null ? BulkIntentSnapshot.items(context,codec,items) : BulkIntentSnapshot.command(context,codec,command,v->json.valueToTree(v),v->json.valueToTree(v));
-    BulkEditableFields fields=mode==BulkMode.DOMAIN_COMMAND ? null : editable(resource);
-    Instant created=Instant.now();
-    var proposal=new BulkStoredProposal(UUID.randomUUID(),created,created.plus(admission.profile().proposalLifetime()),intent,admission.expectation());
-    long deadline=System.nanoTime()+Duration.ofSeconds(30).toNanos();
-    var evidence=transaction(TransactionDefinition.ISOLATION_REPEATABLE_READ,()->store().captureAndInsertEvaluated(
-        selectionMode==BulkSelectionMode.QUERY ? admission : null,proposal,(connection,budget)->{
-          LOG.debug("Captura de avaliação iniciada: modalidade={}",mode);
-          List<BulkTarget> targets=new ArrayList<>();
-          if(items!=null) for(Object item:items.items()) { var change=(BulkItemChange)item;targets.add(new BulkTarget(change.id(),change.expectedVersion())); }
-          else if(selectionMode==BulkSelectionMode.EXPLICIT) targets.addAll(selection.targets());
-          else {
-            var excluded=new HashSet<>(selection.excludedIds());
-            for(Object id:domain.query(resource,selection.filter(),excluded.size())) {
-              remaining(budget);if(excluded.contains(id)) continue;
-              Object entity=domain.load(resource,id,false); if(entity==null) throw new IllegalStateException("Seleção alterada durante captura.");
-              targets.add(new BulkTarget(id,etags.create(scopes.currentScope(),resource.key,domain.identity(resource,id),domain.version(entity))));
-            }
-          }
-          if(targets.isEmpty() || targets.size()>admission.maxTargets()) throw new IllegalArgumentException("Seleção deve conter de 1 a 200 registros.");
-          var all=new ArrayList<BulkTargetEvidence<?>>();
-          for(var target:targets) {
-            LOG.debug("Avaliando candidato ordinal={}",all.size());
-            remaining(budget);
-            List<BulkFieldChange> changes=items==null ? uniform==null ? List.of() : uniform.changes()
-                : ((List<BulkItemChange>)items.items()).stream().filter(i->i.id().equals(target.id())).findFirst().orElseThrow().changes();
-            ObjectNode plan=json.createObjectNode();
-            if(command!=null) plan.set("parameters",json.valueToTree(command.parameters())); else plan.set("changes",json.valueToTree(changes));
-            ObjectNode facts=json.createObjectNode().put("orgao",tenant.orgao());
-            BulkTargetEligibility eligibility;String observed=target.expectedVersion();
-            try {
-              Object entity=domain.load(resource,target.id(),false);
-              LOG.debug("Carga do candidato concluída: ordinal={}",all.size());
-              if(entity==null) throw new IllegalArgumentException("Registro inexistente.");
-              observed=etags.create(scopes.currentScope(),resource.key,domain.identity(resource,target.id()),domain.version(entity));
-              if(!observed.equals(target.expectedVersion())) { plan.put("blockedReason","CONFLICT");throw new IllegalArgumentException("Versão defasada."); }
-              if(command!=null) domain.commandCandidate(entity,operation,plan.path("parameters"));
-              else domain.candidate(resource,entity,changes,fields,mode);
-              LOG.debug("Validação do candidato concluída: ordinal={}",all.size());
-              eligibility=BulkTargetEligibility.executable();
-            } catch(SecurityException denied) { plan.put("blockedReason","DENIED");eligibility=blocked("DENIED"); }
-            catch(BulkInputViolation invalid) { plan.put("blockedReason",invalid.code);eligibility=blocked(invalid.code); }
-            catch(ErgonRuleViolationException ruleViolation) {
-              String code = ruleViolation.getReasonCodes() != null && !ruleViolation.getReasonCodes().isEmpty()
-                  ? ruleViolation.getReasonCodes().getFirst()
-                  : "INVALID";
-              plan.put("blockedReason", code);
-              eligibility = blocked(code);
-            }
-            catch(IllegalArgumentException | ResponseStatusException invalid) {
-              if(!plan.has("blockedReason")) plan.put("blockedReason","INVALID");eligibility=blocked(plan.path("blockedReason").asText());
-            }
-            all.add(new BulkTargetEvidence(target,observed,facts,plan,eligibility));
-          }
-          LOG.debug("Captura de avaliação concluída: registros={}",all.size());
-          return new BulkEvaluationSnapshot(proposal,Instant.now(),all,new BulkEvaluationGovernance(REVISION,fingerprint(),List.of()));
-        },evaluation->new BulkPreviewProjection(evaluation,"1",publicDiagnostics(evaluation)),()->Duration.ofNanos(Math.max(0,deadline-System.nanoTime()))));
-    return proposal(resource,operation,evidence.proposal().id());
-  }
-  private List<BulkPreviewProjection.PublicDiagnostic> publicDiagnostics(BulkEvaluationSnapshot evaluation) {
-    var codes = new LinkedHashSet<>(List.of("INVALID","CONFLICT","DENIED","JORNADA_FORA_INTERVALO"));
-    if (evaluation != null && evaluation.targets() != null) {
-      for (var target : evaluation.targets()) {
-        String blockedReason = target.plan() != null ? target.plan().path("blockedReason").asText(null) : null;
-        if (blockedReason != null && !blockedReason.isBlank() && codes.size() < 64) {
-          codes.add(blockedReason);
-        }
-      }
-    }
-    return codes.stream().map(code->new BulkPreviewProjection.PublicDiagnostic(ResourceCommandErrorCategory.VALIDATION,code,diagnosticMessage(code))).toList();
-  }
   private String diagnosticMessage(String code) {
     return switch(code) {
       case "JORNADA_FORA_INTERVALO" -> "Informe jornadaSemanal entre 1 e 168 horas e avalie novamente.";
-      case "CONFLICT" -> "O registro mudou. Atualize a seleção e avalie novamente antes de confirmar.";
-      case "DENIED" -> "Não foi possível autorizar este item. Revise o órgão selecionado e solicite acesso ao responsável.";
+      case "CONFLICT", "BULK_VERSION_CONFLICT" -> "O registro mudou. Atualize a seleção e avalie novamente antes de confirmar.";
+      case "DENIED", "BULK_TARGET_UNAVAILABLE" -> "Não foi possível autorizar este item. Revise o órgão selecionado e solicite acesso ao responsável.";
       default -> ErgonRuleErrorCatalog.find(code)
           .map(ErgonRuleErrorCatalog.RuleErrorDescriptor::messagePtBr)
           .orElse("Os valores não atendem às regras do cadastro. Revise os campos alterados e avalie novamente.");
     };
-  }
-  private BulkTargetEligibility blocked(String code) {
-    return BulkTargetEligibility.blocked(List.of(new ResourceCommandMessage(ResourceCommandErrorCategory.VALIDATION,code,diagnosticMessage(code),null,Map.of())));
-  }
-
-  public BulkExecution confirm(Resource resource,String operation,BulkConfirmationRequest request,String key) {
-    authority("ERGON_WRITE");outside();
-    if(key==null || key.isBlank() || key.length()>128) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Idempotency-Key obrigatório, até 128 caracteres.");
-    UUID proposalId=UUID.fromString(request.proposalId());
-    var requestContext=context(resource,operation);
-    BulkStoredProposal stored=transaction(TransactionDefinition.ISOLATION_READ_COMMITTED,()->store().find(requestContext,proposalId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND)));
-    BulkEditableFields updateFields=stored.snapshot().mode()==BulkMode.DOMAIN_COMMAND ? null : editable(resource);
-    var executor=executor();
-    var reservation=executor.reserve(stored.snapshot().context(),proposalId,key,"ergon-http",stored.controlExpectation().structuralRevision(),Instant.now().plus(Duration.ofMinutes(5)));
-    executor.advance(reservation,unit->{
-      authority("ERGON_WRITE");remaining(unit::remainingBudget);
-      var evidence=unit.targetEvidence(); var plan=evidence.plan();
-      if(!evidence.eligibility().orElseThrow().isExecutable()) return switch(plan.path("blockedReason").asText()) {
-        case "CONFLICT" -> BulkUnitAdmission.conflict(BulkUnitReasonCode.TARGET_VERSION_CONFLICT);
-        case "DENIED" -> BulkUnitAdmission.denied(BulkUnitReasonCode.TARGET_DENIED);
-        default -> BulkUnitAdmission.invalid(BulkUnitReasonCode.TARGET_INVALID);
-      };
-      try {
-        Object entity=domain.load(resource,evidence.target().id(),true);
-        if(entity==null) return BulkUnitAdmission.invalid(BulkUnitReasonCode.TARGET_NOT_FOUND);
-        if(!etags.matches(evidence.target().expectedVersion(),scopes.currentScope(),resource.key,domain.identity(resource,evidence.target().id()),domain.version(entity)))
-          return BulkUnitAdmission.conflict(BulkUnitReasonCode.TARGET_VERSION_CONFLICT);
-        if(unit.originalIntent().mode()==BulkMode.DOMAIN_COMMAND) domain.commandCandidate(entity,operation,plan.path("parameters"));
-        else domain.candidate(resource,entity,changes(plan),updateFields,unit.originalIntent().mode());
-        remaining(unit::remainingBudget);return BulkUnitAdmission.admit();
-      } catch(SecurityException denied) { return BulkUnitAdmission.denied(BulkUnitReasonCode.TARGET_DENIED); }
-      catch(IllegalArgumentException | ResponseStatusException invalid) { return BulkUnitAdmission.invalid(BulkUnitReasonCode.TARGET_INVALID); }
-    },unit->{
-      remaining(unit::remainingBudget);Object entity=domain.load(resource,unit.targetEvidence().target().id(),true);
-      boolean changed;
-      if(unit.originalIntent().mode()==BulkMode.DOMAIN_COMMAND) changed=domain.applyCommand(entity,domain.commandCandidate(entity,operation,unit.targetEvidence().plan().path("parameters")));
-      else changed=domain.apply(resource,entity,domain.candidate(resource,entity,changes(unit.targetEvidence().plan()),updateFields,unit.originalIntent().mode()));
-      remaining(unit::remainingBudget);return changed ? BulkUnitMutationResult.confirmed() : BulkUnitMutationResult.unchanged();
-    });
-    return execution(resource,operation,reservation.executionId());
-  }
-  private List<BulkFieldChange> changes(JsonNode plan) {
-    var result=new ArrayList<BulkFieldChange>();
-    for(var value:plan.path("changes")) result.add(new BulkFieldChange(value.path("field").asText(),BulkChangeOperator.valueOf(value.path("operator").asText()),value.get("value")));
-    return result;
   }
 
   private BulkReadAuthorizationProvider authorization(Resource resource,String operation) {
@@ -264,16 +138,14 @@ public class ErgonBulkOperations {
             : resource==Resource.DEPENDENTES ? "numfunc::text || ':' || numdep::text"
             : resource==Resource.PESSOAS ? "numero::text"
             : resource==Resource.CARGOS ? "cargo::text" : "id::text";
-        String table=resource==Resource.CAMPOS_CUSTOMIZADOS ? "custom_field_definitions"
-            : resource==Resource.PARAMETROS_CONTAGEM_FERIAS ? "parametros_contagem_ferias"
-            : resource==Resource.PERIODOS_AQUISITIVOS_FERIAS ? "periodos_aquisitivos_ferias"
-            : resource==Resource.FERIAS_GOZO ? "ferias_gozo"
-            : resource.name;
+        String table=resource.table;
         String placeholders=String.join(",",Collections.nCopies(targets.size(),"?"));
-        boolean crossTenant=resource==Resource.PESSOAS || resource==Resource.DEPENDENTES;
+        boolean crossTenant=resource==Resource.PESSOAS;
         boolean nullableTenant=resource==Resource.CAMPOS_CUSTOMIZADOS || resource==Resource.PARAMETROS_CONTAGEM_FERIAS;
-        String tenantClause=crossTenant ? "" : nullableTenant ? " and (emp_codigo is null or emp_codigo=?)" : " and emp_codigo=?";
-        String sql="select count(*) from public."+table+" where ("+idExpression+") in ("+placeholders+")"+tenantClause;
+        String tenantClause=crossTenant ? "" : resource==Resource.DEPENDENTES
+            ? " and exists (select 1 from public.vinculos v where v.numfunc=t.numfunc and v.emp_codigo=? and v.situacao in ('ATIVO','AFASTADO','CEDIDO'))"
+            : nullableTenant ? " and (emp_codigo is null or emp_codigo=?)" : " and emp_codigo=?";
+        String sql="select count(*) from public."+table+" t where ("+idExpression+") in ("+placeholders+")"+tenantClause;
         try {
           var holder=(org.springframework.jdbc.datasource.ConnectionHolder)TransactionSynchronizationManager.getResource(infrastructure.dataSource());
           if(holder==null) return ScopeDecision.unavailable();
@@ -288,6 +160,7 @@ public class ErgonBulkOperations {
       }
     };
   }
+
   private BulkProposalProjectionProvider projection(Resource resource,String operation) {
     return new BulkProposalProjectionProvider() {
       public String resourceKey(){return resource.key;}
@@ -301,30 +174,7 @@ public class ErgonBulkOperations {
       }
     };
   }
-  public BulkProposal proposal(Resource resource,String operation,UUID id) {
-    authority("ERGON_READ");outside();
-    var observation=new BulkAuthorizedProposalReader(infrastructure,resource.key,authorization(resource,operation),projection(resource,operation)).readProposal(subject(),id);
-    readState(observation.state().name());return observation.proposal();
-  }
-  public CursorPage<BulkProposalItemResult<Object>> proposalResults(Resource resource,String operation,UUID id,int size,String after) {
-    authority("ERGON_READ");outside();
-    var observation=new BulkAuthorizedProposalResultsReader(infrastructure,resource.key,authorization(resource,operation),cursors).readProposalResults(subject(),id,size,after);
-    readState(observation.state().name());return observation.page();
-  }
-  public BulkExecution execution(Resource resource,String operation,UUID id) {
-    authority("ERGON_READ");outside();
-    var observation=new BulkAuthorizedExecutionReader(infrastructure,resource.key,authorization(resource,operation)).readExecution(subject(),id);
-    readState(observation.state().name());return observation.execution();
-  }
-  public CursorPage<BulkItemResult<Object>> results(Resource resource,String operation,UUID id,int size,String after) {
-    authority("ERGON_READ");outside();
-    var observation=new BulkAuthorizedExecutionResultsReader(infrastructure,resource.key,authorization(resource,operation),cursors).readExecutionResults(subject(),id,size,after);
-    readState(observation.state().name());return observation.page();
-  }
-  public BulkExecution cancel(Resource resource,String operation,UUID id) {
-    authority("ERGON_WRITE");outside();
-    execution(resource,operation,id);executor().requestCancel(context(resource,operation),id);return execution(resource,operation,id);
-  }
+
   public String locate(Resource resource,UUID id,boolean execution) {
     authority("ERGON_READ");outside();
     return transaction(TransactionDefinition.ISOLATION_READ_COMMITTED,()->infrastructure.withConnection(connection->{
@@ -335,11 +185,81 @@ public class ErgonBulkOperations {
       }
     }));
   }
-  private void readState(String state) {
-    if(state.equals("COMPLETE")) return;
-    HttpStatus status=switch(state) { case "GLOBAL_DENIED" -> HttpStatus.FORBIDDEN;case "INVALID_CURSOR" -> HttpStatus.BAD_REQUEST;
-      case "PRECONDITION_FAILED" -> HttpStatus.PRECONDITION_FAILED;case "GONE","TOMBSTONED" -> HttpStatus.GONE;
-      case "NOT_FOUND_OR_DENIED" -> HttpStatus.NOT_FOUND;default -> HttpStatus.SERVICE_UNAVAILABLE; };
-    throw new ResponseStatusException(status,"Consulta de lote indisponível para este contexto.");
+
+  /** Composition only: capture, durable execution and authorized reads belong to the starter. */
+  public JpaResourceBulkEngine engine(Resource resource) {
+    BulkDomainResourceAdapter adapter = domain.service(resource).bulkDomainAdapter(json, validator, etags, scopes::currentScope);
+    BulkDomainResourceAdapter governed = new BulkDomainResourceAdapter() {
+      public Object readFilter(JsonNode node) { Object filter = adapter.readFilter(node); domain.validate(filter); return filter; }
+      public List selectBulkIdentities(Object filter, Collection included, Collection excluded, int max) {
+        return adapter.selectBulkIdentities(filter, included, excluded, max);
+      }
+      public String currentVersion(Object id) { return adapter.currentVersion(id); }
+      public Candidate evaluate(Object id, String expected, List changes, BulkMode mode, BulkEditableFields fields) {
+        try {
+          var candidate = adapter.evaluate(id, expected, changes, mode, fields);
+          return new Candidate(candidate.observedVersion(), json.createObjectNode().put("orgao",tenant.orgao())
+              .set("resource",candidate.facts()), candidate.plan());
+        } catch (org.praxisplatform.uischema.customfields.CustomFieldValidationException rejection) {
+          if (br.com.praxis.ergonshowcase.rules.ErgonCustomFieldErrors.isJsonLogic(rejection))
+            throw br.com.praxis.ergonshowcase.rules.ErgonCustomFieldErrors.violation(rejection);
+          throw rejection;
+        } catch (jakarta.validation.ConstraintViolationException invalid) {
+          if (invalid.getConstraintViolations().stream().anyMatch(v -> v.getPropertyPath().toString().equals("jornadaSemanal")))
+            throw new org.praxisplatform.rules.violation.PraxisRuleViolationException(new org.praxisplatform.rules.violation.SlotViolationDetail(
+                "JORNADA_FORA_INTERVALO",null,null,null,null,org.praxisplatform.rules.contract.RuleDecision.DENY,"jornadaSemanal",
+                diagnosticMessage("JORNADA_FORA_INTERVALO"),null));
+          throw invalid;
+        }
+      }
+      public void update(Object id, String expected, JsonNode plan) { adapter.update(id, expected, plan); }
+    };
+    BulkResourcePolicy policy = new BulkResourcePolicy() {
+      public BulkFingerprintContext context(String operation) { return ErgonBulkOperations.this.context(resource, operation); }
+      public void authorize(BulkFingerprintContext context) { authority("ERGON_WRITE"); }
+      public BulkEvaluationGovernance evaluateGovernance(BulkFingerprintContext context) {
+        return new BulkEvaluationGovernance(REVISION, fingerprint(), List.of());
+      }
+      public BulkUnitAdmission admit(BulkExecutionUnit unit) {
+        try { authority("ERGON_WRITE"); return BulkUnitAdmission.admit(); }
+        catch (AccessDeniedException denied) { return BulkUnitAdmission.denied(BulkUnitReasonCode.TARGET_DENIED); }
+      }
+      public BulkReadAuthorizationProvider readAuthorization(String operation) { return authorization(resource, operation); }
+      public BulkProposalProjectionProvider proposalProjection(String operation) { return projection(resource, operation); }
+      public List<BulkPreviewProjection.PublicDiagnostic> publicDiagnostics(String operation) {
+        var codes = new LinkedHashSet<String>(List.of("JORNADA_FORA_INTERVALO"));
+        ErgonRuleErrorCatalog.all().values().forEach(error -> codes.add(error.code()));
+        var diagnostics = new ArrayList<BulkPreviewProjection.PublicDiagnostic>();
+        codes.forEach(code -> diagnostics.add(new BulkPreviewProjection.PublicDiagnostic(ResourceCommandErrorCategory.VALIDATION,code,diagnosticMessage(code))));
+        diagnostics.add(new BulkPreviewProjection.PublicDiagnostic(ResourceCommandErrorCategory.PRECONDITION,"BULK_VERSION_CONFLICT",diagnosticMessage("CONFLICT")));
+        diagnostics.add(new BulkPreviewProjection.PublicDiagnostic(ResourceCommandErrorCategory.PERMISSION,"BULK_TARGET_UNAVAILABLE",diagnosticMessage("DENIED")));
+        diagnostics.add(new BulkPreviewProjection.PublicDiagnostic(ResourceCommandErrorCategory.VALIDATION,"BULK_TARGET_INVALID",diagnosticMessage("INVALID")));
+        return diagnostics;
+      }
+    };
+    Map<String, BulkDomainCommandAdapter> commands = new LinkedHashMap<>();
+    for (var identity : identities.discover(infrastructure.namespace())) {
+      if (!identity.confirmationOperationId().startsWith("ergon." + resource.name + ".")
+          || identity.confirmationOperationId().equals(operation(resource, BulkMode.UNIFORM_UPDATE))
+          || identity.confirmationOperationId().equals(operation(resource, BulkMode.PER_ITEM_UPDATE))) continue;
+      String operation = identity.confirmationOperationId();
+      commands.put(operation, new BulkDomainCommandAdapter() {
+        public BulkDomainResourceAdapter.Candidate evaluate(Object id, String expected, JsonNode parameters) {
+          Object entity = domain.load(resource, domain.codec(resource).encode(id), false);
+          if (entity == null) throw new IllegalArgumentException("Registro inexistente.");
+          String observed = etags.create(scopes.currentScope(),resource.key,id,domain.version(entity));
+          if (!observed.equals(expected)) throw ResourceVersionPreconditionException.stale();
+          domain.commandCandidate(entity,operation,parameters);
+          return new BulkDomainResourceAdapter.Candidate(observed, json.createObjectNode().put("orgao",tenant.orgao()),
+              json.createObjectNode().set("parameters",parameters.deepCopy()));
+        }
+        public void execute(Object id, String expected, JsonNode plan) {
+          var precondition = new ResourceVersionUpdatePrecondition(etags,expected,scopes.currentScope(),resource.key,id);
+          domain.service(resource).executeBulkDomainCommand(id,precondition,entity ->
+              domain.applyCommand(entity,domain.commandCandidate(entity,operation,plan.path("parameters"))));
+        }
+      });
+    }
+    return new JpaResourceBulkEngine(infrastructure,lifecycle(),governed,domain.codec(resource),editable(resource),json,policy,cursors,commands);
   }
 }

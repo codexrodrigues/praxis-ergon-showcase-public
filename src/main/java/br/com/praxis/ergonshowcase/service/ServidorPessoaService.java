@@ -33,7 +33,6 @@ public class ServidorPessoaService
         CreateServidorPessoaDTO,
         UpdateServidorPessoaDTO> {
   @org.springframework.beans.factory.annotation.Autowired private ErgonInvariants invariants;
-  @PersistenceContext protected EntityManager entityManager;
 
   @Override
   public org.praxisplatform.uischema.filter.specification.GenericSpecificationsBuilder<
@@ -67,10 +66,6 @@ public class ServidorPessoaService
     return new ServidorPessoaFilterDTO();
   }
 
-  @Override
-  protected OptionalLong getEntityResourceVersion(ServidorPessoa e) {
-    return OptionalLong.of(e.getVersion());
-  }
 
   @Override
   public Optional<String> getDatasetVersion() {
@@ -112,45 +107,9 @@ public class ServidorPessoaService
   }
 
   @Override
-  public StatsSupportMode getGroupByStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getTimeSeriesStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getDistributionStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getComparisonStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  @Transactional
-  public ResourceRepresentationResult<ServidorPessoaResponseDTO> update(
-      Long id, UpdateServidorPessoaDTO dto, ResourceVersionUpdatePrecondition<Long> precondition) {
-    if (precondition == null) throw ResourceVersionPreconditionException.required();
-    var readOnlyKeys = validateCustomFields(dto, "request");
-    var entity = findEntityById(id);
-    entityManager.lock(entity, LockModeType.PESSIMISTIC_WRITE);
-    entityManager.refresh(entity);
-    precondition.requireMatch(entity.getVersion());
-    beforeUpdate(id, entity, dto);
-    var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
+  protected void applyResourceUpdate(Long id, ServidorPessoa entity, UpdateServidorPessoaDTO dto) {
     mapper.applyUpdate(entity, dto);
     invariants.pessoa(entity);
-    CustomFieldSupport.restoreReadOnlyValues(entity, readOnlyKeys, old);
-    var saved = getRepository().save(entity);
-    afterUpdate(id, saved, dto);
-    entityManager.flush();
-    entityManager.refresh(saved);
-    return toResourceRepresentation(saved);
   }
 
   @Override
@@ -159,4 +118,22 @@ public class ServidorPessoaService
     if (getRepository().existsById(e.getNumero()))
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Identidade já cadastrada.");
   }
+
+  @Override
+  protected void beforeDelete(Long id, ServidorPessoa entity) {
+    if (getEntityManager() != null && id != null) {
+      long vinculos =
+          getEntityManager()
+              .createQuery("select count(v) from Vinculo v where v.id.numfunc=:p", Long.class)
+              .setParameter("p", id)
+              .getSingleResult();
+      if (vinculos > 0) {
+        throw new ResponseStatusException(
+            HttpStatus.CONFLICT,
+            "Não é permitido excluir servidor titular que possui vínculos funcionais cadastrados.");
+      }
+    }
+  }
+  @Override protected String resolveResourceKey() { return "administracao-pessoal.funcionarios"; }
+
 }

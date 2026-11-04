@@ -72,22 +72,8 @@ public class RegraFrequenciaEstatutariaService
     return new RegraFrequenciaEstatutariaFilterDTO();
   }
 
-  @Override
-  protected OptionalLong getEntityResourceVersion(RegraFrequenciaEstatutaria entity) {
-    return OptionalLong.of(entity.getVersion());
-  }
 
-  @Override
-  protected ResourceFilterAccessScope<RegraFrequenciaEstatutaria> resolveResourceFilterAccessScope() {
-    var explicit = tenantContext.explicitOrgao();
-    if (explicit.isEmpty()) {
-      return ResourceFilterAccessScope.unrestricted();
-    }
-    int orgao = explicit.getAsInt();
-    return ResourceFilterAccessScope.restricted(
-        (root, query, cb) ->
-            cb.or(cb.isNull(root.get("empCodigo")), cb.equal(root.get("empCodigo"), orgao)));
-  }
+
 
   @Override
   protected List<CollectionExportField> exportFields() {
@@ -116,16 +102,6 @@ public class RegraFrequenciaEstatutariaService
         .categoricalGroupByBucket("tipofreq", "tipofreq")
         .numericHistogramMeasureField("qtdMaxDias", "qtdMaxDias")
         .build();
-  }
-
-  @Override
-  public StatsSupportMode getGroupByStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getDistributionStatsSupportMode() {
-    return StatsSupportMode.AUTO;
   }
 
   public ErgonRuleEngineFacade getRuleEngineFacade() {
@@ -204,4 +180,7 @@ public class RegraFrequenciaEstatutariaService
         regraRepository.findByTipofreqAndCodfreq(draft.getTipofreq(), draft.getCodfreq());
     return generalCandidates != null ? generalCandidates : List.of();
   }
+  @Override protected String resolveResourceKey() { return "administracao-pessoal.regras-frequencia-estatutaria"; }
+
+  @Override protected boolean globalOrganizationRecords() { return true; }
 }

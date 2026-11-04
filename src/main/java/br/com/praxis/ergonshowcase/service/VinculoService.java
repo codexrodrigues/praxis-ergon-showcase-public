@@ -33,8 +33,7 @@ public class VinculoService
         VinculoResponseDTO, VinculoId, VinculoFilterDTO, CreateVinculoDTO, UpdateVinculoDTO> {
   @Autowired(required = false)
   private ErgonInvariants invariants;
-
-  @PersistenceContext protected EntityManager entityManager;
+  @Autowired private VinculoAccumulationFacts accumulationFacts;
   protected final VinculoMapper mapper;
   private final TenantContext tenant;
   private final ErgonRuleEngineFacade ruleEngineFacade;
@@ -94,14 +93,15 @@ public class VinculoService
       return new ErgonRuleEngineFacade.VinculoRuleContext(
           null, null, null, null, 0L, null, 0L, null, null, null, List.of(), 0L, creating);
     }
+    checkOrg(draft.getEmpCodigo());
     Orgao orgao = draft.getOrgao();
     if (draft.getEmpCodigo() == null) {
       orgao = null;
     } else if (orgao != null && !Objects.equals(orgao.getEmpresa(), draft.getEmpCodigo())) {
       orgao = null;
     }
-    if (orgao == null && entityManager != null && draft.getEmpCodigo() != null) {
-      orgao = entityManager.find(Orgao.class, draft.getEmpCodigo());
+    if (orgao == null && getEntityManager() != null && draft.getEmpCodigo() != null) {
+      orgao = getEntityManager().find(Orgao.class, draft.getEmpCodigo());
     }
     ServidorPessoa pessoa = draft.getPessoa();
     if (draft.getId() == null || draft.getId().numfunc() == null) {
@@ -110,10 +110,10 @@ public class VinculoService
       pessoa = null;
     }
     if (pessoa == null
-        && entityManager != null
+        && getEntityManager() != null
         && draft.getId() != null
         && draft.getId().numfunc() != null) {
-      pessoa = entityManager.find(ServidorPessoa.class, draft.getId().numfunc());
+      pessoa = getEntityManager().find(ServidorPessoa.class, draft.getId().numfunc());
     }
     Cargo cargo = draft.getCargoEntidade();
     if (draft.getCargo() == null) {
@@ -121,12 +121,12 @@ public class VinculoService
     } else if (cargo != null && !Objects.equals(cargo.getCargo(), draft.getCargo())) {
       cargo = null;
     }
-    if (cargo == null && entityManager != null && draft.getCargo() != null) {
-      cargo = entityManager.find(Cargo.class, draft.getCargo());
+    if (cargo == null && getEntityManager() != null && draft.getCargo() != null) {
+      cargo = getEntityManager().find(Cargo.class, draft.getCargo());
     }
     Cargo cargoComissao = null;
-    if (entityManager != null && draft.getCargoComissao() != null) {
-      cargoComissao = entityManager.find(Cargo.class, draft.getCargoComissao());
+    if (getEntityManager() != null && draft.getCargoComissao() != null) {
+      cargoComissao = getEntityManager().find(Cargo.class, draft.getCargoComissao());
     }
     Setor lotacao = draft.getLotacao();
     if (draft.getSetor() == null || draft.getSetor().isBlank()) {
@@ -135,10 +135,10 @@ public class VinculoService
       lotacao = null;
     }
     if (lotacao == null
-        && entityManager != null
+        && getEntityManager() != null
         && draft.getSetor() != null
         && !draft.getSetor().isBlank()) {
-      lotacao = entityManager.find(Setor.class, draft.getSetor());
+      lotacao = getEntityManager().find(Setor.class, draft.getSetor());
     }
     Setor exercicio = draft.getExercicio();
     if (draft.getSetorExercicio() == null || draft.getSetorExercicio().isBlank()) {
@@ -148,45 +148,36 @@ public class VinculoService
       exercicio = null;
     }
     if (exercicio == null
-        && entityManager != null
+        && getEntityManager() != null
         && draft.getSetorExercicio() != null
         && !draft.getSetorExercicio().isBlank()) {
-      exercicio = entityManager.find(Setor.class, draft.getSetorExercicio());
+      exercicio = getEntityManager().find(Setor.class, draft.getSetorExercicio());
     }
     DocumentoLegal doc = null;
-    if (entityManager != null && draft.getDocumentoLegalId() != null) {
-      doc = entityManager.find(DocumentoLegal.class, draft.getDocumentoLegalId());
+    if (getEntityManager() != null && draft.getDocumentoLegalId() != null) {
+      doc = getEntityManager().find(DocumentoLegal.class, draft.getDocumentoLegalId());
     }
+    ErgonTenantAccess.requireReferencesInOrganization(draft.getEmpCodigo(), cargo, cargoComissao, lotacao, exercicio, doc);
     long cargoOcupadas =
         cargo != null && invariants != null
-            ? invariants.ocupadas(cargo.getCargo(), draft.getId())
+            ? invariants.ocupadas(cargo.getCargo(), draft.getId(), draft.getEmpCodigo())
             : 0L;
     long comissaoOcupadas =
         cargoComissao != null && invariants != null
-            ? invariants.ocupadas(cargoComissao.getCargo(), draft.getId())
+            ? invariants.ocupadas(cargoComissao.getCargo(), draft.getId(), draft.getEmpCodigo())
             : 0L;
-    List<Vinculo> existingVinculos = List.of();
+    var existingVinculos = accumulationFacts == null ? null
+        : accumulationFacts.load(getEntityManager(), draft);
     int openAfastamentosCount = 0;
-    if (entityManager != null && draft.getId() != null && draft.getId().numfunc() != null) {
-      var qv =
-          entityManager.createQuery(
-              "select v from Vinculo v where v.id.numfunc=:p and (:n is null or v.id.numero<>:n) and v.situacao='ATIVO'",
-              Vinculo.class);
-      if (qv != null) {
-        existingVinculos =
-            qv.setParameter("p", draft.getId().numfunc())
-                .setParameter("n", draft.getId().numero())
-                .setFlushMode(FlushModeType.COMMIT)
-                .getResultList();
-      }
+    if (getEntityManager() != null && draft.getId() != null && draft.getId().numfunc() != null) {
       if (draft.getId().numero() != null) {
         var qa =
-            entityManager.createQuery(
-                "select count(a) from Afastamento a where a.numfunc=:p and a.numvinc=:v and a.situacao='HOMOLOGADO' and a.dtfim is null",
+            getEntityManager().createQuery(
+                "select count(a) from Afastamento a where a.empCodigo=:org and a.numfunc=:p and a.numvinc=:v and a.situacao='HOMOLOGADO' and a.dtfim is null",
                 Long.class);
         if (qa != null) {
           Long cnt =
-              qa.setParameter("p", draft.getId().numfunc())
+              qa.setParameter("org", draft.getEmpCodigo()).setParameter("p", draft.getId().numfunc())
                   .setParameter("v", draft.getId().numero())
                   .setFlushMode(FlushModeType.COMMIT)
                   .getSingleResult();
@@ -241,10 +232,6 @@ public class VinculoService
     return new VinculoFilterDTO();
   }
 
-  @Override
-  protected OptionalLong getEntityResourceVersion(Vinculo e) {
-    return OptionalLong.of(e.getVersion());
-  }
 
   @Override
   public Optional<String> getDatasetVersion() {
@@ -281,63 +268,16 @@ public class VinculoService
         .build();
   }
 
-  @Override
-  public StatsSupportMode getGroupByStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
+
 
   @Override
-  public StatsSupportMode getTimeSeriesStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getDistributionStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getComparisonStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  protected ResourceFilterAccessScope<Vinculo> resolveResourceFilterAccessScope() {
-    var explicit = tenant != null ? tenant.explicitOrgao() : OptionalInt.empty();
-    if (explicit.isEmpty()) {
-      return ResourceFilterAccessScope.unrestricted();
-    }
-    int orgao = explicit.getAsInt();
-    return ResourceFilterAccessScope.restricted(
-        (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
-  }
-
-  @Override
-  @Transactional
-  public ResourceRepresentationResult<VinculoResponseDTO> update(
-      VinculoId id,
-      UpdateVinculoDTO dto,
-      ResourceVersionUpdatePrecondition<VinculoId> precondition) {
-    if (precondition == null) throw ResourceVersionPreconditionException.required();
-    var readOnlyKeys = validateCustomFields(dto, "request");
-    var entity = findEntityById(id);
-    entityManager.lock(entity, LockModeType.PESSIMISTIC_WRITE);
-    entityManager.refresh(entity);
-    precondition.requireMatch(entity.getVersion());
-    beforeUpdate(id, entity, dto);
-    var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
+  protected void applyResourceUpdate(VinculoId id, Vinculo entity, UpdateVinculoDTO dto) {
     mapper.applyUpdate(entity, dto);
     checkOrg(entity.getEmpCodigo());
     if (invariants != null) {
       invariants.vinculo(entity, false, false);
     }
     validateVinculoProvimento(entity, false);
-    CustomFieldSupport.restoreReadOnlyValues(entity, readOnlyKeys, old);
-    var saved = getRepository().save(entity);
-    afterUpdate(id, saved, dto);
-    entityManager.flush();
-    entityManager.refresh(saved);
-    return enriched(toResourceRepresentation(saved));
   }
 
   @Transactional
@@ -345,46 +285,39 @@ public class VinculoService
       VinculoId id,
       RegistrarVacanciaDTO dto,
       ResourceVersionUpdatePrecondition<VinculoId> precondition) {
-    Vinculo e = findEntityById(id);
-    entityManager.lock(e, LockModeType.PESSIMISTIC_WRITE);
-    entityManager.refresh(e);
-    precondition.requireMatch(e.getVersion());
+    return executeVersionedMutation(id, precondition, (Vinculo e) -> {
     checkOrg(e.getEmpCodigo());
     if (!"ATIVO".equals(e.getSituacao()))
       throw new ResponseStatusException(
           HttpStatus.CONFLICT, "Somente vínculo ativo pode receber esta ação.");
-    if (e.getDtexerc() != null && dto.data().isBefore(e.getDtexerc()))
-      throw new ResponseStatusException(
-          HttpStatus.UNPROCESSABLE_ENTITY, "Vacância anterior ao exercício.");
     e.setDtvac(dto.data());
     e.setFormavac(dto.forma());
     e.setMotivovac(dto.motivo());
-    ErgonInvariants.chronology(dto.data(), dto.dtPgtoAte(), "Pagamento final anterior à vacância.");
     e.setDtPgtoAte(dto.dtPgtoAte());
     e.setSituacao("VACANTE");
     validateVinculoProvimento(e, false);
     if (invariants != null) {
       invariants.vinculo(e, false, false);
     }
-    entityManager.flush();
-    return toResourceRepresentation(e);
+    });
+  }
+
+  @Override
+  @Transactional
+  public BaseResourceCommandService.SavedResult<VinculoId, VinculoResponseDTO> create(CreateVinculoDTO dto) {
+    checkOrg(dto.getEmpCodigo());
+    return super.create(dto);
   }
 
   @Override
   protected void beforeCreate(CreateVinculoDTO dto, Vinculo e) {
+    checkOrg(e.getEmpCodigo());
     if (invariants != null) {
       invariants.vinculo(e, true, false);
     }
     validateVinculoProvimento(e, true);
-    checkOrg(e.getEmpCodigo());
     if (getRepository().existsById(e.getId()))
       throw new ResponseStatusException(HttpStatus.CONFLICT, "Vínculo já cadastrado.");
-    Orgao o = entityManager.find(Orgao.class, e.getEmpCodigo());
-    if (o == null || !o.getAtiva())
-      throw new ResponseStatusException(
-          HttpStatus.UNPROCESSABLE_ENTITY, "Órgão indisponível para admissão.");
-    if (entityManager.find(ServidorPessoa.class, e.getId().numfunc()) == null)
-      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Pessoa inexistente.");
   }
 
   @Override
@@ -392,9 +325,40 @@ public class VinculoService
     checkOrg(e.getEmpCodigo());
   }
 
+  @Override
+  protected void beforeDelete(VinculoId id, Vinculo entity) {
+    if (entity != null) {
+      checkOrg(entity.getEmpCodigo());
+    }
+    if (getEntityManager() != null && id != null && entity != null) {
+      long afastamentos =
+          getEntityManager()
+              .createQuery(
+                  "select count(a) from Afastamento a where a.empCodigo=:org and a.numfunc=:p and a.numvinc=:v",
+                  Long.class)
+              .setParameter("org", entity.getEmpCodigo()).setParameter("p", id.numfunc())
+              .setParameter("v", id.numero())
+              .getSingleResult();
+      if (afastamentos > 0) {
+        throw new ResponseStatusException(
+            HttpStatus.CONFLICT,
+            "Não é permitido excluir vínculo funcional que possui históricos de afastamento.");
+      }
+    }
+  }
+
   private void checkOrg(Integer orgao) {
     if (!java.util.Objects.equals(orgao, tenant.orgao()))
       throw new ResponseStatusException(
-          HttpStatus.UNPROCESSABLE_ENTITY, "Órgão do vínculo diverge de X-Tenant.");
+          HttpStatus.FORBIDDEN, "Órgão do vínculo diverge de X-Tenant.");
   }
+  @Override protected java.util.Optional<org.praxisplatform.uischema.capability.ResourceStateSnapshot> toResourceStateSnapshot(Vinculo e) {
+    return java.util.Optional.of(snapshotState(e));
+  }
+  private org.praxisplatform.uischema.capability.ResourceStateSnapshot snapshotState(Vinculo e) {
+    return org.praxisplatform.uischema.capability.ResourceStateSnapshot.of(e.getSituacao());
+  }
+
+  @Override protected String resolveResourceKey() { return "administracao-pessoal.vinculos"; }
+
 }

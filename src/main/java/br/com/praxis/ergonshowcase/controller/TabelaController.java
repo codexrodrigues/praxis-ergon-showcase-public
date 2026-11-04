@@ -69,7 +69,7 @@ import org.springframework.web.server.ResponseStatusException;
             titleField = "descr",
             displayLabelField = "descr",
             subtitleField = "tab",
-            metadataFields = {"sis", "multiEmp", "tipo", "taminfo"}),
+            metadataFields = {"updatedAt"}),
     quickFilters = {
       @QuickFilter(
           id = "multi-orgao",
@@ -152,17 +152,9 @@ public class TabelaController
       @Parameter(description = "Quantidade de registros da página, de 1 a 200")
           @RequestParam(defaultValue = "20")
           int size) {
-    service.findById(id);
-    if (page < 0 || size < 1 || size > 200)
-      throw new ResponseStatusException(
-          HttpStatus.UNPROCESSABLE_ENTITY, "Paginação fora do limite permitido.");
-    var filter = new ItemTabelaFilterDTO();
-    filter.setTab(id);
-    var result =
-        itensService.filter(
-            filter, PageRequest.of(page, size, itensService.getDefaultSort()), null);
-    return ResponseEntity.ok(
-        RestApiResponse.success(result, Links.of(Link.of(ApiPaths.ITENS_TABELA, "collection"))));
+    ErgonHttpContract.childPage(page, size);
+    return filterRelatedChildResource(id, itensService, ApiPaths.ITENS_TABELA, ItemTabelaFilterDTO::new,
+        (child, parent) -> { child.setTab(parent); }, page, size);
   }
 
   @GetMapping("/{id}/campos-customizados")
@@ -195,19 +187,8 @@ public class TabelaController
           @Parameter(description = "Quantidade de registros da página, de 1 a 200")
               @RequestParam(defaultValue = "20")
               int size) {
-    service.findById(id);
-    if (page < 0 || size < 1 || size > 200)
-      throw new ResponseStatusException(
-          HttpStatus.UNPROCESSABLE_ENTITY, "Paginação fora do limite permitido.");
-    var filter = new DefinicaoCampoCustomizadoFilterDTO();
-    filter.setOptionTabela(id);
-    var result =
-        camposCustomizadosService.filter(
-            filter,
-            PageRequest.of(page, size, camposCustomizadosService.getDefaultSort()),
-            null);
-    return ResponseEntity.ok(
-        RestApiResponse.success(
-            result, Links.of(Link.of(ApiPaths.CAMPOS_CUSTOMIZADOS, "collection"))));
+    ErgonHttpContract.childPage(page, size);
+    return filterRelatedChildResource(id, camposCustomizadosService, ApiPaths.CAMPOS_CUSTOMIZADOS, DefinicaoCampoCustomizadoFilterDTO::new,
+        (child, parent) -> { child.setOptionTabela(parent); }, page, size);
   }
 }

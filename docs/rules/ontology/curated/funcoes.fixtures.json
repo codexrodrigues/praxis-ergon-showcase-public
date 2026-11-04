@@ -1,0 +1,449 @@
+[
+  {
+    "operationKey": "createErgonFuncaoConfianca",
+    "positive": {
+      "draft": {
+        "id": null,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "codigo": "FC-01",
+        "categoria": "CHEFIA",
+        "simbolo": "FC1",
+        "controleVaga": true,
+        "dtInicioContrVaga": "2026-01-01",
+        "permiteSubstituicao": true,
+        "tipoSubstituicao": null,
+        "diasMinimosSubstituicao": 15,
+        "valorGratificacao": 1000,
+        "percentualOpcaoEfetivo": 50,
+        "exigeVinculoEfetivo": true,
+        "requisitos": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": null,
+      "neighborhood": {
+        "vagas": [],
+        "designacoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "createErgonFuncaoConfianca",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "CREATE"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "updateErgonFuncaoConfianca",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "codigo": "FC-01",
+        "categoria": "CHEFIA",
+        "simbolo": "FC1",
+        "controleVaga": true,
+        "dtInicioContrVaga": "2026-01-01",
+        "permiteSubstituicao": true,
+        "tipoSubstituicao": null,
+        "diasMinimosSubstituicao": 15,
+        "valorGratificacao": 1000,
+        "percentualOpcaoEfetivo": 50,
+        "exigeVinculoEfetivo": true,
+        "requisitos": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "codigo": "FC-01",
+        "categoria": "CHEFIA",
+        "simbolo": "FC1",
+        "controleVaga": true,
+        "dtInicioContrVaga": "2026-01-01",
+        "permiteSubstituicao": true,
+        "tipoSubstituicao": null,
+        "diasMinimosSubstituicao": 15,
+        "valorGratificacao": 1000,
+        "percentualOpcaoEfetivo": 50,
+        "exigeVinculoEfetivo": true,
+        "requisitos": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "neighborhood": {
+        "vagas": [],
+        "designacoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "updateErgonFuncaoConfianca",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "UPDATE"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "ergon.funcoes.bulk.uniform.evaluation",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "codigo": "FC-01",
+        "categoria": "CHEFIA",
+        "simbolo": "FC1",
+        "controleVaga": true,
+        "dtInicioContrVaga": "2026-01-01",
+        "permiteSubstituicao": true,
+        "tipoSubstituicao": null,
+        "diasMinimosSubstituicao": 15,
+        "valorGratificacao": 1000,
+        "percentualOpcaoEfetivo": 50,
+        "exigeVinculoEfetivo": true,
+        "requisitos": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "codigo": "FC-01",
+        "categoria": "CHEFIA",
+        "simbolo": "FC1",
+        "controleVaga": true,
+        "dtInicioContrVaga": "2026-01-01",
+        "permiteSubstituicao": true,
+        "tipoSubstituicao": null,
+        "diasMinimosSubstituicao": 15,
+        "valorGratificacao": 1000,
+        "percentualOpcaoEfetivo": 50,
+        "exigeVinculoEfetivo": true,
+        "requisitos": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "neighborhood": {
+        "vagas": [],
+        "designacoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "ergon.funcoes.bulk.uniform.evaluation",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "BULK_ITEM"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "ergon.funcoes.bulk.items.evaluation",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "codigo": "FC-01",
+        "categoria": "CHEFIA",
+        "simbolo": "FC1",
+        "controleVaga": true,
+        "dtInicioContrVaga": "2026-01-01",
+        "permiteSubstituicao": true,
+        "tipoSubstituicao": null,
+        "diasMinimosSubstituicao": 15,
+        "valorGratificacao": 1000,
+        "percentualOpcaoEfetivo": 50,
+        "exigeVinculoEfetivo": true,
+        "requisitos": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "codigo": "FC-01",
+        "categoria": "CHEFIA",
+        "simbolo": "FC1",
+        "controleVaga": true,
+        "dtInicioContrVaga": "2026-01-01",
+        "permiteSubstituicao": true,
+        "tipoSubstituicao": null,
+        "diasMinimosSubstituicao": 15,
+        "valorGratificacao": 1000,
+        "percentualOpcaoEfetivo": 50,
+        "exigeVinculoEfetivo": true,
+        "requisitos": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "neighborhood": {
+        "vagas": [],
+        "designacoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "ergon.funcoes.bulk.items.evaluation",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "BULK_ITEM"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "ergon.funcoes.bulk.uniform",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "codigo": "FC-01",
+        "categoria": "CHEFIA",
+        "simbolo": "FC1",
+        "controleVaga": true,
+        "dtInicioContrVaga": "2026-01-01",
+        "permiteSubstituicao": true,
+        "tipoSubstituicao": null,
+        "diasMinimosSubstituicao": 15,
+        "valorGratificacao": 1000,
+        "percentualOpcaoEfetivo": 50,
+        "exigeVinculoEfetivo": true,
+        "requisitos": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "codigo": "FC-01",
+        "categoria": "CHEFIA",
+        "simbolo": "FC1",
+        "controleVaga": true,
+        "dtInicioContrVaga": "2026-01-01",
+        "permiteSubstituicao": true,
+        "tipoSubstituicao": null,
+        "diasMinimosSubstituicao": 15,
+        "valorGratificacao": 1000,
+        "percentualOpcaoEfetivo": 50,
+        "exigeVinculoEfetivo": true,
+        "requisitos": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "neighborhood": {
+        "vagas": [],
+        "designacoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "ergon.funcoes.bulk.uniform",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "BULK_ITEM"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "ergon.funcoes.bulk.items",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "codigo": "FC-01",
+        "categoria": "CHEFIA",
+        "simbolo": "FC1",
+        "controleVaga": true,
+        "dtInicioContrVaga": "2026-01-01",
+        "permiteSubstituicao": true,
+        "tipoSubstituicao": null,
+        "diasMinimosSubstituicao": 15,
+        "valorGratificacao": 1000,
+        "percentualOpcaoEfetivo": 50,
+        "exigeVinculoEfetivo": true,
+        "requisitos": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "codigo": "FC-01",
+        "categoria": "CHEFIA",
+        "simbolo": "FC1",
+        "controleVaga": true,
+        "dtInicioContrVaga": "2026-01-01",
+        "permiteSubstituicao": true,
+        "tipoSubstituicao": null,
+        "diasMinimosSubstituicao": 15,
+        "valorGratificacao": 1000,
+        "percentualOpcaoEfetivo": 50,
+        "exigeVinculoEfetivo": true,
+        "requisitos": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "neighborhood": {
+        "vagas": [],
+        "designacoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "ergon.funcoes.bulk.items",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "BULK_ITEM"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "administracao-pessoal.funcoes.delete",
+    "positive": {
+      "draft": null,
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "codigo": "FC-01",
+        "categoria": "CHEFIA",
+        "simbolo": "FC1",
+        "controleVaga": true,
+        "dtInicioContrVaga": "2026-01-01",
+        "permiteSubstituicao": true,
+        "tipoSubstituicao": null,
+        "diasMinimosSubstituicao": 15,
+        "valorGratificacao": 1000,
+        "percentualOpcaoEfetivo": 50,
+        "exigeVinculoEfetivo": true,
+        "requisitos": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "neighborhood": {
+        "vagas": [],
+        "designacoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "administracao-pessoal.funcoes.delete",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "DELETE"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "administracao-pessoal.funcoes.delete-batch",
+    "positive": {
+      "draft": null,
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "codigo": "FC-01",
+        "categoria": "CHEFIA",
+        "simbolo": "FC1",
+        "controleVaga": true,
+        "dtInicioContrVaga": "2026-01-01",
+        "permiteSubstituicao": true,
+        "tipoSubstituicao": null,
+        "diasMinimosSubstituicao": 15,
+        "valorGratificacao": 1000,
+        "percentualOpcaoEfetivo": 50,
+        "exigeVinculoEfetivo": true,
+        "requisitos": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "neighborhood": {
+        "vagas": [],
+        "designacoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "administracao-pessoal.funcoes.delete-batch",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "DELETE"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "preview-product.chefia.erg-01101",
+    "positive": {
+      "current": null,
+      "context": {
+        "empCodigo": 1,
+        "operation": "preview-product.chefia.erg-01101",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "PREVIEW"
+      },
+      "draft": {
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  }
+]

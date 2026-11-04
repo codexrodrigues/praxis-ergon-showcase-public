@@ -1,0 +1,50 @@
+{
+  "date": "2026-11-01",
+  "timezone": "America/Sao_Paulo",
+  "java": "21",
+  "starter": "8.0.0-rc.186",
+  "suite": {
+    "command": "mvn test -Dtest=!*Neon*",
+    "tests": 248,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "exitCode": 0,
+    "newRegressionTests": 15
+  },
+  "audit": {
+    "command": "python ../scripts/workspace/audit-java-resource-completeness.py . --strict",
+    "exitCode": 1,
+    "failures": 51,
+    "resourceFailures": 15,
+    "ruleParityFindings": 36,
+    "slice6EditorialIssues": 0,
+    "duplicateDraftPending": 0,
+    "calculatedFieldsNotRecognized": [
+      "diasGozados",
+      "diasVendidos",
+      "saldoDias"
+    ]
+  },
+  "preservation": {
+    "unrelatedBaselineModifications": 0,
+    "sourceDriftSinceFinalTests": 0
+  },
+  "limits": [
+    "No Slice 6 PostgreSQL or V5 application proof",
+    "No integrated Slice 6 HTTP proof",
+    "No browser validation"
+  ],
+  "sourceHashes": {
+    "src\\main\\java\\br\\com\\praxis\\ergonshowcase\\dto\\LicencaEspecialGozoDados.java": "3b513932f2acc67b7fbf0f9eff1bb71c4ccc7946b2130de52b72e040c28b5e33",
+    "src\\main\\java\\br\\com\\praxis\\ergonshowcase\\dto\\PeriodoAquisitivoLicencaEspecialDados.java": "f635ea19901ce8439da3f85408f56f63b5145eb841a7f00f0d32ab927a2ed14c",
+    "src\\main\\java\\br\\com\\praxis\\ergonshowcase\\dto\\PeriodoAquisitivoLicencaEspecialResponseDTO.java": "8389f7bb4692ab5ec30d3f0a4f9150f03ee3a28654e7a3b88f5b50f5b62845a2",
+    "src\\main\\java\\br\\com\\praxis\\ergonshowcase\\mapper\\PeriodoAquisitivoLicencaEspecialMapper.java": "ddda1746850ea65b46ec42b9268e1b352059141ecabff00bd7d3fa9aa7026a33",
+    "src\\main\\java\\br\\com\\praxis\\ergonshowcase\\service\\EffectiveSpecialLeavePolicy.java": "8caa22b6224e5f90cc6a93858ed2d3461e51010a0a365ec6f253aa488ad374f6",
+    "src\\main\\java\\br\\com\\praxis\\ergonshowcase\\service\\PeriodoAquisitivoLicencaEspecialService.java": "bdcd32bfd11aed8b1af8d99befcd5ff7ee59d2ecf0183aef277fdbc89d0c6178",
+    "src\\main\\java\\br\\com\\praxis\\ergonshowcase\\service\\TempoLicencaValidation.java": "9947c458f831ac4860c1e8fc03ca4898bc22de2a16b33c44cf0ca90c8c74acc0",
+    "src\\test\\java\\br\\com\\praxis\\ergonshowcase\\TempoLicencaCrudContractTest.java": "f1cedb00c467b88bca815212c22bc6e478715bb2aae37069c6968243cca80e40",
+    "src\\test\\java\\br\\com\\praxis\\ergonshowcase\\TempoLicencaSevenFixesRegressionTest.java": "160eaa3e916ae29be720bb8ceaffe8b3b7af247753cc92740cd52ec6dd56d192",
+    "src\\test\\java\\br\\com\\praxis\\ergonshowcase\\TempoLicencaSlice6Phase1ContractTest.java": "5434b97f26b0e13feb269d3ef91ef23c55fd3f77e37f41a90603d10f0a65b56c"
+  }
+}

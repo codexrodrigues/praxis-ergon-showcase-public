@@ -29,12 +29,6 @@ public abstract class VinculoDados {
       group = "Identificação funcional",
       order = 10,
       icon = "badge")
-  @ResourceReference(
-      resourceKey = "administracao-pessoal.vinculos",
-      valueField = "id",
-      surfaceId = "resumo-funcional",
-      previewSurfaceId = "resumo-funcional",
-      detailPresentation = "drawer")
   private String matric;
 
   @NotBlank

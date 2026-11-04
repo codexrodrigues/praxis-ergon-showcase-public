@@ -38,6 +38,7 @@ public class AfastamentoFilterDTO implements GenericFilterDTO {
         "pessoa.nome",
         "pessoa.cpf",
         "vinculo.matric",
+        "vinculo.lotacao.nome",
         "codigoFrequenciaEntidade.nome",
         "codigoFrequenciaEntidade.mnemonico",
         "documentoLegal.numeroDocumento",
@@ -359,6 +360,64 @@ public class AfastamentoFilterDTO implements GenericFilterDTO {
       helpText = "Selecione o vínculo funcional titular para listar seus afastamentos.")
   @Filterable(operation = FilterOperation.EQUAL, relation = "vinculo.id")
   private br.com.praxis.ergonshowcase.domain.VinculoId vinculoId;
+
+  @Schema(
+      description =
+          "Restringe aos afastamentos sem servidor substituto designado, apoiando auditorias de descobertura de postos durante licenças.")
+  @UISchema(
+      label = "Sem substituto designado",
+      group = "Prorrogação e substituição",
+      order = 35,
+      type = FieldDataType.BOOLEAN,
+      controlType = FieldControlType.CHECKBOX,
+      icon = "person_off")
+  @Filterable(operation = FilterOperation.IS_NULL, relation = "numfuncSubstituto")
+  private Boolean semSubstituto;
+
+  @Schema(
+      description =
+          "Pesquisa textual pelo nome da unidade organizacional de lotação do vínculo afastado (ex.: UPA, Hospital, Secretaria de Saúde).",
+      example = "Saúde")
+  @UISchema(
+      label = "Nome da lotação do vínculo",
+      group = "Identificação",
+      order = 5,
+      type = FieldDataType.TEXT,
+      controlType = FieldControlType.INPUT,
+      icon = "account_tree",
+      helpText = "Digite parte do nome do setor de lotação do servidor.")
+  @Filterable(operation = FilterOperation.LIKE, relation = "vinculo.lotacao.nome")
+  private String setorLotacaoNome;
+
+  @Schema(
+      description =
+          "Filtra afastamentos pelo tipo de unidade organizacional de lotação do vínculo (ex.: SECRETARIA, DIRETORIA, COORDENADORIA, NUCLEO, UNIDADE_SAUDE, ESCOLA).")
+  @UISchema(
+      label = "Tipos de unidade de lotação",
+      group = "Identificação",
+      order = 6,
+      type = FieldDataType.ARRAY,
+      controlType = FieldControlType.MULTI_SELECT,
+      icon = "category",
+      options =
+          "[{\"value\":\"SECRETARIA\",\"label\":\"Secretaria\"},{\"value\":\"DIRETORIA\",\"label\":\"Diretoria\"},{\"value\":\"COORDENADORIA\",\"label\":\"Coordenadoria\"},{\"value\":\"NUCLEO\",\"label\":\"Núcleo\"},{\"value\":\"UNIDADE_SAUDE\",\"label\":\"Unidade de Saúde\"},{\"value\":\"ESCOLA\",\"label\":\"Unidade Escolar\"}]")
+  @Filterable(operation = FilterOperation.IN, relation = "vinculo.lotacao.tipoSetor")
+  private List<String> tipoSetorLotacao;
+
+  @Schema(
+      description =
+          "Filtra afastamentos pela categoria funcional do vínculo titular (ex.: ADMINISTRATIVO, MAGISTERIO, SAUDE, GUARDA_MUNICIPAL).")
+  @UISchema(
+      label = "Categorias funcionais",
+      group = "Enquadramento",
+      order = 36,
+      type = FieldDataType.ARRAY,
+      controlType = FieldControlType.MULTI_SELECT,
+      icon = "badge",
+      options =
+          "[{\"value\":\"ADMINISTRATIVO\",\"label\":\"Administrativo\"},{\"value\":\"MAGISTERIO\",\"label\":\"Magistério\"},{\"value\":\"SAUDE\",\"label\":\"Saúde\"},{\"value\":\"GUARDA_MUNICIPAL\",\"label\":\"Guarda Municipal\"}]")
+  @Filterable(operation = FilterOperation.IN, relation = "vinculo.categoria")
+  private List<String> categoriaVinculo;
 
   @Schema(
       description =

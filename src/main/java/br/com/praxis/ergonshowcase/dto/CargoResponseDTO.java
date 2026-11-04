@@ -19,7 +19,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
     titleField = "nome",
     displayLabelField = "nome",
     subtitleField = "categoria",
-    metadataFields = {"id", "orgaoNome", "tipoCargo", "saldoVagasDisponiveis"})
+    metadataFields = {"id", "cargoFuncao", "cbo"})
 public class CargoResponseDTO extends CargoDados {
   @Schema(description = "Número de vagas ocupadas por vínculos ativos, afastados ou cedidos no cargo titular ou em comissão, sem dupla contagem. Nulo sem quadro autorizado conhecido.", accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(label = "Ocupação do quadro", group = "Quadro de Vagas e Vigência", readOnly = true,
@@ -136,4 +136,16 @@ public class CargoResponseDTO extends CargoDados {
       previewSurfaceId = "ficha-cargo",
       detailPresentation = "drawer")
   private String cargoAglutinadorNome;
+  @Override
+  @Schema(
+      description =
+          "Nomenclatura oficial do cargo público ou função de confiança no quadro de pessoal.", accessMode = Schema.AccessMode.READ_ONLY)
+  @org.praxisplatform.uischema.annotation.ResourceReference(
+      resourceKey = "administracao-pessoal.cargos",
+      valueField = "id",
+      surfaceId = "ficha-cargo",
+      previewSurfaceId = "ficha-cargo",
+      detailPresentation = "drawer")
+  public String getNome() { return super.getNome(); }
+
 }

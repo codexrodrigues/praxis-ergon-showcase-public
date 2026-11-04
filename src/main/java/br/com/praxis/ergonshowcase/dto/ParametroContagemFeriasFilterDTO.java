@@ -24,6 +24,10 @@ import org.praxisplatform.uischema.filter.dto.GenericFilterDTO;
     description =
         "Critérios ricos de filtragem da matriz estatutária de parâmetros de contagem de férias, abono pecuniário, prescrição e licença especial.")
 public class ParametroContagemFeriasFilterDTO implements GenericFilterDTO {
+  @Schema(description = "Seleciona matrizes que permitem ou vedam gozo de licença-prêmio antes do término da aquisição.")
+  @UISchema(label = "Gozo antecipado de licença", helpText = "Selecione a permissão de antecipação prevista no regime.", type = FieldDataType.BOOLEAN, controlType = FieldControlType.CHECKBOX, icon = "event_available")
+  @Filterable(operation = FilterOperation.EQUAL, relation = "permGozoLicEspAntFimPe")
+  private Boolean permGozoLicEspAntFimPe;
 
   @Schema(
       description =

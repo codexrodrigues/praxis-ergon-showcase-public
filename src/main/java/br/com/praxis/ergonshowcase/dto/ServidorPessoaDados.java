@@ -36,12 +36,7 @@ public abstract class ServidorPessoaDados {
       group = "Identificação civil",
       order = 10,
       icon = "person")
-  @ResourceReference(
-      resourceKey = "administracao-pessoal.funcionarios",
-      valueField = "id",
-      surfaceId = "ficha-cadastral",
-      previewSurfaceId = "ficha-cadastral",
-      detailPresentation = "drawer")
+
   private String nome;
 
   @Size(max = 70)
@@ -90,7 +85,6 @@ public abstract class ServidorPessoaDados {
   private String cpf;
 
   @NotNull
-  @Past
   @Schema(
       description =
           "Data de nascimento civil da pessoa, utilizada no cadastro funcional e na conferência de identificação.")
@@ -109,6 +103,18 @@ public abstract class ServidorPessoaDados {
       icon = "event",
       type = org.praxisplatform.uischema.FieldDataType.DATE)
   private LocalDate dtnasc;
+
+  @Schema(nullable = true, description = "Data de óbito ou desaparecimento informada no registro civil. Quando preenchida, é a referência para validar a idade máxima do servidor.")
+  @DomainGovernance(kind = DomainGovernanceKind.PRIVACY,
+      classification = DomainClassification.CONFIDENTIAL,
+      dataCategory = DomainDataCategory.PERSONAL,
+      reason = "Data de evento do registro civil individual.",
+      aiUsage = @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
+  @UISchema(label = "Óbito ou desaparecimento", group = "Identificação civil", order = 42,
+      icon = "event", tableHidden = true, helpText = "Informe a data registrada na certidão ou no ato.",
+      type = org.praxisplatform.uischema.FieldDataType.DATE,
+      controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER)
+  private LocalDate dtCertFim;
 
   @Email
   @Size(max = 120)

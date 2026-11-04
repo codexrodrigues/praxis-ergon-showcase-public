@@ -76,8 +76,6 @@ public class FrequenciaService
 
   @Autowired(required = false)
   private ErgonInvariants invariants;
-
-  @PersistenceContext protected EntityManager entityManager;
   protected final FrequenciaMapper mapper;
   private final TenantContext tenant;
   private final ErgonRuleEngineFacade ruleEngineFacade;
@@ -171,48 +169,47 @@ public class FrequenciaService
     }
     Vinculo vinculo = draft.getVinculo();
     if (vinculo == null
-        && entityManager != null
+        && getEntityManager() != null
         && draft.getNumfunc() != null
         && draft.getNumvinc() != null) {
       vinculo =
-          entityManager.find(
+          getEntityManager().find(
               Vinculo.class, new VinculoId(draft.getNumfunc(), draft.getNumvinc()));
     }
 
+    ErgonTenantAccess.requireReferencesInOrganization(draft.getEmpCodigo(), vinculo);
     ServidorPessoa pessoa = draft.getPessoa();
-    if (pessoa == null && entityManager != null && draft.getNumfunc() != null) {
-      pessoa = entityManager.find(ServidorPessoa.class, draft.getNumfunc());
+    if (pessoa == null && getEntityManager() != null && draft.getNumfunc() != null) {
+      pessoa = getEntityManager().find(ServidorPessoa.class, draft.getNumfunc());
     }
 
+    var codigoId = new CodigoFrequenciaId(draft.getTipofreq(), draft.getCodfreq());
     CodigoFrequencia codigo = draft.getCodigoFrequenciaEntidade();
-    if (codigo == null
-        && entityManager != null
-        && draft.getTipofreq() != null
-        && draft.getCodfreq() != null) {
-      codigo =
-          entityManager.find(
-              CodigoFrequencia.class,
-              new CodigoFrequenciaId(draft.getTipofreq(), draft.getCodfreq()));
+    if (getEntityManager() != null && (codigo == null || !codigoId.equals(codigo.getId()))) {
+      codigo = draft.getTipofreq() == null || draft.getCodfreq() == null ? null
+          : getEntityManager().find(CodigoFrequencia.class, codigoId);
+      draft.setCodigoFrequenciaEntidade(codigo);
     }
 
-    if (entityManager != null && draft.getTipofreq() != null) {
+    if (getEntityManager() != null && draft.getTipofreq() != null) {
       if (draft.getTipoFrequenciaEntidade() == null
           || !Objects.equals(draft.getTipoFrequenciaEntidade().getTipo(), draft.getTipofreq())) {
         draft.setTipoFrequenciaEntidade(
-            entityManager.find(TipoFrequencia.class, draft.getTipofreq()));
+            getEntityManager().find(TipoFrequencia.class, draft.getTipofreq()));
       }
     }
 
-    if (entityManager != null && draft.getDocumentoLegalId() != null) {
+    if (getEntityManager() != null && draft.getDocumentoLegalId() != null) {
       if (draft.getDocumentoLegal() == null
           || !Objects.equals(draft.getDocumentoLegal().getId(), draft.getDocumentoLegalId())) {
         draft.setDocumentoLegal(
-            entityManager.find(DocumentoLegal.class, draft.getDocumentoLegalId()));
+            getEntityManager().find(DocumentoLegal.class, draft.getDocumentoLegalId()));
       }
     } else if (draft.getDocumentoLegalId() == null) {
       draft.setDocumentoLegal(null);
     }
 
+    ErgonTenantAccess.requireReferencesInOrganization(draft.getEmpCodigo(), draft.getDocumentoLegal());
     List<RegraFrequenciaEstatutaria> ruleCandidates = loadStatutoryRuleCandidates(draft);
     RegraFrequenciaEstatutaria effectiveRule =
         ruleEngineFacade
@@ -243,8 +240,8 @@ public class FrequenciaService
           regraRepository.findByTipofreqAndCodfreq(draft.getTipofreq(), draft.getCodfreq());
       return candidates != null ? candidates : List.of();
     }
-    if (entityManager != null) {
-      return entityManager
+    if (getEntityManager() != null) {
+      return getEntityManager()
           .createQuery(
               "select r from RegraFrequenciaEstatutaria r where r.tipofreq=:t and r.codfreq=:c",
               RegraFrequenciaEstatutaria.class)
@@ -257,28 +254,28 @@ public class FrequenciaService
   }
 
   private List<Frequencia> loadExistingFrequencias(Frequencia draft) {
-    if (entityManager == null || draft.getNumfunc() == null || draft.getNumvinc() == null) {
+    if (getEntityManager() == null || draft.getNumfunc() == null || draft.getNumvinc() == null) {
       return List.of();
     }
-    return entityManager
+    return getEntityManager()
         .createQuery(
-            "select x from Frequencia x where x.numfunc=:p and x.numvinc=:v and x.situacao<>'CANCELADO'",
+            "select x from Frequencia x where x.empCodigo=:org and x.numfunc=:p and x.numvinc=:v and x.situacao<>'CANCELADO'",
             Frequencia.class)
-        .setParameter("p", draft.getNumfunc())
+        .setParameter("org", draft.getEmpCodigo()).setParameter("p", draft.getNumfunc())
         .setParameter("v", draft.getNumvinc())
         .setFlushMode(FlushModeType.COMMIT)
         .getResultList();
   }
 
   private List<Afastamento> loadActiveAfastamentos(Frequencia draft) {
-    if (entityManager == null || draft.getNumfunc() == null || draft.getNumvinc() == null) {
+    if (getEntityManager() == null || draft.getNumfunc() == null || draft.getNumvinc() == null) {
       return List.of();
     }
-    return entityManager
+    return getEntityManager()
         .createQuery(
-            "select a from Afastamento a where a.numfunc=:p and a.numvinc=:v and a.situacao not in ('CANCELADO','REJEITADO')",
+            "select a from Afastamento a where a.empCodigo=:org and a.numfunc=:p and a.numvinc=:v and a.situacao not in ('CANCELADO','REJEITADO')",
             Afastamento.class)
-        .setParameter("p", draft.getNumfunc())
+        .setParameter("org", draft.getEmpCodigo()).setParameter("p", draft.getNumfunc())
         .setParameter("v", draft.getNumvinc())
         .setFlushMode(FlushModeType.COMMIT)
         .getResultList();
@@ -317,10 +314,6 @@ public class FrequenciaService
     return new FrequenciaFilterDTO();
   }
 
-  @Override
-  protected OptionalLong getEntityResourceVersion(Frequencia entity) {
-    return OptionalLong.of(entity.getVersion());
-  }
 
   @Override
   public Optional<String> getDatasetVersion() {
@@ -359,32 +352,12 @@ public class FrequenciaService
   }
 
   @Override
-  public StatsSupportMode getGroupByStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getTimeSeriesStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getDistributionStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getComparisonStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
   protected void beforeCreate(CreateFrequenciaDTO dto, Frequencia entity) {
     checkOrg(entity.getEmpCodigo());
-    validateFrequenciaLancamento(entity);
     if (invariants != null) {
-      invariants.frequencia(entity, true);
+      invariants.frequencia(entity, true, false);
     }
+    validateFrequenciaLancamento(entity);
   }
 
   @Override
@@ -393,63 +366,41 @@ public class FrequenciaService
   }
 
   @Override
-  protected ResourceFilterAccessScope<Frequencia> resolveResourceFilterAccessScope() {
-    var explicit = tenant != null ? tenant.explicitOrgao() : OptionalInt.empty();
-    if (explicit.isEmpty()) {
-      return ResourceFilterAccessScope.unrestricted();
+  protected void beforeDelete(Long id, Frequencia entity) {
+    checkOrg(entity.getEmpCodigo());
+    if ("HOMOLOGADO".equals(entity.getSituacao())) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "Frequência homologada não pode ser excluída diretamente; utilize o fluxo de estorno/cancelamento.");
     }
-    int orgao = explicit.getAsInt();
-    return ResourceFilterAccessScope.restricted(
-        (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
   }
 
+
+
   @Override
-  @Transactional
-  public ResourceRepresentationResult<FrequenciaResponseDTO> update(
-      Long id, UpdateFrequenciaDTO dto, ResourceVersionUpdatePrecondition<Long> precondition) {
-    if (precondition == null) throw ResourceVersionPreconditionException.required();
-    var readOnlyKeys = validateCustomFields(dto, "request");
-    Frequencia entity = findEntityById(id);
-    entityManager.lock(entity, LockModeType.PESSIMISTIC_WRITE);
-    entityManager.refresh(entity);
-    precondition.requireMatch(entity.getVersion());
-    beforeUpdate(id, entity, dto);
-    var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
+  protected void applyResourceUpdate(Long id, Frequencia entity, UpdateFrequenciaDTO dto) {
     mapper.applyUpdate(entity, dto);
     checkOrg(entity.getEmpCodigo());
-    validateFrequenciaLancamento(entity);
     if (invariants != null) {
-      invariants.frequencia(entity, false);
+      invariants.frequencia(entity, false, false);
     }
-    CustomFieldSupport.restoreReadOnlyValues(entity, readOnlyKeys, old);
-    var saved = getRepository().save(entity);
-    afterUpdate(id, saved, dto);
-    entityManager.flush();
-    entityManager.refresh(saved);
-    return toResourceRepresentation(saved);
+    validateFrequenciaLancamento(entity);
   }
 
   private ResourceRepresentationResult<FrequenciaResponseDTO> command(
       Long id,
       ResourceVersionUpdatePrecondition<Long> precondition,
       Consumer<Frequencia> action) {
-    if (precondition == null) throw ResourceVersionPreconditionException.required();
-    Frequencia entity = findEntityById(id);
-    entityManager.lock(entity, LockModeType.PESSIMISTIC_WRITE);
-    entityManager.refresh(entity);
-    precondition.requireMatch(entity.getVersion());
-    checkOrg(entity.getEmpCodigo());
+    return executeVersionedMutation(id, precondition, entity -> {
+      checkOrg(entity.getEmpCodigo());
     action.accept(entity);
     if (!Set.of("CANCELADO", "REJEITADO").contains(entity.getSituacao())) {
-      validateFrequenciaLancamento(entity);
       if (invariants != null) {
-        invariants.frequencia(entity, false);
+        invariants.frequencia(entity, false, false);
       }
+      validateFrequenciaLancamento(entity);
     }
-    var saved = getRepository().save(entity);
-    entityManager.flush();
-    entityManager.refresh(saved);
-    return toResourceRepresentation(saved);
+    });
   }
 
   @Transactional
@@ -579,7 +530,16 @@ public class FrequenciaService
   private void checkOrg(Integer orgao) {
     if (!Objects.equals(orgao, tenant.orgao())) {
       throw new ResponseStatusException(
-          HttpStatus.UNPROCESSABLE_ENTITY, "Órgão da frequência diverge de X-Tenant.");
+          HttpStatus.FORBIDDEN, "Órgão da frequência diverge de X-Tenant.");
     }
   }
+  @Override protected java.util.Optional<org.praxisplatform.uischema.capability.ResourceStateSnapshot> toResourceStateSnapshot(Frequencia e) {
+    return java.util.Optional.of(snapshotState(e));
+  }
+  private org.praxisplatform.uischema.capability.ResourceStateSnapshot snapshotState(Frequencia e) {
+    return new org.praxisplatform.uischema.capability.ResourceStateSnapshot(e.getSituacao(), java.util.Map.of("possuiDocumento",e.getDocumentoLegalId()!=null));
+  }
+
+  @Override protected String resolveResourceKey() { return "administracao-pessoal.frequencias"; }
+
 }

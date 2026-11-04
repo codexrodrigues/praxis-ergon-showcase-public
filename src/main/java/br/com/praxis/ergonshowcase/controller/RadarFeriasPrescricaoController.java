@@ -116,12 +116,7 @@ import org.springframework.web.server.ResponseStatusException;
             titleField = "periodoResumo",
             displayLabelField = "periodoResumo",
             subtitleField = "pessoaNome",
-            metadataFields = {
-              "vinculoMatricula",
-              "exercicio",
-              "faixaUrgenciaPrescricao",
-              "saldoDiasDisponivel"
-            }),
+            metadataFields = {"exercicio", "situacao", "cargoNome"}),
     quickFilters = {
       @QuickFilter(
           id = "vencidos-ou-criticos",
@@ -300,17 +295,8 @@ public class RadarFeriasPrescricaoController
       @PathVariable Long id,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size) {
-    service.findById(id);
-    if (page < 0 || size < 1 || size > 200) {
-      throw new ResponseStatusException(
-          HttpStatus.UNPROCESSABLE_ENTITY, "Paginação fora do limite permitido.");
-    }
-    var filter = new FeriasGozoFilterDTO();
-    filter.setPeriodoAquisitivoId(id);
-    var result =
-        feriasGozoService.filter(
-            filter, PageRequest.of(page, size, feriasGozoService.getDefaultSort()), null);
-    return ResponseEntity.ok(
-        RestApiResponse.success(result, Links.of(Link.of(ApiPaths.FERIAS_GOZO, "collection"))));
+    ErgonHttpContract.childPage(page, size);
+    return filterRelatedChildResource(id, feriasGozoService, ApiPaths.FERIAS_GOZO, FeriasGozoFilterDTO::new,
+        (child, parent) -> { child.setPeriodoAquisitivoId(parent); }, page, size);
   }
 }

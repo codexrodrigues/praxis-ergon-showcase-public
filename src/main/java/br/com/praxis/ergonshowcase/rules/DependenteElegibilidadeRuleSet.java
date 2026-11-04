@@ -223,16 +223,16 @@ public final class DependenteElegibilidadeRuleSet {
         new DecisionSlot(
             SLOT_DATA_NASCIMENTO,
             DecisionStage.PROTECTED_GUARD,
-            SlotCardinality.SINGLE,
+            SlotCardinality.MULTIPLE,
             OverridePolicy.FORBIDDEN,
-            DecisionAggregationPolicy.SINGLE_RESULT,
+            DecisionAggregationPolicy.DENY_OVERRIDES,
             null),
         new DecisionSlot(
             SLOT_COERENCIA_PARENTESCO,
             DecisionStage.PROTECTED_GUARD,
-            SlotCardinality.SINGLE,
+            SlotCardinality.MULTIPLE,
             OverridePolicy.FORBIDDEN,
-            DecisionAggregationPolicy.SINGLE_RESULT,
+            DecisionAggregationPolicy.DENY_OVERRIDES,
             null),
 
         // Stage 2: DOMAIN_DECISION
@@ -322,7 +322,7 @@ public final class DependenteElegibilidadeRuleSet {
             ErgonRuleErrorCatalog.ERG_03162.code(),
             baseRequiredFacts),
 
-        // 2. ERG-03182: data de nascimento não futura e idade <= 120 anos
+        // 2. ERG-03182: data de nascimento não futura
         productJsonLogicBinding(
             "product.ergon.dep.erg03182",
             SLOT_DATA_NASCIMENTO,
@@ -331,17 +331,30 @@ public final class DependenteElegibilidadeRuleSet {
             {
               "and": [
                 {"!=": [{"var": "draft.dtnasc"}, null]},
-                {"<=": [{"var": "draft.dtnasc"}, {"var": "draft.referenceDate"}]},
-                {"!=": [{"var": "draft.ageYears"}, null]},
-                {">=": [{"var": "draft.ageYears"}, 0]},
-                {"<=": [{"var": "draft.ageYears"}, 120]}
+                {"<=": [{"var": "draft.dtnasc"}, {"var": "draft.referenceDate"}]}
               ]
             }
             """,
             ErgonRuleErrorCatalog.ERG_03182.code(),
             baseRequiredFacts),
 
-        // 3. ERG-03183: coerência cronológica do parentesco e CPF distinto do servidor titular
+        // 2b. ERG-03181: idade máxima do dependente <= 120 anos
+        productJsonLogicBinding(
+            "product.ergon.dep.erg03181",
+            SLOT_DATA_NASCIMENTO,
+            21,
+            """
+            {
+              "and": [
+                {"!=": [{"var": "draft.ageYears"}, null]},
+                {"<=": [{"var": "draft.ageYears"}, 120]}
+              ]
+            }
+            """,
+            ErgonRuleErrorCatalog.ERG_03181.code(),
+            baseRequiredFacts),
+
+        // 3. ERG-03183: coerência cronológica do parentesco (filho/enteado/neto nascido após o titular) e CPF distinto do servidor titular
         productJsonLogicBinding(
             "product.ergon.dep.erg03183",
             SLOT_COERENCIA_PARENTESCO,
@@ -365,7 +378,22 @@ public final class DependenteElegibilidadeRuleSet {
                     {"!": [{"in": [{"var": "draft.parentesco"}, ["FILHO", "FILHA", "FILHO_INV", "ENTEADO", "NETO"]]}]},
                     {">": [{"var": "draft.dtnasc"}, {"var": "pessoa.dtnasc"}]}
                   ]
-                },
+                }
+              ]
+            }
+            """,
+            ErgonRuleErrorCatalog.ERG_03183.code(),
+            baseRequiredFacts),
+
+        // 3b. ERG-03184: coerência cronológica do parentesco (pais/mães/genitores/avós nascidos antes do titular)
+        productJsonLogicBinding(
+            "product.ergon.dep.erg03184",
+            SLOT_COERENCIA_PARENTESCO,
+            31,
+            """
+            {
+              "and": [
+                {"==": [{"var": "pessoa.present"}, true]},
                 {
                   "or": [
                     {"==": [{"var": "pessoa.dtnasc"}, null]},
@@ -377,7 +405,7 @@ public final class DependenteElegibilidadeRuleSet {
               ]
             }
             """,
-            ErgonRuleErrorCatalog.ERG_03183.code(),
+            ErgonRuleErrorCatalog.ERG_03184.code(),
             baseRequiredFacts),
 
         // 4. ERG-03185: CPF obrigatório para dedução de IRRF e formato válido de 11 dígitos
@@ -767,7 +795,7 @@ public final class DependenteElegibilidadeRuleSet {
         true,
         RuleDecision.DENY,
         ErgonRuleErrorCatalog.CERG_09301.code(),
-        List.of("draft.dtnasc", "draft.dtini"),
+        List.of("draft.dtnasc", "draft.dtini", "documentoLegal"),
         null);
   }
 
@@ -804,7 +832,7 @@ public final class DependenteElegibilidadeRuleSet {
         true,
         RuleDecision.DENY,
         ErgonRuleErrorCatalog.CERG_03198.code(),
-        List.of("draft.dtnasc", "draft.dtini"),
+        List.of("draft.dtnasc", "draft.dtini", "documentoLegal"),
         null);
   }
 
@@ -824,18 +852,19 @@ public final class DependenteElegibilidadeRuleSet {
       String jsonLogic,
       String falseReasonCode,
       List<String> requiredFactPaths) {
+    JsonNode parsed = parseJson(jsonLogic);
     return new DecisionBinding(
         bindingKey,
         slotKey,
         DecisionSource.PRODUCT,
         null,
-        RuleExecutorRef.jsonLogic(parseJson(jsonLogic)),
+        RuleExecutorRef.jsonLogic(parsed),
         List.of(),
         order,
         true,
         RuleDecision.DENY,
         falseReasonCode,
-        requiredFactPaths,
+        ErgonOntologyRuleSetSupport.mergeRequiredRoots(requiredFactPaths, parsed),
         null);
   }
 

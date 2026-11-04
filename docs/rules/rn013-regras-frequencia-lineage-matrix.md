@@ -64,7 +64,7 @@ No `praxis-rules-engine`, a `RN-013` é decomposta em **15 `DecisionSlot`s atôm
 2. **Modo 2 — `OverridePolicy.PARAMETERIZABLE` + `CompositionPolicy.PARAMETERIZE` (`RuleParameterTemplate`):**
    - O Órgão `empCodigo = 2` parametriza `maxAllowedQty = 12` no template `ergon.rn013:qtd-max-bounds@1.0` sem alterar a árvore JSON Logic do slot `rn013.qtd_max_non_negative` (`ERG-08380`). Enquanto `qtdMaxDias = 30` é `ALLOW` no Órgão 1, é `DENY` (`ERG-08380`) no Órgão 2.
 3. **Modo 3 — `OverridePolicy.RESTRICT_ONLY` + `CompositionPolicy.AUGMENT` (`DENY_OVERRIDES`):**
-   - O Órgão `empCodigo = 2` adiciona o binding `customer.emp2.rn013.augment_cerg09001` (`CERG-09001`) ao slot `rn013.consec_ano_calendar_limit`, exigindo `documentoLegalId != null` quando `qtdMaxDias > 30`. Tanto a regra do produto (`ERG-08391`) quanto a regra do órgão (`CERG-09001`) permanecem ativas simultaneamente.
+   - O Órgão `empCodigo = 2` adiciona o binding `customer.emp2.rn013.augment_cerg09001` (`CERG-09001`) ao slot `rn013.consec_ano_calendar_limit`, exigindo `documentoLegalId != null` quando `qtdMaxConsecAno > 30`. O teto de 12 dias por concessão permanece em `qtdMaxDias`. Os campos representam limites distintos em `regras_freq.tab` (L13 e L24) e `pck_regras_freq.pkb` (L132 e L176). Tanto a regra do produto (`ERG-08391`) quanto a regra do órgão (`CERG-09001`) permanecem ativas simultaneamente.
 4. **Modo 4 — `OverridePolicy.REPLACEABLE` + `CompositionPolicy.REPLACE_EXACT` (Substituição Cirúrgica sem Efeito Colateral):**
    - O Órgão `empCodigo = 2` substitui exclusivamente o slot `rn013.interp_mes_non_negative` (`ERG-08385` -> `CERG-08385`), mantendo todas as outras 14 decisões do produto (`ERG-00019`, `ERG-08380`..`ERG-08384`, `ERG-08386`..`ERG-08393`) integralmente ativas.
 

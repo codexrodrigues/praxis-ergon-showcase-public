@@ -1,14 +1,18 @@
 package br.com.praxis.ergonshowcase;
 
 import static org.assertj.core.api.Assertions.*;
+import br.com.praxis.ergonshowcase.operations.InstallBulkStorage;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.sql.DriverManager;
 import java.util.*;
+import org.praxisplatform.uischema.bulk.BulkOperationControlIdentity;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 
 /** Fixture administrativa explícita; somente o kernel realiza transições de controle. */
 final class BulkPublicationProof {
+  static final java.time.Duration ADMIN_READ_TIMEOUT = java.time.Duration.ofMinutes(10);
+
   private BulkPublicationProof() {}
   /** Um contexto já publicado conserva sua fotografia; cada request continua reatestando o fence LIVE. */
   static void ensurePublished(org.praxisplatform.uischema.openapi.OpenApiDocumentService documents,
@@ -25,13 +29,17 @@ final class BulkPublicationProof {
     // Bound a broken network independently of the SDK's operational budgets.
     var client=java.net.http.HttpClient.newBuilder().connectTimeout(java.time.Duration.ofSeconds(10)).build();
     var transport=new org.springframework.http.client.JdkClientHttpRequestFactory(client);
-    transport.setReadTimeout(java.time.Duration.ofSeconds(90));
+    transport.setReadTimeout(ADMIN_READ_TIMEOUT);
     http.getRestTemplate().setRequestFactory(transport);
     runtimeHttp.getRestTemplate().setRequestFactory(transport);
     var generations=new LinkedHashMap<String,Long>();
     var states=new HashMap<String,String>();
     readControls(generations,states);
-    assertThat(generations.size()).isIn(8, 29);
+    var expectedOperations = InstallBulkStorage.identities().stream()
+        .map(BulkOperationControlIdentity::confirmationOperationId)
+        .toList();
+    assertThat(expectedOperations).hasSize(50).doesNotHaveDuplicates();
+    assertThat(generations.keySet()).containsExactlyInAnyOrderElementsOf(expectedOperations);
     // One explicit reconciliation installs the exact committed photograph locally.
     // The capability probes below still re-attest each operation's independent READY record.
     if(!reset && states.values().stream().allMatch("READY"::equals)) {

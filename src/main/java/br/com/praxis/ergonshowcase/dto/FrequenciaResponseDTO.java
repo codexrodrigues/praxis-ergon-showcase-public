@@ -24,7 +24,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
     titleField = "obs",
     displayLabelField = "obs",
     subtitleField = "pessoaNome",
-    metadataFields = {"vinculoMatricula", "codigoFrequenciaNome", "situacao", "dtini"})
+    metadataFields = {"tipoFrequenciaDescricao", "dtfim", "documentoLegalNumero"})
 @Schema(
     description =
         "Projeção completa da ocorrência operacional de frequência, falta, abono, atraso ou hora extraordinária do vínculo funcional.")

@@ -95,9 +95,43 @@ public class CamposCustomizadosProvider implements CustomFieldDefinitionProvider
               options,
               null,
               FilterOperation.EQUAL,
-              g));
+              g, jsonLogicRules(v)));
     }
     return List.copyOf(result.values());
+  }
+
+  /** The declared JSON Logic is published and evaluated by the same native descriptor. */
+  public static Map<String, Object> jsonLogicRules(Map<String, Object> rules) {
+    if (rules == null || rules.isEmpty()) return Map.of();
+    Object expression;
+    if (rules.containsKey("jsonLogic") || rules.containsKey("rule")) {
+      expression = rules.get(rules.containsKey("jsonLogic") ? "jsonLogic" : "rule");
+    } else {
+      var tree = new LinkedHashMap<String,Object>();
+      rules.forEach((key,value) -> {
+        boolean scalar = switch (key) {
+          case "min", "max", "minLength", "maxLength" -> value instanceof Number;
+          case "pattern", "customMessage" -> value instanceof String;
+          case "required" -> value instanceof Boolean;
+          default -> false;
+        };
+        if (!scalar) tree.put(key,value);
+      });
+      if (tree.isEmpty()) return Map.of();
+      expression = tree;
+    }
+    if (expression instanceof String text) {
+      try { expression = new com.fasterxml.jackson.databind.ObjectMapper().readValue(text, Object.class); }
+      catch (com.fasterxml.jackson.core.JsonProcessingException invalid) {
+        throw new IllegalArgumentException("Expressão declarativa inválida.", invalid);
+      }
+    }
+    var result = new LinkedHashMap<String,Object>();
+    result.put("jsonLogic", expression);
+    Object message = rules.get("customMessage");
+    result.put("message", message != null && !message.toString().isBlank()
+        ? message.toString() : br.com.praxis.ergonshowcase.rules.ErgonRuleErrorCatalog.ERG_21502.messagePtBr());
+    return result;
   }
 
   private static String string(Map<String, Object> m, String k) {

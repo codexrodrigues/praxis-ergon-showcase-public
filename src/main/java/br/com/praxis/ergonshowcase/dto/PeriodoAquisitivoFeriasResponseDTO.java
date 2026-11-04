@@ -22,7 +22,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
     titleField = "periodoResumo",
     displayLabelField = "periodoResumo",
     subtitleField = "pessoaNome",
-    metadataFields = {"vinculoMatricula", "exercicio", "saldoDiasDisponivel", "situacao"})
+    metadataFields = {"situacao", "chave", "geradoPorAverbacao"})
 @Schema(
     description =
         "Projeção completa do período aquisitivo de férias do vínculo funcional, com contabilidade de direito, faltas, suspensões, saldo disponível, prescrição e overrides individuais.")

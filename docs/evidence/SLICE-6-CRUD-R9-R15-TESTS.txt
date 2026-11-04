@@ -1,0 +1,6 @@
+mvn test "-Dtest=!*Neon*"
+Java 21; local services/mocks and schema proofs. No Slice 6 PostgreSQL/HTTP/browser proof.
+[INFO] Tests run: 248, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+[INFO] Finished at: 2026-11-01T05:47:50-03:00
+New regression class: 15 tests, 0 failures/errors/skipped.

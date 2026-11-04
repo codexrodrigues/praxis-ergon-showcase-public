@@ -63,7 +63,7 @@ import org.springframework.web.bind.annotation.*;
     executionResultsOperationId = "ergon.parametros-contagem-ferias.bulk.results",
     cancelOperationId = "ergon.parametros-contagem-ferias.bulk.cancel",
     updateSourceOperationId = "updateErgonParametroContagemFerias",
-    protectedUpdateFields = {"dtini", "active"})
+    protectedUpdateFields = {"dtini"})
 @ApiResource(
     value = ApiPaths.PARAMETROS_CONTAGEM_FERIAS,
     resourceKey = "administracao-pessoal.parametros-contagem-ferias",
@@ -77,7 +77,7 @@ import org.springframework.web.bind.annotation.*;
             titleField = "regimeJuridico",
             displayLabelField = "regimeJuridico",
             subtitleField = "categoria",
-            metadataFields = {"tipoVinculo", "subcategoria", "dtini", "active"}),
+            metadataFields = {"active", "dtfim", "subcategoria"}),
     quickFilters = {
       @QuickFilter(
           id = "ativos",
@@ -106,7 +106,7 @@ import org.springframework.web.bind.annotation.*;
     description = "Cadastros civis e assentamentos funcionais dos órgãos públicos.",
     icon = "groups")
 public class ParametroContagemFeriasController
-    extends AbstractResourceController<
+    extends org.praxisplatform.uischema.controller.base.AbstractBulkGovernedResourceController<
         ParametroContagemFeriasResponseDTO,
         Long,
         ParametroContagemFeriasFilterDTO,
@@ -114,8 +114,6 @@ public class ParametroContagemFeriasController
         UpdateParametroContagemFeriasDTO> {
 
   private final ParametroContagemFeriasService service;
-  private final ResourceVersionEtagService etags;
-  private final ResourceVersionScopeProvider scopes;
   @Autowired private ErgonBulkOperations bulk;
   @Autowired private ErgonDeterminationService determinations;
 
@@ -124,8 +122,7 @@ public class ParametroContagemFeriasController
       ResourceVersionEtagService etags,
       ResourceVersionScopeProvider scopes) {
     this.service = service;
-    this.etags = etags;
-    this.scopes = scopes;
+    configureResourceVersioning(etags, scopes);
   }
 
   @Override
@@ -284,15 +281,7 @@ public class ParametroContagemFeriasController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody AtualizarParcelamentoAbonoParametroFeriasDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags,
-            ifMatch,
-            scopes.currentScope(),
-            "administracao-pessoal.parametros-contagem-ferias",
-            id);
-    return withResourceVersion(
-        ResponseEntity.ok(), id, service.atualizarParcelamentoAbono(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemPatch("parcelamento-abono", id, ifMatch, condition -> service.atualizarParcelamentoAbono(id, dto, condition)));
   }
 
   @PatchMapping("/{id}/licenca-progressao")
@@ -318,15 +307,7 @@ public class ParametroContagemFeriasController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody AtualizarLicencaProgressaoParametroFeriasDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags,
-            ifMatch,
-            scopes.currentScope(),
-            "administracao-pessoal.parametros-contagem-ferias",
-            id);
-    return withResourceVersion(
-        ResponseEntity.ok(), id, service.atualizarLicencaProgressao(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemPatch("licenca-progressao", id, ifMatch, condition -> service.atualizarLicencaProgressao(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/ativar-parametro-ferias")
@@ -349,14 +330,8 @@ public class ParametroContagemFeriasController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody AlterarVigenciaParametroFeriasDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags,
-            ifMatch,
-            scopes.currentScope(),
-            "administracao-pessoal.parametros-contagem-ferias",
-            id);
-    return withResourceVersion(ResponseEntity.ok(), id, service.ativarParametro(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("ativar-parametro-ferias", id, ifMatch, null, dto,
+        condition -> service.ativarParametro(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/encerrar-vigencia-parametro-ferias")
@@ -379,15 +354,8 @@ public class ParametroContagemFeriasController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody AlterarVigenciaParametroFeriasDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags,
-            ifMatch,
-            scopes.currentScope(),
-            "administracao-pessoal.parametros-contagem-ferias",
-            id);
-    return withResourceVersion(
-        ResponseEntity.ok(), id, service.encerrarVigenciaParametro(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("encerrar-vigencia-parametro-ferias", id, ifMatch, null, dto,
+        condition -> service.encerrarVigenciaParametro(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/desativar-parametro-ferias")
@@ -411,15 +379,8 @@ public class ParametroContagemFeriasController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody AlterarVigenciaParametroFeriasDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags,
-            ifMatch,
-            scopes.currentScope(),
-            "administracao-pessoal.parametros-contagem-ferias",
-            id);
-    return withResourceVersion(
-        ResponseEntity.ok(), id, service.inativarParametro(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("desativar-parametro-ferias", id, ifMatch, null, dto,
+        condition -> service.inativarParametro(id, dto, condition)));
   }
 
   @PostMapping("/determinations/previa")
@@ -434,45 +395,31 @@ public class ParametroContagemFeriasController
     return ResponseEntity.ok(determinations.previaParametroContagemFerias(draft));
   }
 
+  @Override
   @PostMapping("/bulk/update/evaluation")
   @Operation(
       operationId = "ergon.parametros-contagem-ferias.bulk.uniform.evaluation",
       summary = "Avaliar edição uniforme de parâmetros de contagem de férias",
       description =
           "Avalia seleção, versões e alterações de parâmetros de contagem de férias sem modificar o catálogo; produz uma proposta protegida.")
-  public RestApiResponse<BulkProposal> bulkEvaluate(
-      @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              content =
-                  @io.swagger.v3.oas.annotations.media.Content(
-                      schema =
-                          @io.swagger.v3.oas.annotations.media.Schema(
-                              implementation =
-                                  ErgonBulkSchema.ParametroContagemFeriasUniform.class)))
-          @RequestBody
-          BulkUniformEvaluationRequest<String, ParametroContagemFeriasFilterDTO> request) {
-    return RestApiResponse.success(
-        bulk.uniform(Resource.PARAMETROS_CONTAGEM_FERIAS, request), null);
+  @BulkResourceOperation(BulkResourceOperation.Role.UNIFORM_EVALUATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> evaluateBulkUpdate(@RequestBody BulkUniformEvaluationRequest<?, ParametroContagemFeriasFilterDTO> request) {
+    return super.evaluateBulkUpdate(request);
   }
 
+  @Override
   @PostMapping("/bulk/update-items/evaluation")
   @Operation(
       operationId = "ergon.parametros-contagem-ferias.bulk.items.evaluation",
       summary = "Avaliar edições por parâmetro de contagem de férias",
       description =
           "Avalia deltas distintos e a versão esperada de cada parâmetro estatutário de férias, com impedimentos individualizados.")
-  public RestApiResponse<BulkProposal> bulkEvaluateItems(
-      @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              content =
-                  @io.swagger.v3.oas.annotations.media.Content(
-                      schema =
-                          @io.swagger.v3.oas.annotations.media.Schema(
-                              implementation =
-                                  ErgonBulkSchema.ParametroContagemFeriasItems.class)))
-          @RequestBody
-          BulkItemEvaluationRequest<String> request) {
-    return RestApiResponse.success(bulk.items(Resource.PARAMETROS_CONTAGEM_FERIAS, request), null);
+  @BulkResourceOperation(BulkResourceOperation.Role.ITEM_EVALUATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> evaluateBulkUpdateItems(@RequestBody BulkItemEvaluationRequest<?> request) {
+    return super.evaluateBulkUpdateItems(request);
   }
 
+  @Override
   @PostMapping("/bulk/update")
   @BulkOperation(
       mode = BulkMode.UNIFORM_UPDATE,
@@ -483,22 +430,12 @@ public class ParametroContagemFeriasController
       summary = "Confirmar edição uniforme de parâmetros de contagem de férias",
       description =
           "Confirma uma proposta avaliada; cada parâmetro de contagem de férias é revalidado e possui recibo durável.")
-  public RestApiResponse<BulkExecution> bulkConfirm(
-      @RequestBody BulkConfirmationRequest request,
-      @Parameter(
-              description =
-                  "Chave estável desta confirmação; repetir a mesma chave recupera a execução.")
-          @RequestHeader("Idempotency-Key")
-          String key) {
-    return RestApiResponse.success(
-        bulk.confirm(
-            Resource.PARAMETROS_CONTAGEM_FERIAS,
-            "ergon.parametros-contagem-ferias.bulk.uniform",
-            request,
-            key),
-        null);
+  @BulkResourceOperation(BulkResourceOperation.Role.UNIFORM_CONFIRMATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> confirmBulkUpdate(@RequestBody BulkConfirmationRequest request, @RequestHeader("Idempotency-Key") String key) {
+    return super.confirmBulkUpdate(request, key);
   }
 
+  @Override
   @PostMapping("/bulk/update-items")
   @BulkOperation(
       mode = BulkMode.PER_ITEM_UPDATE,
@@ -509,126 +446,20 @@ public class ParametroContagemFeriasController
       summary = "Confirmar edições por parâmetro de contagem de férias",
       description =
           "Aplica os deltas individualizados preservados na proposta, com versão e resultado próprios por parâmetro.")
-  public RestApiResponse<BulkExecution> bulkConfirmItems(
-      @RequestBody BulkConfirmationRequest request,
-      @Parameter(
-              description =
-                  "Chave estável de confirmação para recuperar a mesma execução em caso de repetição.")
-          @RequestHeader("Idempotency-Key")
-          String key) {
-    return RestApiResponse.success(
-        bulk.confirm(
-            Resource.PARAMETROS_CONTAGEM_FERIAS,
-            "ergon.parametros-contagem-ferias.bulk.items",
-            request,
-            key),
-        null);
+  @BulkResourceOperation(BulkResourceOperation.Role.ITEM_CONFIRMATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> confirmBulkUpdateItems(@RequestBody BulkConfirmationRequest request, @RequestHeader("Idempotency-Key") String key) {
+    return super.confirmBulkUpdateItems(request, key);
   }
 
-  @GetMapping("/bulk/proposals/{proposalId}")
-  @BulkResourceOperation(BulkResourceOperation.Role.PROPOSAL)
-  @Operation(
-      operationId = "ergon.parametros-contagem-ferias.bulk.proposal",
-      summary = "Consultar proposta de lote de parâmetros de férias",
-      description =
-          "Consulta totais e intenção pública da proposta após conferir acesso ao conjunto completo de parâmetros.")
-  public RestApiResponse<BulkProposal> bulkProposal(
-      @Parameter(description = "Identidade da proposta avaliada.") @PathVariable UUID proposalId) {
-    return RestApiResponse.success(
-        bulk.proposal(
-            Resource.PARAMETROS_CONTAGEM_FERIAS,
-            bulk.locate(Resource.PARAMETROS_CONTAGEM_FERIAS, proposalId, false),
-            proposalId),
-        null);
-  }
 
-  @GetMapping("/bulk/proposals/{proposalId}/results")
-  @BulkResourceOperation(BulkResourceOperation.Role.PROPOSAL_RESULTS)
-  @Operation(
-      operationId = "ergon.parametros-contagem-ferias.bulk.proposal-results",
-      summary = "Inspecionar avaliação do lote de parâmetros de férias",
-      description =
-          "Pagina parâmetros executáveis e bloqueados, com diagnósticos seguros e cursor vinculado ao solicitante.")
-  public RestApiResponse<CursorPage<BulkProposalItemResult<Object>>> bulkProposalResults(
-      @Parameter(description = "Identidade da proposta avaliada.") @PathVariable UUID proposalId,
-      @Parameter(description = "Quantidade de registros por página, de 1 a 200.")
-          @RequestParam(defaultValue = "50")
-          int size,
-      @Parameter(description = "Cursor opaco emitido na página anterior.")
-          @RequestParam(required = false)
-          String after) {
-    return RestApiResponse.success(
-        bulk.proposalResults(
-            Resource.PARAMETROS_CONTAGEM_FERIAS,
-            bulk.locate(Resource.PARAMETROS_CONTAGEM_FERIAS, proposalId, false),
-            proposalId,
-            size,
-            after),
-        null);
-  }
 
-  @GetMapping("/bulk/executions/{executionId}")
-  @BulkResourceOperation(BulkResourceOperation.Role.EXECUTION)
-  @Operation(
-      operationId = "ergon.parametros-contagem-ferias.bulk.execution",
-      summary = "Consultar execução do lote de parâmetros de férias",
-      description = "Retorna estado e contadores reconciliados a partir dos recibos persistidos.")
-  public RestApiResponse<BulkExecution> bulkExecution(
-      @Parameter(description = "Identidade da execução confirmada.")
-          @PathVariable
-          UUID executionId) {
-    return RestApiResponse.success(
-        bulk.execution(
-            Resource.PARAMETROS_CONTAGEM_FERIAS,
-            bulk.locate(Resource.PARAMETROS_CONTAGEM_FERIAS, executionId, true),
-            executionId),
-        null);
-  }
 
-  @GetMapping("/bulk/executions/{executionId}/results")
-  @BulkResourceOperation(BulkResourceOperation.Role.EXECUTION_RESULTS)
-  @Operation(
-      operationId = "ergon.parametros-contagem-ferias.bulk.results",
-      summary = "Consultar recibos do lote de parâmetros de férias",
-      description = "Pagina resultados por parâmetro sem expor dados sensíveis da proposta.")
-  public RestApiResponse<CursorPage<BulkItemResult<Object>>> bulkResults(
-      @Parameter(description = "Identidade da execução confirmada.")
-          @PathVariable
-          UUID executionId,
-      @Parameter(description = "Quantidade de recibos por página, de 1 a 200.")
-          @RequestParam(defaultValue = "50")
-          int size,
-      @Parameter(description = "Cursor opaco da página anterior de recibos.")
-          @RequestParam(required = false)
-          String after) {
-    return RestApiResponse.success(
-        bulk.results(
-            Resource.PARAMETROS_CONTAGEM_FERIAS,
-            bulk.locate(Resource.PARAMETROS_CONTAGEM_FERIAS, executionId, true),
-            executionId,
-            size,
-            after),
-        null);
-  }
 
-  @PostMapping("/bulk/executions/{executionId}/cancel")
-  @BulkResourceOperation(BulkResourceOperation.Role.CANCEL)
-  @Operation(
-      operationId = "ergon.parametros-contagem-ferias.bulk.cancel",
-      summary = "Solicitar parada do lote de parâmetros de férias",
-      description =
-          "Registra a solicitação de parada sem desfazer alterações já confirmadas e sem reabrir efeitos no replay.")
-  public RestApiResponse<BulkExecution> bulkCancel(
-      @Parameter(description = "Identidade da execução a interromper.")
-          @PathVariable
-          UUID executionId) {
-    return RestApiResponse.success(
-        bulk.cancel(
-            Resource.PARAMETROS_CONTAGEM_FERIAS,
-            bulk.locate(Resource.PARAMETROS_CONTAGEM_FERIAS, executionId, true),
-            executionId),
-        null);
-  }
+
+
+
+
+
 
   @PostMapping("/bulk/ativar-parametro-ferias-lote/evaluation")
   @Operation(
@@ -636,22 +467,13 @@ public class ParametroContagemFeriasController
       summary = "Avaliar ativação coletiva de parâmetros de contagem de férias",
       description =
           "Avalia ativação coletiva de parâmetros de contagem de férias inativos do mesmo órgão, sem persistir alterações.")
-  public RestApiResponse<BulkProposal> bulkAtivarEvaluate(
-      @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              content =
-                  @io.swagger.v3.oas.annotations.media.Content(
-                      schema =
-                          @io.swagger.v3.oas.annotations.media.Schema(
-                              implementation =
-                                  ErgonBulkSchema.AtivarParametroContagemFeriasCommand.class)))
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> bulkAtivarEvaluate(
+
           @RequestBody
           BulkCommandEvaluationRequest<
-                  AlterarVigenciaParametroFeriasDTO, String, ParametroContagemFeriasFilterDTO>
+                  AlterarVigenciaParametroFeriasDTO, ?, ParametroContagemFeriasFilterDTO>
               request) {
-    return RestApiResponse.success(
-        bulk.command(
-            Resource.PARAMETROS_CONTAGEM_FERIAS, "ativar-parametro-ferias-lote", request),
-        null);
+    return evaluateBulkDomainCommand("ativar-parametro-ferias-lote", request);
   }
 
   @PostMapping("/actions/ativar-parametro-ferias-lote")
@@ -676,17 +498,16 @@ public class ParametroContagemFeriasController
       summary = "Ativar parâmetros de férias em lote",
       description =
           "Executa ativação coletiva governada de parâmetros de contagem de férias inativos.")
-  public RestApiResponse<BulkExecution> bulkAtivarConfirm(
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> bulkAtivarConfirm(
       @RequestBody BulkConfirmationRequest request,
       @Parameter(description = "Chave estável do ato coletivo para impedir efeitos duplicados.")
           @RequestHeader("Idempotency-Key")
           String key) {
-    return RestApiResponse.success(
-        bulk.confirm(
-            Resource.PARAMETROS_CONTAGEM_FERIAS,
-            "ergon.parametros-contagem-ferias.ativar-parametro-ferias-lote",
-            request,
-            key),
-        null);
+    return confirmBulkDomainCommand("ativar-parametro-ferias-lote", request, key);
   }
+  @Override @SuppressWarnings({"unchecked", "rawtypes"})
+  protected org.praxisplatform.uischema.bulk.JpaResourceBulkEngine getBulkEngine() { return bulk.engine(Resource.PARAMETROS_CONTAGEM_FERIAS); }
+  @Override protected String bulkProposalOperationId(UUID id) { return bulk.locate(Resource.PARAMETROS_CONTAGEM_FERIAS, id, false); }
+  @Override protected String bulkExecutionOperationId(UUID id) { return bulk.locate(Resource.PARAMETROS_CONTAGEM_FERIAS, id, true); }
+
 }

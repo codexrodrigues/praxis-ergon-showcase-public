@@ -18,9 +18,9 @@ import org.praxisplatform.uischema.filter.dto.GenericFilterDTO;
 @Setter
 @Schema(description = "Critérios de pesquisa de vínculos na administração de pessoal.")
 public class VinculoFilterDTO implements GenericFilterDTO {
-  @Schema(description = "Pesquisa assentamentos por trecho da matrícula, nome ou CPF da pessoa vinculada, código de lotação ou observação funcional. A correspondência em qualquer atributo atende à busca, sem dispensar os outros filtros ou o escopo de acesso.", example = "REV-305")
+  @Schema(description = "Pesquisa assentamentos por trecho da matrícula, nome ou CPF da pessoa vinculada, código ou nome da lotação/exercício, denominação do cargo ou observação funcional. A correspondência em qualquer atributo atende à busca, sem dispensar os outros filtros ou o escopo de acesso.", example = "REV-305")
   @UISchema(label = "Busca ampla", group = "Pesquisa", order = 1, icon = "search", type = org.praxisplatform.uischema.FieldDataType.TEXT, controlType = org.praxisplatform.uischema.FieldControlType.INPUT)
-  @Filterable(operation = FilterOperation.LIKE, relations = {"matric", "pessoa.nome", "pessoa.cpf", "setor", "motivo"})
+  @Filterable(operation = FilterOperation.LIKE, relations = {"matric", "pessoa.nome", "pessoa.cpf", "setor", "lotacao.nome", "exercicio.nome", "cargoEntidade.nome", "motivo"})
   @DomainGovernance(kind = DomainGovernanceKind.PRIVACY, classification = DomainClassification.CONFIDENTIAL, dataCategory = DomainDataCategory.PERSONAL, reason = "Critério pode identificar a pessoa ou conter informação do assentamento funcional.", aiUsage = @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   private String buscaAmpla;
 
@@ -156,11 +156,6 @@ public class VinculoFilterDTO implements GenericFilterDTO {
   @Filterable(operation = FilterOperation.EQUAL, relation = "cargo")
   private Integer cargo;
 
-  @Schema(description = "Trecho da nomenclatura do cargo ocupado.")
-  @UISchema(label = "Cargo", group = "Pesquisa avançada", order = 208)
-  @Filterable(operation = FilterOperation.LIKE, relation = "cargoEntidade.nome")
-  private String cargoNome;
-
   @Schema(description = "Código exato do cargo em comissão.")
   @UISchema(
       label = "Cargo em comissão",
@@ -291,4 +286,92 @@ public class VinculoFilterDTO implements GenericFilterDTO {
   @UISchema(label = "Desconta IR", group = "Pesquisa avançada", order = 224)
   @Filterable(operation = FilterOperation.EQUAL, relation = "descontaIr")
   private Boolean descontaIr;
+
+  @Schema(description = "Pesquisa textual pelo nome oficial da unidade de lotação formal do vínculo (ex.: UPA Central, Secretaria de Saúde, Escola Municipal), permitindo localizar servidores por vocabulário organizacional sem exigir o código estruturado do setor.", example = "Saúde")
+  @UISchema(
+      label = "Nome da lotação",
+      helpText = "Digite parte do nome da unidade de lotação.",
+      group = "Pesquisa",
+      order = 125,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      controlType = org.praxisplatform.uischema.FieldControlType.INPUT,
+      icon = "account_tree")
+  @Filterable(operation = FilterOperation.LIKE, relation = "lotacao.nome")
+  private String setorNome;
+
+  @Schema(description = "Pesquisa textual pelo nome oficial da unidade onde o servidor cumpre exercício efetivo, quando distinta ou coincidente com a lotação formal.", example = "Hospital")
+  @UISchema(
+      label = "Nome do setor de exercício",
+      helpText = "Digite parte do nome da unidade de exercício.",
+      group = "Pesquisa",
+      order = 135,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      controlType = org.praxisplatform.uischema.FieldControlType.INPUT,
+      icon = "place")
+  @Filterable(operation = FilterOperation.LIKE, relation = "exercicio.nome")
+  private String setorExercicioNome;
+
+  @Schema(description = "Filtra vínculos pela natureza operacional das unidades de lotação (ex.: SECRETARIA, DIRETORIA, COORDENADORIA, NUCLEO, UNIDADE_SAUDE, ESCOLA), apoiando recortes investigativos por rede de atendimento.")
+  @UISchema(
+      label = "Tipos de unidade de lotação",
+      helpText = "Selecione um ou mais tipos de unidade organizacional.",
+      group = "Pesquisa avançada",
+      order = 225,
+      type = org.praxisplatform.uischema.FieldDataType.ARRAY,
+      controlType = org.praxisplatform.uischema.FieldControlType.MULTI_SELECT,
+      icon = "category",
+      options = "[{\"value\":\"SECRETARIA\",\"label\":\"Secretaria\"},{\"value\":\"DIRETORIA\",\"label\":\"Diretoria\"},{\"value\":\"COORDENADORIA\",\"label\":\"Coordenadoria\"},{\"value\":\"NUCLEO\",\"label\":\"Núcleo\"},{\"value\":\"UNIDADE_SAUDE\",\"label\":\"Unidade de Saúde\"},{\"value\":\"ESCOLA\",\"label\":\"Unidade Escolar\"}]")
+  @Filterable(operation = FilterOperation.IN, relation = "lotacao.tipoSetor")
+  private List<String> tipoSetor;
+
+  @Schema(description = "Pesquisa textual pela razão social ou denominação oficial do órgão público de origem do vínculo.", example = "Secretaria")
+  @UISchema(
+      label = "Nome do órgão",
+      helpText = "Digite parte do nome do órgão.",
+      group = "Pesquisa",
+      order = 35,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      controlType = org.praxisplatform.uischema.FieldControlType.INPUT,
+      icon = "apartment")
+  @Filterable(operation = FilterOperation.LIKE, relation = "orgao.nome")
+  private String orgaoNome;
+
+  @Schema(description = "Pesquisa textual pela denominação do cargo de provimento do vínculo (ex.: Médico, Enfermeiro, Professor, Analista).", example = "Enfermeiro")
+  @UISchema(
+      label = "Nome do cargo",
+      helpText = "Digite parte da denominação do cargo.",
+      group = "Pesquisa",
+      order = 145,
+      type = org.praxisplatform.uischema.FieldDataType.TEXT,
+      controlType = org.praxisplatform.uischema.FieldControlType.INPUT,
+      icon = "work")
+  @Filterable(operation = FilterOperation.LIKE, relation = "cargoEntidade.nome")
+  private String cargoNome;
+
+  @Schema(description = "Seleciona vínculos que ainda não possuem data de homologação de estágio probatório registrada, apoiando auditorias de servidores pendentes de estabilização funcional.")
+  @UISchema(
+      label = "Sem estágio homologado",
+      helpText = "Filtra vínculos sem data de homologação de estágio.",
+      group = "Pesquisa avançada",
+      order = 226)
+  @Filterable(operation = FilterOperation.IS_NULL, relation = "dtHomologEstagio")
+  private Boolean semHomologacaoEstagio;
+
+  @Schema(description = "Seleciona vínculos que não exercem cargo em comissão ou função comissionada vinculada ao assentamento, permitindo isolar servidores exclusivos do cargo efetivo em investigações remuneratórias.")
+  @UISchema(
+      label = "Sem cargo em comissão",
+      helpText = "Filtra vínculos sem cargo em comissão registrado.",
+      group = "Pesquisa avançada",
+      order = 227)
+  @Filterable(operation = FilterOperation.IS_NULL, relation = "cargoComissao")
+  private Boolean semCargoComissao;
+
+  @Schema(description = "Seleciona vínculos sem registro de início de cessão externa, isolando servidores que permanecem no quadro próprio do órgão.")
+  @UISchema(
+      label = "Sem cessão registrada",
+      helpText = "Filtra vínculos sem data de início de cessão.",
+      group = "Pesquisa avançada",
+      order = 228)
+  @Filterable(operation = FilterOperation.IS_NULL, relation = "dtiniCessao")
+  private Boolean semCessaoAtiva;
 }

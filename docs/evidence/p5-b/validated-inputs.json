@@ -1,0 +1,1983 @@
+{
+  "recordedAtUtc": "2026-11-02T15:46:58.612527+00:00",
+  "scope": "P5-B local candidate; no release or integrated host acceptance",
+  "hostJavaVersion": "21",
+  "commands": {
+    "showcase": "mvn test \"-Dtest=!*Neon*\"",
+    "audit": "python ../scripts/workspace/audit-java-resource-completeness.py . --strict"
+  },
+  "results": {
+    "tests": 385,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "resourcePasses": 25,
+    "editorialIssues": 0,
+    "reactiveDefinitions": 14,
+    "reactiveSchemaCompilations": 28
+  },
+  "dependencies": [
+    {
+      "coordinate": "io.github.codexrodrigues:praxis-rules-engine:0.1.0-beta.17",
+      "jar": "C:\\Users\\rodrigo.moreira\\.m2\\repository\\io\\github\\codexrodrigues\\praxis-rules-engine\\0.1.0-beta.17\\praxis-rules-engine-0.1.0-beta.17.jar",
+      "sha256": "6aadb8f020c87f3fdc7e02567c846a4f8a6b2f292016824d31d7ebdb3ca31925",
+      "matchesBuiltJar": true
+    },
+    {
+      "coordinate": "io.github.codexrodrigues:praxis-metadata-starter:8.0.0-rc.188",
+      "jar": "C:\\Users\\rodrigo.moreira\\.m2\\repository\\io\\github\\codexrodrigues\\praxis-metadata-starter\\8.0.0-rc.188\\praxis-metadata-starter-8.0.0-rc.188.jar",
+      "sha256": "25e1423582ffc1e00b0bfc39f511384a0212d7664a85ba5949f17f429089ccfa",
+      "matchesBuiltJar": true
+    }
+  ],
+  "canonicalComplements": [
+    {
+      "path": "praxis-rules-engine/src/main/java/org/praxisplatform/rules/violation/PraxisRuleViolationException.java",
+      "sha256": "9d1387ad0f290034b0e3918d7fa3641a335938250108466be67f8bb379be85da"
+    },
+    {
+      "path": "praxis-rules-engine/src/test/java/org/praxisplatform/rules/violation/PraxisRuleViolationExceptionTest.java",
+      "sha256": "5c85d8ca13ddee1b668647d88b3ec4676bb75b8fe952be2224ecb5914b51c3db"
+    },
+    {
+      "path": "praxis-metadata-starter/src/main/java/org/praxisplatform/uischema/service/base/ResourceStateCopySupport.java",
+      "sha256": "6ee565eb89c847977b993aeaead86a868de417ea753f10bf5964947241c3bd30"
+    },
+    {
+      "path": "praxis-metadata-starter/src/main/java/org/praxisplatform/uischema/service/base/AbstractBaseResourceService.java",
+      "sha256": "b9a8dafc58d2ef5965aa86cd96fc17cad5ca2d1caee184356c06404b61e1c8af"
+    },
+    {
+      "path": "praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/service/base/ResourceStateCopySupportTest.java",
+      "sha256": "af921744868051bbc6c7221050e53f06b32d5a70588d0d91ab697b75346e446d"
+    },
+    {
+      "path": "praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/customfields/CustomFieldAdoptionRegressionTest.java",
+      "sha256": "9cfa4919c0f457751d9f6b238b965738659828232979eba116f18b874e0fb669"
+    }
+  ],
+  "hostInputs": [
+    {
+      "path": "pom.xml",
+      "sha256": "78ad41ec2578cfdd2277770568133f4b564c4b09c284969d432eb16f281a0af0"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/bulk/BulkInputViolation.java",
+      "sha256": "916e8b9e70bc0c13aa3e00cabfbd056de4bcd46906c46a32ed587fb4242d4eb2"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/bulk/BulkPublicationRequest.java",
+      "sha256": "975e084fcf9852bf3d8fedd30a3904f4b04f5c24b915877f67bc055ff402c33d"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/bulk/BulkPublicationResult.java",
+      "sha256": "837074ad7fd0e88c1d75960b8125572bec21395b0c81c3316eb2b41d45b06b24"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/bulk/ErgonBulkConfiguration.java",
+      "sha256": "e725a2b59cd310c7219f705d9bf819218b6fd8954352a6f4cb09e49718e94e89"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/bulk/ErgonBulkDomain.java",
+      "sha256": "58b425167e1fd412139bd98ce0682875d82a299c6fdceb7bce7fdd1f12e71f9b"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/bulk/ErgonBulkOperations.java",
+      "sha256": "6dab96e7edc64bf0544ef86396187da93d347feb946b88ca7fcbacb810a3b645"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/config/CamposCustomizadosProvider.java",
+      "sha256": "79c9cc709d630a3ae0803197ee1bf758431ffe30897700d23fcbec80d7b23f18"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/config/CargoDraftAvailability.java",
+      "sha256": "99afd8d0001b3d2c07ff6465205efe7c2039e81e0311f69e4b839ecc423b32cf"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/config/ErgonDeterminationConfig.java",
+      "sha256": "45eb98291dc739565042fb125d465483099ac81c0ef2e87e2c34a6d4ba732394"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/config/JsonConfig.java",
+      "sha256": "bbd6ef4de7110f00ef1b21abdf38ab0cbff3e402019ccc958ce843408ed88500"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/config/OptionSourcesConfig.java",
+      "sha256": "115ce0b488ecabdb1c22a32e48e49c456c18d22c5da0ea6c4046ca8c6c6767f8"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/config/ResourceCommandReceiptsConfig.java",
+      "sha256": "f5803997e6f6b4952638a9bc982bb71adafb4221bf2c6a388fa717b80af6623e"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/config/SecurityConfig.java",
+      "sha256": "db6c74ead7bd0c5d558887445cad27073354db64b64f2774ad1182a1d511eec8"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/config/TempoLicencaDeterminationConfig.java",
+      "sha256": "65ea67a3be18fb14d8fb8f8fb595c6b56e17ecb7e1171e4d516ffc36bf79a9b9"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/config/TenantContext.java",
+      "sha256": "484a5ea0a1658cff56c8e8ce845e9a6597fe2c491d305b691a3a8898d6d6f2d7"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/config/TenantRequestValidation.java",
+      "sha256": "0af439b0fb32181b6cb4e280521889b4f128c64de258cba70f96615a099c3608"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/constants/ApiPaths.java",
+      "sha256": "92838bd760daa0cc062d35f7fc4726c34d61d2bf39f4545d30ad609108ec3b74"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/AfastamentoController.java",
+      "sha256": "a6daeeae5cdf7a1183c1af7de8f05e54f7323c7b37781301797189df0b7d17ff"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/AverbacaoTempoServicoController.java",
+      "sha256": "0d525a39ebc9f7df8fd1a93aec85f7d6fd6b5f4c870467b5843538784c82dbce"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/BulkPublicationController.java",
+      "sha256": "6172656672350fa675bf312adc56bd3e90aa0d4b90e98f8491bf60616696a334"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/CargoController.java",
+      "sha256": "2397d3f774aaebf2cf799d25447e00789c1628c14bb2874f1e6847afdfd94d59"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/CodigoFrequenciaController.java",
+      "sha256": "344474a4dc32832fbfd57e7c673fa09e748612f7370ea1f50fa9f57bc30b9445"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/DefinicaoCampoCustomizadoController.java",
+      "sha256": "61b45640daa0f0747851ab24ff081f8ce3fa4236ce3329539ceac51a6dd371a3"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/DependenteController.java",
+      "sha256": "beaed2b9ba263c618d7726b23bd800c7f9308d92a265f9023b0bb1382b086bdd"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/DocumentoLegalController.java",
+      "sha256": "a85728ce0c25ecde7b20bdcc3f45615e7d0612a381c628fa4bd13a56afcd04a4"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/ErgonCustomFieldExceptionHandler.java",
+      "sha256": "fa24ae86b8d101709ed68fcc996f0aed7a002dc97a6bb871856cbbdf07c95ba0"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/ErgonHttpContract.java",
+      "sha256": "4e980096a252ef00926bc068618a178b40eef788c9dc27b1d97391c9153ba9a1"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/FeriasGozoController.java",
+      "sha256": "fc43e2720b40242b50722d9d388c5cea941af72ed6533d7180018bdf2ef356e3"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/FrequenciaController.java",
+      "sha256": "b22f0d3b110ce5cd51598a3d0f35f94b571d846eaeb7c7aac564edde3fd1a9ff"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/ItemTabelaController.java",
+      "sha256": "7e064d1508efb23cfc488e4f4a978a684cae774a61cee1e43bb685f1d229896c"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/LicencaEspecialGozoController.java",
+      "sha256": "ab76c31af8416b011d77a73049d67745c091552f3fbfb35cebb55fb4e4220c89"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/OrgaoController.java",
+      "sha256": "43eb614bdee777dba86661d1b750b32164b2959311da64badea4ed74b36426a3"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/ParametroContagemFeriasController.java",
+      "sha256": "43d68d6c928b6b51fe7cbc3761d060a2dd271b77c2a0f75c9e7ffffa51ce513f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/PeriodoAquisitivoFeriasController.java",
+      "sha256": "0bd5bdc90a3da017851cad88e843485d1daa2a3d3fc48f0d87b779d7e245305c"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/PeriodoAquisitivoLicencaEspecialController.java",
+      "sha256": "ea3df6a6cdc8186b727da2aa506694b3319c5eb239d6bfb7284a6a237934fcee"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/RadarFeriasPrescricaoController.java",
+      "sha256": "6ea6747140e9e5f0b55f8e83aa3ba9f66c16afd2d44adb3b2887ee078d6a3d43"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/RadarTempoServicoLicencaEspecialController.java",
+      "sha256": "da1b501aee0f4a4e9e5843b594a6103016ae81f5d2cc9a104a0d7b51fc4b0cef"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/RegraFrequenciaEstatutariaController.java",
+      "sha256": "6a55129683fbc0824a7f04d33e21ed8ecb107a9edaaffa1a6eea94f1b6906c40"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/ServidorPessoaController.java",
+      "sha256": "01d26782800f3332760a3176c376771f7d6d1ae965f82a7c67c3867bd1980b06"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/SetorController.java",
+      "sha256": "4be605ae8b4a604f3f9dd277b106d5e8f147a5aa4df658aa0c7c5d5f336c5426"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/TabelaController.java",
+      "sha256": "e7659aa4d9e283248f73d80b1bf783f56b8eac540bf6c5a6085f3b54630d1769"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/TipoDependenteController.java",
+      "sha256": "756b716c8a0b1db2743d0218f148f450d453361d9e341e2652c39469f04582a9"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/TipoFrequenciaController.java",
+      "sha256": "716aa8a6021394becaeae6156a6f65367acd23cad0e53e2523c71df4c0eb7b63"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/VendaLicencaEspecialController.java",
+      "sha256": "7430f905c138ba44de15077963a1c5f269cdf6a1ff5cbdf7ea1f579b36fe1321"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/VinculoController.java",
+      "sha256": "d7a04a189753a6d2202e075040ce19e23a0e7016ba8733b147630e7970671a45"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/Afastamento.java",
+      "sha256": "9fd39e6e5b612f22f38e55128ed1f1cc465b7b02785c3ff9ae3b1ff0cd9478e7"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/AssentamentoTempoLicenca.java",
+      "sha256": "bbc2819d52fcba7cb40b7ea450fa8ab7c2ad22d70091704f4c47370370b22ede"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/AuditoriaErgon.java",
+      "sha256": "bae42799e34864a84d7f89368da2a98546740a911e8bcbf4338e90e014caef7d"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/AverbacaoTempoServico.java",
+      "sha256": "dba1584ba694561ca127016d22f0bd7c262ed237f4102862e3736323a4654b84"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/Cargo.java",
+      "sha256": "d71edeb02b7a88b339987d08f44e31f8f0715318b67d19712f03b07d8cff9f08"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/CodigoFrequencia.java",
+      "sha256": "997934dc8d1633fb842130a313589504eb99ff12be01042eee67e39f2c720714"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/CodigoFrequenciaId.java",
+      "sha256": "ded4c428c48e75893b05049adac6710be21f0f63e6c18f1abd7fafd0c9e66ee3"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/DefinicaoCampoCustomizado.java",
+      "sha256": "bef4a6ebe9a0937f354216a327b6d3caf3c1a915fd3dd3c2ad26b235b3129255"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/Dependente.java",
+      "sha256": "94698d35ac0d1b60f787937b2eca424da94a3c6f281dbf6c020693ab8a356f18"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/DependenteId.java",
+      "sha256": "4740231ff34dfa5e6681a2808d36dc3e40f35a21e1d3f88a4e6cd29fe587c358"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/DocumentoLegal.java",
+      "sha256": "9ac40b9acf810e174b30275edc2ca4f46f306d15a5c488d60ccb0b40659ab26c"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/FeriasGozo.java",
+      "sha256": "ac3f72c031feb716d485a3182d4f4925738aa4499b5b423a4562b5080bca1d63"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/Frequencia.java",
+      "sha256": "00b93e275b7fc3b86e974f14624c991e2179d5e04fbe1559b5b40bafcdc4c46e"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/ItemTabela.java",
+      "sha256": "4ed965fe18972e230373ac7cc83d2a36736a9f955346d9759466f397b1e9ff7a"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/ItemTabelaId.java",
+      "sha256": "5567a7ca48306e5532d1f26cbb9d7345f1289973bf0f8ce2bca281da18da8cdb"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/LicencaEspecialGozo.java",
+      "sha256": "60bd724f73e6b20bfba865b335ef59b405048536149f2c81497100905212af8c"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/Orgao.java",
+      "sha256": "a7743527e3015d7e0dfd9e24cc66e09483a2eac16afb0819358ecfba02440e50"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/ParametroContagemFerias.java",
+      "sha256": "51da8503d54d92416da76f1ac532182b5365080990c8cada98dcb1b8fe6428c4"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/ParcelaLicencaEspecial.java",
+      "sha256": "2c1424a988d16c24a7144c03e3966d01a7065bdd5b7bf4a735921bc921c36b98"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/PeriodoAquisitivoFerias.java",
+      "sha256": "cf11305223a967fa1baafeaafddc7ea3c87470588d86a3d94d1c637e9d8607ab"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/PeriodoAquisitivoLicencaEspecial.java",
+      "sha256": "d1a664441a46cb45562ccd55820ccf50befb94706cf42b72afd1cb86e6228b15"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/PoliticaAntecipacaoLicenca.java",
+      "sha256": "4d49202c120207f79d33c1ba5e4f189d2b503f42492e7afb011b999e1d47b2f1"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/PoliticaAntecipacaoLicencaConverter.java",
+      "sha256": "2cd5d36b3a60bac5e7dc0be9c031bbba400991c8a4a676cd40dad2843fd97c09"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/RadarFeriasPrescricao.java",
+      "sha256": "ae3af33c4b20a1f38a463e16c805c1b3b2ae503a75ccf07f01b8991fc465a2ec"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/RadarTempoServicoLicencaEspecial.java",
+      "sha256": "058aa437dfd61d0c05f64b13476d7cee7a4646ded99b238e13b05e424566ff19"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/RegraFrequenciaEstatutaria.java",
+      "sha256": "4be374533e8b3f80ae0ea39262f5afe6ba2b69e881461207a8f7ba216fc65046"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/ServidorPessoa.java",
+      "sha256": "076dbc3b4356b60663846a95a87cb53ffc8000c888baf64c8149d3d74f6c4bea"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/Setor.java",
+      "sha256": "e7de59dc73c12c62c68b5f980b7861db36927eb64dc5eb44b7cca0958db8e5e1"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/Tabela.java",
+      "sha256": "24b86fae31db82f374b899b8aa2f47c175b15211852e011ec44391df790c5ed3"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/TipoDependente.java",
+      "sha256": "cc546181f2478da8620dd6e4d2e4cb9d4fabe24f499f69daa3ad5b6868c3629d"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/TipoFrequencia.java",
+      "sha256": "947c4c579cca93febf1b32717a99b2bdd20be6a75e9dc6b8d4ad8b4d5b4305c1"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/VendaLicencaEspecial.java",
+      "sha256": "449f943381da66d10375b0cca78e944ddbae8d6ef6ca6001a78a0ab25b21021f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/Vinculo.java",
+      "sha256": "90c5b4866df34a6a0557f811befffa8fedc4115e92abe28d0462b704993308a9"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/domain/VinculoId.java",
+      "sha256": "69abf9777354179dbd3962a9d203e2188c93578c5942a6af31c970ee7a09f7e1"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AbonarFaltaFrequenciaDTO.java",
+      "sha256": "57b87405df0ddcbf374e1584fb206053145829c43ca318c2cc45c113d692713f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AfastamentoDados.java",
+      "sha256": "a86d9f883875481fbc4ac6f7fff070b48a3e7e818352ba496684c55df836b5e3"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AfastamentoFilterDTO.java",
+      "sha256": "03eafdd08e848bd63bd4350a5d36893ed28bf07008cd518fe5345fce4c95b97b"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AfastamentoPreviaDraftDTO.java",
+      "sha256": "54e061b1dacb0473138e84c0193264a4ddb555e2612dcd5db47b6f4605282463"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AfastamentoPreviaPreviewDTO.java",
+      "sha256": "f55c95b430336b84adcb73d5efa1119a72b8c50663a4f3901303d1c31567e77b"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AfastamentoResponseDTO.java",
+      "sha256": "cf11350a1f413207d1c729a94712b45c48def89e9c8c16adcf86257214c8ac7d"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AglutinadorPreviewDTO.java",
+      "sha256": "b8c862ce8f9115fe4aa7bce507becf80fee925f630f3b5076716eb080fe8cd5b"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AlterarLotacaoExercicioDTO.java",
+      "sha256": "724c462af7ffb888c48d46335971ee003cfab95b5173e057313a82ec97e7c7c7"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AlterarSituacaoCampoCustomizadoDTO.java",
+      "sha256": "22b2756f032c7f6e31de447099d75bec9010f4a6894297ed2fa1530995cd0d11"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AlterarSituacaoOrgaoDTO.java",
+      "sha256": "14cdda7d575331d36dafba595a08383ea9348d083fd36fd142b7361444d9b108"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AlterarVigenciaParametroFeriasDTO.java",
+      "sha256": "3a8be6b6a5e5ea1222ded0de4ad36b1014d1be318624c68c4f06af151b36331e"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AssentamentoTempoLicencaDados.java",
+      "sha256": "b1fe9f68849603da4e12befe0ce61ca55b282a6aca044998a517de728796c333"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AtivarCampoCustomizadoLoteDTO.java",
+      "sha256": "60f0b78b0772b21785fb95303b4e220c9178331c4a5055b58fe8c3396ecb4ebe"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AtualizarAbonoFinanceiroFeriasGozoDTO.java",
+      "sha256": "c58a16be93af46e69438f476e3b7a27a86b90fce9b10b6aae25143c073a4b282"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AtualizarApresentacaoCampoCustomizadoDTO.java",
+      "sha256": "5369f16a3804f77d7110cbcc3ef4095e0683815b081766daaf680c6b699c2564"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AtualizarAtosPublicacaoAfastamentoDTO.java",
+      "sha256": "8ab37ac57d477bbff4a71f013892e758ceab698691299bd3738af908426a2878"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AtualizarCertidaoDependenteDTO.java",
+      "sha256": "5e6ec7f8bf0bbc4374b9fa7e4eebe6113f582b552c23eff1f0ec373c86ea202b"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AtualizarDadosBancariosContatoDTO.java",
+      "sha256": "ef49623363e59f5b3ae6cf5f9b0b336e0b32246e68872828eaf289685e18c39f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AtualizarElegibilidadeDependenteDTO.java",
+      "sha256": "2481f68b6ec0eccd08c767021e9a989e46b054d244bdbd2020daaacf76519100"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AtualizarGovernancaCampoCustomizadoDTO.java",
+      "sha256": "a9f626ba534d909215698377d12ef1ff0c79f63477fc1a99d6dfe1895f4b8ea2"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AtualizarHorarioFrequenciaDTO.java",
+      "sha256": "bd4b82e3546f07bc555385ba710db8ac65e5e777b8a09b98253a19e2dcae1855"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AtualizarJustificativaFrequenciaDTO.java",
+      "sha256": "6f26df2f871e57af3f7924c7095e0241fef34a6d8bb25f3ee43a0ae49b9fc530"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AtualizarLicencaProgressaoParametroFeriasDTO.java",
+      "sha256": "637e0824228215a9dee4996ee481ca05594fb3ff0d54daf732c8185a7f4bfe85"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AtualizarOverridesPeriodoAquisitivoDTO.java",
+      "sha256": "1f131a40c1117f3c928f8cf66b63f603dbcc846b2afa1658d987940257040746"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AtualizarParcelamentoAbonoParametroFeriasDTO.java",
+      "sha256": "f3ec4cc72fce1a809a16b16e5daaa7e62aafc1e140b9c5add1acdb5e58bc97d6"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AtualizarPrescricaoMultaPeriodoAquisitivoDTO.java",
+      "sha256": "c7546e066bf1f02a9b2a8872062bad7700892fac2d99f3f0b0575ba85d5176e8"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AtualizarPrevidenciaPagamentoDTO.java",
+      "sha256": "0b8bcade6fdef8e6fa89a69780b3ec004809aa520c8e74ccdb63963095fb76b6"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AtualizarSubstitutoAfastamentoDTO.java",
+      "sha256": "da0bf2fc6991855a515415b84a8d54d0b4e29c47040e40174796920672a23fff"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AtualizarSubstitutoFolhaFeriasGozoDTO.java",
+      "sha256": "d24f499af3da24167aea05612c57984218aaa492f7c4668669107ecc08231771"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AverbacaoCertidaoFinalidadesPatchDTO.java",
+      "sha256": "5a28e653233f07bbb0a62af4e5f2c6630d4e6ac63fdff0e0c4461fbc0e62e5c1"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AverbacaoGovernancaPatchDTO.java",
+      "sha256": "a8619171a7c988078b148bf059cda08a1793ed06cffd0493f74e456144f10801"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AverbacaoTempoServicoDados.java",
+      "sha256": "96f040db9cd0b5d044fa4206dd21ddd761fcb064a01c45bb6cf861889e7487bd"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AverbacaoTempoServicoDuplicateDraftDTO.java",
+      "sha256": "932aefcb15091e86e7730fcec8f272737e5768ed9f38cfe341b8510c8d07dea8"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AverbacaoTempoServicoFilterDTO.java",
+      "sha256": "2ec5252c029392787f50304a3e6be3e8975c36ff28c22fa66e793c43f4b9f98e"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/AverbacaoTempoServicoResponseDTO.java",
+      "sha256": "e1f4eb06e29af5d278521e433ed15032d8584b22a005dbc4553134687b1df72f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CampoCustomizadoPreviaDraftDTO.java",
+      "sha256": "728e69b27daf5ce4238a32473287ff0be1915cd4a91f4c686d13e9f9fef67766"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CampoCustomizadoPreviaPreviewDTO.java",
+      "sha256": "08873c5e66ca68e91430b5e4cbe000fe6bda566f7c5d22e3d7a8f8a7c8a84a5f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CancelarAfastamentoDTO.java",
+      "sha256": "3863ce633ba372c7365288aea773008aad535acafd3b02e95827c47501257636"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CancelarFrequenciaDTO.java",
+      "sha256": "400031882fb5a4e279aa2aa8f17565a40099b53a9cfa2200cb3b1637bdd2acab"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CargoDados.java",
+      "sha256": "9b5275a371a0559840e1156bd554e2df742e70e0e82f9d8c6e3baddbffbc5b3d"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CargoDuplicateDraftDTO.java",
+      "sha256": "8514160cb5b4e5cf103a70edcbcc348b37c12afababca32673bfa915b64c2d4f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CargoFilterDTO.java",
+      "sha256": "909f01d18d480e37105a51550c4fd037f7b101a4fccee137aa9ec4855dd55ce0"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CargoResponseDTO.java",
+      "sha256": "3a1a034134e0c1a595e63b50b733d47128d11a35414028e2cdec71c7b3abf203"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CargoSelectionDTO.java",
+      "sha256": "0467d6eb8c64820f37c0332d8aea0ed04e7a85d29ff21e1f7afd6b57ff2fb81f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CodigoFrequenciaFilterDTO.java",
+      "sha256": "722b52e7667c8e7e48b7695a09c4d27d20685e9b24fb402dced6ff4854793d97"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CodigoFrequenciaResponseDTO.java",
+      "sha256": "4f9fe70d6e2c8740fbb8453db7fc815628fbb10964979e22bb9d9a14a372bdbf"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/ConcederAposentadoriaDTO.java",
+      "sha256": "e85e02820653f7be412c7f126a1844d17705293003a31d653ac2e5930af9bd55"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/ConverterDobroPeriodoAquisitivoDTO.java",
+      "sha256": "387cca900352c87cea4c58aa9a8ad7cf7f0740eb06dee1a8f5daaa25363c02a7"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CreateAfastamentoDTO.java",
+      "sha256": "39a876f779106baae5d812c90fb55b4922b6bccee5cbf1dc8019fbe88511d358"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CreateAverbacaoTempoServicoDTO.java",
+      "sha256": "aa3d99e1753ded540ae83647892bf5ac19ad4dccfe80ca973e31807a62453d58"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CreateCargoDTO.java",
+      "sha256": "10a2e79b71ca447335d8783097c07729a5a4c9c0ebb3830d6ee00db7e234e7e6"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CreateDefinicaoCampoCustomizadoDTO.java",
+      "sha256": "45d6a5116117cf35eef0ace4dba1c60a1b3ad486d8947031cc0c009842a72656"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CreateDependenteDTO.java",
+      "sha256": "7d800ee43cb615de65845b7aded63186fca71569720db2a8402cda78be50eb21"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CreateFeriasGozoDTO.java",
+      "sha256": "37be01441ecfbf0edf66cbb66776b057ded5c30586ef27255c366a9ddcede1f9"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CreateFrequenciaDTO.java",
+      "sha256": "fdaae8a7684a6f755d55dd105d575a5d5a6dfe838143b4fdb2b8a9da718673ef"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CreateLicencaEspecialGozoDTO.java",
+      "sha256": "9f8e8547290bca7de0b90f8e404ef574c31ead58ffa30c5ca2d625eb22340020"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CreateOrgaoDTO.java",
+      "sha256": "92dadac3b079228dd844cc6d815af342f103059a428d8256cf218d28cf92a37a"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CreateParametroContagemFeriasDTO.java",
+      "sha256": "1a5c767b45a8097c6768e5ccabd1e2e6c96d65a9168ab96889d797a76684b99a"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CreatePeriodoAquisitivoFeriasDTO.java",
+      "sha256": "ab9fd5177efb45f582e7df3c3d32d51ad131f92b663a716650b6a07446446b95"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CreatePeriodoAquisitivoLicencaEspecialDTO.java",
+      "sha256": "2d75ee039744fa3e5e3bafde95627a98e5a096b96c28e122d5d2ed52a6d0e979"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CreateServidorPessoaDTO.java",
+      "sha256": "5b7a9f177a77ef0ff74ee09072186155e41b2fb19335168db0b8fc072c1a1cbf"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CreateVendaLicencaEspecialDTO.java",
+      "sha256": "861a9ed2f51021f6af9bb71baba23ca8f0e910d4384f1e7cec77df7fad32d378"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/CreateVinculoDTO.java",
+      "sha256": "d4974e3b38196f5c60375d6c7ef5c1f71a91830c67456cff8ac94f91edb437e0"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/DefinicaoCampoCustomizadoDados.java",
+      "sha256": "75c49498bef72ee80d2ddd8bf1f98260953d70f595d52bf8d2e298e71f05ec0e"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/DefinicaoCampoCustomizadoFilterDTO.java",
+      "sha256": "afabe1b1bb4ffedd36d088348c2141a372429e16f4631cce3faa0c517b46f8e6"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/DefinicaoCampoCustomizadoResponseDTO.java",
+      "sha256": "a620fcd7f2fdde724abe71dfab176e7e6e334ba495fb0dccd69d241f1d76f855"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/DependenteDados.java",
+      "sha256": "90032280dd615b2c352b4e1ca9523c403eaead99e9b47c38820cd730a45119c3"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/DependenteElegibilidadeDraftDTO.java",
+      "sha256": "52e9f1ebb22f70d25c482c3ac8218759d887d41e8ebb469a7256b82ddfb944cd"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/DependenteElegibilidadePreviewDTO.java",
+      "sha256": "76a4b97c00e0b9e1918abc0da1299aaa4780c53884782db7a49a844284a23719"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/DependenteFilterDTO.java",
+      "sha256": "e76cbaa0725b47dc1a4535a9178ade81d870fef0a86769c99471d4b840000e8a"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/DependenteResponseDTO.java",
+      "sha256": "a410ffefea298226b9c1f6bd96ef0f05017cf2c56a2da8085c219b1be865075c"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/DocumentoLegalFilterDTO.java",
+      "sha256": "b6c6d6faa039b834cc69dc60358928ea8f255d6d3618572fd672ec5ee887faa9"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/DocumentoLegalResponseDTO.java",
+      "sha256": "a6144d4587b4293c94c6991679b2817ba83c607a037be4dd24c129d112275ab7"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/EncerrarAfastamentoDTO.java",
+      "sha256": "12c945d705a8f08a3828943b0b375554940fb65e874b3e68a21c88a8a485e1fb"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/EncerrarAfastamentoItemDTO.java",
+      "sha256": "db18e3a2eec90d37c5058746908adb22e99329f9ce566a74df9c4235f4a6d78f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/EncerrarCessaoDTO.java",
+      "sha256": "ea98ac4f6570c8689a723f7ab67dfee2ee32b93e14cf48a3c875a55f7bf97015"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/EncerrarDependenciaDTO.java",
+      "sha256": "2d3a665445567399b8358b860861b4f9e8d0130a15be42f0289374306515eadc"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/EncerrarDependenciaLoteDTO.java",
+      "sha256": "e742cf1a8c10e16097e6ab63f9b7857d5043da8f69e7d8de3f62e0a299df1847"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/ExtinguirCargoDTO.java",
+      "sha256": "078a83198e1918a63952f476b097b286e06698349fd6e2c94a02d5e846db34f7"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/FeriasGozoDados.java",
+      "sha256": "257c5b28cb07aab24cc194de592e9d4be5b7ab4320124b0c6ca978331797ade2"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/FeriasGozoFilterDTO.java",
+      "sha256": "1796dfd786f4bae56fe7e8d25e43b10536b3af8de08dc4e6e4dc98fb29729882"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/FeriasGozoPreviaDraftDTO.java",
+      "sha256": "f524a0ce4805f862c1c354120f60e74e8cf61e1141b5f546a059edfdd3287e64"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/FeriasGozoPreviaPreviewDTO.java",
+      "sha256": "15706198e9318dad07d2af154e39c3231bcdb1304aff8420abe01a1eca7caf08"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/FeriasGozoResponseDTO.java",
+      "sha256": "4f75c5c467885413b28fedef7979913f36df04bd01c4f005444bb851f7955c23"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/FrequenciaDados.java",
+      "sha256": "58e630339680de22b63a759bab0404c0646cc93a725ac01229d1e7282201cc0b"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/FrequenciaFilterDTO.java",
+      "sha256": "1d2bc060d6c3b6ec8e4fd05032406008625a24b82d468cc60e3ee76877dd4670"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/FrequenciaPreviaDraftDTO.java",
+      "sha256": "d44b052f520ef7c34955a977f5cb3eff73c62b9872d4ed4d235b2d1275237a06"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/FrequenciaPreviaPreviewDTO.java",
+      "sha256": "199a96e3bc05e220f07e40f69e753b277ffcf255293556bf0c2080ea0013096f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/FrequenciaResponseDTO.java",
+      "sha256": "a87a0416ef2f763ea3719bc60662e77dfe693475ccf65393c7ce650b1648eb48"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/HomologarAfastamentoDTO.java",
+      "sha256": "bec00866ef3f3263c71eb4c78dc45c18cb429517e11820d45edb69b6a3c1418b"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/HomologarAfastamentoLoteDTO.java",
+      "sha256": "afb03ce8b50298e73728d029238f94d2949d067a82c124a4182e6df762790170"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/HomologarEstagioDTO.java",
+      "sha256": "2effc20146075a59f6f92425b3ae35fa80197290a1cd1834ee31e00ee9a4ea34"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/HomologarEstagioLoteDTO.java",
+      "sha256": "69e9ed09f2072f7aee62540193f15148149f3a4efe91e3d491a98952678b55a8"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/HomologarFrequenciaDTO.java",
+      "sha256": "5e5b582deb156342914e13d3ded4793f2f62a54e7c265c0081f1a01e4e181172"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/HomologarFrequenciaLoteDTO.java",
+      "sha256": "fcd81c2b3c6e0d466c792668cb4df1a567509c4d4816124bf6d28b5a3e6f0f7d"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/HomologarInvalidezDependenteDTO.java",
+      "sha256": "392636736c6ab7ea12deb02746b3c44a35b5bdc380192cdfc25e01e08f06bd5c"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/InterromperFeriasGozoDTO.java",
+      "sha256": "06e1cf6a14eb202346c325ee0131e23bf45f1fb4504bd5e0d3a3ebe6fa8d468d"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/ItemTabelaFilterDTO.java",
+      "sha256": "e90f90c8532a6074846ef40f36fdc6dd5cf1b68fe2b582a99b978d6bff56c961"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/ItemTabelaResponseDTO.java",
+      "sha256": "b2801595903ed3edabc37192d2c99a0b1a4c23139de22afcac4fc876ca75528c"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/LicencaEspecialGozoDados.java",
+      "sha256": "db4292b9dba0159dea44f4c98e9adda1f353453598cb22fe843455b40c8c7248"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/LicencaEspecialGozoDuplicateDraftDTO.java",
+      "sha256": "ef71c0cb087c7009495021e1af8ab36e9a7b6b80d095b6d657292e9dd4d39bec"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/LicencaEspecialGozoFilterDTO.java",
+      "sha256": "c9e172b6aba4ed32a0b10cc994a19588dcca3af8ef69b0d7da6d322dffc0265f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/LicencaEspecialGozoReagendamentoPatchDTO.java",
+      "sha256": "27f3d61cae1600388bb1dbe9001006f6955f3de19b6f0f4adc64e957f86056d0"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/LicencaEspecialGozoResponseDTO.java",
+      "sha256": "aa7292476b1d1714405e3215d6c7e9075962df46ba9dd6a91680ce3d6dc6e255"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/LicencaEspecialGozoSubstitutoPatchDTO.java",
+      "sha256": "9d1804d0559eca505755acaa561b6fd60f5a92ca2b25db42ca3bddca9a3f16a0"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/OrgaoDados.java",
+      "sha256": "0217043af37f89399c3d2b58d3b083ffd9ed6dce92448a2140ba4f1acf456087"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/OrgaoFilterDTO.java",
+      "sha256": "dffc9e959bddf2a497fbc63c7119eb8022666157873c5abae0bbd6fe892056ec"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/OrgaoResponseDTO.java",
+      "sha256": "cae9b17bcbb5a5ac2676818531560b1daea2a29b64a1e9ad9771a64cb5736fa3"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/ParametroContagemFeriasDados.java",
+      "sha256": "8d5461e5dc4a2b9728d10d511a98b0d1319c54ad788d6120e618006588deb8a4"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/ParametroContagemFeriasFilterDTO.java",
+      "sha256": "efb142f347995163b3cadad3a7e756e3136b0f67e832a029c39b354c35506fa0"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/ParametroContagemFeriasPreviaDraftDTO.java",
+      "sha256": "4c4e445a20eefc6483f1ff5919ac5b994a1dfff49f5d0899b60ef3c2ffc9e2d7"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/ParametroContagemFeriasPreviaPreviewDTO.java",
+      "sha256": "2b610a488fcc9868cc4f17de1cc49f2d51df9e987af98630c2517d0cb87cf3ff"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/ParametroContagemFeriasResponseDTO.java",
+      "sha256": "8a5803187ac2491329b6b84b22677bdc0f21e55bfd952a44913e32f28e97542e"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/ParcelaLicencaEspecialDados.java",
+      "sha256": "9ec78f1a14ce4ab92a3c328b1f21829752c5c6705bc961f0af8d5c65ac268e4b"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/PcdDraftDTO.java",
+      "sha256": "1aa6134a99e67f7991e270e78cc3603710cd5789cb7f16660da4fe65d09541c7"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/PcdPreviewDTO.java",
+      "sha256": "b50a4fe78f3c84f6d37f3ddb5d174695e34827476ce0209604a622bd7a43723f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoFeriasDados.java",
+      "sha256": "22e57052696cc8d90fa38aebf49b8ea1346044998391030c254c45a6550da986"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoFeriasFilterDTO.java",
+      "sha256": "2892bd5020f6691a3850518fc1c26bed9539b3e53214cb6a6159265360076f5c"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoFeriasResponseDTO.java",
+      "sha256": "b70ca10e4570ea6f4b11b6673b1d0606e67e34e186445749f2ae550495cf760a"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoLicencaEspecialDados.java",
+      "sha256": "3630c7da8af2c75cde2d6fc8254a947f73e8fd81644ec4e0a68d8eec71b4de42"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoLicencaEspecialDuplicateDraftDTO.java",
+      "sha256": "a518b5e923d406a65408856bcdf8fa9cad265760446d7aae1e0164cccfd49838"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoLicencaEspecialFilterDTO.java",
+      "sha256": "02be4d0d3f2cf5e601549b98aae4b8bc98e6b5325ef74b04d222513a20f7345c"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoLicencaEspecialResponseDTO.java",
+      "sha256": "a0a2ec384ea579e762561ece79b8c4ad2022a5c99bd7168f430a37f712cd7eb9"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoLicEspPrescricaoPatchDTO.java",
+      "sha256": "a935a49efea1971a4223328fb47a642043e1613097e1a96b241477c300685d6a"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoLicEspRegrasIndividuaisPatchDTO.java",
+      "sha256": "990c037acc6302bce470c3c0d8881996cd8c93cfe11aecd681df62eb217da184"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoPreviaDraftDTO.java",
+      "sha256": "63cdd9e1e95e6224a97aa1b0eb3523eb8172a724efffa04b8459e9ddfd318b5f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoPreviaPreviewDTO.java",
+      "sha256": "98b9b08cc6d01cb07723fc2f8274d8953b163b59481a9e4c15b90e5d1a320b2f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/ProrrogarAfastamentoDTO.java",
+      "sha256": "d36fe4df2b0518fbe8d09a2ffcd7a97b845df2fc2bfc22d3620a1e35948cd0e0"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/ProvimentoPreviewDTO.java",
+      "sha256": "9dce322dd145a314e9e51c7fecd6173ee67d5c7d027eb96614d56fae9246d5e2"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/RadarFeriasPrescricaoFilterDTO.java",
+      "sha256": "f9226add25f86e2421d0ef73a8695a30af13ba61b610577179e1d55cf81ec2eb"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/RadarFeriasPrescricaoResponseDTO.java",
+      "sha256": "a2dc1ca25de6a577ae1c0a9e072f2af95630459d617bfdd15d3516f028700213"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/RadarTempoServicoLicencaEspecialFilterDTO.java",
+      "sha256": "f5a98bc87a38678544848e040a49917815fedc63655200cc9b69f11f423b029a"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/RadarTempoServicoLicencaEspecialResponseDTO.java",
+      "sha256": "3e4f720d659b3b52937307c51026b08a5d00f8a34e2b6fe2f91b9b3a047a54a3"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/RealocarSetorLoteDTO.java",
+      "sha256": "33ae6c5cf9999ae4884627297d7a5d88b1da543a18e5fc905800e879ca4efe93"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/ReativarDependenciaDTO.java",
+      "sha256": "ffc4a0a997e00258f41b92efb09b8738b55de4be4c17a19d88a4c7a4db2450b3"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/RegistrarAfastamentoDTO.java",
+      "sha256": "3e2d9957401a94ecf7dea08bb2f00d222690313aca6eee83dc116be80645df49"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/RegistrarCessaoDTO.java",
+      "sha256": "6d59d4b96a72ea8d218d80a1e4c0d7c904d74da394b42c0f7e7c2b44cd23a440"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/RegistrarVacanciaDTO.java",
+      "sha256": "0cd7843fc65421887f3b5ad061fe8512de33e7acf4fa394cbdd214480e3efe4f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/RegraFrequenciaEstatutariaFilterDTO.java",
+      "sha256": "bb03f6aad724830e0b9227905ebea1f8cf8bfaf4f6ad47819b52372596d2dd2c"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/RegraFrequenciaEstatutariaResponseDTO.java",
+      "sha256": "3f0e4be19bf59a8ee7a9c807010d533570d777eb0b7eaf8c9ea92d1dd791c6c6"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/RejeitarAfastamentoDTO.java",
+      "sha256": "f3f2646c884fa738d95f7d0d1cfc7d6eca5dd1cdbaef9bb10e1457820ee17d72"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/RejeitarFrequenciaDTO.java",
+      "sha256": "6765924353307cd6d8f60c50bd33913e4a27bbfa9a06fb785e6aab2054d9987b"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/ServidorPessoaDados.java",
+      "sha256": "228c7540ce989d51b748afee6299d99726413ad99f42845995a30272f622061a"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/ServidorPessoaFilterDTO.java",
+      "sha256": "364c2f56b2f78eee055fe3fad914cb311234ede654f67dfc865782ea348b8aff"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/ServidorPessoaResponseDTO.java",
+      "sha256": "f4ae40d5cdb12b07c9113c952d553efcb17a21b0ab78874bf3334541ee3d5827"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/SetorFilterDTO.java",
+      "sha256": "68b7db627a9a4d21231baeb4e849fd7b1251fae0394079d939abafbef8518fa3"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/SetorResponseDTO.java",
+      "sha256": "5fa0b83cc521732951b23f3c2313a9297ad4fbb1b1ac282a027d0b354ecc36cc"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/TabelaFilterDTO.java",
+      "sha256": "5995bbcfa2f2ef3e805fcaa3f6963060317f1bac6586f1b427d2db994d2af1e0"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/TabelaResponseDTO.java",
+      "sha256": "7658aa94afb7927b3fcab5e01c15f25d6253d7152a1960a622c17dd584b0c7ec"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/TempoLicencaFilterDTO.java",
+      "sha256": "294fa4d6562a487d9679ceb6fb0ed8fc2b797fb7ac467ba92875b665fd924652"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/TempoLicencaPrevia.java",
+      "sha256": "7fbd0b9cc31d850b062c57040ccd382ee5be8c579de2db31cd48e889b3b49fc7"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/TempoLicencaTransicaoDTO.java",
+      "sha256": "c4164b36f997f8c7b5ee06615db535e8527b7828fd0a0e525e708b18477b4c22"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/TipoDependenteFilterDTO.java",
+      "sha256": "45342c94755bf8aecd0b85466988f96981bbc5cd2b6a730b6661d44c5f24e7c5"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/TipoDependenteResponseDTO.java",
+      "sha256": "1f89d21c0983d27bf97ca21c5c3ca323c45002ce289b05980488febf20028a96"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/TipoFrequenciaFilterDTO.java",
+      "sha256": "792f16bd6c4b90f35f87688d14e8a0c8a7e8a9abd38a674cb3a42092ed241ed8"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/TipoFrequenciaResponseDTO.java",
+      "sha256": "8fe659eb9f71bbb174e018537cfe3c203d14c7e4b522e3190026f51a6ed153f1"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/TransicaoFeriasGozoDTO.java",
+      "sha256": "25abdfce1a7cebbe2304f7878806ac015f268022a0d4f56cabaa4504fdf59c94"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/TransicaoPeriodoAquisitivoFeriasDTO.java",
+      "sha256": "89d0937692fb120925a75c8144343c16f875b0972de79eacee1ddadf7912e246"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/UpdateAfastamentoDTO.java",
+      "sha256": "877458d61527e97bcb355a1257df3f78a3f2e38d2dcaf0db13f0a04c8e4b5965"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/UpdateAverbacaoTempoServicoDTO.java",
+      "sha256": "e932f3bd3fc010d56c4cd8622d106cde2af1f1c35e9b3b00557e86acec0fdd4b"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/UpdateCargoDTO.java",
+      "sha256": "265792a893e5a2043300d401d69cd61e86652a4f6c6c926049217d31b0469152"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/UpdateDefinicaoCampoCustomizadoDTO.java",
+      "sha256": "59b202eaafb96217025938015bdfba07846833ff10514260aa1d0c3013a2ebeb"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/UpdateDependenteDTO.java",
+      "sha256": "b6e44d3a4d79c56a8669767b259f31b6471038e17b73b24b679c66d5702f7350"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/UpdateFeriasGozoDTO.java",
+      "sha256": "97d12875c7a73540eea707f84237b41b8649f530c253cac22110b8a706815cbf"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/UpdateFrequenciaDTO.java",
+      "sha256": "ff434d0b682557cc59c30c9657753559120668aa6efae919e319fc879c3088fa"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/UpdateLicencaEspecialGozoDTO.java",
+      "sha256": "601de3ab0f088dc6a6be7cc79e2ebb1ad38245d90502145a06835b48d59f3f19"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/UpdateOrgaoDTO.java",
+      "sha256": "2cc2c16b3b7a0dc52f6b3f716e6544ff6ace2b77ebaa97a931edf2c0331c2158"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/UpdateParametroContagemFeriasDTO.java",
+      "sha256": "aa4ba5c58c32fa965a2316439e92487f3c62d485d038c25619e5ac469f1b0cd1"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/UpdatePeriodoAquisitivoFeriasDTO.java",
+      "sha256": "636ada0da4120711603b8697cede2fc5379dc1c38ef1d926fb39d2cbc1cce9ac"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/UpdatePeriodoAquisitivoLicencaEspecialDTO.java",
+      "sha256": "2a8b803effd033674cba9695a8adb7aa1f7fddd306faff111d662e1d42684cb2"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/UpdateServidorPessoaDTO.java",
+      "sha256": "cf72fc065838ff64fff3e331a32a9ed9f03c8a9fb3b9c208eec41004e0321191"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/UpdateVendaLicencaEspecialDTO.java",
+      "sha256": "17130d652fcaedf26ad7a6f40d84401f763f93a8a6c5381f1c60cb961a7cfd59"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/UpdateVinculoDTO.java",
+      "sha256": "30f438d978fdfd7482c97ef1c34865c1a5329ce25fc5cee32eaefd6752f1aad6"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/VendaLicencaEspecialDados.java",
+      "sha256": "2d875355bdc8012dbc7958149adcb4570b3bc05f93231037081107dd7fc011ab"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/VendaLicencaEspecialDuplicateDraftDTO.java",
+      "sha256": "ed224c8538278da8156555b4106ecd439c5d8c109a9688aa60f751d001536564"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/VendaLicencaEspecialFilterDTO.java",
+      "sha256": "6020322611e5f950d70819fa905ab4efd2370aced827e11b76d1b3c059bb57ac"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/VendaLicencaEspecialLiquidacaoPatchDTO.java",
+      "sha256": "430323243143a3231a84e3a8a04302db2a14498b4b50a1e1679d0d8d485fbbcb"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/VendaLicencaEspecialResponseDTO.java",
+      "sha256": "3ae7af385309ee684bf98467d3747af3253e6586ca805b376b10bfc2e62ff18a"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/VinculoDados.java",
+      "sha256": "3d0e977f204ce5414947a66436fa919b4b0bb2f667ac0965fb04dddc6917241e"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/VinculoFilterDTO.java",
+      "sha256": "2814d3f7f0a526bc60618c3eaac3352c2e0055527a8e6de7f0a8a30b4ae806f9"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/VinculoResponseDTO.java",
+      "sha256": "1eed29482e49179700e989a0a2b418de9f5f057e153ec2010ac83e5a3a0b4a8e"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/ErgonShowcaseApplication.java",
+      "sha256": "94a2ba9c405145e44880098a4d4484d0ee1e68e913df25c8d91ed887783ed835"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/AfastamentoMapper.java",
+      "sha256": "e47458666b649ca73a84c68015c56a4d113fba00c9460ce8e22fa95180ff6567"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/AverbacaoTempoServicoMapper.java",
+      "sha256": "27b1247f9c829118a2814235c7ec68ab96c00dc34db971e0bb28dba5c44dd2b8"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/CargoMapper.java",
+      "sha256": "8769f7593904e32f83eac0ad6b7175c53c6c10ad9ffa635a06b46632de6a21c5"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/CodigoFrequenciaMapper.java",
+      "sha256": "d8104bd5418e2af4b3512d1b9bfcc377c88926b02649b9bf98ed7e6f71943372"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/DefinicaoCampoCustomizadoMapper.java",
+      "sha256": "e5d4542bdec6c2786908d4c659e71eebcc4a7152ad893d3c01e252cc6f92dd63"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/DependenteMapper.java",
+      "sha256": "76b0c4b22c9e4037128009675eea58d0ce64e9228f25f6a2105c2b68578028fd"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/DocumentoLegalMapper.java",
+      "sha256": "96ab4b2f836ffbebe58958128fe133a3034f488a6fd043279b99e1ddcd2b7c96"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/FeriasGozoMapper.java",
+      "sha256": "9d58f22fcebeb3927399e6a2f7822909de69956cb6fd45362b5827576429dafa"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/FrequenciaMapper.java",
+      "sha256": "7062e7560d9f502b7b384745494331b87b90aad04ea7af6d90fb02643bcfec87"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/ItemTabelaMapper.java",
+      "sha256": "13fc9d98d53e8780f0ede763a352b6a269e8d4c84a09e73bbc6d1707896f041f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/LicencaEspecialGozoMapper.java",
+      "sha256": "92bc0e8102b10e4c3d61b372d2b717356a2b3a5ea9cd9719b3fd0b410abc1191"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/OrgaoMapper.java",
+      "sha256": "3ae6710545ada359c67946fc61f13ded2a0cc63cb647d062b01aaa4769259e48"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/ParametroContagemFeriasMapper.java",
+      "sha256": "bd2d7c1debfd684e335ad88bfbd697254e0767befff93d2fc5abd22767b63a26"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/PeriodoAquisitivoFeriasMapper.java",
+      "sha256": "1dbb0f99b181a096587716b90899b33a297afc105fc1383b0da2b49b52528935"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/PeriodoAquisitivoLicencaEspecialMapper.java",
+      "sha256": "6e9c0ed1b2f4b4c04d3d88d34c0faf94fbb944a4a0fd2e7e0f9b06bced80c68d"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/RadarFeriasPrescricaoMapper.java",
+      "sha256": "4c86f862f11cd0582ee2c923ce796128fa86f045f4e32b95d4a97b8f4a23013f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/RadarTempoServicoLicencaEspecialMapper.java",
+      "sha256": "9b8bbae82feca236438b2003af67c5f5ab405e4b22ca9e02433e0c8a197ca265"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/RegraFrequenciaEstatutariaMapper.java",
+      "sha256": "2da5594a8228e39398d4bd6811559139565b1ebeef924fa2fdb8579d8274e4b9"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/ServidorPessoaMapper.java",
+      "sha256": "f64b3ad7f9acae4320dd7a0f0298b98c3a394bfbdb96b118f24231891a3270f2"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/SetorMapper.java",
+      "sha256": "2ae8ac59269ed815479c80360596d8098f55f45767fcfa16703a83a126491d8a"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/TabelaMapper.java",
+      "sha256": "c2b3d309ca68e4d2eeb5fd93b7a6bab501ca7b88b056b282243813cf9751bb07"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/TipoDependenteMapper.java",
+      "sha256": "bc49a6c4871f4cbdc5c57feff92b01f4136f92cd74ce14281cbdc3853752fa0b"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/TipoFrequenciaMapper.java",
+      "sha256": "dbb8adc8fbcb31a40f37c80be1003f0a45857d735b1c5678b8232c236f995984"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/VendaLicencaEspecialMapper.java",
+      "sha256": "ce9191d69a5e3b05ed96258b2fd68455f27941b3f4340e3777bb047b95902c9e"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/mapper/VinculoMapper.java",
+      "sha256": "59e18958c022fa8a82ec4c54d2d0cbaf6feed3fd2bdc291d8f5890edf186b805"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/operations/InstallBulkStorage.java",
+      "sha256": "fb20f154e7a39b69b91035a6d72331d23ac63f1a65c6df7ae56fcdac51c59d94"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/AfastamentoRepository.java",
+      "sha256": "d7d163cc2f32d68837fb2987c6cbc90f069bbb8ce7d1a996670a714daed75f4e"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/AverbacaoTempoServicoRepository.java",
+      "sha256": "3c7c57cf5820c4734429aa7e40eae7b56c339acd137b0a97dde9d56cf2f72e97"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/CargoRepository.java",
+      "sha256": "847d074334070ebd2fd6663c26bdd683bac940e15a2bbbafeb09f42c9863fd99"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/CodigoFrequenciaRepository.java",
+      "sha256": "80748adfdd09d7c4657a37e933854b6f9a7aa357ef5cc6363d8f9f078cca55e7"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/DefinicaoCampoCustomizadoRepository.java",
+      "sha256": "991277a843b339465452a8c776d88c1829739291da27da93bbcfb57e1ddbdb0f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/DependenteRepository.java",
+      "sha256": "f8eacb18a37d28a5a55ade30f9a7b8851fe4f5278efb0b3af807ccc383006656"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/DocumentoLegalRepository.java",
+      "sha256": "4461b06e39e2eca9461dcbfb31b4718149632c552cde43707fbc7e572ff5fffe"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/FeriasGozoRepository.java",
+      "sha256": "c3378a26f5e37fa6f2b750aa08d5b799f23bcc3cb81b649e46bc5d981eb74130"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/FrequenciaRepository.java",
+      "sha256": "c587670380200a1137818cbcb82cae5765edec3c0767dc119f4c585b0b2ee2cb"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/ItemTabelaRepository.java",
+      "sha256": "fbbfec305c7c3520c4a6508740231444a3a590c69acee4dc66f6d8e55959c02d"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/LicencaEspecialGozoRepository.java",
+      "sha256": "53d1a24d8cae13a1c404311a12129d341f81df73049579a9e18ab6bc13916d5e"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/OrgaoRepository.java",
+      "sha256": "7512b14bd9a60973acefefada4b3524fee07c18635122b6920230efaf1e6b1e0"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/ParametroContagemFeriasRepository.java",
+      "sha256": "b95c31d26972d6c34901421b9e4a015b56c2b7bbbcc98319eec5d5d7ac83e32e"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/PeriodoAquisitivoFeriasRepository.java",
+      "sha256": "dac18547de1470771032fac4e0c1e70595b9cb17d90286a3aaa72595a2460c7c"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/PeriodoAquisitivoLicencaEspecialRepository.java",
+      "sha256": "8914f76020b6f14cd8b739a7d3aa98214bac3f7cbf71503779093ae5b031dc2d"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/RadarFeriasPrescricaoRepository.java",
+      "sha256": "2c362a9d63cc848bc73292284fbf2e260f4b895a139181e073dd27560f82994a"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/RadarTempoServicoLicencaEspecialRepository.java",
+      "sha256": "64651ca6614e24ec5115db713d7005c0c1a200982a4761c84ad6210a7a05c12f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/RegraFrequenciaEstatutariaRepository.java",
+      "sha256": "e89bd913c289fceaa2ed60473bce0226024b606049542e4b05778f63ad1ddc44"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/ServidorPessoaRepository.java",
+      "sha256": "e68ff193b2b541a061f361486441854512a8309057196d3e7a5217db5180c7a1"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/SetorRepository.java",
+      "sha256": "59f1f1354bc40f4b6178ba9420cdc3059614a22fa9df9d588c6ee17ea978da75"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/TabelaRepository.java",
+      "sha256": "b361f9da9c9027c70024dd0905b99f902c833a02ba5953a4c3ee56d38cacf2f4"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/TipoDependenteRepository.java",
+      "sha256": "97fe8a781c719e14889aba922e29f055074ee7eb6922fcddc8d6056eaceafbfc"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/TipoFrequenciaRepository.java",
+      "sha256": "a1fee667aac1fd811d8ef9e52cf71a3526e08648037608ceb66f02989e45f8ad"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/VendaLicencaEspecialRepository.java",
+      "sha256": "53d61245a948ca2ee94a49ec15485d9993ad7b754e0d77b7a27f3bc73a4eec34"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/repository/VinculoRepository.java",
+      "sha256": "664ecc6767d7fb82070de297b0032d700e83e4446cca38f034a6cb0e952f17cf"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/rules/AfastamentoConcessaoRuleSet.java",
+      "sha256": "b8469a3a3c525e76da54289d580b46f6b71458728e52d187caf4cc4cc8b0c94b"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/rules/DependenteElegibilidadeRuleSet.java",
+      "sha256": "72d4efdcfd456cff1762f52dfe9b25addbf970e192366b67ea49726ea90a9c81"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/rules/EffectiveVacationParameterResolver.java",
+      "sha256": "de4fe54f1b61dcc783c63d7dd723ba423aef840e5594f647a0ecc075dbe17724"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/rules/ErgonCustomFieldErrors.java",
+      "sha256": "590adb01db08fcc8f4d3471a768d0f3e1fb5696f44b8685c6a18841f73fd1f0f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/rules/ErgonRuleEngineFacade.java",
+      "sha256": "cdc91c2e4707184fa9f1a8c8db6c2f83390c74647f13bf2b695bac3a8b34f72b"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/rules/ErgonRuleErrorCatalog.java",
+      "sha256": "d04bfab72fd3420da234a76bb797530fe3223c5d92370f47356652429e3c163f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/rules/ErgonRuleViolationException.java",
+      "sha256": "60a4ad2ece09d5e6c33e4f3d904e0e205f8916562f5fb8307136f22d3bb47231"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/rules/FeriasGozoRuleSet.java",
+      "sha256": "291314dd3861bfd80a130aea8f292e0567defef8111ad5a12e462fd49cf243e7"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/rules/FrequenciaLancamentoRuleSet.java",
+      "sha256": "b3e12a4b6838556a193fed46c82db861eb89c135ad9fe0ada6fe925dd66a390e"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/rules/ParametroContagemFeriasRuleSet.java",
+      "sha256": "cc6605b7e578132ed626f501bcba5d05c3a092ded7bff98399e7e067c0947380"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/rules/PeriodoAquisitivoFeriasRuleSet.java",
+      "sha256": "42c4af4c5c32c0dd58cd2a7fb5aa2969d1c4e80173e838d64bf62cfc70fc7b84"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/rules/Rn013RegrasFrequenciaRuleSet.java",
+      "sha256": "e11ce9d223dff2d7b0cca2fb651c04e59cbee8bd9ced233bd492bfb2abe4c700"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/rules/VinculoProvimentoRuleSet.java",
+      "sha256": "80642e7da3e37a399830cf0e35e63b54c1e134cb5a346b3521185f3e6a390740"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/AfastamentoService.java",
+      "sha256": "901b70e0b3484dbf6e371bfeb1c367a880cb628d9e231bed02548f7a89dbfda9"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/AverbacaoTempoServicoService.java",
+      "sha256": "778eb20baec177ed4805456eedc5870c0dab1b8046931b6334e79f8a264bb6fd"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/CargoService.java",
+      "sha256": "338293914a9da1d23fa1f4b16e58b0bd4e3c4a12b05df04928fd929eee345fbc"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/CodigoFrequenciaService.java",
+      "sha256": "14eed8085ba030027244b4c12d40a294eacaf0fc845b0b84e37a638304a542d8"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/DefinicaoCampoCustomizadoService.java",
+      "sha256": "6c227f758e53474a3550acef05db152c69e507f2cb154b5406d0797233827d9a"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/DependenteService.java",
+      "sha256": "03c7ed481f1caeca580fc6f1227e20cc63c69b141ccab0ae4521f3fc73a5f786"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/DocumentoLegalService.java",
+      "sha256": "061a32bd0b8613e9673d569286a8e5121f61b7e64b7ac44837321b51287d2ca6"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/EffectiveSpecialLeavePolicy.java",
+      "sha256": "f79b521f559ad705956f17cadb56cb7fb51752dd7a55ddb6e160e3f7240124df"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/ErgonCommands.java",
+      "sha256": "33115397a80d698f194dd7ba2135050973802542d283beb8637dad368323bcbb"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/ErgonDerivedFacts.java",
+      "sha256": "ebceb20a82744d2bfd9190c5347bac3e97d4a96f357a21440b6dd10c0a7f276c"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/ErgonDeterminationService.java",
+      "sha256": "02e1d0765424c80b885e77cd114c813deb1fce25f18f3dbf03a245720321f54c"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/ErgonExportPolicy.java",
+      "sha256": "af14d6a7f208d6109a9fed8b1540c6771bb58191ca8d82387f63fa3ef5cc891b"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/ErgonInvariants.java",
+      "sha256": "e51fff3396033e758dbe1bb368267d8c5f065f791c9b8e94b99a2aa2fadd2b8d"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/ErgonReadFacts.java",
+      "sha256": "60a261696363b7ea6461e0faea8a1d5576a174f1356e4b5f515a89ac6b8663e3"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/ErgonReadOnlyResourceService.java",
+      "sha256": "1d458043a4424c9c0998f47913bc2486da2c000048f3c31f35dca0ae6a86b593"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/ErgonResourceService.java",
+      "sha256": "382508fae5c06c8fd237d2193da8838e59ff50544fb85d5d78a9117dc67c7804"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/ErgonTenantAccess.java",
+      "sha256": "9e4180d727711b5929d07caf7601af7da92216a6b06e4ec8430e9d0b5d7bc7d8"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/FeriasGozoService.java",
+      "sha256": "bcebfded2d7421b5de83437a008946bf789bcfc49aa17ccf40d8dde580caa30f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/FrequenciaService.java",
+      "sha256": "f0f19832d25adfa61c30a4344f38e47dd7f1a46de870948bac8d7d4824fc4865"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/ItemTabelaService.java",
+      "sha256": "77b9c08daf427c062b49b09e013468a5eebd0a3557ed76f0f8ed82114e80601b"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/LicencaEspecialGozoService.java",
+      "sha256": "e527c393028014891442ebdad62de86db66e63ad75b9e5166395e3622c85445d"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/OrgaoService.java",
+      "sha256": "f6e368f6dac30e5e0a3657b9e531bae6485e25afe52f68cfdd084803e750a577"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/ParametroContagemFeriasService.java",
+      "sha256": "47dba19b70e88dd1164c9fa6d3656444c490824aab311354a71ba53d0d583546"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/PeriodoAquisitivoFeriasService.java",
+      "sha256": "2c0bccc4436f52ef4610089c90612bbd444912b1ad205fbf48c57961409da2e5"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/PeriodoAquisitivoLicencaEspecialService.java",
+      "sha256": "dca72b998328be3769398a997e519ce8e3caceaeccec9622cbd878ddfb06ef12"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/RadarFeriasPrescricaoService.java",
+      "sha256": "934eeb765c9e5bb40e4135c7d48fe40385dc47a04c446f582df0405d28642a80"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/RadarTempoServicoLicencaEspecialService.java",
+      "sha256": "118265c8fb84b5b2e4c2f3c8a72cf6f3ae8c85ed33a374010b94a1b66c98b045"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/RegraFrequenciaEstatutariaService.java",
+      "sha256": "ab80a0c68f3676d323271b849f495167e5dd0929d9c3a803417a3ddfc6df9419"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/ServidorPessoaService.java",
+      "sha256": "fe397e6664289708e47c031a08f23339c3c849d28e7dae8120b353166dc4b657"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/SetorService.java",
+      "sha256": "13601681c0b9db225fe5d7e583352bb014692cbf1aeab4680a086f28bea45d79"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/TabelaService.java",
+      "sha256": "4120ad81bd08a39f5991fc8a8e84f105967616ca9a4d96d1d3343b52a4d6c6b1"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/TempoLicencaLifecycle.java",
+      "sha256": "42f4d41c1ecaa4518e8a9291f93a1319cee2cbd7f27c14536520b23e095e253a"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/TempoLicencaPreviewService.java",
+      "sha256": "dc4f6b398e7f42a43e5b193117e47f358d69ec76224334b8e9cd93ed3c359931"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/TempoLicencaValidation.java",
+      "sha256": "7eef82da0a7ca00760b357075c1d8bbf0c8ef79c1f560b180956b386ab45240e"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/TipoDependenteService.java",
+      "sha256": "4e1f21682a884057fec54a7653c4cda88046941bceab8306ce29092c787b5da3"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/TipoFrequenciaService.java",
+      "sha256": "a57b64510ddd0efb237f151adda2eb8bd154d74f33b2e367df11b57d405faacf"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/VendaLicencaEspecialService.java",
+      "sha256": "420b69f5663ab660595092e4f807aa87405a1c1dbe44cd1f4964dc3d0723a94f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/VinculoService.java",
+      "sha256": "b44dc7adc371f8bfea57328308ffa0a62b9a226ca8d7ce8846b9d56fe17627cf"
+    },
+    {
+      "path": "src/main/resources/application.yml",
+      "sha256": "3ad95ce3532fb8531adca51c3d705d693f3833c8290cbbd4ae7f7b2aba5c92a8"
+    },
+    {
+      "path": "src/main/resources/db/migration/V5__averbacoes_e_licenca_especial.sql",
+      "sha256": "c17179605f3d843f2f7b23c3e9fadc859a9ae92cee1e107f8ba6a33cee5da454"
+    },
+    {
+      "path": "src/main/resources/db/migration/V6__tempo_licenca_ciclo_de_vida.sql",
+      "sha256": "b0d9299968b6ccea70ee38aaea5e89f5ca7f128ddd87eaab4ef92f6aa3c31834"
+    },
+    {
+      "path": "src/main/resources/db/migration/V7__canonical_resource_command_receipts.sql",
+      "sha256": "fce85c3833eaf6a774940ade305f5355b5780d099c0519ffef5dacb851f8f49f"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/AfastamentoContractTest.java",
+      "sha256": "71c9c0360998f983a4b97f5a39998c272b8354847b12cb4cec84f42b37569cba"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/ApiPathsContractTest.java",
+      "sha256": "53a5c145dc433687449c56a0f2ded583cf427a4a258e16d3dedbba404b02babb"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/BulkCandidateFixture.java",
+      "sha256": "4b08cf2727481b7047073719ea0c7d413fcb8b5d6810755143f4cf148eb1d621"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/BulkNeonIntegrationTest.java",
+      "sha256": "0e17da682f25e67ff3d6f5dd1785c9d9d0a3d1eec8eb0c680982128e210c8190"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/BulkPublicationProof.java",
+      "sha256": "3661c340b6e4978ebd056c41d589287807665a19d4e9de1c9509f4ee4abac446"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/CampoCustomizadoContractTest.java",
+      "sha256": "8742e3fa71fca7ddf5b6f816131ad4e2e6ee49a04b7043e02757e6ebb3c20680"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/CanonicalResourceTestContext.java",
+      "sha256": "4950041c122cb318be6abca5d12df1678a7079e05d04785bdbc46b254bdae7d8"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/CargoDraftContractTest.java",
+      "sha256": "d33b587dd7f2dd5b32ca7005990bbf106d660bf72cf3b873e7c576e159686ee6"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/CargoDraftPresentationContractTest.java",
+      "sha256": "b72eb178d4026cb9704e7ba6a705688af77b4831f98910d514494c99356b3961"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/CargoDuplicateDraftNeonTest.java",
+      "sha256": "b00b0fc01c97a45a4624c275e7cef4b83223e482ddef58cd55b3ed3da90676c8"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/DependenteContractTest.java",
+      "sha256": "e4d9ece2e1b4e1e8c1750c38d297c0cb7d1445f32d3f62d8dd3396f8202f039e"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/ErgonBulkTwoPhaseProtocolHttpTest.java",
+      "sha256": "5456de2bbd5ca19dadecba1b4f5221eaca5e7e250b271fbb6756954153925ba2"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/ErgonFailureAssertions.java",
+      "sha256": "8a9de75d63e35e095c13241d542314c6eb272e6cdfe7cb3ac653c51410825db8"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/ErgonReactiveDeterminationMetadataTest.java",
+      "sha256": "633aab2b743b440b8122ac65e783bd0e2b0b2a047569ed1c72e75e769e5df889"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/ErgonRuleViolationHttpTest.java",
+      "sha256": "b1cb39138fe4a40b1e2820b1e2a3d75c42907fecda12bdbdfab8fbb4d689f81e"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/ErgonTenantIsolationTest.java",
+      "sha256": "ee1f87fbbbd8410afef1f97fcfab4160e925017d7e2456a564e395296a5f468f"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/FeriasRuleEngineAndDeterminationsContractTest.java",
+      "sha256": "7477d4266405cb4d865dc37352ae8356ad07277d49828ef7f8074b2e4f4046f5"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/FeriasSlice5Phase1ContractTest.java",
+      "sha256": "68230055464d33de7382446039156bd2b2532b96bb4ffe58d564517b5b85b3ea"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/FeriasSlice5Phase2ContractTest.java",
+      "sha256": "7bd22e469b27274a9d0cbe96e81767b8dbb94b9d106c03410b413bd75e251052"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/FrequenciaAfastamentoRuleEngineContractTest.java",
+      "sha256": "6e8a68860c2f7d53dcd8bbe39e55f40d6ea9bb1d31230e460b86d0e68e0c896f"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/FrequenciaContractTest.java",
+      "sha256": "bf2c928b5b134206a3049a1dabec23237cdac9953d86c3d137f118ab4d1fb28a"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/NeonDomainFixture.java",
+      "sha256": "8593e3899997a390addc5743757a1c8fe8d8097d0104a950e3b0c989a9ac43c6"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/NeonIntegrationTest.java",
+      "sha256": "830bc847e4d3b8b806e79c6a822e6df4fb3f88e7b793feb92b3cbbc85f635cf1"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/P4CustomFieldAdoptionRegressionTest.java",
+      "sha256": "52d79829bf0cc65259c5d77d2802d442b498dc20bfa74b280b04dce9af9a3ce7"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/P4MetadataProjectionTest.java",
+      "sha256": "a2260010d608b4e1584258513d797bb2b8d0bb61f1199a1a66256369eb550dd6"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/P5CustomFieldsAndDraftTest.java",
+      "sha256": "c81c2a8d6bb01a95f91f82fc9d0a87c9326dcb8324fd909f1ebdbd4efd958a11"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/PillarsNeonIntegrationTest.java",
+      "sha256": "1c1cf1c3c1ea94b00ca3aad3381312c0ca49582bf9876c13931bf35a1e508785"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/PraxisMetadataCompletenessTest.java",
+      "sha256": "4db31aa4013956fa96e296686b9d0c63beff5d9efc7744f2872b1dc5550144fb"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/Rn013RuleEngineContractTest.java",
+      "sha256": "e944951a8b71f6b292ef79dd668b7b53cf255b19304755553f46f63872bfcf44"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/RuleCatalogExhaustivenessContractTest.java",
+      "sha256": "fa8715e5dc85a88910e39d7fb769271e6ca696e77b4990d9a5cde0baaf499082"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/ShowcaseCanonicalConformanceGateTest.java",
+      "sha256": "2283242652c5dff7096eecfe7832c24f8070f3de6ded5f9b2466567cfc3fb3c5"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/StateSnapshotFixture.java",
+      "sha256": "77656ec59f292a8c7a1158d83a4f6e20d92d2124d8bbc0998e37ca79ac617c8f"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/TempoLicencaBulkAnalyticsExportTest.java",
+      "sha256": "189ba0e6a2516a99fe16ab931628e5817d63a1ceda396bdfdeb2ec5f8c42ef1c"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/TempoLicencaCommandReceiptTest.java",
+      "sha256": "081992384095e2b87fbf8369e3d181c2a5fd70675901ccd88fe194e346b5cb74"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/TempoLicencaCorrectionsContractTest.java",
+      "sha256": "7e4a8f65f5384e13abde6bef4cbff6522f8d152cda87e2301fba8d0872a62164"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/TempoLicencaCrudContractTest.java",
+      "sha256": "1587e531aa76ab9666b7b569509cefa7cde4dfd0b195d702525b7e83443e1559"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/TempoLicencaIssue10PostgresTest.java",
+      "sha256": "a0a75d931c53b1292e4aab419e2bed3024a7abb35a787b9b6c594b5e6b1785e1"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/TempoLicencaIssue10RegressionTest.java",
+      "sha256": "730ce6f8ac1ea233fdcb74492658539a9d1d02c771746af67d3d52b96619e7c2"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/TempoLicencaRemainingFindingsTest.java",
+      "sha256": "8024dd60f4d025a569b2f093ebb12c7adc2343267cf50bcc7cbee0f96e1d5916"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/TempoLicencaSevenFixesRegressionTest.java",
+      "sha256": "6bb958d985ce401e03a6bc03b6ad39e05ffa03283db8868ead0fd58269a114bc"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/TempoLicencaSlice6Phase1ContractTest.java",
+      "sha256": "47b79c62d611c973c9966fee90d6d8e106e323fd9e1a70ab886af09e13f17d31"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/TempoLicencaSlice6Phase2Test.java",
+      "sha256": "b71e5cc795ccd23884103f10404de30a7b643504f4abab185a3537fbac9d0fd5"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/TenantRequestValidationTest.java",
+      "sha256": "1b62ab099d9a96e4932477a15a79e5e8c479f8ecea66010877ce2e8f10b651d3"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/VinculoDependenteCustomFieldRuleEngineContractTest.java",
+      "sha256": "65a189c528072af7ccad700e174ccd712588056e5e0b845a04392e4457e52185"
+    }
+  ],
+  "changedHostInputsSinceInitialSnapshot": [
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/bulk/ErgonBulkDomain.java",
+      "before": "d943007aa12a18f3c4b101d5710bf771734beaeda0c44c505ad91a053c9c500e",
+      "after": "58b425167e1fd412139bd98ce0682875d82a299c6fdceb7bce7fdd1f12e71f9b"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/bulk/ErgonBulkOperations.java",
+      "before": "685e43117a06799ec323868e3202b87cec5a1d3d946e721677e2728ae152011e",
+      "after": "6dab96e7edc64bf0544ef86396187da93d347feb946b88ca7fcbacb810a3b645"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/config/ErgonDeterminationConfig.java",
+      "before": "6618d0dfac70c20713a28ba7b4efc9a4ef625d30baaa30ac7f25dba0c49d5843",
+      "after": "45eb98291dc739565042fb125d465483099ac81c0ef2e87e2c34a6d4ba732394"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/config/OptionSourcesConfig.java",
+      "before": "75a74973ea6d88ddb7576fa8088654919f851826487c7fad377496fc577f0ea7",
+      "after": "115ce0b488ecabdb1c22a32e48e49c456c18d22c5da0ea6c4046ca8c6c6767f8"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/config/TempoLicencaDeterminationConfig.java",
+      "before": "fc75588a69ed08001ebd1dfa48ef6a8d40ee08a31ded38f78728e810b27c5be5",
+      "after": "65ea67a3be18fb14d8fb8f8fb595c6b56e17ecb7e1171e4d516ffc36bf79a9b9"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/controller/ErgonCustomFieldExceptionHandler.java",
+      "before": "f1dc3df9287d4f8984e89a6562bdb1d52753fbd4d6bc61fdce8633cee0d8d89f",
+      "after": "fa24ae86b8d101709ed68fcc996f0aed7a002dc97a6bb871856cbbdf07c95ba0"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/FeriasGozoDados.java",
+      "before": "135fe2ed46731937fe9ab31b051a924f9fa0620705e6bb00c13fab10ca8c4f8e",
+      "after": "257c5b28cb07aab24cc194de592e9d4be5b7ab4320124b0c6ca978331797ade2"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoFeriasDados.java",
+      "before": "76de6bcde0f86844eacb18cce375430b50c922d43ee463ae69862a9647bd3ce1",
+      "after": "22e57052696cc8d90fa38aebf49b8ea1346044998391030c254c45a6550da986"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/rules/ErgonCustomFieldErrors.java",
+      "before": "67b6c2400a44802925f0ed7d4f80f157025c25dd256ca5835b4674e2ba8e40d0",
+      "after": "590adb01db08fcc8f4d3471a768d0f3e1fb5696f44b8685c6a18841f73fd1f0f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/rules/ErgonRuleEngineFacade.java",
+      "before": "20c7e21f6e0f649e2115099707cc6b9bcbd46f407031f8c82b1317044aeeb7d7",
+      "after": "cdc91c2e4707184fa9f1a8c8db6c2f83390c74647f13bf2b695bac3a8b34f72b"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/rules/ErgonRuleErrorCatalog.java",
+      "before": "10f00312597ca0928a09fb9dcfa715746cc8d76e2cd1f24fb2514e894149c01d",
+      "after": "d04bfab72fd3420da234a76bb797530fe3223c5d92370f47356652429e3c163f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/rules/ErgonRuleViolationException.java",
+      "before": "fd3c0a049c458a8f79944ad86a424287e7fbe09bbcd6036e2dcd3d3a28472735",
+      "after": "60a4ad2ece09d5e6c33e4f3d904e0e205f8916562f5fb8307136f22d3bb47231"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/AfastamentoService.java",
+      "before": "15d3cda336f092ce52f6e990aee6dc1d30b67dec3b1ec4b60723d30d919cd719",
+      "after": "901b70e0b3484dbf6e371bfeb1c367a880cb628d9e231bed02548f7a89dbfda9"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/AverbacaoTempoServicoService.java",
+      "before": "455e1fb457521b5efbeea6608271fee2877bb76b93c9ea9680067d8b9c3845f1",
+      "after": "778eb20baec177ed4805456eedc5870c0dab1b8046931b6334e79f8a264bb6fd"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/CargoService.java",
+      "before": "ca5ab8157f4f75419c5bd7a92b39560c8bb5729491896f13c71490ca0f47654e",
+      "after": "338293914a9da1d23fa1f4b16e58b0bd4e3c4a12b05df04928fd929eee345fbc"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/DefinicaoCampoCustomizadoService.java",
+      "before": "3472006fe13799268027b59f895c96fe957a4d733c881a062b6e65747abdc0f0",
+      "after": "6c227f758e53474a3550acef05db152c69e507f2cb154b5406d0797233827d9a"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/DependenteService.java",
+      "before": "ae9eb155ad01d79be9d585aa42926d24e749958827aaaba680a928dce14d8ff4",
+      "after": "03c7ed481f1caeca580fc6f1227e20cc63c69b141ccab0ae4521f3fc73a5f786"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/DocumentoLegalService.java",
+      "before": "d936e93a12b85c24517901e6f6cfb6d9544123034a434ac1b5744854e1b30c9a",
+      "after": "061a32bd0b8613e9673d569286a8e5121f61b7e64b7ac44837321b51287d2ca6"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/ErgonCommands.java",
+      "before": "4fdd06ae7ae45a15ddfa8fd63b5b5b4b1fff56026ab87a506fc0d012c4591303",
+      "after": "33115397a80d698f194dd7ba2135050973802542d283beb8637dad368323bcbb"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/ErgonDeterminationService.java",
+      "before": "23f4c5d2224fea230a4b7114452c9c4ebfb549266899288d5ec3a0bd92e443cb",
+      "after": "02e1d0765424c80b885e77cd114c813deb1fce25f18f3dbf03a245720321f54c"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/ErgonInvariants.java",
+      "before": "d0c15e2d83dec17ad5823ecaabca4218624f84d796f68df94b83e7a1763bd7ec",
+      "after": "e51fff3396033e758dbe1bb368267d8c5f065f791c9b8e94b99a2aa2fadd2b8d"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/ErgonReadOnlyResourceService.java",
+      "before": "a9d3335f223eb6634075a3913a8f26d3f65d4b2529209a324da06ccc362fcb72",
+      "after": "1d458043a4424c9c0998f47913bc2486da2c000048f3c31f35dca0ae6a86b593"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/ErgonResourceService.java",
+      "before": "149348ee080f2e06530c937d626f63caeff886cbfbbf4bc245483358aa5b6e38",
+      "after": "382508fae5c06c8fd237d2193da8838e59ff50544fb85d5d78a9117dc67c7804"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/ErgonTenantAccess.java",
+      "before": null,
+      "after": "9e4180d727711b5929d07caf7601af7da92216a6b06e4ec8430e9d0b5d7bc7d8"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/FeriasGozoService.java",
+      "before": "080b05d015a033483d50736aa5480e6aa609ed3b3c55b90b358b0779c296c679",
+      "after": "bcebfded2d7421b5de83437a008946bf789bcfc49aa17ccf40d8dde580caa30f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/FrequenciaService.java",
+      "before": "c700a8d4f2783f548326997414c1d2ba7961306bf274e4d5922c558f7fa40f25",
+      "after": "f0f19832d25adfa61c30a4344f38e47dd7f1a46de870948bac8d7d4824fc4865"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/ItemTabelaService.java",
+      "before": "b444f9dd09aa3cbe27d7e94564668f5ff4260f68e3d65bacfc72f8242956147f",
+      "after": "77b9c08daf427c062b49b09e013468a5eebd0a3557ed76f0f8ed82114e80601b"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/LicencaEspecialGozoService.java",
+      "before": "67894788ffcab0fcd119e79c3fb0c2eed557ed93a82061574ed799e2cadefd72",
+      "after": "e527c393028014891442ebdad62de86db66e63ad75b9e5166395e3622c85445d"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/OrgaoService.java",
+      "before": "a450510e6fbf65914f2474f5a1c32785f5c7f2526e4d7db7636a3d72b0cf5515",
+      "after": "f6e368f6dac30e5e0a3657b9e531bae6485e25afe52f68cfdd084803e750a577"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/ParametroContagemFeriasService.java",
+      "before": "e4e3818bda0254f936b0999e04c91dbc8eaa73f54cb1ed654168c6272c8f7187",
+      "after": "47dba19b70e88dd1164c9fa6d3656444c490824aab311354a71ba53d0d583546"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/PeriodoAquisitivoFeriasService.java",
+      "before": "c51464de0d41a322f2f1781a1f85c51860a8804a22078cdd67af232a6f863453",
+      "after": "2c0bccc4436f52ef4610089c90612bbd444912b1ad205fbf48c57961409da2e5"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/PeriodoAquisitivoLicencaEspecialService.java",
+      "before": "cb83a2cc32ee73d065643155fecf87e70c74f5e913651c669ace3ace8111a847",
+      "after": "dca72b998328be3769398a997e519ce8e3caceaeccec9622cbd878ddfb06ef12"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/RadarFeriasPrescricaoService.java",
+      "before": "5da07703b3a96e5d7a7c798eb6b02854400474daa6bf61204d767648bda2398f",
+      "after": "934eeb765c9e5bb40e4135c7d48fe40385dc47a04c446f582df0405d28642a80"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/RadarTempoServicoLicencaEspecialService.java",
+      "before": "fe2196b9d674bc8fc447959ec6f46288714eb2ecb1baabbc08f5cef63f6b1b70",
+      "after": "118265c8fb84b5b2e4c2f3c8a72cf6f3ae8c85ed33a374010b94a1b66c98b045"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/RegraFrequenciaEstatutariaService.java",
+      "before": "9e746c5f4e9aae5dc942c2a09844905a9737b73cd867fddd2047b4b0f99d282a",
+      "after": "ab80a0c68f3676d323271b849f495167e5dd0929d9c3a803417a3ddfc6df9419"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/SetorService.java",
+      "before": "6684119aa90d8d7661c2823b62dc569ea6c58ca9b1582be84c0d156454f8620c",
+      "after": "13601681c0b9db225fe5d7e583352bb014692cbf1aeab4680a086f28bea45d79"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/VendaLicencaEspecialService.java",
+      "before": "6dcfec216b664fb6566d3672c527787e899c8675e8a8f60ab8174cdf5909a130",
+      "after": "420b69f5663ab660595092e4f807aa87405a1c1dbe44cd1f4964dc3d0723a94f"
+    },
+    {
+      "path": "src/main/java/br/com/praxis/ergonshowcase/service/VinculoService.java",
+      "before": "49295370b82b3fd2d7bf966461efe5f9fea2a8d053a6ce185f8ee1ec88907911",
+      "after": "b44dc7adc371f8bfea57328308ffa0a62b9a226ca8d7ce8846b9d56fe17627cf"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/AfastamentoContractTest.java",
+      "before": "243798753bc7cbc602ae154fed8db8c2a27c072899c1b95bb65654449dc8d861",
+      "after": "71c9c0360998f983a4b97f5a39998c272b8354847b12cb4cec84f42b37569cba"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/CanonicalResourceTestContext.java",
+      "before": "d461600daebe1f5e0d763130521975bd1bad2c1bbb4eaeea1d11e02e9d44a177",
+      "after": "4950041c122cb318be6abca5d12df1678a7079e05d04785bdbc46b254bdae7d8"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/DependenteContractTest.java",
+      "before": "09016b5fbbca8ee1c8057ad98c8e2f46100f65045aa988cd684bed315586b072",
+      "after": "e4d9ece2e1b4e1e8c1750c38d297c0cb7d1445f32d3f62d8dd3396f8202f039e"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/ErgonFailureAssertions.java",
+      "before": null,
+      "after": "8a9de75d63e35e095c13241d542314c6eb272e6cdfe7cb3ac653c51410825db8"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/ErgonReactiveDeterminationMetadataTest.java",
+      "before": null,
+      "after": "633aab2b743b440b8122ac65e783bd0e2b0b2a047569ed1c72e75e769e5df889"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/ErgonRuleViolationHttpTest.java",
+      "before": null,
+      "after": "b1cb39138fe4a40b1e2820b1e2a3d75c42907fecda12bdbdfab8fbb4d689f81e"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/ErgonTenantIsolationTest.java",
+      "before": null,
+      "after": "ee1f87fbbbd8410afef1f97fcfab4160e925017d7e2456a564e395296a5f468f"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/FeriasRuleEngineAndDeterminationsContractTest.java",
+      "before": "f8e7bbf75e8c64dd79f60581ddb64eb7d585deca149734438bdd56a9066846a2",
+      "after": "7477d4266405cb4d865dc37352ae8356ad07277d49828ef7f8074b2e4f4046f5"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/FeriasSlice5Phase1ContractTest.java",
+      "before": "1b101c122a3b5992ed701e2817e64bc57efe96d86e1ccc0b5d82fbe4acd33c3a",
+      "after": "68230055464d33de7382446039156bd2b2532b96bb4ffe58d564517b5b85b3ea"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/FeriasSlice5Phase2ContractTest.java",
+      "before": "6efffdfe4114537e1da9f5766d9a597ef1416d41ad1c96960f9b295f034e5275",
+      "after": "7bd22e469b27274a9d0cbe96e81767b8dbb94b9d106c03410b413bd75e251052"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/FrequenciaContractTest.java",
+      "before": "be7167874da528ad193435fafe9ee1237f0dad7987f75230911d46afee092711",
+      "after": "bf2c928b5b134206a3049a1dabec23237cdac9953d86c3d137f118ab4d1fb28a"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/P5CustomFieldsAndDraftTest.java",
+      "before": null,
+      "after": "c81c2a8d6bb01a95f91f82fc9d0a87c9326dcb8324fd909f1ebdbd4efd958a11"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/PraxisMetadataCompletenessTest.java",
+      "before": "044168c64879629c2f193612c256e0ab3f54e04c0db787e33640452193b377ac",
+      "after": "4db31aa4013956fa96e296686b9d0c63beff5d9efc7744f2872b1dc5550144fb"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/Rn013RuleEngineContractTest.java",
+      "before": "6af9fce4b9415f25dda683b52b739b6f851c6a14133a94353d1f3daaa327f0d3",
+      "after": "e944951a8b71f6b292ef79dd668b7b53cf255b19304755553f46f63872bfcf44"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/RuleCatalogExhaustivenessContractTest.java",
+      "before": "fc0904f25847dbef3188e51b2c4058dfa941e5675092d70c7fbc6b821ff30ccd",
+      "after": "fa8715e5dc85a88910e39d7fb769271e6ca696e77b4990d9a5cde0baaf499082"
+    },
+    {
+      "path": "src/test/java/br/com/praxis/ergonshowcase/VinculoDependenteCustomFieldRuleEngineContractTest.java",
+      "before": "f5f797ed7cc06fd73eb44958e0fa595bde8347a9bf79741be3864508b2192b6e",
+      "after": "65a189c528072af7ccad700e174ccd712588056e5e0b845a04392e4457e52185"
+    }
+  ],
+  "preExistingChangesPreserved": true,
+  "temporaryReviewFilesRemoved": true
+}

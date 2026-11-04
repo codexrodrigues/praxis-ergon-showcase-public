@@ -49,22 +49,8 @@ public class ItemTabelaService
     return new ItemTabelaFilterDTO();
   }
 
-  @Override
-  protected OptionalLong getEntityResourceVersion(ItemTabela entity) {
-    return OptionalLong.of(entity.getVersion());
-  }
 
-  @Override
-  protected ResourceFilterAccessScope<ItemTabela> resolveResourceFilterAccessScope() {
-    var explicit = tenant.explicitOrgao();
-    if (explicit.isEmpty()) {
-      return ResourceFilterAccessScope.unrestricted();
-    }
-    int orgao = explicit.getAsInt();
-    return ResourceFilterAccessScope.restricted(
-        (root, query, cb) ->
-            cb.or(cb.isNull(root.get("empCodigo")), cb.equal(root.get("empCodigo"), orgao)));
-  }
+
 
   @Override
   protected List<CollectionExportField> exportFields() {
@@ -91,13 +77,8 @@ public class ItemTabelaService
         .build();
   }
 
-  @Override
-  public StatsSupportMode getGroupByStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
 
-  @Override
-  public StatsSupportMode getDistributionStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
+  @Override protected String resolveResourceKey() { return "administracao-pessoal.itens-tabela"; }
+
+  @Override protected boolean globalOrganizationRecords() { return true; }
 }

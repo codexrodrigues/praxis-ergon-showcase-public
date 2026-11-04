@@ -1,0 +1,680 @@
+{
+  "ergon.administracao-pessoal.ferias-gozo.concessao": [
+    {
+      "presetScenarioKey": "CONFORMIDADE_PADRAO",
+      "descriptionPtBr": "Fatos de referência aceitos pelos planos de fábrica dos órgãos 1 e 2.",
+      "facts": {
+        "draft": {"id": 900.0, "empCodigo": 1, "numfunc": 1001, "numvinc": 1, "periodoAquisitivoId": 700.0, "chavePeraqfer": 1, "ordemParcela": 1, "dtini": "2025-07-01", "dtprevfim": "2025-07-30", "dtfim": null, "dtfimEfetivo": "2025-07-30", "diasGozo": 30.0, "totDiasDireitoPa": 30.0, "abonoPecuniario": false, "iniFimAbono": null, "diasAbonoVendidos": 0, "dtVendaAbono": null, "dtPagtoAbono": null, "abonoConstitucional": true, "adiantamento13": true, "adiantamentoSalario": false, "emprestimoFerias": false, "mesAnoFolha": null, "numFolha": null, "situacao": "PROGRAMADA", "dtInterrupcao": null, "motivoInterrupcao": null, "numfuncSubstituto": null, "numvincSubstituto": null, "documentoLegalId": 91, "atoPublicacaoId": null, "observacoes": null},
+        "vinculo": {"dtexerc": "2020-01-01", "dtvac": null, "dtaposent": null, "situacao": "ATIVO"},
+        "substituto": {"pairComplete": true, "selfSubstitution": false, "vinculoValidoNoOrgao": true, "activeSubstitutionConflict": false},
+        "pa": {"id": 700.0, "chave": 1, "ordemNoVinculo": 1, "dtini": "2024-01-01", "dtfim": "2024-12-31", "dtPrescricao": "2026-12-31", "totDiasDireito": 30.0, "diasConvertidosDobro": 0, "situacao": "DISPONIVEL", "aptoConcessao": true},
+        "effectiveParametroConta": {"parametroEncontrado": true, "parametroId": 100.0, "escopoGlobal": false, "temFerias": true, "totDiasFer": 30.0, "maxPerFer": 3, "minPerFer": 1, "maxDiasPerFer": 30.0, "minDiasPerFer": 10.0, "minDiasPerPrincFer": 14, "abonoDirGozo": "D", "permiteAbonoPecuniario": true, "numDiasAbonoFer": 1, "denDiasAbonoFer": 3, "maxDiasVendFer": 10.0, "minDiasPvendFer": 5, "abonoConstFer": true, "adiant13Fer": true, "adiantSalFer": true, "emprestFer": true, "contDobroFerias": true, "minDiasPeraqfer": 5, "maxDiasPeraqfer": 30.0, "criterioPrescricao": "F", "permiteGozoAposPrescricao": false, "semPgtoMulta": false, "permiteGozoAntesPaFer": true, "permiteFerPrimPer": true, "permiteFerSegunPer": true, "permiteFerTercPer": true, "permiteFerPerInc": true, "permiteLancConcPa": true},
+        "existingParcelas": [],
+        "derived": {"antecedenciaDias": null, "maxDiasAbonoPelaFracao": 10.0, "overlappingNormalFrequenciasCount": 0, "overlappingAfastamentosCount": 0, "overlappingFeriasGozoCount": 0, "duplicateOrdemParcelaCount": 0, "otherParcelasWithAbonoConstCount": 0, "otherParcelasWithAdiant13InYearCount": 0, "otherParcelasWithAbonoPecuniarioInPaCount": 0, "violatesDtPrescricao": false, "totalParcelasNoPa": 1, "totalDiasGozadosPa": 30, "totalDiasAbonoPa": 0, "totalDiasConsumidosPa": 30, "saldoRemanescentePa": 0, "maxParcelaDiasNoPa": 30, "enforceStrictResidualBalance": true},
+        "tenant": {"empCodigo": 1},
+        "context": {"operation": "validate"}
+      }
+    },
+    {
+      "presetScenarioKey": "CUSTOMIZACAO_ORGAO_2",
+      "descriptionPtBr": "Fatos aceitos pelo produto e rejeitados pela regra CERG-FER-301 do Órgão 2.",
+      "facts": {
+        "draft": {"id": 900.0, "empCodigo": 1, "numfunc": 1001, "numvinc": 1, "periodoAquisitivoId": 700.0, "chavePeraqfer": 1, "ordemParcela": 1, "dtini": "2025-07-01", "dtprevfim": "2025-07-30", "dtfim": null, "dtfimEfetivo": "2025-07-30", "diasGozo": 30.0, "totDiasDireitoPa": 30.0, "abonoPecuniario": false, "iniFimAbono": null, "diasAbonoVendidos": 0, "dtVendaAbono": null, "dtPagtoAbono": null, "abonoConstitucional": true, "adiantamento13": true, "adiantamentoSalario": false, "emprestimoFerias": false, "mesAnoFolha": null, "numFolha": null, "situacao": "PROGRAMADA", "dtInterrupcao": null, "motivoInterrupcao": null, "numfuncSubstituto": null, "numvincSubstituto": null, "documentoLegalId": null, "atoPublicacaoId": null, "observacoes": null},
+        "vinculo": {"dtexerc": "2020-01-01", "dtvac": null, "dtaposent": null, "situacao": "ATIVO"},
+        "substituto": {"pairComplete": true, "selfSubstitution": false, "vinculoValidoNoOrgao": true, "activeSubstitutionConflict": false},
+        "pa": {"id": 700.0, "chave": 1, "ordemNoVinculo": 1, "dtini": "2024-01-01", "dtfim": "2024-12-31", "dtPrescricao": "2026-12-31", "totDiasDireito": 30.0, "diasConvertidosDobro": 0, "situacao": "DISPONIVEL", "aptoConcessao": true},
+        "effectiveParametroConta": {"parametroEncontrado": true, "parametroId": 100.0, "escopoGlobal": false, "temFerias": true, "totDiasFer": 30.0, "maxPerFer": 3, "minPerFer": 1, "maxDiasPerFer": 30.0, "minDiasPerFer": 10.0, "minDiasPerPrincFer": 14, "abonoDirGozo": "D", "permiteAbonoPecuniario": true, "numDiasAbonoFer": 1, "denDiasAbonoFer": 3, "maxDiasVendFer": 10.0, "minDiasPvendFer": 5, "abonoConstFer": true, "adiant13Fer": true, "adiantSalFer": true, "emprestFer": true, "contDobroFerias": true, "minDiasPeraqfer": 5, "maxDiasPeraqfer": 30.0, "criterioPrescricao": "F", "permiteGozoAposPrescricao": false, "semPgtoMulta": false, "permiteGozoAntesPaFer": true, "permiteFerPrimPer": true, "permiteFerSegunPer": true, "permiteFerTercPer": true, "permiteFerPerInc": true, "permiteLancConcPa": true},
+        "existingParcelas": [],
+        "derived": {"antecedenciaDias": null, "maxDiasAbonoPelaFracao": 10.0, "overlappingNormalFrequenciasCount": 0, "overlappingAfastamentosCount": 0, "overlappingFeriasGozoCount": 0, "duplicateOrdemParcelaCount": 0, "otherParcelasWithAbonoConstCount": 0, "otherParcelasWithAdiant13InYearCount": 0, "otherParcelasWithAbonoPecuniarioInPaCount": 0, "violatesDtPrescricao": false, "totalParcelasNoPa": 1, "totalDiasGozadosPa": 30, "totalDiasAbonoPa": 0, "totalDiasConsumidosPa": 30, "saldoRemanescentePa": 0, "maxParcelaDiasNoPa": 30, "enforceStrictResidualBalance": true},
+        "tenant": {"empCodigo": 1},
+        "context": {"operation": "validate"}
+      }
+    },
+    {
+      "presetScenarioKey": "GUARD_ESTRUTURAL_OU_BYPASS",
+      "descriptionPtBr": "Término previsto anterior ao início das férias.",
+      "facts": {
+        "draft": {"id": 900.0, "empCodigo": 1, "numfunc": 1001, "numvinc": 1, "periodoAquisitivoId": 700.0, "chavePeraqfer": 1, "ordemParcela": 1, "dtini": "2025-07-01", "dtprevfim": "2025-06-30", "dtfim": null, "dtfimEfetivo": "2025-06-30", "diasGozo": 30.0, "totDiasDireitoPa": 30.0, "abonoPecuniario": false, "iniFimAbono": null, "diasAbonoVendidos": 0, "dtVendaAbono": null, "dtPagtoAbono": null, "abonoConstitucional": true, "adiantamento13": false, "adiantamentoSalario": false, "emprestimoFerias": false, "mesAnoFolha": null, "numFolha": null, "situacao": "PROGRAMADA", "dtInterrupcao": null, "motivoInterrupcao": null, "numfuncSubstituto": null, "numvincSubstituto": null, "documentoLegalId": null, "atoPublicacaoId": null, "observacoes": null},
+        "vinculo": {"dtexerc": "2020-01-01", "dtvac": null, "dtaposent": null, "situacao": "ATIVO"},
+        "substituto": {"pairComplete": true, "selfSubstitution": false, "vinculoValidoNoOrgao": true, "activeSubstitutionConflict": false},
+        "pa": {"id": 700.0, "chave": 1, "ordemNoVinculo": 1, "dtini": "2024-01-01", "dtfim": "2024-12-31", "dtPrescricao": "2026-12-31", "totDiasDireito": 30.0, "diasConvertidosDobro": 0, "situacao": "DISPONIVEL", "aptoConcessao": true},
+        "effectiveParametroConta": {"parametroEncontrado": true, "parametroId": 100.0, "escopoGlobal": false, "temFerias": true, "totDiasFer": 30.0, "maxPerFer": 3, "minPerFer": 1, "maxDiasPerFer": 30.0, "minDiasPerFer": 10.0, "minDiasPerPrincFer": 14, "abonoDirGozo": "D", "permiteAbonoPecuniario": true, "numDiasAbonoFer": 1, "denDiasAbonoFer": 3, "maxDiasVendFer": 10.0, "minDiasPvendFer": 5, "abonoConstFer": true, "adiant13Fer": true, "adiantSalFer": true, "emprestFer": true, "contDobroFerias": true, "minDiasPeraqfer": 5, "maxDiasPeraqfer": 30.0, "criterioPrescricao": "F", "permiteGozoAposPrescricao": false, "semPgtoMulta": false, "permiteGozoAntesPaFer": true, "permiteFerPrimPer": true, "permiteFerSegunPer": true, "permiteFerTercPer": true, "permiteFerPerInc": true, "permiteLancConcPa": true},
+        "existingParcelas": [],
+        "derived": {"antecedenciaDias": null, "maxDiasAbonoPelaFracao": 10.0, "overlappingNormalFrequenciasCount": 0, "overlappingAfastamentosCount": 0, "overlappingFeriasGozoCount": 0, "duplicateOrdemParcelaCount": 0, "otherParcelasWithAbonoConstCount": 0, "otherParcelasWithAdiant13InYearCount": 0, "otherParcelasWithAbonoPecuniarioInPaCount": 0, "violatesDtPrescricao": false, "totalParcelasNoPa": 1, "totalDiasGozadosPa": 30, "totalDiasAbonoPa": 0, "totalDiasConsumidosPa": 30, "saldoRemanescentePa": 0, "maxParcelaDiasNoPa": 30, "enforceStrictResidualBalance": true},
+        "tenant": {"empCodigo": 1},
+        "context": {"operation": "validate"}
+      }
+    }
+  ],
+  "ergon.administracao-pessoal.cargos.cadastro": [
+    {
+      "presetScenarioKey": "CONFORMIDADE_PADRAO",
+      "descriptionPtBr": "Fatos de referência aceitos pelos planos de fábrica dos órgãos 1 e 2.",
+      "facts": {
+        "draft": {"cargo": 1, "controle": true, "autorizadas": 5, "aglutinador": false, "pai": null, "inicio": 20760, "extincao": null, "extinguindo": false, "documentoLegalId": 91},
+        "cargoAglutinador": {"aglutinador": null},
+        "neighborhood": {"ocupadas": 0, "dependentes": 0}
+      }
+    },
+    {
+      "presetScenarioKey": "CUSTOMIZACAO_ORGAO_2",
+      "descriptionPtBr": "Fatos aceitos pelo produto e rejeitados pela regra CERG-02108 do Órgão 2.",
+      "facts": {
+        "draft": {"cargo": 1, "controle": true, "autorizadas": 5, "aglutinador": false, "pai": null, "inicio": 20760, "extincao": null, "extinguindo": false, "documentoLegalId": null},
+        "cargoAglutinador": {"aglutinador": null},
+        "neighborhood": {"ocupadas": 0, "dependentes": 0}
+      }
+    },
+    {
+      "presetScenarioKey": "GUARD_ESTRUTURAL_OU_BYPASS",
+      "descriptionPtBr": "Cargo referenciado como seu próprio aglutinador.",
+      "facts": {
+        "draft": {"cargo": 1, "controle": true, "autorizadas": 5, "aglutinador": false, "pai": 1, "inicio": 20760, "extincao": null, "extinguindo": false, "documentoLegalId": 91},
+        "cargoAglutinador": {"aglutinador": null},
+        "neighborhood": {"ocupadas": 0, "dependentes": 0}
+      }
+    }
+  ],
+  "ergon.administracao-pessoal.funcionarios.cadastro": [
+    {
+      "presetScenarioKey": "CONFORMIDADE_PADRAO",
+      "descriptionPtBr": "Fatos de referência aceitos pelos planos de fábrica dos órgãos 1 e 2.",
+      "facts": {
+        "draft": {"nascimento": 6150, "anosCompletosHoje": 39, "anosArredondadosNaReferencia": 40, "anoNascimento": 1986, "anoPrimeiroEmprego": null, "expedicaoRg": null, "registroProfissional": null, "tipoRegistro": null, "pispasep": "12345678901"},
+        "neighborhood": {"outrosComCpf": 0},
+        "context": {"hoje": 20583, "anoAtual": 2026}
+      }
+    },
+    {
+      "presetScenarioKey": "CUSTOMIZACAO_ORGAO_2",
+      "descriptionPtBr": "Fatos aceitos pelo produto e rejeitados pela regra CERG-02206 do Órgão 2.",
+      "facts": {
+        "draft": {"nascimento": 6150, "anosCompletosHoje": 39, "anosArredondadosNaReferencia": 40, "anoNascimento": 1986, "anoPrimeiroEmprego": null, "expedicaoRg": null, "registroProfissional": null, "tipoRegistro": null, "pispasep": null},
+        "neighborhood": {"outrosComCpf": 0},
+        "context": {"hoje": 20583, "anoAtual": 2026}
+      }
+    },
+    {
+      "presetScenarioKey": "GUARD_ESTRUTURAL_OU_BYPASS",
+      "descriptionPtBr": "CPF já registrado para outra pessoa.",
+      "facts": {
+        "draft": {"nascimento": 6150, "anosCompletosHoje": 39, "anosArredondadosNaReferencia": 40, "anoNascimento": 1986, "anoPrimeiroEmprego": null, "expedicaoRg": null, "registroProfissional": null, "tipoRegistro": null, "pispasep": "12345678901"},
+        "neighborhood": {"outrosComCpf": 1},
+        "context": {"hoje": 20583, "anoAtual": 2026}
+      }
+    }
+  ],
+  "ergon.administracao-pessoal.dependentes.elegibilidade": [
+    {
+      "presetScenarioKey": "CONFORMIDADE_PADRAO",
+      "descriptionPtBr": "Fatos de referência aceitos pelos planos de fábrica dos órgãos 1 e 2.",
+      "facts": {
+        "draft": {"id": 1, "empCodigo": 1, "numfunc": 1001, "numero": 1, "numdep": 1, "nome": "Dependente Filho Menor", "dtnasc": "2006-01-01", "sexo": "M", "cpf": "99988877766", "cpfValidFormat": true, "parentesco": "FILHO", "tipodepen": "FILHO_MENOR", "dtini": "2016-05-10", "dtfim": null, "depIr": true, "depSalarioFamilia": false, "depPlanoSaude": false, "estudante": true, "universitario": true, "invalido": false, "excepcional": false, "representanteLegal": false, "documentoLegalId": 91, "numrg": null, "tiporg": null, "orgaorg": null, "ufrg": null, "expedrg": null, "numCert": null, "livroCert": null, "folhaCert": null, "cartorioCert": null, "tipodocCert": null, "referenceDate": "2026-06-01", "ageYears": 20},
+        "pessoa": {"present": true, "id": 1001, "cpf": "11122233344", "dtnasc": "1985-03-15", "sexo": "F"},
+        "tipoDependente": {"present": true, "codigo": "FILHO_MENOR", "geraIr": true, "geraSalarioFamilia": true, "effectiveMaxAge": 24},
+        "documentoLegal": {"present": true, "id": 77, "empCodigo": 1, "sameOrgao": true, "tipoDocumento": null},
+        "existingDependentes": [],
+        "tenant": {"empCodigo": 1},
+        "context": {"resourceKey": "administracao-pessoal.dependentes", "ruleSetKey": "ergon.administracao-pessoal.dependentes.elegibilidade", "referenceDate": "2026-06-01"}
+      }
+    },
+    {
+      "presetScenarioKey": "CUSTOMIZACAO_ORGAO_2",
+      "descriptionPtBr": "Fatos aceitos pelo produto e rejeitados pela regra CERG-09301 do Órgão 2.",
+      "facts": {
+        "draft": {"id": 1, "empCodigo": 1, "numfunc": 1001, "numero": 1, "numdep": 1, "nome": "Dependente Filho Menor", "dtnasc": "2006-01-01", "sexo": "M", "cpf": "99988877766", "cpfValidFormat": true, "parentesco": "FILHO", "tipodepen": "FILHO_MENOR", "dtini": "2016-05-10", "dtfim": null, "depIr": true, "depSalarioFamilia": false, "depPlanoSaude": false, "estudante": true, "universitario": true, "invalido": false, "excepcional": false, "representanteLegal": false, "documentoLegalId": null, "numrg": null, "tiporg": null, "orgaorg": null, "ufrg": null, "expedrg": null, "numCert": null, "livroCert": null, "folhaCert": null, "cartorioCert": null, "tipodocCert": null, "referenceDate": "2026-06-01", "ageYears": 20},
+        "pessoa": {"present": true, "id": 1001, "cpf": "11122233344", "dtnasc": "1985-03-15", "sexo": "F"},
+        "tipoDependente": {"present": true, "codigo": "FILHO_MENOR", "geraIr": true, "geraSalarioFamilia": true, "effectiveMaxAge": 24},
+        "documentoLegal": {"present": true, "id": 77, "empCodigo": 1, "sameOrgao": true, "tipoDocumento": null},
+        "existingDependentes": [],
+        "tenant": {"empCodigo": 1},
+        "context": {"resourceKey": "administracao-pessoal.dependentes", "ruleSetKey": "ergon.administracao-pessoal.dependentes.elegibilidade", "referenceDate": "2026-06-01"}
+      }
+    },
+    {
+      "presetScenarioKey": "GUARD_ESTRUTURAL_OU_BYPASS",
+      "descriptionPtBr": "Nascimento do dependente posterior à data de referência.",
+      "facts": {
+        "draft": {"id": 1, "empCodigo": 1, "numfunc": 1001, "numero": 1, "numdep": 1, "nome": "Dependente Filho Menor", "dtnasc": "2099-01-01", "sexo": "M", "cpf": "99988877766", "cpfValidFormat": true, "parentesco": "FILHO", "tipodepen": "FILHO_MENOR", "dtini": "2016-05-10", "dtfim": null, "depIr": true, "depSalarioFamilia": false, "depPlanoSaude": false, "estudante": true, "universitario": true, "invalido": false, "excepcional": false, "representanteLegal": false, "documentoLegalId": 91, "numrg": null, "tiporg": null, "orgaorg": null, "ufrg": null, "expedrg": null, "numCert": null, "livroCert": null, "folhaCert": null, "cartorioCert": null, "tipodocCert": null, "referenceDate": "2026-06-01", "ageYears": 20},
+        "pessoa": {"present": true, "id": 1001, "cpf": "11122233344", "dtnasc": "1985-03-15", "sexo": "F"},
+        "tipoDependente": {"present": true, "codigo": "FILHO_MENOR", "geraIr": true, "geraSalarioFamilia": true, "effectiveMaxAge": 24},
+        "documentoLegal": {"present": true, "id": 77, "empCodigo": 1, "sameOrgao": true, "tipoDocumento": null},
+        "existingDependentes": [],
+        "tenant": {"empCodigo": 1},
+        "context": {"resourceKey": "administracao-pessoal.dependentes", "ruleSetKey": "ergon.administracao-pessoal.dependentes.elegibilidade", "referenceDate": "2026-06-01"}
+      }
+    }
+  ],
+  "ergon.administracao-pessoal.vinculos.provimento": [
+    {
+      "presetScenarioKey": "CONFORMIDADE_PADRAO",
+      "descriptionPtBr": "Fatos de referência aceitos pelos planos de fábrica dos órgãos 1 e 2.",
+      "facts": {
+        "draft": {"id": 1, "empCodigo": 1, "numfunc": 1001, "numero": 1, "regimejur": "ESTATUTARIO", "tipovinc": "EFETIVO", "categoria": "ADMINISTRATIVO", "subcategoria": null, "situacao": "VACANTE", "creating": true, "occupyingPosition": false, "dtnom": "2020-01-05", "dtposse": "2020-01-10", "dtexerc": "2020-01-15", "dtvac": "2026-05-01", "formavac": "EXONERACAO", "motivovac": null, "dtaposent": null, "tipoapos": null, "dtinicontr": null, "dtfimcontr": null, "dtprorrogcontr": null, "contractDurationDays": null, "dtHomologEstagio": null, "dtinihomologestag": null, "dtfimhomologestag": null, "dtiniCessao": null, "dtfimCessao": null, "tipoReq": null, "orgaoReq": null, "dtinipagto": null, "dtfimpagto": null, "dtPgtoAte": null, "jornadaSemanal": 40.0, "daysPosseToExercicio": 5, "ageAtIngressoYears": 30, "cargo": 101, "cargoComissao": null, "setor": "SETOR-01", "setorExercicio": "SETOR-01", "documentoLegalId": 91, "openAfastamentosCount": 0},
+        "orgao": {"present": true, "ativa": true},
+        "pessoa": {"present": true, "id": 1001, "dtnasc": "1990-01-01"},
+        "setor": {"present": true, "sameOrgao": true},
+        "setorExercicio": {"present": true, "sameOrgao": true},
+        "cargo": {"present": true, "sameOrgao": true, "extinct": false, "tipoCargo": "EFETIVO", "controleVaga": true, "vagasAutorizadas": 10.0, "ocupadas": 3},
+        "cargoComissao": {"present": false, "sameOrgao": false, "extinct": false, "tipoCargo": null, "controleVaga": false, "vagasAutorizadas": null, "ocupadas": 0},
+        "documentoLegal": {"present": true, "id": 50.0, "empCodigo": 1, "sameOrgao": true, "tipoDocumento": null},
+        "existingVinculos": [],
+        "tenant": {"empCodigo": 1},
+        "context": {"resourceKey": "administracao-pessoal.vinculos", "ruleSetKey": "ergon.administracao-pessoal.vinculos.provimento", "creating": true}
+      }
+    },
+    {
+      "presetScenarioKey": "CUSTOMIZACAO_ORGAO_2",
+      "descriptionPtBr": "Fatos aceitos pelo produto e rejeitados pela regra CERG-09401 do Órgão 2.",
+      "facts": {
+        "draft": {"id": 1, "empCodigo": 1, "numfunc": 1001, "numero": 1, "regimejur": "ESTATUTARIO", "tipovinc": "EFETIVO", "categoria": "ADMINISTRATIVO", "subcategoria": null, "situacao": "VACANTE", "creating": true, "occupyingPosition": false, "dtnom": "2020-01-05", "dtposse": "2020-01-10", "dtexerc": "2020-01-15", "dtvac": "2026-05-01", "formavac": "EXONERACAO", "motivovac": null, "dtaposent": null, "tipoapos": null, "dtinicontr": null, "dtfimcontr": null, "dtprorrogcontr": null, "contractDurationDays": null, "dtHomologEstagio": null, "dtinihomologestag": null, "dtfimhomologestag": null, "dtiniCessao": null, "dtfimCessao": null, "tipoReq": null, "orgaoReq": null, "dtinipagto": null, "dtfimpagto": null, "dtPgtoAte": null, "jornadaSemanal": 40.0, "daysPosseToExercicio": 5, "ageAtIngressoYears": 30, "cargo": 101, "cargoComissao": null, "setor": "SETOR-01", "setorExercicio": "SETOR-01", "documentoLegalId": null, "openAfastamentosCount": 0},
+        "orgao": {"present": true, "ativa": true},
+        "pessoa": {"present": true, "id": 1001, "dtnasc": "1990-01-01"},
+        "setor": {"present": true, "sameOrgao": true},
+        "setorExercicio": {"present": true, "sameOrgao": true},
+        "cargo": {"present": true, "sameOrgao": true, "extinct": false, "tipoCargo": "EFETIVO", "controleVaga": true, "vagasAutorizadas": 10.0, "ocupadas": 3},
+        "cargoComissao": {"present": false, "sameOrgao": false, "extinct": false, "tipoCargo": null, "controleVaga": false, "vagasAutorizadas": null, "ocupadas": 0},
+        "documentoLegal": {"present": true, "id": 50.0, "empCodigo": 1, "sameOrgao": true, "tipoDocumento": null},
+        "existingVinculos": [],
+        "tenant": {"empCodigo": 1},
+        "context": {"resourceKey": "administracao-pessoal.vinculos", "ruleSetKey": "ergon.administracao-pessoal.vinculos.provimento", "creating": true}
+      }
+    },
+    {
+      "presetScenarioKey": "GUARD_ESTRUTURAL_OU_BYPASS",
+      "descriptionPtBr": "Posse anterior à nomeação.",
+      "facts": {
+        "draft": {"id": 1, "empCodigo": 1, "numfunc": 1001, "numero": 1, "regimejur": "ESTATUTARIO", "tipovinc": "EFETIVO", "categoria": "ADMINISTRATIVO", "subcategoria": null, "situacao": "VACANTE", "creating": true, "occupyingPosition": false, "dtnom": "2020-01-05", "dtposse": "2019-12-01", "dtexerc": "2020-01-15", "dtvac": "2026-05-01", "formavac": "EXONERACAO", "motivovac": null, "dtaposent": null, "tipoapos": null, "dtinicontr": null, "dtfimcontr": null, "dtprorrogcontr": null, "contractDurationDays": null, "dtHomologEstagio": null, "dtinihomologestag": null, "dtfimhomologestag": null, "dtiniCessao": null, "dtfimCessao": null, "tipoReq": null, "orgaoReq": null, "dtinipagto": null, "dtfimpagto": null, "dtPgtoAte": null, "jornadaSemanal": 40.0, "daysPosseToExercicio": 5, "ageAtIngressoYears": 30, "cargo": 101, "cargoComissao": null, "setor": "SETOR-01", "setorExercicio": "SETOR-01", "documentoLegalId": 91, "openAfastamentosCount": 0},
+        "orgao": {"present": true, "ativa": true},
+        "pessoa": {"present": true, "id": 1001, "dtnasc": "1990-01-01"},
+        "setor": {"present": true, "sameOrgao": true},
+        "setorExercicio": {"present": true, "sameOrgao": true},
+        "cargo": {"present": true, "sameOrgao": true, "extinct": false, "tipoCargo": "EFETIVO", "controleVaga": true, "vagasAutorizadas": 10.0, "ocupadas": 3},
+        "cargoComissao": {"present": false, "sameOrgao": false, "extinct": false, "tipoCargo": null, "controleVaga": false, "vagasAutorizadas": null, "ocupadas": 0},
+        "documentoLegal": {"present": true, "id": 50.0, "empCodigo": 1, "sameOrgao": true, "tipoDocumento": null},
+        "existingVinculos": [],
+        "tenant": {"empCodigo": 1},
+        "context": {"resourceKey": "administracao-pessoal.vinculos", "ruleSetKey": "ergon.administracao-pessoal.vinculos.provimento", "creating": true}
+      }
+    }
+  ],
+  "ergon.administracao-pessoal.regras-frequencia.rn013": [
+    {
+      "presetScenarioKey": "CONFORMIDADE_PADRAO",
+      "descriptionPtBr": "Fatos de referência aceitos pelos planos de fábrica dos órgãos 1 e 2.",
+      "facts": {
+        "draft": {"id": 10.0, "empCodigo": 1, "regimeJuridico": "ESTATUTARIO", "tipoVinculo": "EFETIVO", "categoria": "GERAL", "subcategoria": "PADRAO", "tipofreq": "LICENCA", "codfreq": 201, "dtini": "2024-01-01", "dtfim": "2024-12-31", "qtdMinDias": 1, "qtdMaxDias": 12, "intervMinDias": 30.0, "intProrrogDias": 10.0, "qtdMaxConsecMes": 15, "qtdMaxInterpMes": 15, "qtdMaxConsecAno": 60.0, "qtdMaxInterpAno": 90.0, "exigeHomologacao": true, "permiteConcomitancia": false, "naoSeAplica": false, "ativa": true, "documentoLegalId": 91, "ruleKey": "ergon.administracao-pessoal.regras-frequencia.rn013", "ruleParams": {"prorrogacao": null, "prazo": null, "tipoUnidadePrazo": null, "intersticio": null, "tipoUnidadeInterst": null, "tipoUnidade": null, "pontlei": null}},
+        "existingOverlaps": [],
+        "tenant": {"empCodigo": 2},
+        "context": {"resourceKey": "administracao-pessoal.regras-frequencia", "ruleSetKey": "ergon.administracao-pessoal.regras-frequencia.rn013"}
+      }
+    },
+    {
+      "presetScenarioKey": "CUSTOMIZACAO_ORGAO_2",
+      "descriptionPtBr": "Fatos aceitos pelo produto e rejeitados pela regra ERG-08380 do Órgão 2.",
+      "facts": {
+        "draft": {"id": 10.0, "empCodigo": 1, "regimeJuridico": "ESTATUTARIO", "tipoVinculo": "EFETIVO", "categoria": "GERAL", "subcategoria": "PADRAO", "tipofreq": "LICENCA", "codfreq": 201, "dtini": "2024-01-01", "dtfim": "2024-12-31", "qtdMinDias": 1, "qtdMaxDias": 13, "intervMinDias": 30.0, "intProrrogDias": 10.0, "qtdMaxConsecMes": 15, "qtdMaxInterpMes": 15, "qtdMaxConsecAno": 60.0, "qtdMaxInterpAno": 90.0, "exigeHomologacao": true, "permiteConcomitancia": false, "naoSeAplica": false, "ativa": true, "documentoLegalId": 91, "ruleKey": "ergon.administracao-pessoal.regras-frequencia.rn013", "ruleParams": {"prorrogacao": null, "prazo": null, "tipoUnidadePrazo": null, "intersticio": null, "tipoUnidadeInterst": null, "tipoUnidade": null, "pontlei": null}},
+        "existingOverlaps": [],
+        "tenant": {"empCodigo": 2},
+        "context": {"resourceKey": "administracao-pessoal.regras-frequencia", "ruleSetKey": "ergon.administracao-pessoal.regras-frequencia.rn013"}
+      }
+    },
+    {
+      "presetScenarioKey": "GUARD_ESTRUTURAL_OU_BYPASS",
+      "descriptionPtBr": "Fim de vigência anterior ao início da regra.",
+      "facts": {
+        "draft": {"id": 10.0, "empCodigo": 1, "regimeJuridico": "ESTATUTARIO", "tipoVinculo": "EFETIVO", "categoria": "GERAL", "subcategoria": "PADRAO", "tipofreq": "LICENCA", "codfreq": 201, "dtini": "2024-01-01", "dtfim": "2023-12-31", "qtdMinDias": 1, "qtdMaxDias": 12, "intervMinDias": 30.0, "intProrrogDias": 10.0, "qtdMaxConsecMes": 15, "qtdMaxInterpMes": 15, "qtdMaxConsecAno": 60.0, "qtdMaxInterpAno": 90.0, "exigeHomologacao": true, "permiteConcomitancia": false, "naoSeAplica": false, "ativa": true, "documentoLegalId": 91, "ruleKey": "ergon.administracao-pessoal.regras-frequencia.rn013", "ruleParams": {"prorrogacao": null, "prazo": null, "tipoUnidadePrazo": null, "intersticio": null, "tipoUnidadeInterst": null, "tipoUnidade": null, "pontlei": null}},
+        "existingOverlaps": [],
+        "tenant": {"empCodigo": 2},
+        "context": {"resourceKey": "administracao-pessoal.regras-frequencia", "ruleSetKey": "ergon.administracao-pessoal.regras-frequencia.rn013"}
+      }
+    }
+  ],
+  "ergon.administracao-pessoal.frequencias.lancamento": [
+    {
+      "presetScenarioKey": "CONFORMIDADE_PADRAO",
+      "descriptionPtBr": "Fatos de referência aceitos pelos planos de fábrica dos órgãos 1 e 2.",
+      "facts": {
+        "draft": {"id": 700.0, "empCodigo": 1, "numfunc": 1001, "numvinc": 1, "tipofreq": "FALTA", "codfreq": 101, "dtini": "2026-05-10", "dtfim": "2026-05-13", "horaEntradaMinutes": null, "horaSaidaMinutes": null, "quantidade": 4, "effectiveQuantity": 4, "effectiveDurationDays": 4, "situacao": "PENDENTE_HOMOLOGACAO", "documentoLegalId": 91, "retroactiveDays": 5},
+        "vinculo": {"present": true, "sameOrgao": true, "dtexerc": "2020-01-10", "dtvac": null, "dtaposent": null, "situacao": "ATIVO", "regimejur": "ESTATUTARIO", "tipovinc": "EFETIVO", "categoria": "GERAL", "subcategoria": "PADRAO"},
+        "pessoa": {"present": true, "sexo": "M"},
+        "tipoFrequencia": {"present": false, "tipo": null, "nome": null, "influiConta": false, "horaExtra": false},
+        "codigoFrequencia": {"present": true, "tipofreq": "FALTA", "codigo": 101, "viaFrequencia": true, "afastamento": false, "horaEntradaSaida": false, "regrasFreq": true, "sexo": "A", "qtdmin": 1, "qtdmax": 5},
+        "documentoLegal": {"present": true, "id": 91, "empCodigo": null, "sameOrgao": true, "tipoDocumento": null},
+        "effectiveStatutoryRule": {"present": true, "id": 10.0, "ruleKey": null, "naoSeAplica": false, "qtdMinDias": 1, "qtdMaxDias": 5, "intervMinDias": 15, "intProrrogDias": 10.0, "qtdMaxConsecMes": 5, "qtdMaxInterpMes": 5, "qtdMaxConsecAno": 30.0, "qtdMaxInterpAno": 30.0, "exigeHomologacao": true, "permiteConcomitancia": false, "exigeDocumentoLegal": false, "prorrogacaoPermitida": true, "documentoLegalId": null, "daysSincePreviousOccurrence": null, "accumulatedProrrogDays": 4, "projectedConsecMesDays": 4, "projectedInterpMesDays": 4, "projectedConsecAnoDays": 4, "projectedInterpAnoDays": 4, "overlappingAfastamentosCount": 0},
+        "existingFrequencias": [],
+        "activeAfastamentos": [],
+        "tenant": {"empCodigo": 1},
+        "context": {"resourceKey": "administracao-pessoal.frequencias", "ruleSetKey": "ergon.administracao-pessoal.frequencias.lancamento"}
+      }
+    },
+    {
+      "presetScenarioKey": "CUSTOMIZACAO_ORGAO_2",
+      "descriptionPtBr": "Fatos aceitos pelo produto e rejeitados pela regra CERG-09101 do Órgão 2.",
+      "facts": {
+        "draft": {"id": 700.0, "empCodigo": 1, "numfunc": 1001, "numvinc": 1, "tipofreq": "FALTA", "codfreq": 101, "dtini": "2026-05-10", "dtfim": "2026-05-13", "horaEntradaMinutes": null, "horaSaidaMinutes": null, "quantidade": 4, "effectiveQuantity": 4, "effectiveDurationDays": 4, "situacao": "PENDENTE_HOMOLOGACAO", "documentoLegalId": null, "retroactiveDays": 5},
+        "vinculo": {"present": true, "sameOrgao": true, "dtexerc": "2020-01-10", "dtvac": null, "dtaposent": null, "situacao": "ATIVO", "regimejur": "ESTATUTARIO", "tipovinc": "EFETIVO", "categoria": "GERAL", "subcategoria": "PADRAO"},
+        "pessoa": {"present": true, "sexo": "M"},
+        "tipoFrequencia": {"present": false, "tipo": null, "nome": null, "influiConta": false, "horaExtra": false},
+        "codigoFrequencia": {"present": true, "tipofreq": "FALTA", "codigo": 101, "viaFrequencia": true, "afastamento": false, "horaEntradaSaida": false, "regrasFreq": true, "sexo": "A", "qtdmin": 1, "qtdmax": 5},
+        "documentoLegal": {"present": false, "id": 91, "empCodigo": null, "sameOrgao": true, "tipoDocumento": null},
+        "effectiveStatutoryRule": {"present": true, "id": 10.0, "ruleKey": null, "naoSeAplica": false, "qtdMinDias": 1, "qtdMaxDias": 5, "intervMinDias": 15, "intProrrogDias": 10.0, "qtdMaxConsecMes": 5, "qtdMaxInterpMes": 5, "qtdMaxConsecAno": 30.0, "qtdMaxInterpAno": 30.0, "exigeHomologacao": true, "permiteConcomitancia": false, "exigeDocumentoLegal": false, "prorrogacaoPermitida": true, "documentoLegalId": null, "daysSincePreviousOccurrence": null, "accumulatedProrrogDays": 4, "projectedConsecMesDays": 4, "projectedInterpMesDays": 4, "projectedConsecAnoDays": 4, "projectedInterpAnoDays": 4, "overlappingAfastamentosCount": 0},
+        "existingFrequencias": [],
+        "activeAfastamentos": [],
+        "tenant": {"empCodigo": 1},
+        "context": {"resourceKey": "administracao-pessoal.frequencias", "ruleSetKey": "ergon.administracao-pessoal.frequencias.lancamento"}
+      }
+    },
+    {
+      "presetScenarioKey": "GUARD_ESTRUTURAL_OU_BYPASS",
+      "descriptionPtBr": "Término do lançamento anterior ao início.",
+      "facts": {
+        "draft": {"id": 700.0, "empCodigo": 1, "numfunc": 1001, "numvinc": 1, "tipofreq": "FALTA", "codfreq": 101, "dtini": "2026-05-10", "dtfim": "2026-05-09", "horaEntradaMinutes": null, "horaSaidaMinutes": null, "quantidade": 4, "effectiveQuantity": 4, "effectiveDurationDays": 4, "situacao": "PENDENTE_HOMOLOGACAO", "documentoLegalId": 91, "retroactiveDays": 5},
+        "vinculo": {"present": true, "sameOrgao": true, "dtexerc": "2020-01-10", "dtvac": null, "dtaposent": null, "situacao": "ATIVO", "regimejur": "ESTATUTARIO", "tipovinc": "EFETIVO", "categoria": "GERAL", "subcategoria": "PADRAO"},
+        "pessoa": {"present": true, "sexo": "M"},
+        "tipoFrequencia": {"present": false, "tipo": null, "nome": null, "influiConta": false, "horaExtra": false},
+        "codigoFrequencia": {"present": true, "tipofreq": "FALTA", "codigo": 101, "viaFrequencia": true, "afastamento": false, "horaEntradaSaida": false, "regrasFreq": true, "sexo": "A", "qtdmin": 1, "qtdmax": 5},
+        "documentoLegal": {"present": true, "id": 91, "empCodigo": null, "sameOrgao": true, "tipoDocumento": null},
+        "effectiveStatutoryRule": {"present": true, "id": 10.0, "ruleKey": null, "naoSeAplica": false, "qtdMinDias": 1, "qtdMaxDias": 5, "intervMinDias": 15, "intProrrogDias": 10.0, "qtdMaxConsecMes": 5, "qtdMaxInterpMes": 5, "qtdMaxConsecAno": 30.0, "qtdMaxInterpAno": 30.0, "exigeHomologacao": true, "permiteConcomitancia": false, "exigeDocumentoLegal": false, "prorrogacaoPermitida": true, "documentoLegalId": null, "daysSincePreviousOccurrence": null, "accumulatedProrrogDays": 4, "projectedConsecMesDays": 4, "projectedInterpMesDays": 4, "projectedConsecAnoDays": 4, "projectedInterpAnoDays": 4, "overlappingAfastamentosCount": 0},
+        "existingFrequencias": [],
+        "activeAfastamentos": [],
+        "tenant": {"empCodigo": 1},
+        "context": {"resourceKey": "administracao-pessoal.frequencias", "ruleSetKey": "ergon.administracao-pessoal.frequencias.lancamento"}
+      }
+    }
+  ],
+  "ergon.administracao-pessoal.afastamentos.concessao": [
+    {
+      "presetScenarioKey": "CONFORMIDADE_PADRAO",
+      "descriptionPtBr": "Fatos de referência aceitos pelos planos de fábrica dos órgãos 1 e 2.",
+      "facts": {
+        "draft": {"id": 500.0, "empCodigo": 1, "numfunc": 1001, "numvinc": 1, "tipofreq": "LICENCA", "codfreq": 201, "dtini": "2026-03-01", "dtprevfim": "2026-04-04", "dtfim": null, "quantidadeDias": 35, "effectiveDurationDays": 35, "prorrogacao": false, "inPlaceProrrogacao": false, "previsaoAnterior": null, "previsaoAtual": 20547, "afastamentoOrigemId": null, "numfuncSubstituto": null, "numvincSubstituto": null, "documentoLegalId": 91, "atoPublicacaoId": 91, "situacao": "PENDENTE_HOMOLOGACAO"},
+        "vinculo": {"present": true, "sameOrgao": true, "dtexerc": "2020-01-10", "dtvac": null, "dtaposent": null, "situacao": "ATIVO", "regimejur": "ESTATUTARIO", "tipovinc": "EFETIVO", "categoria": "GERAL", "subcategoria": "PADRAO"},
+        "pessoa": {"present": true, "sexo": "M"},
+        "tipoFrequencia": {"present": false, "tipo": null, "nome": null, "influiConta": false, "horaExtra": false},
+        "codigoFrequencia": {"present": true, "tipofreq": "LICENCA", "codigo": 201, "viaFrequencia": false, "afastamento": true, "horaEntradaSaida": false, "regrasFreq": true, "sexo": "A", "qtdmin": 1, "qtdmax": 90.0},
+        "documentoLegal": {"present": true, "id": 91, "empCodigo": null, "sameOrgao": true, "tipoDocumento": null},
+        "afastamentoOrigem": {"present": false, "sameVinculo": false, "selfReference": false, "activeOrigin": false, "chronologicalAfterOrigin": false, "gapDays": null},
+        "substitutoVinculo": {"present": false, "sameOrgao": false, "ativo": false},
+        "effectiveStatutoryRule": {"present": true, "id": 10.0, "ruleKey": null, "naoSeAplica": false, "qtdMinDias": 1, "qtdMaxDias": 60.0, "intervMinDias": 15, "intProrrogDias": 10.0, "qtdMaxConsecMes": 31, "qtdMaxInterpMes": 31, "qtdMaxConsecAno": 90.0, "qtdMaxInterpAno": 90.0, "exigeHomologacao": true, "permiteConcomitancia": false, "exigeDocumentoLegal": false, "prorrogacaoPermitida": true, "documentoLegalId": null, "daysSincePreviousOccurrence": null, "accumulatedProrrogDays": 35, "projectedConsecMesDays": 31, "projectedInterpMesDays": 31, "projectedConsecAnoDays": 35, "projectedInterpAnoDays": 35, "overlappingFrequenciasCount": 0},
+        "existingAfastamentos": [],
+        "activeFrequencias": [],
+        "tenant": {"empCodigo": 1},
+        "context": {"resourceKey": "administracao-pessoal.afastamentos", "ruleSetKey": "ergon.administracao-pessoal.afastamentos.concessao"}
+      }
+    },
+    {
+      "presetScenarioKey": "CUSTOMIZACAO_ORGAO_2",
+      "descriptionPtBr": "Fatos aceitos pelo produto e rejeitados pela regra CERG-09201 do Órgão 2.",
+      "facts": {
+        "draft": {"id": 500.0, "empCodigo": 1, "numfunc": 1001, "numvinc": 1, "tipofreq": "LICENCA", "codfreq": 201, "dtini": "2026-03-01", "dtprevfim": "2026-04-04", "dtfim": null, "quantidadeDias": 35, "effectiveDurationDays": 35, "prorrogacao": false, "inPlaceProrrogacao": false, "previsaoAnterior": null, "previsaoAtual": 20547, "afastamentoOrigemId": null, "numfuncSubstituto": null, "numvincSubstituto": null, "documentoLegalId": 91, "atoPublicacaoId": null, "situacao": "PENDENTE_HOMOLOGACAO"},
+        "vinculo": {"present": true, "sameOrgao": true, "dtexerc": "2020-01-10", "dtvac": null, "dtaposent": null, "situacao": "ATIVO", "regimejur": "ESTATUTARIO", "tipovinc": "EFETIVO", "categoria": "GERAL", "subcategoria": "PADRAO"},
+        "pessoa": {"present": true, "sexo": "M"},
+        "tipoFrequencia": {"present": false, "tipo": null, "nome": null, "influiConta": false, "horaExtra": false},
+        "codigoFrequencia": {"present": true, "tipofreq": "LICENCA", "codigo": 201, "viaFrequencia": false, "afastamento": true, "horaEntradaSaida": false, "regrasFreq": true, "sexo": "A", "qtdmin": 1, "qtdmax": 90.0},
+        "documentoLegal": {"present": false, "id": 91, "empCodigo": null, "sameOrgao": true, "tipoDocumento": null},
+        "afastamentoOrigem": {"present": false, "sameVinculo": false, "selfReference": false, "activeOrigin": false, "chronologicalAfterOrigin": false, "gapDays": null},
+        "substitutoVinculo": {"present": false, "sameOrgao": false, "ativo": false},
+        "effectiveStatutoryRule": {"present": true, "id": 10.0, "ruleKey": null, "naoSeAplica": false, "qtdMinDias": 1, "qtdMaxDias": 60.0, "intervMinDias": 15, "intProrrogDias": 10.0, "qtdMaxConsecMes": 31, "qtdMaxInterpMes": 31, "qtdMaxConsecAno": 90.0, "qtdMaxInterpAno": 90.0, "exigeHomologacao": true, "permiteConcomitancia": false, "exigeDocumentoLegal": false, "prorrogacaoPermitida": true, "documentoLegalId": null, "daysSincePreviousOccurrence": null, "accumulatedProrrogDays": 35, "projectedConsecMesDays": 31, "projectedInterpMesDays": 31, "projectedConsecAnoDays": 35, "projectedInterpAnoDays": 35, "overlappingFrequenciasCount": 0},
+        "existingAfastamentos": [],
+        "activeFrequencias": [],
+        "tenant": {"empCodigo": 1},
+        "context": {"resourceKey": "administracao-pessoal.afastamentos", "ruleSetKey": "ergon.administracao-pessoal.afastamentos.concessao"}
+      }
+    },
+    {
+      "presetScenarioKey": "GUARD_ESTRUTURAL_OU_BYPASS",
+      "descriptionPtBr": "Fim previsto anterior ao início do afastamento.",
+      "facts": {
+        "draft": {"id": 500.0, "empCodigo": 1, "numfunc": 1001, "numvinc": 1, "tipofreq": "LICENCA", "codfreq": 201, "dtini": "2026-03-01", "dtprevfim": "2026-02-28", "dtfim": null, "quantidadeDias": 35, "effectiveDurationDays": 35, "prorrogacao": false, "inPlaceProrrogacao": false, "previsaoAnterior": null, "previsaoAtual": 20547, "afastamentoOrigemId": null, "numfuncSubstituto": null, "numvincSubstituto": null, "documentoLegalId": 91, "atoPublicacaoId": 91, "situacao": "PENDENTE_HOMOLOGACAO"},
+        "vinculo": {"present": true, "sameOrgao": true, "dtexerc": "2020-01-10", "dtvac": null, "dtaposent": null, "situacao": "ATIVO", "regimejur": "ESTATUTARIO", "tipovinc": "EFETIVO", "categoria": "GERAL", "subcategoria": "PADRAO"},
+        "pessoa": {"present": true, "sexo": "M"},
+        "tipoFrequencia": {"present": false, "tipo": null, "nome": null, "influiConta": false, "horaExtra": false},
+        "codigoFrequencia": {"present": true, "tipofreq": "LICENCA", "codigo": 201, "viaFrequencia": false, "afastamento": true, "horaEntradaSaida": false, "regrasFreq": true, "sexo": "A", "qtdmin": 1, "qtdmax": 90.0},
+        "documentoLegal": {"present": true, "id": 91, "empCodigo": null, "sameOrgao": true, "tipoDocumento": null},
+        "afastamentoOrigem": {"present": false, "sameVinculo": false, "selfReference": false, "activeOrigin": false, "chronologicalAfterOrigin": false, "gapDays": null},
+        "substitutoVinculo": {"present": false, "sameOrgao": false, "ativo": false},
+        "effectiveStatutoryRule": {"present": true, "id": 10.0, "ruleKey": null, "naoSeAplica": false, "qtdMinDias": 1, "qtdMaxDias": 60.0, "intervMinDias": 15, "intProrrogDias": 10.0, "qtdMaxConsecMes": 31, "qtdMaxInterpMes": 31, "qtdMaxConsecAno": 90.0, "qtdMaxInterpAno": 90.0, "exigeHomologacao": true, "permiteConcomitancia": false, "exigeDocumentoLegal": false, "prorrogacaoPermitida": true, "documentoLegalId": null, "daysSincePreviousOccurrence": null, "accumulatedProrrogDays": 35, "projectedConsecMesDays": 31, "projectedInterpMesDays": 31, "projectedConsecAnoDays": 35, "projectedInterpAnoDays": 35, "overlappingFrequenciasCount": 0},
+        "existingAfastamentos": [],
+        "activeFrequencias": [],
+        "tenant": {"empCodigo": 1},
+        "context": {"resourceKey": "administracao-pessoal.afastamentos", "ruleSetKey": "ergon.administracao-pessoal.afastamentos.concessao"}
+      }
+    }
+  ],
+  "ergon.administracao-pessoal.parametros-contagem-ferias.matriz": [
+    {
+      "presetScenarioKey": "CONFORMIDADE_PADRAO",
+      "descriptionPtBr": "Fatos de referência aceitos pelos planos de fábrica dos órgãos 1 e 2.",
+      "facts": {
+        "draft": {"id": 100.0, "empCodigo": 1, "regimeJuridico": "ESTATUTARIO", "tipoVinculo": "EFETIVO", "categoria": "GERAL", "subcategoria": "PADRAO", "dtini": "2020-01-01", "dtfim": null, "temFerias": true, "totDiasFer": 30.0, "minPerFer": 1, "maxPerFer": 2, "minDiasPerFer": 10.0, "maxDiasPerFer": 30.0, "minDiasPerPrincFer": 14, "abonoDirGozo": "N", "numDiasAbonoFer": null, "denDiasAbonoFer": null, "minDiasPvendFer": null, "maxDiasVendFer": null, "abonoConstFer": true, "adiant13Fer": true, "adiantSalFer": true, "emprestFer": true, "permiteGozoAntesPaFer": true, "permiteFerPrimPer": true, "permiteFerSegunPer": true, "permiteFerTercPer": true, "permiteFerPerInc": true, "criterioPrescricao": "F", "permiteGozoAposPrescricao": false, "permiteLancConcPa": true, "exigeExercicio": true, "semPgtoMulta": false, "contDobroFerias": true, "minDiasPeraqfer": 5, "maxDiasPeraqfer": 30.0, "temLicEsp": false, "anosLicEsp": null, "mesesLicEspPer": null, "vendLicEsp": false, "abonoDirGozoLicEsp": null, "minDiasPvendLicEsp": null, "maxDiasVendLicEsp": null, "numDiasAbonoLicEsp": null, "denDiasAbonoLicEsp": null, "contDobroLicEsp": false, "minDiasPcontDobLicEsp": null, "maxDiasContDobLicEsp": null, "temProgressao": false, "anosProgressao": null, "temTempoServ": false, "anos1TempoServ": null, "temSextaParte": false, "anosSextaParte": null, "documentoLegalFeriasId": 91, "documentoLegalProgressaoId": null, "observacoes": null, "active": true},
+        "existingRules": [],
+        "scope": {"overlappingActiveCount": 0},
+        "derived": {},
+        "tenant": {"empCodigo": 1},
+        "context": {"operation": "validate"}
+      }
+    },
+    {
+      "presetScenarioKey": "CUSTOMIZACAO_ORGAO_2",
+      "descriptionPtBr": "Fatos aceitos pelo produto e rejeitados pela regra CERG-PARAM-301 do Órgão 2.",
+      "facts": {
+        "draft": {"id": 100.0, "empCodigo": 1, "regimeJuridico": "ESTATUTARIO", "tipoVinculo": "EFETIVO", "categoria": "GERAL", "subcategoria": "PADRAO", "dtini": "2020-01-01", "dtfim": null, "temFerias": true, "totDiasFer": 30.0, "minPerFer": 1, "maxPerFer": 2, "minDiasPerFer": 10.0, "maxDiasPerFer": 30.0, "minDiasPerPrincFer": 14, "abonoDirGozo": "N", "numDiasAbonoFer": null, "denDiasAbonoFer": null, "minDiasPvendFer": null, "maxDiasVendFer": null, "abonoConstFer": true, "adiant13Fer": true, "adiantSalFer": true, "emprestFer": true, "permiteGozoAntesPaFer": true, "permiteFerPrimPer": true, "permiteFerSegunPer": true, "permiteFerTercPer": true, "permiteFerPerInc": true, "criterioPrescricao": "F", "permiteGozoAposPrescricao": false, "permiteLancConcPa": true, "exigeExercicio": true, "semPgtoMulta": false, "contDobroFerias": true, "minDiasPeraqfer": 5, "maxDiasPeraqfer": 30.0, "temLicEsp": false, "anosLicEsp": null, "mesesLicEspPer": null, "vendLicEsp": false, "abonoDirGozoLicEsp": null, "minDiasPvendLicEsp": null, "maxDiasVendLicEsp": null, "numDiasAbonoLicEsp": null, "denDiasAbonoLicEsp": null, "contDobroLicEsp": false, "minDiasPcontDobLicEsp": null, "maxDiasContDobLicEsp": null, "temProgressao": false, "anosProgressao": null, "temTempoServ": false, "anos1TempoServ": null, "temSextaParte": false, "anosSextaParte": null, "documentoLegalFeriasId": null, "documentoLegalProgressaoId": null, "observacoes": null, "active": true},
+        "existingRules": [],
+        "scope": {"overlappingActiveCount": 0},
+        "derived": {},
+        "tenant": {"empCodigo": 1},
+        "context": {"operation": "validate"}
+      }
+    },
+    {
+      "presetScenarioKey": "GUARD_ESTRUTURAL_OU_BYPASS",
+      "descriptionPtBr": "Fim de vigência anterior ao início do parâmetro.",
+      "facts": {
+        "draft": {"id": 100.0, "empCodigo": 1, "regimeJuridico": "ESTATUTARIO", "tipoVinculo": "EFETIVO", "categoria": "GERAL", "subcategoria": "PADRAO", "dtini": "2020-01-01", "dtfim": "2019-12-31", "temFerias": true, "totDiasFer": 30.0, "minPerFer": 1, "maxPerFer": 2, "minDiasPerFer": 10.0, "maxDiasPerFer": 30.0, "minDiasPerPrincFer": 14, "abonoDirGozo": "N", "numDiasAbonoFer": null, "denDiasAbonoFer": null, "minDiasPvendFer": null, "maxDiasVendFer": null, "abonoConstFer": true, "adiant13Fer": true, "adiantSalFer": true, "emprestFer": true, "permiteGozoAntesPaFer": true, "permiteFerPrimPer": true, "permiteFerSegunPer": true, "permiteFerTercPer": true, "permiteFerPerInc": true, "criterioPrescricao": "F", "permiteGozoAposPrescricao": false, "permiteLancConcPa": true, "exigeExercicio": true, "semPgtoMulta": false, "contDobroFerias": true, "minDiasPeraqfer": 5, "maxDiasPeraqfer": 30.0, "temLicEsp": false, "anosLicEsp": null, "mesesLicEspPer": null, "vendLicEsp": false, "abonoDirGozoLicEsp": null, "minDiasPvendLicEsp": null, "maxDiasVendLicEsp": null, "numDiasAbonoLicEsp": null, "denDiasAbonoLicEsp": null, "contDobroLicEsp": false, "minDiasPcontDobLicEsp": null, "maxDiasContDobLicEsp": null, "temProgressao": false, "anosProgressao": null, "temTempoServ": false, "anos1TempoServ": null, "temSextaParte": false, "anosSextaParte": null, "documentoLegalFeriasId": 91, "documentoLegalProgressaoId": null, "observacoes": null, "active": true},
+        "existingRules": [],
+        "scope": {"overlappingActiveCount": 0},
+        "derived": {},
+        "tenant": {"empCodigo": 1},
+        "context": {"operation": "validate"}
+      }
+    }
+  ],
+  "ergon.administracao-pessoal.periodos-aquisitivos-ferias.aquisicao": [
+    {
+      "presetScenarioKey": "CONFORMIDADE_PADRAO",
+      "descriptionPtBr": "Fatos de referência aceitos pelos planos de fábrica dos órgãos 1 e 2.",
+      "facts": {
+        "draft": {"id": 700.0, "empCodigo": 1, "numfunc": 1001, "numvinc": 1, "chave": 1, "exercicio": 2025, "dtini": "2024-01-01", "dtfim": "2024-12-31", "totDiasDireito": 30.0, "faltasApuradas": 0, "diasAfastamentoSuspensivo": 0, "diasGozados": 0, "diasVendidosAbono": 0, "diasConvertidosDobro": 10.0, "saldoDiasDisponivel": 20.0, "situacao": "DISPONIVEL", "dtPrescricao": "2026-12-31", "criterioPrescricao": "F", "permiteGozoPosPrescricao": "I", "dtPgtoComMulta": null, "semPgtoMulta": "I", "maxPerFer": null, "minPerFer": null, "maxDiasPerFer": null, "minDiasPerFer": null, "minDiasPerPrincFer": null, "abonoDirGozo": "I", "abonoConstFer": "I", "adiant13Fer": "I", "adiantSalFer": "I", "emprestFer": "I", "permiteFerEstePer": "I", "maxDiasVendFer": null, "minDiasPvendFer": null, "numDiasAbonoFer": null, "denDiasAbonoFer": null, "contDobroFerias": "I", "minDiasPeraqfer": null, "maxDiasPeraqfer": null, "geradoPorAverbacao": false, "documentoLegalId": 91, "atoPublicacaoId": null, "observacoes": null, "lockedAverbacaoMutation": false},
+        "vinculo": {"dtexerc": "2020-01-01", "dtvac": null, "dtaposent": null, "situacao": "ATIVO", "regimeJuridico": "ESTATUTARIO", "tipoVinculo": "EFETIVO", "categoria": "GERAL", "subcategoria": "PADRAO"},
+        "effectiveParametroConta": {"parametroEncontrado": true, "parametroId": 100.0, "escopoGlobal": false, "temFerias": true, "totDiasFer": 30.0, "maxPerFer": 3, "minPerFer": 1, "maxDiasPerFer": 30.0, "minDiasPerFer": 10.0, "minDiasPerPrincFer": 14, "abonoDirGozo": "D", "permiteAbonoPecuniario": true, "numDiasAbonoFer": 1, "denDiasAbonoFer": 3, "maxDiasVendFer": 10.0, "minDiasPvendFer": 5, "abonoConstFer": true, "adiant13Fer": true, "adiantSalFer": true, "emprestFer": true, "contDobroFerias": true, "minDiasPeraqfer": 5, "maxDiasPeraqfer": 30.0, "criterioPrescricao": "F", "permiteGozoAposPrescricao": false, "semPgtoMulta": false, "permiteGozoAntesPaFer": true, "permiteFerPrimPer": true, "permiteFerSegunPer": true, "permiteFerTercPer": true, "permiteFerPerInc": true, "permiteLancConcPa": true},
+        "existingPeriodos": [],
+        "derived": {"faltasNoPeriodoCount": 0, "diasAfastamentoNoPeriodoCount": 0, "maxDiasDireitoPelaEscalaFaltas": 30, "totalDiasConsumidos": 10, "openAccumulatedPeriodsCount": 1, "overlappingPeriodsCount": 0, "parcelasViolandoPrescricaoCount": 0},
+        "tenant": {"empCodigo": 1},
+        "context": {"operation": "validate"}
+      }
+    },
+    {
+      "presetScenarioKey": "CUSTOMIZACAO_ORGAO_2",
+      "descriptionPtBr": "Fatos aceitos pelo produto e rejeitados pela regra CERG-PA-301 do Órgão 2.",
+      "facts": {
+        "draft": {"id": 700.0, "empCodigo": 1, "numfunc": 1001, "numvinc": 1, "chave": 1, "exercicio": 2025, "dtini": "2024-01-01", "dtfim": "2024-12-31", "totDiasDireito": 30.0, "faltasApuradas": 0, "diasAfastamentoSuspensivo": 0, "diasGozados": 0, "diasVendidosAbono": 0, "diasConvertidosDobro": 10.0, "saldoDiasDisponivel": 20.0, "situacao": "DISPONIVEL", "dtPrescricao": "2026-12-31", "criterioPrescricao": "F", "permiteGozoPosPrescricao": "I", "dtPgtoComMulta": null, "semPgtoMulta": "I", "maxPerFer": null, "minPerFer": null, "maxDiasPerFer": null, "minDiasPerFer": null, "minDiasPerPrincFer": null, "abonoDirGozo": "I", "abonoConstFer": "I", "adiant13Fer": "I", "adiantSalFer": "I", "emprestFer": "I", "permiteFerEstePer": "I", "maxDiasVendFer": null, "minDiasPvendFer": null, "numDiasAbonoFer": null, "denDiasAbonoFer": null, "contDobroFerias": "I", "minDiasPeraqfer": null, "maxDiasPeraqfer": null, "geradoPorAverbacao": false, "documentoLegalId": null, "atoPublicacaoId": null, "observacoes": null, "lockedAverbacaoMutation": false},
+        "vinculo": {"dtexerc": "2020-01-01", "dtvac": null, "dtaposent": null, "situacao": "ATIVO", "regimeJuridico": "ESTATUTARIO", "tipoVinculo": "EFETIVO", "categoria": "GERAL", "subcategoria": "PADRAO"},
+        "effectiveParametroConta": {"parametroEncontrado": true, "parametroId": 100.0, "escopoGlobal": false, "temFerias": true, "totDiasFer": 30.0, "maxPerFer": 3, "minPerFer": 1, "maxDiasPerFer": 30.0, "minDiasPerFer": 10.0, "minDiasPerPrincFer": 14, "abonoDirGozo": "D", "permiteAbonoPecuniario": true, "numDiasAbonoFer": 1, "denDiasAbonoFer": 3, "maxDiasVendFer": 10.0, "minDiasPvendFer": 5, "abonoConstFer": true, "adiant13Fer": true, "adiantSalFer": true, "emprestFer": true, "contDobroFerias": true, "minDiasPeraqfer": 5, "maxDiasPeraqfer": 30.0, "criterioPrescricao": "F", "permiteGozoAposPrescricao": false, "semPgtoMulta": false, "permiteGozoAntesPaFer": true, "permiteFerPrimPer": true, "permiteFerSegunPer": true, "permiteFerTercPer": true, "permiteFerPerInc": true, "permiteLancConcPa": true},
+        "existingPeriodos": [],
+        "derived": {"faltasNoPeriodoCount": 0, "diasAfastamentoNoPeriodoCount": 0, "maxDiasDireitoPelaEscalaFaltas": 30, "totalDiasConsumidos": 10, "openAccumulatedPeriodsCount": 1, "overlappingPeriodsCount": 0, "parcelasViolandoPrescricaoCount": 0},
+        "tenant": {"empCodigo": 1},
+        "context": {"operation": "validate"}
+      }
+    },
+    {
+      "presetScenarioKey": "GUARD_ESTRUTURAL_OU_BYPASS",
+      "descriptionPtBr": "Término da aquisição de férias anterior ao início.",
+      "facts": {
+        "draft": {"id": 700.0, "empCodigo": 1, "numfunc": 1001, "numvinc": 1, "chave": 1, "exercicio": 2025, "dtini": "2024-01-01", "dtfim": "2023-12-31", "totDiasDireito": 30.0, "faltasApuradas": 0, "diasAfastamentoSuspensivo": 0, "diasGozados": 0, "diasVendidosAbono": 0, "diasConvertidosDobro": 10.0, "saldoDiasDisponivel": 20.0, "situacao": "DISPONIVEL", "dtPrescricao": "2026-12-31", "criterioPrescricao": "F", "permiteGozoPosPrescricao": "I", "dtPgtoComMulta": null, "semPgtoMulta": "I", "maxPerFer": null, "minPerFer": null, "maxDiasPerFer": null, "minDiasPerFer": null, "minDiasPerPrincFer": null, "abonoDirGozo": "I", "abonoConstFer": "I", "adiant13Fer": "I", "adiantSalFer": "I", "emprestFer": "I", "permiteFerEstePer": "I", "maxDiasVendFer": null, "minDiasPvendFer": null, "numDiasAbonoFer": null, "denDiasAbonoFer": null, "contDobroFerias": "I", "minDiasPeraqfer": null, "maxDiasPeraqfer": null, "geradoPorAverbacao": false, "documentoLegalId": 91, "atoPublicacaoId": null, "observacoes": null, "lockedAverbacaoMutation": false},
+        "vinculo": {"dtexerc": "2020-01-01", "dtvac": null, "dtaposent": null, "situacao": "ATIVO", "regimeJuridico": "ESTATUTARIO", "tipoVinculo": "EFETIVO", "categoria": "GERAL", "subcategoria": "PADRAO"},
+        "effectiveParametroConta": {"parametroEncontrado": true, "parametroId": 100.0, "escopoGlobal": false, "temFerias": true, "totDiasFer": 30.0, "maxPerFer": 3, "minPerFer": 1, "maxDiasPerFer": 30.0, "minDiasPerFer": 10.0, "minDiasPerPrincFer": 14, "abonoDirGozo": "D", "permiteAbonoPecuniario": true, "numDiasAbonoFer": 1, "denDiasAbonoFer": 3, "maxDiasVendFer": 10.0, "minDiasPvendFer": 5, "abonoConstFer": true, "adiant13Fer": true, "adiantSalFer": true, "emprestFer": true, "contDobroFerias": true, "minDiasPeraqfer": 5, "maxDiasPeraqfer": 30.0, "criterioPrescricao": "F", "permiteGozoAposPrescricao": false, "semPgtoMulta": false, "permiteGozoAntesPaFer": true, "permiteFerPrimPer": true, "permiteFerSegunPer": true, "permiteFerTercPer": true, "permiteFerPerInc": true, "permiteLancConcPa": true},
+        "existingPeriodos": [],
+        "derived": {"faltasNoPeriodoCount": 0, "diasAfastamentoNoPeriodoCount": 0, "maxDiasDireitoPelaEscalaFaltas": 30, "totalDiasConsumidos": 10, "openAccumulatedPeriodsCount": 1, "overlappingPeriodsCount": 0, "parcelasViolandoPrescricaoCount": 0},
+        "tenant": {"empCodigo": 1},
+        "context": {"operation": "validate"}
+      }
+    }
+  ],
+  "ergon.administracao-pessoal.averbacoes-tempo-servico.cadastro": [
+    {
+      "presetScenarioKey": "CONFORMIDADE_PADRAO",
+      "descriptionPtBr": "Fatos de referência aceitos pelos planos de fábrica dos órgãos 1 e 2.",
+      "facts": {
+        "draft": {"inicio": 100, "fim": 1199, "diasCorridos": 1100, "totalDias": 1100, "diasFinalidade": 100, "diasDesaverbados": 1, "finalidade": "LICENCA_ESPECIAL", "complementoInicio": 100, "complementoFim": 1199, "sobrepoe": false, "documentoLegalId": 1, "regimePrevidenciario": "RGPS"},
+        "vinculo": {"exercicio": null, "vacancia": null},
+        "neighborhood": {"sobreposicoes": 0, "consumoPeriodosGerados": 0}
+      }
+    },
+    {
+      "presetScenarioKey": "CUSTOMIZACAO_ORGAO_2",
+      "descriptionPtBr": "Fatos aceitos pelo produto e rejeitados pela regra CERG-06111 do Órgão 2.",
+      "facts": {
+        "draft": {"inicio": 100, "fim": 1199, "diasCorridos": 1100, "totalDias": 1100, "diasFinalidade": 100, "diasDesaverbados": 1, "finalidade": "LICENCA_ESPECIAL", "complementoInicio": 100, "complementoFim": 1199, "sobrepoe": false, "documentoLegalId": null, "regimePrevidenciario": "RGPS"},
+        "vinculo": {"exercicio": null, "vacancia": null},
+        "neighborhood": {"sobreposicoes": 0, "consumoPeriodosGerados": 0}
+      }
+    },
+    {
+      "presetScenarioKey": "GUARD_ESTRUTURAL_OU_BYPASS",
+      "descriptionPtBr": "Tempo averbado concomitante ao exercício do vínculo.",
+      "facts": {
+        "draft": {"inicio": 100, "fim": 1199, "diasCorridos": 1100, "totalDias": 1100, "diasFinalidade": 100, "diasDesaverbados": 1, "finalidade": "LICENCA_ESPECIAL", "complementoInicio": 100, "complementoFim": 1199, "sobrepoe": false, "documentoLegalId": 1, "regimePrevidenciario": "RGPS"},
+        "vinculo": {"exercicio": 200, "vacancia": null},
+        "neighborhood": {"sobreposicoes": 0, "consumoPeriodosGerados": 0}
+      }
+    }
+  ],
+  "ergon.administracao-pessoal.periodos-aquisitivos-licenca-especial.cadastro": [
+    {
+      "presetScenarioKey": "CONFORMIDADE_PADRAO",
+      "descriptionPtBr": "Fatos de referência aceitos pelos planos de fábrica dos órgãos 1 e 2.",
+      "facts": {
+        "draft": {"inicio": 100, "fim": 200, "diasDireito": 100, "diasConvertidosDobro": 1, "vendLicEsp": "I", "contDobroLicEsp": "I", "saldoDisponivel": 100, "documentoLegalId": 1},
+        "current": {"edicaoManual": false, "origem": null, "inicio": null, "fim": null, "diasDireito": null},
+        "vinculo": {"exercicio": null, "vacancia": null},
+        "politica": {"temLicEsp": true, "permiteDobro": true, "mesesPeriodo": null, "minimoDobro": null, "maximoDobro": null},
+        "neighborhood": {"sobreposicoes": 0, "diasGozados": 0, "diasVendidos": 0, "gozoAtivo": 0, "vendaAtiva": 0}
+      }
+    },
+    {
+      "presetScenarioKey": "CUSTOMIZACAO_ORGAO_2",
+      "descriptionPtBr": "Fatos aceitos pelo produto e rejeitados pela regra CERG-06211 do Órgão 2.",
+      "facts": {
+        "draft": {"inicio": 100, "fim": 200, "diasDireito": 100, "diasConvertidosDobro": 1, "vendLicEsp": "I", "contDobroLicEsp": "I", "saldoDisponivel": 100, "documentoLegalId": null},
+        "current": {"edicaoManual": false, "origem": null, "inicio": null, "fim": null, "diasDireito": null},
+        "vinculo": {"exercicio": null, "vacancia": null},
+        "politica": {"temLicEsp": true, "permiteDobro": true, "mesesPeriodo": null, "minimoDobro": null, "maximoDobro": null},
+        "neighborhood": {"sobreposicoes": 0, "diasGozados": 0, "diasVendidos": 0, "gozoAtivo": 0, "vendaAtiva": 0}
+      }
+    },
+    {
+      "presetScenarioKey": "GUARD_ESTRUTURAL_OU_BYPASS",
+      "descriptionPtBr": "Término da aquisição de licença anterior ao início.",
+      "facts": {
+        "draft": {"inicio": 100, "fim": 99, "diasDireito": 100, "diasConvertidosDobro": 1, "vendLicEsp": "I", "contDobroLicEsp": "I", "saldoDisponivel": 100, "documentoLegalId": 1},
+        "current": {"edicaoManual": false, "origem": null, "inicio": null, "fim": null, "diasDireito": null},
+        "vinculo": {"exercicio": null, "vacancia": null},
+        "politica": {"temLicEsp": true, "permiteDobro": true, "mesesPeriodo": null, "minimoDobro": null, "maximoDobro": null},
+        "neighborhood": {"sobreposicoes": 0, "diasGozados": 0, "diasVendidos": 0, "gozoAtivo": 0, "vendaAtiva": 0}
+      }
+    }
+  ],
+  "ergon.administracao-pessoal.licencas-especiais-gozo.cadastro": [
+    {
+      "presetScenarioKey": "CONFORMIDADE_PADRAO",
+      "descriptionPtBr": "Fatos de referência aceitos pelos planos de fábrica dos órgãos 1 e 2.",
+      "facts": {
+        "draft": {"inicio": 100, "prevFim": 109, "fimEfetivo": 109, "diasGozo": 10, "diasCorridos": 10, "numfunc": 1, "consumo": 10, "abono": true, "diasAbono": 2, "documentoLegalId": 1, "iniFimAbono": "I", "baseDiasAbono": 10},
+        "vinculo": {"exercicio": null, "vacancia": null},
+        "periodoAquisitivo": {"situacao": "DISPONIVEL", "saldoDisponivel": 100, "diasDireito": 100, "fim": null, "prescricao": null, "origem": null},
+        "politica": {"permiteVenda": true, "baseAbono": "D", "numeradorAbono": 2, "denominadorAbono": 10, "maximoVenda": null, "permiteAntecipacao": null, "permiteAposPrescricao": null},
+        "venda": {},
+        "neighborhood": {"vinculosSubstituto": 0, "sobreposicoes": 0, "consumoAcumulado": 10, "outrosAbonos": 0, "maiorOrdemOuQuantidade": 1, "pecuniaAcumulada": null}
+      }
+    },
+    {
+      "presetScenarioKey": "CUSTOMIZACAO_ORGAO_2",
+      "descriptionPtBr": "Fatos aceitos pelo produto e rejeitados pela regra CERG-06314 do Órgão 2.",
+      "facts": {
+        "draft": {"inicio": 100, "prevFim": 109, "fimEfetivo": 109, "diasGozo": 10, "diasCorridos": 10, "numfunc": 1, "consumo": 10, "abono": true, "diasAbono": 2, "documentoLegalId": null, "iniFimAbono": "I", "baseDiasAbono": 10},
+        "vinculo": {"exercicio": null, "vacancia": null},
+        "periodoAquisitivo": {"situacao": "DISPONIVEL", "saldoDisponivel": 100, "diasDireito": 100, "fim": null, "prescricao": null, "origem": null},
+        "politica": {"permiteVenda": true, "baseAbono": "D", "numeradorAbono": 2, "denominadorAbono": 10, "maximoVenda": null, "permiteAntecipacao": null, "permiteAposPrescricao": null},
+        "venda": {},
+        "neighborhood": {"vinculosSubstituto": 0, "sobreposicoes": 0, "consumoAcumulado": 10, "outrosAbonos": 0, "maiorOrdemOuQuantidade": 1, "pecuniaAcumulada": null}
+      }
+    },
+    {
+      "presetScenarioKey": "GUARD_ESTRUTURAL_OU_BYPASS",
+      "descriptionPtBr": "Término previsto anterior ao início da licença.",
+      "facts": {
+        "draft": {"inicio": 100, "prevFim": 99, "fimEfetivo": 109, "diasGozo": 10, "diasCorridos": 10, "numfunc": 1, "consumo": 10, "abono": true, "diasAbono": 2, "documentoLegalId": 1, "iniFimAbono": "I", "baseDiasAbono": 10},
+        "vinculo": {"exercicio": null, "vacancia": null},
+        "periodoAquisitivo": {"situacao": "DISPONIVEL", "saldoDisponivel": 100, "diasDireito": 100, "fim": null, "prescricao": null, "origem": null},
+        "politica": {"permiteVenda": true, "baseAbono": "D", "numeradorAbono": 2, "denominadorAbono": 10, "maximoVenda": null, "permiteAntecipacao": null, "permiteAposPrescricao": null},
+        "venda": {},
+        "neighborhood": {"vinculosSubstituto": 0, "sobreposicoes": 0, "consumoAcumulado": 10, "outrosAbonos": 0, "maiorOrdemOuQuantidade": 1, "pecuniaAcumulada": null}
+      }
+    }
+  ],
+  "ergon.administracao-pessoal.vendas-licenca-especial.cadastro": [
+    {
+      "presetScenarioKey": "CONFORMIDADE_PADRAO",
+      "descriptionPtBr": "Fatos de referência aceitos pelos planos de fábrica dos órgãos 1 e 2.",
+      "facts": {
+        "draft": {"inicio": 100, "diasVendidos": 10, "consumo": 10, "documentoLegalId": 1},
+        "periodoAquisitivo": {"situacao": "DISPONIVEL", "saldoDisponivel": 100, "diasDireito": 100},
+        "politica": {"permiteVenda": true, "baseAbono": "D", "minimoVenda": null, "maximoVenda": null, "numeradorAbono": null, "denominadorAbono": null},
+        "neighborhood": {"pecuniaAcumulada": 10, "consumoAcumulado": 10}
+      }
+    },
+    {
+      "presetScenarioKey": "CUSTOMIZACAO_ORGAO_2",
+      "descriptionPtBr": "Fatos aceitos pelo produto e rejeitados pela regra CERG-06409 do Órgão 2.",
+      "facts": {
+        "draft": {"inicio": 100, "diasVendidos": 10, "consumo": 10, "documentoLegalId": null},
+        "periodoAquisitivo": {"situacao": "DISPONIVEL", "saldoDisponivel": 100, "diasDireito": 100},
+        "politica": {"permiteVenda": true, "baseAbono": "D", "minimoVenda": null, "maximoVenda": null, "numeradorAbono": null, "denominadorAbono": null},
+        "neighborhood": {"pecuniaAcumulada": 10, "consumoAcumulado": 10}
+      }
+    },
+    {
+      "presetScenarioKey": "GUARD_ESTRUTURAL_OU_BYPASS",
+      "descriptionPtBr": "Pagamento anterior à solicitação da venda.",
+      "facts": {
+        "draft": {"inicio": 100, "diasVendidos": 10, "consumo": 10, "documentoLegalId": 1, "pagamento": 99},
+        "periodoAquisitivo": {"situacao": "DISPONIVEL", "saldoDisponivel": 100, "diasDireito": 100},
+        "politica": {"permiteVenda": true, "baseAbono": "D", "minimoVenda": null, "maximoVenda": null, "numeradorAbono": null, "denominadorAbono": null},
+        "neighborhood": {"pecuniaAcumulada": 10, "consumoAcumulado": 10}
+      }
+    }
+  ],
+  "ergon.administracao-pessoal.funcoes.chefia": [
+    {
+      "presetScenarioKey": "CONFORMIDADE_PADRAO",
+      "descriptionPtBr": "Fatos de referência aceitos pelos planos de fábrica dos órgãos 1 e 2.",
+      "facts": {
+        "draft": {"inicio": 20454, "fim": null, "situacao": "EXTINTA", "permiteSubstituicao": null, "minimo": null, "documentoLegalId": 5, "atoPublicacaoId": 7}
+      }
+    },
+    {
+      "presetScenarioKey": "CUSTOMIZACAO_ORGAO_2",
+      "descriptionPtBr": "Fatos aceitos pelo produto e rejeitados pela regra CERG-07102 do Órgão 2.",
+      "facts": {
+        "draft": {"inicio": 20454, "fim": null, "situacao": "EXTINTA", "permiteSubstituicao": null, "minimo": null, "documentoLegalId": 5, "atoPublicacaoId": null}
+      }
+    },
+    {
+      "presetScenarioKey": "GUARD_ESTRUTURAL_OU_BYPASS",
+      "descriptionPtBr": "Término da função anterior ao início.",
+      "facts": {
+        "draft": {"inicio": 20454, "fim": 20453, "situacao": "EXTINTA", "permiteSubstituicao": null, "minimo": null, "documentoLegalId": 5, "atoPublicacaoId": 7}
+      }
+    }
+  ],
+  "ergon.administracao-pessoal.vagas-funcao.chefia": [
+    {
+      "presetScenarioKey": "CONFORMIDADE_PADRAO",
+      "descriptionPtBr": "Fatos de referência aceitos pelos planos de fábrica dos órgãos 1 e 2.",
+      "facts": {
+        "draft": {"inicio": 20454, "fim": null, "situacao": "LIVRE", "funcao": 2, "documentoLegalId": 5},
+        "current": {"criacao": true, "titular": null, "funcao": null},
+        "funcao": {"situacao": "ATIVA"}
+      }
+    },
+    {
+      "presetScenarioKey": "CUSTOMIZACAO_ORGAO_2",
+      "descriptionPtBr": "Fatos aceitos pelo produto e rejeitados pela regra CERG-07151 do Órgão 2.",
+      "facts": {
+        "draft": {"inicio": 20454, "fim": null, "situacao": "LIVRE", "funcao": 2, "documentoLegalId": null},
+        "current": {"criacao": true, "titular": null, "funcao": null},
+        "funcao": {"situacao": "ATIVA"}
+      }
+    },
+    {
+      "presetScenarioKey": "GUARD_ESTRUTURAL_OU_BYPASS",
+      "descriptionPtBr": "Término da vaga anterior à abertura.",
+      "facts": {
+        "draft": {"inicio": 20454, "fim": 20453, "situacao": "LIVRE", "funcao": 2, "documentoLegalId": 5},
+        "current": {"criacao": true, "titular": null, "funcao": null},
+        "funcao": {"situacao": "ATIVA"}
+      }
+    }
+  ],
+  "ergon.administracao-pessoal.designacoes.chefia": [
+    {
+      "presetScenarioKey": "CONFORMIDADE_PADRAO",
+      "descriptionPtBr": "Fatos de referência aceitos pelos planos de fábrica dos órgãos 1 e 2.",
+      "facts": {
+        "draft": {"titular": 1, "primeiro": null, "segundo": null, "situacao": "EM_EXERCICIO", "inicio": 20583, "fim": null, "exercicio": 20583, "vagaId": 1, "funcao": 2, "atoPublicacaoId": 20},
+        "current": {"situacao": "DESIGNADA"},
+        "vaga": {"situacao": "LIVRE", "funcao": 2},
+        "neighborhood": {"outrosTitulares": 0}
+      }
+    },
+    {
+      "presetScenarioKey": "CUSTOMIZACAO_ORGAO_2",
+      "descriptionPtBr": "Fatos aceitos pelo produto e rejeitados pela regra CERG-07161 do Órgão 2.",
+      "facts": {
+        "draft": {"titular": 1, "primeiro": null, "segundo": null, "situacao": "EM_EXERCICIO", "inicio": 20583, "fim": null, "exercicio": 20583, "vagaId": 1, "funcao": 2, "atoPublicacaoId": null},
+        "current": {"situacao": "DESIGNADA"},
+        "vaga": {"situacao": "LIVRE", "funcao": 2},
+        "neighborhood": {"outrosTitulares": 0}
+      }
+    },
+    {
+      "presetScenarioKey": "GUARD_ESTRUTURAL_OU_BYPASS",
+      "descriptionPtBr": "Titular indicado como seu próprio primeiro substituto.",
+      "facts": {
+        "draft": {"titular": 1, "primeiro": 1, "segundo": null, "situacao": "EM_EXERCICIO", "inicio": 20583, "fim": null, "exercicio": 20583, "vagaId": 1, "funcao": 2, "atoPublicacaoId": 20},
+        "current": {"situacao": "DESIGNADA"},
+        "vaga": {"situacao": "LIVRE", "funcao": 2},
+        "neighborhood": {"outrosTitulares": 0}
+      }
+    }
+  ],
+  "ergon.administracao-pessoal.substituicoes.chefia": [
+    {
+      "presetScenarioKey": "CONFORMIDADE_PADRAO",
+      "descriptionPtBr": "Fatos de referência aceitos pelos planos de fábrica dos órgãos 1 e 2.",
+      "facts": {
+        "draft": {"inicio": 10, "fim": 24, "inicioRemunerado": 15, "fimRemunerado": 20, "substituto": 2, "documentoLegalId": 20},
+        "designacao": {"titular": 1, "inicio": 1, "fim": null, "situacao": "EM_EXERCICIO"},
+        "substituto": {"exercicio": 1, "vacancia": null, "inicioCessao": null, "fimCessao": null},
+        "funcao": {"permiteSubstituicao": true, "diasMinimosSubstituicao": null},
+        "impedimento": {"tipo": "AFASTAMENTO", "situacao": "HOMOLOGADO", "inicio": 10, "fim": 24, "interrupcao": null},
+        "neighborhood": {"outrasSubstituicoesTitular": 0, "outrasSubstituicoesSubstituto": 0, "feriasSubstituto": 0, "afastamentosSubstituto": 0}
+      }
+    },
+    {
+      "presetScenarioKey": "CUSTOMIZACAO_ORGAO_2",
+      "descriptionPtBr": "Fatos aceitos pelo produto e rejeitados pela regra CERG-07171 do Órgão 2.",
+      "facts": {
+        "draft": {"inicio": 10, "fim": 24, "inicioRemunerado": 15, "fimRemunerado": 20, "substituto": 2, "documentoLegalId": null},
+        "designacao": {"titular": 1, "inicio": 1, "fim": null, "situacao": "EM_EXERCICIO"},
+        "substituto": {"exercicio": 1, "vacancia": null, "inicioCessao": null, "fimCessao": null},
+        "funcao": {"permiteSubstituicao": true, "diasMinimosSubstituicao": null},
+        "impedimento": {"tipo": "AFASTAMENTO", "situacao": "HOMOLOGADO", "inicio": 10, "fim": 24, "interrupcao": null},
+        "neighborhood": {"outrasSubstituicoesTitular": 0, "outrasSubstituicoesSubstituto": 0, "feriasSubstituto": 0, "afastamentosSubstituto": 0}
+      }
+    },
+    {
+      "presetScenarioKey": "GUARD_ESTRUTURAL_OU_BYPASS",
+      "descriptionPtBr": "Término da substituição anterior ao início.",
+      "facts": {
+        "draft": {"inicio": 10, "fim": 9, "inicioRemunerado": 15, "fimRemunerado": 20, "substituto": 2, "documentoLegalId": 20},
+        "designacao": {"titular": 1, "inicio": 1, "fim": null, "situacao": "EM_EXERCICIO"},
+        "substituto": {"exercicio": 1, "vacancia": null, "inicioCessao": null, "fimCessao": null},
+        "funcao": {"permiteSubstituicao": true, "diasMinimosSubstituicao": null},
+        "impedimento": {"tipo": "AFASTAMENTO", "situacao": "HOMOLOGADO", "inicio": 10, "fim": 24, "interrupcao": null},
+        "neighborhood": {"outrasSubstituicoesTitular": 0, "outrasSubstituicoesSubstituto": 0, "feriasSubstituto": 0, "afastamentosSubstituto": 0}
+      }
+    }
+  ]
+}

@@ -61,7 +61,7 @@ import org.springframework.web.bind.annotation.*;
             titleField = "nome",
             displayLabelField = "nome",
             subtitleField = "tipoFrequenciaNome",
-            metadataFields = {"tipofreq", "codigo", "mnemonico", "afastamento"}),
+            metadataFields = {"tipofreq", "codigo", "sexo"}),
     quickFilters = {
       @QuickFilter(
           id = "afastamentos",

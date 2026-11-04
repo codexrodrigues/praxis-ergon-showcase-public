@@ -1,0 +1,58 @@
+{
+  "capturedAtUtc": "2026-11-01T16:29:39.074571+00:00",
+  "verdict": "CHANGES REQUESTED",
+  "baselineManifestSha256": "b804b1d48c6619f4f3fb4b0b13b4bbfccdc61565f8c1d62ec24e1a69bf8f2a3e",
+  "sourceFilesVerified": 397,
+  "sourceDrift": [],
+  "productionEditsByReview": false,
+  "suite": {
+    "tests": 329,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "neonExcludedByProfile": true
+  },
+  "strictAudit": {
+    "exitCode": 0,
+    "resources": 25,
+    "staticPass": 25
+  },
+  "gatewayPostgres": {
+    "version": "14.22",
+    "realHibernateAndJpaTransactionManager": true,
+    "createAndReplayPassed": true,
+    "effects": 1,
+    "concurrentStress": false
+  },
+  "findings": [
+    {
+      "id": "S1",
+      "priority": "P1",
+      "proof": "complete V5 seed blocks V6"
+    },
+    {
+      "id": "S2",
+      "priority": "P1",
+      "proof": "migrated origin EM_ANALISE with consumed linked period cannot advance"
+    },
+    {
+      "id": "S3",
+      "priority": "P2",
+      "proof": "paid linked abono has no functional estorno path"
+    }
+  ],
+  "databaseStopped": true,
+  "databaseDataRemoved": true,
+  "artifactsSha256": {
+    "REVISAO.md": "64bd47c09196e0caba3d5f2cbb9017c4e12de48f7b7de4aad584ab3f0cd5800a",
+    "GatewayPostgresProbe.java": "358ddd83f571bfe664df41a594255cf448151104f205a2ad560f04c3e3b20a25",
+    "MigrationChainProbe.java": "1a152ec2d756be7cfb31e3b66f83eadd868c3565f05b1ef971b2a736ae875a70",
+    "CorrectionBehaviorProbe.java": "9192341dd12694e6634b85e352602f679d1f39c878d4a157abe54c4ac0f90845",
+    "mvn-test.log": "f1168240d6df0ece0fd77d916bf398e2e651fb2d3166349f24791ee4cfa46422",
+    "scorecard.md": "340302794d09dbbf04eeacf17a4d11d30cfa434959a98beffffebd5690c58af5",
+    "gateway-postgres.log": "9381d36f6f2f9976da54244e2560f9dfc5f5845a9d4125b6a11f0cc0416861c1",
+    "migration-chain.log": "6cdcc870ffcdffa9f3e2980348a728f7bf7259674e54547ec01543c4d903ed6a",
+    "behavior.log": "31d7c7206f7651bd513c9f59aa044cfa7607734a105a78fb38278637341a8776",
+    "classpath.txt": "cdca5b4c72d122cef54f42e6abbbbebd0375c726b322a500922e4ceb4279aafc"
+  }
+}

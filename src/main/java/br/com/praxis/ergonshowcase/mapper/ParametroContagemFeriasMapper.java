@@ -32,6 +32,7 @@ public class ParametroContagemFeriasMapper
   public ParametroContagemFeriasResponseDTO toResponse(ParametroContagemFerias entity) {
     var dto = new ParametroContagemFeriasResponseDTO();
     dto.setId(entity.getId());
+    dto.setPermGozoLicEspAntFimPe(entity.getPermGozoLicEspAntFimPe());
     dto.setEmpCodigo(entity.getEmpCodigo());
     dto.setOrgaoNome(entity.getOrgao() != null ? entity.getOrgao().getNome() : null);
     dto.setRegimeJuridico(entity.getRegimeJuridico());
@@ -133,6 +134,8 @@ public class ParametroContagemFeriasMapper
   }
 
   private void apply(ParametroContagemFeriasDados dto, ParametroContagemFerias entity) {
+    entity.setPermGozoLicEspAntFimPe(dto.getPermGozoLicEspAntFimPe());
+    entity.setPermGozoLicEspAntFimPe(Boolean.TRUE.equals(entity.getPermGozoLicEspAntFimPe()));
     entity.setEmpCodigo(dto.getEmpCodigo());
     entity.setRegimeJuridico(dto.getRegimeJuridico());
     entity.setRegimeJuridico(normUpper(entity.getRegimeJuridico()));

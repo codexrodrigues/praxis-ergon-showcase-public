@@ -339,4 +339,32 @@ public class ServidorPessoaFilterDTO implements GenericFilterDTO {
   @UISchema(label = "Cadastro nos últimos dias", group = "Pesquisa avançada", order = 221)
   @Filterable(operation = FilterOperation.IN_LAST_DAYS, relation = "auditoria.createdAt")
   private Integer cadastradoNosUltimosDias;
+
+  @Schema(
+      description =
+          "Seleciona servidores sem data de recadastramento anual registrada para auditoria cadastral.")
+  @UISchema(
+      label = "Sem recadastramento",
+      helpText = "Filtra servidores sem data de recadastramento anual preenchida.",
+      group = "Pesquisa avançada",
+      order = 222,
+      type = org.praxisplatform.uischema.FieldDataType.BOOLEAN,
+      controlType = org.praxisplatform.uischema.FieldControlType.CHECKBOX,
+      icon = "event_busy")
+  @Filterable(operation = FilterOperation.IS_NULL, relation = "dtRecadast")
+  private Boolean semRecadastramento;
+
+  @Schema(
+      description =
+          "Seleciona servidores sem conta bancária padrão registrada no cadastro civil.")
+  @UISchema(
+      label = "Sem conta bancária",
+      helpText = "Filtra servidores sem conta corrente ou salário cadastrada.",
+      group = "Pesquisa avançada",
+      order = 223,
+      type = org.praxisplatform.uischema.FieldDataType.BOOLEAN,
+      controlType = org.praxisplatform.uischema.FieldControlType.CHECKBOX,
+      icon = "account_balance")
+  @Filterable(operation = FilterOperation.IS_NULL, relation = "conta")
+  private Boolean semContaBancaria;
 }

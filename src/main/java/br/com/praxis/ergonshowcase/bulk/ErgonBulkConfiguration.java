@@ -50,25 +50,23 @@ public class ErgonBulkConfiguration {
   BulkReadCursorConfiguration ergonBulkCursors(@Value("${BULK_CURSOR_KEY}") String key) {
     return new BulkReadCursorConfiguration("ergon-1", Map.of("ergon-1", new SecretKeySpec(Base64.getDecoder().decode(key), "AES")), Duration.ofMinutes(5));
   }
-  @Bean
-  WebMvcConfigurer ergonBulkTransport(ObjectMapper mapper, List<org.praxisplatform.uischema.filter.web.FilterPayloadNormalizer> normalizers) {
-    return new WebMvcConfigurer() {
-      @Override public void extendMessageConverters(List<org.springframework.http.converter.HttpMessageConverter<?>> converters) {
-        converters.addFirst(new ErgonBulkMessageConverter(mapper,normalizers));
-      }
-    };
-  }
+
   private BulkOperationDescriptorProvider provider(String resource, String suffix, BulkMode mode, BulkExecutionInfrastructure infrastructure) {
     return new BulkOperationDescriptorProvider() {
-      public String confirmationOperationId() { return "ergon." + resource + "." + suffix; }
+      public String confirmationOperationId() {
+        var designacoes = ErgonBulkDomain.Resource.DESIGNACOES;
+        return designacoes.name.equals(resource) && mode != BulkMode.DOMAIN_COMMAND
+            ? ErgonBulkOperations.operation(designacoes, mode) : "ergon." + resource + "." + suffix;
+      }
       public String providerId() { return "ergon-bulk-" + resource + "-" + suffix; }
       public String providerRevision() { return ErgonBulkOperations.REVISION; }
       public BulkIdentityCodec<?, ?> identityCodec() {
-        return resource.equals("cargos")
-            ? BulkIdentityCodecs.integers()
-            : (resource.equals("vinculos") || resource.equals("dependentes"))
-                ? BulkIdentityCodecs.strings()
-                : BulkIdentityCodecs.longs();
+        return switch (resource) {
+          case "cargos" -> BulkIdentityCodecs.integers();
+          case "vinculos" -> BulkIdentityCodecs.composite(br.com.praxis.ergonshowcase.domain.VinculoId.class);
+          case "dependentes" -> BulkIdentityCodecs.composite(br.com.praxis.ergonshowcase.domain.DependenteId.class);
+          default -> BulkIdentityCodecs.longs();
+        };
       }
       public String identitySchemaPointer() { return mode == BulkMode.PER_ITEM_UPDATE ? "/properties/items/items/properties/id" : "/properties/selection/properties/targets/items/properties/id"; }
       public BulkOperationalProfile profile() {
@@ -108,4 +106,49 @@ public class ErgonBulkConfiguration {
   @Bean BulkOperationDescriptorProvider ativarParametroFeriasLote(BulkExecutionInfrastructure i) { return provider("parametros-contagem-ferias", "ativar-parametro-ferias-lote", BulkMode.DOMAIN_COMMAND, i); }
   @Bean BulkOperationDescriptorProvider homologarPeriodoAquisitivoLote(BulkExecutionInfrastructure i) { return provider("periodos-aquisitivos-ferias", "homologar-periodo-aquisitivo-lote", BulkMode.DOMAIN_COMMAND, i); }
   @Bean BulkOperationDescriptorProvider homologarFeriasGozoLote(BulkExecutionInfrastructure i) { return provider("ferias-gozo", "homologar-ferias-gozo-lote", BulkMode.DOMAIN_COMMAND, i); }
+
+  @Bean BulkOperationDescriptorProvider averbacaoTempoServicoUniform(BulkExecutionInfrastructure i) { return provider("averbacoes-tempo-servico","bulk.uniform",BulkMode.UNIFORM_UPDATE,i); }
+  @Bean BulkOperationDescriptorProvider averbacaoTempoServicoItems(BulkExecutionInfrastructure i) { return provider("averbacoes-tempo-servico","bulk.items",BulkMode.PER_ITEM_UPDATE,i); }
+  @Bean BulkOperationDescriptorProvider averbacaoTempoServicoCommand(BulkExecutionInfrastructure i) { return provider("averbacoes-tempo-servico","homologar-averbacoes-lote",BulkMode.DOMAIN_COMMAND,i); }
+
+  @Bean BulkOperationDescriptorProvider periodoAquisitivoLicencaEspecialUniform(BulkExecutionInfrastructure i) { return provider("periodos-aquisitivos-licenca-especial","bulk.uniform",BulkMode.UNIFORM_UPDATE,i); }
+  @Bean BulkOperationDescriptorProvider periodoAquisitivoLicencaEspecialItems(BulkExecutionInfrastructure i) { return provider("periodos-aquisitivos-licenca-especial","bulk.items",BulkMode.PER_ITEM_UPDATE,i); }
+  @Bean BulkOperationDescriptorProvider periodoAquisitivoLicencaEspecialCommand(BulkExecutionInfrastructure i) { return provider("periodos-aquisitivos-licenca-especial","recalcular-saldos-licenca-especial-lote",BulkMode.DOMAIN_COMMAND,i); }
+
+  @Bean BulkOperationDescriptorProvider licencaEspecialGozoUniform(BulkExecutionInfrastructure i) { return provider("licencas-especiais-gozo","bulk.uniform",BulkMode.UNIFORM_UPDATE,i); }
+  @Bean BulkOperationDescriptorProvider licencaEspecialGozoItems(BulkExecutionInfrastructure i) { return provider("licencas-especiais-gozo","bulk.items",BulkMode.PER_ITEM_UPDATE,i); }
+  @Bean BulkOperationDescriptorProvider licencaEspecialGozoCommand(BulkExecutionInfrastructure i) { return provider("licencas-especiais-gozo","homologar-licencas-especiais-lote",BulkMode.DOMAIN_COMMAND,i); }
+
+  @Bean BulkOperationDescriptorProvider vendaLicencaEspecialUniform(BulkExecutionInfrastructure i) { return provider("vendas-licenca-especial","bulk.uniform",BulkMode.UNIFORM_UPDATE,i); }
+  @Bean BulkOperationDescriptorProvider vendaLicencaEspecialItems(BulkExecutionInfrastructure i) { return provider("vendas-licenca-especial","bulk.items",BulkMode.PER_ITEM_UPDATE,i); }
+  @Bean BulkOperationDescriptorProvider vendaLicencaEspecialCommand(BulkExecutionInfrastructure i) { return provider("vendas-licenca-especial","autorizar-vendas-licenca-especial-lote",BulkMode.DOMAIN_COMMAND,i); }
+
+  @Bean BulkOperationDescriptorProvider designacaoUniform(BulkExecutionInfrastructure i) {
+    return provider(ErgonBulkDomain.Resource.DESIGNACOES.name, "bulk.update", BulkMode.UNIFORM_UPDATE, i);
+  }
+  @Bean BulkOperationDescriptorProvider designacaoItems(BulkExecutionInfrastructure i) {
+    return provider(ErgonBulkDomain.Resource.DESIGNACOES.name, "bulk.update-items", BulkMode.PER_ITEM_UPDATE, i);
+  }
+  @Bean BulkOperationDescriptorProvider designacaoCommand(BulkExecutionInfrastructure i) {
+    return provider(ErgonBulkDomain.Resource.DESIGNACOES.name, "homologar-designacoes-lote", BulkMode.DOMAIN_COMMAND, i);
+  }
+
+  @Bean BulkOperationDescriptorProvider funcaoConfiancaUniform(BulkExecutionInfrastructure i) {
+    return provider(ErgonBulkDomain.Resource.FUNCOES.name, "bulk.uniform", BulkMode.UNIFORM_UPDATE, i);
+  }
+  @Bean BulkOperationDescriptorProvider funcaoConfiancaItems(BulkExecutionInfrastructure i) {
+    return provider(ErgonBulkDomain.Resource.FUNCOES.name, "bulk.items", BulkMode.PER_ITEM_UPDATE, i);
+  }
+  @Bean BulkOperationDescriptorProvider vagaFuncaoUniform(BulkExecutionInfrastructure i) {
+    return provider(ErgonBulkDomain.Resource.VAGAS_FUNCAO.name, "bulk.uniform", BulkMode.UNIFORM_UPDATE, i);
+  }
+  @Bean BulkOperationDescriptorProvider vagaFuncaoItems(BulkExecutionInfrastructure i) {
+    return provider(ErgonBulkDomain.Resource.VAGAS_FUNCAO.name, "bulk.items", BulkMode.PER_ITEM_UPDATE, i);
+  }
+  @Bean BulkOperationDescriptorProvider substituicaoFuncaoUniform(BulkExecutionInfrastructure i) {
+    return provider(ErgonBulkDomain.Resource.SUBSTITUICOES.name, "bulk.uniform", BulkMode.UNIFORM_UPDATE, i);
+  }
+  @Bean BulkOperationDescriptorProvider substituicaoFuncaoItems(BulkExecutionInfrastructure i) {
+    return provider(ErgonBulkDomain.Resource.SUBSTITUICOES.name, "bulk.items", BulkMode.PER_ITEM_UPDATE, i);
+  }
 }

@@ -47,7 +47,7 @@ Como a gramática JSON Logic do `praxis-rules-engine` opera sobre uma árvore JS
   - `setor.*` e `setorExercicio.*`: `present`, `sameTenant`.
   - `documentoLegal.*`: `present`, `sameTenant`.
   - `openAfastamentosCount`: total de afastamentos em aberto do vínculo.
-  - `existingVinculos`: lista de demais vínculos do mesmo `numfunc` para verificação de acumulação constitucional (`JAVA` executor).
+  - `existingVinculos`: datas e categoria dos demais vínculos do titular, consultados na fonte autorizada para acumulação constitucional (`JAVA` executor). Ausência da fonte é inconclusiva.
 
 ---
 
@@ -79,7 +79,7 @@ Como a gramática JSON Logic do `praxis-rules-engine` opera sobre uma árvore JS
 | 40 | `vinc.limites_jornada_e_prazo_exercicio` | `DOMAIN_DECISION` | `PARAMETERIZABLE` (`ergon.vinculos:provimento-operational-bounds@1.0`) | `SINGLE` / `FIRST_APPLICABLE` | `JSON_LOGIC` | `ERG-00315` | `pck_vinculos.pkb:3195-3225` (`DTPOSSE` vs `DTEXERC` e limites de carga horária semanal por órgão) | Parâmetros por órgão: `maxDaysPosseToExercicio` (`30` dias no Órgão 1; `15` dias no Órgão 2) e `maxWeeklyHours` (`168`h no Órgão 1; `44`h no Órgão 2), além da faixa positiva `1..168`. |
 | 50 | `vinc.vacancia_sem_afastamento_aberto` | `DOMAIN_DECISION` | `RESTRICT_ONLY` | `MULTIPLE` / `DENY_OVERRIDES` | `JSON_LOGIC` | `ERG-00342` | `pck_vinculos.pkb:1839-1855, 3380-3415` (`VERIFICA_LICAFAST`, `FORMAVAC`, `TIPOAPOS`) | Vacância exige `dtvac != null`, `formavac != null` e `openAfastamentosCount == 0`; aposentadoria exige `dtaposent != null`; no Órgão 2 (`AUGMENT`), provimento em cargo comissionado ou vacância exige `documentoLegalId != null` (`CERG-09401`). |
 | 60 | `vinc.politica_contrato_temporario_cessao` | `DOMAIN_DECISION` | `REPLACEABLE` | `SINGLE` / `FIRST_APPLICABLE` | `JSON_LOGIC` | `ERG-00330` | `pck_vinculos.pkb:3285-3330` (`DTINICONTR`, `DTFIMCONTR`, `EPB__VINCULOS`) | Produto exige `dtinicontr` e `dtfimcontr` quando `tipovinc == "TEMPORARIO"` e `dtiniCessao`/`orgaoReq` quando `situacao == "CEDIDO"`; no Órgão 2 (`REPLACE_EXACT`), contrato `TEMPORARIO` exige `documentoLegalId != null` e duração contratual `<= 730` dias (`CERG-00330`). |
-| 70 | `vinc.acumulacao_constitucional_cargos` | `POST_DECISION` | `FORBIDDEN` | `SINGLE` / `FIRST_APPLICABLE` | `JAVA` (`ergon.vinculos:acumulacao-constitucional-cargos@1.0`) | `ERG-00300` | `pck_vinculos.pkb:1810-1820` (`VALID_VINC_CONCOMIT` / Art. 37, XVI da CF/88) | Permite no máximo 2 vínculos ativos concomitantes para o mesmo `ServidorPessoa`, restritos às categorias constitucionalmente acumuláveis (`MAGISTERIO` e `SAUDE`). |
+| 80 | `vinc.acumulacao_constitucional_cargos` | `POST_DECISION` | `FORBIDDEN` | `SINGLE` / `SINGLE_RESULT` | `JAVA` (`ergon.vinculos:acumulacao-constitucional-cargos@2.1`) | `ERG-00300` | `pck_vinculos.pkb:1810-1820` (`VALID_VINC_CONCOMIT` / Art. 37, XVI da CF/88) | Nega três vínculos com sobreposição efetiva ou par de categorias incompatível na vigência aplicável. A combinação que envolve professor observa a EC 138/2025. Pares elegíveis dependem de prova concreta de horários e ficam inconclusivos na fonte atual. |
 
 ---
 

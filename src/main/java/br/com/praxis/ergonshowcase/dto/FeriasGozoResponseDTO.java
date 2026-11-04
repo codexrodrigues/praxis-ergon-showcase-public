@@ -22,7 +22,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
     titleField = "parcelaResumo",
     displayLabelField = "parcelaResumo",
     subtitleField = "pessoaNome",
-    metadataFields = {"vinculoMatricula", "ordemParcela", "diasGozo", "situacao"})
+    metadataFields = {"orgaoNome", "situacao", "periodoAquisitivoExercicio"})
 @Schema(
     description =
         "Projeção completa da parcela de programação e gozo de férias, com venda de abono pecuniário, opções financeiras, competência de folha, substituto e situação operacional.")

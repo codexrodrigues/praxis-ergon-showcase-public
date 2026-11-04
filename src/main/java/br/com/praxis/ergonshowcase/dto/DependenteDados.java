@@ -37,12 +37,7 @@ public abstract class DependenteDados {
       order = 10,
       icon = "person",
       tableHidden = false)
-  @ResourceReference(
-      resourceKey = "administracao-pessoal.dependentes",
-      valueField = "id",
-      surfaceId = "ficha-dependente",
-      previewSurfaceId = "ficha-dependente",
-      detailPresentation = "drawer")
+
   private String nome;
 
   @Size(max = 70)
@@ -69,8 +64,7 @@ public abstract class DependenteDados {
   @Size(max = 1)
   @Schema(
       nullable = true,
-      description = "Sexo registral do dependente no cadastro civil ([F]eminino ou [M]asculino).",
-      allowableValues = {"F", "M"})
+      description = "Sexo registral do dependente no cadastro civil ([F]eminino ou [M]asculino).")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -92,7 +86,6 @@ public abstract class DependenteDados {
   private String sexo;
 
   @NotNull
-  @Past
   @Schema(
       description =
           "Data de nascimento civil do dependente, base para apuração de limite etário de IRRF e salário-família.")

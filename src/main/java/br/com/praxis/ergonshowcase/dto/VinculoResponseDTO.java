@@ -22,7 +22,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
     titleField = "matric",
     displayLabelField = "matric",
     subtitleField = "pessoaNome",
-    metadataFields = {"orgaoNome", "cargoNome", "situacao"})
+    metadataFields = {"setorNome", "regimejur", "categoria"})
 public class VinculoResponseDTO extends VinculoDados {
   @Override
   @Schema(
@@ -466,4 +466,11 @@ public class VinculoResponseDTO extends VinculoDados {
       previewSurfaceId = "ficha-cargo",
       detailPresentation = "drawer")
   private String cargoComissaoNome;
+
+  @Override
+  @Schema(description = "Matrícula institucional atribuída ao vínculo funcional dentro do órgão; distingue assentamentos da mesma pessoa.",
+      accessMode = Schema.AccessMode.READ_ONLY)
+  @ResourceReference(resourceKey = "administracao-pessoal.vinculos", valueField = "id",
+      surfaceId = "resumo-funcional", previewSurfaceId = "resumo-funcional", detailPresentation = "drawer")
+  public String getMatric() { return super.getMatric(); }
 }

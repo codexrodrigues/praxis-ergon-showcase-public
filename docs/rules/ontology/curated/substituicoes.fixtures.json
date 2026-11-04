@@ -1,0 +1,844 @@
+[
+  {
+    "operationKey": "createErgonSubstituicaoFuncao",
+    "positive": {
+      "draft": {
+        "id": null,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "designacaoId": 103,
+        "substitutoId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivo": "FERIAS",
+        "afastamentoId": null,
+        "feriasGozoId": 104,
+        "dtiniRemunerada": "2026-01-05",
+        "dtfimRemunerada": "2026-01-20",
+        "competenciaFolha": "2026-01-01",
+        "valorSubstituicao": 500,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": null,
+      "designacao": {
+        "id": 103,
+        "empCodigo": 1,
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "situacao": "ATIVA",
+        "dtExercicio": "2026-01-02",
+        "dtfim": "2026-01-31"
+      },
+      "substituto": {
+        "id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "empCodigo": 1,
+        "dtexerc": "2020-01-01",
+        "dtvac": null,
+        "dtiniCessao": null,
+        "dtfimCessao": null
+      },
+      "funcao": {
+        "id": 101,
+        "empCodigo": 1,
+        "permiteSubstituicao": true,
+        "diasMinimosSubstituicao": 15
+      },
+      "feriasImpedimento": {
+        "id": 104,
+        "empCodigo": 1,
+        "numfunc": 1001,
+        "numvinc": 1,
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "dtprevfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "dtInterrupcao": null
+      },
+      "afastamentoImpedimento": null,
+      "neighborhood": {
+        "substituicoesDoTitular": [],
+        "substituicoesDoSubstituto": [],
+        "feriasDoSubstituto": [],
+        "afastamentosDoSubstituto": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "createErgonSubstituicaoFuncao",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "CREATE"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "updateErgonSubstituicaoFuncao",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "designacaoId": 103,
+        "substitutoId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivo": "FERIAS",
+        "afastamentoId": null,
+        "feriasGozoId": 104,
+        "dtiniRemunerada": "2026-01-05",
+        "dtfimRemunerada": "2026-01-20",
+        "competenciaFolha": "2026-01-01",
+        "valorSubstituicao": 500,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "designacaoId": 103,
+        "substitutoId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivo": "FERIAS",
+        "afastamentoId": null,
+        "feriasGozoId": 104,
+        "dtiniRemunerada": "2026-01-05",
+        "dtfimRemunerada": "2026-01-20",
+        "competenciaFolha": "2026-01-01",
+        "valorSubstituicao": 500,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "designacao": {
+        "id": 103,
+        "empCodigo": 1,
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "situacao": "ATIVA",
+        "dtExercicio": "2026-01-02",
+        "dtfim": "2026-01-31"
+      },
+      "substituto": {
+        "id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "empCodigo": 1,
+        "dtexerc": "2020-01-01",
+        "dtvac": null,
+        "dtiniCessao": null,
+        "dtfimCessao": null
+      },
+      "funcao": {
+        "id": 101,
+        "empCodigo": 1,
+        "permiteSubstituicao": true,
+        "diasMinimosSubstituicao": 15
+      },
+      "feriasImpedimento": {
+        "id": 104,
+        "empCodigo": 1,
+        "numfunc": 1001,
+        "numvinc": 1,
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "dtprevfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "dtInterrupcao": null
+      },
+      "afastamentoImpedimento": null,
+      "neighborhood": {
+        "substituicoesDoTitular": [],
+        "substituicoesDoSubstituto": [],
+        "feriasDoSubstituto": [],
+        "afastamentosDoSubstituto": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "updateErgonSubstituicaoFuncao",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "UPDATE"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "ergon.substituicoes.bulk.uniform.evaluation",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "designacaoId": 103,
+        "substitutoId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivo": "FERIAS",
+        "afastamentoId": null,
+        "feriasGozoId": 104,
+        "dtiniRemunerada": "2026-01-05",
+        "dtfimRemunerada": "2026-01-20",
+        "competenciaFolha": "2026-01-01",
+        "valorSubstituicao": 500,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "designacaoId": 103,
+        "substitutoId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivo": "FERIAS",
+        "afastamentoId": null,
+        "feriasGozoId": 104,
+        "dtiniRemunerada": "2026-01-05",
+        "dtfimRemunerada": "2026-01-20",
+        "competenciaFolha": "2026-01-01",
+        "valorSubstituicao": 500,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "designacao": {
+        "id": 103,
+        "empCodigo": 1,
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "situacao": "ATIVA",
+        "dtExercicio": "2026-01-02",
+        "dtfim": "2026-01-31"
+      },
+      "substituto": {
+        "id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "empCodigo": 1,
+        "dtexerc": "2020-01-01",
+        "dtvac": null,
+        "dtiniCessao": null,
+        "dtfimCessao": null
+      },
+      "funcao": {
+        "id": 101,
+        "empCodigo": 1,
+        "permiteSubstituicao": true,
+        "diasMinimosSubstituicao": 15
+      },
+      "feriasImpedimento": {
+        "id": 104,
+        "empCodigo": 1,
+        "numfunc": 1001,
+        "numvinc": 1,
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "dtprevfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "dtInterrupcao": null
+      },
+      "afastamentoImpedimento": null,
+      "neighborhood": {
+        "substituicoesDoTitular": [],
+        "substituicoesDoSubstituto": [],
+        "feriasDoSubstituto": [],
+        "afastamentosDoSubstituto": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "ergon.substituicoes.bulk.uniform.evaluation",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "BULK_ITEM"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "ergon.substituicoes.bulk.items.evaluation",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "designacaoId": 103,
+        "substitutoId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivo": "FERIAS",
+        "afastamentoId": null,
+        "feriasGozoId": 104,
+        "dtiniRemunerada": "2026-01-05",
+        "dtfimRemunerada": "2026-01-20",
+        "competenciaFolha": "2026-01-01",
+        "valorSubstituicao": 500,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "designacaoId": 103,
+        "substitutoId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivo": "FERIAS",
+        "afastamentoId": null,
+        "feriasGozoId": 104,
+        "dtiniRemunerada": "2026-01-05",
+        "dtfimRemunerada": "2026-01-20",
+        "competenciaFolha": "2026-01-01",
+        "valorSubstituicao": 500,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "designacao": {
+        "id": 103,
+        "empCodigo": 1,
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "situacao": "ATIVA",
+        "dtExercicio": "2026-01-02",
+        "dtfim": "2026-01-31"
+      },
+      "substituto": {
+        "id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "empCodigo": 1,
+        "dtexerc": "2020-01-01",
+        "dtvac": null,
+        "dtiniCessao": null,
+        "dtfimCessao": null
+      },
+      "funcao": {
+        "id": 101,
+        "empCodigo": 1,
+        "permiteSubstituicao": true,
+        "diasMinimosSubstituicao": 15
+      },
+      "feriasImpedimento": {
+        "id": 104,
+        "empCodigo": 1,
+        "numfunc": 1001,
+        "numvinc": 1,
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "dtprevfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "dtInterrupcao": null
+      },
+      "afastamentoImpedimento": null,
+      "neighborhood": {
+        "substituicoesDoTitular": [],
+        "substituicoesDoSubstituto": [],
+        "feriasDoSubstituto": [],
+        "afastamentosDoSubstituto": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "ergon.substituicoes.bulk.items.evaluation",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "BULK_ITEM"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "ergon.substituicoes.bulk.uniform",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "designacaoId": 103,
+        "substitutoId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivo": "FERIAS",
+        "afastamentoId": null,
+        "feriasGozoId": 104,
+        "dtiniRemunerada": "2026-01-05",
+        "dtfimRemunerada": "2026-01-20",
+        "competenciaFolha": "2026-01-01",
+        "valorSubstituicao": 500,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "designacaoId": 103,
+        "substitutoId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivo": "FERIAS",
+        "afastamentoId": null,
+        "feriasGozoId": 104,
+        "dtiniRemunerada": "2026-01-05",
+        "dtfimRemunerada": "2026-01-20",
+        "competenciaFolha": "2026-01-01",
+        "valorSubstituicao": 500,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "designacao": {
+        "id": 103,
+        "empCodigo": 1,
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "situacao": "ATIVA",
+        "dtExercicio": "2026-01-02",
+        "dtfim": "2026-01-31"
+      },
+      "substituto": {
+        "id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "empCodigo": 1,
+        "dtexerc": "2020-01-01",
+        "dtvac": null,
+        "dtiniCessao": null,
+        "dtfimCessao": null
+      },
+      "funcao": {
+        "id": 101,
+        "empCodigo": 1,
+        "permiteSubstituicao": true,
+        "diasMinimosSubstituicao": 15
+      },
+      "feriasImpedimento": {
+        "id": 104,
+        "empCodigo": 1,
+        "numfunc": 1001,
+        "numvinc": 1,
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "dtprevfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "dtInterrupcao": null
+      },
+      "afastamentoImpedimento": null,
+      "neighborhood": {
+        "substituicoesDoTitular": [],
+        "substituicoesDoSubstituto": [],
+        "feriasDoSubstituto": [],
+        "afastamentosDoSubstituto": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "ergon.substituicoes.bulk.uniform",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "BULK_ITEM"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "ergon.substituicoes.bulk.items",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "designacaoId": 103,
+        "substitutoId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivo": "FERIAS",
+        "afastamentoId": null,
+        "feriasGozoId": 104,
+        "dtiniRemunerada": "2026-01-05",
+        "dtfimRemunerada": "2026-01-20",
+        "competenciaFolha": "2026-01-01",
+        "valorSubstituicao": 500,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "designacaoId": 103,
+        "substitutoId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivo": "FERIAS",
+        "afastamentoId": null,
+        "feriasGozoId": 104,
+        "dtiniRemunerada": "2026-01-05",
+        "dtfimRemunerada": "2026-01-20",
+        "competenciaFolha": "2026-01-01",
+        "valorSubstituicao": 500,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "designacao": {
+        "id": 103,
+        "empCodigo": 1,
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "situacao": "ATIVA",
+        "dtExercicio": "2026-01-02",
+        "dtfim": "2026-01-31"
+      },
+      "substituto": {
+        "id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "empCodigo": 1,
+        "dtexerc": "2020-01-01",
+        "dtvac": null,
+        "dtiniCessao": null,
+        "dtfimCessao": null
+      },
+      "funcao": {
+        "id": 101,
+        "empCodigo": 1,
+        "permiteSubstituicao": true,
+        "diasMinimosSubstituicao": 15
+      },
+      "feriasImpedimento": {
+        "id": 104,
+        "empCodigo": 1,
+        "numfunc": 1001,
+        "numvinc": 1,
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "dtprevfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "dtInterrupcao": null
+      },
+      "afastamentoImpedimento": null,
+      "neighborhood": {
+        "substituicoesDoTitular": [],
+        "substituicoesDoSubstituto": [],
+        "feriasDoSubstituto": [],
+        "afastamentosDoSubstituto": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "ergon.substituicoes.bulk.items",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "BULK_ITEM"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "administracao-pessoal.substituicoes.delete",
+    "positive": {
+      "draft": null,
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "designacaoId": 103,
+        "substitutoId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivo": "FERIAS",
+        "afastamentoId": null,
+        "feriasGozoId": 104,
+        "dtiniRemunerada": "2026-01-05",
+        "dtfimRemunerada": "2026-01-20",
+        "competenciaFolha": "2026-01-01",
+        "valorSubstituicao": 500,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "designacao": {
+        "id": 103,
+        "empCodigo": 1,
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "situacao": "ATIVA",
+        "dtExercicio": "2026-01-02",
+        "dtfim": "2026-01-31"
+      },
+      "substituto": {
+        "id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "empCodigo": 1,
+        "dtexerc": "2020-01-01",
+        "dtvac": null,
+        "dtiniCessao": null,
+        "dtfimCessao": null
+      },
+      "funcao": {
+        "id": 101,
+        "empCodigo": 1,
+        "permiteSubstituicao": true,
+        "diasMinimosSubstituicao": 15
+      },
+      "feriasImpedimento": {
+        "id": 104,
+        "empCodigo": 1,
+        "numfunc": 1001,
+        "numvinc": 1,
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "dtprevfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "dtInterrupcao": null
+      },
+      "afastamentoImpedimento": null,
+      "neighborhood": {
+        "substituicoesDoTitular": [],
+        "substituicoesDoSubstituto": [],
+        "feriasDoSubstituto": [],
+        "afastamentosDoSubstituto": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "administracao-pessoal.substituicoes.delete",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "DELETE"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "administracao-pessoal.substituicoes.delete-batch",
+    "positive": {
+      "draft": null,
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "designacaoId": 103,
+        "substitutoId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivo": "FERIAS",
+        "afastamentoId": null,
+        "feriasGozoId": 104,
+        "dtiniRemunerada": "2026-01-05",
+        "dtfimRemunerada": "2026-01-20",
+        "competenciaFolha": "2026-01-01",
+        "valorSubstituicao": 500,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "designacao": {
+        "id": 103,
+        "empCodigo": 1,
+        "titularId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "funcaoId": 101,
+        "situacao": "ATIVA",
+        "dtExercicio": "2026-01-02",
+        "dtfim": "2026-01-31"
+      },
+      "substituto": {
+        "id": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "empCodigo": 1,
+        "dtexerc": "2020-01-01",
+        "dtvac": null,
+        "dtiniCessao": null,
+        "dtfimCessao": null
+      },
+      "funcao": {
+        "id": 101,
+        "empCodigo": 1,
+        "permiteSubstituicao": true,
+        "diasMinimosSubstituicao": 15
+      },
+      "feriasImpedimento": {
+        "id": 104,
+        "empCodigo": 1,
+        "numfunc": 1001,
+        "numvinc": 1,
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "dtprevfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "dtInterrupcao": null
+      },
+      "afastamentoImpedimento": null,
+      "neighborhood": {
+        "substituicoesDoTitular": [],
+        "substituicoesDoSubstituto": [],
+        "feriasDoSubstituto": [],
+        "afastamentosDoSubstituto": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "administracao-pessoal.substituicoes.delete-batch",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "DELETE"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "preview-product.chefia.erg-01300",
+    "positive": {
+      "current": null,
+      "context": {
+        "empCodigo": 1,
+        "operation": "preview-product.chefia.erg-01300",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "PREVIEW"
+      },
+      "draft": {
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "preview-product.chefia.erg-01315",
+    "positive": {
+      "current": null,
+      "context": {
+        "empCodigo": 1,
+        "operation": "preview-product.chefia.erg-01315",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "PREVIEW"
+      },
+      "draft": {
+        "designacaoId": 103
+      },
+      "designacao": {
+        "id": 103,
+        "empCodigo": 1,
+        "funcaoId": 101
+      },
+      "funcao": {
+        "id": 101,
+        "empCodigo": 1,
+        "permiteSubstituicao": true
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "preview-product.chefia.erg-01319",
+    "positive": {
+      "current": null,
+      "context": {
+        "empCodigo": 1,
+        "operation": "preview-product.chefia.erg-01319",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "PREVIEW"
+      },
+      "draft": {
+        "designacaoId": 103,
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31"
+      },
+      "designacao": {
+        "id": 103,
+        "empCodigo": 1,
+        "situacao": "ATIVA",
+        "dtExercicio": "2026-01-02",
+        "dtfim": "2026-01-31"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  }
+]

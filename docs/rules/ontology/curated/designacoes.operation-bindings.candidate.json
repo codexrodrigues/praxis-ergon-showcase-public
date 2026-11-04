@@ -1,0 +1,785 @@
+{
+  "ruleSetKey": "ergon.administracao-pessoal.designacoes.chefia",
+  "operations": [
+    {
+      "operationKey": "createErgonDesignacaoFuncao",
+      "mode": "CREATE",
+      "controller": "DesignacaoFuncaoController",
+      "operationId": "createErgonDesignacaoFuncao",
+      "method": "POST",
+      "pathConstant": "ApiPaths.DESIGNACOES",
+      "relativePath": "",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "GOVERNED_FAMILY_WITH_OPERATION_APPLICABILITY",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [
+        {
+          "root": "vaga",
+          "role": "vaga",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.vagas-funcao"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "vagaFuncaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        }
+      ],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "designacoesDaVaga",
+          "targetResourceKey": "administracao-pessoal.designacoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "vagaFuncaoId"
+          ],
+          "targetFields": [
+            "vagaFuncaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "draft.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "substituicoes",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "designacaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ]
+    },
+    {
+      "operationKey": "updateErgonDesignacaoFuncao",
+      "mode": "UPDATE",
+      "controller": "DesignacaoFuncaoController",
+      "operationId": "updateErgonDesignacaoFuncao",
+      "method": "PUT",
+      "pathConstant": "ApiPaths.DESIGNACOES",
+      "relativePath": "/{id}",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "GOVERNED_FAMILY_WITH_OPERATION_APPLICABILITY",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [
+        {
+          "root": "vaga",
+          "role": "vaga",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.vagas-funcao"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "vagaFuncaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        }
+      ],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "designacoesDaVaga",
+          "targetResourceKey": "administracao-pessoal.designacoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "vagaFuncaoId"
+          ],
+          "targetFields": [
+            "vagaFuncaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "draft.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "substituicoes",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "designacaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ]
+    },
+    {
+      "operationKey": "administracao-pessoal.designacoes.bulk.update.evaluation",
+      "mode": "BULK_ITEM",
+      "controller": "DesignacaoFuncaoController",
+      "operationId": "administracao-pessoal.designacoes.bulk.update.evaluation",
+      "method": "POST",
+      "pathConstant": "ApiPaths.DESIGNACOES",
+      "relativePath": "/bulk/update/evaluation",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "GOVERNED_FAMILY_WITH_OPERATION_APPLICABILITY",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [
+        {
+          "root": "vaga",
+          "role": "vaga",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.vagas-funcao"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "vagaFuncaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        }
+      ],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "designacoesDaVaga",
+          "targetResourceKey": "administracao-pessoal.designacoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "vagaFuncaoId"
+          ],
+          "targetFields": [
+            "vagaFuncaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "draft.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "substituicoes",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "designacaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ]
+    },
+    {
+      "operationKey": "administracao-pessoal.designacoes.bulk.update-items.evaluation",
+      "mode": "BULK_ITEM",
+      "controller": "DesignacaoFuncaoController",
+      "operationId": "administracao-pessoal.designacoes.bulk.update-items.evaluation",
+      "method": "POST",
+      "pathConstant": "ApiPaths.DESIGNACOES",
+      "relativePath": "/bulk/update-items/evaluation",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "GOVERNED_FAMILY_WITH_OPERATION_APPLICABILITY",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [
+        {
+          "root": "vaga",
+          "role": "vaga",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.vagas-funcao"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "vagaFuncaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        }
+      ],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "designacoesDaVaga",
+          "targetResourceKey": "administracao-pessoal.designacoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "vagaFuncaoId"
+          ],
+          "targetFields": [
+            "vagaFuncaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "draft.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "substituicoes",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "designacaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ]
+    },
+    {
+      "operationKey": "administracao-pessoal.designacoes.bulk.update",
+      "mode": "BULK_ITEM",
+      "controller": "DesignacaoFuncaoController",
+      "operationId": "administracao-pessoal.designacoes.bulk.update",
+      "method": "POST",
+      "pathConstant": "ApiPaths.DESIGNACOES",
+      "relativePath": "/bulk/update",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "GOVERNED_FAMILY_WITH_OPERATION_APPLICABILITY",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [
+        {
+          "root": "vaga",
+          "role": "vaga",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.vagas-funcao"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "vagaFuncaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        }
+      ],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "designacoesDaVaga",
+          "targetResourceKey": "administracao-pessoal.designacoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "vagaFuncaoId"
+          ],
+          "targetFields": [
+            "vagaFuncaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "draft.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "substituicoes",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "designacaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ]
+    },
+    {
+      "operationKey": "administracao-pessoal.designacoes.bulk.update-items",
+      "mode": "BULK_ITEM",
+      "controller": "DesignacaoFuncaoController",
+      "operationId": "administracao-pessoal.designacoes.bulk.update-items",
+      "method": "POST",
+      "pathConstant": "ApiPaths.DESIGNACOES",
+      "relativePath": "/bulk/update-items",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "GOVERNED_FAMILY_WITH_OPERATION_APPLICABILITY",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [
+        {
+          "root": "vaga",
+          "role": "vaga",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.vagas-funcao"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "vagaFuncaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        }
+      ],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "designacoesDaVaga",
+          "targetResourceKey": "administracao-pessoal.designacoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "vagaFuncaoId"
+          ],
+          "targetFields": [
+            "vagaFuncaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "draft.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "substituicoes",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "designacaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ]
+    },
+    {
+      "operationKey": "administracao-pessoal.designacoes.delete",
+      "mode": "DELETE",
+      "controller": "DesignacaoFuncaoController",
+      "operationId": null,
+      "method": "DELETE",
+      "pathConstant": "ApiPaths.DESIGNACOES",
+      "relativePath": "/{id}",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "DELETE_GUARDS_TO_MIGRATE",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [
+        {
+          "root": "vaga",
+          "role": "vaga",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.vagas-funcao"
+          },
+          "fromRoot": "current",
+          "foreignKey": [
+            "vagaFuncaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        }
+      ],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "designacoesDaVaga",
+          "targetResourceKey": "administracao-pessoal.designacoes",
+          "fromRoot": "current",
+          "sourceFields": [
+            "vagaFuncaoId"
+          ],
+          "targetFields": [
+            "vagaFuncaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "current.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "substituicoes",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "current",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "designacaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ],
+      "httpIdentity": "METHOD_AND_PATH; operationId must be obtained from canonical resolver in G2",
+      "providerPlan": "Pass detached OLD to dedicated delete guards; do not apply CREATE rules to draft=null."
+    },
+    {
+      "operationKey": "administracao-pessoal.designacoes.delete-batch",
+      "mode": "DELETE",
+      "controller": "DesignacaoFuncaoController",
+      "operationId": null,
+      "method": "DELETE",
+      "pathConstant": "ApiPaths.DESIGNACOES",
+      "relativePath": "/batch",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "DELETE_GUARDS_TO_MIGRATE",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [
+        {
+          "root": "vaga",
+          "role": "vaga",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.vagas-funcao"
+          },
+          "fromRoot": "current",
+          "foreignKey": [
+            "vagaFuncaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        }
+      ],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "designacoesDaVaga",
+          "targetResourceKey": "administracao-pessoal.designacoes",
+          "fromRoot": "current",
+          "sourceFields": [
+            "vagaFuncaoId"
+          ],
+          "targetFields": [
+            "vagaFuncaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "current.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "substituicoes",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "current",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "designacaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ],
+      "httpIdentity": "METHOD_AND_PATH; operationId must be obtained from canonical resolver in G2",
+      "providerPlan": "Pass detached OLD to dedicated delete guards; do not apply CREATE rules to draft=null."
+    },
+    {
+      "operationKey": "ergon.designacoes.homologar-designacoes-lote.evaluation",
+      "mode": "COMMAND_ITEM",
+      "controller": "DesignacaoFuncaoController",
+      "operationId": "ergon.designacoes.homologar-designacoes-lote.evaluation",
+      "method": "POST",
+      "pathConstant": "ApiPaths.DESIGNACOES",
+      "relativePath": "/bulk/homologar-designacoes-lote/evaluation",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "GOVERNED_FAMILY_WITH_OPERATION_APPLICABILITY",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [
+        {
+          "root": "vaga",
+          "role": "vaga",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.vagas-funcao"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "vagaFuncaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        }
+      ],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "designacoesDaVaga",
+          "targetResourceKey": "administracao-pessoal.designacoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "vagaFuncaoId"
+          ],
+          "targetFields": [
+            "vagaFuncaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "draft.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "substituicoes",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "designacaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ]
+    },
+    {
+      "operationKey": "ergon.designacoes.homologar-designacoes-lote",
+      "mode": "COMMAND_ITEM",
+      "controller": "DesignacaoFuncaoController",
+      "operationId": "ergon.designacoes.homologar-designacoes-lote",
+      "method": "POST",
+      "pathConstant": "ApiPaths.DESIGNACOES",
+      "relativePath": "/actions/homologar-designacoes-lote",
+      "evaluationUnit": "ONE_ENTITY_AFTER_HYDRATION",
+      "ruleSelection": "GOVERNED_FAMILY_WITH_OPERATION_APPLICABILITY",
+      "implementationStatus": "CONTRACT_ONLY_PROVIDER_AND_CALL_SITE_MIGRATION_PENDING",
+      "conceptRootBindings": [
+        {
+          "root": "vaga",
+          "role": "vaga",
+          "target": {
+            "serviceKey": "praxis-ergon-showcase",
+            "contextKey": "administracao-pessoal",
+            "resourceKey": "administracao-pessoal.vagas-funcao"
+          },
+          "fromRoot": "draft",
+          "foreignKey": [
+            "vagaFuncaoId"
+          ],
+          "identity": [
+            "id"
+          ],
+          "tenantPath": "empCodigo",
+          "resolution": "IDENTITY_FK_AND_TENANT_ONLY",
+          "nullPolicy": "NULL_ONLY_IF_OPTIONAL_FK_ABSENT; REFERENCE_NOT_FOUND_OR_QUERY_FAILURE_ABORTS",
+          "tenantSource": "context.empCodigo"
+        }
+      ],
+      "collectionBindings": [
+        {
+          "root": "neighborhood",
+          "collection": "designacoesDaVaga",
+          "targetResourceKey": "administracao-pessoal.designacoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "vagaFuncaoId"
+          ],
+          "targetFields": [
+            "vagaFuncaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": "draft.id",
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        },
+        {
+          "root": "neighborhood",
+          "collection": "substituicoes",
+          "targetResourceKey": "administracao-pessoal.substituicoes",
+          "fromRoot": "draft",
+          "sourceFields": [
+            "id"
+          ],
+          "targetFields": [
+            "designacaoId"
+          ],
+          "tenantSource": "context.empCodigo",
+          "tenantTarget": "empCodigo",
+          "excludeIdentity": null,
+          "nullKeyPolicy": "EMPTY_FOR_ABSENT_OPTIONAL_RELATION_OR_UNPERSISTED_OWNER_ONLY",
+          "queryPredicates": "IDENTITY_RELATION_AND_TENANT_ONLY",
+          "businessPredicates": "RULESET"
+        }
+      ]
+    }
+  ],
+  "nonEvaluatingOperations": [
+    {
+      "operationId": "determineErgonDesignacaoFuncaoPrevia",
+      "method": "POST",
+      "relativePath": "/determinations/previa",
+      "kind": "LOOKUP_PROJECTION_ONLY",
+      "reason": "ErgonDeterminationService.previaDesignacao returns vaga.situacao without RuleSet evaluation."
+    }
+  ],
+  "exclusions": [
+    {
+      "field": "version",
+      "reason": "Optimistic concurrency belongs to If-Match/transaction; not a business fact."
+    },
+    {
+      "field": "auditoria",
+      "reason": "Technical audit envelope; no migrated rule consumes it."
+    },
+    {
+      "field": "customFields",
+      "reason": "Separate CustomFieldValidator contract; no untyped map admitted in this RuleSet snapshot."
+    }
+  ],
+  "entityProjection": [
+    "id",
+    "empCodigo",
+    "descricao",
+    "dtini",
+    "dtfim",
+    "situacao",
+    "titularId",
+    "funcaoId",
+    "vagaFuncaoId",
+    "setorId",
+    "dtExercicio",
+    "substituto1Id",
+    "substituto2Id",
+    "opcaoRemuneracao",
+    "valorRemuneracao",
+    "atoDispensaId",
+    "motivoDispensa",
+    "documentoLegalId",
+    "atoPublicacaoId",
+    "observacoes"
+  ],
+  "collectionContract": {
+    "scope": "IDENTITY_RELATION_AND_TENANT_ONLY",
+    "maxItems": 10000,
+    "onOverflow": {
+      "decision": "INCONCLUSIVE",
+      "reasonCode": "FACTS_LIMIT_EXCEEDED"
+    },
+    "onQueryFailure": "ABORT_EVALUATION",
+    "missingIsEmpty": false,
+    "businessPredicates": "RuleSet with raw status and dates; reduce accumulator carries outer interval without implicit global access."
+  }
+}

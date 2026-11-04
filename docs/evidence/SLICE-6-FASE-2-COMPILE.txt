@@ -1,0 +1,27 @@
+[ERROR] COMPILATION ERROR : 
+[ERROR] /D:/Developer/praxis-plataform/praxis-ergon-showcase/src/main/java/br/com/praxis/ergonshowcase/dto/VendaLicencaEspecialFilterDTO.java:[70,125] cannot find symbol
+  symbol:   variable ApiPaths
+  location: class br.com.praxis.ergonshowcase.dto.VendaLicencaEspecialFilterDTO
+[ERROR] /D:/Developer/praxis-plataform/praxis-ergon-showcase/src/main/java/br/com/praxis/ergonshowcase/dto/VendaLicencaEspecialDados.java:[20,224] cannot find symbol
+  symbol:   variable ApiPaths
+  location: class br.com.praxis.ergonshowcase.dto.VendaLicencaEspecialDados
+[ERROR] /D:/Developer/praxis-plataform/praxis-ergon-showcase/src/main/java/br/com/praxis/ergonshowcase/dto/LicencaEspecialGozoDados.java:[18,220] cannot find symbol
+  symbol:   variable ApiPaths
+  location: class br.com.praxis.ergonshowcase.dto.LicencaEspecialGozoDados
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.14.1:compile (default-compile) on project praxis-ergon-showcase: Compilation failure: Compilation failure: 
+[ERROR] /D:/Developer/praxis-plataform/praxis-ergon-showcase/src/main/java/br/com/praxis/ergonshowcase/dto/VendaLicencaEspecialFilterDTO.java:[70,125] cannot find symbol
+[ERROR]   symbol:   variable ApiPaths
+[ERROR]   location: class br.com.praxis.ergonshowcase.dto.VendaLicencaEspecialFilterDTO
+[ERROR] /D:/Developer/praxis-plataform/praxis-ergon-showcase/src/main/java/br/com/praxis/ergonshowcase/dto/VendaLicencaEspecialDados.java:[20,224] cannot find symbol
+[ERROR]   symbol:   variable ApiPaths
+[ERROR]   location: class br.com.praxis.ergonshowcase.dto.VendaLicencaEspecialDados
+[ERROR] /D:/Developer/praxis-plataform/praxis-ergon-showcase/src/main/java/br/com/praxis/ergonshowcase/dto/LicencaEspecialGozoDados.java:[18,220] cannot find symbol
+[ERROR]   symbol:   variable ApiPaths
+[ERROR]   location: class br.com.praxis.ergonshowcase.dto.LicencaEspecialGozoDados
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

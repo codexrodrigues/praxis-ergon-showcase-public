@@ -1,0 +1,123 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------< io.github.codexrodrigues:praxis-metadata-starter >----------
+[INFO] Building Praxis Metadata Starter 8.0.0-rc.188
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ praxis-metadata-starter ---
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] Copying 57 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ praxis-metadata-starter ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- download:2.1.0:wget (download-published-v19-migration-fixture) @ praxis-metadata-starter ---
+[INFO] File already exists, skipping
+[INFO] 
+[INFO] --- download:2.1.0:wget (download-published-v17-migration-fixture) @ praxis-metadata-starter ---
+[INFO] File already exists, skipping
+[INFO] 
+[INFO] --- download:2.1.0:wget (download-published-v16-migration-fixture) @ praxis-metadata-starter ---
+[INFO] File already exists, skipping
+[INFO] 
+[INFO] --- download:2.1.0:wget (download-published-v15-migration-fixture) @ praxis-metadata-starter ---
+[INFO] File already exists, skipping
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ praxis-metadata-starter ---
+[INFO] Copying 21 resources from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ praxis-metadata-starter ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 360 source files with javac [debug release 21] to target\test-classes
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractUnitDeleteResourceControllerMappedTest.java:[39,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractUnitDeleteResourceControllerMappedTest.java:[39,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractUnitDeleteResourceControllerMappedTest.java:[39,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractUnitDeleteResourceControllerMappedTest.java:[39,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractUnitDeleteResourceControllerMappedTest.java:[39,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceQueryControllerGetByIdsTest.java:[43,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceQueryControllerGetByIdsTest.java:[43,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceQueryControllerGetByIdsTest.java:[43,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceQueryControllerGetByIdsTest.java:[43,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceQueryControllerGetByIdsTest.java:[43,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceControllerMappedCrudTest.java:[51,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceControllerMappedCrudTest.java:[51,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceControllerMappedCrudTest.java:[51,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceControllerMappedCrudTest.java:[51,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceControllerMappedCrudTest.java:[51,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceControllerMappedCrudTest.java:[54,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceControllerMappedCrudTest.java:[54,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceControllerMappedCrudTest.java:[54,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceControllerMappedCrudTest.java:[54,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractResourceControllerMappedCrudTest.java:[54,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractCreateUpdateResourceControllerMappedTest.java:[39,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractCreateUpdateResourceControllerMappedTest.java:[39,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractCreateUpdateResourceControllerMappedTest.java:[39,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractCreateUpdateResourceControllerMappedTest.java:[39,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractCreateUpdateResourceControllerMappedTest.java:[39,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractCreateResourceControllerMappedTest.java:[36,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractCreateResourceControllerMappedTest.java:[36,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractCreateResourceControllerMappedTest.java:[36,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractCreateResourceControllerMappedTest.java:[36,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/AbstractCreateResourceControllerMappedTest.java:[36,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/VersionedCreateUpdateResourceControllerTest.java:[55,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/VersionedCreateUpdateResourceControllerTest.java:[55,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/VersionedCreateUpdateResourceControllerTest.java:[55,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/VersionedCreateUpdateResourceControllerTest.java:[55,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/controller/base/VersionedCreateUpdateResourceControllerTest.java:[55,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[INFO] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/openapi/OpenApiCanonicalOperationResolverTest.java: Some input files use or override a deprecated API.
+[INFO] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/openapi/OpenApiCanonicalOperationResolverTest.java: Recompile with -Xlint:deprecation for details.
+[INFO] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/customfields/CustomFieldAdoptionRegressionTest.java: Some input files use unchecked or unsafe operations.
+[INFO] /D:/Developer/praxis-plataform/praxis-metadata-starter/src/test/java/org/praxisplatform/uischema/customfields/CustomFieldAdoptionRegressionTest.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- surefire:3.5.6:test (default-test) @ praxis-metadata-starter ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running org.praxisplatform.uischema.customfields.CustomFieldAdoptionHttpTest
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (C:\Users\rodrigo.moreira\.m2\repository\net\bytebuddy\byte-buddy-agent\1.17.8\byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+08:16:33.791 [main] INFO org.hibernate.validator.internal.util.Version -- HV000001: Hibernate Validator 8.0.3.Final
+08:16:34.212 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+08:16:34.212 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+08:16:34.216 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 3 ms
+08:16:34.510 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+08:16:34.511 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+08:16:34.511 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+08:16:34.570 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+08:16:34.570 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+08:16:34.571 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 1 ms
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.631 s -- in org.praxisplatform.uischema.customfields.CustomFieldAdoptionHttpTest
+[INFO] Running org.praxisplatform.uischema.rest.exceptionhandler.RuleViolationHttpTest
+08:16:34.648 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [org.praxisplatform.uischema.rest.exceptionhandler.RuleViolationHttpTest]: RuleViolationHttpTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+08:16:34.962 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration org.praxisplatform.uischema.TestApplication for test class org.praxisplatform.uischema.rest.exceptionhandler.RuleViolationHttpTest
+██   ██████  ██████    █████   ██   ██ ██  ██████
+ ██  ██   ██ ██   ██  ██   ██   ██ ██  ██ ██
+  ██ ██████  ██████   ███████    ███   ██ ███████
+ ██  ██      ██   ██  ██   ██   ██ ██  ██      ██
+██   ██      ██   ██  ██   ██  ██   ██ ██ ██████
+
+
+2026-11-02T08:16:35.642-03:00  INFO 4492 --- [           main] o.p.u.r.e.RuleViolationHttpTest          : Starting RuleViolationHttpTest using Java 21.0.2 with PID 4492 (started by rodrigo.moreira in D:\Developer\praxis-plataform\praxis-metadata-starter)
+2026-11-02T08:16:35.645-03:00  INFO 4492 --- [           main] o.p.u.r.e.RuleViolationHttpTest          : No active profile set, falling back to 1 default profile: "default"
+2026-11-02T08:16:50.804-03:00  INFO 4492 --- [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-02T08:16:50.804-03:00  INFO 4492 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-02T08:16:50.805-03:00  INFO 4492 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-11-02T08:16:50.846-03:00  INFO 4492 --- [           main] o.p.u.r.e.RuleViolationHttpTest          : Started RuleViolationHttpTest in 15.811 seconds (process running for 19.75)
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 16.84 s -- in org.praxisplatform.uischema.rest.exceptionhandler.RuleViolationHttpTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  01:14 min
+[INFO] Finished at: 2026-11-02T08:16:51-03:00
+[INFO] ------------------------------------------------------------------------

@@ -20,7 +20,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
     titleField = "descr",
     displayLabelField = "descr",
     subtitleField = "tabelaDescricao",
-    metadataFields = {"tab", "item", "ordem", "ativo"})
+    metadataFields = {"orgaoNome", "updatedAt"})
 public class ItemTabelaResponseDTO {
   @Schema(
       description =

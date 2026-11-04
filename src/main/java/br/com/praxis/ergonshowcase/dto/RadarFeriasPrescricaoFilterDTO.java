@@ -281,4 +281,44 @@ public class RadarFeriasPrescricaoFilterDTO implements GenericFilterDTO {
       icon = "event_busy")
   @Filterable(operation = FilterOperation.IS_NULL, relation = "proximaParcelaInicio")
   private Boolean semProximaParcelaAgendada;
+
+  @Schema(
+      description =
+          "Filtra períodos aquisitivos pela natureza operacional da unidade de lotação do vínculo (ex.: SECRETARIA, DIRETORIA, COORDENADORIA, NUCLEO, UNIDADE_SAUDE, ESCOLA).")
+  @UISchema(
+      label = "Tipos de unidade de lotação",
+      helpText = "Selecione os tipos de unidade organizacional.",
+      type = FieldDataType.ARRAY,
+      controlType = FieldControlType.MULTI_SELECT,
+      icon = "category",
+      options =
+          "[{\"value\":\"SECRETARIA\",\"label\":\"Secretaria\"},{\"value\":\"DIRETORIA\",\"label\":\"Diretoria\"},{\"value\":\"COORDENADORIA\",\"label\":\"Coordenadoria\"},{\"value\":\"NUCLEO\",\"label\":\"Núcleo\"},{\"value\":\"UNIDADE_SAUDE\",\"label\":\"Unidade de Saúde\"},{\"value\":\"ESCOLA\",\"label\":\"Unidade Escolar\"}]")
+  @Filterable(operation = FilterOperation.IN, relation = "setor.tipoSetor")
+  private List<String> tipoSetor;
+
+  @Schema(
+      description =
+          "Filtra períodos aquisitivos por uma ou mais categorias funcionais do vínculo (ex.: ADMINISTRATIVO, MAGISTERIO, SAUDE, GUARDA_MUNICIPAL).")
+  @UISchema(
+      label = "Categorias funcionais",
+      helpText = "Selecione uma ou mais categorias funcionais.",
+      type = FieldDataType.ARRAY,
+      controlType = FieldControlType.MULTI_SELECT,
+      icon = "badge",
+      options =
+          "[{\"value\":\"ADMINISTRATIVO\",\"label\":\"Administrativo\"},{\"value\":\"MAGISTERIO\",\"label\":\"Magistério\"},{\"value\":\"SAUDE\",\"label\":\"Saúde\"},{\"value\":\"GUARDA_MUNICIPAL\",\"label\":\"Guarda Municipal\"}]")
+  @Filterable(operation = FilterOperation.IN, relation = "categoria")
+  private List<String> categoriasIn;
+
+  @Schema(
+      description =
+          "Filtra períodos aquisitivos sem nenhuma parcela de férias futura programada ou homologada (possuiParcelaProgramada = false).")
+  @UISchema(
+      label = "Sem parcela programada",
+      helpText = "Exibe períodos cujo saldo não possui parcela futura.",
+      type = FieldDataType.BOOLEAN,
+      controlType = FieldControlType.CHECKBOX,
+      icon = "event_busy")
+  @Filterable(operation = FilterOperation.IS_FALSE, relation = "possuiParcelaProgramada")
+  private Boolean semParcelaProgramada;
 }

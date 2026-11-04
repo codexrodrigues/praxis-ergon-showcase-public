@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 @ResourceFact(
     key = "ativa",
-    resourceKey = "administracao-pessoal.regras-frequencia-estatutaria",
+    resourceKey = ApiPaths.KEY_REGRAS_FREQUENCIA_ESTATUTARIA,
     label = "Regra estatutária ativa",
     description =
         "Indica se a parametrização estatutária encontra-se vigente para validação de ocorrências.",
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.*;
     sourceKind = "field")
 @ResourceFact(
     key = "exigeHomologacao",
-    resourceKey = "administracao-pessoal.regras-frequencia-estatutaria",
+    resourceKey = ApiPaths.KEY_REGRAS_FREQUENCIA_ESTATUTARIA,
     label = "Exige homologação formal",
     description =
         "Indica se o afastamento ou ocorrência requer homologação administrativa ou pericial.",
@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.*;
     sourceKind = "field")
 @ResourceFact(
     key = "qtdMaxDias",
-    resourceKey = "administracao-pessoal.regras-frequencia-estatutaria",
+    resourceKey = ApiPaths.KEY_REGRAS_FREQUENCIA_ESTATUTARIA,
     label = "Duração máxima por evento",
     description =
         "Quantidade máxima de dias permitida para um único evento sob esta regra estatutária.",
@@ -55,7 +55,7 @@ import org.springframework.web.bind.annotation.*;
     })
 @ApiResource(
     value = ApiPaths.REGRAS_FREQUENCIA_ESTATUTARIA,
-    resourceKey = "administracao-pessoal.regras-frequencia-estatutaria",
+    resourceKey = ApiPaths.KEY_REGRAS_FREQUENCIA_ESTATUTARIA,
     title = "Regras estatutárias de frequência",
     description =
         "Matriz parametrizada de regras, durações, interstícios e limites mensais/anuais de frequência e afastamento por regime, vínculo e categoria (REGRAS_FREQ).",
@@ -66,7 +66,7 @@ import org.springframework.web.bind.annotation.*;
             titleField = "ruleKey",
             displayLabelField = "ruleKey",
             subtitleField = "codigoFrequenciaNome",
-            metadataFields = {"regimeJuridico", "tipoVinculo", "categoria", "ativa"}),
+            metadataFields = {"dtini", "dtfim", "subcategoria"}),
     quickFilters = {
       @QuickFilter(
           id = "ativas",

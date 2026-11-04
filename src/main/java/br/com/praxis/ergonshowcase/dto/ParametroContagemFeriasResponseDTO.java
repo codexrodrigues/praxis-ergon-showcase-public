@@ -21,11 +21,14 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
     titleField = "regimeJuridico",
     displayLabelField = "regimeJuridico",
     subtitleField = "categoria",
-    metadataFields = {"tipoVinculo", "dtini", "totDiasFer", "active"})
+    metadataFields = {"active", "dtfim", "subcategoria"})
 @Schema(
     description =
         "Projeção completa da matriz estatutária de parâmetros de contagem de férias, abono pecuniário, prescrição, contagem em dobro, licença especial e progressão funcional.")
 public class ParametroContagemFeriasResponseDTO {
+  @Schema(description = "Permissão estatutária de gozo da licença-prêmio antes do término do período aquisitivo (Tarefa 103339); não representa concessão automática.", accessMode = Schema.AccessMode.READ_ONLY)
+  @UISchema(label = "Gozo antecipado de licença", helpText = "Indica se a matriz permite fruição antes do fechamento da aquisição.", group = "Licença Especial", order = 475, type = FieldDataType.BOOLEAN, controlType = FieldControlType.CHECKBOX, icon = "event_available", tableHidden = true, readOnly = true, preset = UISchemaPreset.BOOLEAN_FLAG)
+  private Boolean permGozoLicEspAntFimPe;
 
   @Schema(
       description = "Identificador único surrogate da regra de contagem de férias.",

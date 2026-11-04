@@ -85,19 +85,7 @@ import org.springframework.web.server.ResponseStatusException;
     executionResultsOperationId = "ergon.periodos-aquisitivos-ferias.bulk.results",
     cancelOperationId = "ergon.periodos-aquisitivos-ferias.bulk.cancel",
     updateSourceOperationId = "updateErgonPeriodoAquisitivoFerias",
-    protectedUpdateFields = {
-      "empCodigo",
-      "numfunc",
-      "numvinc",
-      "chave",
-      "dtini",
-      "diasGozados",
-      "diasVendidosAbono",
-      "diasConvertidosDobro",
-      "saldoDiasDisponivel",
-      "situacao",
-      "geradoPorAverbacao"
-    })
+    protectedUpdateFields = {"empCodigo", "numfunc", "numvinc", "chave", "dtini", "diasGozados", "diasVendidosAbono", "diasConvertidosDobro", "geradoPorAverbacao"})
 @ApiResource(
     value = ApiPaths.PERIODOS_AQUISITIVOS_FERIAS,
     resourceKey = "administracao-pessoal.periodos-aquisitivos-ferias",
@@ -111,12 +99,7 @@ import org.springframework.web.server.ResponseStatusException;
             titleField = "periodoResumo",
             displayLabelField = "periodoResumo",
             subtitleField = "pessoaNome",
-            metadataFields = {
-              "vinculoMatricula",
-              "exercicio",
-              "situacao",
-              "saldoDiasDisponivel"
-            }),
+            metadataFields = {"situacao", "chave", "geradoPorAverbacao"}),
     quickFilters = {
       @QuickFilter(
           id = "disponiveis",
@@ -145,7 +128,7 @@ import org.springframework.web.server.ResponseStatusException;
     description = "Cadastros civis e assentamentos funcionais dos órgãos públicos.",
     icon = "groups")
 public class PeriodoAquisitivoFeriasController
-    extends AbstractResourceController<
+    extends org.praxisplatform.uischema.controller.base.AbstractBulkGovernedResourceController<
         PeriodoAquisitivoFeriasResponseDTO,
         Long,
         PeriodoAquisitivoFeriasFilterDTO,
@@ -153,8 +136,6 @@ public class PeriodoAquisitivoFeriasController
         UpdatePeriodoAquisitivoFeriasDTO> {
 
   private final PeriodoAquisitivoFeriasService service;
-  private final ResourceVersionEtagService etags;
-  private final ResourceVersionScopeProvider scopes;
   @Autowired private FeriasGozoService feriasGozoService;
   @Autowired private ErgonBulkOperations bulk;
   @Autowired private ErgonDeterminationService determinations;
@@ -164,8 +145,7 @@ public class PeriodoAquisitivoFeriasController
       ResourceVersionEtagService etags,
       ResourceVersionScopeProvider scopes) {
     this.service = service;
-    this.etags = etags;
-    this.scopes = scopes;
+    configureResourceVersioning(etags, scopes);
   }
 
   @Override
@@ -332,18 +312,9 @@ public class PeriodoAquisitivoFeriasController
       @Parameter(description = "Quantidade de registros da página, de 1 a 200")
           @RequestParam(defaultValue = "20")
           int size) {
-    service.findById(id);
-    if (page < 0 || size < 1 || size > 200)
-      throw new ResponseStatusException(
-          HttpStatus.UNPROCESSABLE_ENTITY, "Paginação fora do limite permitido.");
-    var filter = new FeriasGozoFilterDTO();
-    filter.setPeriodoAquisitivoId(id);
-    var result =
-        feriasGozoService.filter(
-            filter, PageRequest.of(page, size, feriasGozoService.getDefaultSort()), null);
-    return ResponseEntity.ok(
-        RestApiResponse.success(
-            result, Links.of(Link.of(ApiPaths.FERIAS_GOZO, "collection"))));
+    ErgonHttpContract.childPage(page, size);
+    return filterRelatedChildResource(id, feriasGozoService, ApiPaths.FERIAS_GOZO, FeriasGozoFilterDTO::new,
+        (child, parent) -> { child.setPeriodoAquisitivoId(parent); }, page, size);
   }
 
   @PatchMapping("/{id}/overrides-parametros")
@@ -370,14 +341,7 @@ public class PeriodoAquisitivoFeriasController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody AtualizarOverridesPeriodoAquisitivoDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags,
-            ifMatch,
-            scopes.currentScope(),
-            "administracao-pessoal.periodos-aquisitivos-ferias",
-            id);
-    return withResourceVersion(ResponseEntity.ok(), id, service.atualizarOverrides(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemPatch("overrides-parametros", id, ifMatch, condition -> service.atualizarOverrides(id, dto, condition)));
   }
 
   @PatchMapping("/{id}/prescricao-multa")
@@ -403,15 +367,7 @@ public class PeriodoAquisitivoFeriasController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody AtualizarPrescricaoMultaPeriodoAquisitivoDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags,
-            ifMatch,
-            scopes.currentScope(),
-            "administracao-pessoal.periodos-aquisitivos-ferias",
-            id);
-    return withResourceVersion(
-        ResponseEntity.ok(), id, service.atualizarPrescricaoMulta(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemPatch("prescricao-multa", id, ifMatch, condition -> service.atualizarPrescricaoMulta(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/homologar-periodo-aquisitivo")
@@ -434,15 +390,8 @@ public class PeriodoAquisitivoFeriasController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody TransicaoPeriodoAquisitivoFeriasDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags,
-            ifMatch,
-            scopes.currentScope(),
-            "administracao-pessoal.periodos-aquisitivos-ferias",
-            id);
-    return withResourceVersion(
-        ResponseEntity.ok(), id, service.homologarPeriodoAquisitivo(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("homologar-periodo-aquisitivo", id, ifMatch, null, dto,
+        condition -> service.homologarPeriodoAquisitivo(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/suspender-periodo-aquisitivo")
@@ -465,15 +414,8 @@ public class PeriodoAquisitivoFeriasController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody TransicaoPeriodoAquisitivoFeriasDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags,
-            ifMatch,
-            scopes.currentScope(),
-            "administracao-pessoal.periodos-aquisitivos-ferias",
-            id);
-    return withResourceVersion(
-        ResponseEntity.ok(), id, service.suspenderPeriodoAquisitivo(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("suspender-periodo-aquisitivo", id, ifMatch, null, dto,
+        condition -> service.suspenderPeriodoAquisitivo(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/converter-dobro-periodo-aquisitivo")
@@ -496,15 +438,8 @@ public class PeriodoAquisitivoFeriasController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody ConverterDobroPeriodoAquisitivoDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags,
-            ifMatch,
-            scopes.currentScope(),
-            "administracao-pessoal.periodos-aquisitivos-ferias",
-            id);
-    return withResourceVersion(
-        ResponseEntity.ok(), id, service.converterDobroPeriodoAquisitivo(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("converter-dobro-periodo-aquisitivo", id, ifMatch, null, dto,
+        condition -> service.converterDobroPeriodoAquisitivo(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/prescrever-periodo-aquisitivo")
@@ -528,15 +463,8 @@ public class PeriodoAquisitivoFeriasController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody TransicaoPeriodoAquisitivoFeriasDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags,
-            ifMatch,
-            scopes.currentScope(),
-            "administracao-pessoal.periodos-aquisitivos-ferias",
-            id);
-    return withResourceVersion(
-        ResponseEntity.ok(), id, service.prescreverPeriodoAquisitivo(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("prescrever-periodo-aquisitivo", id, ifMatch, null, dto,
+        condition -> service.prescreverPeriodoAquisitivo(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/reativar-periodo-aquisitivo")
@@ -559,15 +487,8 @@ public class PeriodoAquisitivoFeriasController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody TransicaoPeriodoAquisitivoFeriasDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags,
-            ifMatch,
-            scopes.currentScope(),
-            "administracao-pessoal.periodos-aquisitivos-ferias",
-            id);
-    return withResourceVersion(
-        ResponseEntity.ok(), id, service.reativarPeriodoAquisitivo(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("reativar-periodo-aquisitivo", id, ifMatch, null, dto,
+        condition -> service.reativarPeriodoAquisitivo(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/cancelar-periodo-aquisitivo")
@@ -591,15 +512,8 @@ public class PeriodoAquisitivoFeriasController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody TransicaoPeriodoAquisitivoFeriasDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags,
-            ifMatch,
-            scopes.currentScope(),
-            "administracao-pessoal.periodos-aquisitivos-ferias",
-            id);
-    return withResourceVersion(
-        ResponseEntity.ok(), id, service.cancelarPeriodoAquisitivo(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("cancelar-periodo-aquisitivo", id, ifMatch, null, dto,
+        condition -> service.cancelarPeriodoAquisitivo(id, dto, condition)));
   }
 
   @PostMapping("/{id}/actions/recalcular-faltas-direito-periodo")
@@ -623,15 +537,8 @@ public class PeriodoAquisitivoFeriasController
       @PathVariable Long id,
       @RequestHeader(value = "If-Match", required = false) String ifMatch,
       @Valid @RequestBody TransicaoPeriodoAquisitivoFeriasDTO dto) {
-    var p =
-        new ResourceVersionUpdatePrecondition<Long>(
-            etags,
-            ifMatch,
-            scopes.currentScope(),
-            "administracao-pessoal.periodos-aquisitivos-ferias",
-            id);
-    return withResourceVersion(
-        ResponseEntity.ok(), id, service.recalcularFaltasDireitoPeriodo(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("recalcular-faltas-direito-periodo", id, ifMatch, null, dto,
+        condition -> service.recalcularFaltasDireitoPeriodo(id, dto, condition)));
   }
 
   @PostMapping("/determinations/previa")
@@ -646,46 +553,31 @@ public class PeriodoAquisitivoFeriasController
     return ResponseEntity.ok(determinations.previaPeriodoAquisitivo(draft));
   }
 
+  @Override
   @PostMapping("/bulk/update/evaluation")
   @Operation(
       operationId = "ergon.periodos-aquisitivos-ferias.bulk.uniform.evaluation",
       summary = "Avaliar edição uniforme de períodos aquisitivos de férias",
       description =
           "Avalia seleção, versões e alterações de períodos aquisitivos sem modificar o cadastro; produz uma proposta protegida.")
-  public RestApiResponse<BulkProposal> bulkEvaluate(
-      @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              content =
-                  @io.swagger.v3.oas.annotations.media.Content(
-                      schema =
-                          @io.swagger.v3.oas.annotations.media.Schema(
-                              implementation =
-                                  ErgonBulkSchema.PeriodoAquisitivoFeriasUniform.class)))
-          @RequestBody
-          BulkUniformEvaluationRequest<String, PeriodoAquisitivoFeriasFilterDTO> request) {
-    return RestApiResponse.success(
-        bulk.uniform(Resource.PERIODOS_AQUISITIVOS_FERIAS, request), null);
+  @BulkResourceOperation(BulkResourceOperation.Role.UNIFORM_EVALUATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> evaluateBulkUpdate(@RequestBody BulkUniformEvaluationRequest<?, PeriodoAquisitivoFeriasFilterDTO> request) {
+    return super.evaluateBulkUpdate(request);
   }
 
+  @Override
   @PostMapping("/bulk/update-items/evaluation")
   @Operation(
       operationId = "ergon.periodos-aquisitivos-ferias.bulk.items.evaluation",
       summary = "Avaliar edições por período aquisitivo de férias",
       description =
           "Avalia deltas distintos e a versão esperada de cada período aquisitivo, com impedimentos individualizados.")
-  public RestApiResponse<BulkProposal> bulkEvaluateItems(
-      @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              content =
-                  @io.swagger.v3.oas.annotations.media.Content(
-                      schema =
-                          @io.swagger.v3.oas.annotations.media.Schema(
-                              implementation =
-                                  ErgonBulkSchema.PeriodoAquisitivoFeriasItems.class)))
-          @RequestBody
-          BulkItemEvaluationRequest<String> request) {
-    return RestApiResponse.success(
-        bulk.items(Resource.PERIODOS_AQUISITIVOS_FERIAS, request), null);
+  @BulkResourceOperation(BulkResourceOperation.Role.ITEM_EVALUATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> evaluateBulkUpdateItems(@RequestBody BulkItemEvaluationRequest<?> request) {
+    return super.evaluateBulkUpdateItems(request);
   }
 
+  @Override
   @PostMapping("/bulk/update")
   @BulkOperation(
       mode = BulkMode.UNIFORM_UPDATE,
@@ -696,22 +588,12 @@ public class PeriodoAquisitivoFeriasController
       summary = "Confirmar edição uniforme de períodos aquisitivos de férias",
       description =
           "Confirma uma proposta avaliada; cada período aquisitivo é revalidado e possui recibo durável.")
-  public RestApiResponse<BulkExecution> bulkConfirm(
-      @RequestBody BulkConfirmationRequest request,
-      @Parameter(
-              description =
-                  "Chave estável desta confirmação; repetir a mesma chave recupera a execução.")
-          @RequestHeader("Idempotency-Key")
-          String key) {
-    return RestApiResponse.success(
-        bulk.confirm(
-            Resource.PERIODOS_AQUISITIVOS_FERIAS,
-            "ergon.periodos-aquisitivos-ferias.bulk.uniform",
-            request,
-            key),
-        null);
+  @BulkResourceOperation(BulkResourceOperation.Role.UNIFORM_CONFIRMATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> confirmBulkUpdate(@RequestBody BulkConfirmationRequest request, @RequestHeader("Idempotency-Key") String key) {
+    return super.confirmBulkUpdate(request, key);
   }
 
+  @Override
   @PostMapping("/bulk/update-items")
   @BulkOperation(
       mode = BulkMode.PER_ITEM_UPDATE,
@@ -722,127 +604,20 @@ public class PeriodoAquisitivoFeriasController
       summary = "Confirmar edições por período aquisitivo de férias",
       description =
           "Aplica os deltas individualizados preservados na proposta, com versão e resultado próprios por período aquisitivo.")
-  public RestApiResponse<BulkExecution> bulkConfirmItems(
-      @RequestBody BulkConfirmationRequest request,
-      @Parameter(
-              description =
-                  "Chave estável de confirmação para recuperar a mesma execução em caso de repetição.")
-          @RequestHeader("Idempotency-Key")
-          String key) {
-    return RestApiResponse.success(
-        bulk.confirm(
-            Resource.PERIODOS_AQUISITIVOS_FERIAS,
-            "ergon.periodos-aquisitivos-ferias.bulk.items",
-            request,
-            key),
-        null);
+  @BulkResourceOperation(BulkResourceOperation.Role.ITEM_CONFIRMATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> confirmBulkUpdateItems(@RequestBody BulkConfirmationRequest request, @RequestHeader("Idempotency-Key") String key) {
+    return super.confirmBulkUpdateItems(request, key);
   }
 
-  @GetMapping("/bulk/proposals/{proposalId}")
-  @BulkResourceOperation(BulkResourceOperation.Role.PROPOSAL)
-  @Operation(
-      operationId = "ergon.periodos-aquisitivos-ferias.bulk.proposal",
-      summary = "Consultar proposta de lote de períodos aquisitivos",
-      description =
-          "Consulta totais e intenção pública da proposta após conferir acesso ao conjunto completo de períodos aquisitivos.")
-  public RestApiResponse<BulkProposal> bulkProposal(
-      @Parameter(description = "Identidade da proposta avaliada.") @PathVariable UUID proposalId) {
-    return RestApiResponse.success(
-        bulk.proposal(
-            Resource.PERIODOS_AQUISITIVOS_FERIAS,
-            bulk.locate(Resource.PERIODOS_AQUISITIVOS_FERIAS, proposalId, false),
-            proposalId),
-        null);
-  }
 
-  @GetMapping("/bulk/proposals/{proposalId}/results")
-  @BulkResourceOperation(BulkResourceOperation.Role.PROPOSAL_RESULTS)
-  @Operation(
-      operationId = "ergon.periodos-aquisitivos-ferias.bulk.proposal-results",
-      summary = "Inspecionar avaliação do lote de períodos aquisitivos",
-      description =
-          "Pagina períodos aquisitivos executáveis e bloqueados, com diagnósticos seguros e cursor vinculado ao solicitante.")
-  public RestApiResponse<CursorPage<BulkProposalItemResult<Object>>> bulkProposalResults(
-      @Parameter(description = "Identidade da proposta avaliada.") @PathVariable UUID proposalId,
-      @Parameter(description = "Quantidade de registros por página, de 1 a 200.")
-          @RequestParam(defaultValue = "50")
-          int size,
-      @Parameter(description = "Cursor opaco emitido na página anterior.")
-          @RequestParam(required = false)
-          String after) {
-    return RestApiResponse.success(
-        bulk.proposalResults(
-            Resource.PERIODOS_AQUISITIVOS_FERIAS,
-            bulk.locate(Resource.PERIODOS_AQUISITIVOS_FERIAS, proposalId, false),
-            proposalId,
-            size,
-            after),
-        null);
-  }
 
-  @GetMapping("/bulk/executions/{executionId}")
-  @BulkResourceOperation(BulkResourceOperation.Role.EXECUTION)
-  @Operation(
-      operationId = "ergon.periodos-aquisitivos-ferias.bulk.execution",
-      summary = "Consultar execução do lote de períodos aquisitivos",
-      description = "Retorna estado e contadores reconciliados a partir dos recibos persistidos.")
-  public RestApiResponse<BulkExecution> bulkExecution(
-      @Parameter(description = "Identidade da execução confirmada.")
-          @PathVariable
-          UUID executionId) {
-    return RestApiResponse.success(
-        bulk.execution(
-            Resource.PERIODOS_AQUISITIVOS_FERIAS,
-            bulk.locate(Resource.PERIODOS_AQUISITIVOS_FERIAS, executionId, true),
-            executionId),
-        null);
-  }
 
-  @GetMapping("/bulk/executions/{executionId}/results")
-  @BulkResourceOperation(BulkResourceOperation.Role.EXECUTION_RESULTS)
-  @Operation(
-      operationId = "ergon.periodos-aquisitivos-ferias.bulk.results",
-      summary = "Consultar recibos do lote de períodos aquisitivos",
-      description =
-          "Pagina resultados por período aquisitivo sem expor dados sensíveis da proposta.")
-  public RestApiResponse<CursorPage<BulkItemResult<Object>>> bulkResults(
-      @Parameter(description = "Identidade da execução confirmada.")
-          @PathVariable
-          UUID executionId,
-      @Parameter(description = "Quantidade de recibos por página, de 1 a 200.")
-          @RequestParam(defaultValue = "50")
-          int size,
-      @Parameter(description = "Cursor opaco da página anterior de recibos.")
-          @RequestParam(required = false)
-          String after) {
-    return RestApiResponse.success(
-        bulk.results(
-            Resource.PERIODOS_AQUISITIVOS_FERIAS,
-            bulk.locate(Resource.PERIODOS_AQUISITIVOS_FERIAS, executionId, true),
-            executionId,
-            size,
-            after),
-        null);
-  }
 
-  @PostMapping("/bulk/executions/{executionId}/cancel")
-  @BulkResourceOperation(BulkResourceOperation.Role.CANCEL)
-  @Operation(
-      operationId = "ergon.periodos-aquisitivos-ferias.bulk.cancel",
-      summary = "Solicitar parada do lote de períodos aquisitivos",
-      description =
-          "Registra a solicitação de parada sem desfazer alterações já confirmadas e sem reabrir efeitos no replay.")
-  public RestApiResponse<BulkExecution> bulkCancel(
-      @Parameter(description = "Identidade da execução a interromper.")
-          @PathVariable
-          UUID executionId) {
-    return RestApiResponse.success(
-        bulk.cancel(
-            Resource.PERIODOS_AQUISITIVOS_FERIAS,
-            bulk.locate(Resource.PERIODOS_AQUISITIVOS_FERIAS, executionId, true),
-            executionId),
-        null);
-  }
+
+
+
+
+
 
   @PostMapping("/bulk/homologar-periodo-aquisitivo-lote/evaluation")
   @Operation(
@@ -851,22 +626,13 @@ public class PeriodoAquisitivoFeriasController
       summary = "Avaliar homologação coletiva de períodos aquisitivos de férias",
       description =
           "Avalia homologação coletiva de períodos aquisitivos em aquisição ou suspensos do mesmo órgão, sem persistir alterações.")
-  public RestApiResponse<BulkProposal> bulkHomologarEvaluate(
-      @io.swagger.v3.oas.annotations.parameters.RequestBody(
-              content =
-                  @io.swagger.v3.oas.annotations.media.Content(
-                      schema =
-                          @io.swagger.v3.oas.annotations.media.Schema(
-                              implementation =
-                                  ErgonBulkSchema.HomologarPeriodoAquisitivoFeriasCommand.class)))
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> bulkHomologarEvaluate(
+
           @RequestBody
           BulkCommandEvaluationRequest<
-                  TransicaoPeriodoAquisitivoFeriasDTO, String, PeriodoAquisitivoFeriasFilterDTO>
+                  TransicaoPeriodoAquisitivoFeriasDTO, ?, PeriodoAquisitivoFeriasFilterDTO>
               request) {
-    return RestApiResponse.success(
-        bulk.command(
-            Resource.PERIODOS_AQUISITIVOS_FERIAS, "homologar-periodo-aquisitivo-lote", request),
-        null);
+    return evaluateBulkDomainCommand("homologar-periodo-aquisitivo-lote", request);
   }
 
   @PostMapping("/actions/homologar-periodo-aquisitivo-lote")
@@ -892,17 +658,16 @@ public class PeriodoAquisitivoFeriasController
       summary = "Homologar períodos aquisitivos em lote",
       description =
           "Executa homologação coletiva governada de períodos aquisitivos de férias.")
-  public RestApiResponse<BulkExecution> bulkHomologarConfirm(
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> bulkHomologarConfirm(
       @RequestBody BulkConfirmationRequest request,
       @Parameter(description = "Chave estável do ato coletivo para impedir efeitos duplicados.")
           @RequestHeader("Idempotency-Key")
           String key) {
-    return RestApiResponse.success(
-        bulk.confirm(
-            Resource.PERIODOS_AQUISITIVOS_FERIAS,
-            "ergon.periodos-aquisitivos-ferias.homologar-periodo-aquisitivo-lote",
-            request,
-            key),
-        null);
+    return confirmBulkDomainCommand("homologar-periodo-aquisitivo-lote", request, key);
   }
+  @Override @SuppressWarnings({"unchecked", "rawtypes"})
+  protected org.praxisplatform.uischema.bulk.JpaResourceBulkEngine getBulkEngine() { return bulk.engine(Resource.PERIODOS_AQUISITIVOS_FERIAS); }
+  @Override protected String bulkProposalOperationId(UUID id) { return bulk.locate(Resource.PERIODOS_AQUISITIVOS_FERIAS, id, false); }
+  @Override protected String bulkExecutionOperationId(UUID id) { return bulk.locate(Resource.PERIODOS_AQUISITIVOS_FERIAS, id, true); }
+
 }

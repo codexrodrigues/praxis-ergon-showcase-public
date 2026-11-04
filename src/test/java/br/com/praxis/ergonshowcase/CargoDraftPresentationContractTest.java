@@ -72,6 +72,6 @@ class CargoDraftPresentationContractTest {
       if (openApi31) assertThat(property.getTypes()).as(field).contains("null");
       else assertThat(property.getNullable()).as(field).isTrue();
     }
-    assertThat(create.getRequired()).contains("controleVaga", "porReferencia", "eAglutinador");
+    assertThat(create.getRequired()).doesNotContain("controleVaga", "porReferencia", "eAglutinador");
   }
 }

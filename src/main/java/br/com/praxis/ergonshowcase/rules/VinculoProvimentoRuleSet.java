@@ -67,7 +67,7 @@ public final class VinculoProvimentoRuleSet {
   public static final String TEMPLATE_PROVIMENTO_BOUNDS_VERSION = "1.0";
   public static final String JAVA_EXECUTOR_ACUMULACAO_KEY =
       "ergon.vinculos:acumulacao-constitucional-cargos";
-  public static final String JAVA_EXECUTOR_VERSION = "1.0";
+  public static final String JAVA_EXECUTOR_VERSION = "2.1";
 
   public static final List<String> AVAILABLE_ROOTS =
       List.of(
@@ -407,7 +407,32 @@ public final class VinculoProvimentoRuleSet {
                       "and": [
                         {"==": [{"var": "cargo.present"}, true]},
                         {"==": [{"var": "cargo.sameOrgao"}, true]},
-                        {"==": [{"var": "cargo.categoriaCompativel"}, true]}
+                        {
+                          "or": [
+                            {"==": [{"var": "draft.tipovinc"}, null]},
+                            {"==": [{"var": "cargo.tipoCargo"}, null]},
+                            {
+                              "!": [
+                                {
+                                  "or": [
+                                    {
+                                      "and": [
+                                        {"==": [{"var": "draft.tipovinc"}, "EFETIVO"]},
+                                        {"==": [{"var": "cargo.tipoCargo"}, "COMISSAO"]}
+                                      ]
+                                    },
+                                    {
+                                      "and": [
+                                        {"==": [{"var": "draft.tipovinc"}, "COMISSIONADO"]},
+                                        {"==": [{"var": "cargo.tipoCargo"}, "EFETIVO"]}
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
                       ]
                     }
                   ]
@@ -419,7 +444,12 @@ public final class VinculoProvimentoRuleSet {
                       "and": [
                         {"==": [{"var": "cargoComissao.present"}, true]},
                         {"==": [{"var": "cargoComissao.sameOrgao"}, true]},
-                        {"==": [{"var": "cargoComissao.tipoComissaoValido"}, true]}
+                        {
+                          "or": [
+                            {"==": [{"var": "cargoComissao.tipoCargo"}, null]},
+                            {"!=": [{"var": "cargoComissao.tipoCargo"}, "EFETIVO"]}
+                          ]
+                        }
                       ]
                     }
                   ]
@@ -467,7 +497,17 @@ public final class VinculoProvimentoRuleSet {
                         {
                           "and": [
                             {"!=": [{"var": "cargo.extinct"}, true]},
-                            {"==": [{"var": "cargo.hasVacancyBalance"}, true]}
+                            {
+                              "or": [
+                                {"!=": [{"var": "cargo.controleVaga"}, true]},
+                                {
+                                  "and": [
+                                    {"!=": [{"var": "cargo.vagasAutorizadas"}, null]},
+                                    {"<": [{"var": "cargo.ocupadas"}, {"var": "cargo.vagasAutorizadas"}]}
+                                  ]
+                                }
+                              ]
+                            }
                           ]
                         }
                       ]
@@ -478,7 +518,17 @@ public final class VinculoProvimentoRuleSet {
                         {
                           "and": [
                             {"!=": [{"var": "cargoComissao.extinct"}, true]},
-                            {"==": [{"var": "cargoComissao.hasVacancyBalance"}, true]}
+                            {
+                              "or": [
+                                {"!=": [{"var": "cargoComissao.controleVaga"}, true]},
+                                {
+                                  "and": [
+                                    {"!=": [{"var": "cargoComissao.vagasAutorizadas"}, null]},
+                                    {"<": [{"var": "cargoComissao.ocupadas"}, {"var": "cargoComissao.vagasAutorizadas"}]}
+                                  ]
+                                }
+                              ]
+                            }
                           ]
                         }
                       ]
@@ -737,7 +787,7 @@ public final class VinculoProvimentoRuleSet {
         true,
         RuleDecision.DENY,
         ErgonRuleErrorCatalog.CERG_09401.code(),
-        List.of("draft.empCodigo", "draft.situacao"),
+        List.of("draft.empCodigo", "draft.situacao", "documentoLegal"),
         null);
   }
 
@@ -778,7 +828,7 @@ public final class VinculoProvimentoRuleSet {
         true,
         RuleDecision.DENY,
         ErgonRuleErrorCatalog.CERG_00330.code(),
-        List.of("draft.empCodigo", "draft.situacao"),
+        List.of("draft.empCodigo", "draft.situacao", "documentoLegal"),
         null);
   }
 
@@ -798,18 +848,19 @@ public final class VinculoProvimentoRuleSet {
       String jsonLogic,
       String falseReasonCode,
       List<String> requiredFactPaths) {
+    JsonNode parsed = parseJson(jsonLogic);
     return new DecisionBinding(
         bindingKey,
         slotKey,
         DecisionSource.PRODUCT,
         null,
-        RuleExecutorRef.jsonLogic(parseJson(jsonLogic)),
+        RuleExecutorRef.jsonLogic(parsed),
         List.of(),
         order,
         true,
         RuleDecision.DENY,
         falseReasonCode,
-        requiredFactPaths,
+        ErgonOntologyRuleSetSupport.mergeRequiredRoots(requiredFactPaths, parsed),
         null);
   }
 

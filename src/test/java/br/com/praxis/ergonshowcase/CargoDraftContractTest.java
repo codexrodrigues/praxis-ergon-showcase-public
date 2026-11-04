@@ -32,7 +32,7 @@ class CargoDraftContractTest {
       if (openApi31) assertThat(property.getTypes()).as(field).contains("null");
       else assertThat(property.getNullable()).as(field).isTrue();
     }
-    assertThat(create.getRequired()).contains("cargo","empCodigo","controleVaga","porReferencia","eAglutinador");
+    assertThat(create.getRequired()).contains("cargo","empCodigo").doesNotContain("controleVaga","porReferencia","eAglutinador");
     for (String field : List.of("tipoCargo","cbo","vagasAutorizadas","cargoAglutinador","dtInicioContrVaga","documentoLegalId")) {
       var property = create.getProperties().get(field);
       if (openApi31) assertThat(property.getTypes()).as(field).contains("null");
@@ -42,18 +42,23 @@ class CargoDraftContractTest {
       assertThat(create.getProperties().get(field).getDefault()).isNull();
   }
 
-  @Test void createRequiresExplicitFlagsWhileUpdateKeepsItsExistingDefaults() {
+  @Test void omittedFlagsUseServerDefaultsAndExplicitChoicesArePreserved() {
     try (var factory = Validation.buildDefaultValidatorFactory()) {
       var create = new CreateCargoDTO();
-      create.setCargo(1);create.setEmpCodigo(1);create.setNome("Cargo");create.setCategoria("GERAL");
-      assertThat(factory.getValidator().validate(create)).extracting(v -> v.getPropertyPath().toString())
-          .containsExactlyInAnyOrder("controleVaga","porReferencia","eAglutinador");
-      create.setControleVaga(false);create.setPorReferencia(false);create.setEAglutinador(false);
+      create.setCargo(1);
+      create.setEmpCodigo(1);
+      create.setNome("Cargo");
+      create.setCategoria("GERAL");
       assertThat(factory.getValidator().validate(create)).isEmpty();
-      var update = new UpdateCargoDTO();
-      assertThat(update.getControleVaga()).isFalse();
-      assertThat(update.getPorReferencia()).isFalse();
-      assertThat(update.getEAglutinador()).isFalse();
+
+      var mapper = new br.com.praxis.ergonshowcase.mapper.CargoMapper();
+      var cargo = mapper.newEntity(create);
+      assertThat(cargo.getControleVaga()).isFalse();
+      assertThat(cargo.getPorReferencia()).isFalse();
+      assertThat(cargo.getEAglutinador()).isFalse();
+
+      create.setControleVaga(true);
+      assertThat(mapper.newEntity(create).getControleVaga()).isTrue();
     }
   }
 

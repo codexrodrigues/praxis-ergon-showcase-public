@@ -57,8 +57,6 @@ public class DefinicaoCampoCustomizadoService
 
   @Autowired(required = false)
   private ErgonInvariants invariants;
-
-  @PersistenceContext protected EntityManager entityManager;
   protected final DefinicaoCampoCustomizadoMapper mapper;
   private final TenantContext tenant;
   private final ErgonRuleEngineFacade ruleEngineFacade;
@@ -128,10 +126,6 @@ public class DefinicaoCampoCustomizadoService
     return new DefinicaoCampoCustomizadoFilterDTO();
   }
 
-  @Override
-  protected OptionalLong getEntityResourceVersion(DefinicaoCampoCustomizado entity) {
-    return OptionalLong.of(entity.getVersion());
-  }
 
   @Override
   public Optional<String> getDatasetVersion() {
@@ -172,26 +166,6 @@ public class DefinicaoCampoCustomizadoService
   }
 
   @Override
-  public StatsSupportMode getGroupByStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getTimeSeriesStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getDistributionStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getComparisonStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
   protected void beforeCreate(
       CreateDefinicaoCampoCustomizadoDTO dto, DefinicaoCampoCustomizado entity) {
     checkOrg(entity.getEmpCodigo());
@@ -208,61 +182,39 @@ public class DefinicaoCampoCustomizadoService
   }
 
   @Override
-  protected ResourceFilterAccessScope<DefinicaoCampoCustomizado> resolveResourceFilterAccessScope() {
-    var explicit = tenant != null ? tenant.explicitOrgao() : OptionalInt.empty();
-    if (explicit.isEmpty()) {
-      return ResourceFilterAccessScope.unrestricted();
+  protected void beforeDelete(Long id, DefinicaoCampoCustomizado entity) {
+    checkOrg(entity.getEmpCodigo());
+    if (Boolean.TRUE.equals(entity.getActive())) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "Definição de campo customizado ativa não pode ser excluída; desative-a previamente.");
     }
-    int orgao = explicit.getAsInt();
-    return ResourceFilterAccessScope.restricted(
-        (root, query, cb) ->
-            cb.or(cb.isNull(root.get("empCodigo")), cb.equal(root.get("empCodigo"), orgao)));
   }
 
+
+
   @Override
-  @Transactional
-  public ResourceRepresentationResult<DefinicaoCampoCustomizadoResponseDTO> update(
-      Long id,
-      UpdateDefinicaoCampoCustomizadoDTO dto,
-      ResourceVersionUpdatePrecondition<Long> precondition) {
-    if (precondition == null) throw ResourceVersionPreconditionException.required();
-    DefinicaoCampoCustomizado entity = findEntityById(id);
-    entityManager.lock(entity, LockModeType.PESSIMISTIC_WRITE);
-    entityManager.refresh(entity);
-    precondition.requireMatch(entity.getVersion());
-    beforeUpdate(id, entity, dto);
+  protected void applyResourceUpdate(Long id, DefinicaoCampoCustomizado entity, UpdateDefinicaoCampoCustomizadoDTO dto) {
     mapper.applyUpdate(entity, dto);
     checkOrg(entity.getEmpCodigo());
     validateCampoCustomizadoValidationRules(entity);
     if (invariants != null) {
       invariants.campoCustomizado(entity, false);
     }
-    var saved = getRepository().save(entity);
-    afterUpdate(id, saved, dto);
-    entityManager.flush();
-    entityManager.refresh(saved);
-    return toResourceRepresentation(saved);
   }
 
   private ResourceRepresentationResult<DefinicaoCampoCustomizadoResponseDTO> command(
       Long id,
       ResourceVersionUpdatePrecondition<Long> precondition,
       Consumer<DefinicaoCampoCustomizado> action) {
-    if (precondition == null) throw ResourceVersionPreconditionException.required();
-    DefinicaoCampoCustomizado entity = findEntityById(id);
-    entityManager.lock(entity, LockModeType.PESSIMISTIC_WRITE);
-    entityManager.refresh(entity);
-    precondition.requireMatch(entity.getVersion());
-    checkOrg(entity.getEmpCodigo());
+    return executeVersionedMutation(id, precondition, entity -> {
+      checkOrg(entity.getEmpCodigo());
     action.accept(entity);
     validateCampoCustomizadoValidationRules(entity);
     if (invariants != null) {
       invariants.campoCustomizado(entity, false);
     }
-    var saved = getRepository().save(entity);
-    entityManager.flush();
-    entityManager.refresh(saved);
-    return toResourceRepresentation(saved);
+    });
   }
 
   @Transactional
@@ -336,7 +288,18 @@ public class DefinicaoCampoCustomizadoService
   private void checkOrg(Integer orgao) {
     if (orgao != null && !Objects.equals(orgao, tenant.orgao())) {
       throw new ResponseStatusException(
-          HttpStatus.UNPROCESSABLE_ENTITY, "Órgão do campo customizado diverge de X-Tenant.");
+          HttpStatus.FORBIDDEN, "Órgão do campo customizado diverge de X-Tenant.");
     }
   }
+  @Override protected java.util.Optional<org.praxisplatform.uischema.capability.ResourceStateSnapshot> toResourceStateSnapshot(DefinicaoCampoCustomizado e) {
+    return java.util.Optional.of(snapshotState(e));
+  }
+  private org.praxisplatform.uischema.capability.ResourceStateSnapshot snapshotState(DefinicaoCampoCustomizado e) {
+    return new org.praxisplatform.uischema.capability.ResourceStateSnapshot(Boolean.TRUE.equals(e.getActive()) ? "ATIVO" : "INATIVO",java.util.Map.of("required",Boolean.TRUE.equals(e.getRequired())));
+  }
+
+  @Override protected String resolveResourceKey() { return "administracao-pessoal.campos-customizados"; }
+
+  @Override protected boolean globalOrganizationRecords() { return true; }
+
 }

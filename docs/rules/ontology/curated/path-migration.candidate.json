@@ -1,0 +1,444 @@
+{
+  "status": "CANDIDATE_NOT_RUNTIME",
+  "scope": "Product and factory orgao2 expressions for four leadership families; not an inventory of persisted customizations.",
+  "families": {
+    "funcoes": [
+      {
+        "legacyPath": "draft.inicio",
+        "targetFields": [
+          "draft.dtini"
+        ],
+        "decision": "DATE_ISO"
+      },
+      {
+        "legacyPath": "draft.fim",
+        "targetFields": [
+          "draft.dtfim"
+        ],
+        "decision": "DATE_ISO"
+      },
+      {
+        "legacyPath": "draft.minimo",
+        "targetFields": [
+          "draft.diasMinimosSubstituicao"
+        ],
+        "decision": "PRIMITIVE"
+      },
+      {
+        "legacyPath": "draft.permiteSubstituicao",
+        "targetFields": [
+          "draft.permiteSubstituicao"
+        ],
+        "decision": "PRIMITIVE"
+      },
+      {
+        "legacyPath": "draft.situacao",
+        "targetFields": [
+          "draft.situacao"
+        ],
+        "decision": "PRIMITIVE"
+      },
+      {
+        "legacyPath": "draft.documentoLegalId",
+        "targetFields": [
+          "draft.documentoLegalId"
+        ],
+        "decision": "PRIMITIVE"
+      },
+      {
+        "legacyPath": "draft.atoPublicacaoId",
+        "targetFields": [
+          "draft.atoPublicacaoId"
+        ],
+        "decision": "PRIMITIVE"
+      }
+    ],
+    "vagas-funcao": [
+      {
+        "legacyPath": "draft.inicio",
+        "targetFields": [
+          "draft.dtini"
+        ],
+        "decision": "DATE_ISO"
+      },
+      {
+        "legacyPath": "draft.fim",
+        "targetFields": [
+          "draft.dtfim"
+        ],
+        "decision": "DATE_ISO"
+      },
+      {
+        "legacyPath": "draft.funcao",
+        "targetFields": [
+          "draft.funcaoId"
+        ],
+        "decision": "REFERENCE_ID"
+      },
+      {
+        "legacyPath": "draft.situacao",
+        "targetFields": [
+          "draft.situacao"
+        ],
+        "decision": "PRIMITIVE"
+      },
+      {
+        "legacyPath": "draft.documentoLegalId",
+        "targetFields": [
+          "draft.documentoLegalId"
+        ],
+        "decision": "PRIMITIVE"
+      },
+      {
+        "legacyPath": "current.criacao",
+        "targetFields": [
+          "context.lifecycle"
+        ],
+        "decision": "CREATE_CONTEXT_NOT_OLD"
+      },
+      {
+        "legacyPath": "current.funcao",
+        "targetFields": [
+          "current.funcaoId"
+        ],
+        "decision": "OLD"
+      },
+      {
+        "legacyPath": "current.titular",
+        "targetFields": [
+          "current.titularAtualId"
+        ],
+        "decision": "COMPOSITE_ID"
+      },
+      {
+        "legacyPath": "funcao.situacao",
+        "targetFields": [
+          "funcao.situacao"
+        ],
+        "decision": "PRIMITIVE"
+      }
+    ],
+    "designacoes": [
+      {
+        "legacyPath": "draft.inicio",
+        "targetFields": [
+          "draft.dtini"
+        ],
+        "decision": "DATE_ISO"
+      },
+      {
+        "legacyPath": "draft.fim",
+        "targetFields": [
+          "draft.dtfim"
+        ],
+        "decision": "DATE_ISO"
+      },
+      {
+        "legacyPath": "draft.exercicio",
+        "targetFields": [
+          "draft.dtExercicio"
+        ],
+        "decision": "DATE_ISO"
+      },
+      {
+        "legacyPath": "draft.funcao",
+        "targetFields": [
+          "draft.funcaoId"
+        ],
+        "decision": "REFERENCE_ID"
+      },
+      {
+        "legacyPath": "draft.vagaId",
+        "targetFields": [
+          "draft.vagaFuncaoId"
+        ],
+        "decision": "REFERENCE_ID"
+      },
+      {
+        "legacyPath": "draft.situacao",
+        "targetFields": [
+          "draft.situacao"
+        ],
+        "decision": "PRIMITIVE"
+      },
+      {
+        "legacyPath": "draft.atoPublicacaoId",
+        "targetFields": [
+          "draft.atoPublicacaoId"
+        ],
+        "decision": "PRIMITIVE"
+      },
+      {
+        "legacyPath": "draft.titular",
+        "targetFields": [
+          "draft.titularId"
+        ],
+        "decision": "PERSON_COMPARISON_FROM_COMPOSITE_ID"
+      },
+      {
+        "legacyPath": "draft.primeiro",
+        "targetFields": [
+          "draft.substituto1Id"
+        ],
+        "decision": "PERSON_COMPARISON_FROM_COMPOSITE_ID"
+      },
+      {
+        "legacyPath": "draft.segundo",
+        "targetFields": [
+          "draft.substituto2Id"
+        ],
+        "decision": "PERSON_COMPARISON_FROM_COMPOSITE_ID"
+      },
+      {
+        "legacyPath": "current.situacao",
+        "targetFields": [
+          "current.situacao"
+        ],
+        "decision": "OLD_WITH_COMMAND_APPLICABILITY"
+      },
+      {
+        "legacyPath": "vaga.funcao",
+        "targetFields": [
+          "vaga.funcaoId"
+        ],
+        "decision": "REFERENCE_ID"
+      },
+      {
+        "legacyPath": "vaga.situacao",
+        "targetFields": [
+          "vaga.situacao"
+        ],
+        "decision": "PRIMITIVE"
+      },
+      {
+        "legacyPath": "neighborhood.outrosTitulares",
+        "targetFields": [
+          "neighborhood.designacoesDaVaga"
+        ],
+        "decision": "STATUS_PREDICATE_IN_RULESET"
+      }
+    ],
+    "substituicoes": [
+      {
+        "legacyPath": "draft.inicio",
+        "targetFields": [
+          "draft.dtini"
+        ],
+        "decision": "DATE_ISO"
+      },
+      {
+        "legacyPath": "draft.fim",
+        "targetFields": [
+          "draft.dtfim"
+        ],
+        "decision": "DATE_ISO"
+      },
+      {
+        "legacyPath": "draft.inicioRemunerado",
+        "targetFields": [
+          "draft.dtiniRemunerada"
+        ],
+        "decision": "DATE_ISO"
+      },
+      {
+        "legacyPath": "draft.fimRemunerado",
+        "targetFields": [
+          "draft.dtfimRemunerada"
+        ],
+        "decision": "DATE_ISO"
+      },
+      {
+        "legacyPath": "draft.substituto",
+        "targetFields": [
+          "draft.substitutoId"
+        ],
+        "decision": "PERSON_COMPARISON_FROM_COMPOSITE_ID"
+      },
+      {
+        "legacyPath": "draft.documentoLegalId",
+        "targetFields": [
+          "draft.documentoLegalId"
+        ],
+        "decision": "PRIMITIVE"
+      },
+      {
+        "legacyPath": "designacao.titular",
+        "targetFields": [
+          "designacao.titularId"
+        ],
+        "decision": "PERSON_COMPARISON_FROM_COMPOSITE_ID"
+      },
+      {
+        "legacyPath": "designacao.inicio",
+        "targetFields": [
+          "designacao.dtExercicio"
+        ],
+        "decision": "DATE_ISO"
+      },
+      {
+        "legacyPath": "designacao.fim",
+        "targetFields": [
+          "designacao.dtfim"
+        ],
+        "decision": "DATE_ISO"
+      },
+      {
+        "legacyPath": "designacao.situacao",
+        "targetFields": [
+          "designacao.situacao"
+        ],
+        "decision": "PRIMITIVE"
+      },
+      {
+        "legacyPath": "substituto.exercicio",
+        "targetFields": [
+          "substituto.dtexerc"
+        ],
+        "decision": "DATE_ISO"
+      },
+      {
+        "legacyPath": "substituto.vacancia",
+        "targetFields": [
+          "substituto.dtvac"
+        ],
+        "decision": "DATE_ISO"
+      },
+      {
+        "legacyPath": "substituto.inicioCessao",
+        "targetFields": [
+          "substituto.dtiniCessao"
+        ],
+        "decision": "DATE_ISO"
+      },
+      {
+        "legacyPath": "substituto.fimCessao",
+        "targetFields": [
+          "substituto.dtfimCessao"
+        ],
+        "decision": "DATE_ISO"
+      },
+      {
+        "legacyPath": "funcao.diasMinimosSubstituicao",
+        "targetFields": [
+          "funcao.diasMinimosSubstituicao"
+        ],
+        "decision": "PRIMITIVE"
+      },
+      {
+        "legacyPath": "funcao.permiteSubstituicao",
+        "targetFields": [
+          "funcao.permiteSubstituicao"
+        ],
+        "decision": "PRIMITIVE"
+      },
+      {
+        "legacyPath": "impedimento.tipo",
+        "targetFields": [
+          "feriasImpedimento",
+          "afastamentoImpedimento"
+        ],
+        "decision": "EXCLUSIVE_REFERENCES_IN_RULESET"
+      },
+      {
+        "legacyPath": "impedimento.inicio",
+        "targetFields": [
+          "feriasImpedimento.dtini",
+          "afastamentoImpedimento.dtini"
+        ],
+        "decision": "DATE_ISO"
+      },
+      {
+        "legacyPath": "impedimento.fim",
+        "targetFields": [
+          "feriasImpedimento.dtfim",
+          "feriasImpedimento.dtprevfim",
+          "afastamentoImpedimento.dtfim",
+          "afastamentoImpedimento.dtprevfim"
+        ],
+        "decision": "RAW_DATES_COALESCED_IN_RULESET"
+      },
+      {
+        "legacyPath": "impedimento.situacao",
+        "targetFields": [
+          "feriasImpedimento.situacao",
+          "afastamentoImpedimento.situacao"
+        ],
+        "decision": "STATUS_PREDICATE_IN_RULESET"
+      },
+      {
+        "legacyPath": "impedimento.interrupcao",
+        "targetFields": [
+          "feriasImpedimento.dtInterrupcao"
+        ],
+        "decision": "DATE_ISO"
+      },
+      {
+        "legacyPath": "neighborhood.outrasSubstituicoesTitular",
+        "targetFields": [
+          "neighborhood.substituicoesDoTitular"
+        ],
+        "decision": "INTERVAL_AND_STATUS_PREDICATE_IN_RULESET"
+      },
+      {
+        "legacyPath": "neighborhood.outrasSubstituicoesSubstituto",
+        "targetFields": [
+          "neighborhood.substituicoesDoSubstituto"
+        ],
+        "decision": "INTERVAL_AND_STATUS_PREDICATE_IN_RULESET"
+      },
+      {
+        "legacyPath": "neighborhood.feriasSubstituto",
+        "targetFields": [
+          "neighborhood.feriasDoSubstituto"
+        ],
+        "decision": "INTERVAL_AND_STATUS_PREDICATE_IN_RULESET"
+      },
+      {
+        "legacyPath": "neighborhood.afastamentosSubstituto",
+        "targetFields": [
+          "neighborhood.afastamentosDoSubstituto"
+        ],
+        "decision": "INTERVAL_AND_STATUS_PREDICATE_IN_RULESET"
+      }
+    ]
+  },
+  "operationSemantics": [
+    {
+      "code": "CERG-07003",
+      "appliesTo": [
+        "COMMAND_ITEM"
+      ],
+      "decision": "Homologação coletiva conserva OLD real e verifica DESIGNADA. CRUD/bulk de retificação não podem adquirir essa guarda ao passar OLD completo."
+    },
+    {
+      "code": "ERG-01152/ERG-01153",
+      "appliesTo": [
+        "CREATE",
+        "UPDATE",
+        "BULK_ITEM"
+      ],
+      "decision": "CREATE usa ausência explícita de OLD; não dereferenciar current.titularAtualId quando current=null. UPDATE lê OLD, nunca o candidato."
+    },
+    {
+      "code": "CERG-07151",
+      "appliesTo": [
+        "CREATE"
+      ],
+      "decision": "Usar context.lifecycle, sem current.criacao; preview não executa a regra de abertura."
+    },
+    {
+      "code": "DELETE",
+      "appliesTo": [
+        "DELETE"
+      ],
+      "decision": "Migrar somente as guardas de exclusão dos serviços para escopo dedicado; não avaliar a família de CREATE com draft=null."
+    },
+    {
+      "code": "PREVIEW",
+      "appliesTo": [
+        "PREVIEW"
+      ],
+      "decision": "Admissão verifica cada slot customizado contra o schema específico do preview que o chama."
+    }
+  ]
+}

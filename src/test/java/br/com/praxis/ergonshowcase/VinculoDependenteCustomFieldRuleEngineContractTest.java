@@ -7,8 +7,14 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import br.com.praxis.ergonshowcase.config.TenantContext;
+import br.com.praxis.ergonshowcase.constants.ApiPaths;
+import br.com.praxis.ergonshowcase.controller.DependenteController;
+import br.com.praxis.ergonshowcase.controller.VinculoController;
 import br.com.praxis.ergonshowcase.domain.Afastamento;
 import br.com.praxis.ergonshowcase.domain.Cargo;
 import br.com.praxis.ergonshowcase.domain.CodigoFrequencia;
@@ -24,6 +30,8 @@ import br.com.praxis.ergonshowcase.domain.Setor;
 import br.com.praxis.ergonshowcase.domain.TipoDependente;
 import br.com.praxis.ergonshowcase.domain.Vinculo;
 import br.com.praxis.ergonshowcase.domain.VinculoId;
+import br.com.praxis.ergonshowcase.dto.CreateDependenteDTO;
+import br.com.praxis.ergonshowcase.dto.CreateVinculoDTO;
 import br.com.praxis.ergonshowcase.mapper.DefinicaoCampoCustomizadoMapper;
 import br.com.praxis.ergonshowcase.mapper.DependenteMapper;
 import br.com.praxis.ergonshowcase.mapper.VinculoMapper;
@@ -62,8 +70,12 @@ import org.praxisplatform.rules.contract.RuleEvaluationResult;
 import org.praxisplatform.rules.plan.RuleDecisionPlan;
 import org.praxisplatform.rules.plan.RulePlanException;
 import org.praxisplatform.rules.plan.RulePlanIssueCode;
+import org.praxisplatform.uischema.rest.exceptionhandler.GlobalExceptionHandler;
+import org.praxisplatform.uischema.service.base.BaseCreateUpdateResourceCommandService.SavedResult;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 /**
  * Suíte determinística de contrato para os RuleSets governados de Elegibilidade de Dependentes
@@ -78,7 +90,7 @@ class VinculoDependenteCustomFieldRuleEngineContractTest {
 
   @BeforeEach
   void setUp() {
-    facade = new ErgonRuleEngineFacade();
+    facade = RuleCatalogExecution.facade();
   }
 
   @Test
@@ -90,7 +102,7 @@ class VinculoDependenteCustomFieldRuleEngineContractTest {
     RuleEvaluationResult depResult = facade.evaluateDependente(validDependenteContext());
     assertThat(depResult.decision()).isEqualTo(RuleDecision.ALLOW);
     assertThat(depResult.reasonCodes()).isEmpty();
-    assertThat(depResult.bindingResults()).hasSize(10);
+    assertThat(depResult.bindingResults()).hasSize(12);
 
     RuleDecisionPlan vincPlan = facade.resolveVinculoPlan(1);
     assertThat(vincPlan.slotsByKey()).hasSize(8);
@@ -100,6 +112,155 @@ class VinculoDependenteCustomFieldRuleEngineContractTest {
     assertThat(vincResult.decision()).isEqualTo(RuleDecision.ALLOW);
     assertThat(vincResult.reasonCodes()).isEmpty();
     assertThat(vincResult.bindingResults()).hasSize(8);
+  }
+
+  @Test
+  void entradaDeDependenteAceitaNascimentoHojeEDelegaDataFuturaAoMotor() {
+    var ctx = validDependenteContext();
+    LocalDate hoje = ctx.referenceDate();
+    try (var validation = jakarta.validation.Validation.buildDefaultValidatorFactory()) {
+      var validator = validation.getValidator();
+      for (LocalDate nascimento : List.of(hoje, hoje.plusDays(1))) {
+        assertThat(validator.validateValue(
+            br.com.praxis.ergonshowcase.dto.CreateDependenteDTO.class, "dtnasc", nascimento)).isEmpty();
+      }
+    }
+    ctx.draft().setDtnasc(hoje);
+    ctx.draft().setDtini(hoje);
+    assertThat(facade.enforceDependente(ctx).decision()).isEqualTo(RuleDecision.ALLOW);
+
+    ctx.draft().setDtnasc(hoje.plusDays(1));
+    ctx.draft().setDtini(hoje.plusDays(1));
+    assertThatThrownBy(() -> facade.enforceDependente(ctx))
+        .isInstanceOfSatisfying(ErgonRuleViolationException.class, rejection -> {
+          assertThat(rejection.getHttpStatus()).isEqualTo(422);
+          assertThat(rejection.getReasonCodes()).containsExactly("ERG-03182");
+          assertThat(rejection.getDescriptors().getFirst().targetField()).isEqualTo("dtnasc");
+        });
+  }
+
+  @Test
+  void entradaDeVinculoAceitaExercicioProgramadoMasPreservaOrdemDaPosse() {
+    var ctx = validVinculoContext();
+    var dataProgramada = LocalDate.now().plusDays(5);
+    try (var validation = jakarta.validation.Validation.buildDefaultValidatorFactory()) {
+      assertThat(validation.getValidator().validateValue(
+          br.com.praxis.ergonshowcase.dto.CreateVinculoDTO.class, "dtexerc", dataProgramada)).isEmpty();
+    }
+    ctx.draft().setDtnom(dataProgramada.minusDays(7));
+    ctx.draft().setDtposse(dataProgramada.minusDays(6));
+    ctx.draft().setDtexerc(dataProgramada);
+    assertThat(facade.enforceVinculo(ctx).decision()).isEqualTo(RuleDecision.ALLOW);
+    ctx.draft().setDtposse(dataProgramada.plusDays(1));
+    assertThatThrownBy(() -> facade.enforceVinculo(ctx))
+        .isInstanceOfSatisfying(ErgonRuleViolationException.class,
+            rejection -> assertThat(rejection.getReasonCodes()).contains("ERG-00324"));
+  }
+
+  @Test
+  void postsDeDependenteEVinculoPreservamStatusNaFronteiraHttp() throws Exception {
+    var dep = validDependenteContext();
+    var depService = mock(DependenteService.class);
+    var depMapper = new DependenteMapper();
+    var hoje = LocalDate.now(java.time.ZoneId.of(ErgonRuleEngineFacade.DEFAULT_TIME_ZONE));
+    when(depService.create(any(CreateDependenteDTO.class))).thenAnswer(call -> {
+      var draft = depMapper.newEntity(call.getArgument(0));
+      facade.enforceDependente(new DependenteRuleContext(
+          draft, 1, dep.pessoa(), dep.tipoDependente(), dep.documentoLegal(), List.of(), hoje));
+      return new SavedResult<>(draft.getId(), depMapper.toResponse(draft));
+    });
+    var vinc = validVinculoContext();
+    var vincService = mock(VinculoService.class);
+    var vincMapper = new VinculoMapper();
+    when(vincService.create(any(CreateVinculoDTO.class))).thenAnswer(call -> {
+      var dto = call.<CreateVinculoDTO>getArgument(0);
+      vinc.draft().setDtnom(dto.getDtnom());
+      vinc.draft().setDtposse(dto.getDtposse());
+      vinc.draft().setDtexerc(dto.getDtexerc());
+      facade.enforceVinculo(vinc);
+      vinc.draft().setPessoa(vinc.pessoa());
+      return new SavedResult<>(vinc.draft().getId(), vincMapper.toResponse(vinc.draft()));
+    });
+    var etags = new org.praxisplatform.uischema.concurrency.ResourceVersionEtagService("test");
+    org.praxisplatform.uischema.concurrency.ResourceVersionScopeProvider scopes =
+        () -> org.praxisplatform.uischema.concurrency.ResourceVersionScope.GLOBAL;
+    var mvc = MockMvcBuilders.standaloneSetup(
+            new DependenteController(depService, etags, scopes),
+            new VinculoController(vincService, etags, scopes))
+        .setControllerAdvice(new GlobalExceptionHandler()).build();
+    String dependente = """
+        {"numfunc":1001,"numdep":1,"nome":"Recém-nascido","parentesco":"FILHO",
+         "sexo":"M","tipodepen":"FILHO_MENOR","cpf":"99988877766","documentoLegalId":77,
+         "dtnasc":"%1$s","dtini":"%1$s"}
+        """;
+    mvc.perform(post(ApiPaths.DEPENDENTES).contentType(MediaType.APPLICATION_JSON)
+            .content(dependente.formatted(hoje)))
+        .andExpect(status().isCreated());
+    mvc.perform(post(ApiPaths.DEPENDENTES).contentType(MediaType.APPLICATION_JSON)
+            .content(dependente.formatted(hoje.plusDays(1))))
+        .andExpect(status().isUnprocessableEntity())
+        .andExpect(jsonPath("$.errors[0].code").value("ERG-03182"))
+        .andExpect(jsonPath("$.errors[0].violations[0].targetField").value("dtnasc"))
+        .andExpect(jsonPath("$.errors[0].violations[0].slotKey")
+            .value(DependenteElegibilidadeRuleSet.SLOT_DATA_NASCIMENTO))
+        .andExpect(jsonPath("$.errors[0].violations[0].lineage").isNotEmpty());
+    mvc.perform(post(ApiPaths.VINCULOS).contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {"numfunc":1001,"numero":1,"empCodigo":1,"regimejur":"ESTATUTARIO",
+                 "tipovinc":"EFETIVO","categoria":"ADMINISTRATIVO","dtnom":"%s",
+                 "dtposse":"%s","dtexerc":"%s"}
+                """.formatted(hoje.minusDays(2), hoje, hoje.plusDays(5))))
+        .andExpect(status().isCreated());
+  }
+
+  @ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(strings = {"ceder", "retornar", "aposentar", "estagio"})
+  void comandosDeVinculoEncaminhamDatasInvertidasAoMotor(String acao) {
+    var ctx = validVinculoContext();
+    Vinculo draft = ctx.draft();
+    draft.setSituacao(acao.equals("retornar") ? "CEDIDO" : "ATIVO");
+    draft.setDtiniCessao(draft.getDtexerc().plusDays(5));
+    var anterior = draft.getDtexerc().minusDays(1);
+    var em = mock(EntityManager.class);
+    when(em.find(Vinculo.class, draft.getId())).thenReturn(draft);
+    var invariants = mock(ErgonInvariants.class);
+    org.mockito.Mockito.doAnswer(invocation -> {
+      facade.enforceVinculo(ctx);
+      return null;
+    }).when(invariants).vinculo(draft, false);
+    var commands = new br.com.praxis.ergonshowcase.service.ErgonCommands();
+    ReflectionTestUtils.setField(commands, "em", em);
+    ReflectionTestUtils.setField(commands, "rules", invariants);
+    ReflectionTestUtils.setField(commands, "tenant", new TenantContext());
+    @SuppressWarnings("unchecked")
+    org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition<VinculoId> precondition =
+        mock(org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition.class);
+
+    assertThatThrownBy(() -> {
+      switch (acao) {
+        case "ceder" -> commands.registrarCessao(draft.getId(),
+            new br.com.praxis.ergonshowcase.dto.RegistrarCessaoDTO(
+                "CESSAO", "Órgão", null, null, null, anterior, draft.getDtexerc()), precondition);
+        case "retornar" -> commands.encerrarCessao(draft.getId(),
+            new br.com.praxis.ergonshowcase.dto.EncerrarCessaoDTO(anterior), precondition);
+        case "aposentar" -> commands.concederAposentadoria(draft.getId(),
+            new br.com.praxis.ergonshowcase.dto.ConcederAposentadoriaDTO(
+                anterior, "VOLUNTARIA", null, null), precondition);
+        case "estagio" -> commands.homologarEstagio(draft.getId(),
+            new br.com.praxis.ergonshowcase.dto.HomologarEstagioDTO(anterior, null), precondition);
+        default -> throw new AssertionError(acao);
+      }
+    }).isInstanceOfSatisfying(ErgonRuleViolationException.class, rejection -> {
+      assertThat(rejection.getHttpStatus()).isEqualTo(422);
+      assertThat(rejection.getReasonCodes()).contains("ERG-00324");
+      assertThat(rejection.getViolations()).anySatisfy(violation -> {
+        assertThat(violation.code()).isEqualTo("ERG-00324");
+        assertThat(violation.slotKey()).isNotBlank();
+        assertThat(violation.targetField()).isNotBlank();
+        assertThat(violation.lineage()).contains("PCK_VINCULOS");
+      });
+    });
+    org.mockito.Mockito.verify(em, org.mockito.Mockito.never()).flush();
   }
 
   static Stream<Arguments> dependenteProductDecisionViolations() {
@@ -125,6 +286,18 @@ class VinculoDependenteCustomFieldRuleEngineContractTest {
                   return base;
                 }),
         Arguments.of(
+            "ERG-03181",
+            DependenteElegibilidadeRuleSet.SLOT_DATA_NASCIMENTO,
+            (Supplier<DependenteRuleContext>)
+                () -> {
+                  DependenteRuleContext base = validDependenteContext();
+                  base.draft().setDtnasc(LocalDate.of(1890, 1, 1));
+                  base.draft().setDepIr(false);
+                  base.draft().setDepSalarioFamilia(false);
+                  base.draft().setDepPlanoSaude(false);
+                  return base;
+                }),
+        Arguments.of(
             "ERG-03183",
             DependenteElegibilidadeRuleSet.SLOT_COERENCIA_PARENTESCO,
             (Supplier<DependenteRuleContext>)
@@ -132,6 +305,20 @@ class VinculoDependenteCustomFieldRuleEngineContractTest {
                   DependenteRuleContext base = validDependenteContext();
                   base.draft().setParentesco("FILHO");
                   base.draft().setDtnasc(LocalDate.of(1980, 1, 1)); // anterior ao nascimento do titular (1985)
+                  base.draft().setTipodepen(null);
+                  base.draft().setDepIr(false);
+                  base.draft().setDepSalarioFamilia(false);
+                  base.draft().setDepPlanoSaude(false);
+                  return base;
+                }),
+        Arguments.of(
+            "ERG-03184",
+            DependenteElegibilidadeRuleSet.SLOT_COERENCIA_PARENTESCO,
+            (Supplier<DependenteRuleContext>)
+                () -> {
+                  DependenteRuleContext base = validDependenteContext();
+                  base.draft().setParentesco("PAI");
+                  base.draft().setDtnasc(LocalDate.of(2005, 1, 1)); // posterior ao nascimento do titular (1985)
                   base.draft().setTipodepen(null);
                   base.draft().setDepIr(false);
                   base.draft().setDepSalarioFamilia(false);
@@ -256,7 +443,8 @@ class VinculoDependenteCustomFieldRuleEngineContractTest {
         .isInstanceOfSatisfying(
             ErgonRuleViolationException.class,
             ex -> {
-              assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+              assertThat(ex.getStatusCode()).isEqualTo(java.util.Set.of("ERG-03193", "ERG-00300").contains(expectedCode)
+                  ? HttpStatus.CONFLICT : HttpStatus.UNPROCESSABLE_ENTITY);
               assertThat(ex.getReasonCodes()).contains(expectedCode);
               assertThat(ex.getSlotKeys()).contains(expectedSlot);
             });
@@ -588,7 +776,7 @@ class VinculoDependenteCustomFieldRuleEngineContractTest {
                       base.setor(),
                       base.setorExercicio(),
                       base.documentoLegal(),
-                      List.of(activeOther),
+                      List.of(concomitante(activeOther)),
                       0L,
                       true);
                 }));
@@ -607,14 +795,15 @@ class VinculoDependenteCustomFieldRuleEngineContractTest {
         .isInstanceOfSatisfying(
             ErgonRuleViolationException.class,
             ex -> {
-              assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+              assertThat(ex.getStatusCode()).isEqualTo(java.util.Set.of("ERG-03193", "ERG-00300").contains(expectedCode)
+                  ? HttpStatus.CONFLICT : HttpStatus.UNPROCESSABLE_ENTITY);
               assertThat(ex.getReasonCodes()).contains(expectedCode);
               assertThat(ex.getSlotKeys()).contains(expectedSlot);
             });
   }
 
   @Test
-  void vinculoConstitutionalAccumulationAllowsTwoHealthOrTeachingLinksAndRejectsThird() {
+  void vinculoConstitutionalAccumulationRequiresSchedulesForEligiblePairsAndRejectsThird() {
     Vinculo activeMagisterio = new Vinculo();
     activeMagisterio.setId(new VinculoId(1001L, 2));
     activeMagisterio.setEmpCodigo(1);
@@ -622,7 +811,7 @@ class VinculoDependenteCustomFieldRuleEngineContractTest {
     activeMagisterio.setCategoria("MAGISTERIO");
     activeMagisterio.setDtexerc(LocalDate.of(2018, 1, 1));
 
-    // 1. Segundo vínculo ativo em SAUDE com primeiro em MAGISTERIO -> ALLOW
+    // 1. Segundo vínculo ativo em SAUDE com primeiro em MAGISTERIO exige prova de horários
     VinculoRuleContext base = validVinculoContext();
     base.draft().setCategoria("SAUDE");
     VinculoRuleContext twoValid =
@@ -637,12 +826,12 @@ class VinculoDependenteCustomFieldRuleEngineContractTest {
             base.setor(),
             base.setorExercicio(),
             base.documentoLegal(),
-            List.of(activeMagisterio),
+            List.of(concomitante(activeMagisterio)),
             0L,
             true);
-    assertThat(facade.evaluateVinculo(twoValid).decision()).isEqualTo(RuleDecision.ALLOW);
+    assertThat(facade.evaluateVinculo(twoValid).decision()).isEqualTo(RuleDecision.INCONCLUSIVE);
 
-    // 2. 1 cargo técnico (TECNICO) + 1 cargo de professor (MAGISTERIO) -> ALLOW (CF/88 art. 37, XVI, "b")
+    // 2. 1 cargo técnico (TECNICO) + 1 cargo de professor (MAGISTERIO) -> requer comprovação de horários (CF/88 art. 37, XVI, "b")
     VinculoRuleContext baseTecnico = validVinculoContext();
     baseTecnico.draft().setCategoria("TECNICO");
     baseTecnico.cargo().setCategoria("TECNICO");
@@ -658,11 +847,11 @@ class VinculoDependenteCustomFieldRuleEngineContractTest {
             baseTecnico.setor(),
             baseTecnico.setorExercicio(),
             baseTecnico.documentoLegal(),
-            List.of(activeMagisterio),
+            List.of(concomitante(activeMagisterio)),
             0L,
             true);
     assertThat(facade.evaluateVinculo(tecnicoPlusMagisterio).decision())
-        .isEqualTo(RuleDecision.ALLOW);
+        .isEqualTo(RuleDecision.INCONCLUSIVE);
 
     // 3. 2 cargos técnicos (TECNICO + TECNICO) -> DENY ERG-00300
     Vinculo activeTecnico2 = new Vinculo();
@@ -683,7 +872,7 @@ class VinculoDependenteCustomFieldRuleEngineContractTest {
             baseTecnico.setor(),
             baseTecnico.setorExercicio(),
             baseTecnico.documentoLegal(),
-            List.of(activeTecnico2),
+            List.of(concomitante(activeTecnico2)),
             0L,
             true);
     RuleEvaluationResult twoTecnicosRes = facade.evaluateVinculo(twoTecnicos);
@@ -710,7 +899,7 @@ class VinculoDependenteCustomFieldRuleEngineContractTest {
             base.setor(),
             base.setorExercicio(),
             base.documentoLegal(),
-            List.of(activeMagisterio, activeSaude2),
+            List.of(concomitante(activeMagisterio), concomitante(activeSaude2)),
             0L,
             true);
     RuleEvaluationResult thirdRes = facade.evaluateVinculo(threeActive);
@@ -1084,8 +1273,8 @@ class VinculoDependenteCustomFieldRuleEngineContractTest {
     Map<String, Object> vincDiag =
         vincService.evaluateVinculoDiagnostic(validVincCtx.draft(), true);
     assertThat(vincDiag)
-        .containsEntry("allowed", true)
-        .containsEntry("decision", "ALLOW")
+        .containsEntry("allowed", false)
+        .containsEntry("decision", "INCONCLUSIVE")
         .containsEntry("ruleSetKey", VinculoProvimentoRuleSet.RULESET_KEY);
 
     validVincCtx.draft().setJornadaSemanal(180); // > 168h -> bloqueia ERG-00315
@@ -1095,7 +1284,7 @@ class VinculoDependenteCustomFieldRuleEngineContractTest {
             ex -> assertThat(ex.getReasonCodes()).contains("ERG-00315"));
   }
 
-  private static DependenteRuleContext validDependenteContext() {
+  static DependenteRuleContext validDependenteContext() {
     ServidorPessoa titular = new ServidorPessoa();
     titular.setNumero(1001L);
     titular.setNome("Servidor Titular");
@@ -1138,7 +1327,71 @@ class VinculoDependenteCustomFieldRuleEngineContractTest {
         draft, 1, titular, tipo, doc, List.of(), LocalDate.of(2026, 6, 1));
   }
 
-  private static VinculoRuleContext validVinculoContext() {
+  @Test
+  void ec138AppliesAtPublicationAndAnEligiblePairStillNeedsScheduleEvidence() {
+    var base = validVinculoContext();
+    var priorTeaching = new ErgonRuleEngineFacade.VinculoConcomitante(
+        LocalDate.of(2020, 1, 1), null, "MAGISTERIO");
+    var context = new VinculoRuleContext(base.draft(), base.orgao(), base.pessoa(), base.cargo(),
+        base.cargoOcupadas(), base.cargoComissao(), base.cargoComissaoOcupadas(), base.setor(),
+        base.setorExercicio(), base.documentoLegal(), List.of(priorTeaching), 0L, true);
+    base.draft().setDtnom(LocalDate.of(2025, 12, 19));
+    base.draft().setDtposse(LocalDate.of(2025, 12, 20));
+    base.draft().setDtexerc(LocalDate.of(2025, 12, 21));
+    assertThat(facade.evaluateVinculo(context).reasonCodes()).contains("ERG-00300");
+    base.draft().setDtexerc(LocalDate.of(2025, 12, 22));
+    var result = facade.evaluateVinculo(context);
+    assertThat(result.decision()).isEqualTo(RuleDecision.INCONCLUSIVE);
+    assertThat(result.reasonCodes()).doesNotContain("ERG-00300");
+  }
+
+  @Test
+  void accumulationEvaluatesConcreteSchedulesOnlyWithFullCoverageAndTravelTime() {
+    var base = validVinculoContext();
+    var date = LocalDate.of(2026, 1, 15);
+    base.draft().setDtnom(date.minusDays(2));
+    base.draft().setDtposse(date.minusDays(1));
+    base.draft().setDtexerc(date);
+    var tz = java.time.ZoneId.of("America/Sao_Paulo");
+    var first = expediente("2026-01-15T11:00:00Z", "2026-01-15T15:00:00Z");
+    var nonOverlapping = expediente("2026-01-15T15:30:00Z", "2026-01-15T19:30:00Z");
+    var conflicting = expediente("2026-01-15T14:59:00Z", "2026-01-15T18:59:00Z");
+    var insufficientTravel = expediente("2026-01-15T15:29:00Z", "2026-01-15T19:29:00Z");
+    var travel = java.time.Duration.ofMinutes(30);
+    for (var window : List.of(nonOverlapping, conflicting, insufficientTravel)) {
+      var proof = new br.com.praxis.ergonshowcase.rules.ProvaHorariosAcumulacao(
+          date, date, tz, travel, List.of(first), List.of(window));
+      var fact = new ErgonRuleEngineFacade.VinculoConcomitante(date, date, "MAGISTERIO", proof);
+      var result = facade.evaluateVinculo(withConcomitant(base, fact));
+      if (window == nonOverlapping) assertThat(result.decision()).isEqualTo(RuleDecision.ALLOW);
+      else assertThat(result.reasonCodes()).contains("ERG-00300");
+      if (window == nonOverlapping) {
+        var partial = new ErgonRuleEngineFacade.VinculoConcomitante(date, date.plusDays(1), "MAGISTERIO", proof);
+        assertThat(facade.evaluateVinculo(withConcomitant(base, partial)).decision())
+            .isEqualTo(RuleDecision.INCONCLUSIVE);
+      }
+    }
+  }
+
+  private static br.com.praxis.ergonshowcase.rules.ProvaHorariosAcumulacao.Expediente expediente(
+      String inicio, String fim) {
+    return new br.com.praxis.ergonshowcase.rules.ProvaHorariosAcumulacao.Expediente(
+        java.time.Instant.parse(inicio), java.time.Instant.parse(fim));
+  }
+
+  private static VinculoRuleContext withConcomitant(
+      VinculoRuleContext base, ErgonRuleEngineFacade.VinculoConcomitante fact) {
+    return new VinculoRuleContext(base.draft(), base.orgao(), base.pessoa(), base.cargo(),
+        base.cargoOcupadas(), base.cargoComissao(), base.cargoComissaoOcupadas(), base.setor(),
+        base.setorExercicio(), base.documentoLegal(), List.of(fact), 0L, true);
+  }
+
+  private static ErgonRuleEngineFacade.VinculoConcomitante concomitante(Vinculo vinculo) {
+    return new ErgonRuleEngineFacade.VinculoConcomitante(
+        vinculo.getDtexerc(), vinculo.getDtvac(), vinculo.getCategoria());
+  }
+
+  static VinculoRuleContext validVinculoContext() {
     Orgao orgao = new Orgao();
     orgao.setEmpresa(1);
     orgao.setNome("Secretaria de Administração");

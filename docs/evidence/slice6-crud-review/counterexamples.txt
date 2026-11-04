@@ -1,0 +1,9 @@
+C1: vendLicEsp=I, general=false -> SALE ACCEPTED, saldo=80
+C2: abono=N, venda=N, maxVenda=0 -> ABONO ACCEPTED, diasVendidos=5
+C3: maxVenda=10, abono5+sale10 -> ACCEPTED, diasVendidos=15
+C4: existing sale, policy changed N, CANCEL -> 422 UNPROCESSABLE_ENTITY "Venda vedada para o perï¿½odo aquisitivo.", saldo=80
+C5: parent CANCELADO, child CANCEL -> 422 UNPROCESSABLE_ENTITY "Perï¿½odo aquisitivo cancelado.", saldo=80
+C6: origin CANCELADO+removed+APOSENTADORIA -> LICENSE PERIOD ACCEPTED
+C7: actual Jan1..Jan5, planned Jan1..Jan10 -> diasGozados=10, saldo=80
+C7b: set diasGozo=5 retaining original forecast -> 422 UNPROCESSABLE_ENTITY "Dias de gozo devem corresponder ao intervalo previsto inclusivo."
+C8: create diasDireito=30, unchanged default saldo=90 -> 422 UNPROCESSABLE_ENTITY "Contabilidade de dias do perï¿½odo inconsistente."

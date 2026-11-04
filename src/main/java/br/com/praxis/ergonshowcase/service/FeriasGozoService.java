@@ -61,8 +61,6 @@ public class FeriasGozoService
 
   @Autowired(required = false)
   private ErgonInvariants invariants;
-
-  @PersistenceContext protected EntityManager entityManager;
   protected final FeriasGozoMapper mapper;
   private final TenantContext tenant;
   private final ErgonRuleEngineFacade ruleEngineFacade;
@@ -125,27 +123,13 @@ public class FeriasGozoService
     return new FeriasGozoFilterDTO();
   }
 
-  @Override
-  protected OptionalLong getEntityResourceVersion(FeriasGozo entity) {
-    return OptionalLong.of(entity.getVersion());
-  }
 
   @Override
   public Optional<String> getDatasetVersion() {
     return Optional.empty();
   }
 
-  @Override
-  protected org.praxisplatform.uischema.service.base.ResourceFilterAccessScope<FeriasGozo>
-      resolveResourceFilterAccessScope() {
-    var explicitOrgao = tenant.explicitOrgao();
-    if (explicitOrgao.isEmpty()) {
-      return org.praxisplatform.uischema.service.base.ResourceFilterAccessScope.unrestricted();
-    }
-    int orgao = explicitOrgao.getAsInt();
-    return org.praxisplatform.uischema.service.base.ResourceFilterAccessScope.restricted(
-        (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
-  }
+
 
   @Override
   public StatsFieldRegistry getStatsFieldRegistry() {
@@ -181,23 +165,20 @@ public class FeriasGozoService
   }
 
   @Override
-  public StatsSupportMode getGroupByStatsSupportMode() {
-    return StatsSupportMode.AUTO;
+  protected Object prepareCreateValidationDraft(CreateFeriasGozoDTO dto, FeriasGozo candidate) {
+    hydrateParentPeriodoAquisitivo(candidate);
+    checkOrg(candidate.getEmpCodigo());
+    return mapper.toResponse(candidate);
   }
 
   @Override
-  public StatsSupportMode getTimeSeriesStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getDistributionStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getComparisonStatsSupportMode() {
-    return StatsSupportMode.AUTO;
+  protected Object prepareUpdateValidationDraft(Long id, FeriasGozo candidate, UpdateFeriasGozoDTO dto) {
+    boolean reparented = candidate.getPeriodoAquisitivoId() != null && dto.getPeriodoAquisitivoId() != null
+        && !Objects.equals(candidate.getPeriodoAquisitivoId(), dto.getPeriodoAquisitivoId());
+    mapper.applyUpdate(candidate, dto);
+    hydrateParentPeriodoAquisitivo(candidate, reparented);
+    checkOrg(candidate.getEmpCodigo());
+    return mapper.toResponse(candidate);
   }
 
   @Override
@@ -206,7 +187,7 @@ public class FeriasGozoService
     checkOrg(entity.getEmpCodigo());
     validateFeriasGozo(entity);
     if (invariants != null) {
-      invariants.feriasGozo(entity, true);
+      invariants.feriasGozo(entity, true, false);
     }
   }
 
@@ -218,9 +199,18 @@ public class FeriasGozoService
     if (entity == null) {
       return;
     }
-    if (entityManager != null && entity.getPeriodoAquisitivoId() != null) {
+    if (entity.getDtini() != null) {
+      if (entity.getDtprevfim() == null && entity.getDiasGozo() != null && entity.getDiasGozo() > 0) {
+        entity.setDtprevfim(entity.getDtini().plusDays(entity.getDiasGozo().longValue() - 1));
+      } else if (entity.getDiasGozo() == null && entity.getDtprevfim() != null
+          && !entity.getDtprevfim().isBefore(entity.getDtini())) {
+        LocalDate fim = entity.getDtfim() != null ? entity.getDtfim() : entity.getDtprevfim();
+        entity.setDiasGozo(Math.toIntExact(ChronoUnit.DAYS.between(entity.getDtini(), fim) + 1));
+      }
+    }
+    if (getEntityManager() != null && entity.getPeriodoAquisitivoId() != null) {
       PeriodoAquisitivoFerias pa =
-          entityManager.find(PeriodoAquisitivoFerias.class, entity.getPeriodoAquisitivoId());
+          getEntityManager().find(PeriodoAquisitivoFerias.class, entity.getPeriodoAquisitivoId());
       if (pa != null) {
         if (reparented || entity.getEmpCodigo() == null) {
           entity.setEmpCodigo(pa.getEmpCodigo());
@@ -263,17 +253,42 @@ public class FeriasGozoService
   }
 
   @Override
+  protected void beforeDelete(Long id, FeriasGozo entity) {
+    checkOrg(entity.getEmpCodigo());
+    if (Set.of("EM_GOZO", "GOZADA", "INTERROMPIDA").contains(entity.getSituacao())) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "Parcela de férias já iniciada, gozada ou interrompida não pode ser excluída diretamente.");
+    }
+  }
+
+  @Override
+  protected void afterDelete(Long id, FeriasGozo deleted) {
+    if (deleted != null && deleted.getPeriodoAquisitivoId() != null) {
+      sincronizarContabilidadePeriodoAquisitivo(deleted.getPeriodoAquisitivoId());
+    }
+  }
+
+  @Override
   @Transactional
   public ResourceRepresentationResult<FeriasGozoResponseDTO> update(
       Long id, UpdateFeriasGozoDTO dto, ResourceVersionUpdatePrecondition<Long> precondition) {
-    if (precondition == null) throw ResourceVersionPreconditionException.required();
-    var readOnlyKeys = validateCustomFields(dto, "request");
-    FeriasGozo entity = findEntityById(id);
-    entityManager.lock(entity, LockModeType.PESSIMISTIC_WRITE);
-    entityManager.refresh(entity);
-    precondition.requireMatch(entity.getVersion());
-    beforeUpdate(id, entity, dto);
-    var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
+    return executeVersionedMutation(id, precondition, (previous, entity) -> {
+      var keys = validatePreparedCustomFieldsForUpdate(prepareCustomFields(dto, "request"), id, entity, dto);
+      beforeUpdate(id, entity, dto);
+      var protectedValues = CustomFieldSupport.snapshotReadOnlyValues(entity, keys);
+      applyResourceUpdate(id, entity, dto);
+      CustomFieldSupport.restoreReadOnlyValues(entity, keys, protectedValues);
+      getEntityManager().flush();
+      if (previous.getPeriodoAquisitivoId() != null
+          && !Objects.equals(previous.getPeriodoAquisitivoId(), entity.getPeriodoAquisitivoId()))
+        sincronizarContabilidadePeriodoAquisitivo(previous.getPeriodoAquisitivoId());
+      afterUpdate(id, entity, dto);
+    });
+  }
+
+  @Override
+  protected void applyResourceUpdate(Long id, FeriasGozo entity, UpdateFeriasGozoDTO dto) {
     FeriasGozo previousSnapshot = snapshotBeforeMutation(entity);
     boolean reparented =
         previousSnapshot != null
@@ -291,47 +306,25 @@ public class FeriasGozoService
     checkOrg(entity.getEmpCodigo());
     validateFeriasGozo(entity, previousSnapshot);
     if (invariants != null) {
-      invariants.feriasGozo(entity, false);
+      invariants.feriasGozo(entity, false, false);
     }
-    CustomFieldSupport.restoreReadOnlyValues(entity, readOnlyKeys, old);
-    var saved = getRepository().save(entity);
-    if (previousSnapshot != null
-        && previousSnapshot.getPeriodoAquisitivoId() != null
-        && !Objects.equals(
-            previousSnapshot.getPeriodoAquisitivoId(), saved.getPeriodoAquisitivoId())) {
-      sincronizarContabilidadePeriodoAquisitivo(previousSnapshot.getPeriodoAquisitivoId());
-    }
-    afterUpdate(id, saved, dto);
-    entityManager.flush();
-    entityManager.refresh(saved);
-    return readFacts != null
-        ? enriched(toResourceRepresentation(saved))
-        : toResourceRepresentation(saved);
   }
 
   private ResourceRepresentationResult<FeriasGozoResponseDTO> command(
       Long id, ResourceVersionUpdatePrecondition<Long> precondition, Consumer<FeriasGozo> action) {
-    if (precondition == null) throw ResourceVersionPreconditionException.required();
-    FeriasGozo entity = findEntityById(id);
-    entityManager.lock(entity, LockModeType.PESSIMISTIC_WRITE);
-    entityManager.refresh(entity);
-    precondition.requireMatch(entity.getVersion());
-    checkOrg(entity.getEmpCodigo());
+    return executeVersionedMutation(id, precondition, entity -> {
+      checkOrg(entity.getEmpCodigo());
     FeriasGozo previousSnapshot = snapshotBeforeMutation(entity);
     action.accept(entity);
     if (!"CANCELADA".equals(entity.getSituacao())) {
       validateFeriasGozo(entity, previousSnapshot);
     }
     if (invariants != null && !"CANCELADA".equals(entity.getSituacao())) {
-      invariants.feriasGozo(entity, false);
+      invariants.feriasGozo(entity, false, false);
     }
-    var saved = getRepository().save(entity);
-    sincronizarContabilidadePeriodoAquisitivo(saved.getPeriodoAquisitivoId());
-    entityManager.flush();
-    entityManager.refresh(saved);
-    return readFacts != null
-        ? enriched(toResourceRepresentation(saved))
-        : toResourceRepresentation(saved);
+      if (getEntityManager() != null) getEntityManager().flush();
+      sincronizarContabilidadePeriodoAquisitivo(entity.getPeriodoAquisitivoId());
+    });
   }
 
   @Transactional
@@ -451,16 +444,6 @@ public class FeriasGozoService
                 HttpStatus.CONFLICT,
                 "Somente parcelas homologadas ou efetivamente em gozo podem ser interrompidas.");
           }
-          ErgonInvariants.chronology(
-              fg.getDtini(),
-              dto.getDtInterrupcao(),
-              "A data de interrupção não pode anteceder a data de início do gozo.");
-          if (fg.getDtprevfim() != null) {
-            ErgonInvariants.chronology(
-                dto.getDtInterrupcao(),
-                fg.getDtprevfim(),
-                "A data de interrupção não pode ultrapassar o término previsto da parcela de férias.");
-          }
           fg.setDtInterrupcao(dto.getDtInterrupcao());
           fg.setDtfim(dto.getDtInterrupcao());
           fg.setMotivoInterrupcao(dto.getMotivoInterrupcao());
@@ -517,17 +500,17 @@ public class FeriasGozoService
   }
 
   public void sincronizarContabilidadePeriodoAquisitivo(Long periodoAquisitivoId) {
-    if (periodoAquisitivoId == null || entityManager == null) return;
+    if (periodoAquisitivoId == null || getEntityManager() == null) return;
     PeriodoAquisitivoFerias pa =
-        entityManager.find(
+        getEntityManager().find(
             PeriodoAquisitivoFerias.class, periodoAquisitivoId, LockModeType.PESSIMISTIC_WRITE);
     if (pa == null) return;
     var q =
-        entityManager.createQuery(
-            "select x from FeriasGozo x where x.periodoAquisitivoId=:paId and x.situacao<>'CANCELADA'",
+        getEntityManager().createQuery(
+            "select x from FeriasGozo x where x.empCodigo=:org and x.periodoAquisitivoId=:paId and x.situacao<>'CANCELADA'",
             FeriasGozo.class);
     if (q != null) {
-      var p1 = q.setParameter("paId", periodoAquisitivoId);
+      var p1 = q.setParameter("org", pa.getEmpCodigo()).setParameter("paId", periodoAquisitivoId);
       var parcelas = p1 != null ? p1.getResultList() : List.<FeriasGozo>of();
       if (parcelas != null) {
         int totalGozo =
@@ -562,22 +545,6 @@ public class FeriasGozoService
     ruleEngineFacade.enforceFeriasGozo(buildFeriasGozoRuleContext(entity, previousSnapshot));
   }
 
-  private static FeriasGozo snapshotBeforeMutation(FeriasGozo src) {
-    if (src == null) {
-      return null;
-    }
-    FeriasGozo copy = new FeriasGozo();
-    copy.setId(src.getId());
-    copy.setPeriodoAquisitivoId(src.getPeriodoAquisitivoId());
-    copy.setDtini(src.getDtini());
-    copy.setDtprevfim(src.getDtprevfim());
-    copy.setDtfim(src.getDtfim());
-    copy.setSituacao(src.getSituacao());
-    copy.setNumfuncSubstituto(src.getNumfuncSubstituto());
-    copy.setNumvincSubstituto(src.getNumvincSubstituto());
-    return copy;
-  }
-
   private static boolean detectActiveSubstitutionConflict(
       FeriasGozo entity, FeriasGozo previousSnapshot) {
     if (entity == null || previousSnapshot == null) {
@@ -610,7 +577,7 @@ public class FeriasGozoService
   private ErgonRuleEngineFacade.FeriasGozoRuleContext buildFeriasGozoRuleContext(
       FeriasGozo entity, FeriasGozo previousSnapshot) {
     boolean activeSubstConflict = detectActiveSubstitutionConflict(entity, previousSnapshot);
-    if (entityManager == null) {
+    if (getEntityManager() == null) {
       return new ErgonRuleEngineFacade.FeriasGozoRuleContext(
           entity,
           null,
@@ -629,26 +596,26 @@ public class FeriasGozoService
     Vinculo vinculo = null;
     if (entity.getNumfunc() != null && entity.getNumvinc() != null) {
       vinculo =
-          entityManager.find(
+          getEntityManager().find(
               Vinculo.class,
               new VinculoId(entity.getNumfunc(), entity.getNumvinc()),
               LockModeType.PESSIMISTIC_READ);
       if (vinculo == null) {
         vinculo =
-            entityManager.find(
+            getEntityManager().find(
                 Vinculo.class, new VinculoId(entity.getNumfunc(), entity.getNumvinc()));
       }
     }
     Vinculo substituto = null;
     if (entity.getNumfuncSubstituto() != null && entity.getNumvincSubstituto() != null) {
       substituto =
-          entityManager.find(
+          getEntityManager().find(
               Vinculo.class,
               new VinculoId(entity.getNumfuncSubstituto(), entity.getNumvincSubstituto()),
               LockModeType.PESSIMISTIC_READ);
       if (substituto == null) {
         substituto =
-            entityManager.find(
+            getEntityManager().find(
                 Vinculo.class,
                 new VinculoId(entity.getNumfuncSubstituto(), entity.getNumvincSubstituto()));
       }
@@ -656,58 +623,59 @@ public class FeriasGozoService
     PeriodoAquisitivoFerias pa = null;
     if (entity.getPeriodoAquisitivoId() != null) {
       pa =
-          entityManager.find(
+          getEntityManager().find(
               PeriodoAquisitivoFerias.class,
               entity.getPeriodoAquisitivoId(),
               LockModeType.PESSIMISTIC_READ);
       if (pa == null) {
-        pa = entityManager.find(PeriodoAquisitivoFerias.class, entity.getPeriodoAquisitivoId());
+        pa = getEntityManager().find(PeriodoAquisitivoFerias.class, entity.getPeriodoAquisitivoId());
       }
     }
+    ErgonTenantAccess.requireReferencesInOrganization(entity.getEmpCodigo(), vinculo, substituto, pa);
     List<ParametroContagemFerias> paramCandidates =
-        ruleEngineFacade.getVacationParameterResolver().loadCandidates(entityManager, vinculo);
+        ruleEngineFacade.getVacationParameterResolver().loadCandidates(getEntityManager(), vinculo);
     List<FeriasGozo> parcelasVinculo = List.of();
     List<PeriodoAquisitivoFerias> todosPas = List.of();
     List<Afastamento> afastamentos = List.of();
     List<Frequencia> frequencias = List.of();
     if (entity.getNumfunc() != null && entity.getNumvinc() != null) {
       var qFg =
-          entityManager.createQuery(
-              "select x from FeriasGozo x where x.numfunc=:f and x.numvinc=:v and x.situacao<>'CANCELADA'",
+          getEntityManager().createQuery(
+              "select x from FeriasGozo x where x.empCodigo=:org and x.numfunc=:f and x.numvinc=:v and x.situacao<>'CANCELADA'",
               FeriasGozo.class);
       if (qFg != null) {
-        var r1 = qFg.setParameter("f", entity.getNumfunc());
+        var r1 = qFg.setParameter("org", entity.getEmpCodigo()).setParameter("f", entity.getNumfunc());
         var r2 = r1 != null ? r1.setParameter("v", entity.getNumvinc()) : null;
         var flushed = r2 != null ? r2.setFlushMode(FlushModeType.COMMIT) : null;
         var list = (flushed != null ? flushed : r2) != null ? (flushed != null ? flushed : r2).getResultList() : null;
         if (list != null) parcelasVinculo = list;
       }
       var qPa =
-          entityManager.createQuery(
-              "select x from PeriodoAquisitivoFerias x where x.numfunc=:f and x.numvinc=:v and x.situacao<>'CANCELADO'",
+          getEntityManager().createQuery(
+              "select x from PeriodoAquisitivoFerias x where x.empCodigo=:org and x.numfunc=:f and x.numvinc=:v and x.situacao<>'CANCELADO'",
               PeriodoAquisitivoFerias.class);
       if (qPa != null) {
-        var r1 = qPa.setParameter("f", entity.getNumfunc());
+        var r1 = qPa.setParameter("org", entity.getEmpCodigo()).setParameter("f", entity.getNumfunc());
         var r2 = r1 != null ? r1.setParameter("v", entity.getNumvinc()) : null;
         var flushed = r2 != null ? r2.setFlushMode(FlushModeType.COMMIT) : null;
         var list = (flushed != null ? flushed : r2) != null ? (flushed != null ? flushed : r2).getResultList() : null;
         if (list != null) todosPas = list;
       }
       var qAf =
-          entityManager.createQuery(
-              "select x from Afastamento x where x.numfunc=:f and x.numvinc=:v", Afastamento.class);
+          getEntityManager().createQuery(
+              "select x from Afastamento x where x.empCodigo=:org and x.numfunc=:f and x.numvinc=:v", Afastamento.class);
       if (qAf != null) {
-        var r1 = qAf.setParameter("f", entity.getNumfunc());
+        var r1 = qAf.setParameter("org", entity.getEmpCodigo()).setParameter("f", entity.getNumfunc());
         var r2 = r1 != null ? r1.setParameter("v", entity.getNumvinc()) : null;
         var flushed = r2 != null ? r2.setFlushMode(FlushModeType.COMMIT) : null;
         var list = (flushed != null ? flushed : r2) != null ? (flushed != null ? flushed : r2).getResultList() : null;
         if (list != null) afastamentos = list;
       }
       var qFr =
-          entityManager.createQuery(
-              "select x from Frequencia x where x.numfunc=:f and x.numvinc=:v", Frequencia.class);
+          getEntityManager().createQuery(
+              "select x from Frequencia x where x.empCodigo=:org and x.numfunc=:f and x.numvinc=:v", Frequencia.class);
       if (qFr != null) {
-        var r1 = qFr.setParameter("f", entity.getNumfunc());
+        var r1 = qFr.setParameter("org", entity.getEmpCodigo()).setParameter("f", entity.getNumfunc());
         var r2 = r1 != null ? r1.setParameter("v", entity.getNumvinc()) : null;
         var flushed = r2 != null ? r2.setFlushMode(FlushModeType.COMMIT) : null;
         var list = (flushed != null ? flushed : r2) != null ? (flushed != null ? flushed : r2).getResultList() : null;
@@ -733,7 +701,19 @@ public class FeriasGozoService
   private void checkOrg(Integer orgao) {
     if (!Objects.equals(orgao, tenant.orgao())) {
       throw new ResponseStatusException(
-          HttpStatus.UNPROCESSABLE_ENTITY, "Órgão da parcela de férias diverge de X-Tenant.");
+          HttpStatus.FORBIDDEN, "Órgão da parcela de férias diverge de X-Tenant.");
     }
   }
+  @Override protected java.util.Optional<org.praxisplatform.uischema.capability.ResourceStateSnapshot> toResourceStateSnapshot(FeriasGozo e) {
+    return java.util.Optional.of(snapshotState(e));
+  }
+  private org.praxisplatform.uischema.capability.ResourceStateSnapshot snapshotState(FeriasGozo e) {
+    boolean abono=Boolean.TRUE.equals(e.getAbonoPecuniario()) || e.getDiasAbonoVendidos()!=null && e.getDiasAbonoVendidos()>0;
+    boolean interrompida="INTERROMPIDA".equals(e.getSituacao()) || e.getDtInterrupcao()!=null;
+    return new org.praxisplatform.uischema.capability.ResourceStateSnapshot(e.getSituacao(),java.util.Map.of("abonoPecuniario",abono,"comAbonoVendido",abono,
+        "comSubstitutoDesignado",e.getNumfuncSubstituto()!=null && e.getNumvincSubstituto()!=null,"interrompida",interrompida,"parcelaInterrompida",interrompida));
+  }
+
+  @Override protected String resolveResourceKey() { return "administracao-pessoal.ferias-gozo"; }
+
 }

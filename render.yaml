@@ -1,0 +1,46 @@
+services:
+  - type: web
+    name: praxis-ergon-showcase
+    runtime: docker
+    plan: starter
+    region: oregon
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: PORT
+        value: "8080"
+      - key: SHOWCASE_PUBLIC_READ_ENABLED
+        value: "true"
+      - key: SHOWCASE_CORS_ORIGINS
+        value: "https://praxis-ergon-showcase.web.app,https://praxis-ergon-showcase.firebaseapp.com,http://localhost:4200,http://localhost:4310"
+      - key: SHOWCASE_CONFIG_ORIGINS
+        value: "https://praxis-ergon-showcase.web.app,https://praxis-ergon-showcase.firebaseapp.com,http://localhost:4200,http://localhost:4310"
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        value: "ergon_showcase_bulk_runtime"
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: CONFIG_DATASOURCE_URL
+        sync: false
+      - key: CONFIG_DATASOURCE_USERNAME
+        value: "ps3b_config_runtime"
+      - key: CONFIG_DATASOURCE_PASSWORD
+        sync: false
+      - key: CONFIG_DATASOURCE_SCHEMA
+        value: "public"
+      - key: PRAXIS_RESOURCE_VERSION_ETAG_SECRET
+        generateValue: true
+      - key: SHOWCASE_USERNAME
+        value: "ergon"
+      - key: SHOWCASE_PASSWORD
+        sync: false
+      - key: SHOWCASE_BULK_ADMIN_USERNAME
+        value: "ergon-publication-admin"
+      - key: SHOWCASE_BULK_ADMIN_PASSWORD
+        sync: false
+      - key: BULK_OWNER_USERNAME
+        value: "neondb_owner"
+      - key: BULK_CONTROL_PASSWORD
+        sync: false
+      - key: BULK_CURSOR_KEY
+        sync: false

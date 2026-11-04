@@ -12,6 +12,23 @@ public class ErgonDeterminationConfig {
     return () ->
         List.of(
             definition(
+                "ergon.chefia.funcao.previa", "FuncaoConfianca", "determineErgonFuncaoConfiancaPrevia",
+                List.of("dtini", "dtfim"), List.of("dtini", "dtfim"),
+                List.of(new ReactiveDeterminationOutputBinding("/diasVigenciaPrevistos", "/diasVigenciaPrevistos"))),
+            definition(
+                "ergon.chefia.vaga.previa", "VagaFuncao", "determineErgonVagaFuncaoPrevia",
+                List.of("funcaoId"), List.of("funcaoId"),
+                List.of(new ReactiveDeterminationOutputBinding("/controleVagaPrevisto", "/controleVagaPrevisto"))),
+            definition(
+                "ergon.chefia.designacao.previa", "DesignacaoFuncao", "determineErgonDesignacaoFuncaoPrevia",
+                List.of("vagaFuncaoId"), List.of("vagaFuncaoId"),
+                List.of(new ReactiveDeterminationOutputBinding("/situacaoVagaPrevista", "/situacaoVagaPrevista"))),
+            definition(
+                "ergon.chefia.substituicao.previa", "SubstituicaoFuncao", "determineErgonSubstituicaoFuncaoPrevia",
+                List.of("designacaoId", "dtini", "dtfim"), List.of("designacaoId", "dtini", "dtfim"),
+                List.of(new ReactiveDeterminationOutputBinding("/diasSubstituicaoPrevistos", "/diasSubstituicaoPrevistos"),
+                    new ReactiveDeterminationOutputBinding("/minimoRemuneradoPrevisto", "/minimoRemuneradoPrevisto"))),
+            definition(
                 "ergon.pessoa.pcd",
                 "ServidorPessoa",
                 "determineErgonPcd",
@@ -140,14 +157,14 @@ public class ErgonDeterminationConfig {
                     "diasVendidosAbono",
                     "diasConvertidosDobro"),
                 List.of(
-                    new ReactiveDeterminationOutputBinding("/dtfim", "/dtfim"),
-                    new ReactiveDeterminationOutputBinding("/totDiasDireito", "/totDiasDireito"),
+                    new ReactiveDeterminationOutputBinding("/dtfim", "/dtfimPrevista"),
+                    new ReactiveDeterminationOutputBinding("/totDiasDireito", "/diasDireitoPrevistos"),
                     new ReactiveDeterminationOutputBinding(
-                        "/saldoDiasDisponivel", "/saldoDiasDisponivel"),
-                    new ReactiveDeterminationOutputBinding("/dtPrescricao", "/dtPrescricao"),
-                    new ReactiveDeterminationOutputBinding("/faltasApuradas", "/faltasApuradas"),
+                        "/saldoDiasDisponivel", "/saldoDiasDisponivelPrevisto"),
+                    new ReactiveDeterminationOutputBinding("/dtPrescricao", "/dataPrescricaoPrevista"),
+                    new ReactiveDeterminationOutputBinding("/faltasApuradas", "/faltasApuradasPrevistas"),
                     new ReactiveDeterminationOutputBinding(
-                        "/diasAfastamentoSuspensivo", "/diasAfastamentoSuspensivo"))),
+                        "/diasAfastamentoSuspensivo", "/diasSuspensivosPrevistos"))),
             definition(
                 "ergon.feriasGozo.previa",
                 "FeriasGozo",
@@ -170,11 +187,11 @@ public class ErgonDeterminationConfig {
                     new ReactiveDeterminationOutputBinding("/chavePeraqfer", "/chavePeraqfer"),
                     new ReactiveDeterminationOutputBinding(
                         "/totDiasDireitoPa", "/totDiasDireitoPa"),
-                    new ReactiveDeterminationOutputBinding("/diasGozo", "/diasGozo"),
-                    new ReactiveDeterminationOutputBinding("/dtprevfim", "/dtprevfim"),
+                    new ReactiveDeterminationOutputBinding("/diasGozo", "/diasGozoPrevistos"),
+                    new ReactiveDeterminationOutputBinding("/dtprevfim", "/dtprevfimPrevista"),
                     new ReactiveDeterminationOutputBinding("/ordemParcela", "/ordemParcela"),
                     new ReactiveDeterminationOutputBinding(
-                        "/diasAbonoVendidos", "/diasAbonoVendidos"),
+                        "/diasAbonoVendidos", "/diasAbonoPrevistos"),
                     new ReactiveDeterminationOutputBinding("/dtPagtoAbono", "/dtPagtoAbono"),
                     new ReactiveDeterminationOutputBinding(
                         "/saldoPaAposParcela", "/saldoPaAposParcela"))));
@@ -195,19 +212,12 @@ public class ErgonDeterminationConfig {
           case "ServidorPessoa", "Vinculo", "Cargo" -> ReactiveDeterminationTriggerMode.ON_CHANGE;
           default -> ReactiveDeterminationTriggerMode.ON_INIT_AND_CHANGE;
         };
-    return new ReactiveDeterminationDefinition(
-        id,
-        List.of(
-            new ReactiveDeterminationScope(
-                "createErgon" + resource, ReactiveDeterminationFormMode.CREATE),
-            new ReactiveDeterminationScope(
-                "updateErgon" + resource, ReactiveDeterminationFormMode.EDIT)),
-        operation,
-        triggerMode,
-        source.stream().map(v -> "/" + v).toList(),
-        inputs,
-        outputs,
-        new ReactiveDeterminationProvenance(
-            ReactiveDeterminationProvenanceKind.HOST, "ergon-derived-facts", "1"));
+    var builder = ReactiveDeterminationDefinition.forCrudResource(id, "createErgon" + resource,
+        "updateErgon" + resource, operation).triggerMode(triggerMode)
+        .provenance(new ReactiveDeterminationProvenance(ReactiveDeterminationProvenanceKind.HOST, "ergon-derived-facts", "1"));
+    source.forEach(path -> builder.source("/" + path));
+    inputs.forEach(input -> builder.input(input.fieldPath(), input.requestPath()));
+    outputs.forEach(output -> builder.output(output.responsePath(), output.fieldPath()));
+    return builder.build();
   }
 }

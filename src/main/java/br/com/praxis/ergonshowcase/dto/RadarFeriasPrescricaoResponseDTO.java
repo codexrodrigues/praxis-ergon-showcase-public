@@ -18,12 +18,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
     titleField = "periodoResumo",
     displayLabelField = "periodoResumo",
     subtitleField = "pessoaNome",
-    metadataFields = {
-      "vinculoMatricula",
-      "exercicio",
-      "faixaUrgenciaPrescricao",
-      "saldoDiasDisponivel"
-    })
+    metadataFields = {"exercicio", "situacao", "cargoNome"})
 @Schema(
     description =
         "Projeção analítica executiva de saldos de períodos aquisitivos de férias, queima de direito, cobertura de programação futura, risco de prescrição e acúmulo de ciclos vencidos.")

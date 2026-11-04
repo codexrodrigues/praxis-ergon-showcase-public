@@ -137,13 +137,15 @@ public final class AfastamentoConcessaoRuleSet {
    * legal comprobatório até {@code N} dias ({@code ERG-07513}) sob o Contrato 1.6.
    */
   public static RuleParameterTemplate periciaWaiverBoundsTemplate() {
+    JsonNode parsed = parseJson(ERG07513_TEMPLATE_EXPRESSION);
     return new RuleParameterTemplate(
         TEMPLATE_PERICIA_WAIVER_BOUNDS_KEY,
         TEMPLATE_PERICIA_WAIVER_BOUNDS_VERSION,
-        RuleExecutorRef.jsonLogic(parseJson(ERG07513_TEMPLATE_EXPRESSION)),
+        RuleExecutorRef.jsonLogic(parsed),
         RuleDecision.DENY,
         "ERG-07513",
-        List.of("draft.dtini", "draft.tipofreq", "draft.codfreq"),
+        ErgonOntologyRuleSetSupport.mergeRequiredRoots(
+            List.of("draft.dtini", "draft.tipofreq", "draft.codfreq"), parsed),
         List.of(
             new RuleParameterDefinition(
                 "minDaysWithoutPericia",
@@ -178,9 +180,9 @@ public final class AfastamentoConcessaoRuleSet {
         new DecisionSlot(
             SLOT_PERIODO_ORDEM_VALIDA,
             DecisionStage.PROTECTED_GUARD,
-            SlotCardinality.SINGLE,
+            SlotCardinality.MULTIPLE,
             OverridePolicy.FORBIDDEN,
-            DecisionAggregationPolicy.SINGLE_RESULT,
+            DecisionAggregationPolicy.DENY_OVERRIDES,
             null),
         new DecisionSlot(
             SLOT_VINCULO_EM_EXERCICIO_NO_PERIODO,
@@ -290,30 +292,49 @@ public final class AfastamentoConcessaoRuleSet {
   public static List<DecisionBinding> productBindings() {
     List<String> baseRequiredFacts = List.of("draft.dtini", "draft.tipofreq", "draft.codfreq");
     return List.of(
-        // 1. ERG-04312: coerência cronológica (dtfim >= dtini && dtprevfim >= dtini)
+        // 1. ERG-04312: coerência cronológica do término efetivo (dtfim >= dtini)
         productJsonLogicBinding(
             "product.ergon.afast.erg04312",
             SLOT_PERIODO_ORDEM_VALIDA,
             10,
             """
             {
-              "and": [
-                {
-                  "or": [
-                    {"==": [{"var": "draft.dtfim"}, null]},
-                    {">=": [{"date": [{"var": "draft.dtfim"}]}, {"date": [{"var": "draft.dtini"}]}]}
-                  ]
-                },
-                {
-                  "or": [
-                    {"==": [{"var": "draft.dtprevfim"}, null]},
-                    {">=": [{"date": [{"var": "draft.dtprevfim"}]}, {"date": [{"var": "draft.dtini"}]}]}
-                  ]
-                }
+              "or": [
+                {"==": [{"var": "draft.dtfim"}, null]},
+                {">=": [{"date": [{"var": "draft.dtfim"}]}, {"date": [{"var": "draft.dtini"}]}]}
               ]
             }
             """,
             "ERG-04312",
+            baseRequiredFacts),
+
+        // 1b. ERG-04313: coerência cronológica do término previsto (dtprevfim >= dtini)
+        productJsonLogicBinding(
+            "product.ergon.afast.erg04313",
+            SLOT_PERIODO_ORDEM_VALIDA,
+            11,
+            """
+            {
+              "or": [
+                {"==": [{"var": "draft.dtprevfim"}, null]},
+                {">=": [{"date": [{"var": "draft.dtprevfim"}]}, {"date": [{"var": "draft.dtini"}]}]}
+              ]
+            }
+            """,
+            "ERG-04313",
+            baseRequiredFacts),
+
+        productJsonLogicBinding(
+            "product.ergon.afast.cerg04319",
+            SLOT_PERIODO_ORDEM_VALIDA,
+            13,
+            """
+            {"or":[
+              {"==":[{"var":"draft.previsaoAnterior"},null]},
+              {">":[{"var":"draft.previsaoAtual"},{"var":"draft.previsaoAnterior"}]}
+            ]}
+            """,
+            "CERG-04319",
             baseRequiredFacts),
 
         // 2. ERG-04314: vínculo em exercício na data do afastamento e antes de vacância/aposentadoria
@@ -856,7 +877,7 @@ public final class AfastamentoConcessaoRuleSet {
         true,
         RuleDecision.DENY,
         "CERG-04316",
-        List.of("draft.dtini", "draft.tipofreq", "draft.codfreq"),
+        List.of("draft.dtini", "draft.tipofreq", "draft.codfreq", "effectiveStatutoryRule"),
         null);
   }
 
@@ -876,18 +897,19 @@ public final class AfastamentoConcessaoRuleSet {
       String jsonLogic,
       String falseReasonCode,
       List<String> requiredFactPaths) {
+    JsonNode parsed = parseJson(jsonLogic);
     return new DecisionBinding(
         bindingKey,
         slotKey,
         DecisionSource.PRODUCT,
         null,
-        RuleExecutorRef.jsonLogic(parseJson(jsonLogic)),
+        RuleExecutorRef.jsonLogic(parsed),
         List.of(),
         order,
         true,
         RuleDecision.DENY,
         falseReasonCode,
-        requiredFactPaths,
+        ErgonOntologyRuleSetSupport.mergeRequiredRoots(requiredFactPaths, parsed),
         null);
   }
 

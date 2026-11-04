@@ -72,14 +72,14 @@ import org.praxisplatform.uischema.controller.base.AbstractResourceController;
             titleField = "nome",
             displayLabelField = "nome",
             subtitleField = "nomeSocial",
-            metadataFields = {"id", "escolaridade", "cidadeender", "ufender"}))
+            metadataFields = {"id", "tratamento"}))
 @ApiGroup(
     value = "ergon",
     title = "Administração de pessoal",
     description = "Cadastros civis e assentamentos funcionais dos órgãos públicos.",
     icon = "groups")
 public class ServidorPessoaController
-    extends AbstractResourceController<
+    extends org.praxisplatform.uischema.controller.base.AbstractBulkGovernedResourceController<
         ServidorPessoaResponseDTO,
         Long,
         ServidorPessoaFilterDTO,
@@ -172,17 +172,7 @@ public class ServidorPessoaController
               String ifMatch,
           @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
               AtualizarDadosBancariosContatoDTO dto) {
-    var p =
-        new org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition<Long>(
-            commandEtags,
-            ifMatch,
-            commandScopes.currentScope(),
-            "administracao-pessoal.funcionarios",
-            id);
-    return withResourceVersion(
-        org.springframework.http.ResponseEntity.ok(),
-        id,
-        commands.atualizarDadosBancariosContato(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemPatch("atualizar-dados-bancarios-contato", id, ifMatch, condition -> commands.atualizarDadosBancariosContato(id, dto, condition)));
   }
 
   @org.springframework.web.bind.annotation.GetMapping("/{id}/ficha-cadastral")
@@ -247,24 +237,9 @@ public class ServidorPessoaController
                   description = "Quantidade de registros da página, de 1 a 200")
               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20")
               int size) {
-    service.findById(id);
-    if (page < 0 || size < 1 || size > 200)
-      throw new org.springframework.web.server.ResponseStatusException(
-          org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
-          "Paginação fora do limite permitido.");
-    var filter = new AfastamentoFilterDTO();
-    filter.setNumfunc(id);
-    var result =
-        afastamentosService.filter(
-            filter,
-            org.springframework.data.domain.PageRequest.of(
-                page, size, afastamentosService.getDefaultSort()),
-            null);
-    return org.springframework.http.ResponseEntity.ok(
-        org.praxisplatform.uischema.rest.response.RestApiResponse.success(
-            result,
-            org.springframework.hateoas.Links.of(
-                org.springframework.hateoas.Link.of(ApiPaths.AFASTAMENTOS, "collection"))));
+    ErgonHttpContract.childPage(page, size);
+    return filterRelatedChildResource(id, afastamentosService, ApiPaths.AFASTAMENTOS, AfastamentoFilterDTO::new,
+        (child, parent) -> { child.setNumfunc(parent); }, page, size);
   }
 
   @org.springframework.web.bind.annotation.GetMapping("/{id}/frequencias")
@@ -302,24 +277,9 @@ public class ServidorPessoaController
                   description = "Quantidade de registros da página, de 1 a 200")
               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20")
               int size) {
-    service.findById(id);
-    if (page < 0 || size < 1 || size > 200)
-      throw new org.springframework.web.server.ResponseStatusException(
-          org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
-          "Paginação fora do limite permitido.");
-    var filter = new FrequenciaFilterDTO();
-    filter.setNumfunc(id);
-    var result =
-        frequenciasService.filter(
-            filter,
-            org.springframework.data.domain.PageRequest.of(
-                page, size, frequenciasService.getDefaultSort()),
-            null);
-    return org.springframework.http.ResponseEntity.ok(
-        org.praxisplatform.uischema.rest.response.RestApiResponse.success(
-            result,
-            org.springframework.hateoas.Links.of(
-                org.springframework.hateoas.Link.of(ApiPaths.FREQUENCIAS, "collection"))));
+    ErgonHttpContract.childPage(page, size);
+    return filterRelatedChildResource(id, frequenciasService, ApiPaths.FREQUENCIAS, FrequenciaFilterDTO::new,
+        (child, parent) -> { child.setNumfunc(parent); }, page, size);
   }
 
   @org.springframework.web.bind.annotation.GetMapping("/{id}/dependentes")
@@ -357,24 +317,9 @@ public class ServidorPessoaController
                   description = "Quantidade de registros da página, de 1 a 200")
               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20")
               int size) {
-    service.findById(id);
-    if (page < 0 || size < 1 || size > 200)
-      throw new org.springframework.web.server.ResponseStatusException(
-          org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
-          "Paginação fora do limite permitido.");
-    var filter = new DependenteFilterDTO();
-    filter.setNumfunc(id);
-    var result =
-        dependentesService.filter(
-            filter,
-            org.springframework.data.domain.PageRequest.of(
-                page, size, dependentesService.getDefaultSort()),
-            null);
-    return org.springframework.http.ResponseEntity.ok(
-        org.praxisplatform.uischema.rest.response.RestApiResponse.success(
-            result,
-            org.springframework.hateoas.Links.of(
-                org.springframework.hateoas.Link.of(ApiPaths.DEPENDENTES, "collection"))));
+    ErgonHttpContract.childPage(page, size);
+    return filterRelatedChildResource(id, dependentesService, ApiPaths.DEPENDENTES, DependenteFilterDTO::new,
+        (child, parent) -> { child.setNumfunc(parent); }, page, size);
   }
 
   @org.springframework.web.bind.annotation.GetMapping("/{id}/vinculos-funcionais")
@@ -412,24 +357,9 @@ public class ServidorPessoaController
                   description = "Quantidade de registros da página, de 1 a 200")
               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20")
               int size) {
-    service.findById(id);
-    if (page < 0 || size < 1 || size > 200)
-      throw new org.springframework.web.server.ResponseStatusException(
-          org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
-          "Paginação fora do limite permitido.");
-    var filter = new VinculoFilterDTO();
-    filter.setNumfunc(id);
-    var result =
-        relatedService.filter(
-            filter,
-            org.springframework.data.domain.PageRequest.of(
-                page, size, relatedService.getDefaultSort()),
-            null);
-    return org.springframework.http.ResponseEntity.ok(
-        org.praxisplatform.uischema.rest.response.RestApiResponse.success(
-            result,
-            org.springframework.hateoas.Links.of(
-                org.springframework.hateoas.Link.of(ApiPaths.VINCULOS, "collection"))));
+    ErgonHttpContract.childPage(page, size);
+    return filterRelatedChildResource(id, relatedService, ApiPaths.VINCULOS, VinculoFilterDTO::new,
+        (child, parent) -> { child.setNumfunc(parent); }, page, size);
   }
 
   @Override
@@ -484,64 +414,44 @@ public class ServidorPessoaController
 
   @org.springframework.beans.factory.annotation.Autowired private ErgonBulkOperations bulk;
 
+  @Override
   @PostMapping("/bulk/update/evaluation")
   @Operation(operationId="ergon.funcionarios.bulk.uniform.evaluation", summary="Avaliar edição uniforme",description="Avalia seleção, versões e alterações sem modificar o cadastro; produz uma proposta protegida.")
-  public RestApiResponse<BulkProposal> bulkEvaluate(@io.swagger.v3.oas.annotations.parameters.RequestBody(content=@io.swagger.v3.oas.annotations.media.Content(schema=@io.swagger.v3.oas.annotations.media.Schema(implementation=ErgonBulkSchema.PessoaUniform.class))) @RequestBody BulkUniformEvaluationRequest<String,ServidorPessoaFilterDTO> request) {
-    return RestApiResponse.success(bulk.uniform(Resource.PESSOAS,request),null);
+  @BulkResourceOperation(BulkResourceOperation.Role.UNIFORM_EVALUATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> evaluateBulkUpdate(@RequestBody BulkUniformEvaluationRequest<?, ServidorPessoaFilterDTO> request) {
+    return super.evaluateBulkUpdate(request);
   }
+  @Override
   @PostMapping("/bulk/update-items/evaluation")
   @Operation(operationId="ergon.funcionarios.bulk.items.evaluation",summary="Avaliar edições por registro",description="Avalia deltas distintos e a versão esperada de cada registro, com impedimentos individualizados.")
-  public RestApiResponse<BulkProposal> bulkEvaluateItems(@io.swagger.v3.oas.annotations.parameters.RequestBody(content=@io.swagger.v3.oas.annotations.media.Content(schema=@io.swagger.v3.oas.annotations.media.Schema(implementation=ErgonBulkSchema.PessoaItems.class))) @RequestBody BulkItemEvaluationRequest<String> request) {
-    return RestApiResponse.success(bulk.items(Resource.PESSOAS,request),null);
+  @BulkResourceOperation(BulkResourceOperation.Role.ITEM_EVALUATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkProposal>> evaluateBulkUpdateItems(@RequestBody BulkItemEvaluationRequest<?> request) {
+    return super.evaluateBulkUpdateItems(request);
   }
+  @Override
   @PostMapping("/bulk/update")
   @BulkOperation(mode=BulkMode.UNIFORM_UPDATE,evaluationOperationId="ergon.funcionarios.bulk.uniform.evaluation",atomicity=ActionCollectionAtomicity.PER_ITEM)
   @Operation(operationId="ergon.funcionarios.bulk.uniform",summary="Confirmar edição uniforme",description="Confirma uma proposta avaliada; cada registro é revalidado e possui recibo durável, sem repetir efeitos no replay.")
-  public RestApiResponse<BulkExecution> bulkConfirm(@RequestBody BulkConfirmationRequest request,
-      @Parameter(description="Chave estável desta confirmação; repetir a mesma chave recupera a execução.") @RequestHeader("Idempotency-Key") String key) {
-    return RestApiResponse.success(bulk.confirm(Resource.PESSOAS,"ergon.funcionarios.bulk.uniform",request,key),null);
+  @BulkResourceOperation(BulkResourceOperation.Role.UNIFORM_CONFIRMATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> confirmBulkUpdate(@RequestBody BulkConfirmationRequest request, @RequestHeader("Idempotency-Key") String key) {
+    return super.confirmBulkUpdate(request, key);
   }
+  @Override
   @PostMapping("/bulk/update-items")
   @BulkOperation(mode=BulkMode.PER_ITEM_UPDATE,evaluationOperationId="ergon.funcionarios.bulk.items.evaluation",atomicity=ActionCollectionAtomicity.PER_ITEM)
   @Operation(operationId="ergon.funcionarios.bulk.items",summary="Confirmar edições por registro",description="Aplica os deltas individualizados preservados na proposta, com versão e resultado próprios por registro.")
-  public RestApiResponse<BulkExecution> bulkConfirmItems(@RequestBody BulkConfirmationRequest request,
-      @Parameter(description="Chave estável de confirmação para recuperar a mesma execução em caso de repetição.") @RequestHeader("Idempotency-Key") String key) {
-    return RestApiResponse.success(bulk.confirm(Resource.PESSOAS,"ergon.funcionarios.bulk.items",request,key),null);
+  @BulkResourceOperation(BulkResourceOperation.Role.ITEM_CONFIRMATION)
+  public org.springframework.http.ResponseEntity<RestApiResponse<BulkExecution>> confirmBulkUpdateItems(@RequestBody BulkConfirmationRequest request, @RequestHeader("Idempotency-Key") String key) {
+    return super.confirmBulkUpdateItems(request, key);
   }
-  @GetMapping("/bulk/proposals/{proposalId}")
-  @BulkResourceOperation(BulkResourceOperation.Role.PROPOSAL)
-  @Operation(operationId="ergon.funcionarios.bulk.proposal",summary="Consultar proposta de lote",description="Consulta totais e intenção pública da proposta após conferir acesso ao conjunto completo de registros.")
-  public RestApiResponse<BulkProposal> bulkProposal(@Parameter(description="Identidade da proposta avaliada.") @PathVariable UUID proposalId) {
-    return RestApiResponse.success(bulk.proposal(Resource.PESSOAS,bulk.locate(Resource.PESSOAS,proposalId,false),proposalId),null);
-  }
-  @GetMapping("/bulk/proposals/{proposalId}/results")
-  @BulkResourceOperation(BulkResourceOperation.Role.PROPOSAL_RESULTS)
-  @Operation(operationId="ergon.funcionarios.bulk.proposal-results",summary="Inspecionar avaliação do lote",description="Pagina registros executáveis e bloqueados, com diagnósticos seguros e cursor vinculado ao solicitante.")
-  public RestApiResponse<CursorPage<BulkProposalItemResult<Object>>> bulkProposalResults(
-      @Parameter(description="Identidade da proposta avaliada.") @PathVariable UUID proposalId,
-      @Parameter(description="Quantidade de registros por página, de 1 a 200.") @RequestParam(defaultValue="50") int size,
-      @Parameter(description="Cursor opaco emitido na página anterior; preserve o tamanho da página.") @RequestParam(required=false) String after) {
-    return RestApiResponse.success(bulk.proposalResults(Resource.PESSOAS,bulk.locate(Resource.PESSOAS,proposalId,false),proposalId,size,after),null);
-  }
-  @GetMapping("/bulk/executions/{executionId}")
-  @BulkResourceOperation(BulkResourceOperation.Role.EXECUTION)
-  @Operation(operationId="ergon.funcionarios.bulk.execution",summary="Consultar execução do lote",description="Retorna estado e contadores reconciliados a partir dos recibos persistidos.")
-  public RestApiResponse<BulkExecution> bulkExecution(@Parameter(description="Identidade da execução confirmada.") @PathVariable UUID executionId) {
-    return RestApiResponse.success(bulk.execution(Resource.PESSOAS,bulk.locate(Resource.PESSOAS,executionId,true),executionId),null);
-  }
-  @GetMapping("/bulk/executions/{executionId}/results")
-  @BulkResourceOperation(BulkResourceOperation.Role.EXECUTION_RESULTS)
-  @Operation(operationId="ergon.funcionarios.bulk.results",summary="Consultar recibos do lote",description="Pagina resultados por registro sem expor fatos protegidos, versões ou dados bancários da proposta.")
-  public RestApiResponse<CursorPage<BulkItemResult<Object>>> bulkResults(
-      @Parameter(description="Identidade da execução confirmada.") @PathVariable UUID executionId,
-      @Parameter(description="Quantidade de recibos por página, de 1 a 200.") @RequestParam(defaultValue="50") int size,
-      @Parameter(description="Cursor opaco da página anterior de recibos.") @RequestParam(required=false) String after) {
-    return RestApiResponse.success(bulk.results(Resource.PESSOAS,bulk.locate(Resource.PESSOAS,executionId,true),executionId,size,after),null);
-  }
-  @PostMapping("/bulk/executions/{executionId}/cancel")
-  @BulkResourceOperation(BulkResourceOperation.Role.CANCEL)
-  @Operation(operationId="ergon.funcionarios.bulk.cancel",summary="Solicitar parada do lote",description="Registra a solicitação de parada sem desfazer alterações já confirmadas e sem reabrir efeitos no replay.")
-  public RestApiResponse<BulkExecution> bulkCancel(@Parameter(description="Identidade da execução a interromper.") @PathVariable UUID executionId) {
-    return RestApiResponse.success(bulk.cancel(Resource.PESSOAS,bulk.locate(Resource.PESSOAS,executionId,true),executionId),null);
-  }
+
+
+
+
+
+  @Override @SuppressWarnings({"unchecked", "rawtypes"})
+  protected org.praxisplatform.uischema.bulk.JpaResourceBulkEngine getBulkEngine() { return bulk.engine(Resource.PESSOAS); }
+  @Override protected String bulkProposalOperationId(UUID id) { return bulk.locate(Resource.PESSOAS, id, false); }
+  @Override protected String bulkExecutionOperationId(UUID id) { return bulk.locate(Resource.PESSOAS, id, true); }
+
 }

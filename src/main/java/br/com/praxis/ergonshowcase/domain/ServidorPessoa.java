@@ -60,6 +60,10 @@ public class ServidorPessoa {
   @Column(name = "dtnasc", nullable = false)
   private LocalDate dtnasc;
 
+  @Column(name = "dt_cert_fim")
+  @Comment("Data de óbito ou desaparecimento no registro civil, usada como referência da idade máxima.")
+  private LocalDate dtCertFim;
+
   /** Município de naturalidade (nascimento) do servidor. */
   @Comment("Município de naturalidade (nascimento) do servidor.")
   @Column(name = "cidnasc", nullable = true, length = 60)

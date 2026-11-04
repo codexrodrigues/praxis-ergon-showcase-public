@@ -96,11 +96,10 @@ public abstract class AfastamentoDados {
   @BulkEditable(modes = {BulkMode.UNIFORM_UPDATE, BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private LocalDate dtprevfim;
 
-  @NotBlank
   @Size(max = 4000)
   @Schema(
       description =
-          "Fundamentação administrativa, clínica ou jurídica detalhada do lançamento da licença ou afastamento (MOTIVO).")
+          "Fundamentação complementar do afastamento. Pode ser omitida quando a modalidade já tipifica o lançamento.")
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.RESTRICTED,
@@ -119,16 +118,10 @@ public abstract class AfastamentoDados {
       visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_HEALTH_READ"},
       editableForAuthorities = {"ERGON_WRITE"},
       fieldAccessReason = "Fundamentação sujeita a sigilo pericial e clínico (LGPD Art. 11).")
-  @ResourceReference(
-      resourceKey = "administracao-pessoal.afastamentos",
-      valueField = "id",
-      surfaceId = "ficha-afastamento",
-      previewSurfaceId = "ficha-afastamento",
-      detailPresentation = "drawer")
+
   @BulkEditable(modes = {BulkMode.UNIFORM_UPDATE, BulkMode.PER_ITEM_UPDATE}, allowClear = false)
   private String motivo;
 
-  @NotNull
   @Schema(
       description =
           "Indica se este lançamento representa prorrogação contínua de licença imediatamente anterior do mesmo vínculo.")
@@ -146,7 +139,7 @@ public abstract class AfastamentoDados {
       toneFalse = "neutral",
       tableHidden = true)
   @BulkEditable(modes = {BulkMode.UNIFORM_UPDATE, BulkMode.PER_ITEM_UPDATE}, allowClear = false)
-  private Boolean prorrogacao = false;
+  private Boolean prorrogacao;
 
   @Positive
   @Schema(
@@ -233,9 +226,7 @@ public abstract class AfastamentoDados {
       endpoint = ApiPaths.DOCUMENTO_OPTIONS,
       valueField = "id",
       displayField = "label",
-      tableHidden = true,
-      quickViewVisible = true,
-      quickViewOrder = 6)
+      tableHidden = true)
   @ResourceReference(
       resourceKey = "administracao-pessoal.documentos-legais",
       valueField = "documentoLegalId",

@@ -10,12 +10,12 @@ import static org.mockito.Mockito.when;
 
 import br.com.praxis.ergonshowcase.config.ErgonDeterminationConfig;
 import br.com.praxis.ergonshowcase.config.TenantContext;
-import br.com.praxis.ergonshowcase.config.VinculoStateProvider;
 import br.com.praxis.ergonshowcase.domain.*;
 import br.com.praxis.ergonshowcase.dto.*;
 import br.com.praxis.ergonshowcase.mapper.*;
 import br.com.praxis.ergonshowcase.repository.DependenteRepository;
 import br.com.praxis.ergonshowcase.repository.VinculoRepository;
+import br.com.praxis.ergonshowcase.rules.ErgonRuleViolationException;
 import br.com.praxis.ergonshowcase.service.ErgonDeterminationService;
 import br.com.praxis.ergonshowcase.service.ErgonInvariants;
 import br.com.praxis.ergonshowcase.service.ErgonReadFacts;
@@ -154,11 +154,9 @@ class DependenteContractTest {
     tipo.setGeraSalarioFamilia(false);
     when(em.find(TipoDependente.class, "CONJUGE")).thenReturn(tipo);
 
-    TypedQuery<Long> countQuery = mock(TypedQuery.class);
-    when(em.createQuery(anyString(), eq(Long.class))).thenReturn(countQuery);
-    when(countQuery.setParameter(anyString(), any())).thenReturn(countQuery);
-    when(countQuery.setFlushMode(any(FlushModeType.class))).thenReturn(countQuery);
-    when(countQuery.getSingleResult()).thenReturn(0L);
+    TypedQuery<Dependente> siblings = mock(TypedQuery.class, org.mockito.Mockito.RETURNS_SELF);
+    when(em.createQuery(anyString(), eq(Dependente.class))).thenReturn(siblings);
+    when(siblings.getResultList()).thenReturn(java.util.List.of());
 
     var dep = new Dependente();
     dep.setId(new DependenteId(1001L, 1));
@@ -178,22 +176,22 @@ class DependenteContractTest {
     // 1. CPF igual ao titular -> 422
     dep.setCpf("11122233344");
     assertThatThrownBy(() -> invariants.dependente(dep, true))
-        .isInstanceOf(ResponseStatusException.class)
+        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
         .hasMessageContaining("CPF do servidor titular");
     dep.setCpf("99988877766");
 
     // 2. depSalarioFamilia = true em modalidade que não gera salário-família -> 422
     dep.setDepSalarioFamilia(true);
     assertThatThrownBy(() -> invariants.dependente(dep, false))
-        .isInstanceOf(ResponseStatusException.class)
+        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
         .hasMessageContaining("salário-família");
     dep.setDepSalarioFamilia(false);
 
     // 3. dtfim preenchido com benefício ativo -> 422
     dep.setDtfim(LocalDate.of(2024, 1, 1));
     assertThatThrownBy(() -> invariants.dependente(dep, false))
-        .isInstanceOf(ResponseStatusException.class)
-        .hasMessageContaining("Dependência encerrada não pode manter benefícios ativos");
+        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
+        .hasMessageContaining("não pode manter benefícios ativos");
   }
 
   @Test
@@ -222,6 +220,24 @@ class DependenteContractTest {
             new DependenteElegibilidadeDraftDTO(
                 "FILHO_MENOR", LocalDate.now(ZoneOffset.UTC).minusYears(22), true, false));
     assertThat(previewUniversitario.elegivelIrrfPrevisto()).isTrue();
+
+    assertThatThrownBy(
+            () ->
+                service.elegibilidadeDependente(
+                    new DependenteElegibilidadeDraftDTO(
+                        "FILHO_MENOR", LocalDate.now(ZoneOffset.UTC).plusDays(1), false, false)))
+        .isInstanceOfSatisfying(
+            ErgonRuleViolationException.class,
+            ex -> assertThat(ex.getReasonCodes()).contains("ERG-03182"));
+
+    assertThatThrownBy(
+            () ->
+                service.elegibilidadeDependente(
+                    new DependenteElegibilidadeDraftDTO(
+                        "FILHO_MENOR", LocalDate.now(ZoneOffset.UTC).minusYears(121), false, false)))
+        .isInstanceOfSatisfying(
+            ErgonRuleViolationException.class,
+            ex -> assertThat(ex.getReasonCodes()).contains("ERG-03181"));
   }
 
   @Test
@@ -244,8 +260,14 @@ class DependenteContractTest {
     dep.setInvalido(true);
     when(depRepo.findById(new DependenteId(1001L, 1))).thenReturn(Optional.of(dep));
 
-    var stateProvider = new VinculoStateProvider(mock(VinculoRepository.class));
-    ReflectionTestUtils.setField(stateProvider, "dependentes", depRepo);
+    var dependentService = StateSnapshotFixture.service(br.com.praxis.ergonshowcase.service.DependenteService.class, depRepo);
+    var membershipEntityManager = mock(EntityManager.class);
+    TypedQuery<Long> membership = mock(TypedQuery.class, org.mockito.Mockito.RETURNS_SELF);
+    when(membershipEntityManager.createQuery(org.mockito.ArgumentMatchers.contains("v.empCodigo=:org"), eq(Long.class))).thenReturn(membership);
+    when(membership.getSingleResult()).thenReturn(1L);
+    ReflectionTestUtils.setField(dependentService, "entityManager", membershipEntityManager);
+    var stateProvider = StateSnapshotFixture.provider(dependentService);
+
 
     var vigenteSnap = stateProvider.resolve("administracao-pessoal.dependentes", "1001:1").orElseThrow();
     assertThat(vigenteSnap.state()).isEqualTo("VIGENTE");

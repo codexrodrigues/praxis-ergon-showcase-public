@@ -1,0 +1,127 @@
+name: CI & Render Cloud Deploy (Ergon Showcase)
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      deploy_to_render:
+        description: "Trigger Render deployment after CI passes"
+        required: false
+        default: true
+        type: boolean
+
+concurrency:
+  group: ergon-showcase-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Build & Offline Conformance Suite (Java 21)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Verify published Praxis dependencies on Maven Central
+        shell: bash
+        run: |
+          set -euo pipefail
+          read_property() {
+            python3 - "$1" <<'PY'
+          import sys, xml.etree.ElementTree as ET
+          ns = {"m": "http://maven.apache.org/POM/4.0.0"}
+          root = ET.parse("pom.xml").getroot()
+          props = root.find("m:properties", ns)
+          val = props.findtext(f"m:{sys.argv[1]}", namespaces=ns) if props is not None else None
+          if not val:
+              raise SystemExit(f"Missing property {sys.argv[1]}")
+          print(val.strip())
+          PY
+          }
+          check_artifact() {
+            local artifact="$1"
+            local version="$2"
+            local url="https://repo.maven.apache.org/maven2/io/github/codexrodrigues/${artifact}/${version}/${artifact}-${version}.pom"
+            local status
+            status="$(curl -L -s -o /dev/null -w '%{http_code}' --connect-timeout 10 --max-time 30 "$url" || true)"
+            [[ "$status" == "200" ]] || { echo "::error::${artifact}:${version} not found on Maven Central (HTTP $status)"; exit 1; }
+            echo "Verified ${artifact}:${version} on Maven Central (HTTP 200)"
+          }
+          check_artifact "praxis-metadata-starter" "$(read_property praxis.core.version)"
+          check_artifact "praxis-config-starter" "$(read_property praxis.config.version)"
+          check_artifact "praxis-rules-engine" "$(read_property praxis.rules.version)"
+
+      - name: Run offline JUnit conformance & security test suite
+        run: mvn -B test
+
+      - name: Package Spring Boot executable JAR
+        run: mvn -B package -DskipTests
+
+  deploy-render:
+    name: Deploy to Render (Starter) & Smoke Health Check
+    needs: ci
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && inputs.deploy_to_render)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Trigger Render Deployment
+        id: trigger
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -n "${RENDER_DEPLOY_HOOK_URL:-}" ]]; then
+            curl -fsSL -X POST "$RENDER_DEPLOY_HOOK_URL" >/dev/null
+            echo "triggered=true" >> "$GITHUB_OUTPUT"
+            echo "Triggered Render deploy via RENDER_DEPLOY_HOOK_URL."
+          elif [[ -n "${RENDER_API_KEY:-}" && -n "${RENDER_SERVICE_ID:-}" ]]; then
+            curl -fsSL -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" \
+              -H "Authorization: Bearer ${RENDER_API_KEY}" \
+              -H "Accept: application/json" \
+              -H "Content-Type: application/json" \
+              -d '{"clearCache":"do_not_clear"}' >/dev/null
+            echo "triggered=true" >> "$GITHUB_OUTPUT"
+            echo "Triggered Render deploy via Render REST API."
+          else
+            echo "triggered=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Render deployment secrets (RENDER_API_KEY + RENDER_SERVICE_ID or RENDER_DEPLOY_HOOK_URL) are not configured; skipping remote deploy trigger."
+          fi
+
+      - name: Wait for /actuator/health UP on Render
+        if: steps.trigger.outputs.triggered == 'true'
+        env:
+          RENDER_PUBLIC_URL: ${{ vars.RENDER_PUBLIC_URL || 'https://praxis-ergon-showcase.onrender.com' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Polling ${RENDER_PUBLIC_URL}/actuator/health ..."
+          for i in $(seq 1 36); do
+            status="$(curl -s -o /dev/null -w '%{http_code}' --connect-timeout 10 --max-time 20 "${RENDER_PUBLIC_URL}/actuator/health" || true)"
+            if [[ "$status" == "200" ]]; then
+              echo "Render service is UP (HTTP 200)."
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "::warning::Timed out waiting for ${RENDER_PUBLIC_URL}/actuator/health to return HTTP 200."

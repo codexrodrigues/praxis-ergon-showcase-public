@@ -16,7 +16,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchema;
     keyField = "id",
     titleField = "ementa",
     subtitleField = "tipoDocumento",
-    metadataFields = {"empCodigo", "numeroDocumento"})
+    metadataFields = {"numeroPublicacao", "processoAdministrativo"})
 public class DocumentoLegalResponseDTO {
   @Schema(
       description = "Identidade estável do diploma legal, ato administrativo ou publicação.",

@@ -96,7 +96,7 @@ public class Cargo {
   @Comment(
       "Indica se o provimento neste cargo exige verificação de saldo de vagas autorizadas em lei.")
   @Column(name = "controle_vaga", nullable = false)
-  private Boolean controleVaga = true;
+  private Boolean controleVaga = false;
 
   /**
    * Indica se a remuneração do cargo é estruturada por tabela de vencimentos/referências salariais.
@@ -104,7 +104,7 @@ public class Cargo {
   @Comment(
       "Indica se a remuneração do cargo é estruturada por tabela de vencimentos/referências salariais.")
   @Column(name = "por_referencia", nullable = false)
-  private Boolean porReferencia = true;
+  private Boolean porReferencia = false;
 
   /** Indica se o cargo atua como aglutinador para fins de controle global de quadro de vagas. */
   @Comment(

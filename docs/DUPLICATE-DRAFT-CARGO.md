@@ -1,6 +1,7 @@
 # Preparar um novo cargo a partir de referência
 
-Esta implementação trata a pendência de Cargos; seu encerramento depende da revisão independente e das provas atuais.
+Cargo tem aceite focal **local** autorizado em 29/10/2026 (T08), após revisão
+independente. Esse aceite não é integração SpringBootTest/Neon ou publicação.
 Órgãos, pessoas, vínculos, setores e documentos legais conservam as decisões
 fundamentadas em `DUPLICATE-DRAFT-ADOCAO.md`. O estado das provas executadas
 consta no scorecard e em `evidence/PILLARS-CAMPAIGN.json`.
@@ -57,9 +58,9 @@ O POST final conserva as validações de identidade única, órgão, controle de
 e integridade do cargo aglutinador. A capacidade de preparar não substitui a
 autorização ou as regras da criação.
 
-`CargoDuplicateDraftNeonTest` cobre cenários por HTTP e serviço, com hashes
+`CargoDuplicateDraftNeonTest` especifica cenários por HTTP e serviço, com hashes
 e contagens de todas as tabelas de domínio e do ledger técnico antes/depois.
-O harness do host acrescenta consumo HTTP do link e do schema, normalização e
+O harness do host prevê consumo HTTP do link e do schema, normalização e
 submit pelo runtime oficial Angular. Essa prova não monta tela e não certifica
 orquestração visual da ação, responsividade ou acessibilidade de uma aplicação
 Angular. Nenhum código de biblioteca Angular é alterado nesta frente.
@@ -71,4 +72,15 @@ privado de validação não equivale à rc.179 declarada no POM nem a release p�
 
 ## Reconciliação T08
 
-Decisões humanas: `T07-decisoes-mantenedor.md`, 28/10/2026. A política anterior de flags false e origem extinta foi substituída; provas anteriores não certificam este ajuste. O pacote é local, sem push ou publicação GitHub. A mudança de obrigatoriedade no CREATE exige que consumidores informem as três flags; UPDATE conserva seus defaults anteriores. O indicador booleano do host não equivale integralmente a CONTROLE_VAGA L/Q/N ou POR_REFER do legado.
+Decisões humanas: `T07-decisoes-mantenedor.md`, 28/10/2026. A política anterior de flags false e origem extinta foi substituída; provas anteriores não certificam este ajuste. O pacote é local, sem push ou publicação GitHub. Na revisão A1, o CREATE passou a aceitar as três flags omitidas. O mapeador aplica false quando a entrada é ausente ou nula e preserva escolhas explícitas. O preparo continua retornando rascunho parcial sem reservar identidade; o UPDATE mantém o default false. O indicador booleano do host não equivale integralmente a CONTROLE_VAGA L/Q/N ou POR_REFER do legado.
+
+O aceite T08 usa 27 provas próprias locais da revisão e seis linhas estruturais
+PASS; o recibo de 114 regressões do auditor é histórico examinado, não uma nova
+execução deste guia. As campanhas integradas históricas integral 112/113 e focal
+2/3 preservam seus 503/`TransactionTimedOutException` e não foram aprovadas como
+integração. T08-D1/D2/D3 foram encerradas por decisão do mantenedor; não reabrir
+telemetria/JFR para completar esta documentação. T12 vigente é empacotamento e
+checklist VM Linux; a execução integrada permanece pendente se não realizada.
+
+Este consumidor ativo é `praxis-ergon-showcase`; a PoC ErgonX encerrada permanece
+fora da migração. O uso dos legados como fonte documental não a reativa.

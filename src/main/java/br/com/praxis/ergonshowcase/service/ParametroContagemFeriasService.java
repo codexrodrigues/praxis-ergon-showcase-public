@@ -52,8 +52,6 @@ public class ParametroContagemFeriasService
 
   @Autowired(required = false)
   private ErgonInvariants invariants;
-
-  @PersistenceContext protected EntityManager entityManager;
   protected final ParametroContagemFeriasMapper mapper;
   private final TenantContext tenant;
   private final ErgonRuleEngineFacade ruleEngineFacade;
@@ -121,11 +119,11 @@ public class ParametroContagemFeriasService
   }
 
   private List<ParametroContagemFerias> loadExistingParametroRules(ParametroContagemFerias draft) {
-    if (entityManager == null || draft == null || draft.getRegimeJuridico() == null) {
+    if (getEntityManager() == null || draft == null || draft.getRegimeJuridico() == null) {
       return List.of();
     }
     var q =
-        entityManager.createQuery(
+        getEntityManager().createQuery(
             "select x from ParametroContagemFerias x where x.active=true and x.regimeJuridico=:rj and x.tipoVinculo=:tv and x.categoria=:cat",
             ParametroContagemFerias.class);
     if (q == null) {
@@ -180,29 +178,13 @@ public class ParametroContagemFeriasService
     return new ParametroContagemFeriasFilterDTO();
   }
 
-  @Override
-  protected OptionalLong getEntityResourceVersion(ParametroContagemFerias entity) {
-    return OptionalLong.of(entity.getVersion());
-  }
 
   @Override
   public Optional<String> getDatasetVersion() {
     return Optional.empty();
   }
 
-  @Override
-  protected org.praxisplatform.uischema.service.base.ResourceFilterAccessScope<
-          ParametroContagemFerias>
-      resolveResourceFilterAccessScope() {
-    var explicit = tenant.explicitOrgao();
-    if (explicit.isEmpty()) {
-      return org.praxisplatform.uischema.service.base.ResourceFilterAccessScope.unrestricted();
-    }
-    int orgao = explicit.getAsInt();
-    return org.praxisplatform.uischema.service.base.ResourceFilterAccessScope.restricted(
-        (root, query, cb) ->
-            cb.or(cb.isNull(root.get("empCodigo")), cb.equal(root.get("empCodigo"), orgao)));
-  }
+
 
   @Override
   public StatsFieldRegistry getStatsFieldRegistry() {
@@ -240,32 +222,12 @@ public class ParametroContagemFeriasService
   }
 
   @Override
-  public StatsSupportMode getGroupByStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getTimeSeriesStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getDistributionStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getComparisonStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
   protected void beforeCreate(
       CreateParametroContagemFeriasDTO dto, ParametroContagemFerias entity) {
     checkOrg(entity.getEmpCodigo());
     validateParametroContagemFerias(entity);
     if (invariants != null) {
-      invariants.parametroContagemFerias(entity, true);
+      invariants.parametroContagemFerias(entity, true, false);
     }
   }
 
@@ -276,56 +238,37 @@ public class ParametroContagemFeriasService
   }
 
   @Override
-  @Transactional
-  public ResourceRepresentationResult<ParametroContagemFeriasResponseDTO> update(
-      Long id,
-      UpdateParametroContagemFeriasDTO dto,
-      ResourceVersionUpdatePrecondition<Long> precondition) {
-    if (precondition == null) throw ResourceVersionPreconditionException.required();
-    var readOnlyKeys = validateCustomFields(dto, "request");
-    ParametroContagemFerias entity = findEntityById(id);
-    entityManager.lock(entity, LockModeType.PESSIMISTIC_WRITE);
-    entityManager.refresh(entity);
-    precondition.requireMatch(entity.getVersion());
-    beforeUpdate(id, entity, dto);
-    var old = CustomFieldSupport.snapshotReadOnlyValues(entity, readOnlyKeys);
+  protected void beforeDelete(Long id, ParametroContagemFerias entity) {
+    checkOrg(entity.getEmpCodigo());
+    if (Boolean.TRUE.equals(entity.getActive())) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "Parâmetro de contagem de férias ativo não pode ser excluído; encerre ou desative a vigência previamente.");
+    }
+  }
+
+  @Override
+  protected void applyResourceUpdate(Long id, ParametroContagemFerias entity, UpdateParametroContagemFeriasDTO dto) {
     mapper.applyUpdate(entity, dto);
     checkOrg(entity.getEmpCodigo());
     validateParametroContagemFerias(entity);
     if (invariants != null) {
-      invariants.parametroContagemFerias(entity, false);
+      invariants.parametroContagemFerias(entity, false, false);
     }
-    CustomFieldSupport.restoreReadOnlyValues(entity, readOnlyKeys, old);
-    var saved = getRepository().save(entity);
-    afterUpdate(id, saved, dto);
-    entityManager.flush();
-    entityManager.refresh(saved);
-    return readFacts != null
-        ? enriched(toResourceRepresentation(saved))
-        : toResourceRepresentation(saved);
   }
 
   private ResourceRepresentationResult<ParametroContagemFeriasResponseDTO> command(
       Long id,
       ResourceVersionUpdatePrecondition<Long> precondition,
       Consumer<ParametroContagemFerias> action) {
-    if (precondition == null) throw ResourceVersionPreconditionException.required();
-    ParametroContagemFerias entity = findEntityById(id);
-    entityManager.lock(entity, LockModeType.PESSIMISTIC_WRITE);
-    entityManager.refresh(entity);
-    precondition.requireMatch(entity.getVersion());
-    checkOrg(entity.getEmpCodigo());
+    return executeVersionedMutation(id, precondition, entity -> {
+      checkOrg(entity.getEmpCodigo());
     action.accept(entity);
     validateParametroContagemFerias(entity);
     if (invariants != null) {
-      invariants.parametroContagemFerias(entity, false);
+      invariants.parametroContagemFerias(entity, false, false);
     }
-    var saved = getRepository().save(entity);
-    entityManager.flush();
-    entityManager.refresh(saved);
-    return readFacts != null
-        ? enriched(toResourceRepresentation(saved))
-        : toResourceRepresentation(saved);
+    });
   }
 
   @Transactional
@@ -444,7 +387,7 @@ public class ParametroContagemFeriasService
         (ParametroContagemFerias p) -> {
           if (dto.getDtfim() == null) {
             throw new ResponseStatusException(
-                HttpStatus.UNPROCESSABLE_ENTITY,
+                HttpStatus.BAD_REQUEST,
                 "O encerramento de vigência exige informar a data final (dtfim).");
           }
           p.setDtfim(dto.getDtfim());
@@ -458,8 +401,22 @@ public class ParametroContagemFeriasService
   private void checkOrg(Integer orgao) {
     if (orgao != null && !Objects.equals(orgao, tenant.orgao())) {
       throw new ResponseStatusException(
-          HttpStatus.UNPROCESSABLE_ENTITY,
+          HttpStatus.FORBIDDEN,
           "Órgão da matriz de parâmetros de férias diverge de X-Tenant.");
     }
   }
+  @Override protected java.util.Optional<org.praxisplatform.uischema.capability.ResourceStateSnapshot> toResourceStateSnapshot(ParametroContagemFerias e) {
+    return java.util.Optional.of(snapshotState(e));
+  }
+  private org.praxisplatform.uischema.capability.ResourceStateSnapshot snapshotState(ParametroContagemFerias e) {
+    return new org.praxisplatform.uischema.capability.ResourceStateSnapshot(Boolean.TRUE.equals(e.getActive()) ? "ATIVO" : "INATIVO", java.util.Map.of(
+        "temFerias",Boolean.TRUE.equals(e.getTemFerias()),"vigenciaAberta",e.getDtfim()==null,"escopoGlobal",e.getEmpCodigo()==null,
+        "permiteParcelamento",e.getMaxPerFer()!=null && e.getMaxPerFer()>1,
+        "permiteAbonoPecuniario",Boolean.TRUE.equals(e.getTemFerias()) && e.getAbonoDirGozo()!=null && !"N".equals(e.getAbonoDirGozo())));
+  }
+
+  @Override protected String resolveResourceKey() { return "administracao-pessoal.parametros-contagem-ferias"; }
+
+  @Override protected boolean globalOrganizationRecords() { return true; }
+
 }

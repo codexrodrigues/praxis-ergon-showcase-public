@@ -570,13 +570,15 @@ class NeonIntegrationTest {
   @Test
   void reviewBulkSelectionAppliesOrganizationBeforeLimit() {
     var service=context.getBean(br.com.praxis.ergonshowcase.service.CargoService.class);
-    var ids=service.selectBulkIdentities(new br.com.praxis.ergonshowcase.dto.CargoFilterDTO(),
-        (root,q,cb)->cb.equal(root.get("empCodigo"),2),1);
-    assertThat(ids).hasSize(1);
-    assertThat(em.find(br.com.praxis.ergonshowcase.domain.Cargo.class,ids.get(0)).getEmpCodigo()).isEqualTo(2);
-    var domain=context.getBean(br.com.praxis.ergonshowcase.bulk.ErgonBulkDomain.class);
-    var selected=domain.query(br.com.praxis.ergonshowcase.bulk.ErgonBulkDomain.Resource.CARGOS,
-        new br.com.praxis.ergonshowcase.dto.CargoFilterDTO(),0);
+    var selectionFilter=new br.com.praxis.ergonshowcase.dto.CargoFilterDTO();selectionFilter.setEmpCodigo(2);
+    var request=new org.springframework.mock.web.MockHttpServletRequest();request.addHeader("X-Tenant","2");
+    org.springframework.web.context.request.RequestContextHolder.setRequestAttributes(new org.springframework.web.context.request.ServletRequestAttributes(request));
+    try {
+      var ids=service.selectBulkIdentities(selectionFilter,null,java.util.List.of(),1);
+      assertThat(ids).hasSize(1);
+      assertThat(em.find(br.com.praxis.ergonshowcase.domain.Cargo.class,ids.get(0)).getEmpCodigo()).isEqualTo(2);
+    } finally {org.springframework.web.context.request.RequestContextHolder.resetRequestAttributes();}
+    var selected=service.selectBulkIdentities(new br.com.praxis.ergonshowcase.dto.CargoFilterDTO(),null,java.util.List.of(),200);
     assertThat(selected).isNotEmpty();
     for(Object id:selected) assertThat(em.find(br.com.praxis.ergonshowcase.domain.Cargo.class,id).getEmpCodigo()).isEqualTo(1);
   }
@@ -728,7 +730,7 @@ class NeonIntegrationTest {
     assertThat(
             context
                 .getBean(br.com.praxis.ergonshowcase.service.ErgonInvariants.class)
-                .ocupadas(9505, null))
+                .ocupadas(9505, null, 1))
         .isEqualTo(1);
     revisionCommand(
             "/api/ergon/cargos/9505/actions/extinguir-cargo", "{\"dtExtincao\":\"2026-10-01\"}")
@@ -798,7 +800,7 @@ class NeonIntegrationTest {
       Long afastamento =
           json.readTree(response.getContentAsString()).path("afastamentoAbertoId").longValue();
       assertThat(afastamento).isPositive();
-      reviewActionAllowed(uri, "registrar-afastamento", false);
+      reviewActionAllowed(uri, "registrar-afastamento", true);
       reviewActionAllowed(uri, "encerrar-afastamento", true);
       mvc.perform(
               post(uri + "/actions/encerrar-afastamento")
@@ -838,7 +840,7 @@ class NeonIntegrationTest {
     revisionCommand(
             uri + "/actions/registrar-afastamento",
             reviewAfastamentoBody().replace("\"codfreq\":201", "\"codfreq\":999999"))
-        .andExpect(status().isUnprocessableEntity());
+        .andExpect(status().isNotFound());
   }
 
   @Test
@@ -866,7 +868,7 @@ class NeonIntegrationTest {
                 + ",\"dtfim\":\"2026-10-10\",\"documentoLegalId\":"
                 + reviewDocumento()
                 + "}")
-        .andExpect(status().isUnprocessableEntity());
+        .andExpect(status().isNotFound());
   }
 
   @Test
@@ -937,7 +939,7 @@ class NeonIntegrationTest {
     var cargo = em.find(br.com.praxis.ergonshowcase.domain.Cargo.class, id);
     cargo.setDtExtincao(null);
     cargo.setControleVaga(true);
-    cargo.setVagasAutorizadas((int) rules.ocupadas(id, null));
+    cargo.setVagasAutorizadas((int) rules.ocupadas(id, null, cargo.getEmpCodigo()));
     var v = revisionNewVinculo();
     v.setCargo(id);
     assertThatThrownBy(() -> rules.vinculo(v, true)).hasMessageContaining("Saldo de vagas");
@@ -1305,8 +1307,8 @@ class NeonIntegrationTest {
   }
 
   @Test
-  void allSixteenEntitiesMatchPostgres17() {
-    assertThat(em.getMetamodel().getEntities()).hasSize(16);
+  void allThirtyEntitiesMatchPostgres17() {
+    assertThat(em.getMetamodel().getEntities()).hasSize(30);
     assertThat(em.createNativeQuery("show server_version").getSingleResult().toString())
         .startsWith("17.");
     for (var entity : em.getMetamodel().getEntities())
@@ -1663,12 +1665,17 @@ class NeonIntegrationTest {
 
   @Test
   void mappingCoversEveryDocumentedColumn() {
-    int total = 0;
+    int relations = 0;
     for (var entity : em.getMetamodel().getEntities()) {
       var type = entity.getJavaType();
+      var mapping = type.getAnnotation(jakarta.persistence.Table.class);
+      if (mapping == null) {
+        assertThat(type.getAnnotation(org.hibernate.annotations.Subselect.class)).isNotNull();
+        continue;
+      }
+      relations++;
       var columns = columns(type);
-      total += columns.size();
-      String table = type.getAnnotation(jakarta.persistence.Table.class).name();
+      String table = mapping.name();
       var actual =
           em.createNativeQuery(
                   "select column_name from information_schema.columns where table_schema='public' and table_name=:table",
@@ -1677,7 +1684,7 @@ class NeonIntegrationTest {
               .getResultList();
       assertThat(columns).containsExactlyInAnyOrderElementsOf(actual);
     }
-    assertThat(total).isEqualTo(392);
+    assertThat(relations).isEqualTo(28);
   }
 
   private java.util.Set<String> columns(Class<?> type) {

@@ -1,5 +1,6 @@
 package br.com.praxis.ergonshowcase.bulk;
 
+import br.com.praxis.ergonshowcase.constants.ApiPaths;
 import br.com.praxis.ergonshowcase.config.TenantContext;
 import br.com.praxis.ergonshowcase.domain.*;
 import br.com.praxis.ergonshowcase.dto.*;
@@ -31,21 +32,44 @@ public class ErgonBulkDomain {
     CAMPOS_CUSTOMIZADOS("administracao-pessoal.campos-customizados", "campos-customizados", "updateErgonCampoCustomizado", DefinicaoCampoCustomizado.class, UpdateDefinicaoCampoCustomizadoDTO.class),
     PARAMETROS_CONTAGEM_FERIAS("administracao-pessoal.parametros-contagem-ferias", "parametros-contagem-ferias", "updateErgonParametroContagemFerias", ParametroContagemFerias.class, UpdateParametroContagemFeriasDTO.class),
     PERIODOS_AQUISITIVOS_FERIAS("administracao-pessoal.periodos-aquisitivos-ferias", "periodos-aquisitivos-ferias", "updateErgonPeriodoAquisitivoFerias", PeriodoAquisitivoFerias.class, UpdatePeriodoAquisitivoFeriasDTO.class),
-    FERIAS_GOZO("administracao-pessoal.ferias-gozo", "ferias-gozo", "updateErgonFeriasGozo", FeriasGozo.class, UpdateFeriasGozoDTO.class);
+    FERIAS_GOZO("administracao-pessoal.ferias-gozo", "ferias-gozo", "updateErgonFeriasGozo", FeriasGozo.class, UpdateFeriasGozoDTO.class),
+    AVERBACOES_TEMPO_SERVICO("administracao-pessoal.averbacoes-tempo-servico","averbacoes-tempo-servico","updateErgonAverbacaoTempoServico",AverbacaoTempoServico.class,UpdateAverbacaoTempoServicoDTO.class),
+    PERIODOS_AQUISITIVOS_LICENCA_ESPECIAL("administracao-pessoal.periodos-aquisitivos-licenca-especial","periodos-aquisitivos-licenca-especial","updateErgonPeriodoAquisitivoLicencaEspecial",PeriodoAquisitivoLicencaEspecial.class,UpdatePeriodoAquisitivoLicencaEspecialDTO.class),
+    LICENCAS_ESPECIAIS_GOZO("administracao-pessoal.licencas-especiais-gozo","licencas-especiais-gozo","updateErgonLicencaEspecialGozo",LicencaEspecialGozo.class,UpdateLicencaEspecialGozoDTO.class),
+    VENDAS_LICENCA_ESPECIAL("administracao-pessoal.vendas-licenca-especial","vendas-licenca-especial","updateErgonVendaLicencaEspecial",VendaLicencaEspecial.class,UpdateVendaLicencaEspecialDTO.class),
+    DESIGNACOES(ApiPaths.KEY_DESIGNACOES, "designacoes", "updateErgonDesignacaoFuncao", DesignacaoFuncao.class, UpdateDesignacaoFuncaoDTO.class),
+    FUNCOES(ApiPaths.KEY_FUNCOES, "funcoes", "updateErgonFuncaoConfianca", FuncaoConfianca.class, UpdateFuncaoConfiancaDTO.class),
+    VAGAS_FUNCAO(ApiPaths.KEY_VAGAS_FUNCAO, "vagas-funcao", "updateErgonVagaFuncao", VagaFuncao.class, UpdateVagaFuncaoDTO.class),
+    SUBSTITUICOES(ApiPaths.KEY_SUBSTITUICOES, "substituicoes", "updateErgonSubstituicaoFuncao", SubstituicaoFuncao.class, UpdateSubstituicaoFuncaoDTO.class);
     public final String key, name, updateOperation;
+    /** Nome físico declarado pela entidade; a rota pública nunca identifica uma tabela. */
+    public final String table;
     public final Class<?> entity, update;
-    Resource(String key, String name, String op, Class<?> entity, Class<?> update) { this.key=key;this.name=name;this.updateOperation=op;this.entity=entity;this.update=update; }
+    Resource(String key, String name, String op, Class<?> entity, Class<?> update) {
+      this.key=key;this.name=name;this.updateOperation=op;this.entity=entity;this.update=update;
+      this.table=Objects.requireNonNull(entity.getAnnotation(Table.class), "Entidade de lote exige @Table explícita").name();
+      if(!table.matches("[a-z][a-z0-9_]*")) throw new IllegalArgumentException("Tabela de lote deve ser um identificador físico simples");
+    }
     public Set<String> protectedFields() {
       return switch(this) {
+        case FUNCOES -> Set.of("empCodigo", "codigo", "situacao", "dtini", "dtfim", "controleVaga", "dtInicioContrVaga", "permiteSubstituicao", "tipoSubstituicao", "diasMinimosSubstituicao", "valorGratificacao", "percentualOpcaoEfetivo", "exigeVinculoEfetivo", "atoPublicacaoId");
+        case VAGAS_FUNCAO -> Set.of("empCodigo", "numeroVaga", "funcaoId", "situacao", "dtini", "dtfim", "setorId", "origemVaga", "motivoBloqueio", "atoPublicacaoId");
+        case SUBSTITUICOES -> Set.of("empCodigo", "designacaoId", "substitutoId", "situacao", "dtini", "dtfim", "motivo", "afastamentoId", "feriasGozoId", "dtiniRemunerada", "dtfimRemunerada", "competenciaFolha", "valorSubstituicao", "atoPublicacaoId");
+        case DESIGNACOES -> Set.of("empCodigo", "titularId", "funcaoId", "vagaFuncaoId", "situacao",
+            "dtini", "dtfim", "dtExercicio", "atoDispensaId", "motivoDispensa");
         case VINCULOS -> Set.of("cargo", "dtnom", "dtposse");
         case PESSOAS -> Set.of("cpf", "nome", "dtnasc");
         case CARGOS -> Set.of();
         case DEPENDENTES -> Set.of("nome", "dtnasc", "invalido");
         case AFASTAMENTOS, FREQUENCIAS -> Set.of("tipofreq", "codfreq", "dtini");
         case CAMPOS_CUSTOMIZADOS -> Set.of("empCodigo", "resourceKey", "fieldKey", "fieldType", "validationRules", "governancePolicy");
-        case PARAMETROS_CONTAGEM_FERIAS -> Set.of("dtini", "active");
-        case PERIODOS_AQUISITIVOS_FERIAS -> Set.of("empCodigo", "numfunc", "numvinc", "chave", "dtini", "diasGozados", "diasVendidosAbono", "diasConvertidosDobro", "saldoDiasDisponivel", "geradoPorAverbacao", "situacao");
-        case FERIAS_GOZO -> Set.of("empCodigo", "numfunc", "numvinc", "periodoAquisitivoId", "chavePeraqfer", "ordemParcela", "dtini", "totDiasDireitoPa", "situacao");
+        case PARAMETROS_CONTAGEM_FERIAS -> Set.of("dtini");
+        case PERIODOS_AQUISITIVOS_FERIAS -> Set.of("empCodigo", "numfunc", "numvinc", "chave", "dtini", "diasGozados", "diasVendidosAbono", "diasConvertidosDobro", "geradoPorAverbacao");
+        case AVERBACOES_TEMPO_SERVICO -> Set.of("empCodigo", "numfunc", "numvinc", "chave", "situacao", "diasDesaverbados", "dataDesaverbacao", "motivoDesaverbacao", "dataRemocao", "motivoRemocao");
+        case PERIODOS_AQUISITIVOS_LICENCA_ESPECIAL -> Set.of("empCodigo", "numfunc", "numvinc", "chave", "situacao", "diasConvertidosDobro", "dtCntDobro", "averbacaoOrigemId");
+        case LICENCAS_ESPECIAIS_GOZO -> Set.of("empCodigo", "numfunc", "numvinc", "periodoAquisitivoLicencaId", "chavePeraqlicesp", "ordemParcela", "situacao", "dtfim");
+        case VENDAS_LICENCA_ESPECIAL -> Set.of("empCodigo", "numfunc", "numvinc", "periodoAquisitivoLicencaId", "chavePeraqlicesp", "situacao", "dtPagamento", "dtEstorno", "modalidade");
+        case FERIAS_GOZO -> Set.of("empCodigo", "numfunc", "numvinc", "periodoAquisitivoId", "chavePeraqfer", "ordemParcela", "dtini", "totDiasDireitoPa");
       };
     }
   }
@@ -55,14 +79,10 @@ public class ErgonBulkDomain {
   @Autowired TenantContext tenant;
   @Autowired ErgonInvariants invariants;
   @Autowired VinculoMapper vinculos;
-  @Autowired ServidorPessoaMapper pessoas;
   @Autowired CargoMapper cargos;
   @Autowired DependenteMapper dependentes;
   @Autowired AfastamentoMapper afastamentos;
   @Autowired FrequenciaMapper frequencias;
-  @Autowired DefinicaoCampoCustomizadoMapper camposCustomizados;
-  @Autowired ParametroContagemFeriasMapper parametrosContagemFerias;
-  @Autowired PeriodoAquisitivoFeriasMapper periodosAquisitivosFerias;
   @Autowired FeriasGozoMapper feriasGozo;
   @Autowired VinculoService vinculoService;
   @Autowired ServidorPessoaService pessoaService;
@@ -75,33 +95,48 @@ public class ErgonBulkDomain {
   @Autowired PeriodoAquisitivoFeriasService periodoAquisitivoFeriasService;
   @Autowired FeriasGozoService feriasGozoService;
 
-  ResourceMapper mapper(Resource r) {
-    return switch(r) {
-      case VINCULOS -> vinculos;
-      case PESSOAS -> pessoas;
-      case CARGOS -> cargos;
-      case DEPENDENTES -> dependentes;
-      case AFASTAMENTOS -> afastamentos;
-      case FREQUENCIAS -> frequencias;
-      case CAMPOS_CUSTOMIZADOS -> camposCustomizados;
-      case PARAMETROS_CONTAGEM_FERIAS -> parametrosContagemFerias;
-      case PERIODOS_AQUISITIVOS_FERIAS -> periodosAquisitivosFerias;
-      case FERIAS_GOZO -> feriasGozo;
+  @Autowired AverbacaoTempoServicoMapper averbacaoTempoServico;
+  @Autowired AverbacaoTempoServicoService averbacaoTempoServicoService;
+  @Autowired PeriodoAquisitivoLicencaEspecialMapper periodoAquisitivoLicencaEspecial;
+  @Autowired PeriodoAquisitivoLicencaEspecialService periodoAquisitivoLicencaEspecialService;
+  @Autowired LicencaEspecialGozoMapper licencaEspecialGozo;
+  @Autowired LicencaEspecialGozoService licencaEspecialGozoService;
+  @Autowired VendaLicencaEspecialMapper vendaLicencaEspecial;
+  @Autowired VendaLicencaEspecialService vendaLicencaEspecialService;
+  @Autowired FuncaoConfiancaService funcaoConfiancaService;
+  @Autowired VagaFuncaoService vagaFuncaoService;
+  @Autowired SubstituicaoFuncaoService substituicaoFuncaoService;
+  @Autowired DesignacaoFuncaoService designacaoFuncaoService;
+
+  public ErgonResourceService service(Resource resource) {
+    return switch (resource) {
+      case FUNCOES -> funcaoConfiancaService;
+      case VAGAS_FUNCAO -> vagaFuncaoService;
+      case SUBSTITUICOES -> substituicaoFuncaoService;
+      case DESIGNACOES -> designacaoFuncaoService;
+      case VINCULOS -> vinculoService; case PESSOAS -> pessoaService; case CARGOS -> cargoService;
+      case DEPENDENTES -> dependenteService; case AFASTAMENTOS -> afastamentoService; case FREQUENCIAS -> frequenciaService;
+      case CAMPOS_CUSTOMIZADOS -> campoCustomizadoService; case PARAMETROS_CONTAGEM_FERIAS -> parametroContagemFeriasService;
+      case PERIODOS_AQUISITIVOS_FERIAS -> periodoAquisitivoFeriasService; case FERIAS_GOZO -> feriasGozoService;
+      case AVERBACOES_TEMPO_SERVICO -> averbacaoTempoServicoService;
+      case PERIODOS_AQUISITIVOS_LICENCA_ESPECIAL -> periodoAquisitivoLicencaEspecialService;
+      case LICENCAS_ESPECIAIS_GOZO -> licencaEspecialGozoService; case VENDAS_LICENCA_ESPECIAL -> vendaLicencaEspecialService;
     };
   }
   public BulkIdentityCodec codec(Resource r) {
     return switch(r) {
       case CARGOS -> BulkIdentityCodecs.integers();
-      case PESSOAS, AFASTAMENTOS, FREQUENCIAS, CAMPOS_CUSTOMIZADOS,
-          PARAMETROS_CONTAGEM_FERIAS, PERIODOS_AQUISITIVOS_FERIAS, FERIAS_GOZO -> BulkIdentityCodecs.longs();
-      case VINCULOS, DEPENDENTES -> BulkIdentityCodecs.strings();
+      case FUNCOES, VAGAS_FUNCAO, SUBSTITUICOES, DESIGNACOES, PESSOAS, AFASTAMENTOS, FREQUENCIAS, CAMPOS_CUSTOMIZADOS,
+          PARAMETROS_CONTAGEM_FERIAS, PERIODOS_AQUISITIVOS_FERIAS, AVERBACOES_TEMPO_SERVICO, PERIODOS_AQUISITIVOS_LICENCA_ESPECIAL, LICENCAS_ESPECIAIS_GOZO, VENDAS_LICENCA_ESPECIAL, FERIAS_GOZO -> BulkIdentityCodecs.longs();
+      case VINCULOS -> BulkIdentityCodecs.composite(VinculoId.class);
+      case DEPENDENTES -> BulkIdentityCodecs.composite(DependenteId.class);
     };
   }
   public Object identity(Resource r, Object wire) {
     return switch(r) {
       case CARGOS -> BulkIdentityCodecs.integers().decode((Integer) wire);
-      case PESSOAS, AFASTAMENTOS, FREQUENCIAS, CAMPOS_CUSTOMIZADOS,
-          PARAMETROS_CONTAGEM_FERIAS, PERIODOS_AQUISITIVOS_FERIAS, FERIAS_GOZO -> BulkIdentityCodecs.longs().decode((String) wire);
+      case FUNCOES, VAGAS_FUNCAO, SUBSTITUICOES, DESIGNACOES, PESSOAS, AFASTAMENTOS, FREQUENCIAS, CAMPOS_CUSTOMIZADOS,
+          PARAMETROS_CONTAGEM_FERIAS, PERIODOS_AQUISITIVOS_FERIAS, AVERBACOES_TEMPO_SERVICO, PERIODOS_AQUISITIVOS_LICENCA_ESPECIAL, LICENCAS_ESPECIAIS_GOZO, VENDAS_LICENCA_ESPECIAL, FERIAS_GOZO -> BulkIdentityCodecs.longs().decode((String) wire);
       case VINCULOS -> {
         VinculoId id=CompositeIdSupport.decode((String)wire,VinculoId.class);
         if(!wire.equals(CompositeIdSupport.encode(id))) throw new IllegalArgumentException("Identidade composta não canônica.");
@@ -114,22 +149,11 @@ public class ErgonBulkDomain {
       }
     };
   }
-  public Object wire(Resource r, Object e) {
-    return switch(r) {
-      case CARGOS -> ((Cargo)e).getCargo();
-      case PESSOAS -> ((ServidorPessoa)e).getNumero().toString();
-      case AFASTAMENTOS -> ((Afastamento)e).getId().toString();
-      case FREQUENCIAS -> ((Frequencia)e).getId().toString();
-      case CAMPOS_CUSTOMIZADOS -> ((DefinicaoCampoCustomizado)e).getId().toString();
-      case PARAMETROS_CONTAGEM_FERIAS -> ((ParametroContagemFerias)e).getId().toString();
-      case PERIODOS_AQUISITIVOS_FERIAS -> ((PeriodoAquisitivoFerias)e).getId().toString();
-      case FERIAS_GOZO -> ((FeriasGozo)e).getId().toString();
-      case VINCULOS -> CompositeIdSupport.encode(((Vinculo)e).getId());
-      case DEPENDENTES -> CompositeIdSupport.encode(((Dependente)e).getId());
-    };
-  }
+
   public long version(Object e) {
-    return e instanceof Vinculo v ? v.getVersion()
+    return e instanceof DesignacaoFuncao d ? d.getVersion()
+        : e instanceof AssentamentoTempoLicenca t ? t.getVersion()
+        : e instanceof Vinculo v ? v.getVersion()
         : e instanceof Cargo c ? c.getVersion()
         : e instanceof Dependente d ? d.getVersion()
         : e instanceof Afastamento a ? a.getVersion()
@@ -142,8 +166,16 @@ public class ErgonBulkDomain {
   }
   public Object load(Resource r, Object wire, boolean lock) {
     if (em.unwrap(org.hibernate.Session.class).isDirty()) throw new IllegalStateException("Contexto de persistência deve estar limpo antes do lote.");
-    Object e = lock ? em.find(r.entity, identity(r,wire), LockModeType.PESSIMISTIC_WRITE, Map.of("jakarta.persistence.lock.timeout",1000)) : em.find(r.entity,identity(r,wire));
+    Object e = em.find(r.entity, identity(r,wire));
     if (e != null && !scope(r,e)) throw new SecurityException("Registro fora do órgão selecionado.");
+    if (lock && e instanceof Afastamento afastamento) {
+      AfastamentoService.lockVinculo(em, afastamento);
+    }
+    if (lock && e != null) {
+      em.lock(e, LockModeType.PESSIMISTIC_WRITE, Map.of("jakarta.persistence.lock.timeout",1000));
+      em.refresh(e);
+      if (!scope(r,e)) throw new SecurityException("Registro fora do órgão selecionado.");
+    }
     if (lock && e instanceof FeriasGozo fg && fg.getPeriodoAquisitivoId() != null) {
       em.find(
           PeriodoAquisitivoFerias.class,
@@ -151,193 +183,67 @@ public class ErgonBulkDomain {
           LockModeType.PESSIMISTIC_WRITE,
           Map.of("jakarta.persistence.lock.timeout", 1000));
     }
+    if(lock && e instanceof AssentamentoTempoLicenca) { em.refresh(e); if(!scope(r,e)) throw new SecurityException("Registro fora do órgão selecionado."); }
     return e;
   }
-  public boolean scope(Resource r, Object e) {
-    if (r == Resource.CAMPOS_CUSTOMIZADOS) {
-      Integer emp = ((DefinicaoCampoCustomizado) e).getEmpCodigo();
-      return emp == null || Objects.equals(emp, tenant.orgao());
+  public boolean scope(Resource resource, Object entity) {
+    try {
+      ErgonTenantAccess.assertAllowed(entity, tenant, em,
+          resource == Resource.CAMPOS_CUSTOMIZADOS || resource == Resource.PARAMETROS_CONTAGEM_FERIAS);
+      return true;
+    } catch (org.springframework.web.server.ResponseStatusException denied) {
+      if (denied.getStatusCode().value() == 403) return false;
+      throw denied;
     }
-    if (r == Resource.PARAMETROS_CONTAGEM_FERIAS) {
-      Integer emp = ((ParametroContagemFerias) e).getEmpCodigo();
-      return emp == null || Objects.equals(emp, tenant.orgao());
-    }
-    return r == Resource.PESSOAS || r == Resource.DEPENDENTES
-        || Objects.equals(
-            r == Resource.CARGOS ? ((Cargo)e).getEmpCodigo()
-                : r == Resource.AFASTAMENTOS ? ((Afastamento)e).getEmpCodigo()
-                : r == Resource.FREQUENCIAS ? ((Frequencia)e).getEmpCodigo()
-                : r == Resource.PERIODOS_AQUISITIVOS_FERIAS ? ((PeriodoAquisitivoFerias)e).getEmpCodigo()
-                : r == Resource.FERIAS_GOZO ? ((FeriasGozo)e).getEmpCodigo()
-                : ((Vinculo)e).getEmpCodigo(),
-            tenant.orgao());
   }
-  public ObjectNode prior(Resource r, Object e) {
-    ObjectNode response=json.valueToTree(mapper(r).toResponse(e));
-    var allowed=new HashSet<String>();
-    json.getDeserializationConfig().introspect(json.constructType(r.update)).findProperties().stream()
-        .filter(p -> p.couldDeserialize()).forEach(p -> allowed.add(p.getName()));
-    allowed.removeAll(Set.of("cargoNomePrevisto","saldoVagasPrevisto","cargoAglutinadorNomePrevisto",
-        "possuiDeficienciaPcDPrevisto","tipoDependenteDescricaoPrevista","idadeCalculadaAnos","elegivelIrrfPrevisto",
-        "codigoFrequenciaNomePrevisto","quantidadeDiasPrevista","comOnusPrevisto",
-        "formatoQuantidadePrevisto","exigeHorarioPrevisto",
-        "optionTabelaDescricaoPrevista","requerTabelaOpcoesPrevisto","escopoGlobalPrevisto",
-        "orgaoNome","escopoGlobal","resumoParametro",
-        "pessoaNome","vinculoSituacao","periodoResumo","saldoDiasDisponivel",
-        "parcelaResumo","totalDiasConsumidosPa","saldoPaAposParcela"));
-    response.retain(allowed);
-    return response;
-  }
+
   public void validate(Object dto) {
     var violations=validator.validate(dto);
     if(violations.stream().anyMatch(v->v.getPropertyPath().toString().equals("jornadaSemanal")))
       throw new BulkInputViolation("JORNADA_FORA_INTERVALO");
     if (!violations.isEmpty()) throw new IllegalArgumentException("Parâmetros incompatíveis com o cadastro.");
   }
-  private void types(Resource r, List<BulkFieldChange> changes) {
-    var bean=json.getDeserializationConfig().introspect(json.constructType(r.update));
-    for (var change:changes) {
-      if (change.operator()==BulkChangeOperator.CLEAR) continue;
-      var property=bean.findProperties().stream().filter(p -> p.getName().equals(change.field())).findFirst()
-          .orElseThrow(()->new IllegalArgumentException("Campo não pertence ao contrato cadastral de atualização."));
-      Class<?> type=property.getPrimaryType().getRawClass(); var value=change.value();
-      boolean valid=type==String.class || type==java.time.LocalDate.class || type==java.time.LocalTime.class ? value.isTextual()
-          : type==Boolean.class ? value.isBoolean()
-          : type==Integer.class ? value.isIntegralNumber() && value.canConvertToInt()
-          : type==Long.class ? value.isIntegralNumber() && value.canConvertToLong()
-          : type==java.math.BigDecimal.class ? value.isNumber() : false;
-      if (!valid) throw new IllegalArgumentException("Tipo de valor incompatível com o campo do cadastro.");
-    }
-  }
-  public Object candidate(Resource r, Object e, List<BulkFieldChange> changes, BulkEditableFields fields, BulkMode mode) {
-    types(r,changes);
-    ObjectNode value=BulkFieldChanges.applyTo(prior(r,e),changes,fields.writableFields(mode),fields.clearableFields(mode));
-    Object dto=json.convertValue(value,r.update); validate(dto);
-    try {
-      Object copy=r.entity.getDeclaredConstructor().newInstance(); BeanUtils.copyProperties(e,copy);
-      mapper(r).applyUpdate(copy,dto);
-      if (copy instanceof FeriasGozo fg && feriasGozoService != null) {
-        feriasGozoService.hydrateParentPeriodoAquisitivo(fg, false);
-      }
-      validateEntity(r,copy,e); return dto;
-    } catch (ReflectiveOperationException failure) { throw new IllegalStateException("Tipo de entidade não construível."); }
-  }
-  public void validateEntity(Resource r, Object e) {
-    validateEntity(r, e, null);
-  }
-  public void validateEntity(Resource r, Object e, Object previousSnapshot) {
-    switch(r) {
-      case CARGOS -> invariants.cargo((Cargo)e);
-      case PESSOAS -> invariants.pessoa((ServidorPessoa)e);
-      case VINCULOS -> {
-        invariants.vinculo((Vinculo) e, false, false);
-        if (vinculoService != null) {
-          vinculoService.validateVinculoProvimento((Vinculo) e, false);
-        }
-      }
-      case DEPENDENTES -> {
-        invariants.dependente((Dependente) e, false, false);
-        if (dependenteService != null) {
-          dependenteService.validateDependenteElegibilidade((Dependente) e);
-        }
-      }
-      case AFASTAMENTOS -> {
-        if (afastamentoService != null) {
-          afastamentoService.validateAfastamentoConcessao((Afastamento) e, false);
-        }
-        invariants.afastamento((Afastamento) e, false);
-      }
-      case FREQUENCIAS -> {
-        if (frequenciaService != null) {
-          frequenciaService.validateFrequenciaLancamento((Frequencia) e);
-        }
-        invariants.frequencia((Frequencia) e, false);
-      }
-      case CAMPOS_CUSTOMIZADOS -> invariants.campoCustomizado((DefinicaoCampoCustomizado)e,false);
-      case PARAMETROS_CONTAGEM_FERIAS -> {
-        if (parametroContagemFeriasService != null) {
-          parametroContagemFeriasService.validateParametroContagemFerias((ParametroContagemFerias) e);
-        }
-        invariants.parametroContagemFerias((ParametroContagemFerias) e, false);
-      }
-      case PERIODOS_AQUISITIVOS_FERIAS -> {
-        if (periodoAquisitivoFeriasService != null) {
-          periodoAquisitivoFeriasService.validatePeriodoAquisitivoFerias(
-              (PeriodoAquisitivoFerias) e,
-              previousSnapshot instanceof PeriodoAquisitivoFerias paf ? paf : null);
-        }
-        invariants.periodoAquisitivoFerias((PeriodoAquisitivoFerias) e, false);
-      }
-      case FERIAS_GOZO -> {
-        if (feriasGozoService != null) {
-          feriasGozoService.validateFeriasGozo(
-              (FeriasGozo) e, previousSnapshot instanceof FeriasGozo fg ? fg : null);
-        }
-        invariants.feriasGozo((FeriasGozo) e, false);
-      }
-    }
-  }
-  public boolean apply(Resource r, Object e, Object dto) {
-    Object previousSnapshot = null;
-    try {
-      previousSnapshot = r.entity.getDeclaredConstructor().newInstance();
-      BeanUtils.copyProperties(e, previousSnapshot);
-    } catch (ReflectiveOperationException ignored) {
-    }
-    ObjectNode before=prior(r,e); mapper(r).applyUpdate(e,dto);
-    if (e instanceof PeriodoAquisitivoFerias paf && previousSnapshot instanceof PeriodoAquisitivoFerias prevPa) {
-      if (prevPa.getDiasGozados() != null) paf.setDiasGozados(prevPa.getDiasGozados());
-      if (prevPa.getDiasVendidosAbono() != null) paf.setDiasVendidosAbono(prevPa.getDiasVendidosAbono());
-      if (prevPa.getDiasConvertidosDobro() != null) paf.setDiasConvertidosDobro(prevPa.getDiasConvertidosDobro());
-      if (prevPa.getGeradoPorAverbacao() != null) paf.setGeradoPorAverbacao(prevPa.getGeradoPorAverbacao());
-      PeriodoAquisitivoFeriasMapper.recomputeSaldoAndSituacao(paf);
-    }
-    if (e instanceof FeriasGozo fg && feriasGozoService != null) {
-      feriasGozoService.hydrateParentPeriodoAquisitivo(fg, false);
-    }
-    boolean changed=!before.equals(prior(r,e));
-    validateEntity(r,e,previousSnapshot);
-    if (e instanceof FeriasGozo fg && feriasGozoService != null) {
-      feriasGozoService.sincronizarContabilidadePeriodoAquisitivo(fg.getPeriodoAquisitivoId());
-    }
-    em.flush(); return changed;
-  }
-  public List<Object> query(Resource r, Object filter, int excluded) {
-    validate(filter);
-    int limit=Math.addExact(201,excluded);
-    int orgao=tenant.orgao();
-    return switch(r) {
-      case VINCULOS -> vinculoService.selectBulkIdentities((VinculoFilterDTO)filter,
-          (root,q,cb)->cb.equal(root.get("empCodigo"),orgao),limit).stream()
-          .map(id->(Object)CompositeIdSupport.encode(id)).toList();
-      case PESSOAS -> pessoaService.selectBulkIdentities((ServidorPessoaFilterDTO)filter,
-          (root,q,cb)->cb.conjunction(),limit).stream().map(id->(Object)id.toString()).toList();
-      case CARGOS -> cargoService.selectBulkIdentities((CargoFilterDTO)filter,
-          (root,q,cb)->cb.equal(root.get("empCodigo"),orgao),limit).stream().map(id->(Object)id).toList();
-      case DEPENDENTES -> dependenteService.selectBulkIdentities((DependenteFilterDTO)filter,
-          (root,q,cb)->cb.conjunction(),limit).stream()
-          .map(id->(Object)CompositeIdSupport.encode(id)).toList();
-      case AFASTAMENTOS -> afastamentoService.selectBulkIdentities((AfastamentoFilterDTO)filter,
-          (root,q,cb)->cb.equal(root.get("empCodigo"),orgao),limit).stream()
-          .map(id->(Object)id.toString()).toList();
-      case FREQUENCIAS -> frequenciaService.selectBulkIdentities((FrequenciaFilterDTO)filter,
-          (root,q,cb)->cb.equal(root.get("empCodigo"),orgao),limit).stream()
-          .map(id->(Object)id.toString()).toList();
-      case CAMPOS_CUSTOMIZADOS -> campoCustomizadoService.selectBulkIdentities((DefinicaoCampoCustomizadoFilterDTO)filter,
-          (root,q,cb)->cb.or(cb.isNull(root.get("empCodigo")), cb.equal(root.get("empCodigo"),orgao)),limit).stream()
-          .map(id->(Object)id.toString()).toList();
-      case PARAMETROS_CONTAGEM_FERIAS -> parametroContagemFeriasService.selectBulkIdentities((ParametroContagemFeriasFilterDTO)filter,
-          (root,q,cb)->cb.or(cb.isNull(root.get("empCodigo")), cb.equal(root.get("empCodigo"),orgao)),limit).stream()
-          .map(id->(Object)id.toString()).toList();
-      case PERIODOS_AQUISITIVOS_FERIAS -> periodoAquisitivoFeriasService.selectBulkIdentities((PeriodoAquisitivoFeriasFilterDTO)filter,
-          (root,q,cb)->cb.equal(root.get("empCodigo"),orgao),limit).stream()
-          .map(id->(Object)id.toString()).toList();
-      case FERIAS_GOZO -> feriasGozoService.selectBulkIdentities((FeriasGozoFilterDTO)filter,
-          (root,q,cb)->cb.equal(root.get("empCodigo"),orgao),limit).stream()
-          .map(id->(Object)id.toString()).toList();
-    };
-  }
+
+
+
+
+
+
   public Object commandCandidate(Object current, String operation, JsonNode parameters) {
+    if (current instanceof DesignacaoFuncao source) {
+      var input = json.convertValue(parameters, HomologarDesignacaoLoteDTO.class);
+      validate(input);
+      return designacaoFuncaoService.previewHomologacao(source, input);
+    }
+    if(current instanceof AverbacaoTempoServico source) {
+      var copy = new AverbacaoTempoServico(); BeanUtils.copyProperties(source,copy);
+      var input=json.convertValue(parameters,TempoLicencaTransicaoDTO.class);validate(input);
+      TempoLicencaLifecycle.transition(copy,"homologar-averbacao",input,tenant,em,invariants.ruleEngine());
+      averbacaoTempoServicoService.validateBulkCandidate(copy,source);
+      return copy;
+    }
+    if(current instanceof PeriodoAquisitivoLicencaEspecial source) {
+      var copy = new PeriodoAquisitivoLicencaEspecial(); BeanUtils.copyProperties(source,copy);
+      var input=json.convertValue(parameters,TempoLicencaTransicaoDTO.class);validate(input);
+      TempoLicencaLifecycle.transition(copy,"recalcular-saldo-licenca-especial",input,tenant,em,invariants.ruleEngine());
+      periodoAquisitivoLicencaEspecialService.validateBulkCandidate(copy,source);
+      return copy;
+    }
+    if(current instanceof LicencaEspecialGozo source) {
+      var copy = new LicencaEspecialGozo(); BeanUtils.copyProperties(source,copy);
+      var input=json.convertValue(parameters,TempoLicencaTransicaoDTO.class);validate(input);
+      TempoLicencaLifecycle.transition(copy,"homologar-licenca-especial",input,tenant,em,invariants.ruleEngine());
+      licencaEspecialGozoService.validateBulkCandidate(copy,source);
+      return copy;
+    }
+    if(current instanceof VendaLicencaEspecial source) {
+      var copy = new VendaLicencaEspecial(); BeanUtils.copyProperties(source,copy);
+      var input=json.convertValue(parameters,TempoLicencaTransicaoDTO.class);validate(input);
+      TempoLicencaLifecycle.transition(copy,"autorizar-venda-licenca-especial",input,tenant,em,invariants.ruleEngine());
+      vendaLicencaEspecialService.validateBulkCandidate(copy,source);
+      return copy;
+    }
+
     if (current instanceof ParametroContagemFerias pcf) {
       ParametroContagemFerias copy = new ParametroContagemFerias(); BeanUtils.copyProperties(pcf, copy);
       var dto = json.convertValue(parameters, AlterarVigenciaParametroFeriasDTO.class); validate(dto);
@@ -348,7 +254,7 @@ public class ErgonBulkDomain {
       if (parametroContagemFeriasService != null) {
         parametroContagemFeriasService.validateParametroContagemFerias(copy);
       }
-      invariants.parametroContagemFerias(copy, false);
+      invariants.parametroContagemFerias(copy, false, false);
       return copy;
     }
     if (current instanceof PeriodoAquisitivoFerias paf) {
@@ -364,7 +270,7 @@ public class ErgonBulkDomain {
       if (periodoAquisitivoFeriasService != null) {
         periodoAquisitivoFeriasService.validatePeriodoAquisitivoFerias(copy, paf);
       }
-      invariants.periodoAquisitivoFerias(copy, false);
+      invariants.periodoAquisitivoFerias(copy, false, false);
       return copy;
     }
     if (current instanceof FeriasGozo fg) {
@@ -381,7 +287,7 @@ public class ErgonBulkDomain {
       if (feriasGozoService != null) {
         feriasGozoService.validateFeriasGozo(copy, fg);
       }
-      invariants.feriasGozo(copy, false);
+      invariants.feriasGozo(copy, false, false);
       return copy;
     }
     if (current instanceof DefinicaoCampoCustomizado cc) {
@@ -404,7 +310,7 @@ public class ErgonBulkDomain {
       if (frequenciaService != null) {
         frequenciaService.validateFrequenciaLancamento(copy);
       }
-      invariants.frequencia(copy,false); return copy;
+      invariants.frequencia(copy, false, false); return copy;
     }
     if (current instanceof Afastamento afast) {
       Afastamento copy=new Afastamento(); BeanUtils.copyProperties(afast,copy);
@@ -419,13 +325,12 @@ public class ErgonBulkDomain {
       if (afastamentoService != null) {
         afastamentoService.validateAfastamentoConcessao(copy, false);
       }
-      invariants.afastamento(copy,false); return copy;
+      invariants.afastamento(copy, false, false, false); return copy;
     }
     if (current instanceof Dependente dep) {
       Dependente copy=new Dependente(); BeanUtils.copyProperties(dep,copy);
       var dto=json.convertValue(parameters,EncerrarDependenciaLoteDTO.class); validate(dto);
       if (copy.getDtfim()!=null) throw new IllegalArgumentException("Dependência já encerrada.");
-      ErgonInvariants.chronology(copy.getDtini(),dto.dtfim(),"Encerramento anterior ao início da dependência.");
       document(dto.documentoLegalId(),tenant.orgao());
       copy.setDtfim(dto.dtfim()); copy.setDepIr(false); copy.setDepSalarioFamilia(false); copy.setDepPlanoSaude(false);
       copy.setDocumentoLegalId(dto.documentoLegalId());
@@ -444,7 +349,6 @@ public class ErgonBulkDomain {
     } else {
       var dto=json.convertValue(parameters,HomologarEstagioLoteDTO.class); validate(dto);
       if (!"ATIVO".equals(copy.getSituacao()) || copy.getDtHomologEstagio()!=null || copy.getDtexerc()==null) throw new IllegalArgumentException("Estágio não disponível para homologação.");
-      ErgonInvariants.chronology(copy.getDtexerc(),dto.dtHomologEstagio(),"Homologação anterior ao exercício.");
       document(dto.documentoLegalId(),copy.getEmpCodigo()); copy.setDtHomologEstagio(dto.dtHomologEstagio()); copy.setDocumentoLegalId(dto.documentoLegalId());
     }
     invariants.vinculo(copy, false, false);
@@ -457,7 +361,24 @@ public class ErgonBulkDomain {
     var document=em.find(DocumentoLegal.class,id);
     if (document==null || !Objects.equals(document.getEmpCodigo(),owner)) throw new IllegalArgumentException("Ato coletivo deve pertencer ao órgão do vínculo.");
   }
+  private void synchronizeTempo(Long id) {
+    // Service delegates to the same parent lock and recalculation used by CRUD.
+    periodoAquisitivoLicencaEspecialService.synchronizeAccounting(id);
+  }
   public boolean applyCommand(Object entity, Object candidate) {
+    if (entity instanceof DesignacaoFuncao current && candidate instanceof DesignacaoFuncao next) {
+      designacaoFuncaoService.applyHomologacao(current, new HomologarDesignacaoLoteDTO(next.getDtExercicio()));
+      return true;
+    }
+    if(entity instanceof AssentamentoTempoLicenca current && candidate instanceof AssentamentoTempoLicenca next) {
+      boolean changed=!json.valueToTree(mapperForTempo(current).toResponse(current)).equals(json.valueToTree(mapperForTempo(next).toResponse(next)));
+      BeanUtils.copyProperties(next,current,"id","version","auditoria","orgao","pessoa","vinculo","documentoLegal","atoPublicacao","averbacaoOrigem","periodoAquisitivoLicenca");
+      em.flush();
+      if(current instanceof AverbacaoTempoServico a) averbacaoTempoServicoService.synchronizeOrigin(a);
+      if(current instanceof LicencaEspecialGozo g) licencaEspecialGozoService.synchronizeAbono(g);
+      if(current instanceof ParcelaLicencaEspecial t) synchronizeTempo(t.getPeriodoAquisitivoLicencaId());
+      return changed;
+    }
     if (entity instanceof ParametroContagemFerias current && candidate instanceof ParametroContagemFerias next) {
       boolean changed = !Objects.equals(current.getActive(), next.getActive())
           || !Objects.equals(current.getDtfim(), next.getDtfim());
@@ -533,5 +454,12 @@ public class ErgonBulkDomain {
         || !Objects.equals(v.getDtHomologEstagio(),c.getDtHomologEstagio()) || !Objects.equals(v.getDocumentoLegalId(),c.getDocumentoLegalId());
     v.setSetor(c.getSetor());v.setSetorExercicio(c.getSetorExercicio());
     v.setDtHomologEstagio(c.getDtHomologEstagio());v.setDocumentoLegalId(c.getDocumentoLegalId());em.flush();return changed;
+  }
+  private ResourceMapper mapperForTempo(AssentamentoTempoLicenca e) {
+    if(e instanceof AverbacaoTempoServico) return averbacaoTempoServico;
+    if(e instanceof PeriodoAquisitivoLicencaEspecial) return periodoAquisitivoLicencaEspecial;
+    if(e instanceof LicencaEspecialGozo) return licencaEspecialGozo;
+    if(e instanceof VendaLicencaEspecial) return vendaLicencaEspecial;
+    throw new IllegalArgumentException("Tipo desconhecido.");
   }
 }

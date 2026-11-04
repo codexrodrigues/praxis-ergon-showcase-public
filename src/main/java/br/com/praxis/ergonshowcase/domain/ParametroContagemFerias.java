@@ -26,6 +26,8 @@ import org.hibernate.type.SqlTypes;
 @Setter
 @NoArgsConstructor
 public class ParametroContagemFerias {
+  @Column(name = "perm_gozo_lic_esp_ant_fim_pe", nullable = false)
+  private Boolean permGozoLicEspAntFimPe = false;
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id")

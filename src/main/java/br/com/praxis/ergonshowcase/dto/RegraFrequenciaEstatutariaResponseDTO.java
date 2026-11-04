@@ -20,7 +20,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
     titleField = "ruleKey",
     displayLabelField = "ruleKey",
     subtitleField = "codigoFrequenciaNome",
-    metadataFields = {"regimeJuridico", "tipoVinculo", "categoria", "ativa"})
+    metadataFields = {"dtini", "dtfim", "subcategoria"})
 @Schema(
     description =
         "Projeção completa da matriz parametrizada de regras e limites estatutários de frequência e afastamento por órgão, regime jurídico, tipo de vínculo e categoria.")

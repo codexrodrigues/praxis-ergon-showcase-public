@@ -41,6 +41,7 @@ public class PeriodoAquisitivoFeriasFilterDTO implements GenericFilterDTO {
         "pessoa.nome",
         "pessoa.cpf",
         "vinculo.matric",
+        "vinculo.lotacao.nome",
         "situacao",
         "observacoes"
       })
@@ -259,6 +260,42 @@ public class PeriodoAquisitivoFeriasFilterDTO implements GenericFilterDTO {
       icon = "double_arrow")
   @Filterable(operation = FilterOperation.GREATER_OR_EQUAL, relation = "diasConvertidosDobro")
   private Integer diasConvertidosDobroMinimo;
+
+  @Schema(
+      description =
+          "Trecho do nome da unidade organizacional de lotação do vínculo titular do período aquisitivo (ex.: Saúde, Educação, Fazenda).")
+  @UISchema(
+      label = "Nome da unidade",
+      helpText = "Pesquise períodos pelo nome da secretaria ou setor de lotação.",
+      type = FieldDataType.TEXT,
+      controlType = FieldControlType.INPUT,
+      icon = "account_tree")
+  @Filterable(operation = FilterOperation.LIKE, relation = "vinculo.lotacao.nome")
+  private String setorLotacaoNome;
+
+  @Schema(
+      description =
+          "Classificação estrutural da unidade de lotação do vínculo titular (ex.: SECRETARIA, DIRETORIA, HOSPITAL, UNIDADE_ENSINO).")
+  @UISchema(
+      label = "Tipo de unidade",
+      helpText = "Filtra períodos pela classificação da unidade de lotação.",
+      type = FieldDataType.TEXT,
+      controlType = FieldControlType.INPUT,
+      icon = "domain")
+  @Filterable(operation = FilterOperation.EQUAL, relation = "vinculo.lotacao.tipoSetor")
+  private String tipoSetorLotacao;
+
+  @Schema(
+      description =
+          "Categoria funcional do vínculo titular do período aquisitivo (ex.: SAUDE, MAGISTERIO, GERAL, GUARDA_MUNICIPAL).")
+  @UISchema(
+      label = "Categoria funcional",
+      helpText = "Filtra períodos pela carreira ou categoria do vínculo.",
+      type = FieldDataType.TEXT,
+      controlType = FieldControlType.INPUT,
+      icon = "category")
+  @Filterable(operation = FilterOperation.EQUAL, relation = "vinculo.categoria")
+  private String categoriaVinculo;
 
   @Schema(description = "Critérios de filtragem sobre atributos dinâmicos customizados.")
   @CustomFields(resourceKey = "administracao-pessoal.periodos-aquisitivos-ferias")

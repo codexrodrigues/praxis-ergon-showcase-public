@@ -1,0 +1,471 @@
+[
+  {
+    "operationKey": "createErgonVagaFuncao",
+    "positive": {
+      "draft": {
+        "id": null,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "numeroVaga": 1,
+        "funcaoId": 101,
+        "setorId": "001",
+        "origemVaga": "CRIACAO",
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivoBloqueio": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": null,
+      "funcao": {
+        "id": 101,
+        "empCodigo": 1,
+        "situacao": "ATIVA",
+        "controleVaga": true,
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31"
+      },
+      "neighborhood": {
+        "designacoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "createErgonVagaFuncao",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "CREATE"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "updateErgonVagaFuncao",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "numeroVaga": 1,
+        "funcaoId": 101,
+        "setorId": "001",
+        "origemVaga": "CRIACAO",
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivoBloqueio": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "numeroVaga": 1,
+        "funcaoId": 101,
+        "setorId": "001",
+        "origemVaga": "CRIACAO",
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivoBloqueio": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "funcao": {
+        "id": 101,
+        "empCodigo": 1,
+        "situacao": "ATIVA",
+        "controleVaga": true,
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31"
+      },
+      "neighborhood": {
+        "designacoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "updateErgonVagaFuncao",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "UPDATE"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "ergon.vagas-funcao.bulk.uniform.evaluation",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "numeroVaga": 1,
+        "funcaoId": 101,
+        "setorId": "001",
+        "origemVaga": "CRIACAO",
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivoBloqueio": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "numeroVaga": 1,
+        "funcaoId": 101,
+        "setorId": "001",
+        "origemVaga": "CRIACAO",
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivoBloqueio": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "funcao": {
+        "id": 101,
+        "empCodigo": 1,
+        "situacao": "ATIVA",
+        "controleVaga": true,
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31"
+      },
+      "neighborhood": {
+        "designacoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "ergon.vagas-funcao.bulk.uniform.evaluation",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "BULK_ITEM"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "ergon.vagas-funcao.bulk.items.evaluation",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "numeroVaga": 1,
+        "funcaoId": 101,
+        "setorId": "001",
+        "origemVaga": "CRIACAO",
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivoBloqueio": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "numeroVaga": 1,
+        "funcaoId": 101,
+        "setorId": "001",
+        "origemVaga": "CRIACAO",
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivoBloqueio": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "funcao": {
+        "id": 101,
+        "empCodigo": 1,
+        "situacao": "ATIVA",
+        "controleVaga": true,
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31"
+      },
+      "neighborhood": {
+        "designacoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "ergon.vagas-funcao.bulk.items.evaluation",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "BULK_ITEM"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "ergon.vagas-funcao.bulk.uniform",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "numeroVaga": 1,
+        "funcaoId": 101,
+        "setorId": "001",
+        "origemVaga": "CRIACAO",
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivoBloqueio": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "numeroVaga": 1,
+        "funcaoId": 101,
+        "setorId": "001",
+        "origemVaga": "CRIACAO",
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivoBloqueio": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "funcao": {
+        "id": 101,
+        "empCodigo": 1,
+        "situacao": "ATIVA",
+        "controleVaga": true,
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31"
+      },
+      "neighborhood": {
+        "designacoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "ergon.vagas-funcao.bulk.uniform",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "BULK_ITEM"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "ergon.vagas-funcao.bulk.items",
+    "positive": {
+      "draft": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "numeroVaga": 1,
+        "funcaoId": 101,
+        "setorId": "001",
+        "origemVaga": "CRIACAO",
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivoBloqueio": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "numeroVaga": 1,
+        "funcaoId": 101,
+        "setorId": "001",
+        "origemVaga": "CRIACAO",
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivoBloqueio": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "funcao": {
+        "id": 101,
+        "empCodigo": 1,
+        "situacao": "ATIVA",
+        "controleVaga": true,
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31"
+      },
+      "neighborhood": {
+        "designacoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "ergon.vagas-funcao.bulk.items",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "BULK_ITEM"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "administracao-pessoal.vagas-funcao.delete",
+    "positive": {
+      "draft": null,
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "numeroVaga": 1,
+        "funcaoId": 101,
+        "setorId": "001",
+        "origemVaga": "CRIACAO",
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivoBloqueio": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "funcao": {
+        "id": 101,
+        "empCodigo": 1,
+        "situacao": "ATIVA",
+        "controleVaga": true,
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31"
+      },
+      "neighborhood": {
+        "designacoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "administracao-pessoal.vagas-funcao.delete",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "DELETE"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "administracao-pessoal.vagas-funcao.delete-batch",
+    "positive": {
+      "draft": null,
+      "current": {
+        "id": 101,
+        "empCodigo": 1,
+        "descricao": "Registro de exemplo",
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31",
+        "situacao": "ATIVA",
+        "numeroVaga": 1,
+        "funcaoId": 101,
+        "setorId": "001",
+        "origemVaga": "CRIACAO",
+        "titularAtualId": {
+          "numfunc": 1001,
+          "numero": 1
+        },
+        "motivoBloqueio": null,
+        "documentoLegalId": 10,
+        "atoPublicacaoId": 11,
+        "observacoes": null
+      },
+      "funcao": {
+        "id": 101,
+        "empCodigo": 1,
+        "situacao": "ATIVA",
+        "controleVaga": true,
+        "dtini": "2026-01-01",
+        "dtfim": "2026-01-31"
+      },
+      "neighborhood": {
+        "designacoes": []
+      },
+      "context": {
+        "empCodigo": 1,
+        "operation": "administracao-pessoal.vagas-funcao.delete-batch",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "DELETE"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  },
+  {
+    "operationKey": "preview-product.chefia.erg-01154",
+    "positive": {
+      "current": null,
+      "context": {
+        "empCodigo": 1,
+        "operation": "preview-product.chefia.erg-01154",
+        "referenceDate": "2026-01-01",
+        "lifecycle": "PREVIEW"
+      },
+      "draft": {
+        "funcaoId": 101,
+        "situacao": "LIVRE"
+      },
+      "funcao": {
+        "id": 101,
+        "empCodigo": 1,
+        "situacao": "ATIVA"
+      }
+    },
+    "claim": "STRUCTURAL_VALIDITY_ONLY_NOT_BUSINESS_ALLOW"
+  }
+]

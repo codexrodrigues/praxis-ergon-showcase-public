@@ -20,6 +20,7 @@ public class ServidorPessoaMapper
     dto.setNomeSocial(entity.getNomeSocial());
     dto.setCpf(entity.getCpf());
     dto.setDtnasc(entity.getDtnasc());
+    dto.setDtCertFim(entity.getDtCertFim());
     dto.setEMail(entity.getEMail());
     dto.setTelefone(entity.getTelefone());
     dto.setNumtelCelular(entity.getNumtelCelular());
@@ -107,6 +108,7 @@ public class ServidorPessoaMapper
     entity.setNomeSocial(dto.getNomeSocial());
     entity.setCpf(dto.getCpf());
     entity.setDtnasc(dto.getDtnasc());
+    entity.setDtCertFim(dto.getDtCertFim());
     entity.setEMail(dto.getEMail());
     entity.setTelefone(dto.getTelefone());
     entity.setNumtelCelular(dto.getNumtelCelular());
@@ -180,6 +182,7 @@ public class ServidorPessoaMapper
     entity.setNomeSocial(dto.getNomeSocial());
     entity.setCpf(dto.getCpf());
     entity.setDtnasc(dto.getDtnasc());
+    entity.setDtCertFim(dto.getDtCertFim());
     entity.setEMail(dto.getEMail());
     entity.setTelefone(dto.getTelefone());
     entity.setNumtelCelular(dto.getNumtelCelular());

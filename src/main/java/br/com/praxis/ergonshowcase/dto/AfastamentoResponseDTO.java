@@ -22,7 +22,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
     titleField = "motivo",
     displayLabelField = "motivo",
     subtitleField = "pessoaNome",
-    metadataFields = {"vinculoMatricula", "codigoFrequenciaNome", "situacao", "dtini"})
+    metadataFields = {"orgaoNome", "codigoFrequenciaNome"})
 public class AfastamentoResponseDTO extends AfastamentoDados {
   @Schema(
       description = "Identificador único surrogate imutável do registro de licença ou afastamento.",
@@ -329,7 +329,9 @@ public class AfastamentoResponseDTO extends AfastamentoDados {
       group = "Atos e publicação oficial",
       order = 105,
       readOnly = true,
-      tableHidden = true)
+      tableHidden = true,
+      quickViewVisible = true,
+      quickViewOrder = 6)
   @ResourceReference(
       resourceKey = "administracao-pessoal.documentos-legais",
       valueField = "documentoLegalId",
@@ -407,4 +409,16 @@ public class AfastamentoResponseDTO extends AfastamentoDados {
       readOnly = true,
       tableHidden = true)
   private Boolean pendenteHomologacao;
+  @Override
+  @Schema(
+      description =
+          "Fundamentação administrativa, clínica ou jurídica detalhada do lançamento da licença ou afastamento (MOTIVO).", accessMode = Schema.AccessMode.READ_ONLY)
+  @org.praxisplatform.uischema.annotation.ResourceReference(
+      resourceKey = "administracao-pessoal.afastamentos",
+      valueField = "id",
+      surfaceId = "ficha-afastamento",
+      previewSurfaceId = "ficha-afastamento",
+      detailPresentation = "drawer")
+  public String getMotivo() { return super.getMotivo(); }
+
 }

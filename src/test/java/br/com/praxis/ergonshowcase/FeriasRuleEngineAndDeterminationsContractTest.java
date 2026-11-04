@@ -60,6 +60,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.praxisplatform.rules.contract.DecisionSource;
 import org.praxisplatform.rules.contract.RuleDecision;
+import org.praxisplatform.rules.contract.OverridePolicy;
 import org.praxisplatform.rules.contract.RuleEvaluationResult;
 import org.praxisplatform.rules.plan.RuleDecisionPlan;
 import org.praxisplatform.rules.plan.RulePlanException;
@@ -92,7 +93,7 @@ class FeriasRuleEngineAndDeterminationsContractTest {
 
   @BeforeEach
   void setUp() {
-    facade = new ErgonRuleEngineFacade();
+    facade = RuleCatalogExecution.facade();
   }
 
   @Test
@@ -115,12 +116,22 @@ class FeriasRuleEngineAndDeterminationsContractTest {
     assertThat(paResult.reasonCodes()).isEmpty();
 
     RuleDecisionPlan fgPlan = facade.resolveFeriasGozoPlan(1);
-    assertThat(fgPlan.slotsByKey()).hasSize(12);
+    assertThat(fgPlan.slotsByKey()).hasSize(19);
     assertThat(fgPlan.planDigest()).isNotBlank();
 
     RuleEvaluationResult fgResult = facade.evaluateFeriasGozo(validFeriasGozoContext());
     assertThat(fgResult.decision()).isEqualTo(RuleDecision.ALLOW);
     assertThat(fgResult.reasonCodes()).isEmpty();
+
+    for (var plan : List.of(paramPlan, paPlan, fgPlan)) {
+      var extensions = plan.slotsByKey().values().stream()
+          .filter(slot -> slot.slotKey().contains(".hook.")).toList();
+      assertThat(extensions).hasSize(2);
+      assertThat(extensions).allSatisfy(slot -> {
+        assertThat(slot.overridePolicy()).isEqualTo(OverridePolicy.RESTRICT_ONLY);
+        assertThat(plan.orderedBindings()).noneMatch(binding -> binding.slotKey().equals(slot.slotKey()));
+      });
+    }
   }
 
   static Stream<Arguments> parametroContagemViolations() {
@@ -152,6 +163,16 @@ class FeriasRuleEngineAndDeterminationsContractTest {
                   ParametroContagemFerias p = validParametro();
                   p.setTemFerias(true);
                   p.setTotDiasFer(0);
+                  return new ParametroContagemFeriasRuleContext(p, List.of());
+                }),
+        Arguments.of(
+            "ERG-01801",
+            ParametroContagemFeriasRuleSet.SLOT_FERIAS_HABILITADAS_OBRIGATORIOS,
+            (Supplier<ParametroContagemFeriasRuleContext>)
+                () -> {
+                  ParametroContagemFerias p = validParametro();
+                  p.setTemFerias(true);
+                  p.setMaxPerFer(null);
                   return new ParametroContagemFeriasRuleContext(p, List.of());
                 }),
         Arguments.of(
@@ -473,6 +494,24 @@ class FeriasRuleEngineAndDeterminationsContractTest {
                       List.of(overlapping),
                       List.of());
                 }));
+  }
+
+  @Test
+  void periodoAquisitivoRejeitaModalidadeDeAbonoInvalidaHerdada() {
+    var context = validPaContext();
+    assertThat(facade.evaluatePeriodoAquisitivoFerias(context).decision()).isEqualTo(RuleDecision.ALLOW);
+    context.parametroCandidates().getFirst().setAbonoDirGozo("X");
+
+    var result = facade.evaluatePeriodoAquisitivoFerias(context);
+    assertThat(result.decision()).isEqualTo(RuleDecision.DENY);
+    assertThat(result.reasonCodes()).containsExactly("ERG-01801");
+    assertThat(result.bindingResults()).anySatisfy(binding -> {
+      assertThat(binding.slotKey()).isEqualTo(PeriodoAquisitivoFeriasRuleSet.SLOT_OVERRIDES_PARCELAMENTO_E_ABONO);
+      assertThat(binding.reasonCodes()).containsExactly("ERG-01801");
+    });
+
+    context.draft().setAbonoDirGozo("D");
+    assertThat(facade.evaluatePeriodoAquisitivoFerias(context).decision()).isEqualTo(RuleDecision.ALLOW);
   }
 
   @ParameterizedTest(name = "PeriodoAquisitivoFerias [{index}] -> {0} no slot {1}")
@@ -825,7 +864,7 @@ class FeriasRuleEngineAndDeterminationsContractTest {
                 }),
         Arguments.of(
             "ERG-00514",
-            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            FeriasGozoRuleSet.parcelamentoSlotKey("ERG-00514"),
             (Supplier<FeriasGozoRuleContext>)
                 () -> {
                   FeriasGozoRuleContext base = validFeriasGozoContext();
@@ -848,7 +887,7 @@ class FeriasRuleEngineAndDeterminationsContractTest {
                 }),
         Arguments.of(
             "ERG-00518",
-            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            FeriasGozoRuleSet.parcelamentoSlotKey("ERG-00518"),
             (Supplier<FeriasGozoRuleContext>)
                 () -> {
                   FeriasGozoRuleContext base = validFeriasGozoContext();
@@ -857,7 +896,7 @@ class FeriasRuleEngineAndDeterminationsContractTest {
                 }),
         Arguments.of(
             "ERG-00520",
-            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            FeriasGozoRuleSet.parcelamentoSlotKey("ERG-00520"),
             (Supplier<FeriasGozoRuleContext>)
                 () -> {
                   FeriasGozoRuleContext base = validFeriasGozoContext();
@@ -867,7 +906,7 @@ class FeriasRuleEngineAndDeterminationsContractTest {
                 }),
         Arguments.of(
             "ERG-00523",
-            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            FeriasGozoRuleSet.parcelamentoSlotKey("ERG-00523"),
             (Supplier<FeriasGozoRuleContext>)
                 () -> {
                   FeriasGozoRuleContext base = validFeriasGozoContext();
@@ -879,7 +918,7 @@ class FeriasRuleEngineAndDeterminationsContractTest {
                 }),
         Arguments.of(
             "ERG-00531",
-            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            FeriasGozoRuleSet.parcelamentoSlotKey("ERG-00531"),
             (Supplier<FeriasGozoRuleContext>)
                 () -> {
                   FeriasGozoRuleContext base = validFeriasGozoContext();
@@ -889,7 +928,7 @@ class FeriasRuleEngineAndDeterminationsContractTest {
                 }),
         Arguments.of(
             "ERG-00532",
-            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            FeriasGozoRuleSet.parcelamentoSlotKey("ERG-00532"),
             (Supplier<FeriasGozoRuleContext>)
                 () -> {
                   FeriasGozoRuleContext base = validFeriasGozoContext();
@@ -917,7 +956,7 @@ class FeriasRuleEngineAndDeterminationsContractTest {
                 }),
         Arguments.of(
             "ERG-00525",
-            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            FeriasGozoRuleSet.parcelamentoSlotKey("ERG-00525"),
             (Supplier<FeriasGozoRuleContext>)
                 () -> {
                   FeriasGozoRuleContext base = validFeriasGozoContext();
@@ -932,7 +971,7 @@ class FeriasRuleEngineAndDeterminationsContractTest {
                 }),
         Arguments.of(
             "ERG-00526",
-            FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO,
+            FeriasGozoRuleSet.parcelamentoSlotKey("ERG-00526"),
             (Supplier<FeriasGozoRuleContext>)
                 () -> {
                   FeriasGozoRuleContext base = validFeriasGozoContext();
@@ -942,6 +981,18 @@ class FeriasRuleEngineAndDeterminationsContractTest {
                   base.draft().setDtprevfim(LocalDate.of(2025, 7, 25));
                   return base;
                 }));
+  }
+
+  @Test
+  void vacationWithoutMinimumForMainParcelDoesNotFailTechnically() {
+    var context = validFeriasGozoContext();
+    context.parametroCandidates().getFirst().setMinDiasPerPrincFer(null);
+    var result = facade.evaluateFeriasGozo(context);
+    assertThat(result.decision()).isEqualTo(RuleDecision.ALLOW);
+    assertThat(result.bindingResults()).anySatisfy(binding -> {
+      assertThat(binding.slotKey()).isEqualTo(FeriasGozoRuleSet.parcelamentoSlotKey("ERG-00526"));
+      assertThat(binding.decision()).isEqualTo(RuleDecision.ALLOW);
+    });
   }
 
   @ParameterizedTest(name = "FeriasGozo [{index}] -> {0} no slot {1}")
@@ -1109,7 +1160,7 @@ class FeriasRuleEngineAndDeterminationsContractTest {
               RulePlanException planEx = (RulePlanException) ex;
               assertThat(planEx.getCode()).isEqualTo(RulePlanIssueCode.PLAN_OVERRIDE_INVALID);
               assertThat(planEx.getMessage())
-                  .contains(FeriasGozoRuleSet.SLOT_CONCOMITANCIA_E_SALDO_FRACIONAMENTO);
+                  .contains(FeriasGozoRuleSet.SLOT_CRONOLOGIA_E_INTERRUPCAO_VALIDA);
             });
   }
 
@@ -1344,7 +1395,7 @@ class FeriasRuleEngineAndDeterminationsContractTest {
     ParametroContagemFeriasService paramService =
         new ParametroContagemFeriasService(
             paramRepo, new ParametroContagemFeriasMapper(tenant), tenant, facade);
-    ReflectionTestUtils.setField(paramService, "entityManager", em);
+    CanonicalResourceTestContext.wire(paramService, em);
 
     ParametroContagemFerias conflictingParam = validParametro();
     conflictingParam.setId(null);
@@ -1364,7 +1415,7 @@ class FeriasRuleEngineAndDeterminationsContractTest {
     PeriodoAquisitivoFeriasService paService =
         new PeriodoAquisitivoFeriasService(
             paRepo, new PeriodoAquisitivoFeriasMapper(tenant), tenant, facade);
-    ReflectionTestUtils.setField(paService, "entityManager", em);
+    CanonicalResourceTestContext.wire(paService, em);
     ReflectionTestUtils.setField(paService, "readFacts", mock(ErgonReadFacts.class));
 
     PeriodoAquisitivoFerias pa = validPa();
@@ -1382,6 +1433,7 @@ class FeriasRuleEngineAndDeterminationsContractTest {
 
     Frequencia falta = new Frequencia();
     falta.setId(501L);
+    falta.setEmpCodigo(1);
     falta.setNumfunc(1001L);
     falta.setNumvinc(1);
     falta.setTipofreq("FALTA");
@@ -1400,6 +1452,7 @@ class FeriasRuleEngineAndDeterminationsContractTest {
 
     Afastamento afastSusp = new Afastamento();
     afastSusp.setId(601L);
+    afastSusp.setEmpCodigo(1);
     afastSusp.setNumfunc(1001L);
     afastSusp.setNumvinc(1);
     afastSusp.setDtini(LocalDate.of(2024, 5, 1));
@@ -1441,7 +1494,7 @@ class FeriasRuleEngineAndDeterminationsContractTest {
     FeriasGozoRepository fgRepo = mock(FeriasGozoRepository.class);
     FeriasGozoService fgService =
         new FeriasGozoService(fgRepo, new FeriasGozoMapper(tenant), tenant, facade);
-    ReflectionTestUtils.setField(fgService, "entityManager", em);
+    CanonicalResourceTestContext.wire(fgService, em);
 
     FeriasGozo fgExcesso = validFeriasGozo();
     fgExcesso.setDiasGozo(20); // 20 > 18 dias de direito após faltas
@@ -1906,16 +1959,25 @@ class FeriasRuleEngineAndDeterminationsContractTest {
         });
   }
 
-  private static ParametroContagemFeriasRuleContext validParametroContext() {
+  static ParametroContagemFeriasRuleContext validParametroContext() {
     return new ParametroContagemFeriasRuleContext(validParametro(), List.of());
   }
 
-  private static PeriodoAquisitivoFeriasRuleContext validPaContext() {
+  @Test
+  void conversaoNaoPodeUltrapassarODireitoSomadoAoConsumoAnterior() {
+    var ctx = validPaContext();
+    ctx.draft().setDiasGozados(29);
+    ctx.draft().setDiasConvertidosDobro(5);
+    assertThat(facade.evaluatePeriodoAquisitivoFerias(ctx).reasonCodes())
+        .containsExactly("ERG-00600");
+  }
+
+  static PeriodoAquisitivoFeriasRuleContext validPaContext() {
     return new PeriodoAquisitivoFeriasRuleContext(
         validPa(), validVinculo(), List.of(validParametro()), List.of(), List.of());
   }
 
-  private static FeriasGozoRuleContext validFeriasGozoContext() {
+  static FeriasGozoRuleContext validFeriasGozoContext() {
     PeriodoAquisitivoFerias pa = validPa();
     return new FeriasGozoRuleContext(
         validFeriasGozo(),

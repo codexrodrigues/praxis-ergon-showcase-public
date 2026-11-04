@@ -1,0 +1,605 @@
+ M .env.example
+ M README.md
+ M docs/DUPLICATE-DRAFT-ADOCAO.md
+ M docs/DUPLICATE-DRAFT-CARGO.md
+ M docs/rules/ferias-peraqfer-lineage-matrix.md
+ M docs/rules/rn013-regras-frequencia-lineage-matrix.md
+ M docs/rules/vinculo-dependente-lineage-matrix.md
+ M pom.xml
+ M src/main/java/br/com/praxis/ergonshowcase/ErgonShowcaseApplication.java
+ M src/main/java/br/com/praxis/ergonshowcase/bulk/BulkInputViolation.java
+ M src/main/java/br/com/praxis/ergonshowcase/bulk/BulkPublicationRequest.java
+ M src/main/java/br/com/praxis/ergonshowcase/bulk/BulkPublicationResult.java
+ M src/main/java/br/com/praxis/ergonshowcase/bulk/ErgonBulkConfiguration.java
+ M src/main/java/br/com/praxis/ergonshowcase/bulk/ErgonBulkDomain.java
+ D src/main/java/br/com/praxis/ergonshowcase/bulk/ErgonBulkMessageConverter.java
+ M src/main/java/br/com/praxis/ergonshowcase/bulk/ErgonBulkOperations.java
+ D src/main/java/br/com/praxis/ergonshowcase/bulk/ErgonBulkSchema.java
+ M src/main/java/br/com/praxis/ergonshowcase/config/CamposCustomizadosProvider.java
+ M src/main/java/br/com/praxis/ergonshowcase/config/CargoDraftAvailability.java
+ M src/main/java/br/com/praxis/ergonshowcase/config/ErgonDeterminationConfig.java
+ M src/main/java/br/com/praxis/ergonshowcase/config/JsonConfig.java
+ M src/main/java/br/com/praxis/ergonshowcase/config/OptionSourcesConfig.java
+ M src/main/java/br/com/praxis/ergonshowcase/config/SecurityConfig.java
+ M src/main/java/br/com/praxis/ergonshowcase/config/TenantRequestValidation.java
+ D src/main/java/br/com/praxis/ergonshowcase/config/VinculoStateProvider.java
+ M src/main/java/br/com/praxis/ergonshowcase/constants/ApiPaths.java
+ M src/main/java/br/com/praxis/ergonshowcase/controller/AfastamentoController.java
+ M src/main/java/br/com/praxis/ergonshowcase/controller/CargoController.java
+ M src/main/java/br/com/praxis/ergonshowcase/controller/CodigoFrequenciaController.java
+ M src/main/java/br/com/praxis/ergonshowcase/controller/DefinicaoCampoCustomizadoController.java
+ M src/main/java/br/com/praxis/ergonshowcase/controller/DependenteController.java
+ M src/main/java/br/com/praxis/ergonshowcase/controller/DocumentoLegalController.java
+ M src/main/java/br/com/praxis/ergonshowcase/controller/FeriasGozoController.java
+ M src/main/java/br/com/praxis/ergonshowcase/controller/FrequenciaController.java
+ M src/main/java/br/com/praxis/ergonshowcase/controller/ItemTabelaController.java
+ M src/main/java/br/com/praxis/ergonshowcase/controller/OrgaoController.java
+ M src/main/java/br/com/praxis/ergonshowcase/controller/ParametroContagemFeriasController.java
+ M src/main/java/br/com/praxis/ergonshowcase/controller/PeriodoAquisitivoFeriasController.java
+ M src/main/java/br/com/praxis/ergonshowcase/controller/RadarFeriasPrescricaoController.java
+ M src/main/java/br/com/praxis/ergonshowcase/controller/RegraFrequenciaEstatutariaController.java
+ M src/main/java/br/com/praxis/ergonshowcase/controller/ServidorPessoaController.java
+ M src/main/java/br/com/praxis/ergonshowcase/controller/SetorController.java
+ M src/main/java/br/com/praxis/ergonshowcase/controller/TabelaController.java
+ M src/main/java/br/com/praxis/ergonshowcase/controller/TipoDependenteController.java
+ M src/main/java/br/com/praxis/ergonshowcase/controller/TipoFrequenciaController.java
+ M src/main/java/br/com/praxis/ergonshowcase/controller/VinculoController.java
+ M src/main/java/br/com/praxis/ergonshowcase/domain/AuditoriaErgon.java
+ M src/main/java/br/com/praxis/ergonshowcase/domain/Cargo.java
+ M src/main/java/br/com/praxis/ergonshowcase/domain/CodigoFrequenciaId.java
+ M src/main/java/br/com/praxis/ergonshowcase/domain/DependenteId.java
+ M src/main/java/br/com/praxis/ergonshowcase/domain/DocumentoLegal.java
+ M src/main/java/br/com/praxis/ergonshowcase/domain/ItemTabelaId.java
+ M src/main/java/br/com/praxis/ergonshowcase/domain/Orgao.java
+ M src/main/java/br/com/praxis/ergonshowcase/domain/ParametroContagemFerias.java
+ M src/main/java/br/com/praxis/ergonshowcase/domain/ServidorPessoa.java
+ M src/main/java/br/com/praxis/ergonshowcase/domain/Setor.java
+ M src/main/java/br/com/praxis/ergonshowcase/domain/Vinculo.java
+ M src/main/java/br/com/praxis/ergonshowcase/domain/VinculoId.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/AfastamentoDados.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/AfastamentoFilterDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/AfastamentoResponseDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/AglutinadorPreviewDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/AlterarLotacaoExercicioDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/AlterarSituacaoOrgaoDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/CargoDados.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/CargoFilterDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/CargoResponseDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/CargoSelectionDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/CodigoFrequenciaResponseDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/ConcederAposentadoriaDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/CreateCargoDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/CreateOrgaoDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/CreateServidorPessoaDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/CreateVinculoDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/DefinicaoCampoCustomizadoResponseDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/DependenteDados.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/DependenteResponseDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/DocumentoLegalFilterDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/DocumentoLegalResponseDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/EncerrarCessaoDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/ExtinguirCargoDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/FeriasGozoDados.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/FeriasGozoFilterDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/FeriasGozoResponseDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/FrequenciaDados.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/FrequenciaFilterDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/FrequenciaResponseDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/HomologarEstagioDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/HomologarEstagioLoteDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/ItemTabelaResponseDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/OrgaoDados.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/OrgaoFilterDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/OrgaoResponseDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/ParametroContagemFeriasDados.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/ParametroContagemFeriasFilterDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/ParametroContagemFeriasResponseDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/PcdPreviewDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoFeriasDados.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoFeriasFilterDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoFeriasResponseDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/ProvimentoPreviewDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/RadarFeriasPrescricaoFilterDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/RadarFeriasPrescricaoResponseDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/RealocarSetorLoteDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/RegistrarAfastamentoDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/RegistrarCessaoDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/RegistrarVacanciaDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/RegraFrequenciaEstatutariaResponseDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/ServidorPessoaDados.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/ServidorPessoaFilterDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/ServidorPessoaResponseDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/SetorFilterDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/SetorResponseDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/TabelaResponseDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/TipoDependenteResponseDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/TipoFrequenciaResponseDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/UpdateCargoDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/UpdateOrgaoDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/UpdateServidorPessoaDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/UpdateVinculoDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/VinculoDados.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/VinculoFilterDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/dto/VinculoResponseDTO.java
+ M src/main/java/br/com/praxis/ergonshowcase/mapper/AfastamentoMapper.java
+ M src/main/java/br/com/praxis/ergonshowcase/mapper/CargoMapper.java
+ M src/main/java/br/com/praxis/ergonshowcase/mapper/DocumentoLegalMapper.java
+ M src/main/java/br/com/praxis/ergonshowcase/mapper/OrgaoMapper.java
+ M src/main/java/br/com/praxis/ergonshowcase/mapper/ParametroContagemFeriasMapper.java
+ M src/main/java/br/com/praxis/ergonshowcase/mapper/ServidorPessoaMapper.java
+ M src/main/java/br/com/praxis/ergonshowcase/mapper/SetorMapper.java
+ M src/main/java/br/com/praxis/ergonshowcase/mapper/VinculoMapper.java
+ M src/main/java/br/com/praxis/ergonshowcase/operations/InstallBulkStorage.java
+ M src/main/java/br/com/praxis/ergonshowcase/repository/CargoRepository.java
+ M src/main/java/br/com/praxis/ergonshowcase/repository/DocumentoLegalRepository.java
+ M src/main/java/br/com/praxis/ergonshowcase/repository/OrgaoRepository.java
+ M src/main/java/br/com/praxis/ergonshowcase/repository/ServidorPessoaRepository.java
+ M src/main/java/br/com/praxis/ergonshowcase/repository/SetorRepository.java
+ M src/main/java/br/com/praxis/ergonshowcase/repository/VinculoRepository.java
+ M src/main/java/br/com/praxis/ergonshowcase/rules/AfastamentoConcessaoRuleSet.java
+ M src/main/java/br/com/praxis/ergonshowcase/rules/DependenteElegibilidadeRuleSet.java
+ M src/main/java/br/com/praxis/ergonshowcase/rules/EffectiveVacationParameterResolver.java
+ M src/main/java/br/com/praxis/ergonshowcase/rules/ErgonRuleEngineFacade.java
+ M src/main/java/br/com/praxis/ergonshowcase/rules/ErgonRuleErrorCatalog.java
+ M src/main/java/br/com/praxis/ergonshowcase/rules/ErgonRuleViolationException.java
+ M src/main/java/br/com/praxis/ergonshowcase/rules/FeriasGozoRuleSet.java
+ M src/main/java/br/com/praxis/ergonshowcase/rules/FrequenciaLancamentoRuleSet.java
+ M src/main/java/br/com/praxis/ergonshowcase/rules/ParametroContagemFeriasRuleSet.java
+ M src/main/java/br/com/praxis/ergonshowcase/rules/PeriodoAquisitivoFeriasRuleSet.java
+ M src/main/java/br/com/praxis/ergonshowcase/rules/Rn013RegrasFrequenciaRuleSet.java
+ M src/main/java/br/com/praxis/ergonshowcase/rules/VinculoProvimentoRuleSet.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/AfastamentoService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/CargoService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/CodigoFrequenciaService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/DefinicaoCampoCustomizadoService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/DependenteService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/DocumentoLegalService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/ErgonCommands.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/ErgonDerivedFacts.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/ErgonDeterminationService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/ErgonInvariants.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/ErgonReadFacts.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/ErgonReadOnlyResourceService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/ErgonResourceService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/FeriasGozoService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/FrequenciaService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/ItemTabelaService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/OrgaoService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/ParametroContagemFeriasService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/PeriodoAquisitivoFeriasService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/RadarFeriasPrescricaoService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/RegraFrequenciaEstatutariaService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/ServidorPessoaService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/SetorService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/TabelaService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/TipoDependenteService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/TipoFrequenciaService.java
+ M src/main/java/br/com/praxis/ergonshowcase/service/VinculoService.java
+ M src/main/resources/application.yml
+ M src/test/java/br/com/praxis/ergonshowcase/AfastamentoContractTest.java
+ M src/test/java/br/com/praxis/ergonshowcase/ApiPathsContractTest.java
+ M src/test/java/br/com/praxis/ergonshowcase/BulkNeonIntegrationTest.java
+ M src/test/java/br/com/praxis/ergonshowcase/BulkPublicationProof.java
+ M src/test/java/br/com/praxis/ergonshowcase/CampoCustomizadoContractTest.java
+ M src/test/java/br/com/praxis/ergonshowcase/CargoDraftContractTest.java
+ M src/test/java/br/com/praxis/ergonshowcase/CargoDraftPresentationContractTest.java
+ M src/test/java/br/com/praxis/ergonshowcase/DependenteContractTest.java
+ M src/test/java/br/com/praxis/ergonshowcase/FeriasRuleEngineAndDeterminationsContractTest.java
+ M src/test/java/br/com/praxis/ergonshowcase/FeriasSlice5Phase1ContractTest.java
+ M src/test/java/br/com/praxis/ergonshowcase/FeriasSlice5Phase2ContractTest.java
+ M src/test/java/br/com/praxis/ergonshowcase/FrequenciaAfastamentoRuleEngineContractTest.java
+ M src/test/java/br/com/praxis/ergonshowcase/FrequenciaContractTest.java
+ M src/test/java/br/com/praxis/ergonshowcase/NeonDomainFixture.java
+ M src/test/java/br/com/praxis/ergonshowcase/NeonIntegrationTest.java
+ M src/test/java/br/com/praxis/ergonshowcase/PraxisMetadataCompletenessTest.java
+ M src/test/java/br/com/praxis/ergonshowcase/Rn013RuleEngineContractTest.java
+ M src/test/java/br/com/praxis/ergonshowcase/VinculoDependenteCustomFieldRuleEngineContractTest.java
+?? .codex/p5-b-abono-decision-20261102/LicencaEspecialGozoService.before.java
+?? .codex/p5-b-abono-decision-20261102/P5-B-FECHAMENTO.before.md
+?? .codex/p5-b-abono-decision-20261102/P5CustomFieldsAndDraftTest.before.java
+?? .codex/p5-b-abono-decision-20261102/abono-decision.patch
+?? .codex/p5-b-abono-decision-20261102/decision-manifest.json
+?? .codex/p5-b-abono-decision-20261102/dependencies-after-tests.json
+?? .codex/p5-b-abono-decision-20261102/dependencies-before-tests.json
+?? .codex/p5-b-abono-decision-20261102/resource-completeness.md
+?? AGENTS.md
+?? Dockerfile
+?? docs/A1-PARIDADE-LEGADO.md
+?? docs/CORRECOES-CRUD-SLICE-6-R9-R15.md
+?? docs/CORRECOES-P4-R1-R3-2026-11-02.md
+?? docs/CORRECOES-SLICE-6-2026-11-01.md
+?? docs/P4-ADOCAO-CANONICA.md
+?? docs/P5-B-CORRECOES-2026-11-02.md
+?? docs/P5-B-FECHAMENTO.md
+?? docs/P5-C-DUPLICATE-DRAFT.md
+?? docs/PARIDADE-SLICES-1-4-2026-11-03.md
+?? docs/PLANO-CORRECOES-CRUD-SLICE-6.md
+?? docs/REVISAO-CRUD-SLICE-6-2026-11-01.md
+?? docs/REVISAO-SLICE-6-FASE-1-2026-11-01.md
+?? docs/SLICE-6-FASE-1.md
+?? docs/SLICE-6-FASE-2.md
+?? docs/SLICE-7-BENCHMARK-REDUCAO-CODIGO.md
+?? docs/SLICE-7-FASE-1.md
+?? docs/SLICE-8-ONDA-1.md
+?? docs/evidence/P4-RESOURCE-COMPLETENESS.md
+?? docs/evidence/P5-C-RESOURCE-COMPLETENESS.md
+?? docs/evidence/SLICE-6-CORRECOES-SCORECARD.md
+?? docs/evidence/SLICE-6-CRUD-R9-R15-SCORECARD.md
+?? docs/evidence/SLICE-6-CRUD-R9-R15-TESTS.txt
+?? docs/evidence/SLICE-6-CRUD-R9-R15-VALIDACAO.json
+?? docs/evidence/SLICE-6-CRUD-REVISAO-SCORECARD.md
+?? docs/evidence/SLICE-6-CRUD-SCORECARD.md
+?? docs/evidence/SLICE-6-CRUD-VALIDACAO.md
+?? docs/evidence/SLICE-6-FASE-1-SCORECARD.md
+?? docs/evidence/SLICE-6-FASE-1-VALIDACAO.md
+?? docs/evidence/SLICE-6-FASE-2-BASELINE.txt
+?? docs/evidence/SLICE-6-FASE-2-COMPILE.txt
+?? docs/evidence/SLICE-6-FASE-2-CORRECOES-REGRESSAO.txt
+?? docs/evidence/SLICE-6-FASE-2-CORRECOES-SCORECARD.md
+?? docs/evidence/SLICE-6-FASE-2-CORRECOES.md
+?? docs/evidence/SLICE-6-FASE-2-DIFF-CHECK.txt
+?? docs/evidence/SLICE-6-FASE-2-S1-S3-FOCAL.txt
+?? docs/evidence/SLICE-6-FASE-2-S1-S3-SCORECARD.md
+?? docs/evidence/SLICE-6-FASE-2-S1-S3.md
+?? docs/evidence/SLICE-6-FASE-2-SCORECARD.md
+?? docs/evidence/SLICE-6-FASE-2-TESTS.txt
+?? docs/evidence/SLICE-6-FASE-2-VALIDACAO.json
+?? docs/evidence/SLICE-6-FASE-2-VALIDACAO.md
+?? docs/evidence/p4-r1-r3-fix/core-http-tests.txt
+?? docs/evidence/p4-r1-r3-fix/core-tests.txt
+?? docs/evidence/p4-r1-r3-fix/core-wire-tests.txt
+?? docs/evidence/p4-r1-r3-fix/resource-completeness.md
+?? docs/evidence/p4-r1-r3-fix/showcase-tests.txt
+?? docs/evidence/p4-r1-r3-fix/validated-inputs.json
+?? docs/evidence/p5-b/resource-completeness.md
+?? docs/evidence/p5-b/showcase-source-delta.patch
+?? docs/evidence/p5-b/validated-inputs.json
+?? docs/evidence/slice6-crud-review/CrudReviewProbe.java
+?? docs/evidence/slice6-crud-review/FilterReviewProbe.java
+?? docs/evidence/slice6-crud-review/README.md
+?? docs/evidence/slice6-crud-review/counterexamples.txt
+?? docs/evidence/slice6-crud-review/source-manifest.json
+?? docs/evidence/slice6-phase2-corrections-review/CorrectionBehaviorProbe.java
+?? docs/evidence/slice6-phase2-corrections-review/GatewayPostgresProbe.java
+?? docs/evidence/slice6-phase2-corrections-review/MigrationChainProbe.java
+?? docs/evidence/slice6-phase2-corrections-review/REVISAO.md
+?? docs/evidence/slice6-phase2-corrections-review/classes/br/com/praxis/ergonshowcase/CorrectionBehaviorProbe.class
+?? docs/evidence/slice6-phase2-corrections-review/classes/br/com/praxis/ergonshowcase/GatewayPostgresProbe$Reply.class
+?? docs/evidence/slice6-phase2-corrections-review/classes/br/com/praxis/ergonshowcase/GatewayPostgresProbe.class
+?? docs/evidence/slice6-phase2-corrections-review/classes/br/com/praxis/ergonshowcase/MigrationChainProbe.class
+?? docs/evidence/slice6-phase2-corrections-review/classpath.txt
+?? docs/evidence/slice6-phase2-corrections-review/pre-s1-s3-SLICE-6-FASE-2-CORRECOES.md
+?? docs/evidence/slice6-phase2-corrections-review/pre-s1-s3-SLICE-6-FASE-2-SCORECARD.md
+?? docs/evidence/slice6-phase2-corrections-review/pre-s1-s3-SLICE-6-FASE-2-TESTS.txt
+?? docs/evidence/slice6-phase2-corrections-review/pre-s1-s3-SLICE-6-FASE-2-VALIDACAO.json
+?? docs/evidence/slice6-phase2-corrections-review/pre-s1-s3-SLICE-6-FASE-2-VALIDACAO.md
+?? docs/evidence/slice6-phase2-corrections-review/review-manifest.json
+?? docs/evidence/slice6-phase2-corrections-review/scorecard.md
+?? docs/evidence/slice6-phase2-review/Phase2ReviewProbe.java
+?? docs/evidence/slice6-phase2-review/PostgresBulkReadProbe.java
+?? docs/evidence/slice6-phase2-review/REVISAO.md
+?? docs/evidence/slice6-phase2-review/baseline-SLICE-6-FASE-2-SCORECARD.md
+?? docs/evidence/slice6-phase2-review/baseline-SLICE-6-FASE-2-TESTS.txt
+?? docs/evidence/slice6-phase2-review/baseline-SLICE-6-FASE-2-VALIDACAO.json
+?? docs/evidence/slice6-phase2-review/baseline-SLICE-6-FASE-2-VALIDACAO.md
+?? docs/evidence/slice6-phase2-review/classes/br/com/praxis/ergonshowcase/Phase2ReviewProbe.class
+?? docs/evidence/slice6-phase2-review/classes/br/com/praxis/ergonshowcase/PostgresBulkReadProbe$1.class
+?? docs/evidence/slice6-phase2-review/classes/br/com/praxis/ergonshowcase/PostgresBulkReadProbe.class
+?? docs/evidence/slice6-phase2-review/classpath.txt
+?? docs/evidence/slice6-phase2-review/corrections-development-focal.txt
+?? docs/evidence/slice6-phase2-review/postgres-classpath.txt
+?? docs/evidence/slice6-phase2-review/review-manifest.json
+?? docs/evidence/slice6-phase2-review/scorecard.md
+?? docs/rules/POLICY-STUDIO.md
+?? docs/rules/ontology/README.md
+?? docs/rules/ontology/curated/README.md
+?? docs/rules/ontology/curated/designacoes.fact-catalog.candidate.json
+?? docs/rules/ontology/curated/designacoes.fixtures.json
+?? docs/rules/ontology/curated/designacoes.operation-bindings.candidate.json
+?? docs/rules/ontology/curated/funcoes.fact-catalog.candidate.json
+?? docs/rules/ontology/curated/funcoes.fixtures.json
+?? docs/rules/ontology/curated/funcoes.operation-bindings.candidate.json
+?? docs/rules/ontology/curated/manifest.json
+?? docs/rules/ontology/curated/path-migration.candidate.json
+?? docs/rules/ontology/curated/semantic-fixtures.json
+?? docs/rules/ontology/curated/substituicoes.fact-catalog.candidate.json
+?? docs/rules/ontology/curated/substituicoes.fixtures.json
+?? docs/rules/ontology/curated/substituicoes.operation-bindings.candidate.json
+?? docs/rules/ontology/curated/vagas-funcao.fact-catalog.candidate.json
+?? docs/rules/ontology/curated/vagas-funcao.fixtures.json
+?? docs/rules/ontology/curated/vagas-funcao.operation-bindings.candidate.json
+?? docs/rules/ontology/curated/verification.json
+?? docs/rules/ontology/fact-source-inventory.json
+?? render.yaml
+?? src/main/java/br/com/praxis/ergonshowcase/config/ErgonConfigAccess.java
+?? src/main/java/br/com/praxis/ergonshowcase/config/ErgonConfigPrincipals.java
+?? src/main/java/br/com/praxis/ergonshowcase/config/ErgonPersistenceConfiguration.java
+?? src/main/java/br/com/praxis/ergonshowcase/config/OrganogramaPhaseOneAvailability.java
+?? src/main/java/br/com/praxis/ergonshowcase/config/ResourceCommandReceiptsConfig.java
+?? src/main/java/br/com/praxis/ergonshowcase/config/ServidorPessoaAgeOptions.java
+?? src/main/java/br/com/praxis/ergonshowcase/config/TempoLicencaDeterminationConfig.java
+?? src/main/java/br/com/praxis/ergonshowcase/controller/AverbacaoTempoServicoController.java
+?? src/main/java/br/com/praxis/ergonshowcase/controller/CargoSetorController.java
+?? src/main/java/br/com/praxis/ergonshowcase/controller/DesignacaoFuncaoController.java
+?? src/main/java/br/com/praxis/ergonshowcase/controller/ErgonCustomFieldExceptionHandler.java
+?? src/main/java/br/com/praxis/ergonshowcase/controller/ErgonHttpContract.java
+?? src/main/java/br/com/praxis/ergonshowcase/controller/FuncaoConfiancaController.java
+?? src/main/java/br/com/praxis/ergonshowcase/controller/GrupoSetorController.java
+?? src/main/java/br/com/praxis/ergonshowcase/controller/HistoricoSetorController.java
+?? src/main/java/br/com/praxis/ergonshowcase/controller/LicencaEspecialGozoController.java
+?? src/main/java/br/com/praxis/ergonshowcase/controller/PeriodoAquisitivoLicencaEspecialController.java
+?? src/main/java/br/com/praxis/ergonshowcase/controller/RadarChefiaSubstituicaoController.java
+?? src/main/java/br/com/praxis/ergonshowcase/controller/RadarOrganogramaChefiaOcupacaoController.java
+?? src/main/java/br/com/praxis/ergonshowcase/controller/RadarTempoServicoLicencaEspecialController.java
+?? src/main/java/br/com/praxis/ergonshowcase/controller/SetorParametrizacaoErgonController.java
+?? src/main/java/br/com/praxis/ergonshowcase/controller/SubempresaLocalidadeController.java
+?? src/main/java/br/com/praxis/ergonshowcase/controller/SubstituicaoFuncaoController.java
+?? src/main/java/br/com/praxis/ergonshowcase/controller/VagaFuncaoController.java
+?? src/main/java/br/com/praxis/ergonshowcase/controller/VendaLicencaEspecialController.java
+?? src/main/java/br/com/praxis/ergonshowcase/domain/AssentamentoTempoLicenca.java
+?? src/main/java/br/com/praxis/ergonshowcase/domain/AverbacaoTempoServico.java
+?? src/main/java/br/com/praxis/ergonshowcase/domain/CargoSetor.java
+?? src/main/java/br/com/praxis/ergonshowcase/domain/DesignacaoFuncao.java
+?? src/main/java/br/com/praxis/ergonshowcase/domain/FuncaoConfianca.java
+?? src/main/java/br/com/praxis/ergonshowcase/domain/GrupoSetor.java
+?? src/main/java/br/com/praxis/ergonshowcase/domain/HistoricoSetor.java
+?? src/main/java/br/com/praxis/ergonshowcase/domain/LicencaEspecialGozo.java
+?? src/main/java/br/com/praxis/ergonshowcase/domain/ParcelaLicencaEspecial.java
+?? src/main/java/br/com/praxis/ergonshowcase/domain/PeriodoAquisitivoLicencaEspecial.java
+?? src/main/java/br/com/praxis/ergonshowcase/domain/PoliticaAntecipacaoLicenca.java
+?? src/main/java/br/com/praxis/ergonshowcase/domain/PoliticaAntecipacaoLicencaConverter.java
+?? src/main/java/br/com/praxis/ergonshowcase/domain/RadarChefiaSubstituicao.java
+?? src/main/java/br/com/praxis/ergonshowcase/domain/RadarOrganogramaChefiaOcupacao.java
+?? src/main/java/br/com/praxis/ergonshowcase/domain/RadarTempoServicoLicencaEspecial.java
+?? src/main/java/br/com/praxis/ergonshowcase/domain/SetorParametrizacaoErgon.java
+?? src/main/java/br/com/praxis/ergonshowcase/domain/SubempresaLocalidade.java
+?? src/main/java/br/com/praxis/ergonshowcase/domain/SubstituicaoFuncao.java
+?? src/main/java/br/com/praxis/ergonshowcase/domain/VagaFuncao.java
+?? src/main/java/br/com/praxis/ergonshowcase/domain/VendaLicencaEspecial.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/AssentamentoTempoLicencaDados.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/AverbacaoCertidaoFinalidadesPatchDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/AverbacaoGovernancaPatchDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/AverbacaoTempoServicoDados.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/AverbacaoTempoServicoDuplicateDraftDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/AverbacaoTempoServicoFilterDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/AverbacaoTempoServicoResponseDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/CargoSetorDados.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/CargoSetorDuplicateDraftDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/CargoSetorFilterDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/CargoSetorResponseDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/ChefiaDeterminationDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/CreateAverbacaoTempoServicoDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/CreateCargoSetorDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/CreateDesignacaoFuncaoDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/CreateFuncaoConfiancaDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/CreateGrupoSetorDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/CreateHistoricoSetorDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/CreateLicencaEspecialGozoDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/CreatePeriodoAquisitivoLicencaEspecialDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/CreateSetorParametrizacaoErgonDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/CreateSubempresaLocalidadeDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/CreateSubstituicaoFuncaoDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/CreateVagaFuncaoDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/CreateVendaLicencaEspecialDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/DesignacaoFuncaoDados.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/DesignacaoFuncaoDuplicateDraftDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/DesignacaoFuncaoFilterDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/DesignacaoFuncaoResponseDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/FuncaoConfiancaDados.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/FuncaoConfiancaDuplicateDraftDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/FuncaoConfiancaFilterDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/FuncaoConfiancaResponseDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/GrupoSetorDados.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/GrupoSetorDuplicateDraftDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/GrupoSetorFilterDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/GrupoSetorResponseDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/HistoricoSetorDados.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/HistoricoSetorDuplicateDraftDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/HistoricoSetorFilterDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/HistoricoSetorResponseDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/HomologarDesignacaoLoteDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/LicencaEspecialGozoDados.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/LicencaEspecialGozoDuplicateDraftDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/LicencaEspecialGozoFilterDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/LicencaEspecialGozoReagendamentoPatchDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/LicencaEspecialGozoResponseDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/LicencaEspecialGozoSubstitutoPatchDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/ParcelaLicencaEspecialDados.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoLicEspPrescricaoPatchDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoLicEspRegrasIndividuaisPatchDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoLicencaEspecialDados.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoLicencaEspecialDuplicateDraftDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoLicencaEspecialFilterDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/PeriodoAquisitivoLicencaEspecialResponseDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/RadarChefiaSubstituicaoFilterDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/RadarChefiaSubstituicaoResponseDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/RadarOrganogramaChefiaOcupacaoFilterDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/RadarOrganogramaChefiaOcupacaoResponseDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/RadarTempoServicoLicencaEspecialFilterDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/RadarTempoServicoLicencaEspecialResponseDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/SetorParametrizacaoErgonDados.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/SetorParametrizacaoErgonDuplicateDraftDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/SetorParametrizacaoErgonFilterDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/SetorParametrizacaoErgonResponseDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/SubempresaLocalidadeDados.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/SubempresaLocalidadeDuplicateDraftDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/SubempresaLocalidadeFilterDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/SubempresaLocalidadeResponseDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/SubstituicaoFuncaoDados.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/SubstituicaoFuncaoDuplicateDraftDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/SubstituicaoFuncaoFilterDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/SubstituicaoFuncaoResponseDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/TempoLicencaFilterDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/TempoLicencaPrevia.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/TempoLicencaTransicaoDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/UpdateAverbacaoTempoServicoDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/UpdateCargoSetorDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/UpdateDesignacaoFuncaoDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/UpdateFuncaoConfiancaDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/UpdateGrupoSetorDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/UpdateHistoricoSetorDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/UpdateLicencaEspecialGozoDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/UpdatePeriodoAquisitivoLicencaEspecialDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/UpdateSetorParametrizacaoErgonDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/UpdateSubempresaLocalidadeDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/UpdateSubstituicaoFuncaoDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/UpdateVagaFuncaoDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/UpdateVendaLicencaEspecialDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/VagaFuncaoDados.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/VagaFuncaoFilterDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/VagaFuncaoResponseDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/VendaLicencaEspecialDados.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/VendaLicencaEspecialDuplicateDraftDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/VendaLicencaEspecialFilterDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/VendaLicencaEspecialLiquidacaoPatchDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/dto/VendaLicencaEspecialResponseDTO.java
+?? src/main/java/br/com/praxis/ergonshowcase/error/ErgonInputValidationException.java
+?? src/main/java/br/com/praxis/ergonshowcase/mapper/AverbacaoTempoServicoMapper.java
+?? src/main/java/br/com/praxis/ergonshowcase/mapper/CargoSetorMapper.java
+?? src/main/java/br/com/praxis/ergonshowcase/mapper/DesignacaoFuncaoMapper.java
+?? src/main/java/br/com/praxis/ergonshowcase/mapper/FuncaoConfiancaMapper.java
+?? src/main/java/br/com/praxis/ergonshowcase/mapper/GrupoSetorMapper.java
+?? src/main/java/br/com/praxis/ergonshowcase/mapper/HistoricoSetorMapper.java
+?? src/main/java/br/com/praxis/ergonshowcase/mapper/LicencaEspecialGozoMapper.java
+?? src/main/java/br/com/praxis/ergonshowcase/mapper/PeriodoAquisitivoLicencaEspecialMapper.java
+?? src/main/java/br/com/praxis/ergonshowcase/mapper/RadarChefiaSubstituicaoMapper.java
+?? src/main/java/br/com/praxis/ergonshowcase/mapper/RadarOrganogramaChefiaOcupacaoMapper.java
+?? src/main/java/br/com/praxis/ergonshowcase/mapper/RadarTempoServicoLicencaEspecialMapper.java
+?? src/main/java/br/com/praxis/ergonshowcase/mapper/SetorParametrizacaoErgonMapper.java
+?? src/main/java/br/com/praxis/ergonshowcase/mapper/SubempresaLocalidadeMapper.java
+?? src/main/java/br/com/praxis/ergonshowcase/mapper/SubstituicaoFuncaoMapper.java
+?? src/main/java/br/com/praxis/ergonshowcase/mapper/VagaFuncaoMapper.java
+?? src/main/java/br/com/praxis/ergonshowcase/mapper/VendaLicencaEspecialMapper.java
+?? src/main/java/br/com/praxis/ergonshowcase/operations/InstallConfigStorage.java
+?? src/main/java/br/com/praxis/ergonshowcase/policystudio/ErgonDomainRuleSetCatalogProvider.java
+?? src/main/java/br/com/praxis/ergonshowcase/policystudio/ErgonPolicyComposition.java
+?? src/main/java/br/com/praxis/ergonshowcase/policystudio/ErgonPolicyCompositionConfiguration.java
+?? src/main/java/br/com/praxis/ergonshowcase/policystudio/ErgonPolicyCompositionController.java
+?? src/main/java/br/com/praxis/ergonshowcase/policystudio/ErgonPolicyStudioController.java
+?? src/main/java/br/com/praxis/ergonshowcase/policystudio/ErgonPolicyStudioService.java
+?? src/main/java/br/com/praxis/ergonshowcase/policystudio/PolicyStudioAccess.java
+?? src/main/java/br/com/praxis/ergonshowcase/policystudio/PolicyStudioCatalog.java
+?? src/main/java/br/com/praxis/ergonshowcase/policystudio/PolicyStudioDtos.java
+?? src/main/java/br/com/praxis/ergonshowcase/policystudio/PolicyStudioProjection.java
+?? src/main/java/br/com/praxis/ergonshowcase/repository/AverbacaoTempoServicoRepository.java
+?? src/main/java/br/com/praxis/ergonshowcase/repository/CargoSetorRepository.java
+?? src/main/java/br/com/praxis/ergonshowcase/repository/DesignacaoFuncaoRepository.java
+?? src/main/java/br/com/praxis/ergonshowcase/repository/FuncaoConfiancaRepository.java
+?? src/main/java/br/com/praxis/ergonshowcase/repository/GrupoSetorRepository.java
+?? src/main/java/br/com/praxis/ergonshowcase/repository/HistoricoSetorRepository.java
+?? src/main/java/br/com/praxis/ergonshowcase/repository/LicencaEspecialGozoRepository.java
+?? src/main/java/br/com/praxis/ergonshowcase/repository/PeriodoAquisitivoLicencaEspecialRepository.java
+?? src/main/java/br/com/praxis/ergonshowcase/repository/RadarChefiaSubstituicaoRepository.java
+?? src/main/java/br/com/praxis/ergonshowcase/repository/RadarOrganogramaChefiaOcupacaoRepository.java
+?? src/main/java/br/com/praxis/ergonshowcase/repository/RadarTempoServicoLicencaEspecialRepository.java
+?? src/main/java/br/com/praxis/ergonshowcase/repository/SetorParametrizacaoErgonRepository.java
+?? src/main/java/br/com/praxis/ergonshowcase/repository/SubempresaLocalidadeRepository.java
+?? src/main/java/br/com/praxis/ergonshowcase/repository/SubstituicaoFuncaoRepository.java
+?? src/main/java/br/com/praxis/ergonshowcase/repository/VagaFuncaoRepository.java
+?? src/main/java/br/com/praxis/ergonshowcase/repository/VendaLicencaEspecialRepository.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/AverbacaoTempoServicoRuleSet.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/CadastroPessoalRuleSetSupport.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/CargoQuadroRuleSet.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/ChefiaRuleSetSupport.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/DependenteElegibilidadeFacts.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/DesignacaoFuncaoFacts.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/DesignacaoFuncaoRuleSet.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/ErgonCustomFieldErrors.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/ErgonOntologyRuleSetSupport.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/FeriasFacts.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/FrequenciaAfastamentoFacts.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/FuncaoConfiancaRuleSet.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/LicencaEspecialGozoRuleSet.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/OperationalRuleSet.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/PeriodoAquisitivoLicencaEspecialRuleSet.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/ProvaHorariosAcumulacao.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/Rn013RegrasFrequenciaFacts.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/ServidorPessoaCadastroRuleSet.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/SubstituicaoFuncaoFacts.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/SubstituicaoFuncaoRuleSet.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/VagaFuncaoRuleSet.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/VendaLicencaEspecialRuleSet.java
+?? src/main/java/br/com/praxis/ergonshowcase/rules/VinculoProvimentoFacts.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/AverbacaoTempoServicoService.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/CargoSetorService.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/ChefiaResourceService.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/DesignacaoFuncaoService.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/EffectiveSpecialLeavePolicy.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/ErgonExportPolicy.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/ErgonTenantAccess.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/FuncaoConfiancaService.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/GrupoSetorService.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/HistoricoSetorService.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/LicencaEspecialGozoService.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/OrganogramaRadarQuery.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/OrganogramaTemporalQuery.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/PeriodoAquisitivoLicencaEspecialService.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/RadarChefiaSubstituicaoService.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/RadarOrganogramaChefiaOcupacaoService.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/RadarTempoServicoLicencaEspecialService.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/SetorParametrizacaoErgonService.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/SubempresaLocalidadeService.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/SubstituicaoFuncaoService.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/TempoLicencaLifecycle.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/TempoLicencaPreviewService.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/TempoLicencaRuleFacts.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/TempoLicencaValidation.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/VagaFuncaoService.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/VendaLicencaEspecialService.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/VinculoAccumulationFacts.java
+?? src/main/java/br/com/praxis/ergonshowcase/service/VinculoScheduleEvidenceSource.java
+?? src/main/resources/db/migration/V10__servidor_data_certidao_fim.sql
+?? src/main/resources/db/migration/V11__slice8_organograma_temporal_setores_ergon_cargos_subempresas_grupos.sql
+?? src/main/resources/db/migration/V12__seed_slice8_organograma_temporal_chefias_quadro.sql
+?? src/main/resources/db/migration/V5__averbacoes_e_licenca_especial.sql
+?? src/main/resources/db/migration/V6__tempo_licenca_ciclo_de_vida.sql
+?? src/main/resources/db/migration/V7__canonical_resource_command_receipts.sql
+?? src/main/resources/db/migration/V8__funcoes_designacoes_substituicoes.sql
+?? src/main/resources/db/migration/V9__seed_funcoes_designacoes_substituicoes.sql
+?? src/main/resources/policy-studio/scenarios.json
+?? src/test/java/br/com/praxis/ergonshowcase/A1AfastamentoNeonTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/BulkCandidateFixture.java
+?? src/test/java/br/com/praxis/ergonshowcase/CadastroPessoalRuleSetTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/CanonicalResourceTestContext.java
+?? src/test/java/br/com/praxis/ergonshowcase/ChefiaSlice7SqlTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/DesignacaoFuncaoRuleSetTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/ErgonBulkTwoPhaseProtocolHttpTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/ErgonCrossSliceCustomizationMatrixTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/ErgonFailureAssertions.java
+?? src/test/java/br/com/praxis/ergonshowcase/ErgonGovernedSnapshotAdmissionTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/ErgonPolicyStudioContractTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/ErgonReactiveDeterminationMetadataTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/ErgonRuleViolationHttpTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/ErgonTenantIsolationTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/F5DossieIntegrationTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/FuncaoVagaRuleSetTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/OntologyCuratedLeadershipContractTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/OperationalRuleSetTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/OrganogramaSlice8CommandBoundaryTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/OrganogramaSlice8PostgresTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/P4CustomFieldAdoptionRegressionTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/P4MetadataProjectionTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/P5BPreviewTransportTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/P5BSalePreviewRegressionTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/P5BWriteAndScopeRegressionTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/P5CustomFieldsAndDraftTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/RuleCatalogExecution.java
+?? src/test/java/br/com/praxis/ergonshowcase/RuleCatalogExhaustivenessContractTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/ShowcaseCanonicalConformanceGateTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/StateSnapshotFixture.java
+?? src/test/java/br/com/praxis/ergonshowcase/SubstituicaoFuncaoRuleSetTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/TempoLicencaBulkAnalyticsExportTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/TempoLicencaCommandReceiptTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/TempoLicencaCorrectionsContractTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/TempoLicencaCrudContractTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/TempoLicencaIssue10PostgresTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/TempoLicencaIssue10RegressionTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/TempoLicencaRemainingFindingsTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/TempoLicencaRuleSetContractTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/TempoLicencaSevenFixesRegressionTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/TempoLicencaSlice6Phase1ContractTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/TempoLicencaSlice6Phase2Test.java
+?? src/test/java/br/com/praxis/ergonshowcase/config/ErgonConfigAccessTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/config/Ps3bConfigNeonTest.java
+?? src/test/java/br/com/praxis/ergonshowcase/service/P5CVinculoFeriasPostgresTest.java
+?? src/test/resources/db/slice7/predecessores.sql

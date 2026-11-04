@@ -117,6 +117,8 @@ public class FrequenciaDados {
   @Schema(
       description =
           "Horário de entrada registrado na ocorrência quando o código exige controle horário.",
+      type = "string",
+      format = "time",
       nullable = true)
   @UISchema(
       label = "Hora de entrada",
@@ -134,6 +136,8 @@ public class FrequenciaDados {
   @Schema(
       description =
           "Horário de saída registrado na ocorrência quando o código exige controle horário.",
+      type = "string",
+      format = "time",
       nullable = true)
   @UISchema(
       label = "Hora de saída",

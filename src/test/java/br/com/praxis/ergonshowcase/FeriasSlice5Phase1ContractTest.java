@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import br.com.praxis.ergonshowcase.config.ErgonDeterminationConfig;
 import br.com.praxis.ergonshowcase.config.TenantContext;
-import br.com.praxis.ergonshowcase.config.VinculoStateProvider;
 import br.com.praxis.ergonshowcase.domain.*;
 import br.com.praxis.ergonshowcase.dto.*;
 import br.com.praxis.ergonshowcase.mapper.FeriasGozoMapper;
@@ -230,6 +229,7 @@ class FeriasSlice5Phase1ContractTest {
     EntityManager em = mock(EntityManager.class);
     var pa = new PeriodoAquisitivoFerias();
     pa.setId(700L);
+    pa.setEmpCodigo(1);
     pa.setChave(3);
     pa.setTotDiasDireito(30);
     when(em.find(PeriodoAquisitivoFerias.class, 700L)).thenReturn(pa);
@@ -317,8 +317,8 @@ class FeriasSlice5Phase1ContractTest {
     param.setMinDiasPerFer(10);
     param.setMaxDiasPerFer(30);
     assertThatThrownBy(() -> invariants.parametroContagemFerias(param, true))
-        .isInstanceOf(ResponseStatusException.class)
-        .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
+        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
+        .extracting(ex -> ErgonFailureAssertions.status(ex))
         .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
 
     param.setMinPerFer(1);
@@ -342,96 +342,38 @@ class FeriasSlice5Phase1ContractTest {
     when(em.createQuery(anyString(), eq(ParametroContagemFerias.class))).thenReturn(paramQuery);
 
     assertThatThrownBy(() -> invariants.parametroContagemFerias(param, true))
-        .isInstanceOf(ResponseStatusException.class)
-        .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
+        .isInstanceOfAny(ResponseStatusException.class, org.praxisplatform.rules.violation.PraxisRuleViolationException.class)
+        .extracting(ex -> ErgonFailureAssertions.status(ex))
         .isEqualTo(HttpStatus.CONFLICT);
     when(paramQuery.getResultList()).thenReturn(List.of());
 
-    // 2. PeriodoAquisitivoFerias: chave duplicada -> 409 CONFLICT
-    var existingPa = new PeriodoAquisitivoFerias();
-    existingPa.setId(50L);
-    existingPa.setNumfunc(100L);
-    existingPa.setNumvinc(1);
-    existingPa.setChave(1);
-    TypedQuery<PeriodoAquisitivoFerias> paQuery = mock(TypedQuery.class);
-    when(paQuery.setParameter(anyString(), any())).thenReturn(paQuery);
-    when(paQuery.setFlushMode(any(FlushModeType.class))).thenReturn(paQuery);
-    when(paQuery.getResultList()).thenReturn(List.of(existingPa));
-    when(em.createQuery(anyString(), eq(PeriodoAquisitivoFerias.class))).thenReturn(paQuery);
-
-    var novoPa = new PeriodoAquisitivoFerias();
-    novoPa.setEmpCodigo(1);
-    novoPa.setNumfunc(100L);
-    novoPa.setNumvinc(1);
-    novoPa.setChave(1);
-    novoPa.setDtini(LocalDate.of(2023, 1, 1));
-    novoPa.setDtfim(LocalDate.of(2023, 12, 31));
-    novoPa.setTotDiasDireito(30);
-    assertThatThrownBy(() -> invariants.periodoAquisitivoFerias(novoPa, true))
-        .isInstanceOf(ResponseStatusException.class)
-        .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
-        .isEqualTo(HttpStatus.CONFLICT);
-
-    // 3. FeriasGozo: override 'N' em pa.abonoDirGozo bloqueia abono pecuniário -> 422
-    existingPa.setEmpCodigo(1);
-    existingPa.setSituacao("DISPONIVEL");
-    existingPa.setTotDiasDireito(30);
-    existingPa.setSaldoDiasDisponivel(30);
-    existingPa.setMinDiasPerFer(10);
-    existingPa.setMaxDiasPerFer(30);
-    existingPa.setAbonoDirGozo("N");
-    when(em.find(eq(PeriodoAquisitivoFerias.class), eq(50L), any(LockModeType.class)))
-        .thenReturn(existingPa);
-
-    TypedQuery<FeriasGozo> fgQuery = mock(TypedQuery.class);
-    when(fgQuery.setParameter(anyString(), any())).thenReturn(fgQuery);
-    when(fgQuery.setFlushMode(any(FlushModeType.class))).thenReturn(fgQuery);
-    when(fgQuery.getResultList()).thenReturn(List.of());
-    when(em.createQuery(anyString(), eq(FeriasGozo.class))).thenReturn(fgQuery);
+    // A fronteira estrutural encaminha inclusive um período prescrito à decisão governada.
+    var paService = mock(br.com.praxis.ergonshowcase.service.PeriodoAquisitivoFeriasService.class);
+    var fgService = mock(br.com.praxis.ergonshowcase.service.FeriasGozoService.class);
+    ReflectionTestUtils.setField(invariants, "periodoAquisitivoFeriasService", paService);
+    ReflectionTestUtils.setField(invariants, "feriasGozoService", fgService);
+    var pa = new PeriodoAquisitivoFerias();
+    pa.setId(50L);
+    pa.setEmpCodigo(1);
+    pa.setNumfunc(100L);
+    pa.setNumvinc(1);
+    pa.setChave(1);
+    pa.setSituacao("PRESCRITO");
+    when(em.find(eq(PeriodoAquisitivoFerias.class), eq(50L), any(LockModeType.class))).thenReturn(pa);
+    invariants.periodoAquisitivoFerias(pa, true);
+    org.mockito.Mockito.verify(paService).validatePeriodoAquisitivoFerias(pa);
 
     var fg = new FeriasGozo();
     fg.setEmpCodigo(1);
     fg.setNumfunc(100L);
     fg.setNumvinc(1);
     fg.setPeriodoAquisitivoId(50L);
-    fg.setChavePeraqfer(1);
-    fg.setOrdemParcela(1);
-    fg.setDtini(LocalDate.of(2025, 1, 10));
-    fg.setDtprevfim(LocalDate.of(2025, 1, 29));
-    fg.setDiasGozo(20);
-    fg.setAbonoPecuniario(true);
-    fg.setIniFimAbono("I");
-    fg.setDiasAbonoVendidos(10);
+    fg.setChavePeraqfer(99);
+    invariants.feriasGozo(fg, true);
+    var chamadas = org.mockito.Mockito.inOrder(fgService);
+    chamadas.verify(fgService).hydrateParentPeriodoAquisitivo(fg);
+    chamadas.verify(fgService).validateFeriasGozo(fg);
 
-    assertThatThrownBy(() -> invariants.feriasGozo(fg, true))
-        .isInstanceOf(ResponseStatusException.class)
-        .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
-        .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
-
-    // 4. FeriasGozo: interrupção precoce com 2 dias (< minDiasParcela) é permitida quando situacao = INTERROMPIDA
-    existingPa.setAbonoDirGozo("I");
-    fg.setAbonoPecuniario(false);
-    fg.setDiasAbonoVendidos(0);
-    fg.setSituacao("INTERROMPIDA");
-    fg.setDiasGozo(2);
-    fg.setDtInterrupcao(LocalDate.of(2025, 1, 12));
-    invariants.feriasGozo(fg, false);
-
-    // 5. FeriasGozo: ordemParcela duplicada no mesmo PA -> 409 CONFLICT
-    var otherFg = new FeriasGozo();
-    otherFg.setId(888L);
-    otherFg.setPeriodoAquisitivoId(50L);
-    otherFg.setOrdemParcela(1);
-    otherFg.setDiasGozo(10);
-    otherFg.setDtini(LocalDate.of(2025, 3, 1));
-    otherFg.setDtprevfim(LocalDate.of(2025, 3, 10));
-    when(fgQuery.getResultList()).thenReturn(List.of(otherFg));
-    fg.setSituacao("PROGRAMADA");
-    fg.setDiasGozo(15);
-    assertThatThrownBy(() -> invariants.feriasGozo(fg, true))
-        .isInstanceOf(ResponseStatusException.class)
-        .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
-        .isEqualTo(HttpStatus.CONFLICT);
   }
 
   @Test
@@ -439,11 +381,10 @@ class FeriasSlice5Phase1ContractTest {
     var paramRepo = mock(ParametroContagemFeriasRepository.class);
     var paRepo = mock(PeriodoAquisitivoFeriasRepository.class);
     var fgRepo = mock(FeriasGozoRepository.class);
-    var provider = new VinculoStateProvider(mock(VinculoRepository.class));
-    ReflectionTestUtils.setField(provider, "parametrosContagemFerias", paramRepo);
-    ReflectionTestUtils.setField(provider, "periodosAquisitivosFerias", paRepo);
-    ReflectionTestUtils.setField(provider, "feriasGozo", fgRepo);
-    ReflectionTestUtils.setField(provider, "tenant", new TenantContext());
+    var provider = StateSnapshotFixture.provider(StateSnapshotFixture.service(br.com.praxis.ergonshowcase.service.ParametroContagemFeriasService.class, paramRepo),
+        StateSnapshotFixture.service(br.com.praxis.ergonshowcase.service.PeriodoAquisitivoFeriasService.class, paRepo),
+        StateSnapshotFixture.service(br.com.praxis.ergonshowcase.service.FeriasGozoService.class, fgRepo));
+
 
     var param = new ParametroContagemFerias();
     param.setId(10L);

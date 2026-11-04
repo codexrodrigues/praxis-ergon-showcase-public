@@ -1,5 +1,15 @@
 # Decisão de adoção de duplicate-draft — Ergon Showcase
 
+**Estado reconciliado em 01/11/2026:** Cargo está implementado no gate
+estático/local aprovado por T08 em 29/10/2026, com D02 (três flags null no draft,
+decisão explícita no create, false válido) e D04 (somente origem VIGENTE).
+O contrato/política atual está em [DUPLICATE-DRAFT-CARGO.md](DUPLICATE-DRAFT-CARGO.md).
+O inventário e a tabela de 28/10 abaixo registram a decisão anterior, preservada
+como histórico; “Pendente” naquela linha não reabre o gate local. As decisões
+dos outros recursos mantêm seu próprio escopo e não são redefinidas aqui.
+Aceite local não aprova `--require-runtime-evidence`, SpringBootTest/Neon ou
+publicação. T12 prepara checklist/pacote VM; integração continua pendente.
+
 Data: 28/10/2026. Autor da avaliação: Codex, agente responsável pelo host, a pedido
 do mantenedor nesta rodada. Não equivale a aprovação humana ou revisão independente
 do PR inteiro. Base do host: `ac6dd29`; SDK consumido: `3822eca0`, candidato privado.
@@ -46,7 +56,7 @@ As fontes legadas acima ficam em `D:/Developer/Techne/ErgonX/migracao/docs-legad
 As decisões de não adoção são análise arquitetural deste escopo, não afirmação de
 que o legado ou uma norma jurídica proíba toda forma de reaproveitamento.
 
-## Gate remanescente de Cargo
+## Gate de Cargo registrado em 28/10 (histórico)
 
 Consumir primeiro o contrato canônico neutro integrado. Definir DTO de rascunho
 com allowlist deliberada, autorização da origem/órgão/campos e defaults explícitos.

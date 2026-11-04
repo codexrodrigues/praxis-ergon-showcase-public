@@ -61,11 +61,6 @@ public final class PeriodoAquisitivoFeriasRuleSet {
           + "@"
           + TEMPLATE_ACCUMULATION_AND_REDUCTION_BOUNDS_VERSION;
 
-  public static final String JAVA_EXECUTOR_SOBREPOSICAO_KEY =
-      "ergon.peraqfer:sobreposicao-e-acumulo-periodos";
-  public static final String JAVA_EXECUTOR_VERSION = "1.0";
-  public static final String EXECUTOR_SOBREPOSICAO_E_ACUMULO_PERIODOS =
-      JAVA_EXECUTOR_SOBREPOSICAO_KEY + "@" + JAVA_EXECUTOR_VERSION;
 
   public static final String SLOT_CRONOLOGIA_DATAS_VALIDA =
       "peraqfer.guard.cronologia-datas-valida";
@@ -114,13 +109,15 @@ public final class PeriodoAquisitivoFeriasRuleSet {
   }
 
   public static RuleParameterTemplate accumulationAndReductionBoundsTemplate() {
+    JsonNode parsed = parseJson(ERG00612_TEMPLATE_EXPRESSION);
     return new RuleParameterTemplate(
         TEMPLATE_ACCUMULATION_AND_REDUCTION_BOUNDS_KEY,
         TEMPLATE_ACCUMULATION_AND_REDUCTION_BOUNDS_VERSION,
-        RuleExecutorRef.jsonLogic(parseJson(ERG00612_TEMPLATE_EXPRESSION)),
+        RuleExecutorRef.jsonLogic(parsed),
         RuleDecision.DENY,
         "ERG-00612",
-        List.of("draft.dtini", "draft.dtfim"),
+        ErgonOntologyRuleSetSupport.mergeRequiredRoots(
+            List.of("draft.dtini", "draft.dtfim"), parsed),
         List.of(
             new RuleParameterDefinition(
                 "maxPeriodosAcumuladosAbertos",
@@ -217,7 +214,7 @@ public final class PeriodoAquisitivoFeriasRuleSet {
             SLOT_SOBREPOSICAO_E_ACUMULO_PERIODOS,
             DecisionStage.POST_DECISION,
             SlotCardinality.SINGLE,
-            OverridePolicy.FORBIDDEN,
+            OverridePolicy.REPLACEABLE,
             DecisionAggregationPolicy.SINGLE_RESULT,
             null),
         new DecisionSlot(
@@ -289,14 +286,6 @@ public final class PeriodoAquisitivoFeriasRuleSet {
             }
             """,
             "ERG-01850",
-            baseFacts),
-        // 3. Hook pré-validação
-        productJsonLogicBinding(
-            "product.peraqfer.hook-pre-baseline",
-            SLOT_HOOK_PRE_VALIDACAO,
-            30,
-            "{\"==\": [1, 1]}",
-            "CERG-PA-PRE-001",
             baseFacts),
         // 4. ERG-00099: proteção de averbação
         productJsonLogicBinding(
@@ -571,14 +560,14 @@ public final class PeriodoAquisitivoFeriasRuleSet {
             """,
             "ERG-01810",
             baseFacts),
-        // 8e. ERG-01801: abonoDirGozo válido no PA
+        // 8e. ERG-01801: modalidade efetiva após o merge de parâmetros e período (PCK_PERAQFER:424).
         productJsonLogicBinding(
             "product.peraqfer.erg-01801",
             SLOT_OVERRIDES_PARCELAMENTO_E_ABONO,
             84,
             """
             {
-              "in": [{"var": "draft.abonoDirGozo"}, [null, "I", "D", "G", "N"]]
+              "in": [{"var": "effectiveParametroConta.abonoDirGozo"}, ["D", "G", "N"]]
             }
             """,
             "ERG-01801",
@@ -719,27 +708,13 @@ public final class PeriodoAquisitivoFeriasRuleSet {
             "ERG-00615",
             baseFacts),
         // 10. ERG-00601: sobreposição cronológica ou duplicidade de chave no mesmo vínculo
-        new DecisionBinding(
+        productJsonLogicBinding(
             "product.peraqfer.erg-00601",
             SLOT_SOBREPOSICAO_E_ACUMULO_PERIODOS,
-            DecisionSource.PRODUCT,
-            null,
-            RuleExecutorRef.java(JAVA_EXECUTOR_SOBREPOSICAO_KEY, JAVA_EXECUTOR_VERSION),
-            List.of(),
             100,
-            true,
-            null,
-            null,
-            List.of("draft.dtini", "draft.dtfim", "derived.overlappingPeriodsCount"),
-            null),
-        // 11. Hook pós-validação
-        productJsonLogicBinding(
-            "product.peraqfer.hook-pos-baseline",
-            SLOT_HOOK_POS_VALIDACAO,
-            110,
-            "{\"==\": [1, 1]}",
-            "CERG-PA-POST-001",
-            baseFacts));
+            "{\"==\":[{\"var\":\"derived.overlappingPeriodsCount\"},0]}",
+            "ERG-00601",
+            List.of("derived.overlappingPeriodsCount")));
   }
 
   public static RuleSetDefinition productRuleSet() {
@@ -913,7 +888,7 @@ public final class PeriodoAquisitivoFeriasRuleSet {
         true,
         RuleDecision.DENY,
         "CERG-PA-401",
-        List.of("draft.dtini", "draft.dtfim"),
+        List.of("draft.dtini", "draft.dtfim", "derived", "effectiveParametroConta"),
         null);
   }
 
@@ -932,18 +907,19 @@ public final class PeriodoAquisitivoFeriasRuleSet {
       String jsonLogic,
       String falseReasonCode,
       List<String> requiredFactPaths) {
+    JsonNode parsed = parseJson(jsonLogic);
     return new DecisionBinding(
         bindingKey,
         slotKey,
         DecisionSource.PRODUCT,
         null,
-        RuleExecutorRef.jsonLogic(parseJson(jsonLogic)),
+        RuleExecutorRef.jsonLogic(parsed),
         List.of(),
         order,
         true,
         RuleDecision.DENY,
         falseReasonCode,
-        requiredFactPaths,
+        ErgonOntologyRuleSetSupport.mergeRequiredRoots(requiredFactPaths, parsed),
         null);
   }
 

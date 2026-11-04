@@ -20,7 +20,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
     titleField = "nome",
     displayLabelField = "nome",
     subtitleField = "tipoFrequenciaNome",
-    metadataFields = {"tipofreq", "codigo", "mnemonico", "afastamento"})
+    metadataFields = {"tipofreq", "codigo", "sexo"})
 public class CodigoFrequenciaResponseDTO {
   @Schema(
       description =
@@ -356,9 +356,7 @@ public class CodigoFrequenciaResponseDTO {
       valueField = "id",
       displayField = "label",
       readOnly = true,
-      tableHidden = true,
-      quickViewVisible = true,
-      quickViewOrder = 6)
+      tableHidden = true)
   @ResourceReference(
       resourceKey = "administracao-pessoal.documentos-legais",
       valueField = "documentoLegalId",
@@ -377,7 +375,9 @@ public class CodigoFrequenciaResponseDTO {
       group = "Normativo",
       order = 175,
       readOnly = true,
-      tableHidden = true)
+      tableHidden = true,
+      quickViewVisible = true,
+      quickViewOrder = 6)
   @ResourceReference(
       resourceKey = "administracao-pessoal.documentos-legais",
       valueField = "documentoLegalId",

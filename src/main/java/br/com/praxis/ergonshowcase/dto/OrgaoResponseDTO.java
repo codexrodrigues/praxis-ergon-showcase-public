@@ -19,7 +19,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
     titleField = "nome",
     displayLabelField = "nome",
     subtitleField = "fantasia",
-    metadataFields = {"municipio", "ufSigla", "ativa"})
+    metadataFields = {"id", "telefone"})
 public class OrgaoResponseDTO extends OrgaoDados {
   @Schema(
       description = "Habilitação atual do órgão; mantida pelas ações de ativação e inativação.",
@@ -65,4 +65,16 @@ public class OrgaoResponseDTO extends OrgaoDados {
       readOnly = true,
       formHidden = true)
   private java.time.OffsetDateTime updatedAt;
+  @Override
+  @Schema(
+      description =
+          "Nome oficial resumido do ente público usado em cabeçalhos e consultas de seus quadros funcionais.", accessMode = Schema.AccessMode.READ_ONLY)
+  @org.praxisplatform.uischema.annotation.ResourceReference(
+      resourceKey = "administracao-pessoal.empresas",
+      valueField = "id",
+      surfaceId = "ficha-institucional",
+      previewSurfaceId = "ficha-institucional",
+      detailPresentation = "drawer")
+  public String getNome() { return super.getNome(); }
+
 }

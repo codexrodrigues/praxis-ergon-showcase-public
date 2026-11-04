@@ -1,0 +1,125 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------< br.com.praxis:praxis-ergon-showcase >-----------------
+[INFO] Building praxis-ergon-showcase 0.1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ praxis-ergon-showcase ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ praxis-ergon-showcase ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 362 source files with javac [debug parameters release 21] to target\classes
+[INFO] /D:/Developer/praxis-plataform/praxis-ergon-showcase/src/main/java/br/com/praxis/ergonshowcase/service/TempoLicencaCommandGateway.java: D:\Developer\praxis-plataform\praxis-ergon-showcase\src\main\java\br\com\praxis\ergonshowcase\service\TempoLicencaCommandGateway.java uses or overrides a deprecated API.
+[INFO] /D:/Developer/praxis-plataform/praxis-ergon-showcase/src/main/java/br/com/praxis/ergonshowcase/service/TempoLicencaCommandGateway.java: Recompile with -Xlint:deprecation for details.
+[INFO] /D:/Developer/praxis-plataform/praxis-ergon-showcase/src/main/java/br/com/praxis/ergonshowcase/bulk/ErgonBulkMessageConverter.java: D:\Developer\praxis-plataform\praxis-ergon-showcase\src\main\java\br\com\praxis\ergonshowcase\bulk\ErgonBulkMessageConverter.java uses unchecked or unsafe operations.
+[INFO] /D:/Developer/praxis-plataform/praxis-ergon-showcase/src/main/java/br/com/praxis/ergonshowcase/bulk/ErgonBulkMessageConverter.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ praxis-ergon-showcase ---
+[INFO] skip non existing resourceDirectory D:\Developer\praxis-plataform\praxis-ergon-showcase\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ praxis-ergon-showcase ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 29 source files with javac [debug parameters release 21] to target\test-classes
+[INFO] /D:/Developer/praxis-plataform/praxis-ergon-showcase/src/test/java/br/com/praxis/ergonshowcase/CargoDraftContractTest.java: Some input files use unchecked or unsafe operations.
+[INFO] /D:/Developer/praxis-plataform/praxis-ergon-showcase/src/test/java/br/com/praxis/ergonshowcase/CargoDraftContractTest.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- surefire:3.5.6:test (default-test) @ praxis-ergon-showcase ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running br.com.praxis.ergonshowcase.AfastamentoContractTest
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (C:\Users\rodrigo.moreira\.m2\repository\net\bytebuddy\byte-buddy-agent\1.17.8\byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.942 s -- in br.com.praxis.ergonshowcase.AfastamentoContractTest
+[INFO] Running br.com.praxis.ergonshowcase.ApiPathsContractTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.203 s -- in br.com.praxis.ergonshowcase.ApiPathsContractTest
+[INFO] Running br.com.praxis.ergonshowcase.CampoCustomizadoContractTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.297 s -- in br.com.praxis.ergonshowcase.CampoCustomizadoContractTest
+[INFO] Running br.com.praxis.ergonshowcase.CargoDraftContractTest
+10:53:32.802 [main] INFO org.hibernate.validator.internal.util.Version -- HV000001: Hibernate Validator 8.0.3.Final
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.146 s -- in br.com.praxis.ergonshowcase.CargoDraftContractTest
+[INFO] Running br.com.praxis.ergonshowcase.CargoDraftPresentationContractTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.302 s -- in br.com.praxis.ergonshowcase.CargoDraftPresentationContractTest
+[INFO] Running br.com.praxis.ergonshowcase.DependenteContractTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.541 s -- in br.com.praxis.ergonshowcase.DependenteContractTest
+[INFO] Running br.com.praxis.ergonshowcase.FeriasRuleEngineAndDeterminationsContractTest
+[INFO] Tests run: 63, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.177 s -- in br.com.praxis.ergonshowcase.FeriasRuleEngineAndDeterminationsContractTest
+[INFO] Running br.com.praxis.ergonshowcase.FeriasSlice5Phase1ContractTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.183 s -- in br.com.praxis.ergonshowcase.FeriasSlice5Phase1ContractTest
+[INFO] Running br.com.praxis.ergonshowcase.FeriasSlice5Phase2ContractTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.619 s -- in br.com.praxis.ergonshowcase.FeriasSlice5Phase2ContractTest
+[INFO] Running br.com.praxis.ergonshowcase.FrequenciaAfastamentoRuleEngineContractTest
+[INFO] Tests run: 41, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.208 s -- in br.com.praxis.ergonshowcase.FrequenciaAfastamentoRuleEngineContractTest
+[INFO] Running br.com.praxis.ergonshowcase.FrequenciaContractTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.071 s -- in br.com.praxis.ergonshowcase.FrequenciaContractTest
+[INFO] Running br.com.praxis.ergonshowcase.PraxisMetadataCompletenessTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.645 s -- in br.com.praxis.ergonshowcase.PraxisMetadataCompletenessTest
+[INFO] Running br.com.praxis.ergonshowcase.Rn013RuleEngineContractTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.108 s -- in br.com.praxis.ergonshowcase.Rn013RuleEngineContractTest
+[INFO] Running br.com.praxis.ergonshowcase.RuleCatalogExhaustivenessContractTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.409 s -- in br.com.praxis.ergonshowcase.RuleCatalogExhaustivenessContractTest
+[INFO] Running br.com.praxis.ergonshowcase.TempoLicencaBulkAnalyticsExportTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.134 s -- in br.com.praxis.ergonshowcase.TempoLicencaBulkAnalyticsExportTest
+[INFO] Running br.com.praxis.ergonshowcase.TempoLicencaCommandReceiptTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.192 s -- in br.com.praxis.ergonshowcase.TempoLicencaCommandReceiptTest
+[INFO] Running br.com.praxis.ergonshowcase.TempoLicencaCorrectionsContractTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.044 s -- in br.com.praxis.ergonshowcase.TempoLicencaCorrectionsContractTest
+[INFO] Running br.com.praxis.ergonshowcase.TempoLicencaCrudContractTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.122 s -- in br.com.praxis.ergonshowcase.TempoLicencaCrudContractTest
+[INFO] Running br.com.praxis.ergonshowcase.TempoLicencaSevenFixesRegressionTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.241 s -- in br.com.praxis.ergonshowcase.TempoLicencaSevenFixesRegressionTest
+[INFO] Running br.com.praxis.ergonshowcase.TempoLicencaSlice6Phase1ContractTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.041 s -- in br.com.praxis.ergonshowcase.TempoLicencaSlice6Phase1ContractTest
+[INFO] Running br.com.praxis.ergonshowcase.TempoLicencaSlice6Phase2Test
+[INFO] Tests run: 22, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.592 s -- in br.com.praxis.ergonshowcase.TempoLicencaSlice6Phase2Test
+[INFO] Running br.com.praxis.ergonshowcase.TenantRequestValidationTest
+10:53:59.963 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+10:53:59.963 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+10:53:59.967 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 3 ms
+10:54:00.145 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+10:54:00.145 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+10:54:00.145 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+10:54:00.163 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+10:54:00.164 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+10:54:00.164 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+10:54:00.184 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+10:54:00.185 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+10:54:00.185 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+10:54:00.210 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+10:54:00.210 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+10:54:00.211 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 1 ms
+10:54:00.223 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+10:54:00.223 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+10:54:00.223 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+10:54:00.239 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+10:54:00.240 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+10:54:00.240 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+10:54:00.252 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+10:54:00.252 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+10:54:00.252 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+10:54:00.262 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+10:54:00.262 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+10:54:00.262 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.742 s -- in br.com.praxis.ergonshowcase.TenantRequestValidationTest
+[INFO] Running br.com.praxis.ergonshowcase.VinculoDependenteCustomFieldRuleEngineContractTest
+[INFO] Tests run: 28, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.925 s -- in br.com.praxis.ergonshowcase.VinculoDependenteCustomFieldRuleEngineContractTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 296, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  01:32 min
+[INFO] Finished at: 2026-11-01T10:54:02-03:00
+[INFO] ------------------------------------------------------------------------

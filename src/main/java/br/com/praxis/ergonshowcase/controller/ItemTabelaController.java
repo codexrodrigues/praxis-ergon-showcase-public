@@ -55,7 +55,7 @@ import org.springframework.web.bind.annotation.*;
             titleField = "descr",
             displayLabelField = "descr",
             subtitleField = "tabelaDescricao",
-            metadataFields = {"tab", "item", "ordem", "ativo"}),
+            metadataFields = {"orgaoNome", "updatedAt"}),
     quickFilters = {
       @QuickFilter(
           id = "ativos",

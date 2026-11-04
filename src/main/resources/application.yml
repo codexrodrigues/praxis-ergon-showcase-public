@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${PORT:${SERVER_PORT:8080}}
   forward-headers-strategy: framework
 spring:
   application:
@@ -18,6 +18,8 @@ spring:
       hibernate.jdbc.time_zone: UTC
   flyway:
     enabled: false
+  ai:
+    enabled: false
   jackson:
     serialization:
       write-dates-as-timestamps: false
@@ -25,19 +27,41 @@ spring:
       fail-on-unknown-properties: true
 springdoc:
   swagger-ui:
-    oauth2-redirect-url: http://localhost:${SERVER_PORT:8080}/swagger-ui/oauth2-redirect.html
+    oauth2-redirect-url: http://localhost:${PORT:${SERVER_PORT:8080}}/swagger-ui/oauth2-redirect.html
   cache:
     disabled: true
   api-docs:
     version: OPENAPI_3_0
   writer-with-order-by-keys: true
+config:
+  datasource:
+    url: ${CONFIG_DATASOURCE_URL}
+    username: ${CONFIG_DATASOURCE_USERNAME}
+    password: ${CONFIG_DATASOURCE_PASSWORD}
+    schema: ${CONFIG_DATASOURCE_SCHEMA:public}
 praxis:
+  ai:
+    registry:
+      bootstrap:
+        enabled: false
+      health:
+        enabled: false
   stats:
     enabled: true
   resource-version:
     etag:
       secret: ${PRAXIS_RESOURCE_VERSION_ETAG_SECRET}
+  domain-catalog:
+    auto-sync:
+      enabled: false
+      groups:
+        - ergon
 showcase:
   security:
     username: ${SHOWCASE_USERNAME}
     password: ${SHOWCASE_PASSWORD}
+    public-read-enabled: ${SHOWCASE_PUBLIC_READ_ENABLED:false}
+    cors-origins: ${SHOWCASE_CORS_ORIGINS:https://praxis-ergon-showcase.web.app,https://praxis-ergon-showcase.firebaseapp.com,http://localhost:4200,http://localhost:4310}
+    config-origins: ${SHOWCASE_CONFIG_ORIGINS:https://praxis-ergon-showcase.web.app,https://praxis-ergon-showcase.firebaseapp.com,http://localhost:4200,http://localhost:4310}
+    policy-read-orgs: ${SHOWCASE_POLICY_READ_ORGS:}
+    policy-publish-orgs: ${SHOWCASE_POLICY_PUBLISH_ORGS:}

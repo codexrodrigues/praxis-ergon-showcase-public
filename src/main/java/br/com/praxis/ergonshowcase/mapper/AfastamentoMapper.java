@@ -111,8 +111,9 @@ public class AfastamentoMapper
     entity.setDtini(dto.getDtini());
     entity.setDtprevfim(dto.getDtprevfim());
     entity.setMotivo(dto.getMotivo());
-    entity.setProrrogacao(dto.getProrrogacao());
-    if (entity.getProrrogacao() == null) entity.setProrrogacao(false);
+    entity.setProrrogacao(dto.getProrrogacao() == null
+        ? dto.getAfastamentoOrigemId() != null
+        : dto.getProrrogacao());
     entity.setAfastamentoOrigemId(dto.getAfastamentoOrigemId());
     entity.setNumfuncSubstituto(dto.getNumfuncSubstituto());
     entity.setNumvincSubstituto(dto.getNumvincSubstituto());

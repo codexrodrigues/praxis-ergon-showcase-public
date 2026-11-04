@@ -29,12 +29,7 @@ public abstract class CargoDados {
       group = "Identificação",
       order = 10,
       icon = "work")
-  @ResourceReference(
-      resourceKey = "administracao-pessoal.cargos",
-      valueField = "id",
-      surfaceId = "ficha-cargo",
-      previewSurfaceId = "ficha-cargo",
-      detailPresentation = "drawer")
+
   private String nome;
 
   @NotBlank
@@ -120,7 +115,6 @@ public abstract class CargoDados {
       icon = "groups")
   private Integer vagasAutorizadas;
 
-  @NotNull
   @Schema(
       description = "Indica que o provimento requer controle do saldo de vagas autorizadas em lei.")
   @UISchema(
@@ -135,9 +129,8 @@ public abstract class CargoDados {
       quickViewVisible = true,
       quickViewOrder = 3)
   @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = false)
-  private Boolean controleVaga;
+  private Boolean controleVaga = false;
 
-  @NotNull
   @Schema(
       description =
           "Indica remuneração estruturada por tabela de vencimentos e referências salariais.")
@@ -150,7 +143,7 @@ public abstract class CargoDados {
       group = "Quadro de vagas",
       order = 100,
       icon = "payments")
-  private Boolean porReferencia;
+  private Boolean porReferencia = false;
 
   @CustomFields(resourceKey = "administracao-pessoal.cargos")
   @Schema(
@@ -159,7 +152,6 @@ public abstract class CargoDados {
   @UISchema(label = "Características do órgão", group = "Características adicionais", order = 110)
   private Map<String, Object> customFields = new LinkedHashMap<>();
 
-  @NotNull
   @Schema(description = "Indica cargo que reúne outros cargos para controle agregado do quadro.")
   @UISchema(
       label = "Cargo aglutinador",
@@ -174,7 +166,7 @@ public abstract class CargoDados {
   @Getter(onMethod_ = @com.fasterxml.jackson.annotation.JsonProperty("eAglutinador"))
   @Setter(onMethod_ = @com.fasterxml.jackson.annotation.JsonProperty("eAglutinador"))
   @com.fasterxml.jackson.annotation.JsonProperty("eAglutinador")
-  private Boolean eAglutinador;
+  private Boolean eAglutinador = false;
 
   @Schema(nullable = true, description = "Cargo agregador do mesmo órgão ao qual este cargo está vinculado.")
   @UISchema(

@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.*;
             keyField = "id",
             titleField = "ementa",
             subtitleField = "tipoDocumento",
-            metadataFields = {"empCodigo", "numeroDocumento"}),
+            metadataFields = {"numeroPublicacao", "processoAdministrativo"}),
     quickFilters = {
       @QuickFilter(id = "publicados", label = "Atos publicados", filter = "{\"publicados\":true}"),
       @QuickFilter(id = "sem-anexo", label = "Sem anexo digital", filter = "{\"semAnexo\":true}")

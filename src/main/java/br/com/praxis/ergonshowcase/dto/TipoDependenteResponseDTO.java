@@ -17,7 +17,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchema;
     titleField = "descricao",
     displayLabelField = "descricao",
     subtitleField = "id",
-    metadataFields = {"geraIr", "idadeLimite"})
+    metadataFields = {"documentoLegalNumero"})
 public class TipoDependenteResponseDTO {
   @Schema(
       description =

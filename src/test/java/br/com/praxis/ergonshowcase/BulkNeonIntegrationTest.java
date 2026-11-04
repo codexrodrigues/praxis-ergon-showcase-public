@@ -24,6 +24,143 @@ class BulkNeonIntegrationTest {
   @Value("${showcase.security.password}") String password;
   boolean publicationReady;
   @BeforeAll void authenticate() { requireDisposableTarget();rest=rest.withBasicAuth(username,password); }
+
+  @Test @Order(5)
+  void homologatesDesignacaoAndReplaysWithoutReapplyingOnNeon() throws Exception {
+    requireDisposableTarget();
+    String operation = "ergon.designacoes.homologar-designacoes-lote";
+    String path = "/api/ergon/designacoes";
+    long generation;
+    String intent;
+    try (var c = ownerConnection(); var q = c.prepareStatement("""
+        select generation,state from praxis_bulk.praxis_bulk_operation_control
+        where namespace_id='ergon-showcase' and operation_id=?
+        """)) {
+      q.setString(1, operation);
+      try (var rows = q.executeQuery()) {
+        assertThat(rows.next()).as("Controle instalado para homologação").isTrue();
+        generation = rows.getLong(1);
+        intent = "READY".equals(rows.getString(2)) ? "RECONCILE" : "PUBLISH";
+      }
+    }
+    var admin = rest.withBasicAuth(System.getenv("SHOWCASE_BULK_ADMIN_USERNAME"),
+        System.getenv("SHOWCASE_BULK_ADMIN_PASSWORD"));
+    var transport = new org.springframework.http.client.JdkClientHttpRequestFactory(
+        java.net.http.HttpClient.newBuilder().connectTimeout(java.time.Duration.ofSeconds(10)).build());
+    transport.setReadTimeout(BulkPublicationProof.ADMIN_READ_TIMEOUT);
+    admin.getRestTemplate().setRequestFactory(transport);
+    rest.getRestTemplate().setRequestFactory(transport);
+    String publicationPath = "/api/ergon/operations/bulk/publication";
+    var publicationRequest = Map.of("operationId", operation, "expectedGeneration", generation, "intent", intent);
+    var publication = admin.postForEntity(publicationPath, publicationRequest, JsonNode.class);
+    if (publication.getStatusCode() == HttpStatus.SERVICE_UNAVAILABLE && "PUBLISH".equals(intent)) {
+      // Retry cold OpenAPI generation only after proving the first attempt did not publish.
+      try (var c = ownerConnection(); var q = c.prepareStatement("""
+          select state, generation from praxis_bulk.praxis_bulk_operation_control
+          where namespace_id='ergon-showcase' and operation_id=?
+          """)) {
+        q.setString(1, operation);
+        try (var rows = q.executeQuery()) {
+          assertThat(rows.next()).isTrue();
+          assertThat(rows.getString(1)).isEqualTo("UNCOMPOSED");
+          assertThat(rows.getLong(2)).isEqualTo(generation);
+        }
+      }
+      System.out.println("S7 bulk proof: cold OpenAPI returned 503; control unchanged, retrying once");
+      publication = admin.postForEntity(publicationPath, publicationRequest, JsonNode.class);
+    }
+    assertThat(publication.getStatusCode()).as("Publicação de %s: %s", operation, publication.getBody())
+        .isEqualTo(HttpStatus.OK);
+    assertThat(publication.getBody().path("data").path("state").asText()).isEqualTo("READY");
+
+    long id;
+    try (var c = ownerConnection(); var q = c.createStatement(); var rows = q.executeQuery("""
+        with source as (
+          select v.numfunc, v.numero, s.setor from vinculos v
+          cross join lateral (select setor from setores where emp_codigo=1 order by setor limit 1) s
+          where v.emp_codigo=1 and v.situacao='ATIVO' order by v.numfunc, v.numero limit 1
+        ), funcao as (
+          insert into funcoes_confianca(emp_codigo,codigo,descricao,categoria,simbolo,controle_vaga,
+            permite_substituicao,valor_gratificacao,percentual_opcao_efetivo,exige_vinculo_efetivo,dtini,situacao)
+          select 1, 'S7-' || left(md5(random()::text), 12), 'Função prova S7', 'CHEFIA', 'FG-1', true,
+            true, 100, 100, false, current_date - 1, 'ATIVA' from source returning id
+        ), vaga as (
+          insert into vagas_funcao(emp_codigo,funcao_id,setor_id,numero_vaga,descricao,origem_vaga,dtini,situacao)
+          select 1, f.id, s.setor, 1, 'Vaga prova S7', 'CRIACAO POR LEI', current_date - 1, 'LIVRE'
+          from funcao f cross join source s returning id, funcao_id, setor_id
+        )
+        insert into designacoes_funcao(emp_codigo,descricao,dtini,situacao,funcao_id,vaga_funcao_id,
+          setor_id,titular_numfunc,titular_numvinc,opcao_remuneracao)
+        select 1,'Designação prova S7',current_date - 1,'DESIGNADA',v.funcao_id,v.id,v.setor_id,s.numfunc,s.numero,'INTEGRAL'
+        from vaga v cross join source s returning id
+        """)) {
+      assertThat(rows.next()).as("Fixture de designação criada no órgão 1").isTrue();
+      id = rows.getLong(1);
+    }
+    JsonNode before = designacaoState(id);
+    var item = rest.getForEntity(path + "/" + id, JsonNode.class);
+    assertThat(item.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(item.getHeaders().getETag()).isNotBlank();
+    String date = java.time.LocalDate.now(java.time.ZoneId.of("America/Sao_Paulo")).toString();
+    var proposal = rest.postForEntity(path + "/bulk/homologar-designacoes-lote/evaluation",
+        Map.of("executionMode", "SYNC", "selection", Map.of("mode", "EXPLICIT", "targets",
+            List.of(Map.of("id", Long.toString(id), "expectedVersion", item.getHeaders().getETag()))),
+            "parameters", Map.of("dtExercicio", date)), JsonNode.class);
+    assertThat(proposal.getStatusCode()).as("Avaliação: %s", proposal.getBody()).isEqualTo(HttpStatus.OK);
+    var evaluation = proposal.getBody().path("data");
+    assertThat(evaluation.path("totals").path("executable").asInt()).isEqualTo(1);
+    assertThat(designacaoState(id)).isEqualTo(before);
+
+    var headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.set("Idempotency-Key", UUID.randomUUID().toString());
+    var confirmation = new HttpEntity<>(Map.of("proposalId", evaluation.path("proposalId").asText()), headers);
+    String action = path + "/actions/homologar-designacoes-lote";
+    var first = rest.postForEntity(action, confirmation, JsonNode.class);
+    assertThat(first.getStatusCode()).as("Confirmação: %s", first.getBody()).isEqualTo(HttpStatus.OK);
+    var execution = first.getBody().path("data");
+    assertThat(execution.path("status").asText()).isEqualTo("COMPLETED");
+    String executionId = execution.path("executionId").asText();
+    assertThat(executionId).isNotBlank();
+    var receipts = rest.getForEntity(path + "/bulk/executions/" + executionId + "/results", JsonNode.class);
+    assertThat(receipts.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(receipts.getBody().path("data").path("content")).hasSize(1);
+    assertThat(receipts.getBody().path("data").path("content").get(0).path("status").asText()).isEqualTo("CONFIRMED");
+
+    var after = designacaoState(id);
+    assertThat(after.path("designacao").asText()).isEqualTo("EM_EXERCICIO");
+    assertThat(after.path("exercicio").asText()).isEqualTo(date);
+    assertThat(after.path("vaga").asText()).isEqualTo("OCUPADA");
+    assertThat(after.path("ocupante")).isEqualTo(after.path("titular"));
+    assertThat(after.path("ocupanteVinculo")).isEqualTo(after.path("titularVinculo"));
+    assertThat(after.path("designacaoVersao").asLong()).isEqualTo(before.path("designacaoVersao").asLong() + 1);
+    assertThat(after.path("vagaVersao").asLong()).isEqualTo(before.path("vagaVersao").asLong() + 1);
+
+    var replay = rest.postForEntity(action, confirmation, JsonNode.class);
+    assertThat(replay.getStatusCode()).as("Replay: %s", replay.getBody()).isEqualTo(HttpStatus.OK);
+    assertThat(replay.getBody().path("data").path("executionId").asText()).isEqualTo(executionId);
+    assertThat(designacaoState(id)).isEqualTo(after);
+    System.out.printf("S7 bulk proof: branch=%s proposal=%s execution=%s designacaoVersion=%d vagaVersion=%d%n",
+        System.getenv("PROOF_NEON_BRANCH"), evaluation.path("proposalId").asText(), executionId,
+        after.path("designacaoVersao").asLong(), after.path("vagaVersao").asLong());
+  }
+
+  private JsonNode designacaoState(long id) throws Exception {
+    try (var c = ownerConnection(); var q = c.prepareStatement("""
+        select jsonb_build_object('designacao',d.situacao,'exercicio',d.dt_exercicio,
+          'designacaoVersao',d.version,'vaga',v.situacao,'vagaVersao',v.version,
+          'ocupante',v.titular_atual_numfunc,'ocupanteVinculo',v.titular_atual_numvinc,
+          'titular',d.titular_numfunc,'titularVinculo',d.titular_numvinc)
+        from designacoes_funcao d join vagas_funcao v on v.id=d.vaga_funcao_id and v.emp_codigo=d.emp_codigo
+        where d.emp_codigo=1 and d.id=?
+        """)) {
+      q.setLong(1, id);
+      try (var rows = q.executeQuery()) {
+        assertThat(rows.next()).isTrue();
+        return new com.fasterxml.jackson.databind.ObjectMapper().readTree(rows.getString(1));
+      }
+    }
+  }
   private void requireDisposableTarget() {
     String expected=System.getenv("BULK_PROOF_DISPOSABLE_BRANCH");
     assertThat(expected).as("Identidade explícita da cópia descartável provisionada para esta execução").matches("br-[a-z0-9-]+").isNotEqualTo("br-super-sound-b7urizmd");

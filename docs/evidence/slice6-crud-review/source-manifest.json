@@ -1,0 +1,42 @@
+{
+  "capturedAt": "2026-11-01T08:32:22.147291+00:00",
+  "scope": "Local sources and test fixtures; not a release or database proof",
+  "files": [
+    {
+      "path": "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\pom.xml",
+      "sha256": "3b19c50122248646ca9a29439c5419207ead25462620a38c478fc27251debc0c"
+    },
+    {
+      "path": "D:\\Developer\\praxis-plataform\\scripts\\workspace\\audit-java-resource-completeness.py",
+      "sha256": "7aa1588e27e60f54e1a83bcaa7d8460ef399a0bbd9aa21134820c92d90c8bf08"
+    },
+    {
+      "path": "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\src\\main\\java\\br\\com\\praxis\\ergonshowcase\\service\\LicencaEspecialGozoService.java",
+      "sha256": "2e25dfefc0ce57228a5e47607e3eb9782cfd0a8c685b679e870be779e8c0737a"
+    },
+    {
+      "path": "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\src\\main\\java\\br\\com\\praxis\\ergonshowcase\\service\\PeriodoAquisitivoLicencaEspecialService.java",
+      "sha256": "1d005d5cee9bc0c0b7e2ff812fc1837092059e7995d4b8dae531be9882b90983"
+    },
+    {
+      "path": "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\src\\main\\java\\br\\com\\praxis\\ergonshowcase\\service\\RadarTempoServicoLicencaEspecialService.java",
+      "sha256": "6b221f53c7f052458012bdd1a4d75431aac3e4b7b4ee960b41f361bee946d874"
+    },
+    {
+      "path": "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\src\\main\\java\\br\\com\\praxis\\ergonshowcase\\service\\TempoLicencaValidation.java",
+      "sha256": "1659548edd5eac5a02db4698de90177dece32e2d63ff36c22f8487bbd3699fa5"
+    },
+    {
+      "path": "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\src\\main\\java\\br\\com\\praxis\\ergonshowcase\\service\\VendaLicencaEspecialService.java",
+      "sha256": "ddd52fdc6049e5568559f2f93e6ba85fad03d5d79ce2f2639c07482edc6862d4"
+    },
+    {
+      "path": "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\src\\main\\java\\br\\com\\praxis\\ergonshowcase\\service\\AverbacaoTempoServicoService.java",
+      "sha256": "ebaefcb4cbc7b63f23912d5b6499a0df11b861caec2a0e19c09573d8e0ed91ee"
+    },
+    {
+      "path": "D:\\Developer\\praxis-plataform\\praxis-ergon-showcase\\src\\test\\java\\br\\com\\praxis\\ergonshowcase\\TempoLicencaCrudContractTest.java",
+      "sha256": "b1883a2f8719cc581b52f8da7dce876aafdb712a636dd2452a160d6506b4fe22"
+    }
+  ]
+}

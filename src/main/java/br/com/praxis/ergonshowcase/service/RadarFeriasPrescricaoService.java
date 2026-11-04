@@ -80,10 +80,6 @@ public class RadarFeriasPrescricaoService
     return mapper;
   }
 
-  @Override
-  protected OptionalLong getEntityResourceVersion(RadarFeriasPrescricao entity) {
-    return OptionalLong.of(entity.getVersion() != null ? entity.getVersion() : 0L);
-  }
 
   @Override
   public Sort getDefaultSort() {
@@ -110,7 +106,7 @@ public class RadarFeriasPrescricaoService
       return sort;
     }
     throw new ResponseStatusException(
-        HttpStatus.UNPROCESSABLE_ENTITY, "Cursor e localização exigem ordenação pela identidade.");
+        HttpStatus.BAD_REQUEST, "Cursor e localização exigem ordenação pela identidade.");
   }
 
   private String token(RadarFeriasPrescricao e) {
@@ -126,7 +122,7 @@ public class RadarFeriasPrescricaoService
       int size) {
     if (size < 1 || size > 200 || (after != null && before != null)) {
       throw new ResponseStatusException(
-          HttpStatus.UNPROCESSABLE_ENTITY, "Tamanho inválido ou cursores conflitantes.");
+          HttpStatus.BAD_REQUEST, "Tamanho inválido ou cursores conflitantes.");
     }
     Sort sort = identitySort(requested);
     boolean backwards = before != null;
@@ -143,7 +139,7 @@ public class RadarFeriasPrescricaoService
                         ? cb.greaterThan(root.get("id"), idValue)
                         : cb.lessThan(root.get("id"), idValue));
       } catch (IllegalArgumentException e) {
-        throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Cursor inválido.");
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cursor inválido.");
       }
     }
     Sort querySort = backwards ? Sort.by(sort.stream().map(Sort.Order::reverse).toList()) : sort;
@@ -180,16 +176,7 @@ public class RadarFeriasPrescricaoService
     return OptionalLong.of(getRepository().count(filtered(effectiveFilter).and(bound)));
   }
 
-  @Override
-  protected ResourceFilterAccessScope<RadarFeriasPrescricao> resolveResourceFilterAccessScope() {
-    var explicitOrgao = tenant.explicitOrgao();
-    if (explicitOrgao.isEmpty()) {
-      return ResourceFilterAccessScope.unrestricted();
-    }
-    int orgao = explicitOrgao.getAsInt();
-    return ResourceFilterAccessScope.restricted(
-        (root, query, cb) -> cb.equal(root.get("empCodigo"), orgao));
-  }
+
 
   @Override
   public RadarFeriasPrescricao findEntityById(Long id) {
@@ -197,7 +184,7 @@ public class RadarFeriasPrescricaoService
     if (entity.getEmpCodigo() != null
         && !java.util.Objects.equals(entity.getEmpCodigo(), tenant.orgao())) {
       throw new ResponseStatusException(
-          HttpStatus.UNPROCESSABLE_ENTITY,
+          HttpStatus.FORBIDDEN,
           "Órgão do registro no radar de prescrição diverge de X-Tenant.");
     }
     return entity;
@@ -329,12 +316,12 @@ public class RadarFeriasPrescricaoService
       CollectionExportRequest<RadarFeriasPrescricaoFilterDTO> request) {
     if (!getCollectionExportCapability().orElseThrow().formats().contains(request.format())) {
       throw new ResponseStatusException(
-          HttpStatus.UNPROCESSABLE_ENTITY, "Formato de exportação não suportado.");
+          HttpStatus.BAD_REQUEST, "Formato de exportação não suportado.");
     }
     int limit = request.maxRows() == null ? 1000 : Math.min(request.maxRows(), 1000);
     if (limit < 1) {
       throw new ResponseStatusException(
-          HttpStatus.UNPROCESSABLE_ENTITY, "Limite de linhas inválido.");
+          HttpStatus.BAD_REQUEST, "Limite de linhas inválido.");
     }
     CollectionExportScope requestedScope =
         request.scope() != null ? request.scope() : CollectionExportScope.AUTO;
@@ -415,7 +402,7 @@ public class RadarFeriasPrescricaoService
         Map.of("effectiveMaxRows", limit, "truncated", truncated, "scope", scopeName));
   }
 
-  private Sort resolveExportSort(Object rawSort) {
+  protected Sort resolveExportSort(Object rawSort) {
     if (rawSort instanceof Sort s && s.isSorted()) {
       return s;
     }
@@ -519,23 +506,17 @@ public class RadarFeriasPrescricaoService
         .build();
   }
 
-  @Override
-  public StatsSupportMode getGroupByStatsSupportMode() {
-    return StatsSupportMode.AUTO;
+  @Override protected java.util.Optional<org.praxisplatform.uischema.capability.ResourceStateSnapshot> toResourceStateSnapshot(RadarFeriasPrescricao e) {
+    return java.util.Optional.of(snapshotState(e));
+  }
+  private org.praxisplatform.uischema.capability.ResourceStateSnapshot snapshotState(RadarFeriasPrescricao e) {
+    String faixa=e.getFaixaUrgenciaPrescricao()==null ? "REGULAR" : e.getFaixaUrgenciaPrescricao();
+    boolean critica=java.util.Set.of("VENCIDO_PRESCRITO","CRITICO_30D").contains(faixa);
+    return new org.praxisplatform.uischema.capability.ResourceStateSnapshot(faixa,java.util.Map.of("urgenciaCriticaOuVencida",critica,
+        "possuiSaldoDescoberto",e.getSaldoSemProgramacao()!=null && e.getSaldoSemProgramacao()>0,
+        "emRiscoImediatoGovernanca",critica || Boolean.TRUE.equals(e.getEmRiscoAcumuloPeriodos())));
   }
 
-  @Override
-  public StatsSupportMode getTimeSeriesStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
+  @Override protected String resolveResourceKey() { return "administracao-pessoal.radar-ferias-prescricao"; }
 
-  @Override
-  public StatsSupportMode getDistributionStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
-
-  @Override
-  public StatsSupportMode getComparisonStatsSupportMode() {
-    return StatsSupportMode.AUTO;
-  }
 }

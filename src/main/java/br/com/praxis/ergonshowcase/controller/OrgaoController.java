@@ -37,7 +37,7 @@ import org.praxisplatform.uischema.fact.ResourceFact;
             titleField = "nome",
             displayLabelField = "nome",
             subtitleField = "fantasia",
-            metadataFields = {"municipio", "ufSigla", "ativa"}))
+            metadataFields = {"id", "telefone"}))
 @ApiGroup(
     value = "ergon",
     title = "Administração de pessoal",
@@ -98,15 +98,8 @@ public class OrgaoController
           String ifMatch,
       @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
           AlterarSituacaoOrgaoDTO dto) {
-    var p =
-        new org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition<Integer>(
-            commandEtags,
-            ifMatch,
-            commandScopes.currentScope(),
-            "administracao-pessoal.empresas",
-            id);
-    return withResourceVersion(
-        org.springframework.http.ResponseEntity.ok(), id, commands.ativarOrgao(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("ativar-orgao", id, ifMatch, null, dto,
+        condition -> commands.ativarOrgao(id, dto, condition)));
   }
 
   @org.springframework.web.bind.annotation.PostMapping("/{id}/actions/inativar-orgao")
@@ -137,15 +130,8 @@ public class OrgaoController
           String ifMatch,
       @jakarta.validation.Valid @org.springframework.web.bind.annotation.RequestBody
           AlterarSituacaoOrgaoDTO dto) {
-    var p =
-        new org.praxisplatform.uischema.concurrency.ResourceVersionUpdatePrecondition<Integer>(
-            commandEtags,
-            ifMatch,
-            commandScopes.currentScope(),
-            "administracao-pessoal.empresas",
-            id);
-    return withResourceVersion(
-        org.springframework.http.ResponseEntity.ok(), id, commands.inativarOrgao(id, dto, p));
+    return ErgonHttpContract.itemBody(executeVersionedItemCommand("inativar-orgao", id, ifMatch, null, dto,
+        condition -> commands.inativarOrgao(id, dto, condition)));
   }
 
   @org.springframework.web.bind.annotation.GetMapping("/{id}/ficha-institucional")
@@ -207,24 +193,9 @@ public class OrgaoController
                   description = "Quantidade de registros da página, de 1 a 200")
               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20")
               int size) {
-    service.findById(id);
-    if (page < 0 || size < 1 || size > 200)
-      throw new org.springframework.web.server.ResponseStatusException(
-          org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
-          "Paginação fora do limite permitido.");
-    var filter = new CargoFilterDTO();
-    filter.setEmpCodigo(id);
-    var result =
-        relatedService.filter(
-            filter,
-            org.springframework.data.domain.PageRequest.of(
-                page, size, relatedService.getDefaultSort()),
-            null);
-    return org.springframework.http.ResponseEntity.ok(
-        org.praxisplatform.uischema.rest.response.RestApiResponse.success(
-            result,
-            org.springframework.hateoas.Links.of(
-                org.springframework.hateoas.Link.of(ApiPaths.CARGOS, "collection"))));
+    ErgonHttpContract.childPage(page, size);
+    return filterRelatedChildResource(id, relatedService, ApiPaths.CARGOS, CargoFilterDTO::new,
+        (child, parent) -> { child.setEmpCodigo(parent); }, page, size);
   }
 
   @org.springframework.web.bind.annotation.GetMapping("/{id}/campos-customizados")
@@ -262,23 +233,8 @@ public class OrgaoController
                   description = "Quantidade de registros da página, de 1 a 200")
               @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20")
               int size) {
-    service.findById(id);
-    if (page < 0 || size < 1 || size > 200)
-      throw new org.springframework.web.server.ResponseStatusException(
-          org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
-          "Paginação fora do limite permitido.");
-    var filter = new DefinicaoCampoCustomizadoFilterDTO();
-    filter.setEmpCodigo(id);
-    var result =
-        camposCustomizadosService.filter(
-            filter,
-            org.springframework.data.domain.PageRequest.of(
-                page, size, camposCustomizadosService.getDefaultSort()),
-            null);
-    return org.springframework.http.ResponseEntity.ok(
-        org.praxisplatform.uischema.rest.response.RestApiResponse.success(
-            result,
-            org.springframework.hateoas.Links.of(
-                org.springframework.hateoas.Link.of(ApiPaths.CAMPOS_CUSTOMIZADOS, "collection"))));
+    ErgonHttpContract.childPage(page, size);
+    return filterRelatedChildResource(id, camposCustomizadosService, ApiPaths.CAMPOS_CUSTOMIZADOS, DefinicaoCampoCustomizadoFilterDTO::new,
+        (child, parent) -> { child.setEmpCodigo(parent); }, page, size);
   }
 }

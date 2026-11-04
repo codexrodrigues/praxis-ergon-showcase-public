@@ -1,0 +1,473 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------< br.com.praxis:praxis-ergon-showcase >-----------------
+[INFO] Building praxis-ergon-showcase 0.1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ praxis-ergon-showcase ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 3 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ praxis-ergon-showcase ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ praxis-ergon-showcase ---
+[INFO] skip non existing resourceDirectory D:\Developer\praxis-plataform\praxis-ergon-showcase\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ praxis-ergon-showcase ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 39 source files with javac [debug parameters release 21] to target\test-classes
+[INFO] /D:/Developer/praxis-plataform/praxis-ergon-showcase/src/test/java/br/com/praxis/ergonshowcase/CargoDraftContractTest.java: Some input files use unchecked or unsafe operations.
+[INFO] /D:/Developer/praxis-plataform/praxis-ergon-showcase/src/test/java/br/com/praxis/ergonshowcase/CargoDraftContractTest.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- surefire:3.5.6:test (default-test) @ praxis-ergon-showcase ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running br.com.praxis.ergonshowcase.AfastamentoContractTest
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (C:\Users\rodrigo.moreira\.m2\repository\net\bytebuddy\byte-buddy-agent\1.17.8\byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.260 s -- in br.com.praxis.ergonshowcase.AfastamentoContractTest
+[INFO] Running br.com.praxis.ergonshowcase.ApiPathsContractTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.161 s -- in br.com.praxis.ergonshowcase.ApiPathsContractTest
+[INFO] Running br.com.praxis.ergonshowcase.CampoCustomizadoContractTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.167 s -- in br.com.praxis.ergonshowcase.CampoCustomizadoContractTest
+[INFO] Running br.com.praxis.ergonshowcase.CargoDraftContractTest
+08:16:05.985 [main] INFO org.hibernate.validator.internal.util.Version -- HV000001: Hibernate Validator 8.0.3.Final
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.103 s -- in br.com.praxis.ergonshowcase.CargoDraftContractTest
+[INFO] Running br.com.praxis.ergonshowcase.CargoDraftPresentationContractTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.204 s -- in br.com.praxis.ergonshowcase.CargoDraftPresentationContractTest
+[INFO] Running br.com.praxis.ergonshowcase.DependenteContractTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.365 s -- in br.com.praxis.ergonshowcase.DependenteContractTest
+[INFO] Running br.com.praxis.ergonshowcase.ErgonBulkTwoPhaseProtocolHttpTest
+08:16:09.128 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+08:16:09.128 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+08:16:09.135 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 5 ms
+08:16:09.481 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+08:16:09.481 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+08:16:09.481 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.147 s -- in br.com.praxis.ergonshowcase.ErgonBulkTwoPhaseProtocolHttpTest
+[INFO] Running br.com.praxis.ergonshowcase.FeriasRuleEngineAndDeterminationsContractTest
+[INFO] Tests run: 63, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.096 s -- in br.com.praxis.ergonshowcase.FeriasRuleEngineAndDeterminationsContractTest
+[INFO] Running br.com.praxis.ergonshowcase.FeriasSlice5Phase1ContractTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.110 s -- in br.com.praxis.ergonshowcase.FeriasSlice5Phase1ContractTest
+[INFO] Running br.com.praxis.ergonshowcase.FeriasSlice5Phase2ContractTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.550 s -- in br.com.praxis.ergonshowcase.FeriasSlice5Phase2ContractTest
+[INFO] Running br.com.praxis.ergonshowcase.FrequenciaAfastamentoRuleEngineContractTest
+[INFO] Tests run: 41, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.838 s -- in br.com.praxis.ergonshowcase.FrequenciaAfastamentoRuleEngineContractTest
+[INFO] Running br.com.praxis.ergonshowcase.FrequenciaContractTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.043 s -- in br.com.praxis.ergonshowcase.FrequenciaContractTest
+[INFO] Running br.com.praxis.ergonshowcase.P4CustomFieldAdoptionRegressionTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.508 s -- in br.com.praxis.ergonshowcase.P4CustomFieldAdoptionRegressionTest
+[INFO] Running br.com.praxis.ergonshowcase.P4MetadataProjectionTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.322 s -- in br.com.praxis.ergonshowcase.P4MetadataProjectionTest
+[INFO] Running br.com.praxis.ergonshowcase.PraxisMetadataCompletenessTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.500 s -- in br.com.praxis.ergonshowcase.PraxisMetadataCompletenessTest
+[INFO] Running br.com.praxis.ergonshowcase.Rn013RuleEngineContractTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.394 s -- in br.com.praxis.ergonshowcase.Rn013RuleEngineContractTest
+[INFO] Running br.com.praxis.ergonshowcase.RuleCatalogExhaustivenessContractTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.231 s -- in br.com.praxis.ergonshowcase.RuleCatalogExhaustivenessContractTest
+[INFO] Running br.com.praxis.ergonshowcase.ShowcaseCanonicalConformanceGateTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.502 s -- in br.com.praxis.ergonshowcase.ShowcaseCanonicalConformanceGateTest
+[INFO] Running br.com.praxis.ergonshowcase.TempoLicencaBulkAnalyticsExportTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.028 s -- in br.com.praxis.ergonshowcase.TempoLicencaBulkAnalyticsExportTest
+[INFO] Running br.com.praxis.ergonshowcase.TempoLicencaCommandReceiptTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.756 s -- in br.com.praxis.ergonshowcase.TempoLicencaCommandReceiptTest
+[INFO] Running br.com.praxis.ergonshowcase.TempoLicencaCorrectionsContractTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.629 s -- in br.com.praxis.ergonshowcase.TempoLicencaCorrectionsContractTest
+[INFO] Running br.com.praxis.ergonshowcase.TempoLicencaCrudContractTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.193 s -- in br.com.praxis.ergonshowcase.TempoLicencaCrudContractTest
+[INFO] Running br.com.praxis.ergonshowcase.TempoLicencaIssue10PostgresTest
+08:16:26.485 [main] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- Detected a Windows x86_64 system
+08:16:26.489 [main] INFO io.zonky.test.db.postgres.embedded.DefaultPostgresBinaryResolver -- Detected distribution: 'Unknown'
+08:16:26.493 [main] INFO io.zonky.test.db.postgres.embedded.DefaultPostgresBinaryResolver -- System specific postgres binaries found: 'postgres-windows-x86_64.txz'
+08:16:27.283 [main] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- Extracting Postgres...
+08:16:38.080 [main] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- Postgres binaries at D:\AppData\Local\Temp\embedded-pg\PG-3942d5a1dcdbfebc27772e9e670d5d85
+08:16:39.534 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- The files belonging to this database system will be owned by user "rodrigo.moreira".
+08:16:39.535 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- This user must also own the server process.
+08:16:39.535 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 
+08:16:39.792 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- The database cluster will be initialized with locale "Portuguese_Brazil.1252".
+08:16:39.792 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- The default text search configuration will be set to "portuguese".
+08:16:39.792 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 
+08:16:39.792 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- Data page checksums are disabled.
+08:16:39.792 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 
+08:16:39.792 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- fixing permissions on existing directory D:/AppData/Local/Temp/junit-15333990003393463175/postgres ... ok
+08:16:39.810 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- creating subdirectories ... ok
+08:16:39.811 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- selecting dynamic shared memory implementation ... windows
+08:16:40.046 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- selecting default max_connections ... 100
+08:16:40.111 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- selecting default shared_buffers ... 128MB
+08:16:40.132 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- selecting default time zone ... America/Sao_Paulo
+08:16:40.147 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- creating configuration files ... ok
+08:16:41.933 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- running bootstrap script ... ok
+08:16:45.440 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- performing post-bootstrap initialization ... ok
+08:16:51.713 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- syncing data to disk ... ok
+08:16:51.714 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 
+08:16:51.714 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- Success. You can now start the database server using:
+08:16:51.714 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 
+08:16:51.714 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres --     ^"D^:^\AppData^\Local^\Temp^\embedded^-pg^\PG^-3942d5a1dcdbfebc27772e9e670d5d85^\bin^\pg^_ctl^" -D ^"D^:^\AppData^\Local^\Temp^\junit^-15333990003393463175^\postgres^" -l logfile start
+08:16:51.714 [initdb:pid(31628)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 
+08:16:51.724 [main] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 54d41fdd-179c-41e6-bb32-f941ae4cff2b initdb completed in 00:00:13.623
+08:16:51.765 [main] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 54d41fdd-179c-41e6-bb32-f941ae4cff2b postmaster started as Process[pid=3792, exitValue="not exited"] on port 59825.  Waiting up to PT10S for server startup to finish.
+08:16:52.030 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- waiting for server to start....2026-11-02 08:16:52.031 -03 [36792] LOG:  starting PostgreSQL 14.22, compiled by Visual C++ build 1944, 64-bit
+08:16:52.031 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:16:52.032 -03 [36792] LOG:  listening on IPv4 address "127.0.0.1", port 59825
+08:16:52.115 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:16:52.115 -03 [37848] LOG:  database system was shut down at 2026-11-02 08:16:45 -03
+08:16:52.188 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:16:52.189 -03 [36792] LOG:  database system is ready to accept connections
+08:16:52.222 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres --  done
+08:16:52.222 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- server started
+08:16:52.413 [main] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 54d41fdd-179c-41e6-bb32-f941ae4cff2b postmaster startup finished in 00:00:00.682
+08:16:53.620 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:16:53.620 -03 [23868] ERROR:  V6: reconcilie o período ativo vinculado a uma origem removida ou incompatível antes da migração
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:16:53.620 -03 [23868] CONTEXT:  função PL/pgSQL inline_code_block linha 24 em RAISE
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:16:53.620 -03 [23868] STATEMENT:  -- Slice 6 / Fase 2. Migração explícita do cadastro da V5 para os estados operacionais.
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	-- A V5 permitia ABONO sem uma FK de gozo. Não há associação determinística segura
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	-- para inventar durante a migração: reconciliação explícita é necessária se houver tais dados.
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	DO $$ BEGIN
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM vendas_licenca_especial WHERE modalidade='ABONO') THEN
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os registros ABONO sem origem de gozo antes da migração; associação automática não é segura';
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM vendas_licenca_especial
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      WHERE situacao<>'CANCELADO' AND dt_pagamento IS NOT NULL
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        AND (valor_indenizacao IS NULL OR valor_indenizacao<=0 OR mes_ano_folha IS NULL
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	             OR num_folha IS NULL OR num_folha<1)) THEN
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie a liquidação histórica sem valor positivo ou identificação da folha antes da migração';
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM licencas_especiais_gozo WHERE situacao<>'CANCELADO'
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      AND dias_gozo<>(COALESCE(dtfim,dtprevfim)-dtini+1)) THEN
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os dias e o intervalo efetivo dos gozos históricos antes da migração';
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM periodos_aquisitivos_licenca_especial WHERE situacao<>'CANCELADO'
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      AND ((dias_convertidos_dobro>0 AND dt_cnt_dobro IS NULL)
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        OR (dias_convertidos_dobro=0 AND dt_cnt_dobro IS NOT NULL))) THEN
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os dias e a data de efeito da conversão em dobro antes da migração';
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM periodos_aquisitivos_licenca_especial p
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      JOIN averbacoes_tempo_servico a ON a.id=p.averbacao_origem_id
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      WHERE p.situacao<>'CANCELADO' AND (a.situacao='CANCELADO' OR a.data_remocao IS NOT NULL
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        OR a.finalidade<>'LICENCA_ESPECIAL' OR a.dias_desaverbados=a.total_dias AND a.total_dias>0)) THEN
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie o período ativo vinculado a uma origem removida ou incompatível antes da migração';
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:53.621 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	END $$
+08:16:55.694 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:16:55.694 -03 [33820] ERROR:  V6: reconcilie o período ativo vinculado a uma origem removida ou incompatível antes da migração
+08:16:55.694 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:16:55.694 -03 [33820] CONTEXT:  função PL/pgSQL inline_code_block linha 24 em RAISE
+08:16:55.694 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:16:55.694 -03 [33820] STATEMENT:  -- Slice 6 / Fase 2. Migração explícita do cadastro da V5 para os estados operacionais.
+08:16:55.694 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	-- A V5 permitia ABONO sem uma FK de gozo. Não há associação determinística segura
+08:16:55.694 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	-- para inventar durante a migração: reconciliação explícita é necessária se houver tais dados.
+08:16:55.694 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	DO $$ BEGIN
+08:16:55.694 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM vendas_licenca_especial WHERE modalidade='ABONO') THEN
+08:16:55.694 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os registros ABONO sem origem de gozo antes da migração; associação automática não é segura';
+08:16:55.694 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:55.694 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM vendas_licenca_especial
+08:16:55.694 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      WHERE situacao<>'CANCELADO' AND dt_pagamento IS NOT NULL
+08:16:55.694 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        AND (valor_indenizacao IS NULL OR valor_indenizacao<=0 OR mes_ano_folha IS NULL
+08:16:55.694 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	             OR num_folha IS NULL OR num_folha<1)) THEN
+08:16:55.694 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie a liquidação histórica sem valor positivo ou identificação da folha antes da migração';
+08:16:55.694 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:55.694 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM licencas_especiais_gozo WHERE situacao<>'CANCELADO'
+08:16:55.694 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      AND dias_gozo<>(COALESCE(dtfim,dtprevfim)-dtini+1)) THEN
+08:16:55.694 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os dias e o intervalo efetivo dos gozos históricos antes da migração';
+08:16:55.694 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:55.694 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM periodos_aquisitivos_licenca_especial WHERE situacao<>'CANCELADO'
+08:16:55.695 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      AND ((dias_convertidos_dobro>0 AND dt_cnt_dobro IS NULL)
+08:16:55.695 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        OR (dias_convertidos_dobro=0 AND dt_cnt_dobro IS NOT NULL))) THEN
+08:16:55.695 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os dias e a data de efeito da conversão em dobro antes da migração';
+08:16:55.695 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:55.695 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM periodos_aquisitivos_licenca_especial p
+08:16:55.695 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      JOIN averbacoes_tempo_servico a ON a.id=p.averbacao_origem_id
+08:16:55.695 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      WHERE p.situacao<>'CANCELADO' AND (a.situacao='CANCELADO' OR a.data_remocao IS NOT NULL
+08:16:55.695 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        OR a.finalidade<>'LICENCA_ESPECIAL' OR a.dias_desaverbados=a.total_dias AND a.total_dias>0)) THEN
+08:16:55.695 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie o período ativo vinculado a uma origem removida ou incompatível antes da migração';
+08:16:55.695 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:55.695 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	END $$
+08:16:56.337 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:16:56.338 -03 [10328] ERROR:  V6: reconcilie o período ativo vinculado a uma origem removida ou incompatível antes da migração
+08:16:56.337 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:16:56.338 -03 [10328] CONTEXT:  função PL/pgSQL inline_code_block linha 24 em RAISE
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:16:56.338 -03 [10328] STATEMENT:  -- Slice 6 / Fase 2. Migração explícita do cadastro da V5 para os estados operacionais.
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	-- A V5 permitia ABONO sem uma FK de gozo. Não há associação determinística segura
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	-- para inventar durante a migração: reconciliação explícita é necessária se houver tais dados.
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	DO $$ BEGIN
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM vendas_licenca_especial WHERE modalidade='ABONO') THEN
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os registros ABONO sem origem de gozo antes da migração; associação automática não é segura';
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM vendas_licenca_especial
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      WHERE situacao<>'CANCELADO' AND dt_pagamento IS NOT NULL
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        AND (valor_indenizacao IS NULL OR valor_indenizacao<=0 OR mes_ano_folha IS NULL
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	             OR num_folha IS NULL OR num_folha<1)) THEN
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie a liquidação histórica sem valor positivo ou identificação da folha antes da migração';
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM licencas_especiais_gozo WHERE situacao<>'CANCELADO'
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      AND dias_gozo<>(COALESCE(dtfim,dtprevfim)-dtini+1)) THEN
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os dias e o intervalo efetivo dos gozos históricos antes da migração';
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM periodos_aquisitivos_licenca_especial WHERE situacao<>'CANCELADO'
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      AND ((dias_convertidos_dobro>0 AND dt_cnt_dobro IS NULL)
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        OR (dias_convertidos_dobro=0 AND dt_cnt_dobro IS NOT NULL))) THEN
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os dias e a data de efeito da conversão em dobro antes da migração';
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM periodos_aquisitivos_licenca_especial p
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      JOIN averbacoes_tempo_servico a ON a.id=p.averbacao_origem_id
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      WHERE p.situacao<>'CANCELADO' AND (a.situacao='CANCELADO' OR a.data_remocao IS NOT NULL
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        OR a.finalidade<>'LICENCA_ESPECIAL' OR a.dias_desaverbados=a.total_dias AND a.total_dias>0)) THEN
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie o período ativo vinculado a uma origem removida ou incompatível antes da migração';
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:56.338 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	END $$
+08:16:57.714 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:16:57.715 -03 [31460] ERROR:  V6: reconcilie o período ativo vinculado a uma origem removida ou incompatível antes da migração
+08:16:57.714 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:16:57.715 -03 [31460] CONTEXT:  função PL/pgSQL inline_code_block linha 24 em RAISE
+08:16:57.714 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:16:57.715 -03 [31460] STATEMENT:  -- Slice 6 / Fase 2. Migração explícita do cadastro da V5 para os estados operacionais.
+08:16:57.714 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	-- A V5 permitia ABONO sem uma FK de gozo. Não há associação determinística segura
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	-- para inventar durante a migração: reconciliação explícita é necessária se houver tais dados.
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	DO $$ BEGIN
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM vendas_licenca_especial WHERE modalidade='ABONO') THEN
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os registros ABONO sem origem de gozo antes da migração; associação automática não é segura';
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM vendas_licenca_especial
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      WHERE situacao<>'CANCELADO' AND dt_pagamento IS NOT NULL
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        AND (valor_indenizacao IS NULL OR valor_indenizacao<=0 OR mes_ano_folha IS NULL
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	             OR num_folha IS NULL OR num_folha<1)) THEN
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie a liquidação histórica sem valor positivo ou identificação da folha antes da migração';
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM licencas_especiais_gozo WHERE situacao<>'CANCELADO'
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      AND dias_gozo<>(COALESCE(dtfim,dtprevfim)-dtini+1)) THEN
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os dias e o intervalo efetivo dos gozos históricos antes da migração';
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM periodos_aquisitivos_licenca_especial WHERE situacao<>'CANCELADO'
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      AND ((dias_convertidos_dobro>0 AND dt_cnt_dobro IS NULL)
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        OR (dias_convertidos_dobro=0 AND dt_cnt_dobro IS NOT NULL))) THEN
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os dias e a data de efeito da conversão em dobro antes da migração';
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM periodos_aquisitivos_licenca_especial p
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      JOIN averbacoes_tempo_servico a ON a.id=p.averbacao_origem_id
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      WHERE p.situacao<>'CANCELADO' AND (a.situacao='CANCELADO' OR a.data_remocao IS NOT NULL
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        OR a.finalidade<>'LICENCA_ESPECIAL' OR a.dias_desaverbados=a.total_dias AND a.total_dias>0)) THEN
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie o período ativo vinculado a uma origem removida ou incompatível antes da migração';
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:57.715 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	END $$
+08:16:59.419 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:16:59.419 -03 [18176] ERROR:  V6: reconcilie a liquidação histórica sem valor positivo ou identificação da folha antes da migração
+08:16:59.419 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:16:59.419 -03 [18176] CONTEXT:  função PL/pgSQL inline_code_block linha 9 em RAISE
+08:16:59.419 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:16:59.419 -03 [18176] STATEMENT:  -- Slice 6 / Fase 2. Migração explícita do cadastro da V5 para os estados operacionais.
+08:16:59.419 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	-- A V5 permitia ABONO sem uma FK de gozo. Não há associação determinística segura
+08:16:59.419 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	-- para inventar durante a migração: reconciliação explícita é necessária se houver tais dados.
+08:16:59.419 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	DO $$ BEGIN
+08:16:59.419 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM vendas_licenca_especial WHERE modalidade='ABONO') THEN
+08:16:59.419 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os registros ABONO sem origem de gozo antes da migração; associação automática não é segura';
+08:16:59.419 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:59.419 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM vendas_licenca_especial
+08:16:59.419 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      WHERE situacao<>'CANCELADO' AND dt_pagamento IS NOT NULL
+08:16:59.419 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        AND (valor_indenizacao IS NULL OR valor_indenizacao<=0 OR mes_ano_folha IS NULL
+08:16:59.419 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	             OR num_folha IS NULL OR num_folha<1)) THEN
+08:16:59.419 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie a liquidação histórica sem valor positivo ou identificação da folha antes da migração';
+08:16:59.419 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:59.419 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM licencas_especiais_gozo WHERE situacao<>'CANCELADO'
+08:16:59.420 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      AND dias_gozo<>(COALESCE(dtfim,dtprevfim)-dtini+1)) THEN
+08:16:59.420 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os dias e o intervalo efetivo dos gozos históricos antes da migração';
+08:16:59.420 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:59.420 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM periodos_aquisitivos_licenca_especial WHERE situacao<>'CANCELADO'
+08:16:59.420 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      AND ((dias_convertidos_dobro>0 AND dt_cnt_dobro IS NULL)
+08:16:59.420 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        OR (dias_convertidos_dobro=0 AND dt_cnt_dobro IS NOT NULL))) THEN
+08:16:59.420 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os dias e a data de efeito da conversão em dobro antes da migração';
+08:16:59.420 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:59.420 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM periodos_aquisitivos_licenca_especial p
+08:16:59.420 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      JOIN averbacoes_tempo_servico a ON a.id=p.averbacao_origem_id
+08:16:59.420 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      WHERE p.situacao<>'CANCELADO' AND (a.situacao='CANCELADO' OR a.data_remocao IS NOT NULL
+08:16:59.420 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        OR a.finalidade<>'LICENCA_ESPECIAL' OR a.dias_desaverbados=a.total_dias AND a.total_dias>0)) THEN
+08:16:59.420 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie o período ativo vinculado a uma origem removida ou incompatível antes da migração';
+08:16:59.420 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:16:59.420 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	END $$
+08:17:00.512 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:00.513 -03 [37336] ERROR:  V6: reconcilie a liquidação histórica sem valor positivo ou identificação da folha antes da migração
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:00.513 -03 [37336] CONTEXT:  função PL/pgSQL inline_code_block linha 9 em RAISE
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:00.513 -03 [37336] STATEMENT:  -- Slice 6 / Fase 2. Migração explícita do cadastro da V5 para os estados operacionais.
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	-- A V5 permitia ABONO sem uma FK de gozo. Não há associação determinística segura
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	-- para inventar durante a migração: reconciliação explícita é necessária se houver tais dados.
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	DO $$ BEGIN
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM vendas_licenca_especial WHERE modalidade='ABONO') THEN
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os registros ABONO sem origem de gozo antes da migração; associação automática não é segura';
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM vendas_licenca_especial
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      WHERE situacao<>'CANCELADO' AND dt_pagamento IS NOT NULL
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        AND (valor_indenizacao IS NULL OR valor_indenizacao<=0 OR mes_ano_folha IS NULL
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	             OR num_folha IS NULL OR num_folha<1)) THEN
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie a liquidação histórica sem valor positivo ou identificação da folha antes da migração';
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM licencas_especiais_gozo WHERE situacao<>'CANCELADO'
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      AND dias_gozo<>(COALESCE(dtfim,dtprevfim)-dtini+1)) THEN
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os dias e o intervalo efetivo dos gozos históricos antes da migração';
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM periodos_aquisitivos_licenca_especial WHERE situacao<>'CANCELADO'
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      AND ((dias_convertidos_dobro>0 AND dt_cnt_dobro IS NULL)
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        OR (dias_convertidos_dobro=0 AND dt_cnt_dobro IS NOT NULL))) THEN
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os dias e a data de efeito da conversão em dobro antes da migração';
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM periodos_aquisitivos_licenca_especial p
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      JOIN averbacoes_tempo_servico a ON a.id=p.averbacao_origem_id
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      WHERE p.situacao<>'CANCELADO' AND (a.situacao='CANCELADO' OR a.data_remocao IS NOT NULL
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        OR a.finalidade<>'LICENCA_ESPECIAL' OR a.dias_desaverbados=a.total_dias AND a.total_dias>0)) THEN
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie o período ativo vinculado a uma origem removida ou incompatível antes da migração';
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:17:00.513 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	END $$
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:03.986 -03 [33628] ERROR:  V6: reconcilie os registros ABONO sem origem de gozo antes da migração; associação automática não é segura
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:03.986 -03 [33628] CONTEXT:  função PL/pgSQL inline_code_block linha 3 em RAISE
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:03.986 -03 [33628] STATEMENT:  -- Slice 6 / Fase 2. Migração explícita do cadastro da V5 para os estados operacionais.
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	-- A V5 permitia ABONO sem uma FK de gozo. Não há associação determinística segura
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	-- para inventar durante a migração: reconciliação explícita é necessária se houver tais dados.
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	DO $$ BEGIN
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM vendas_licenca_especial WHERE modalidade='ABONO') THEN
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os registros ABONO sem origem de gozo antes da migração; associação automática não é segura';
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM vendas_licenca_especial
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      WHERE situacao<>'CANCELADO' AND dt_pagamento IS NOT NULL
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        AND (valor_indenizacao IS NULL OR valor_indenizacao<=0 OR mes_ano_folha IS NULL
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	             OR num_folha IS NULL OR num_folha<1)) THEN
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie a liquidação histórica sem valor positivo ou identificação da folha antes da migração';
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM licencas_especiais_gozo WHERE situacao<>'CANCELADO'
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      AND dias_gozo<>(COALESCE(dtfim,dtprevfim)-dtini+1)) THEN
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os dias e o intervalo efetivo dos gozos históricos antes da migração';
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM periodos_aquisitivos_licenca_especial WHERE situacao<>'CANCELADO'
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      AND ((dias_convertidos_dobro>0 AND dt_cnt_dobro IS NULL)
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        OR (dias_convertidos_dobro=0 AND dt_cnt_dobro IS NOT NULL))) THEN
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os dias e a data de efeito da conversão em dobro antes da migração';
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM periodos_aquisitivos_licenca_especial p
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      JOIN averbacoes_tempo_servico a ON a.id=p.averbacao_origem_id
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      WHERE p.situacao<>'CANCELADO' AND (a.situacao='CANCELADO' OR a.data_remocao IS NOT NULL
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        OR a.finalidade<>'LICENCA_ESPECIAL' OR a.dias_desaverbados=a.total_dias AND a.total_dias>0)) THEN
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie o período ativo vinculado a uma origem removida ou incompatível antes da migração';
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:17:03.986 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	END $$
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:05.860 -03 [24396] ERROR:  V6: reconcilie os dias e o intervalo efetivo dos gozos históricos antes da migração
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:05.860 -03 [24396] CONTEXT:  função PL/pgSQL inline_code_block linha 13 em RAISE
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:05.860 -03 [24396] STATEMENT:  -- Slice 6 / Fase 2. Migração explícita do cadastro da V5 para os estados operacionais.
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	-- A V5 permitia ABONO sem uma FK de gozo. Não há associação determinística segura
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	-- para inventar durante a migração: reconciliação explícita é necessária se houver tais dados.
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	DO $$ BEGIN
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM vendas_licenca_especial WHERE modalidade='ABONO') THEN
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os registros ABONO sem origem de gozo antes da migração; associação automática não é segura';
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM vendas_licenca_especial
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      WHERE situacao<>'CANCELADO' AND dt_pagamento IS NOT NULL
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        AND (valor_indenizacao IS NULL OR valor_indenizacao<=0 OR mes_ano_folha IS NULL
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	             OR num_folha IS NULL OR num_folha<1)) THEN
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie a liquidação histórica sem valor positivo ou identificação da folha antes da migração';
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM licencas_especiais_gozo WHERE situacao<>'CANCELADO'
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      AND dias_gozo<>(COALESCE(dtfim,dtprevfim)-dtini+1)) THEN
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os dias e o intervalo efetivo dos gozos históricos antes da migração';
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM periodos_aquisitivos_licenca_especial WHERE situacao<>'CANCELADO'
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      AND ((dias_convertidos_dobro>0 AND dt_cnt_dobro IS NULL)
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        OR (dias_convertidos_dobro=0 AND dt_cnt_dobro IS NOT NULL))) THEN
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os dias e a data de efeito da conversão em dobro antes da migração';
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM periodos_aquisitivos_licenca_especial p
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      JOIN averbacoes_tempo_servico a ON a.id=p.averbacao_origem_id
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      WHERE p.situacao<>'CANCELADO' AND (a.situacao='CANCELADO' OR a.data_remocao IS NOT NULL
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        OR a.finalidade<>'LICENCA_ESPECIAL' OR a.dias_desaverbados=a.total_dias AND a.total_dias>0)) THEN
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie o período ativo vinculado a uma origem removida ou incompatível antes da migração';
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:17:05.860 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	END $$
+08:17:06.595 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:06.596 -03 [25992] ERROR:  V6: reconcilie os dias e a data de efeito da conversão em dobro antes da migração
+08:17:06.595 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:06.596 -03 [25992] CONTEXT:  função PL/pgSQL inline_code_block linha 18 em RAISE
+08:17:06.595 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:06.596 -03 [25992] STATEMENT:  -- Slice 6 / Fase 2. Migração explícita do cadastro da V5 para os estados operacionais.
+08:17:06.595 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	-- A V5 permitia ABONO sem uma FK de gozo. Não há associação determinística segura
+08:17:06.595 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	-- para inventar durante a migração: reconciliação explícita é necessária se houver tais dados.
+08:17:06.595 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	DO $$ BEGIN
+08:17:06.595 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM vendas_licenca_especial WHERE modalidade='ABONO') THEN
+08:17:06.595 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os registros ABONO sem origem de gozo antes da migração; associação automática não é segura';
+08:17:06.595 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:17:06.595 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM vendas_licenca_especial
+08:17:06.595 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      WHERE situacao<>'CANCELADO' AND dt_pagamento IS NOT NULL
+08:17:06.595 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        AND (valor_indenizacao IS NULL OR valor_indenizacao<=0 OR mes_ano_folha IS NULL
+08:17:06.595 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	             OR num_folha IS NULL OR num_folha<1)) THEN
+08:17:06.595 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie a liquidação histórica sem valor positivo ou identificação da folha antes da migração';
+08:17:06.595 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:17:06.596 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM licencas_especiais_gozo WHERE situacao<>'CANCELADO'
+08:17:06.596 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      AND dias_gozo<>(COALESCE(dtfim,dtprevfim)-dtini+1)) THEN
+08:17:06.596 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os dias e o intervalo efetivo dos gozos históricos antes da migração';
+08:17:06.596 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:17:06.596 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM periodos_aquisitivos_licenca_especial WHERE situacao<>'CANCELADO'
+08:17:06.596 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      AND ((dias_convertidos_dobro>0 AND dt_cnt_dobro IS NULL)
+08:17:06.596 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        OR (dias_convertidos_dobro=0 AND dt_cnt_dobro IS NOT NULL))) THEN
+08:17:06.596 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie os dias e a data de efeito da conversão em dobro antes da migração';
+08:17:06.596 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:17:06.596 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  IF EXISTS (SELECT 1 FROM periodos_aquisitivos_licenca_especial p
+08:17:06.596 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      JOIN averbacoes_tempo_servico a ON a.id=p.averbacao_origem_id
+08:17:06.596 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	      WHERE p.situacao<>'CANCELADO' AND (a.situacao='CANCELADO' OR a.data_remocao IS NOT NULL
+08:17:06.596 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	        OR a.finalidade<>'LICENCA_ESPECIAL' OR a.dias_desaverbados=a.total_dias AND a.total_dias>0)) THEN
+08:17:06.596 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	    RAISE EXCEPTION 'V6: reconcilie o período ativo vinculado a uma origem removida ou incompatível antes da migração';
+08:17:06.596 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	  END IF;
+08:17:06.596 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 	END $$
+08:17:11.627 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:11.628 -03 [28408] ERROR:  duplicate key value violates unique constraint "ux_abono_licenca_ativo"
+08:17:11.628 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:11.628 -03 [28408] DETAIL:  Key (licenca_especial_gozo_id)=(91) already exists.
+08:17:11.628 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:11.628 -03 [28408] STATEMENT:  insert into vendas_licenca_especial(id,emp_codigo,numfunc,numvinc,descricao,dtini,periodo_aquisitivo_licenca_id,chave_peraqlicesp,dias_vendidos,modalidade,licenca_especial_gozo_id,situacao) values(93,1,1001,1,'Reemissão','2026-01-01',91,1,2,'ABONO_JUNTO_GOZO',91,'AUTORIZADA')
+08:17:11.630 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:11.631 -03 [28408] ERROR:  new row for relation "vendas_licenca_especial" violates check constraint "vendas_licenca_especial_check1"
+08:17:11.631 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:11.631 -03 [28408] DETAIL:  Failing row contains (91, 1, 1001, 1, Teste, 2026-01-01, null, AUTORIZADA, null, null, null, 91, 1, 10, 2026-01-05, 1234.56, ABONO_JUNTO_GOZO, 2026-01-01, 1, {}, 1, 2026-11-02 08:17:11.513584-03, 2026-11-02 08:17:11.513584-03, 91, 2026-01-06).
+08:17:11.631 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:11.631 -03 [28408] STATEMENT:  update vendas_licenca_especial set situacao='AUTORIZADA' where id=91
+08:17:11.632 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:11.632 -03 [28408] ERROR:  new row for relation "vendas_licenca_especial" violates check constraint "vendas_licenca_especial_check2"
+08:17:11.632 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:11.632 -03 [28408] DETAIL:  Failing row contains (91, 1, 1001, 1, Teste, 2026-01-01, null, ESTORNADA, null, null, null, 91, 1, 10, 2026-01-05, 1234.56, ABONO_JUNTO_GOZO, 2026-01-01, 1, {}, 1, 2026-11-02 08:17:11.513584-03, 2026-11-02 08:17:11.513584-03, 91, 2026-01-04).
+08:17:11.632 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:11.632 -03 [28408] STATEMENT:  update vendas_licenca_especial set dt_estorno='2026-01-04' where id=91
+08:17:15.393 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:15.393 -03 [36792] LOG:  received fast shutdown request
+08:17:15.393 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:15.394 -03 [36792] LOG:  aborting any active transactions
+08:17:15.400 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:15.400 -03 [36792] LOG:  background worker "logical replication launcher" (PID 39084) exited with exit code 1
+08:17:15.401 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:15.401 -03 [39384] LOG:  shutting down
+08:17:15.594 [postgres:pid(3792)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 2026-11-02 08:17:15.595 -03 [36792] LOG:  database system is shut down
+08:17:15.623 [pg_ctl:pid(39580)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- waiting for server to shut down.... done
+08:17:15.623 [pg_ctl:pid(39580)] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- server stopped
+08:17:15.626 [main] INFO io.zonky.test.db.postgres.embedded.EmbeddedPostgres -- 54d41fdd-179c-41e6-bb32-f941ae4cff2b shut down postmaster in 00:00:00.268
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 53.36 s -- in br.com.praxis.ergonshowcase.TempoLicencaIssue10PostgresTest
+[INFO] Running br.com.praxis.ergonshowcase.TempoLicencaIssue10RegressionTest
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.546 s -- in br.com.praxis.ergonshowcase.TempoLicencaIssue10RegressionTest
+[INFO] Running br.com.praxis.ergonshowcase.TempoLicencaRemainingFindingsTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.261 s -- in br.com.praxis.ergonshowcase.TempoLicencaRemainingFindingsTest
+[INFO] Running br.com.praxis.ergonshowcase.TempoLicencaSevenFixesRegressionTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.214 s -- in br.com.praxis.ergonshowcase.TempoLicencaSevenFixesRegressionTest
+[INFO] Running br.com.praxis.ergonshowcase.TempoLicencaSlice6Phase1ContractTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.033 s -- in br.com.praxis.ergonshowcase.TempoLicencaSlice6Phase1ContractTest
+[INFO] Running br.com.praxis.ergonshowcase.TempoLicencaSlice6Phase2Test
+[INFO] Tests run: 22, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.306 s -- in br.com.praxis.ergonshowcase.TempoLicencaSlice6Phase2Test
+[INFO] Running br.com.praxis.ergonshowcase.TenantRequestValidationTest
+08:17:21.214 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+08:17:21.214 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+08:17:21.215 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 1 ms
+08:17:21.226 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+08:17:21.226 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+08:17:21.226 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+08:17:21.232 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+08:17:21.232 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+08:17:21.232 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+08:17:21.239 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+08:17:21.239 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+08:17:21.239 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+08:17:21.255 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+08:17:21.255 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+08:17:21.255 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+08:17:21.260 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+08:17:21.260 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+08:17:21.260 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+08:17:21.266 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+08:17:21.266 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+08:17:21.266 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+08:17:21.273 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+08:17:21.273 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+08:17:21.273 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+08:17:21.278 [main] INFO org.springframework.mock.web.MockServletContext -- Initializing Spring TestDispatcherServlet ''
+08:17:21.279 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Initializing Servlet ''
+08:17:21.279 [main] INFO org.springframework.test.web.servlet.TestDispatcherServlet -- Completed initialization in 0 ms
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.106 s -- in br.com.praxis.ergonshowcase.TenantRequestValidationTest
+[INFO] Running br.com.praxis.ergonshowcase.VinculoDependenteCustomFieldRuleEngineContractTest
+[INFO] Tests run: 28, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.487 s -- in br.com.praxis.ergonshowcase.VinculoDependenteCustomFieldRuleEngineContractTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 357, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  01:46 min
+[INFO] Finished at: 2026-11-02T08:17:23-03:00
+[INFO] ------------------------------------------------------------------------

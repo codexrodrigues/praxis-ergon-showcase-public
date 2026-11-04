@@ -66,7 +66,7 @@ import org.springframework.web.bind.annotation.*;
             titleField = "descricao",
             displayLabelField = "descricao",
             subtitleField = "id",
-            metadataFields = {"geraIr", "idadeLimite"}),
+            metadataFields = {"documentoLegalNumero"}),
     quickFilters = {
       @QuickFilter(
           id = "deduz-irrf",

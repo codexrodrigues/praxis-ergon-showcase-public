@@ -26,12 +26,7 @@ public abstract class OrgaoDados {
       group = "Identificação",
       order = 10,
       icon = "apartment")
-  @ResourceReference(
-      resourceKey = "administracao-pessoal.empresas",
-      valueField = "id",
-      surfaceId = "ficha-institucional",
-      previewSurfaceId = "ficha-institucional",
-      detailPresentation = "drawer")
+
   private String nome;
 
   @Size(max = 60)

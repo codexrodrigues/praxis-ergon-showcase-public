@@ -76,10 +76,9 @@ public class CreateVinculoDTO extends VinculoDados {
   private Integer empCodigo;
 
   @NotNull
-  @PastOrPresent
   @Schema(
       description =
-          "Data do início efetivo de exercício que fundamenta a inclusão de um vínculo ativo.")
+          "Data registrada ou programada para início do exercício. Não pode anteceder a posse quando esta foi informada.")
   @UISchema(
       label = "Início de exercício",
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,

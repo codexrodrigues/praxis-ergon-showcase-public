@@ -19,7 +19,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
     titleField = "nome",
     displayLabelField = "nome",
     subtitleField = "nomeSocial",
-    metadataFields = {"id", "escolaridade", "cidadeender", "ufender"})
+    metadataFields = {"id", "tratamento"})
 public class ServidorPessoaResponseDTO extends ServidorPessoaDados {
   @Schema(description = "Quantidade de canais preenchidos entre telefone, celular e e-mail (zero a três). Mede presença cadastral, não validade, consentimento ou possibilidade de contato.", accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(label = "Canais de contato", group = "Endereço e contato", readOnly = true,
@@ -80,4 +80,16 @@ public class ServidorPessoaResponseDTO extends ServidorPessoaDados {
       aiUsage =
           @AiUsagePolicy(visibility = AiVisibilityMode.MASK, trainingUse = AiTrainingUseMode.DENY))
   private Boolean possuiDeficienciaPcD;
+  @Override
+  @Schema(
+      description =
+          "Nome civil completo que identifica a pessoa titular de um ou mais vínculos funcionais.", accessMode = Schema.AccessMode.READ_ONLY)
+  @org.praxisplatform.uischema.annotation.ResourceReference(
+      resourceKey = "administracao-pessoal.funcionarios",
+      valueField = "id",
+      surfaceId = "ficha-cadastral",
+      previewSurfaceId = "ficha-cadastral",
+      detailPresentation = "drawer")
+  public String getNome() { return super.getNome(); }
+
 }
