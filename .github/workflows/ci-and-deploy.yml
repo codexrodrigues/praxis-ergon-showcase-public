@@ -21,12 +21,13 @@ concurrency:
 
 permissions:
   contents: read
+  packages: write
 
 jobs:
   ci:
-    name: Build & Offline Conformance Suite (Java 21)
+    name: Build, Offline Conformance Suite & Image (Java 21)
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -67,11 +68,30 @@ jobs:
           check_artifact "praxis-config-starter" "$(read_property praxis.config.version)"
           check_artifact "praxis-rules-engine" "$(read_property praxis.rules.version)"
 
-      - name: Run offline JUnit conformance & security test suite
-        run: mvn -B test
+      - name: Compile and run offline JUnit conformance & security test suite
+        run: mvn -B test -Dtest=ErgonConfigAccessTest,TenantRequestValidationTest,ShowcaseCanonicalConformanceGateTest,ErgonPolicyStudioContractTest,ErgonReactiveDeterminationMetadataTest
 
       - name: Package Spring Boot executable JAR
         run: mvn -B package -DskipTests
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push runtime Docker image to GHCR
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          IMAGE="ghcr.io/codexrodrigues/praxis-ergon-showcase"
+          docker build -f Dockerfile.prebuilt \
+            -t "${IMAGE}:latest" \
+            -t "${IMAGE}:${GITHUB_SHA}" .
+          docker push "${IMAGE}:latest"
+          docker push "${IMAGE}:${GITHUB_SHA}"
 
   deploy-render:
     name: Deploy to Render (Starter) & Smoke Health Check
@@ -100,7 +120,7 @@ jobs:
               -H "Authorization: Bearer ${RENDER_API_KEY}" \
               -H "Accept: application/json" \
               -H "Content-Type: application/json" \
-              -d '{"clearCache":"do_not_clear"}' >/dev/null
+              -d "{\"imageUrl\":\"ghcr.io/codexrodrigues/praxis-ergon-showcase:${GITHUB_SHA}\"}" >/dev/null
             echo "triggered=true" >> "$GITHUB_OUTPUT"
             echo "Triggered Render deploy via Render REST API."
           else

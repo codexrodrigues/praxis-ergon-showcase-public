@@ -1,0 +1,8 @@
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+RUN install -d -m 0700 /root/.ssh
+ENV PORT=8080
+ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=60.0 -XX:InitialRAMPercentage=25.0 -XX:+ExitOnOutOfMemoryError -Dfile.encoding=UTF-8"
+COPY target/*.jar /app/app.jar
+EXPOSE 8080
+CMD ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]
