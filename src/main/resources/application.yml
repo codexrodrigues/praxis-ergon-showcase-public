@@ -69,7 +69,7 @@ showcase:
     username: ${SHOWCASE_USERNAME}
     password: ${SHOWCASE_PASSWORD}
     public-read-enabled: ${SHOWCASE_PUBLIC_READ_ENABLED:false}
-    cors-origins: ${SHOWCASE_CORS_ORIGINS:https://praxis-ergon-showcase.web.app,https://praxis-ergon-showcase.firebaseapp.com,http://localhost:4200,http://localhost:4310}
-    config-origins: ${SHOWCASE_CONFIG_ORIGINS:https://praxis-ergon-showcase.web.app,https://praxis-ergon-showcase.firebaseapp.com,http://localhost:4200,http://localhost:4310}
+    cors-origins: ${SHOWCASE_CORS_ORIGINS:https://praxis-ergon-showcase.web.app,https://praxis-ergon-showcase.firebaseapp.com,http://localhost:4200,http://localhost:4303,http://localhost:4310}
+    config-origins: ${SHOWCASE_CONFIG_ORIGINS:https://praxis-ergon-showcase.web.app,https://praxis-ergon-showcase.firebaseapp.com,http://localhost:4200,http://localhost:4303,http://localhost:4310}
     policy-read-orgs: ${SHOWCASE_POLICY_READ_ORGS:}
     policy-publish-orgs: ${SHOWCASE_POLICY_PUBLISH_ORGS:}

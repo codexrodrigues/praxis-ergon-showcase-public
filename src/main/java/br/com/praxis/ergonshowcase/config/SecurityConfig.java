@@ -39,6 +39,8 @@ public class SecurityConfig {
       "https://praxis-ergon-showcase.firebaseapp.com",
       "http://localhost:4200",
       "http://127.0.0.1:4200",
+      "http://localhost:4303",
+      "http://127.0.0.1:4303",
       "http://localhost:4310",
       "http://127.0.0.1:4310");
   private static final Set<String> CONFIG_ROLES = Set.of(
@@ -128,6 +130,7 @@ public class SecurityConfig {
         "ETag",
         "X-Schema-Hash",
         "X-Data-Version",
+        "X-XSRF-TOKEN",
         "Location",
         "Content-Disposition"));
     cors.setAllowCredentials(true);
@@ -140,12 +143,21 @@ public class SecurityConfig {
   @Bean
   SecurityFilterChain chain(HttpSecurity http,
       @Value("${showcase.security.config-origins:}") Set<String> configOrigins,
-      @Value("${showcase.security.public-read-enabled:false}") boolean publicReadEnabled) throws Exception {
+      @Value("${showcase.security.public-read-enabled:false}") boolean publicReadEnabled,
+      @Value("${showcase.security.policy-read-orgs:}") String policyReadOrgs) throws Exception {
     if (publicReadEnabled) {
-      http.anonymous(anon -> anon.authorities("ROLE_ANONYMOUS", "ERGON_READ"));
+      var anonAuthorities = new ArrayList<String>(List.of("ROLE_ANONYMOUS", "ERGON_READ"));
+      anonAuthorities.addAll(
+          PolicyStudioAccess.authorities(policyReadOrgs.isBlank() ? "1,2,3" : policyReadOrgs, ""));
+      http.anonymous(anon -> anon.authorities(anonAuthorities.toArray(String[]::new)));
     }
     return http.csrf(c -> c.disable())
         .cors(Customizer.withDefaults())
+        .headers(headers -> headers
+            .frameOptions(frame -> frame.deny())
+            .contentTypeOptions(Customizer.withDefaults())
+            .referrerPolicy(ref -> ref.policy(
+                org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)))
         .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
             a -> {

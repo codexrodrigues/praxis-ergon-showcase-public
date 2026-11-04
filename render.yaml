@@ -24,10 +24,12 @@ services:
         value: "http://127.0.0.1:8080"
       - key: SHOWCASE_PUBLIC_READ_ENABLED
         value: "true"
+      - key: SHOWCASE_POLICY_READ_ORGS
+        value: "1,2,3"
       - key: SHOWCASE_CORS_ORIGINS
-        value: "https://praxis-ergon-showcase.web.app,https://praxis-ergon-showcase.firebaseapp.com,http://localhost:4200,http://localhost:4310"
+        value: "https://praxis-ergon-showcase.web.app,https://praxis-ergon-showcase.firebaseapp.com,http://localhost:4200,http://localhost:4303,http://localhost:4310"
       - key: SHOWCASE_CONFIG_ORIGINS
-        value: "https://praxis-ergon-showcase.web.app,https://praxis-ergon-showcase.firebaseapp.com,http://localhost:4200,http://localhost:4310"
+        value: "https://praxis-ergon-showcase.web.app,https://praxis-ergon-showcase.firebaseapp.com,http://localhost:4200,http://localhost:4303,http://localhost:4310"
       - key: SPRING_DATASOURCE_URL
         sync: false
       - key: SPRING_DATASOURCE_USERNAME

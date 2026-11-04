@@ -80,13 +80,14 @@ class ErgonConfigAccessTest {
         "https://praxis-ergon-showcase.web.app",
         "https://praxis-ergon-showcase.firebaseapp.com",
         "http://localhost:4200",
+        "http://localhost:4303",
         "http://localhost:4310",
         "https://custom-ergon.example.test",
         ORIGIN);
     assertThat(cors.getAllowedHeaders()).contains(
         "Authorization", "X-Tenant", "X-Ergon-Orgao", "If-Match", "Idempotency-Key");
     assertThat(cors.getExposedHeaders()).contains(
-        "ETag", "X-Schema-Hash", "X-Data-Version", "Location");
+        "ETag", "X-Schema-Hash", "X-Data-Version", "X-XSRF-TOKEN", "Location");
     assertThat(cors.getAllowCredentials()).isTrue();
   }
 
