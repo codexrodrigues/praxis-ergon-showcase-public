@@ -29,10 +29,15 @@ springdoc:
   swagger-ui:
     oauth2-redirect-url: http://localhost:${PORT:${SERVER_PORT:8080}}/swagger-ui/oauth2-redirect.html
   cache:
-    disabled: true
+    disabled: ${SPRINGDOC_CACHE_DISABLED:false}
   api-docs:
     version: OPENAPI_3_0
+    groups:
+      enabled: ${SPRINGDOC_API_DOCS_GROUPS_ENABLED:true}
   writer-with-order-by-keys: true
+app:
+  openapi:
+    internal-base-url: ${APP_OPENAPI_INTERNAL_BASE_URL:}
 config:
   datasource:
     url: ${CONFIG_DATASOURCE_URL}
@@ -40,6 +45,9 @@ config:
     password: ${CONFIG_DATASOURCE_PASSWORD}
     schema: ${CONFIG_DATASOURCE_SCHEMA:public}
 praxis:
+  openapi:
+    http:
+      read-timeout: ${PRAXIS_OPENAPI_HTTP_READ_TIMEOUT:60s}
   ai:
     registry:
       bootstrap:

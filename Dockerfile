@@ -14,7 +14,7 @@ ENV PORT=8080
 # Let the container memory limit govern metaspace instead of imposing a second,
 # undersized ceiling. Exit-on-OOM lets Render replace a failed process promptly
 # instead of leaving an HTTP port backed by a degraded JVM.
-ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=60.0 -XX:InitialRAMPercentage=25.0 -XX:+ExitOnOutOfMemoryError -Dfile.encoding=UTF-8"
+ENV JAVA_OPTS="-XX:+UseSerialGC -Xms96m -Xmx220m -XX:MinHeapFreeRatio=5 -XX:MaxHeapFreeRatio=15 -XX:-ShrinkHeapInSteps -XX:ReservedCodeCacheSize=24m -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xss256k -XX:MaxDirectMemorySize=10m -XX:+ExitOnOutOfMemoryError -Dserver.tomcat.threads.max=15 -Dserver.tomcat.threads.min-spare=2 -Dspring.jmx.enabled=false -Dspring.datasource.hikari.maximum-pool-size=2 -Dspring.datasource.hikari.minimum-idle=1 -Dfile.encoding=UTF-8"
 COPY --from=build /app/target/*.jar /app/app.jar
 EXPOSE 8080
 CMD ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]

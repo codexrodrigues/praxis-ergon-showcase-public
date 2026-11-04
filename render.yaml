@@ -8,6 +8,20 @@ services:
     envVars:
       - key: PORT
         value: "8080"
+      - key: SERVER_PORT
+        value: "8080"
+      - key: SPRING_MAIN_LAZY_INITIALIZATION
+        value: "true"
+      - key: SPRING_AUTOCONFIGURE_EXCLUDE
+        value: "org.praxisplatform.uischema.configuration.BulkOperationLifecycleAutoConfiguration"
+      - key: SPRINGDOC_CACHE_DISABLED
+        value: "false"
+      - key: SPRINGDOC_API_DOCS_GROUPS_ENABLED
+        value: "true"
+      - key: PRAXIS_OPENAPI_HTTP_READ_TIMEOUT
+        value: "60s"
+      - key: APP_OPENAPI_INTERNAL_BASE_URL
+        value: "http://127.0.0.1:8080"
       - key: SHOWCASE_PUBLIC_READ_ENABLED
         value: "true"
       - key: SHOWCASE_CORS_ORIGINS

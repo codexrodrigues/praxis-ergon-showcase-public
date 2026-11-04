@@ -141,6 +141,9 @@ public class SecurityConfig {
   SecurityFilterChain chain(HttpSecurity http,
       @Value("${showcase.security.config-origins:}") Set<String> configOrigins,
       @Value("${showcase.security.public-read-enabled:false}") boolean publicReadEnabled) throws Exception {
+    if (publicReadEnabled) {
+      http.anonymous(anon -> anon.authorities("ROLE_ANONYMOUS", "ERGON_READ"));
+    }
     return http.csrf(c -> c.disable())
         .cors(Customizer.withDefaults())
         .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -148,7 +151,7 @@ public class SecurityConfig {
             a -> {
               a.requestMatchers(HttpMethod.OPTIONS, "/**")
                   .permitAll()
-                  .requestMatchers("/actuator/health", "/v3/api-docs/**")
+                  .requestMatchers("/actuator/health", "/v3/api-docs/**", "/error")
                   .permitAll()
                     .requestMatchers(ApiPaths.PRAXIS_CONFIG, ApiPaths.PRAXIS_CONFIG + "/**",
                         ApiPaths.POLICY_STUDIO + ApiPaths.POLICY_STUDIO_COMPOSITION)
@@ -195,5 +198,25 @@ public class SecurityConfig {
             })
         .httpBasic(b -> {})
         .build();
+  }
+
+  /**
+   * Garante que {@code DynamicSwaggerConfig} registre os {@code GroupedOpenApi} individuais
+   * antes da inicialização de {@code MultipleOpenApiWebMvcResource}, inclusive quando
+   * {@code spring.main.lazy-initialization=true} estiver habilitado em containers enxutos.
+   */
+  @Bean
+  static org.springframework.beans.factory.config.BeanFactoryPostProcessor eagerDynamicSwaggerConfigPostProcessor() {
+    return beanFactory -> {
+      for (String name : beanFactory.getBeanDefinitionNames()) {
+        if (name.toLowerCase(Locale.ROOT).contains("dynamicswaggerconfig")) {
+          beanFactory.getBeanDefinition(name).setLazyInit(false);
+        }
+      }
+      if (beanFactory.containsBeanDefinition("multipleOpenApiResource")
+          && beanFactory.containsBeanDefinition("dynamicSwaggerConfig")) {
+        beanFactory.getBeanDefinition("multipleOpenApiResource").setDependsOn("dynamicSwaggerConfig");
+      }
+    };
   }
 }
