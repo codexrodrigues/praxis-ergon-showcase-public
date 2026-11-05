@@ -19,7 +19,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
     titleField = "nome",
     displayLabelField = "nome",
     subtitleField = "nomeSocial",
-    metadataFields = {"id", "tratamento"})
+    metadataFields = {"cpf", "idadeAnos"})
 public class ServidorPessoaResponseDTO extends ServidorPessoaDados {
   @Schema(description = "Quantidade de canais preenchidos entre telefone, celular e e-mail (zero a três). Mede presença cadastral, não validade, consentimento ou possibilidade de contato.", accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(label = "Canais de contato", group = "Endereço e contato", readOnly = true,
@@ -56,7 +56,7 @@ public class ServidorPessoaResponseDTO extends ServidorPessoaDados {
       description = "Idade civil em anos completos na data atual.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Idade",
+      label = "Idade", icon = "cake", type = org.praxisplatform.uischema.FieldDataType.NUMBER, numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER,
       group = "Identificação civil",
       tableHidden = true,
       readOnly = true,

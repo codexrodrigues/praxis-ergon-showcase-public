@@ -160,7 +160,7 @@ public class TipoFrequenciaResponseDTO {
           "Número oficial do ato ou diploma legal associado à regulamentação do tipo de frequência.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Número do ato legal",
+      label = "Número do ato legal", icon = "description",
       helpText = "Identificação oficial do ato normativo vinculado.",
       group = "Normativo",
       order = 65,

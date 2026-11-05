@@ -37,7 +37,7 @@ import org.praxisplatform.uischema.fact.ResourceFact;
             titleField = "nome",
             displayLabelField = "nome",
             subtitleField = "fantasia",
-            metadataFields = {"id", "telefone"}))
+            metadataFields = {"razao", "telefone", "email"}))
 @ApiGroup(
     value = "ergon",
     title = "Administração de pessoal",

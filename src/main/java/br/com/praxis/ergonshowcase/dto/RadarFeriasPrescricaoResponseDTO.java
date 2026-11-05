@@ -428,7 +428,7 @@ public class RadarFeriasPrescricaoResponseDTO {
       description = "Ano de exercício de referência orçamentária e funcional do período aquisitivo.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Ano de exercício",
+      label = "Ano de exercício", numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER,
       helpText = "Ano civil de referência para programação das férias.",
       group = "Ciclo e Saldos de Férias",
       order = 95,
@@ -578,7 +578,7 @@ public class RadarFeriasPrescricaoResponseDTO {
           "Saldo líquido remanescente de dias disponíveis para gozo ou abono no período aquisitivo.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Saldo disponível",
+      label = "Saldo disponível", numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER,
       helpText = "Saldo líquido de dias disponível no período aquisitivo.",
       group = "Ciclo e Saldos de Férias",
       order = 135,
@@ -607,7 +607,7 @@ public class RadarFeriasPrescricaoResponseDTO {
           "Parcela do saldo disponível que ainda não possui programação futura de gozo registrada.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Saldo sem programação",
+      label = "Saldo sem programação", numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER,
       helpText = "Dias disponíveis ainda descobertos de escala futura.",
       group = "Ciclo e Saldos de Férias",
       order = 140,

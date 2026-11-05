@@ -101,7 +101,7 @@ public abstract class ServidorPessoaDados {
       group = "Identificação civil",
       order = 40,
       icon = "event",
-      type = org.praxisplatform.uischema.FieldDataType.DATE)
+      type = org.praxisplatform.uischema.FieldDataType.DATE, quickViewVisible = true, quickViewOrder = 1)
   private LocalDate dtnasc;
 
   @Schema(nullable = true, description = "Data de óbito ou desaparecimento informada no registro civil. Quando preenchida, é a referência para validar a idade máxima do servidor.")
@@ -132,7 +132,7 @@ public abstract class ServidorPessoaDados {
       label = "E-mail",
       controlType = FieldControlType.EMAIL_INPUT,
       group = "Contato",
-      order = 50,
+      order = 50, quickViewVisible = true, quickViewOrder = 4,
       icon = "email")
   @Getter(onMethod_ = @com.fasterxml.jackson.annotation.JsonProperty("eMail"))
   @Setter(onMethod_ = @com.fasterxml.jackson.annotation.JsonProperty("eMail"))
@@ -171,7 +171,7 @@ public abstract class ServidorPessoaDados {
       label = "Celular",
       type = FieldDataType.TEXT,
       group = "Contato",
-      order = 70,
+      order = 70, quickViewVisible = true, quickViewOrder = 5,
       icon = "smartphone")
   private String numtelCelular;
 
@@ -290,6 +290,11 @@ public abstract class ServidorPessoaDados {
   @Schema(description = "Grupo sanguíneo informado para o cadastro de saúde do servidor.")
   @UISchema(
       label = "Grupo sanguíneo",
+      type = FieldDataType.TEXT,
+      controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"A+\",\"label\":\"Tipo A Positivo\"},{\"value\":\"A-\",\"label\":\"Tipo A Negativo\"},{\"value\":\"B+\",\"label\":\"Tipo B Positivo\"},{\"value\":\"B-\",\"label\":\"Tipo B Negativo\"},{\"value\":\"AB+\",\"label\":\"Tipo AB Positivo\"},{\"value\":\"AB-\",\"label\":\"Tipo AB Negativo\"},{\"value\":\"O+\",\"label\":\"Tipo O Positivo\"},{\"value\":\"O-\",\"label\":\"Tipo O Negativo\"}]",
+      icon = "bloodtype",
       group = "Identificação civil",
       tableHidden = true,
       order = 205)
@@ -306,7 +311,16 @@ public abstract class ServidorPessoaDados {
   private String gSanguineo;
 
   @Schema(nullable = true, description = "Raça ou cor autodeclarada para identificação e políticas de pessoal.")
-  @UISchema(label = "Raça/cor", group = "Identificação civil", tableHidden = true, order = 206)
+  @UISchema(
+      label = "Raça/cor",
+      group = "Identificação civil",
+      type = FieldDataType.TEXT,
+      controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"1\",\"label\":\"Indígena\"},{\"value\":\"2\",\"label\":\"Branca\"},{\"value\":\"4\",\"label\":\"Preta\"},{\"value\":\"6\",\"label\":\"Amarela\"},{\"value\":\"8\",\"label\":\"Parda\"},{\"value\":\"9\",\"label\":\"Não informado\"}]",
+      icon = "diversity_3",
+      tableHidden = true,
+      order = 206)
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.RESTRICTED,
@@ -319,7 +333,16 @@ public abstract class ServidorPessoaDados {
   private String racaCor;
 
   @Schema(description = "Estado civil declarado pela pessoa.")
-  @UISchema(label = "Estado civil", group = "Identificação civil", tableHidden = true, order = 207)
+  @UISchema(
+      label = "Estado civil",
+      group = "Identificação civil",
+      type = FieldDataType.TEXT,
+      controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"SOLTEIRO\",\"label\":\"Solteiro(a)\"},{\"value\":\"CASADO\",\"label\":\"Casado(a)\"},{\"value\":\"DIVORCIADO\",\"label\":\"Divorciado(a)\"},{\"value\":\"SEPARADO\",\"label\":\"Separado(a) Judicialmente ou Extrajudicialmente\"},{\"value\":\"UNIAO_ESTAVEL\",\"label\":\"Companheiro(a) em União Estável\"},{\"value\":\"VIUVO\",\"label\":\"Viúvo(a)\"}]",
+      icon = "favorite",
+      tableHidden = true,
+      order = 207, quickViewVisible = true, quickViewOrder = 2)
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -344,11 +367,16 @@ public abstract class ServidorPessoaDados {
   @Schema(nullable = true, description = "Grau de instrução concluído pela pessoa.")
   @UISchema(
       label = "Escolaridade",
+      type = FieldDataType.TEXT,
+      controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":\"FUND_INCOMP\",\"label\":\"Ensino Fundamental Incompleto\"},{\"value\":\"FUND_COMP\",\"label\":\"Ensino Fundamental Completo\"},{\"value\":\"MEDIO_COMP\",\"label\":\"Ensino Médio Completo / Técnico\"},{\"value\":\"SUPERIOR_COMP\",\"label\":\"Ensino Superior Completo (Graduação)\"},{\"value\":\"ESPECIALIZACAO\",\"label\":\"Pós-Graduação Lato Sensu (Especialização / MBA)\"},{\"value\":\"MESTRADO\",\"label\":\"Pós-Graduação Stricto Sensu (Mestrado)\"},{\"value\":\"DOUTORADO\",\"label\":\"Pós-Graduação Stricto Sensu (Doutorado)\"}]",
+      icon = "school",
       group = "Identificação civil",
       tableHidden = true,
       order = 209,
       quickViewVisible = true,
-      quickViewOrder = 1)
+      quickViewOrder = 3)
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -363,11 +391,14 @@ public abstract class ServidorPessoaDados {
   @Schema(description = "Código da nacionalidade no domínio cadastral Ergon.")
   @UISchema(
       label = "Nacionalidade",
+      type = FieldDataType.NUMBER,
+      controlType = FieldControlType.SELECT,
+      options =
+          "[{\"value\":10,\"label\":\"Brasileira Nata\"},{\"value\":20,\"label\":\"Brasileira Naturalizada\"},{\"value\":21,\"label\":\"Argentina\"},{\"value\":22,\"label\":\"Boliviana\"},{\"value\":23,\"label\":\"Chilena\"},{\"value\":24,\"label\":\"Paraguaia\"},{\"value\":25,\"label\":\"Uruguaia\"},{\"value\":30,\"label\":\"Alemã\"},{\"value\":35,\"label\":\"Espanhola\"},{\"value\":37,\"label\":\"Francesa\"},{\"value\":39,\"label\":\"Italiana\"},{\"value\":41,\"label\":\"Japonesa\"},{\"value\":45,\"label\":\"Portuguesa\"},{\"value\":50,\"label\":\"Outras\"}]",
+      icon = "public",
       group = "Identificação civil",
       tableHidden = true,
-      order = 210,
-      quickViewVisible = true,
-      quickViewOrder = 4)
+      order = 210)
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -902,11 +933,12 @@ public abstract class ServidorPessoaDados {
   @Schema(nullable = true, description = "Município de residência da pessoa.")
   @UISchema(
       label = "Município",
+      icon = "location_city",
       group = "Endereço e contato",
       tableHidden = true,
       order = 244,
       quickViewVisible = true,
-      quickViewOrder = 2)
+      quickViewOrder = 6)
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -921,11 +953,10 @@ public abstract class ServidorPessoaDados {
   @Schema(nullable = true, description = "UF de residência da pessoa.")
   @UISchema(
       label = "UF de residência",
+      icon = "map",
       group = "Endereço e contato",
       tableHidden = true,
-      order = 245,
-      quickViewVisible = true,
-      quickViewOrder = 3)
+      order = 245)
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,
@@ -1164,7 +1195,7 @@ public abstract class ServidorPessoaDados {
       type = org.praxisplatform.uischema.FieldDataType.DATE,
       icon = "event",
       quickViewVisible = true,
-      quickViewOrder = 5)
+      quickViewOrder = 7)
   @DomainGovernance(
       kind = DomainGovernanceKind.PRIVACY,
       classification = DomainClassification.CONFIDENTIAL,

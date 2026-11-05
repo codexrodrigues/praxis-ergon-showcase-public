@@ -330,7 +330,7 @@ public class RadarChefiaSubstituicaoResponseDTO {
       targetExpr = "=1", ariaLabel = "Substituições vigentes", fallbackText = "Exercícios interinos", thresholds = {
           @Threshold(max = 0, tone = "warning", label = "Nenhuma"),
           @Threshold(min = 1, tone = "info", label = "Registrada")})
-  @UISchema(label = "Substituições vigentes",
+  @UISchema(label = "Substituições vigentes", numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER,
       helpText = "Verifique sobreposição quando houver mais de um exercício.",
       type = FieldDataType.NUMBER,
       controlType = FieldControlType.NUMERIC_TEXT_BOX,
@@ -353,7 +353,7 @@ public class RadarChefiaSubstituicaoResponseDTO {
       targetExpr = "=1", ariaLabel = "Pendências de folha", fallbackText = "Apurações pendentes", thresholds = {
           @Threshold(max = 0, tone = "neutral", label = "Nenhuma"),
           @Threshold(min = 1, tone = "warning", label = "Registrada")})
-  @UISchema(label = "Pendências de folha",
+  @UISchema(label = "Pendências de folha", numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER,
       helpText = "Priorize o tratamento dos registros pendentes.",
       type = FieldDataType.NUMBER,
       controlType = FieldControlType.NUMERIC_TEXT_BOX,

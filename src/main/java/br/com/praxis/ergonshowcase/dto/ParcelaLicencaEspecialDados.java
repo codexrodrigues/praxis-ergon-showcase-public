@@ -17,6 +17,6 @@ public abstract class ParcelaLicencaEspecialDados extends AssentamentoTempoLicen
   @UISchema(label = "Período aquisitivo", helpText = "Selecione o ciclo; suas chaves funcionais serão preenchidas pelo serviço.", group = "Direito de origem", order = 110, type = FieldDataType.NUMBER, controlType = FieldControlType.ENTITY_LOOKUP, endpoint = ApiPaths.PERIODO_AQUISITIVO_LICENCA_ESPECIAL_OPTIONS, valueField = "id", displayField = "label", icon = "date_range", tableHidden = true, preset = UISchemaPreset.ENTERPRISE_ID)
   private Long periodoAquisitivoLicencaId;
   @Schema(description = "Espelho da chave de negócio de PERAQLICESP, preenchido pelo período selecionado. Um valor informado divergente é rejeitado na criação.")
-  @UISchema(label = "Chave do período", helpText = "Sequencial do ciclo no vínculo; preenchido pelo período.", group = "Direito de origem", order = 120, type = FieldDataType.NUMBER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "tag", tableHidden = true, preset = UISchemaPreset.ENTERPRISE_CODE)
+  @UISchema(label = "Chave do período", helpText = "Sequencial do ciclo no vínculo; preenchido pelo período.", group = "Direito de origem", order = 120, type = FieldDataType.NUMBER, numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "tag", tableHidden = true, preset = UISchemaPreset.ENTERPRISE_CODE)
   private Integer chavePeraqlicesp;
 }

@@ -50,7 +50,7 @@ public abstract class VinculoDados {
       order = 30,
       icon = "work",
       quickViewVisible = true,
-      quickViewOrder = 2)
+      quickViewOrder = 3)
   private String tipovinc;
 
   @NotBlank
@@ -101,7 +101,7 @@ public abstract class VinculoDados {
       order = 70,
       icon = "schedule",
       quickViewVisible = true,
-      quickViewOrder = 1)
+      quickViewOrder = 5)
   @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = false)
   private Integer jornadaSemanal;
 

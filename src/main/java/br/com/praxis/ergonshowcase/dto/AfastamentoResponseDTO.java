@@ -65,7 +65,7 @@ public class AfastamentoResponseDTO extends AfastamentoDados {
       description = "Denominação oficial do órgão público do vínculo funcional afastado.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Órgão",
+      label = "Órgão", icon = "apartment",
       helpText = "Instituição pública de lotação do vínculo afastado.",
       group = "Identificação funcional",
       order = 3,
@@ -139,7 +139,7 @@ public class AfastamentoResponseDTO extends AfastamentoDados {
       description = "Matrícula institucional do vínculo funcional afastado.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Matrícula do vínculo",
+      label = "Matrícula do vínculo", icon = "badge",
       helpText = "Matrícula funcional do vínculo afastado.",
       group = "Identificação funcional",
       order = 7,
@@ -216,7 +216,7 @@ public class AfastamentoResponseDTO extends AfastamentoDados {
       description = "Descrição oficial da modalidade de licença ou afastamento no catálogo de códigos.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Modalidade de licença",
+      label = "Modalidade de licença", icon = "event_busy",
       helpText = "Denominação oficial da modalidade de afastamento.",
       group = "Enquadramento e fundamentação",
       order = 24,
@@ -250,7 +250,7 @@ public class AfastamentoResponseDTO extends AfastamentoDados {
       description = "Duração apurada em dias corridos do período de licença ou afastamento.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Duração (dias)",
+      label = "Duração (dias)", numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER,
       helpText = "Quantidade total de dias corridos apurada para o afastamento.",
       group = "Período e vigência",
       order = 48,
@@ -284,7 +284,7 @@ public class AfastamentoResponseDTO extends AfastamentoDados {
           "Estado do ciclo de vida e aprovação da licença (PENDENTE_HOMOLOGACAO, HOMOLOGADO, REJEITADO, CANCELADO).",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Situação da licença",
+      label = "Situação da licença", icon = "flag",
       helpText = "Estado atual de homologação e vigência do afastamento.",
       preset = UISchemaPreset.ENTERPRISE_STATUS,
       group = "Enquadramento e fundamentação",
@@ -324,7 +324,7 @@ public class AfastamentoResponseDTO extends AfastamentoDados {
       description = "Número oficial da portaria de concessão ou laudo pericial associado.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Número da portaria/laudo",
+      label = "Número da portaria/laudo", icon = "description",
       helpText = "Identificação oficial do documento legal de concessão.",
       group = "Atos e publicação oficial",
       order = 105,

@@ -98,7 +98,7 @@ public class VinculoResponseDTO extends VinculoDados {
       order = 102,
       icon = "apartment",
       quickViewVisible = true,
-      quickViewOrder = 5)
+      quickViewOrder = 6)
   @ResourceReference(
       resourceKey = "administracao-pessoal.empresas",
       valueField = "empCodigo",
@@ -155,9 +155,9 @@ public class VinculoResponseDTO extends VinculoDados {
       readOnly = true,
       formHidden = true,
       group = "Lotação",
-      order = 51,
+      order = 51, icon = "badge",
       quickViewVisible = true,
-      quickViewOrder = 3)
+      quickViewOrder = 2)
   @ResourceReference(
       resourceKey = "administracao-pessoal.cargos",
       valueField = "cargo",
@@ -174,9 +174,9 @@ public class VinculoResponseDTO extends VinculoDados {
       preset = UISchemaPreset.ENTERPRISE_STATUS,
       readOnly = true,
       group = "Exercício",
-      order = 110,
+      order = 110, icon = "verified",
       quickViewVisible = true,
-      quickViewOrder = 4)
+      quickViewOrder = 1)
   private String situacao;
 
   @Schema(description = "Data de início do efetivo exercício neste vínculo.")
@@ -189,7 +189,7 @@ public class VinculoResponseDTO extends VinculoDados {
       type = org.praxisplatform.uischema.FieldDataType.DATE,
       icon = "event",
       quickViewVisible = true,
-      quickViewOrder = 6)
+      quickViewOrder = 4)
   private LocalDate dtexerc;
 
   @Schema(description = "Data do encerramento funcional por vacância, quando registrado.")
@@ -206,7 +206,7 @@ public class VinculoResponseDTO extends VinculoDados {
   @Schema(
       description =
           "Quantidade de dias corridos desde o exercício até a vacância ou a data atual; não desconta afastamentos nem certifica tempo previdenciário.")
-  @UISchema(label = "Dias desde o exercício", readOnly = true, group = "Exercício", order = 140)
+  @UISchema(label = "Dias desde o exercício", readOnly = true, group = "Exercício", order = 140, icon = "timelapse", numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER, quickViewVisible = true, quickViewOrder = 7)
   private Long diasDesdeExercicio;
 
   @Schema(
@@ -385,7 +385,7 @@ public class VinculoResponseDTO extends VinculoDados {
       description = "Denominação da unidade de lotação do vínculo.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Lotação",
+      label = "Lotação", icon = "account_tree",
       group = "Enquadramento e lotação",
       tableHidden = true,
       readOnly = true,

@@ -72,7 +72,7 @@ import org.praxisplatform.uischema.controller.base.AbstractResourceController;
             titleField = "nome",
             displayLabelField = "nome",
             subtitleField = "nomeSocial",
-            metadataFields = {"id", "tratamento"}))
+            metadataFields = {"cpf", "idadeAnos"}))
 @ApiGroup(
     value = "ergon",
     title = "Administração de pessoal",

@@ -52,7 +52,7 @@ public abstract class VendaLicencaEspecialDados extends ParcelaLicencaEspecialDa
   @NotNull @Min(1) @Max(999)
   @Schema(description = "Dias originais de licença convertidos neste evento de venda; o débito no direito é em dias, independentemente do valor indenizatório.")
   @MicroVisualization(kind = MicroVisualizationKind.BULLET, valueExpr = "=diasVendidos", max = 90, fallbackText = "Dias vendidos", ariaLabel = "Dias de licença destinados à venda", thresholds = {@Threshold(max = 30, tone = "info", label = "Até um mês"), @Threshold(min = 31, tone = "warning", label = "Conversão extensa")})
-  @UISchema(label = "Dias vendidos", helpText = "Dias de licença destinados à conversão neste evento.", group = "Conversão pecuniária", order = 130, type = FieldDataType.NUMBER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "sell", tableHidden = false, quickViewVisible = true, quickViewOrder = 4)
+  @UISchema(label = "Dias vendidos", helpText = "Dias de licença destinados à conversão neste evento.", group = "Conversão pecuniária", order = 130, type = FieldDataType.NUMBER, numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "sell", tableHidden = false, quickViewVisible = true, quickViewOrder = 4)
   @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE})
   private Integer diasVendidos;
   @DomainGovernance(kind = DomainGovernanceKind.PRIVACY, classification = DomainClassification.CONFIDENTIAL, dataCategory = DomainDataCategory.FINANCIAL, complianceTags = {"LGPD", "FINANCIAL"}, reason = "Data de liquidação da indenização individual.", aiUsage = @AiUsagePolicy(visibility = AiVisibilityMode.SUMMARIZE_ONLY, trainingUse = AiTrainingUseMode.DENY))
@@ -78,7 +78,7 @@ public abstract class VendaLicencaEspecialDados extends ParcelaLicencaEspecialDa
   @DomainGovernance(kind = DomainGovernanceKind.PRIVACY, classification = DomainClassification.CONFIDENTIAL, dataCategory = DomainDataCategory.FINANCIAL, complianceTags = {"LGPD", "FINANCIAL"}, reason = "Referência de processamento da indenização individual.", aiUsage = @AiUsagePolicy(visibility = AiVisibilityMode.SUMMARIZE_ONLY, trainingUse = AiTrainingUseMode.DENY))
   @Min(1)
   @Schema(description = "Identificador da folha de processamento dentro da competência, sem semântica de quantidade ou medida.", nullable = true)
-  @UISchema(label = "Número da folha", helpText = "Informe a folha da competência de pagamento.", group = "Liquidação financeira", order = 180, type = FieldDataType.NUMBER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "receipt_long", tableHidden = true, preset = UISchemaPreset.ENTERPRISE_CODE)
+  @UISchema(label = "Número da folha", helpText = "Informe a folha da competência de pagamento.", group = "Liquidação financeira", order = 180, type = FieldDataType.NUMBER, numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "receipt_long", tableHidden = true, preset = UISchemaPreset.ENTERPRISE_CODE)
   @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE}, allowClear = true)
   private Integer numFolha;
   @CustomFields(resourceKey = "administracao-pessoal.vendas-licenca-especial")

@@ -297,7 +297,7 @@ public class FeriasGozoResponseDTO {
           "Chave sequencial de negócio do período aquisitivo no vínculo (CHAVEPERAQFER).",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Chave do PA",
+      label = "Chave do PA", numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER,
       helpText = "Sequencial de negócio do período aquisitivo no vínculo.",
       group = "Vínculo e Período Aquisitivo",
       order = 50,
@@ -315,7 +315,7 @@ public class FeriasGozoResponseDTO {
           "Ordem sequencial da parcela de gozo dentro do período aquisitivo (1ª, 2ª, 3ª parcela).",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Ordem da parcela",
+      label = "Ordem da parcela", numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER,
       helpText = "Número sequencial da etapa de gozo dentro do PA.",
       group = "Período de Gozo e Duração",
       order = 60,
@@ -391,7 +391,7 @@ public class FeriasGozoResponseDTO {
       description = "Quantidade de dias corridos de gozo nesta parcela de férias.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Dias de gozo",
+      label = "Dias de gozo", numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER,
       helpText = "Quantidade de dias de descanso nesta parcela.",
       group = "Período de Gozo e Duração",
       order = 100,
@@ -460,7 +460,7 @@ public class FeriasGozoResponseDTO {
           "Quantidade de dias vendidos como abono pecuniário nesta parcela (ERG_ABONOS_FERIAS).",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Dias de abono vendidos",
+      label = "Dias de abono vendidos", numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER,
       helpText = "Quantidade de dias convertidos em pecúnia nesta parcela.",
       group = "Abono Pecuniário e Financeiro",
       order = 140,

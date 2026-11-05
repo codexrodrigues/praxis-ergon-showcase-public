@@ -81,7 +81,7 @@ import org.praxisplatform.uischema.controller.base.AbstractDuplicateDraftResourc
             titleField = "nome",
             displayLabelField = "nome",
             subtitleField = "categoria",
-            metadataFields = {"id", "cargoFuncao", "cbo"}))
+            metadataFields = {"cargoFuncao", "cbo"}))
 @ApiGroup(
     value = "ergon",
     title = "Administração de pessoal",

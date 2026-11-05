@@ -83,7 +83,7 @@ public class ItemTabelaResponseDTO {
           "Código identificador do item dentro da tabela geral de domínio (componente 2 da chave composta natural).",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Código do item",
+      label = "Código do item", icon = "tag",
       helpText = "Valor armazenado quando o item é selecionado.",
       group = "Identificação",
       order = 20,
@@ -135,7 +135,7 @@ public class ItemTabelaResponseDTO {
       description = "Nome do órgão público quando o item possui restrição multi-órgão.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Nome do órgão",
+      label = "Nome do órgão", icon = "apartment",
       helpText = "Denominação do órgão público associado ao item.",
       group = "Escopo e ordenação",
       order = 45,
@@ -154,7 +154,7 @@ public class ItemTabelaResponseDTO {
       description = "Ordem numérica de exibição do item em listas de seleção e formulários.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Ordem de exibição",
+      label = "Ordem de exibição", numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER,
       helpText = "Posição sequencial do item nas listas de seleção.",
       group = "Escopo e ordenação",
       order = 50,
@@ -193,7 +193,7 @@ public class ItemTabelaResponseDTO {
           "Atributo complementar 1 do item (ex.: ordem de escolaridade, código de equivalência eSocial ou agrupador).",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Atributo item1",
+      label = "Atributo item1", icon = "tune",
       helpText = "Primeiro valor complementar parametrizado para o item.",
       group = "Atributos complementares",
       order = 70,

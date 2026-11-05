@@ -70,7 +70,7 @@ public class TabelaResponseDTO {
           "Sistema proprietário da tabela geral no ecossistema corporativo (ex.: Ergon, Hades).",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Sistema proprietário",
+      label = "Sistema proprietário", icon = "dns",
       helpText = "Módulo ou subsistema responsável pela governança da tabela geral.",
       group = "Identificação",
       order = 30,
@@ -128,7 +128,7 @@ public class TabelaResponseDTO {
           "Tamanho máximo recomendado em caracteres para o código identificador dos itens desta tabela geral.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Tamanho máx. do código",
+      label = "Tamanho máx. do código", numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER,
       helpText = "Limite máximo de caracteres para os códigos de item da tabela.",
       group = "Estrutura do item",
       order = 60,
@@ -146,7 +146,7 @@ public class TabelaResponseDTO {
           "Rótulo semântico atribuído à coluna complementar item1 para os itens pertencentes a esta tabela geral.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Rótulo de item1",
+      label = "Rótulo de item1", icon = "label",
       helpText = "Significado negocial da primeira coluna complementar dos itens.",
       group = "Colunas complementares",
       order = 70,

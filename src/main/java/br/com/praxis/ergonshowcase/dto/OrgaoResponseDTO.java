@@ -19,13 +19,13 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
     titleField = "nome",
     displayLabelField = "nome",
     subtitleField = "fantasia",
-    metadataFields = {"id", "telefone"})
+    metadataFields = {"razao", "telefone", "email"})
 public class OrgaoResponseDTO extends OrgaoDados {
   @Schema(
       description = "Habilitação atual do órgão; mantida pelas ações de ativação e inativação.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Órgão ativo",
+      label = "Órgão ativo", icon = "verified", preset = UISchemaPreset.BOOLEAN_FLAG,
       group = "Situação",
       readOnly = true,
       quickViewVisible = true,

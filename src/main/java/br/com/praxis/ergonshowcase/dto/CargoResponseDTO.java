@@ -19,7 +19,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
     titleField = "nome",
     displayLabelField = "nome",
     subtitleField = "categoria",
-    metadataFields = {"id", "cargoFuncao", "cbo"})
+    metadataFields = {"cargoFuncao", "cbo"})
 public class CargoResponseDTO extends CargoDados {
   @Schema(description = "Número de vagas ocupadas por vínculos ativos, afastados ou cedidos no cargo titular ou em comissão, sem dupla contagem. Nulo sem quadro autorizado conhecido.", accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(label = "Ocupação do quadro", group = "Quadro de Vagas e Vigência", readOnly = true,
@@ -111,7 +111,7 @@ public class CargoResponseDTO extends CargoDados {
           "Vagas autorizadas menos vínculos ativos, afastados ou cedidos; nulo quando não há quantitativo autorizado.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Saldo de vagas",
+      label = "Saldo de vagas", type = org.praxisplatform.uischema.FieldDataType.NUMBER, numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER, icon = "event_seat",
       group = "Quadro de Vagas e Vigência",
       tableHidden = true,
       readOnly = true,

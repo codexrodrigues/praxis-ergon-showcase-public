@@ -41,7 +41,7 @@ public abstract class LicencaEspecialGozoDados extends ParcelaLicencaEspecialDad
   private String descricao;
   @NotNull @Min(1)
   @Schema(description = "Ordem da parcela de fruição dentro do ciclo aquisitivo, distinguindo o fracionamento da mesma licença.")
-  @UISchema(label = "Ordem da parcela", helpText = "Sequência de fruição neste período aquisitivo.", group = "Programação do gozo", order = 130, type = FieldDataType.NUMBER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "format_list_numbered", tableHidden = false, quickViewVisible = true, quickViewOrder = 4)
+  @UISchema(label = "Ordem da parcela", helpText = "Sequência de fruição neste período aquisitivo.", group = "Programação do gozo", order = 130, type = FieldDataType.NUMBER, numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "format_list_numbered", tableHidden = false, quickViewVisible = true, quickViewOrder = 4)
   private Integer ordemParcela;
   @Schema(description = "Término previsto da licença especial. Quando omitido, é calculado a partir do início e dos dias de gozo.")
   @UISchema(label = "Término previsto", helpText = "Último dia previsto para esta parcela.", group = "Programação do gozo", order = 140, type = FieldDataType.DATE, controlType = FieldControlType.DATE_PICKER, icon = "event_available", tableHidden = true, quickViewVisible = true, quickViewOrder = 2, preset = UISchemaPreset.DATE_RANGE)
@@ -50,7 +50,7 @@ public abstract class LicencaEspecialGozoDados extends ParcelaLicencaEspecialDad
   @Min(1) @Max(999)
   @Schema(description = "Quantidade inclusiva entre início e término efetivo quando dtfim está preenchido; enquanto aberta, reserva os dias até dtprevfim. O encerramento preserva a previsão original e ajusta o débito do ciclo.")
   @MicroVisualization(kind = MicroVisualizationKind.BULLET, valueExpr = "=diasGozo", max = 90, fallbackText = "Dias de licença", ariaLabel = "Duração da parcela de licença especial", thresholds = {@Threshold(max = 30, tone = "info", label = "Até um mês"), @Threshold(min = 31, tone = "success", label = "Parcela extensa")})
-  @UISchema(label = "Dias de gozo", helpText = "Conte pelo término efetivo; sem encerramento, use o término previsto.", group = "Programação do gozo", order = 150, type = FieldDataType.NUMBER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "beach_access", tableHidden = false, quickViewVisible = true, quickViewOrder = 5)
+  @UISchema(label = "Dias de gozo", helpText = "Conte pelo término efetivo; sem encerramento, use o término previsto.", group = "Programação do gozo", order = 150, type = FieldDataType.NUMBER, numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "beach_access", tableHidden = false, quickViewVisible = true, quickViewOrder = 5)
   @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE})
   private Integer diasGozo;
   @DomainGovernance(kind = DomainGovernanceKind.PRIVACY, classification = DomainClassification.CONFIDENTIAL, dataCategory = DomainDataCategory.FINANCIAL, complianceTags = {"LGPD", "FINANCIAL"}, reason = "Existência de abono indenizatório associado à fruição individual.", aiUsage = @AiUsagePolicy(visibility = AiVisibilityMode.SUMMARIZE_ONLY, trainingUse = AiTrainingUseMode.DENY))

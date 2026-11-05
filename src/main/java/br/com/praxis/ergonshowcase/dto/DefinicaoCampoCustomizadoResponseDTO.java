@@ -95,7 +95,7 @@ public class DefinicaoCampoCustomizadoResponseDTO {
           "Chave semântica em snake_case armazenada dentro do objeto custom_fields JSONB da tabela alvo.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Chave técnica",
+      label = "Chave técnica", icon = "key",
       helpText = "Identificador snake_case da propriedade dentro de customFields.",
       group = "Escopo e Alvo",
       order = 30,
@@ -129,7 +129,7 @@ public class DefinicaoCampoCustomizadoResponseDTO {
           "Tipo de dado primitivo do campo customizado (STRING, INTEGER, NUMBER, BOOLEAN, DATE, SELECT).",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Tipo de dado",
+      label = "Tipo de dado", icon = "data_object",
       helpText = "Natureza primitiva do valor armazenado no JSONB.",
       group = "Tipagem e Componente",
       order = 50,
@@ -144,7 +144,7 @@ public class DefinicaoCampoCustomizadoResponseDTO {
           "Componente visual canônico do @praxisui/dynamic-fields (INPUT, TEXTAREA, NUMERIC_TEXT_BOX, DATE_PICKER, SELECT, SEARCHABLE_SELECT, CHECKBOX, SWITCH).",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Controle visual",
+      label = "Controle visual", icon = "widgets",
       helpText = "Componente de interface dinâmica associado ao campo.",
       group = "Tipagem e Componente",
       order = 60,
@@ -173,7 +173,7 @@ public class DefinicaoCampoCustomizadoResponseDTO {
           "Nome da seção ou agrupamento visual do formulário dinâmico onde o campo será renderizado.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Grupo do formulário",
+      label = "Grupo do formulário", icon = "view_agenda",
       helpText = "Seção do formulário dinâmico onde o campo é exibido.",
       group = "Apresentação Editorial",
       order = 80,

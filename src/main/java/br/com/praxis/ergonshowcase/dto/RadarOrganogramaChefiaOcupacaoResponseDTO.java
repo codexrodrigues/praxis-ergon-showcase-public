@@ -67,7 +67,7 @@ public class RadarOrganogramaChefiaOcupacaoResponseDTO {
   @UISchema(label = "Subordinados diretos", group = "Configuração organizacional", tableHidden = true, readOnly = true, type = FieldDataType.NUMBER, icon = "numbers")
  private Long quantidadeSubordinadosDiretos;
   @Schema(description = "Zero seleciona a hierarquia oficial; um a quatro selecionam as hierarquias auxiliares.", accessMode = Schema.AccessMode.READ_ONLY)
-  @UISchema(label = "Hierarquia", group = "Configuração organizacional", tableHidden = true, readOnly = true, type = FieldDataType.NUMBER, icon = "numbers")
+  @UISchema(label = "Hierarquia", group = "Configuração organizacional", tableHidden = true, readOnly = true, type = FieldDataType.NUMBER, numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER, icon = "numbers")
  private Integer tipoHierarquia;
   @Schema(description = "Primeiro dia em que esta composição de unidade, ancestrais e parâmetros permanece válida.", accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(label = "Início do segmento", group = "Vigência e fundamento", tableHidden = true, readOnly = true, quickViewVisible = true, quickViewOrder = 2, type = FieldDataType.DATE, controlType = FieldControlType.DATE_PICKER, icon = "event", preset = UISchemaPreset.DATE_RANGE)

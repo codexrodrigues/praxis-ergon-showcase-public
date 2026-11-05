@@ -111,7 +111,7 @@ public class SetorResponseDTO {
       description = "Classificação administrativa da unidade, como secretaria ou diretoria.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Tipo de unidade",
+      label = "Tipo de unidade", icon = "account_tree",
       group = "Organograma",
       readOnly = true,
       tableHidden = false,
@@ -158,7 +158,7 @@ public class SetorResponseDTO {
       description = "Município da localização física da unidade organizacional.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Município",
+      label = "Município", icon = "location_city",
       group = "Localização",
       readOnly = true,
       tableHidden = true,
@@ -170,7 +170,7 @@ public class SetorResponseDTO {
       description = "Unidade federativa da localização física da lotação.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "UF",
+      label = "UF", icon = "map",
       group = "Localização",
       readOnly = true,
       tableHidden = true,

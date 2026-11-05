@@ -70,7 +70,7 @@ public abstract class AverbacaoTempoServicoDados extends AssentamentoTempoLicenc
   @Min(0)
   @Schema(description = "Dias reconhecidos na certidão antes de desaverbações. Na omissão, assume os dias corridos inclusivos do período certificado.")
   @MicroVisualization(kind = MicroVisualizationKind.BULLET, valueExpr = "=totalDias", max = 3650, fallbackText = "Dias reconhecidos", ariaLabel = "Dias certificados antes de desaverbações", thresholds = {@Threshold(max = 365, tone = "info", label = "Até um ano"), @Threshold(min = 366, tone = "success", label = "Acima de um ano")})
-  @UISchema(label = "Dias reconhecidos", helpText = "Total certificado antes dos descontos por desaverbação.", group = "Efeitos da contagem", order = 180, type = FieldDataType.NUMBER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "timelapse", tableHidden = false, quickViewVisible = true, quickViewOrder = 5)
+  @UISchema(label = "Dias reconhecidos", helpText = "Total certificado antes dos descontos por desaverbação.", group = "Efeitos da contagem", order = 180, type = FieldDataType.NUMBER, numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER, controlType = FieldControlType.NUMERIC_TEXT_BOX, icon = "timelapse", tableHidden = false, quickViewVisible = true, quickViewOrder = 5)
   @BulkEditable(modes = {org.praxisplatform.uischema.bulk.BulkMode.UNIFORM_UPDATE, org.praxisplatform.uischema.bulk.BulkMode.PER_ITEM_UPDATE})
   private Integer totalDias;
   @Min(0)

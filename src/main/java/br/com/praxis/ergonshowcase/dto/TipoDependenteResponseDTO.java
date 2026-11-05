@@ -100,7 +100,7 @@ public class TipoDependenteResponseDTO {
           "Idade limite padrão em anos completos para manutenção automática da dependência sem laudo de invalidez (ex.: 21 ou 24 anos).",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Idade limite (anos)",
+      label = "Idade limite (anos)", numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER,
       helpText = "Teto etário padrão em anos para vigência sem invalidez permanente.",
       group = "Elegibilidade",
       order = 50,
@@ -145,7 +145,7 @@ public class TipoDependenteResponseDTO {
           "Número oficial do ato ou diploma legal associado à modalidade de dependência.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Número do ato legal",
+      label = "Número do ato legal", icon = "description",
       helpText = "Identificação oficial do ato normativo vinculado.",
       group = "Normativo",
       order = 65,

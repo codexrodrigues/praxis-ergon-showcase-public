@@ -81,7 +81,7 @@ public class CodigoFrequenciaResponseDTO {
           "Código numérico identificador da ocorrência de frequência ou modalidade de afastamento (componente 2 da chave composta natural).",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Código numérico",
+      label = "Código numérico", numericFormat = org.praxisplatform.uischema.NumericFormat.INTEGER,
       helpText = "Número identificador da modalidade dentro do tipo de frequência.",
       group = "Identificação",
       order = 20,
@@ -116,7 +116,7 @@ public class CodigoFrequenciaResponseDTO {
           "Sigla mnemônica curta utilizada em espelhos de ponto e mapas de frequência (ex.: FJ, FI, LTS, LMA).",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Sigla mnemônica",
+      label = "Sigla mnemônica", icon = "short_text",
       helpText = "Sigla curta de até 6 caracteres para espelhos de frequência.",
       group = "Identificação",
       order = 40,
@@ -282,7 +282,7 @@ public class CodigoFrequenciaResponseDTO {
           "Unidade de medida da quantidade informada (ex.: DIAS, HORAS, OCORRENCIAS).",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Unidade de medida",
+      label = "Unidade de medida", icon = "straighten",
       helpText = "Grandeza utilizada na contabilização da ocorrência.",
       group = "Parâmetros de quantidade",
       order = 130,
@@ -370,7 +370,7 @@ public class CodigoFrequenciaResponseDTO {
           "Número oficial do ato ou diploma legal associado ao código de frequência.",
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
-      label = "Número do ato legal",
+      label = "Número do ato legal", icon = "description",
       helpText = "Identificação oficial do diploma legal vinculado.",
       group = "Normativo",
       order = 175,
