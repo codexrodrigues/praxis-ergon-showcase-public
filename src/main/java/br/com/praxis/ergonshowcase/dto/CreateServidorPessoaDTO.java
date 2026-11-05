@@ -22,7 +22,7 @@ public class CreateServidorPessoaDTO extends ServidorPessoaDados {
   @UISchema(
       label = "Código",
       preset = UISchemaPreset.ENTERPRISE_ID,
-      group = "Identificação",
+      group = "Identificação civil",
       order = 1,
       icon = "tag")
   private Long numero;
