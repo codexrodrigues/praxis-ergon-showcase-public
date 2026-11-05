@@ -972,7 +972,7 @@ public class PeriodoAquisitivoFeriasResponseDTO {
   @UISchema(
       label = "Com saldo disponível",
       helpText = "Verdadeiro quando há saldo líquido positivo disponível para gozo.",
-      group = "Contabilidade de Direito e Saldo",
+      group = "Contabilidade de Dias e Saldo",
       order = 145,
       type = FieldDataType.BOOLEAN,
       controlType = FieldControlType.CHECKBOX,
@@ -1004,7 +1004,7 @@ public class PeriodoAquisitivoFeriasResponseDTO {
   @UISchema(
       label = "Em risco de prescrição",
       helpText = "Verdadeiro quando há prescrição registrada ou risco de prescrição com saldo.",
-      group = "Prescrição e Dobro de Férias",
+      group = "Prescrição e Multa",
       order = 195,
       type = FieldDataType.BOOLEAN,
       controlType = FieldControlType.CHECKBOX,

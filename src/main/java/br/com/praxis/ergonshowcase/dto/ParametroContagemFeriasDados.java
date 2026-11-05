@@ -19,7 +19,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchema;
 public abstract class ParametroContagemFeriasDados {
   @NotNull
   @Schema(description = "Permite fruição de licença-prêmio antes do encerramento do período aquisitivo, conforme a Tarefa 103339. Desabilitado por padrão; não antecipa automaticamente a aquisição do direito.", defaultValue = "false")
-  @UISchema(label = "Gozo antecipado de licença", helpText = "Habilite somente quando o regime admitir gozo antes do fim da aquisição.", group = "Licença Especial", order = 475, type = FieldDataType.BOOLEAN, controlType = FieldControlType.CHECKBOX, icon = "event_available", tableHidden = true, preset = org.praxisplatform.uischema.extension.annotation.UISchemaPreset.BOOLEAN_FLAG)
+  @UISchema(label = "Gozo antecipado de licença", helpText = "Habilite somente quando o regime admitir gozo antes do fim da aquisição.", group = "Licença Especial e Progressão", order = 475, type = FieldDataType.BOOLEAN, controlType = FieldControlType.CHECKBOX, icon = "event_available", tableHidden = true, preset = org.praxisplatform.uischema.extension.annotation.UISchemaPreset.BOOLEAN_FLAG)
   private Boolean permGozoLicEspAntFimPe = false;
 
   @Schema(

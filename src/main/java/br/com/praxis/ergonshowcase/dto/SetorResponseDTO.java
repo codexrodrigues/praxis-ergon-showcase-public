@@ -124,7 +124,7 @@ public class SetorResponseDTO {
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Início da vigência",
-      group = "Vigência",
+      group = "Vigência e fundamento",
       readOnly = true,
       tableHidden = true,
       quickViewVisible = true,
@@ -139,7 +139,7 @@ public class SetorResponseDTO {
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Fim da vigência",
-      group = "Vigência",
+      group = "Vigência e fundamento",
       readOnly = true,
       tableHidden = false,
       type = org.praxisplatform.uischema.FieldDataType.DATE,
@@ -189,7 +189,7 @@ public class SetorResponseDTO {
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Ato de criação",
-      group = "Fundamentação",
+      group = "Vigência e fundamento",
       readOnly = true,
       tableHidden = true,
       type = org.praxisplatform.uischema.FieldDataType.TEXT,

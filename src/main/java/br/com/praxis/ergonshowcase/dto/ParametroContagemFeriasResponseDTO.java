@@ -27,7 +27,7 @@ import org.praxisplatform.uischema.extension.annotation.UISchemaPreset;
         "Projeção completa da matriz estatutária de parâmetros de contagem de férias, abono pecuniário, prescrição, contagem em dobro, licença especial e progressão funcional.")
 public class ParametroContagemFeriasResponseDTO {
   @Schema(description = "Permissão estatutária de gozo da licença-prêmio antes do término do período aquisitivo (Tarefa 103339); não representa concessão automática.", accessMode = Schema.AccessMode.READ_ONLY)
-  @UISchema(label = "Gozo antecipado de licença", helpText = "Indica se a matriz permite fruição antes do fechamento da aquisição.", group = "Licença Especial", order = 475, type = FieldDataType.BOOLEAN, controlType = FieldControlType.CHECKBOX, icon = "event_available", tableHidden = true, readOnly = true, preset = UISchemaPreset.BOOLEAN_FLAG)
+  @UISchema(label = "Gozo antecipado de licença", helpText = "Indica se a matriz permite fruição antes do fechamento da aquisição.", group = "Licença Especial e Progressão", order = 475, type = FieldDataType.BOOLEAN, controlType = FieldControlType.CHECKBOX, icon = "event_available", tableHidden = true, readOnly = true, preset = UISchemaPreset.BOOLEAN_FLAG)
   private Boolean permGozoLicEspAntFimPe;
 
   @Schema(
@@ -1128,7 +1128,7 @@ public class ParametroContagemFeriasResponseDTO {
   @UISchema(
       label = "Permite parcelamento",
       helpText = "Verdadeiro quando o máximo de parcelas autoriza mais de uma etapa.",
-      group = "Direito e Parcelamento de Férias",
+      group = "Direito e Parcelamento",
       order = 95,
       type = FieldDataType.BOOLEAN,
       controlType = FieldControlType.CHECKBOX,
@@ -1144,7 +1144,7 @@ public class ParametroContagemFeriasResponseDTO {
   @UISchema(
       label = "Permite abono pecuniário",
       helpText = "Verdadeiro quando a regra habilita conversão em abono pecuniário.",
-      group = "Abono Pecuniário e Opções Financeiras",
+      group = "Abono e Financeiro",
       order = 135,
       type = FieldDataType.BOOLEAN,
       controlType = FieldControlType.CHECKBOX,

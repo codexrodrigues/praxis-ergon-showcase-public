@@ -209,7 +209,7 @@ public class DependenteResponseDTO extends DependenteDados {
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Número do documento legal",
-      group = "Documentação comprobatória",
+      group = "Registro civil",
       order = 295,
       readOnly = true,
       tableHidden = true)

@@ -131,7 +131,7 @@ public abstract class ServidorPessoaDados {
   @UISchema(
       label = "E-mail",
       controlType = FieldControlType.EMAIL_INPUT,
-      group = "Contato",
+      group = "Endereço e contato",
       order = 50, quickViewVisible = true, quickViewOrder = 4,
       icon = "email")
   @Getter(onMethod_ = @com.fasterxml.jackson.annotation.JsonProperty("eMail"))
@@ -151,7 +151,7 @@ public abstract class ServidorPessoaDados {
   @UISchema(
       label = "Telefone",
       type = FieldDataType.TEXT,
-      group = "Contato",
+      group = "Endereço e contato",
       order = 60,
       icon = "phone")
   private String telefone;
@@ -170,7 +170,7 @@ public abstract class ServidorPessoaDados {
   @UISchema(
       label = "Celular",
       type = FieldDataType.TEXT,
-      group = "Contato",
+      group = "Endereço e contato",
       order = 70, quickViewVisible = true, quickViewOrder = 5,
       icon = "smartphone")
   private String numtelCelular;
@@ -191,7 +191,7 @@ public abstract class ServidorPessoaDados {
       label = "PIS/PASEP",
       type = FieldDataType.TEXT,
       tableHidden = true,
-      group = "Documentação",
+      group = "Documentação civil e trabalhista",
       order = 80,
       icon = "assignment_ind",
       visibleForAuthorities = {"ERGON_READ", "ERGON_WRITE", "ERGON_PII_READ"},

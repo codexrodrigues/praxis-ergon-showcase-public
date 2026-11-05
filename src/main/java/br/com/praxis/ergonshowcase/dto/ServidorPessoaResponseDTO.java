@@ -48,7 +48,7 @@ public class ServidorPessoaResponseDTO extends ServidorPessoaDados {
       preset = UISchemaPreset.ENTERPRISE_ID,
       readOnly = true,
       formHidden = true,
-      group = "Identificação",
+      group = "Identificação civil",
       order = 0)
   private Long id;
 

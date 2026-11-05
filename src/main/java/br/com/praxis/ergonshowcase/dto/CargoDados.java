@@ -110,7 +110,7 @@ public abstract class CargoDados {
   @UISchema(
       label = "Vagas autorizadas",
       numericFormat = NumericFormat.INTEGER,
-      group = "Quadro de vagas",
+      group = "Quadro de Vagas e Vigência",
       order = 80,
       icon = "groups")
   private Integer vagasAutorizadas;
@@ -123,7 +123,7 @@ public abstract class CargoDados {
       controlType = org.praxisplatform.uischema.FieldControlType.SELECT,
       options = "[{\"value\":true,\"label\":\"Sim\"},{\"value\":false,\"label\":\"Não\"}]",
       helpText = "Selecione sim ou não; no novo cadastro esta escolha é obrigatória.",
-      group = "Quadro de vagas",
+      group = "Quadro de Vagas e Vigência",
       order = 90,
       icon = "rule",
       quickViewVisible = true,
@@ -140,7 +140,7 @@ public abstract class CargoDados {
       controlType = org.praxisplatform.uischema.FieldControlType.SELECT,
       options = "[{\"value\":true,\"label\":\"Sim\"},{\"value\":false,\"label\":\"Não\"}]",
       helpText = "Selecione sim ou não; no novo cadastro esta escolha é obrigatória.",
-      group = "Quadro de vagas",
+      group = "Quadro de Vagas e Vigência",
       order = 100,
       icon = "payments")
   private Boolean porReferencia = false;

@@ -81,12 +81,12 @@ public class CargoDuplicateDraftDTO {
 
   @Schema(nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED,
       description = "Quantidade de vagas do novo cargo, não herdada da origem. Controle habilitado exige quantidade positiva no cadastro final.")
-  @UISchema(label = "Vagas autorizadas", group = "Quadro de vagas", icon = "groups")
+  @UISchema(label = "Vagas autorizadas", group = "Quadro de Vagas e Vigência", icon = "groups")
   private Integer vagasAutorizadas;
 
   @Schema(nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED,
       description = "Escolha pendente sobre controle de vagas no novo cargo. A criação exige informar sim ou não explicitamente.")
-  @UISchema(label = "Controle de vagas", group = "Quadro de vagas", icon = "rule",
+  @UISchema(label = "Controle de vagas", group = "Quadro de Vagas e Vigência", icon = "rule",
       preset = UISchemaPreset.BOOLEAN_FLAG,
       type = FieldDataType.BOOLEAN, controlType = FieldControlType.SELECT,
       options = "[{\"value\":true,\"label\":\"Sim\"},{\"value\":false,\"label\":\"Não\"}]",
@@ -96,7 +96,7 @@ public class CargoDuplicateDraftDTO {
 
   @Schema(nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED,
       description = "Escolha pendente do indicador de referência salarial do host; não reproduz integralmente o regime POR_REFER do legado.")
-  @UISchema(label = "Por referência salarial", group = "Quadro de vagas", icon = "payments",
+  @UISchema(label = "Por referência salarial", group = "Quadro de Vagas e Vigência", icon = "payments",
       preset = UISchemaPreset.BOOLEAN_FLAG,
       type = FieldDataType.BOOLEAN, controlType = FieldControlType.SELECT,
       options = "[{\"value\":true,\"label\":\"Sim\"},{\"value\":false,\"label\":\"Não\"}]",
@@ -106,7 +106,7 @@ public class CargoDuplicateDraftDTO {
 
   @Schema(nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED,
       description = "Escolha pendente sobre reunir outros cargos no controle agregado; não é copiada da origem.")
-  @UISchema(label = "Cargo aglutinador", group = "Quadro de vagas", icon = "hub",
+  @UISchema(label = "Cargo aglutinador", group = "Quadro de Vagas e Vigência", icon = "hub",
       preset = UISchemaPreset.BOOLEAN_FLAG,
       type = FieldDataType.BOOLEAN, controlType = FieldControlType.SELECT,
       options = "[{\"value\":true,\"label\":\"Sim\"},{\"value\":false,\"label\":\"Não\"}]",
@@ -119,7 +119,7 @@ public class CargoDuplicateDraftDTO {
 
   @Schema(nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED,
       description = "Cargo agregador a escolher novamente, se aplicável; o cadastro final verifica órgão e habilitação do agregador.")
-  @UISchema(label = "Cargo agregador", group = "Quadro de vagas", icon = "hub",
+  @UISchema(label = "Cargo agregador", group = "Quadro de Vagas e Vigência", icon = "hub",
       preset = UISchemaPreset.ENTERPRISE_ID,
       type = FieldDataType.NUMBER, controlType = FieldControlType.ENTITY_LOOKUP,
       endpoint = ApiPaths.CARGO_OPTIONS, valueField = "id", displayField = "label",
@@ -130,14 +130,14 @@ public class CargoDuplicateDraftDTO {
 
   @Schema(nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED,
       description = "Início do controle de vagas do novo cargo, sem reaproveitar a vigência da origem.")
-  @UISchema(label = "Início do controle", group = "Quadro de vagas", icon = "event",
+  @UISchema(label = "Início do controle", group = "Quadro de Vagas e Vigência", icon = "event",
       type = org.praxisplatform.uischema.FieldDataType.DATE,
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER)
   private LocalDate dtInicioContrVaga;
 
   @Schema(nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED,
       description = "Documento de embasamento legal a revisar e selecionar para o novo cargo; a referência da origem não é herdada.")
-  @UISchema(label = "Documento legal", group = "Quadro de vagas", icon = "gavel",
+  @UISchema(label = "Documento legal", group = "Quadro de Vagas e Vigência", icon = "gavel",
       preset = UISchemaPreset.LEGAL_DOCUMENT_REFERENCE,
       type = FieldDataType.NUMBER, controlType = FieldControlType.ENTITY_LOOKUP,
       endpoint = ApiPaths.DOCUMENTO_OPTIONS, valueField = "id", displayField = "label",

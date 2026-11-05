@@ -526,7 +526,7 @@ public abstract class DependenteDados {
           "Referência ao documento comprobatório ou ato legal associado ao assentamento do dependente (substitui PONTPUBL/PONTARQS).")
   @UISchema(
       label = "Documento comprobatório",
-      group = "Documentação comprobatória",
+      group = "Registro civil",
       order = 290,
       type = FieldDataType.NUMBER,
       controlType = FieldControlType.ENTITY_LOOKUP,
