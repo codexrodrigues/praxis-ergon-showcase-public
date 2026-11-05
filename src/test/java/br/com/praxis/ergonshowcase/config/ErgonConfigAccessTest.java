@@ -85,9 +85,9 @@ class ErgonConfigAccessTest {
         "https://custom-ergon.example.test",
         ORIGIN);
     assertThat(cors.getAllowedHeaders()).contains(
-        "Authorization", "X-Tenant", "X-Ergon-Orgao", "If-Match", "Idempotency-Key");
+        "Authorization", "X-Tenant", "X-Ergon-Orgao", "X-Correlation-Id", "X-Correlation-ID", "If-Match", "Idempotency-Key");
     assertThat(cors.getExposedHeaders()).contains(
-        "ETag", "X-Schema-Hash", "X-Data-Version", "X-XSRF-TOKEN", "Location");
+        "ETag", "X-Schema-Hash", "X-Data-Version", "X-Correlation-Id", "X-XSRF-TOKEN", "Location");
     assertThat(cors.getAllowCredentials()).isTrue();
   }
 
