@@ -395,7 +395,7 @@
     {
       "resource": "averbacoes-tempo-servico",
       "keyField": "id",
-      "titleField": "rotuloAssentamento",
+      "titleField": "descricao",
       "subtitleField": "pessoaNome",
       "metadataFields": [
         "instituicao",

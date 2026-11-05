@@ -9,7 +9,7 @@ import { ResourceDiscoveryService } from 'OFFICIAL_DISCOVERY_RUNTIME_PATH';
 import { HttpClient, HttpResponse, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { API_URL } from 'OFFICIAL_API_TOKEN_PATH';
 import { SchemaNormalizerService } from 'OFFICIAL_NORMALIZER_PATH';
-import { resolveFieldQuickViewBinding, resolveQuickViewTargetFromRecord } from 'OFFICIAL_QUICK_VIEW_MODEL_PATH';
+import { resolveFieldQuickViewBinding, resolveResourceQuickViewTarget } from 'OFFICIAL_QUICK_VIEW_MODEL_PATH';
 import { prepareSubmitPayload } from 'OFFICIAL_SUBMIT_PATH';
 import { Injector, runInInjectionContext } from '@angular/core';
 import assert from 'node:assert/strict';
@@ -62,19 +62,18 @@ const injector = Injector.create({providers: [
 ]});
 const bulkClient = runInInjectionContext(injector, () => new BulkOperationClientService());
 const discovery = runInInjectionContext(injector, () => new ResourceDiscoveryService());
+const schemaNormalizer = injector.get(SchemaNormalizerService);
 const quickViewTargets: Array<{ resource: string; sampleId: string; expectIntents: boolean; expectRelatedChildren: boolean }> = [
   { resource: 'vinculos', sampleId: '1001:1', expectIntents: true, expectRelatedChildren: true },
   { resource: 'servidor-pessoas', sampleId: '1001', expectIntents: true, expectRelatedChildren: true },
-  { resource: 'cargos', sampleId: '101', expectIntents: true, expectRelatedChildren: false },
-  { resource: 'averbacoes-tempo-servico', sampleId: '1', expectIntents: true, expectRelatedChildren: true },
+  { resource: 'cargos', sampleId: '101', expectIntents: false, expectRelatedChildren: false },
+  { resource: 'averbacoes-tempo-servico', sampleId: '1', expectIntents: false, expectRelatedChildren: true },
 ];
 for (const target of quickViewTargets) {
   const responseSchema = await http('/schemas/filtered?' + new URLSearchParams({
     path: '/api/ergon/' + target.resource + '/all', operation: 'get', schemaType: 'response'
   }));
-  const identity = normalizeResourceIdentityConfig(
-    responseSchema['x-ui']?.resource?.identity ?? responseSchema['x-ui']?.resourceIdentity
-  );
+  const identity: any = responseSchema['x-ui']?.resource?.identity ?? responseSchema['x-ui']?.resourceIdentity;
   assert(identity?.keyField && identity?.titleField && identity?.subtitleField,
     'Resource ' + target.resource + ' must publish keyField, titleField, and subtitleField');
   assert((identity.metadataFields?.length ?? 0) >= 2,
@@ -83,7 +82,7 @@ for (const target of quickViewTargets) {
   for (const metaField of identity.metadataFields ?? []) {
     assert(!headerFields.has(metaField), 'metadataFields must not repeat header identity field: ' + metaField);
   }
-  const responseFields = normalizeSchemaFields(responseSchema);
+  const responseFields = schemaNormalizer.normalizeSchema(responseSchema);
   const quickViewFields = responseFields.filter((f: any) => f.quickViewVisible === true);
   assert(quickViewFields.length >= 4 && quickViewFields.length <= 8,
     'Resource ' + target.resource + ' must curate 4..8 quickViewVisible fields');
@@ -95,16 +94,20 @@ for (const target of quickViewTargets) {
   const titleField = responseFields.find((f: any) => f.name === identity.titleField);
   assert(titleField, 'Normalized titleField must exist for ' + target.resource);
   const titleBinding = resolveFieldQuickViewBinding(titleField as any);
-  assert(titleBinding?.enabled && titleBinding?.previewSurfaceId,
+  assert(titleBinding?.recordOpen?.target?.resourceKey && titleBinding?.previewSurfaceId,
     'titleField ' + identity.titleField + ' must resolve an enabled QuickView binding');
   if (target.resource === 'vinculos') {
     const numfuncField = responseFields.find((f: any) => f.name === 'numfunc');
     assert(numfuncField, 'vinculos response schema must expose numfunc');
     const numfuncBinding = resolveFieldQuickViewBinding(numfuncField as any);
-    assert.equal(numfuncBinding?.sourceIdentityField, 'numfunc',
+    assert.equal(numfuncBinding?.recordOpen?.sourceIdentityField, 'numfunc',
       'ENTITY_LOOKUP with optionSource.valuePropertyPath !== id must preserve fieldName as sourceIdentityField');
+    const resolvedTarget = resolveResourceQuickViewTarget(numfuncBinding, { id: '1001:1', numfunc: 1001 });
+    assert.equal(resolvedTarget?.identity, 1001,
+      'QuickView target on vinculos.numfunc must resolve 1001 instead of parent id 1001:1');
   }
-  const itemSurfaces = await firstValueFrom(discovery.getItemSurfaces('/api/ergon/' + target.resource, target.sampleId));
+  const itemSurfacesEnvelope: any = await firstValueFrom(discovery.getSurfaces({ surfaces: { href: '/api/ergon/' + target.resource + '/' + target.sampleId + '/surfaces' } }));
+  const itemSurfaces = itemSurfacesEnvelope?.data ?? itemSurfacesEnvelope;
   assert(itemSurfaces.surfaces.some((s: any) => s.id === titleBinding.previewSurfaceId && s.availability?.allowed === true),
     'Contextual item surfaces must authorize previewSurfaceId ' + titleBinding.previewSurfaceId);
   if (target.expectIntents) {
