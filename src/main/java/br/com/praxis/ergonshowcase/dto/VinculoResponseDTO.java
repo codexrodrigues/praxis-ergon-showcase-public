@@ -42,7 +42,7 @@ public class VinculoResponseDTO extends VinculoDados {
       accessMode = Schema.AccessMode.READ_ONLY)
   @UISchema(
       label = "Afastamento aberto",
-      group = "Afastamentos",
+      group = "Exercício",
       readOnly = true,
       tableHidden = true,
       type = org.praxisplatform.uischema.FieldDataType.NUMBER,
@@ -68,7 +68,7 @@ public class VinculoResponseDTO extends VinculoDados {
       preset = UISchemaPreset.ENTERPRISE_ID,
       readOnly = true,
       formHidden = true,
-      group = "Identificação",
+      group = "Identificação funcional",
       order = 0)
   private VinculoId id;
 
@@ -79,7 +79,7 @@ public class VinculoResponseDTO extends VinculoDados {
       label = "Código do órgão",
       readOnly = true,
       tableHidden = true,
-      group = "Lotação",
+      group = "Enquadramento e lotação",
       order = 101,
       type = org.praxisplatform.uischema.FieldDataType.TEXT,
       controlType = org.praxisplatform.uischema.FieldControlType.ENTITY_LOOKUP,
@@ -94,7 +94,7 @@ public class VinculoResponseDTO extends VinculoDados {
       label = "Órgão",
       readOnly = true,
       formHidden = true,
-      group = "Lotação",
+      group = "Enquadramento e lotação",
       order = 102,
       icon = "apartment",
       quickViewVisible = true,
@@ -154,7 +154,7 @@ public class VinculoResponseDTO extends VinculoDados {
       label = "Cargo",
       readOnly = true,
       formHidden = true,
-      group = "Lotação",
+      group = "Enquadramento e lotação",
       order = 51, icon = "badge",
       quickViewVisible = true,
       quickViewOrder = 2)

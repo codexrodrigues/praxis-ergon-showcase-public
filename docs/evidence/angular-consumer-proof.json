@@ -350,5 +350,61 @@
     "explicitNullPersisted": true,
     "untouchedOptionalOmitted": true,
     "pipeline": "prepareSubmitPayload"
-  }
+  },
+  "quickViewContracts": [
+    {
+      "resource": "vinculos",
+      "keyField": "id",
+      "titleField": "matric",
+      "subtitleField": "pessoaNome",
+      "metadataFields": [
+        "setorNome",
+        "regimejur",
+        "categoria"
+      ],
+      "quickViewFieldCount": 7,
+      "previewSurfaceId": "resumo-funcional",
+      "surfaceCount": 13
+    },
+    {
+      "resource": "servidor-pessoas",
+      "keyField": "id",
+      "titleField": "nome",
+      "subtitleField": "nomeSocial",
+      "metadataFields": [
+        "cpf",
+        "idadeAnos"
+      ],
+      "quickViewFieldCount": 6,
+      "previewSurfaceId": "ficha-cadastral",
+      "surfaceCount": 8
+    },
+    {
+      "resource": "cargos",
+      "keyField": "id",
+      "titleField": "nome",
+      "subtitleField": "categoria",
+      "metadataFields": [
+        "cargoFuncao",
+        "cbo"
+      ],
+      "quickViewFieldCount": 5,
+      "previewSurfaceId": "ficha-cargo",
+      "surfaceCount": 5
+    },
+    {
+      "resource": "averbacoes-tempo-servico",
+      "keyField": "id",
+      "titleField": "rotuloAssentamento",
+      "subtitleField": "pessoaNome",
+      "metadataFields": [
+        "instituicao",
+        "finalidade"
+      ],
+      "quickViewFieldCount": 4,
+      "previewSurfaceId": "detail",
+      "surfaceCount": 6
+    }
+  ],
+  "corsCorrelationHeaderVerified": true
 }

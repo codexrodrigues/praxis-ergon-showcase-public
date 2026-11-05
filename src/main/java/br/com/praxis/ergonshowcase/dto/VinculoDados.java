@@ -36,7 +36,7 @@ public abstract class VinculoDados {
   @Schema(
       description =
           "Regime jurídico que fundamenta a relação funcional, como estatutário ou celetista.")
-  @UISchema(label = "Regime jurídico", group = "Enquadramento", order = 20, icon = "gavel")
+  @UISchema(label = "Regime jurídico", group = "Enquadramento e lotação", order = 20, icon = "gavel")
   private String regimejur;
 
   @NotBlank
@@ -46,7 +46,7 @@ public abstract class VinculoDados {
           "Modalidade do vínculo funcional, como efetivo, comissão ou temporário, usada no enquadramento estatutário.")
   @UISchema(
       label = "Tipo de vínculo",
-      group = "Enquadramento",
+      group = "Enquadramento e lotação",
       order = 30,
       icon = "work",
       quickViewVisible = true,
@@ -58,7 +58,7 @@ public abstract class VinculoDados {
   @Schema(
       description =
           "Categoria funcional do assentamento, utilizada no recorte de regras de pessoal.")
-  @UISchema(label = "Categoria", group = "Enquadramento", order = 40, icon = "category")
+  @UISchema(label = "Categoria", group = "Enquadramento e lotação", order = 40, icon = "category")
   private String categoria;
 
   @Schema(
@@ -71,7 +71,7 @@ public abstract class VinculoDados {
       valueField = "id",
       displayField = "label",
       tableHidden = true,
-      group = "Lotação",
+      group = "Enquadramento e lotação",
       order = 50,
       icon = "badge",
       type = org.praxisplatform.uischema.FieldDataType.TEXT)
@@ -86,7 +86,7 @@ public abstract class VinculoDados {
   @Size(max = 20)
   @Schema(
       description = "Referência ou padrão salarial vigente na tabela de vencimentos do vínculo.")
-  @UISchema(label = "Referência salarial", group = "Enquadramento", order = 60, icon = "payments")
+  @UISchema(label = "Referência salarial", group = "Enquadramento e lotação", order = 60, icon = "payments")
   private String referencia;
 
   @Positive
@@ -97,7 +97,7 @@ public abstract class VinculoDados {
   @UISchema(
       label = "Jornada semanal",
       numericFormat = NumericFormat.INTEGER,
-      group = "Enquadramento",
+      group = "Enquadramento e lotação",
       order = 70,
       icon = "schedule",
       quickViewVisible = true,

@@ -63,7 +63,7 @@ public class CreateVinculoDTO extends VinculoDados {
       endpoint = ApiPaths.ORGAO_OPTIONS,
       valueField = "id",
       displayField = "label",
-      group = "Lotação",
+      group = "Enquadramento e lotação",
       order = 3,
       icon = "apartment",
       type = org.praxisplatform.uischema.FieldDataType.TEXT)
@@ -82,7 +82,7 @@ public class CreateVinculoDTO extends VinculoDados {
   @UISchema(
       label = "Início de exercício",
       controlType = org.praxisplatform.uischema.FieldControlType.DATE_PICKER,
-      group = "Exercício",
+      group = "Ingresso, concurso e estágio probatório",
       order = 4,
       icon = "event",
       type = org.praxisplatform.uischema.FieldDataType.DATE)

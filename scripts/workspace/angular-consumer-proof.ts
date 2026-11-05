@@ -9,6 +9,7 @@ import { ResourceDiscoveryService } from 'OFFICIAL_DISCOVERY_RUNTIME_PATH';
 import { HttpClient, HttpResponse, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { API_URL } from 'OFFICIAL_API_TOKEN_PATH';
 import { SchemaNormalizerService } from 'OFFICIAL_NORMALIZER_PATH';
+import { resolveFieldQuickViewBinding, resolveQuickViewTargetFromRecord } from 'OFFICIAL_QUICK_VIEW_MODEL_PATH';
 import { prepareSubmitPayload } from 'OFFICIAL_SUBMIT_PATH';
 import { Injector, runInInjectionContext } from '@angular/core';
 import assert from 'node:assert/strict';
@@ -33,7 +34,7 @@ async function http(url: string, method = 'GET', body?: unknown, extra: any = {}
   return result?.data ?? result;
 }
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
-const receipt: any = { completed: false, schemas: [], executions: [], bulkContracts: [], staleResultProtected: false, rejectionVisible: false, fixtureRemoved: false };
+const receipt: any = { completed: false, schemas: [], executions: [], bulkContracts: [], quickViewContracts: [], corsCorrelationHeaderVerified: false, staleResultProtected: false, rejectionVisible: false, fixtureRemoved: false };
 // Real Angular HttpClient and Discovery; only the Node network backend is adapted to fetch.
 const transport = new HttpClient({ handle(request: any) {
   return new Observable<any>(subscriber => {
@@ -60,6 +61,83 @@ const injector = Injector.create({providers: [
   {provide: ResourceDiscoveryService, useFactory: () => new ResourceDiscoveryService()}
 ]});
 const bulkClient = runInInjectionContext(injector, () => new BulkOperationClientService());
+const discovery = runInInjectionContext(injector, () => new ResourceDiscoveryService());
+const quickViewTargets: Array<{ resource: string; sampleId: string; expectIntents: boolean; expectRelatedChildren: boolean }> = [
+  { resource: 'vinculos', sampleId: '1001:1', expectIntents: true, expectRelatedChildren: true },
+  { resource: 'servidor-pessoas', sampleId: '1001', expectIntents: true, expectRelatedChildren: true },
+  { resource: 'cargos', sampleId: '101', expectIntents: true, expectRelatedChildren: false },
+  { resource: 'averbacoes-tempo-servico', sampleId: '1', expectIntents: true, expectRelatedChildren: true },
+];
+for (const target of quickViewTargets) {
+  const responseSchema = await http('/schemas/filtered?' + new URLSearchParams({
+    path: '/api/ergon/' + target.resource + '/all', operation: 'get', schemaType: 'response'
+  }));
+  const identity = normalizeResourceIdentityConfig(
+    responseSchema['x-ui']?.resource?.identity ?? responseSchema['x-ui']?.resourceIdentity
+  );
+  assert(identity?.keyField && identity?.titleField && identity?.subtitleField,
+    'Resource ' + target.resource + ' must publish keyField, titleField, and subtitleField');
+  assert((identity.metadataFields?.length ?? 0) >= 2,
+    'Resource ' + target.resource + ' must publish at least 2 executive metadataFields');
+  const headerFields = new Set([identity.keyField, identity.titleField, identity.subtitleField, identity.avatarField].filter(Boolean));
+  for (const metaField of identity.metadataFields ?? []) {
+    assert(!headerFields.has(metaField), 'metadataFields must not repeat header identity field: ' + metaField);
+  }
+  const responseFields = normalizeSchemaFields(responseSchema);
+  const quickViewFields = responseFields.filter((f: any) => f.quickViewVisible === true);
+  assert(quickViewFields.length >= 4 && quickViewFields.length <= 8,
+    'Resource ' + target.resource + ' must curate 4..8 quickViewVisible fields');
+  const reservedFields = new Set([...headerFields, ...(identity.metadataFields ?? [])]);
+  for (const qvField of quickViewFields) {
+    assert(!reservedFields.has(qvField.name),
+      'quickViewVisible field ' + qvField.name + ' must not overlap with ResourceIdentity');
+  }
+  const titleField = responseFields.find((f: any) => f.name === identity.titleField);
+  assert(titleField, 'Normalized titleField must exist for ' + target.resource);
+  const titleBinding = resolveFieldQuickViewBinding(titleField as any);
+  assert(titleBinding?.enabled && titleBinding?.previewSurfaceId,
+    'titleField ' + identity.titleField + ' must resolve an enabled QuickView binding');
+  if (target.resource === 'vinculos') {
+    const numfuncField = responseFields.find((f: any) => f.name === 'numfunc');
+    assert(numfuncField, 'vinculos response schema must expose numfunc');
+    const numfuncBinding = resolveFieldQuickViewBinding(numfuncField as any);
+    assert.equal(numfuncBinding?.sourceIdentityField, 'numfunc',
+      'ENTITY_LOOKUP with optionSource.valuePropertyPath !== id must preserve fieldName as sourceIdentityField');
+  }
+  const itemSurfaces = await firstValueFrom(discovery.getItemSurfaces('/api/ergon/' + target.resource, target.sampleId));
+  assert(itemSurfaces.surfaces.some((s: any) => s.id === titleBinding.previewSurfaceId && s.availability?.allowed === true),
+    'Contextual item surfaces must authorize previewSurfaceId ' + titleBinding.previewSurfaceId);
+  if (target.expectIntents) {
+    assert(itemSurfaces.surfaces.some((s: any) => s.kind === 'PARTIAL_FORM' && s.scope === 'ITEM'),
+      'Resource ' + target.resource + ' must publish contextual PARTIAL_FORM intents for Quick View actions');
+  }
+  if (target.expectRelatedChildren) {
+    assert(itemSurfaces.surfaces.some((s: any) => s.relatedResource?.childResourceKey && s.relatedResource?.childResourcePath),
+      'Resource ' + target.resource + ' must publish 1:N relatedResource child surfaces for 360 drawer');
+  }
+  receipt.quickViewContracts.push({
+    resource: target.resource,
+    keyField: identity.keyField,
+    titleField: identity.titleField,
+    subtitleField: identity.subtitleField,
+    metadataFields: identity.metadataFields,
+    quickViewFieldCount: quickViewFields.length,
+    previewSurfaceId: titleBinding.previewSurfaceId,
+    surfaceCount: itemSurfaces.surfaces.length
+  });
+}
+const corsPreflight = await fetch(new URL('/api/ergon/vinculos/determinations/provimento', baseUrl), {
+  method: 'OPTIONS',
+  headers: {
+    Origin: 'https://praxis-ergon-showcase.web.app',
+    'Access-Control-Request-Method': 'POST',
+    'Access-Control-Request-Headers': 'authorization,content-type,x-correlation-id,x-tenant'
+  }
+});
+assert.equal(corsPreflight.status, 200, 'CORS preflight with X-Correlation-Id must succeed');
+assert((corsPreflight.headers.get('access-control-allow-headers') ?? '').toLowerCase().includes('x-correlation-id'),
+  'Access-Control-Allow-Headers must authorize X-Correlation-Id for Reactive Determinations');
+receipt.corsCorrelationHeaderVerified = true;
 for (const resource of ['vinculos', 'servidor-pessoas', 'cargos']) {
   const capabilities = await http('/api/ergon/' + resource + '/capabilities');
   for (const operationId of ['bulk-update', 'bulk-update-items']) {
@@ -255,4 +333,4 @@ try {
   }
   await fs.writeFile(path.join(evidenceDir, 'angular-consumer-proof.json'), JSON.stringify(receipt, null, 2));
 }
-console.log(JSON.stringify({ schemas: receipt.schemas.length, executions: receipt.executions.length, bulkContracts: receipt.bulkContracts.length, staleResultProtected: receipt.staleResultProtected, rejectionVisible: receipt.rejectionVisible, fixtureRemoved: receipt.fixtureRemoved }));
+console.log(JSON.stringify({ schemas: receipt.schemas.length, executions: receipt.executions.length, bulkContracts: receipt.bulkContracts.length, quickViewContracts: receipt.quickViewContracts.length, corsCorrelationHeaderVerified: receipt.corsCorrelationHeaderVerified, staleResultProtected: receipt.staleResultProtected, rejectionVisible: receipt.rejectionVisible, fixtureRemoved: receipt.fixtureRemoved }));

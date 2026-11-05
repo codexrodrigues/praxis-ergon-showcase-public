@@ -24,6 +24,7 @@ const source = (await readFile('scripts/workspace/angular-consumer-proof.ts', 'u
   .replace('OFFICIAL_DISCOVERY_RUNTIME_PATH', path.join(angularRoot, 'projects/praxis-core/src/lib/services/resource-discovery.service.ts').replaceAll('\\', '/'))
   .replace('OFFICIAL_API_TOKEN_PATH', path.join(angularRoot, 'projects/praxis-core/src/lib/tokens/api-url.token.ts').replaceAll('\\', '/'))
   .replace('OFFICIAL_NORMALIZER_PATH', path.join(angularRoot, 'projects/praxis-core/src/lib/services/schema-normalizer.service.ts').replaceAll('\\', '/'))
+  .replace('OFFICIAL_QUICK_VIEW_MODEL_PATH', path.join(angularRoot, 'projects/praxis-core/src/lib/models/resource-quick-view.model.ts').replaceAll('\\', '/'))
   .replace('OFFICIAL_SUBMIT_PATH', path.join(angularRoot, 'projects/praxis-dynamic-form/src/lib/utils/prepare-submit-payload.ts').replaceAll('\\', '/'));
 const entry = path.join(root, '.local/angular-proof/entry.ts');
 const output = path.join(root, '.local/angular-proof/runtime-proof.mjs');
