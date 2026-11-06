@@ -40,7 +40,7 @@
 
     <properties>
         <apache-poi.version>5.5.1</apache-poi.version>
-        
+
         <commons-lang3.version>3.20.0</commons-lang3.version>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -49,7 +49,7 @@
 
     <dependencyManagement>
         <dependencies>
-            
+
             <dependency>
                 <groupId>io.zonky.test.postgres</groupId>
                 <artifactId>embedded-postgres-binaries-bom</artifactId>
@@ -61,19 +61,19 @@
     </dependencyManagement>
 
     <dependencies>
-        
+
         <dependency>
             <groupId>io.github.codexrodrigues</groupId>
             <artifactId>praxis-rules-engine</artifactId>
             <version>0.1.0-beta.17-ergon.1d027b745c29</version>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
@@ -166,7 +166,7 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
@@ -179,7 +179,7 @@
             <version>11.17.0</version>
             <optional>true</optional>
         </dependency>
-        
+
         <dependency>
             <groupId>io.zonky.test</groupId>
             <artifactId>embedded-postgres</artifactId>
@@ -202,7 +202,7 @@
 
     <build>
         <plugins>
-            
+
             <plugin>
                 <groupId>io.github.download-maven-plugin</groupId>
                 <artifactId>download-maven-plugin</artifactId>
@@ -271,7 +271,7 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.3.0</version>
                 <configuration>
-                    
+
                     <forceCreation>true</forceCreation>
                 </configuration>
             </plugin>
@@ -310,7 +310,7 @@
                 </executions>
             </plugin>
 
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -346,35 +346,35 @@
                     <additionalJOption>-Xdoclint:none</additionalJOption>
                     <overview>src/main/javadoc/overview.html</overview>
                     <additionalOptions>
-                        
+
                         <additionalOption>--add-stylesheet=${project.basedir}/src/main/javadoc/dark.css</additionalOption>
                     </additionalOptions>
                     <doctitle>Praxis Metadata Starter — API Javadoc</doctitle>
                     <windowtitle>Praxis Metadata Starter</windowtitle>
                     <header>
-                        
+
                         &lt;div style="display:flex;gap:16px;align-items:center;font:14px system-ui,sans-serif;"&gt;
                           &lt;a href="https://codexrodrigues.github.io/praxis-metadata-starter/" target="_blank"&gt;Docs&lt;/a&gt;
                           &lt;a href="https://codexrodrigues.github.io/praxis-metadata-starter/apidocs/" target="_blank"&gt;Javadoc&lt;/a&gt;
                           &lt;a href="https://github.com/codexrodrigues/praxis-metadata-starter" target="_blank"&gt;GitHub&lt;/a&gt;
                           &lt;a href="https://central.sonatype.com/artifact/io.github.codexrodrigues/praxis-metadata-starter" target="_blank"&gt;Maven Central&lt;/a&gt;
                         &lt;/div&gt;
-                        
+
                     </header>
                     <bottom>
-                        
+
                         &lt;div style="font:12px system-ui,sans-serif;color:#6b7280;"&gt;
                           Built with ❤️ for fast, consistent, contract‑driven backends.
                           &lt;a href="https://codexrodrigues.github.io/praxis-metadata-starter/" target="_blank"&gt;Learn more&lt;/a&gt;.
                         &lt;/div&gt;
-                        
+
                     </bottom>
                 </configuration>
             </plugin>
         </plugins>
     </build>
 
-    
+
     <profiles>
         <profile>
             <id>release-neon-gate</id>
@@ -425,7 +425,7 @@
                         <version>1.5.0</version>
                         <configuration>
                             <updatePomFile>true</updatePomFile>
-                            
+
                             <flattenMode>ossrh</flattenMode>
                         </configuration>
                         <executions>

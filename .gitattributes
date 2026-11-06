@@ -3,3 +3,5 @@ docs/tooling/auditor-canonico-base.txt text eol=lf
 docs/evidence/** text eol=lf
 docs/MATRIZ-PARIDADE-305.md text eol=lf
 docs/DUPLICATE-DRAFT-ADOCAO.md text eol=lf
+
+.mvn/local-repo/** -text

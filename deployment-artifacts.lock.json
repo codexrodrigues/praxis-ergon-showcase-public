@@ -16,7 +16,7 @@
       "gav": "io.github.codexrodrigues:praxis-config-starter:0.1.0-rc.176-ergon.1d027b745c29",
       "extension": "pom",
       "file": ".mvn/local-repo/io/github/codexrodrigues/praxis-config-starter/0.1.0-rc.176-ergon.1d027b745c29/praxis-config-starter-0.1.0-rc.176-ergon.1d027b745c29.pom",
-      "sha256": "4fa75ca0a57b0ffe9f58aa625f90955b43b84b284d6f395d009263c83b654cd9",
+      "sha256": "a8aa47c1495a48a5bc393e6acfc2a7628649130f2ae00f057e022c6a80e7839e",
       "originCommit": "1d027b745c29d158cd6b1fca89d3c249e239564d",
       "originFile": ".mvn/local-repo/io/github/codexrodrigues/praxis-config-starter/0.1.0-rc.176/praxis-config-starter-0.1.0-rc.176.pom",
       "jarBytesUnchangedFromDeployedSource": false
@@ -34,7 +34,7 @@
       "gav": "io.github.codexrodrigues:praxis-metadata-starter:8.0.0-rc.188-ergon.1d027b745c29",
       "extension": "pom",
       "file": ".mvn/local-repo/io/github/codexrodrigues/praxis-metadata-starter/8.0.0-rc.188-ergon.1d027b745c29/praxis-metadata-starter-8.0.0-rc.188-ergon.1d027b745c29.pom",
-      "sha256": "b92839f1072524f9f43075d86072c1b7dd73cab46c65d0bed85d2e1d0ea54291",
+      "sha256": "51d8fca2771f48b42c3df8ed489ded6dfe11595f50b5fb94169a9b1ba096290d",
       "originCommit": "1d027b745c29d158cd6b1fca89d3c249e239564d",
       "originFile": ".mvn/local-repo/io/github/codexrodrigues/praxis-metadata-starter/8.0.0-rc.188/praxis-metadata-starter-8.0.0-rc.188.pom",
       "jarBytesUnchangedFromDeployedSource": false
@@ -52,7 +52,7 @@
       "gav": "io.github.codexrodrigues:praxis-rules-engine:0.1.0-beta.17-ergon.1d027b745c29",
       "extension": "pom",
       "file": ".mvn/local-repo/io/github/codexrodrigues/praxis-rules-engine/0.1.0-beta.17-ergon.1d027b745c29/praxis-rules-engine-0.1.0-beta.17-ergon.1d027b745c29.pom",
-      "sha256": "dc7617d7192e13789a40a0bbce449ff580cbd88d6f9e23d0f9b9645c373b04b5",
+      "sha256": "06ade079dfc271d5858e4c0c084719fef6069c27c1d5fbff5759b2339c0c04ac",
       "originCommit": "1d027b745c29d158cd6b1fca89d3c249e239564d",
       "originFile": ".mvn/local-repo/io/github/codexrodrigues/praxis-rules-engine/0.1.0-beta.17/praxis-rules-engine-0.1.0-beta.17.pom",
       "jarBytesUnchangedFromDeployedSource": false

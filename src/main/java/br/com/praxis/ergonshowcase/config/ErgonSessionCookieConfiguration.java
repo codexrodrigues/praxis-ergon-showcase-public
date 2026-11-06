@@ -17,6 +17,9 @@ public class ErgonSessionCookieConfiguration {
     String sameSite = environment.getProperty("server.servlet.session.cookie.same-site", "lax");
     return factory -> factory.addContextCustomizers(context -> {
       if (secure && "none".equalsIgnoreCase(sameSite)) {
+        // Tomcat explicitly sets this attribute on SESSION cookies; its false default
+        // overrides the processor's default for ordinary cookies.
+        context.setUsePartitioned(true);
         var processor = new Rfc6265CookieProcessor();
         processor.setPartitioned(true);
         processor.setSameSiteCookies("none");
