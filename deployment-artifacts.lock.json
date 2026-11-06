@@ -1,0 +1,61 @@
+{
+  "distribution": "private immutable vendor coordinates for already-deployed SDK bytes; not Maven Central releases",
+  "originCommit": "1d027b745c29d158cd6b1fca89d3c249e239564d",
+  "removalTrigger": "replace with compatible official SDK release after canonical SDK/host conformance gates",
+  "artifacts": [
+    {
+      "gav": "io.github.codexrodrigues:praxis-config-starter:0.1.0-rc.176-ergon.1d027b745c29",
+      "extension": "jar",
+      "file": ".mvn/local-repo/io/github/codexrodrigues/praxis-config-starter/0.1.0-rc.176-ergon.1d027b745c29/praxis-config-starter-0.1.0-rc.176-ergon.1d027b745c29.jar",
+      "sha256": "99be6ba139dc65657f0a9eb07543ddcd0a394e19882feb3acc3b6e27f6442034",
+      "originCommit": "1d027b745c29d158cd6b1fca89d3c249e239564d",
+      "originFile": ".mvn/local-repo/io/github/codexrodrigues/praxis-config-starter/0.1.0-rc.176/praxis-config-starter-0.1.0-rc.176.jar",
+      "jarBytesUnchangedFromDeployedSource": true
+    },
+    {
+      "gav": "io.github.codexrodrigues:praxis-config-starter:0.1.0-rc.176-ergon.1d027b745c29",
+      "extension": "pom",
+      "file": ".mvn/local-repo/io/github/codexrodrigues/praxis-config-starter/0.1.0-rc.176-ergon.1d027b745c29/praxis-config-starter-0.1.0-rc.176-ergon.1d027b745c29.pom",
+      "sha256": "4fa75ca0a57b0ffe9f58aa625f90955b43b84b284d6f395d009263c83b654cd9",
+      "originCommit": "1d027b745c29d158cd6b1fca89d3c249e239564d",
+      "originFile": ".mvn/local-repo/io/github/codexrodrigues/praxis-config-starter/0.1.0-rc.176/praxis-config-starter-0.1.0-rc.176.pom",
+      "jarBytesUnchangedFromDeployedSource": false
+    },
+    {
+      "gav": "io.github.codexrodrigues:praxis-metadata-starter:8.0.0-rc.188-ergon.1d027b745c29",
+      "extension": "jar",
+      "file": ".mvn/local-repo/io/github/codexrodrigues/praxis-metadata-starter/8.0.0-rc.188-ergon.1d027b745c29/praxis-metadata-starter-8.0.0-rc.188-ergon.1d027b745c29.jar",
+      "sha256": "fa2d6ea42ae58ea74948c12cb616ee12226fec15e46a88f2bd896a2c96678c5a",
+      "originCommit": "1d027b745c29d158cd6b1fca89d3c249e239564d",
+      "originFile": ".mvn/local-repo/io/github/codexrodrigues/praxis-metadata-starter/8.0.0-rc.188/praxis-metadata-starter-8.0.0-rc.188.jar",
+      "jarBytesUnchangedFromDeployedSource": true
+    },
+    {
+      "gav": "io.github.codexrodrigues:praxis-metadata-starter:8.0.0-rc.188-ergon.1d027b745c29",
+      "extension": "pom",
+      "file": ".mvn/local-repo/io/github/codexrodrigues/praxis-metadata-starter/8.0.0-rc.188-ergon.1d027b745c29/praxis-metadata-starter-8.0.0-rc.188-ergon.1d027b745c29.pom",
+      "sha256": "b92839f1072524f9f43075d86072c1b7dd73cab46c65d0bed85d2e1d0ea54291",
+      "originCommit": "1d027b745c29d158cd6b1fca89d3c249e239564d",
+      "originFile": ".mvn/local-repo/io/github/codexrodrigues/praxis-metadata-starter/8.0.0-rc.188/praxis-metadata-starter-8.0.0-rc.188.pom",
+      "jarBytesUnchangedFromDeployedSource": false
+    },
+    {
+      "gav": "io.github.codexrodrigues:praxis-rules-engine:0.1.0-beta.17-ergon.1d027b745c29",
+      "extension": "jar",
+      "file": ".mvn/local-repo/io/github/codexrodrigues/praxis-rules-engine/0.1.0-beta.17-ergon.1d027b745c29/praxis-rules-engine-0.1.0-beta.17-ergon.1d027b745c29.jar",
+      "sha256": "f7121016af750c15bd37ea3d125f8b76a653d2ab927fe7f71691832d07bcac2a",
+      "originCommit": "1d027b745c29d158cd6b1fca89d3c249e239564d",
+      "originFile": ".mvn/local-repo/io/github/codexrodrigues/praxis-rules-engine/0.1.0-beta.17/praxis-rules-engine-0.1.0-beta.17.jar",
+      "jarBytesUnchangedFromDeployedSource": true
+    },
+    {
+      "gav": "io.github.codexrodrigues:praxis-rules-engine:0.1.0-beta.17-ergon.1d027b745c29",
+      "extension": "pom",
+      "file": ".mvn/local-repo/io/github/codexrodrigues/praxis-rules-engine/0.1.0-beta.17-ergon.1d027b745c29/praxis-rules-engine-0.1.0-beta.17-ergon.1d027b745c29.pom",
+      "sha256": "dc7617d7192e13789a40a0bbce449ff580cbd88d6f9e23d0f9b9645c373b04b5",
+      "originCommit": "1d027b745c29d158cd6b1fca89d3c249e239564d",
+      "originFile": ".mvn/local-repo/io/github/codexrodrigues/praxis-rules-engine/0.1.0-beta.17/praxis-rules-engine-0.1.0-beta.17.pom",
+      "jarBytesUnchangedFromDeployedSource": false
+    }
+  ]
+}

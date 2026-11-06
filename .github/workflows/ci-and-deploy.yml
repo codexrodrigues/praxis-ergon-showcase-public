@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'ergon-showcase-deploy-*'
   pull_request:
     branches:
       - main
@@ -12,7 +14,7 @@ on:
       deploy_to_render:
         description: "Trigger Render deployment after CI passes"
         required: false
-        default: true
+        default: false
         type: boolean
 
 concurrency:
@@ -38,6 +40,9 @@ jobs:
           java-version: '21'
           cache: maven
 
+      - name: Verify immutable deployment SDK inputs
+        run: python3 scripts/workspace/verify-deployment-artifacts.py
+
       - name: Seed local Praxis dependencies into Maven repository
         shell: bash
         run: |
@@ -47,71 +52,30 @@ jobs:
           find ~/.m2/repository/io/github/codexrodrigues -name '_remote.repositories' -delete || true
 
       - name: Compile and run offline JUnit conformance & security test suite
-        run: mvn -B test -Dtest=ErgonConfigAccessTest,TenantRequestValidationTest,ShowcaseCanonicalConformanceGateTest,ErgonPolicyStudioContractTest,ErgonReactiveDeterminationMetadataTest
+        run: mvn -B test -Dtest=ErgonConfigAccessTest,TenantRequestValidationTest,ShowcaseCanonicalConformanceGateTest,ErgonPolicyStudioContractTest,ErgonReactiveDeterminationMetadataTest,ErgonBrowserSessionTest,ErgonBrowserConfigPostgresTest,ErgonConfigPrincipalsBindingTest,ErgonSessionCookieConfigurationTest
 
       - name: Package Spring Boot executable JAR
         run: mvn -B package -DskipTests
 
       - name: Verify runtime Docker image build
-        run: docker build -f Dockerfile.prebuilt -t praxis-ergon-showcase:${GITHUB_SHA} .
+        run: |
+          docker build -f Dockerfile.prebuilt -t praxis-ergon-showcase:${GITHUB_SHA} .
+          docker build -f Dockerfile -t praxis-ergon-showcase-source:${GITHUB_SHA} .
 
   deploy-render:
     name: Deploy to Render (Starter) & Smoke Health Check
     needs: ci
     if: >-
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && inputs.deploy_to_render)
+      startsWith(github.ref, 'refs/tags/ergon-showcase-deploy-') &&
+      (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy_to_render))
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Trigger Render Deployment
-        id: trigger
+      - name: Checkout reviewed source
+        uses: actions/checkout@v5
+
+      - name: Deploy exact source commit and require candidate health
         env:
-          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ -n "${RENDER_DEPLOY_HOOK_URL:-}" ]]; then
-            curl -fsSL -X POST "$RENDER_DEPLOY_HOOK_URL" >/dev/null
-            echo "triggered=true" >> "$GITHUB_OUTPUT"
-            echo "Triggered Render deploy via RENDER_DEPLOY_HOOK_URL."
-          elif [[ -n "${RENDER_API_KEY:-}" && -n "${RENDER_SERVICE_ID:-}" ]]; then
-            active_status="$(curl -fsSL "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys?limit=1" \
-              -H "Authorization: Bearer ${RENDER_API_KEY}" \
-              -H "Accept: application/json" | grep -oE '"status":"[^"]+"' | head -n1 || true)"
-            if [[ "$active_status" == *"build_in_progress"* || "$active_status" == *"update_in_progress"* || "$active_status" == *"pre_deploy_in_progress"* ]]; then
-              echo "triggered=true" >> "$GITHUB_OUTPUT"
-              echo "Render deploy already in progress (${active_status}); waiting for it to finish."
-            else
-              curl -fsSL -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" \
-                -H "Authorization: Bearer ${RENDER_API_KEY}" \
-                -H "Accept: application/json" \
-                -H "Content-Type: application/json" \
-                -d '{"clearCache":"do_not_clear"}' >/dev/null
-              echo "triggered=true" >> "$GITHUB_OUTPUT"
-              echo "Triggered Render deploy via Render REST API."
-            fi
-          else
-            echo "triggered=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Render deployment secrets (RENDER_API_KEY + RENDER_SERVICE_ID or RENDER_DEPLOY_HOOK_URL) are not configured; skipping remote deploy trigger."
-          fi
-
-      - name: Wait for /actuator/health UP on Render
-        if: steps.trigger.outputs.triggered == 'true'
-        env:
-          RENDER_PUBLIC_URL: ${{ vars.RENDER_PUBLIC_URL || 'https://praxis-ergon-showcase.onrender.com' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "Polling ${RENDER_PUBLIC_URL}/actuator/health ..."
-          for i in $(seq 1 48); do
-            status="$(curl -s -o /dev/null -w '%{http_code}' --connect-timeout 10 --max-time 20 "${RENDER_PUBLIC_URL}/actuator/health" || true)"
-            if [[ "$status" == "200" ]]; then
-              echo "Render service is UP (HTTP 200)."
-              exit 0
-            fi
-            sleep 15
-          done
-          echo "::warning::Timed out waiting for ${RENDER_PUBLIC_URL}/actuator/health to return HTTP 200."
+        run: python3 scripts/workspace/deploy-render.py

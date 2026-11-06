@@ -1,6 +1,10 @@
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
-COPY .mvn/local-repo/io /root/.m2/repository/io
+COPY .mvn/local-repo .mvn/local-repo
+COPY deployment-artifacts.sha256 ./
+RUN sha256sum --check deployment-artifacts.sha256 \
+    && mkdir -p /root/.m2/repository \
+    && cp -R .mvn/local-repo/io /root/.m2/repository/
 COPY pom.xml .
 COPY src ./src
 RUN mvn -B -Dmaven.test.skip=true package

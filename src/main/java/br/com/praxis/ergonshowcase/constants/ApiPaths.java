@@ -13,6 +13,13 @@ public final class ApiPaths {
 
   private ApiPaths() {}
 
+  public static final String AUTH = "/auth";
+  public static final String AUTH_LOGIN = AUTH + "/login";
+  public static final String AUTH_LOGOUT = AUTH + "/logout";
+  public static final String AUTH_SESSION = AUTH + "/session";
+  public static final String RUNTIME_CONTEXT = "/api/praxis/runtime/context";
+  public static final String CONFIG_UI = "/api/praxis/config/ui";
+
   public static final String BASE = "/api/ergon";
   public static final String POLICY_STUDIO = BASE + "/policy-studio";
   public static final String POLICY_STUDIO_COMPOSITION = "/rule-sets/{ruleSetKey}/orgaos/{empCodigo}/composition-manifest";

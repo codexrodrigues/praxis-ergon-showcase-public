@@ -1,19 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version='1.0' encoding='utf-8'?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.5.15</version>
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <groupId>io.github.codexrodrigues</groupId>
     <artifactId>praxis-config-starter</artifactId>
-    <version>0.1.0-rc.176</version>
+    <version>0.1.0-rc.176-ergon.1d027b745c29</version>
     <packaging>jar</packaging>
 
     <name>Praxis Config Starter</name>
@@ -43,7 +41,7 @@
     <properties>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- Build as a plain library JAR (no boot repackage) for starter consumption -->
+        
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <spring-ai.version>1.1.8</spring-ai.version>
         <openai-java.version>4.43.0</openai-java.version>
@@ -67,8 +65,7 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- Compile the optional OpenAPI adapter against the reference host's baseline.
-             The consuming host owns Swagger/Springdoc runtime dependencies. -->
+        
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-core-jakarta</artifactId>
@@ -83,7 +80,7 @@
         <dependency>
             <groupId>io.github.codexrodrigues</groupId>
             <artifactId>praxis-rules-engine</artifactId>
-            <version>${praxis-rules-engine.version}</version>
+            <version>0.1.0-beta.17-ergon.1d027b745c29</version>
         </dependency>
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
@@ -255,7 +252,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
-            <!-- Attach sources and javadocs (required by Maven Central) -->
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -294,7 +291,7 @@
         </plugins>
     </build>
 
-    <!-- Release profile to sign + publish to Maven Central (via Central Portal) -->
+    
     <profiles>
         <profile>
             <id>release</id>

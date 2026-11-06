@@ -31,6 +31,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  */
 @Configuration
 @EnableConfigurationProperties(ErgonConfigPrincipals.class)
+@Import({ErgonBrowserIdentity.class, ErgonSessionController.class, ErgonSessionCookieConfiguration.class})
 @org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 public class SecurityConfig {
   public static final String ACCUMULATION_CHECK = "ERGON_ACCUMULATION_CHECK";
@@ -63,11 +64,13 @@ public class SecurityConfig {
     var operatorAuthorities = new ArrayList<>(List.of("ERGON_READ", "ERGON_WRITE"));
     if (!accumulationOrganizations.isBlank()) operatorAuthorities.add(ACCUMULATION_CHECK);
     operatorAuthorities.addAll(PolicyStudioAccess.authorities(policyRead, policyPublish));
-    users.add(User.withUsername(username)
+    if (username.isBlank() != password.isBlank())
+      throw new IllegalArgumentException("Conta operacional exige identidade e senha juntas.");
+    if (!username.isBlank()) users.add(User.withUsername(username)
             .password(encoder.encode(password))
             .authorities(operatorAuthorities.toArray(String[]::new))
             .build());
-    if (adminUsername.isBlank() != adminPassword.isBlank() || adminUsername.equalsIgnoreCase(username))
+    if (adminUsername.isBlank() != adminPassword.isBlank() || !adminUsername.isBlank() && adminUsername.equalsIgnoreCase(username))
       throw new IllegalArgumentException("Administração de lote exige identidade e senha próprias.");
     if (!adminUsername.isBlank())
       users.add(User.withUsername(adminUsername)
@@ -90,6 +93,12 @@ public class SecurityConfig {
       principal.roles().forEach(role -> authorities.add("ROLE_" + role));
       users.add(User.withUsername(principal.username()).password(encoder.encode(principal.password()))
           .authorities(authorities.toArray(String[]::new)).build());
+    }
+    for (var account : config.browserAccounts()) {
+      if (!usernames.add(account.username().toLowerCase(Locale.ROOT)))
+        throw new IllegalArgumentException("Identidade sintética colide com conta existente.");
+      users.add(User.withUsername(account.username()).password(account.passwordHash())
+          .authorities(account.authorities().toArray(String[]::new)).build());
     }
     return new InMemoryUserDetailsManager(users);
   }
@@ -131,6 +140,9 @@ public class SecurityConfig {
         "If-None-Match",
         "Idempotency-Key",
         "X-Requested-With"));
+    cors.addAllowedHeader("X-XSRF-TOKEN");
+    cors.addAllowedHeader("X-Updated-By");
+    cors.addAllowedHeader("X-Praxis-Context-Version");
     cors.setExposedHeaders(List.of(
         "ETag",
         "X-Schema-Hash",
@@ -151,27 +163,70 @@ public class SecurityConfig {
   SecurityFilterChain chain(HttpSecurity http,
       @Value("${showcase.security.config-origins:}") Set<String> configOrigins,
       @Value("${showcase.security.public-read-enabled:false}") boolean publicReadEnabled,
-      @Value("${showcase.security.policy-read-orgs:}") String policyReadOrgs) throws Exception {
+      @Value("${showcase.security.policy-read-orgs:}") String policyReadOrgs,
+      ErgonBrowserIdentity browserIdentity) throws Exception {
     if (publicReadEnabled) {
       var anonAuthorities = new ArrayList<String>(List.of("ROLE_ANONYMOUS", "ERGON_READ"));
       anonAuthorities.addAll(
           PolicyStudioAccess.authorities(policyReadOrgs.isBlank() ? "1,2,3" : policyReadOrgs, ""));
       http.anonymous(anon -> anon.authorities(anonAuthorities.toArray(String[]::new)));
     }
-    return http.csrf(c -> c.disable())
+    var csrfRepository = new org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository();
+    csrfRepository.setHeaderName("X-XSRF-TOKEN");
+    return http.csrf(c -> c.csrfTokenRepository(csrfRepository)
+            .csrfTokenRequestHandler(new org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler())
+            .requireCsrfProtectionMatcher(request ->
+                !Set.of("GET", "HEAD", "OPTIONS", "TRACE").contains(request.getMethod())
+                && (request.getSession(false) != null
+                    && request.getSession(false).getAttribute("ergon.context.version") != null
+                    || ErgonBrowserAdmissionFilter.requestPath(request).startsWith(ApiPaths.AUTH + "/"))))
+        .addFilterBefore(new org.springframework.web.filter.OncePerRequestFilter() {
+          @Override protected void doFilterInternal(jakarta.servlet.http.HttpServletRequest request,
+              jakarta.servlet.http.HttpServletResponse response, jakarta.servlet.FilterChain chain)
+              throws java.io.IOException, jakarta.servlet.ServletException {
+            if (ErgonBrowserAdmissionFilter.requestPath(request).startsWith(ApiPaths.AUTH + "/")
+                && !Set.of("GET", "HEAD", "OPTIONS").contains(request.getMethod())
+                && !configOrigins.contains(request.getHeader("Origin"))) { response.sendError(403); return; }
+            chain.doFilter(request, response);
+          }
+        }, org.springframework.security.web.csrf.CsrfFilter.class)
+        .addFilterBefore(new ErgonBrowserAdmissionFilter(browserIdentity, configOrigins),
+            org.springframework.security.web.access.intercept.AuthorizationFilter.class)
         .cors(Customizer.withDefaults())
         .headers(headers -> headers
             .frameOptions(frame -> frame.deny())
             .contentTypeOptions(Customizer.withDefaults())
             .referrerPolicy(ref -> ref.policy(
                 org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)))
-        .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+        .requestCache(c -> c.requestCache(new org.springframework.security.web.savedrequest.NullRequestCache()))
+        .formLogin(form -> form.loginProcessingUrl(ApiPaths.AUTH_LOGIN)
+            .successHandler((request, response, authentication) -> {
+              if (browserIdentity.find(authentication) == null) {
+                request.getSession().invalidate();
+                org.springframework.security.core.context.SecurityContextHolder.clearContext();
+                response.sendError(403); return;
+              }
+              request.getSession().setAttribute("ergon.context.version", java.util.UUID.randomUUID().toString());
+              response.setHeader("Cache-Control", "no-store"); response.setStatus(204);
+            })
+            .failureHandler((request, response, error) -> {
+              if (request.getSession(false) != null) request.getSession(false).invalidate();
+              response.setHeader("Cache-Control", "no-store"); response.setStatus(401);
+            }))
+        .logout(logout -> logout.logoutUrl(ApiPaths.AUTH_LOGOUT).invalidateHttpSession(true)
+            .deleteCookies("ERGONSESSION").logoutSuccessHandler((request, response, auth) -> {
+              response.setHeader("Cache-Control", "no-store"); response.setStatus(204);
+            }))
+        .exceptionHandling(e -> e.authenticationEntryPoint((request, response, error) -> response.sendError(401)))
         .authorizeHttpRequests(
             a -> {
               a.requestMatchers(HttpMethod.OPTIONS, "/**")
                   .permitAll()
                   .requestMatchers("/actuator/health", "/v3/api-docs/**", "/error")
                   .permitAll()
+                  .requestMatchers(ApiPaths.AUTH_SESSION, ApiPaths.AUTH_LOGIN, ApiPaths.AUTH_LOGOUT).permitAll()
+                  .requestMatchers(ApiPaths.RUNTIME_CONTEXT).authenticated()
                     .requestMatchers(ApiPaths.PRAXIS_CONFIG, ApiPaths.PRAXIS_CONFIG + "/**",
                         ApiPaths.POLICY_STUDIO + ApiPaths.POLICY_STUDIO_COMPOSITION)
                   .access((authentication, context) -> new AuthorizationDecision(
@@ -215,9 +270,10 @@ public class SecurityConfig {
               }
               a.anyRequest().hasAuthority("ERGON_WRITE");
             })
-        .httpBasic(b -> {})
+        .httpBasic(b -> b.authenticationEntryPoint((request, response, error) -> response.sendError(401)))
         .build();
   }
+
 
   /**
    * Garante que {@code DynamicSwaggerConfig} registre os {@code GroupedOpenApi} individuais

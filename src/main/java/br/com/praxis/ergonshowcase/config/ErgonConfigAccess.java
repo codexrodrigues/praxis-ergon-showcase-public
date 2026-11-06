@@ -22,6 +22,8 @@ final class ErgonConfigAccess {
         || !matchesHint(request.getHeader("X-Tenant-ID"), scope[1])
         || !matchesHint(request.getHeader("X-Env"), scope[2])
         || !matchesHint(request.getHeader("X-User-ID"), authentication.getName())) return false;
+    for (String header : Set.of("X-Tenant-ID", "X-Env", "X-User-ID", "Origin", "Referer"))
+      if (java.util.Collections.list(request.getHeaders(header)).size() > 1) return false;
     request.setAttribute("tenantId", scope[1]);
     request.setAttribute("environment", scope[2]);
     return true;

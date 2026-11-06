@@ -1,19 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version='1.0' encoding='utf-8'?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.5.15</version>
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <groupId>io.github.codexrodrigues</groupId>
     <artifactId>praxis-metadata-starter</artifactId>
-    <version>8.0.0-rc.188</version>
+    <version>8.0.0-rc.188-ergon.1d027b745c29</version>
     <packaging>jar</packaging>
 
     <name>Praxis Metadata Starter</name>
@@ -42,7 +40,7 @@
 
     <properties>
         <apache-poi.version>5.5.1</apache-poi.version>
-        <!-- Align the existing compile dependency with Commons Compress and embedded PostgreSQL. -->
+        
         <commons-lang3.version>3.20.0</commons-lang3.version>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -51,7 +49,7 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- Test-only embedded binaries must use the same supported PostgreSQL on every OS. -->
+            
             <dependency>
                 <groupId>io.zonky.test.postgres</groupId>
                 <artifactId>embedded-postgres-binaries-bom</artifactId>
@@ -63,19 +61,19 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- Canonical pure Java runtime for custom-field rules and structured violations. -->
+        
         <dependency>
             <groupId>io.github.codexrodrigues</groupId>
             <artifactId>praxis-rules-engine</artifactId>
-            <version>0.1.0-beta.17</version>
+            <version>0.1.0-beta.17-ergon.1d027b745c29</version>
         </dependency>
-        <!-- Real Servlet security-chain integration proof; not a runtime security policy. -->
+        
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- MapStruct API for @MapperConfig -->
+        
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
@@ -168,7 +166,7 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- Explicit deployment-time migrator only; consumers opt into Flyway themselves. -->
+        
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
@@ -181,7 +179,7 @@
             <version>11.17.0</version>
             <optional>true</optional>
         </dependency>
-        <!-- Real PostgreSQL transaction proof; no runtime driver or server is introduced. -->
+        
         <dependency>
             <groupId>io.zonky.test</groupId>
             <artifactId>embedded-postgres</artifactId>
@@ -204,7 +202,7 @@
 
     <build>
         <plugins>
-            <!-- Pin genuine published V15/V16/V17/V19 bytes independently of this reactor's current GAV. -->
+            
             <plugin>
                 <groupId>io.github.download-maven-plugin</groupId>
                 <artifactId>download-maven-plugin</artifactId>
@@ -273,7 +271,7 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.3.0</version>
                 <configuration>
-                    <!-- Ensure a JAR is created even if there are no compiled classes/resources yet -->
+                    
                     <forceCreation>true</forceCreation>
                 </configuration>
             </plugin>
@@ -312,7 +310,7 @@
                 </executions>
             </plugin>
 
-            <!-- Attach sources and javadocs (required by Maven Central) -->
+            
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -348,35 +346,35 @@
                     <additionalJOption>-Xdoclint:none</additionalJOption>
                     <overview>src/main/javadoc/overview.html</overview>
                     <additionalOptions>
-                        <!-- Add a dark-mode stylesheet (JDK 9+) -->
+                        
                         <additionalOption>--add-stylesheet=${project.basedir}/src/main/javadoc/dark.css</additionalOption>
                     </additionalOptions>
                     <doctitle>Praxis Metadata Starter — API Javadoc</doctitle>
                     <windowtitle>Praxis Metadata Starter</windowtitle>
                     <header>
-                        <![CDATA[
-                        <div style="display:flex;gap:16px;align-items:center;font:14px system-ui,sans-serif;">
-                          <a href="https://codexrodrigues.github.io/praxis-metadata-starter/" target="_blank">Docs</a>
-                          <a href="https://codexrodrigues.github.io/praxis-metadata-starter/apidocs/" target="_blank">Javadoc</a>
-                          <a href="https://github.com/codexrodrigues/praxis-metadata-starter" target="_blank">GitHub</a>
-                          <a href="https://central.sonatype.com/artifact/io.github.codexrodrigues/praxis-metadata-starter" target="_blank">Maven Central</a>
-                        </div>
-                        ]]>
+                        
+                        &lt;div style="display:flex;gap:16px;align-items:center;font:14px system-ui,sans-serif;"&gt;
+                          &lt;a href="https://codexrodrigues.github.io/praxis-metadata-starter/" target="_blank"&gt;Docs&lt;/a&gt;
+                          &lt;a href="https://codexrodrigues.github.io/praxis-metadata-starter/apidocs/" target="_blank"&gt;Javadoc&lt;/a&gt;
+                          &lt;a href="https://github.com/codexrodrigues/praxis-metadata-starter" target="_blank"&gt;GitHub&lt;/a&gt;
+                          &lt;a href="https://central.sonatype.com/artifact/io.github.codexrodrigues/praxis-metadata-starter" target="_blank"&gt;Maven Central&lt;/a&gt;
+                        &lt;/div&gt;
+                        
                     </header>
                     <bottom>
-                        <![CDATA[
-                        <div style="font:12px system-ui,sans-serif;color:#6b7280;">
+                        
+                        &lt;div style="font:12px system-ui,sans-serif;color:#6b7280;"&gt;
                           Built with ❤️ for fast, consistent, contract‑driven backends.
-                          <a href="https://codexrodrigues.github.io/praxis-metadata-starter/" target="_blank">Learn more</a>.
-                        </div>
-                        ]]>
+                          &lt;a href="https://codexrodrigues.github.io/praxis-metadata-starter/" target="_blank"&gt;Learn more&lt;/a&gt;.
+                        &lt;/div&gt;
+                        
                     </bottom>
                 </configuration>
             </plugin>
         </plugins>
     </build>
 
-    <!-- Release profile to sign + publish to Maven Central (via Central Portal) -->
+    
     <profiles>
         <profile>
             <id>release-neon-gate</id>
@@ -427,7 +425,7 @@
                         <version>1.5.0</version>
                         <configuration>
                             <updatePomFile>true</updatePomFile>
-                            <!-- Generate a Central-friendly POM (no non-public parent, resolved info) -->
+                            
                             <flattenMode>ossrh</flattenMode>
                         </configuration>
                         <executions>
